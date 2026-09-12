@@ -1,0 +1,98 @@
+.sexagenary-hero {
+  max-width: 760px;
+  margin-bottom: 16px;
+}
+
+.sexagenary-hero h1 {
+  font-size: clamp(40px, 4vw, 52px);
+  line-height: .98;
+}
+
+.sexagenary-hero .lede {
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+.cycle-phase-note {
+  margin: 0 auto 2px;
+  padding: 0 12px;
+  max-width: 620px;
+  color: #969c98;
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.phase-node-label {
+  font-size: 22px;
+  font-weight: 760;
+}
+
+.phase-node-label.active {
+  font-weight: 880;
+}
+
+.cycle-selection-ray {
+  stroke-width: 4;
+}
+
+.cycle-selection-cap {
+  r: 11px;
+}
+
+.cycle-dot.active {
+  r: 9px;
+}
+
+@media (max-width: 600px) {
+  .sexagenary-hero {
+    margin-bottom: 12px;
+  }
+
+  .sexagenary-hero h1 {
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .sexagenary-hero .lede {
+    font-size: 13.5px;
+    line-height: 1.48;
+  }
+
+  .cycle-phase-note {
+    padding-inline: 14px;
+    font-size: 8.5px;
+  }
+
+  .cycle-guide-caption {
+    display: none;
+  }
+
+  .phase-node-label {
+    font-size: 22px;
+  }
+
+  .cycle-center-kicker {
+    font-size: 11px;
+  }
+
+  .cycle-center-value {
+    font-size: 47px;
+  }
+
+  .cycle-center-note {
+    font-size: 10px;
+  }
+
+  .cycle-selection-ray {
+    stroke-width: 5;
+  }
+
+  .cycle-selection-cap {
+    r: 12px;
+  }
+
+  .cycle-dot.active {
+    r: 10px;
+  }
+}
