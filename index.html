@@ -6,12 +6,19 @@
   <meta name="description" content="以太陽黃經為共同座標，探索二十四節氣、八字月建、五行與熱帶黃道的關係。">
   <title>BaZi Time Atlas</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./site-nav.css">
 </head>
 <body>
   <main class="site-shell">
     <header class="topbar">
       <div class="brand">BaZi Time Atlas</div>
-      <div class="topbar-note">Annual atlas · v0.4</div>
+      <div class="topbar-actions">
+        <nav class="site-nav" aria-label="Atlas views">
+          <a class="active" href="./" aria-current="page">年度</a>
+          <a href="./sexagenary.html">六十甲子</a>
+        </nav>
+        <div class="topbar-note">Annual atlas · v0.4</div>
+      </div>
     </header>
 
     <section class="hero">
@@ -80,7 +87,7 @@
       </aside>
     </section>
 
-    <p class="footer-note">這一版只處理「一年」的共同幾何。六十甲子不是一年 60 等分；日柱、時柱與出生排盤會放在獨立視圖。</p>
+    <p class="footer-note">這一版只處理「一年」的共同幾何。六十甲子不是一年 60 等分；完整的 60 循環改在「六十甲子」Reference view 中獨立呈現，日柱、時柱與出生排盤則留到 Birth view。</p>
 
     <details class="sources-panel">
       <summary>資料與規則來源</summary>
