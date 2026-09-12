@@ -53,7 +53,11 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
 .gregorian-dot { background:var(--gregorian); }.year-dot { background:var(--year); }.day-dot { background:var(--day); }
 #recurrence-wheel { position:absolute; inset:0; width:100%; height:100%; display:block; }
 .recurrence-track { transform-origin:600px 820px; }
-.recurrence-guide { fill:none; stroke:rgba(238,242,237,.10); stroke-width:1; }
+.phase-band { stroke:none; }
+.phase-band-gregorian { fill:rgba(162,141,184,.10); }
+.phase-band-year { fill:rgba(183,170,120,.09); }
+.phase-band-day { fill:rgba(120,153,165,.10); }
+.recurrence-guide { fill:none; stroke:rgba(238,242,237,.14); stroke-width:1; }
 .phase-sector { stroke:rgba(238,242,237,.075); stroke-width:.9; }
 .gregorian-sector { fill:rgba(162,141,184,.25); }
 .year-sector { fill:rgba(183,170,120,.23); }
@@ -61,10 +65,17 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
 .phase-tick { stroke:rgba(238,242,237,.30); stroke-width:1; }
 .phase-tick.major { stroke:rgba(238,242,237,.58); stroke-width:1.35; }
 .phase-label { fill:rgba(232,238,233,.67); font-size:9px; font-weight:700; text-anchor:middle; dominant-baseline:middle; }
-.zero-mark { stroke:var(--cursor); stroke-width:3.4; filter:drop-shadow(0 0 7px rgba(241,230,183,.42)); }
-.zero-label { fill:var(--cursor); font-size:9px; font-weight:800; text-anchor:middle; }
 .cursor-line { stroke:var(--cursor); stroke-width:2.2; }.cursor-halo { stroke:rgba(241,230,183,.17); stroke-width:9; }
 .cursor-label { fill:var(--cursor); font-size:9px; font-weight:800; letter-spacing:.12em; text-anchor:middle; }
+.return-marker { stroke-width:5.5; stroke-linecap:round; filter:drop-shadow(0 0 7px rgba(238,242,237,.22)); }
+.return-marker-gregorian { stroke:var(--gregorian); }
+.return-marker-year { stroke:var(--year); }
+.return-marker-day { stroke:var(--day); }
+.return-marker.is-closed { stroke:var(--cursor); stroke-width:6.5; }
+.return-marker-label { font-size:10px; font-weight:900; text-anchor:middle; dominant-baseline:middle; paint-order:stroke; stroke:#0d1110; stroke-width:3px; }
+.return-marker-label-gregorian { fill:var(--gregorian); }
+.return-marker-label-year { fill:var(--year); }
+.return-marker-label-day { fill:var(--day); }
 .recurrence-readout { position:absolute; z-index:3; left:50%; bottom:24px; transform:translateX(-50%); width:min(820px,calc(100% - 30px)); text-align:center; }
 .readout-kicker { color:#778179; font-size:9px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
 .recurrence-readout > div:nth-child(2) { margin-top:5px; font-size:clamp(20px,2.3vw,31px); }
