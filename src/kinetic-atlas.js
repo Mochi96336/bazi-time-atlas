@@ -371,7 +371,7 @@ function parseLegacyProjection() {
     }
   }
 
-  const rawLongitude = Number(params.get("lambda"));
+  const rawLongitude = params.has("lambda") ? Number(params.get("lambda")) : Number.NaN;
   const requestedMonth = params.get("month");
   const yearStem = params.get("yearStem");
   let longitude = Number.isFinite(rawLongitude) ? normalizeDegrees(rawLongitude) : null;
