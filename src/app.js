@@ -15,6 +15,9 @@ const groups = Object.fromEntries(
     svg.querySelector(`[data-layer-group="${name}"]`)
   ])
 );
+const centerKicker = document.querySelector("#center-kicker");
+const centerValue = document.querySelector("#center-value");
+const centerNote = document.querySelector("#center-note");
 
 function svgEl(tag, attrs = {}, parent = svg) {
   const node = document.createElementNS(NS, tag);
@@ -78,8 +81,17 @@ function renderStaticWheel() {
     const lineOuter = polar(cx, cy, lineOuterRadius, term.longitude);
     const lineClasses = ["term-line"];
     const labelClasses = ["term-label"];
-    if (term.kind === "jie") { lineClasses.push("jie"); labelClasses.push("jie"); }
-    if (isCardinal) { lineClasses.push("cardinal"); labelClasses.push("cardinal"); }
+    if (term.kind === "jie") {
+      lineClasses.push("jie");
+      labelClasses.push("jie");
+    } else {
+      lineClasses.push("zhongqi");
+      labelClasses.push("zhongqi");
+    }
+    if (isCardinal) {
+      lineClasses.push("cardinal");
+      labelClasses.push("cardinal");
+    }
 
     const line = svgEl("line", {
       x1: lineInner.x,
@@ -116,9 +128,19 @@ function renderStaticWheel() {
   });
 }
 
+function splitRange(start, end) {
+  return end < start ? [[start, 360], [0, end]] : [[start, end]];
+}
+
+function rangesOverlap(startA, endA, startB, endB) {
+  return splitRange(startA, endA).some(([a0, a1]) =>
+    splitRange(startB, endB).some(([b0, b1]) => Math.min(a1, b1) > Math.max(a0, b0))
+  );
+}
+
 function overlappingZodiac(start, end) {
   const ranges = [];
-  const segments = end < start ? [[start, 360], [0, end]] : [[start, end]];
+  const segments = splitRange(start, end);
   for (const sign of zodiacSigns) {
     for (const [a, b] of segments) {
       const overlapStart = Math.max(a, sign.start);
@@ -127,6 +149,10 @@ function overlappingZodiac(start, end) {
     }
   }
   return ranges;
+}
+
+function overlappingMonths(start, end) {
+  return baziMonths.filter(month => rangesOverlap(start, end, month.start, month.end));
 }
 
 function clearHighlights() {
@@ -149,6 +175,12 @@ function renderSelectionBand(start, end) {
   }, groups.selection);
 }
 
+function setCenterReadout(kicker, value, note) {
+  centerKicker.textContent = kicker;
+  centerValue.textContent = value;
+  centerNote.textContent = note;
+}
+
 function renderSelection() {
   clearHighlights();
   const title = document.querySelector("#detail-title");
@@ -167,6 +199,7 @@ function renderSelection() {
     overlappingZodiac(month.start, month.end)
       .forEach(item => highlightSelector("zodiac", item.split(" ")[0], "is-related"));
 
+    setCenterReadout("八字月支", `${month.branch}月`, `${month.start}° → ${month.end}°`);
     eyebrow.textContent = "八字月支";
     title.textContent = `${month.branch}月`;
     body.textContent = `${month.startTerm} → ${month.endTerm}。由兩個「節」界定的 30° 太陽黃經區段。`;
@@ -177,25 +210,34 @@ function renderSelection() {
 
   if (state.selected.type === "zodiac") {
     const sign = zodiacSigns.find(item => item.name === state.selected.key);
+    const relatedMonths = overlappingMonths(sign.start, sign.end);
     renderSelectionBand(sign.start, sign.end);
     highlightSelector("zodiac", sign.name);
+    relatedMonths.forEach(month => highlightSelector("month", month.branch, "is-related"));
+
+    setCenterReadout("熱帶黃道", sign.name, `${sign.start}° → ${sign.end}°`);
     eyebrow.textContent = "熱帶黃道十二宮";
     title.textContent = `${sign.name}宮`;
     body.textContent = `${sign.start}° → ${sign.end}°，固定 30°。這裡是 tropical zodiac，不是現代天文星座邊界。`;
     facts.innerHTML = `<span>元素 <strong>${sign.element}</strong></span><span>模式 <strong>${sign.modality}</strong></span>`;
-    const overlappingMonths = baziMonths.filter(month => overlappingZodiac(month.start, month.end).some(x => x.startsWith(sign.name)));
-    relation.textContent = `八字月支交疊：${overlappingMonths.map(m => `${m.branch}月`).join("、")}。宮界與月界整體錯開 15°。`;
+    relation.textContent = `八字月支交疊：${relatedMonths.map(month => `${month.branch}月`).join("、")}。宮界與月界整體錯開 15°。`;
     return;
   }
 
   const season = seasons.find(item => item.name === state.selected.key);
+  const relatedMonths = overlappingMonths(season.start, season.end);
   renderSelectionBand(season.start, season.end);
   highlightSelector("season", season.name);
+  relatedMonths.forEach(month => highlightSelector("month", month.branch, "is-related"));
+  highlightTerm(season.startTerm);
+  highlightTerm(season.endTerm);
+
+  setCenterReadout("傳統四季", season.name, `${season.start}° → ${season.end}°`);
   eyebrow.textContent = "傳統節氣季節";
   title.textContent = `${season.name}季`;
   body.textContent = `${season.startTerm} → ${season.endTerm}，跨度 90°。季節起點使用立春、立夏、立秋、立冬。`;
   facts.innerHTML = `<span>${season.start}° → ${season.end}°</span><span>跨度 <strong>90°</strong></span>`;
-  relation.textContent = "這裡不是用春分、夏至、秋分、冬至作季節起點。";
+  relation.textContent = `包含 ${relatedMonths.map(month => `${month.branch}月`).join("、")}。這裡不是用春分、夏至、秋分、冬至作季節起點。`;
 }
 
 function wireControls() {
