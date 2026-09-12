@@ -99,13 +99,31 @@ function renderStaticWheel() {
       x2: lineOuter.x,
       y2: lineOuter.y,
       class: lineClasses.join(" "),
-      "data-term": term.name
+      "data-term": term.name,
+      "data-select-type": "term",
+      "data-select-key": term.name
     }, groups.terms);
     line.setAttribute("aria-hidden", "true");
 
     const labelRadius = term.kind === "jie" ? 323 : 304;
-    const label = textAt(groups.terms, labelRadius, term.longitude, term.name, labelClasses.join(" "));
-    label.setAttribute("data-term", term.name);
+    const label = textAt(groups.terms, labelRadius, term.longitude, term.name, labelClasses.join(" "), {
+      "data-term": term.name,
+      "data-select-type": "term",
+      "data-select-key": term.name
+    });
+
+    const hitInner = polar(cx, cy, 242, term.longitude);
+    const hitOuter = polar(cx, cy, 334, term.longitude);
+    const hit = svgEl("line", {
+      x1: hitInner.x,
+      y1: hitInner.y,
+      x2: hitOuter.x,
+      y2: hitOuter.y,
+      class: "term-hit",
+      "data-select-type": "term",
+      "data-select-key": term.name
+    }, groups.terms);
+    makeSelectable(hit, { type: "term", key: term.name }, `${term.name}，太陽黃經 ${term.longitude} 度，${term.kind === "jie" ? "節" : "中氣"}`);
   });
 
   zodiacSigns.forEach(sign => {
@@ -138,6 +156,10 @@ function rangesOverlap(startA, endA, startB, endB) {
   );
 }
 
+function rangeContains(start, end, angle) {
+  return splitRange(start, end).some(([a, b]) => angle >= a && angle < b);
+}
+
 function overlappingZodiac(start, end) {
   const ranges = [];
   const segments = splitRange(start, end);
@@ -155,16 +177,25 @@ function overlappingMonths(start, end) {
   return baziMonths.filter(month => rangesOverlap(start, end, month.start, month.end));
 }
 
+function monthAt(angle) {
+  return baziMonths.find(month => rangeContains(month.start, month.end, angle));
+}
+
+function zodiacAt(angle) {
+  return zodiacSigns.find(sign => angle >= sign.start && angle < sign.end);
+}
+
 function clearHighlights() {
   svg.querySelectorAll(".is-selected, .is-related").forEach(node => node.classList.remove("is-selected", "is-related"));
 }
 
 function highlightSelector(type, key, className = "is-selected") {
-  svg.querySelector(`[data-select-type="${type}"][data-select-key="${key}"]`)?.classList.add(className);
+  svg.querySelectorAll(`[data-select-type="${type}"][data-select-key="${key}"]`)
+    .forEach(node => node.classList.add(className));
 }
 
-function highlightTerm(name) {
-  svg.querySelectorAll(`[data-term="${name}"]`).forEach(node => node.classList.add("is-related"));
+function highlightTerm(name, className = "is-related") {
+  svg.querySelectorAll(`[data-term="${name}"]`).forEach(node => node.classList.add(className));
 }
 
 function renderSelectionBand(start, end) {
@@ -172,6 +203,19 @@ function renderSelectionBand(start, end) {
   svgEl("path", {
     d: annularSectorPath(cx, cy, 82, 418, start, end),
     class: "selection-band"
+  }, groups.selection);
+}
+
+function renderSelectionRay(angle) {
+  groups.selection.replaceChildren();
+  const inner = polar(cx, cy, 82, angle);
+  const outer = polar(cx, cy, 418, angle);
+  svgEl("line", {
+    x1: inner.x,
+    y1: inner.y,
+    x2: outer.x,
+    y2: outer.y,
+    class: "selection-ray"
   }, groups.selection);
 }
 
@@ -205,6 +249,38 @@ function renderSelection() {
     body.textContent = `${month.startTerm} → ${month.endTerm}。由兩個「節」界定的 30° 太陽黃經區段。`;
     facts.innerHTML = `<span>主五行 <strong>${month.element}</strong></span><span>${month.start}° → ${month.end}°</span>`;
     relation.textContent = `熱帶黃道交疊：${overlappingZodiac(month.start, month.end).join("、")}。這是幾何交疊，不代表兩套系統等價。`;
+    return;
+  }
+
+  if (state.selected.type === "term") {
+    const term = solarTerms.find(item => item.name === state.selected.key);
+    const sign = zodiacAt(term.longitude);
+    renderSelectionRay(term.longitude);
+    highlightSelector("term", term.name);
+    highlightSelector("zodiac", sign.name, "is-related");
+
+    let relationText;
+    if (term.kind === "jie") {
+      const previousMonth = baziMonths.find(month => month.endTerm === term.name);
+      const nextMonth = baziMonths.find(month => month.startTerm === term.name);
+      highlightSelector("month", previousMonth.branch, "is-related");
+      highlightSelector("month", nextMonth.branch, "is-related");
+      relationText = `八字月界：${previousMonth.branch}月 → ${nextMonth.branch}月；熱帶黃道：${sign.name}宮。`;
+    } else {
+      const month = monthAt(term.longitude);
+      highlightSelector("month", month.branch, "is-related");
+      relationText = `位於 ${month.branch}月內；熱帶黃道：${sign.name}宮。`;
+    }
+
+    const kindLabel = term.kind === "jie" ? "節" : "中氣";
+    setCenterReadout("二十四節氣", term.name, `${term.longitude}° · ${kindLabel}`);
+    eyebrow.textContent = "二十四節氣";
+    title.textContent = term.name;
+    body.textContent = term.kind === "jie"
+      ? `太陽黃經 ${term.longitude}°。這是十二個「節」之一，同時也是八字月界。`
+      : `太陽黃經 ${term.longitude}°。這是「中氣」，位於一個八字月區段之內。`;
+    facts.innerHTML = `<span>太陽黃經 <strong>${term.longitude}°</strong></span><span><strong>${kindLabel}</strong></span>`;
+    relation.textContent = relationText;
     return;
   }
 
