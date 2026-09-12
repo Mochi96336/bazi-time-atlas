@@ -1,0 +1,177 @@
+.pillar-relations-panel {
+  margin-top: 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  overflow: hidden;
+}
+.pillar-relations-panel > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  cursor: pointer;
+}
+.pillar-relations-panel > summary::-webkit-details-marker { display: none; }
+.pillar-relations-panel > summary::after {
+  content: "+";
+  margin-left: 4px;
+  color: #7e8983;
+  font-size: 18px;
+  line-height: 1;
+}
+.pillar-relations-panel[open] > summary::after { content: "−"; }
+.pillar-relations-panel[open] > summary { border-bottom: 1px solid var(--hairline); }
+.pillar-relations-summary-copy { display: grid; gap: 3px; }
+.pillar-relations-summary-copy small {
+  color: #8c9691;
+  font-size: 8px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.pillar-relations-summary-copy strong { color: var(--ink); font-size: 13px; }
+.pillar-relations-count {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.pillar-relations-intro,
+.pillar-relations-footnote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.65;
+}
+.pillar-relations-intro { padding: 13px 14px 9px; }
+.pillar-relations-footnote {
+  padding: 10px 14px 13px;
+  border-top: 1px solid var(--hairline);
+}
+.pillar-relations-footnote a {
+  color: #536d65;
+  text-decoration-color: #b7c3be;
+  text-underline-offset: 2px;
+}
+
+.pillar-relations-graph-wrap {
+  margin: 0 14px 11px;
+  border: 1px solid #d9ddd8;
+  border-radius: 12px;
+  background: rgba(255,255,255,.34);
+  overflow: hidden;
+}
+.pillar-relations-graph {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 190px;
+}
+.pillar-relations-graph .relation-axis-label {
+  fill: #a0a6a2;
+  font-size: 7px;
+  letter-spacing: .08em;
+  text-anchor: middle;
+  writing-mode: vertical-rl;
+}
+.pillar-relations-graph .pillar-card {
+  fill: color-mix(in srgb, var(--paper) 88%, white);
+  stroke: #d4d8d3;
+  stroke-width: 1;
+}
+.pillar-relations-graph .pillar-card.day {
+  fill: color-mix(in srgb, var(--accent-soft) 48%, white);
+  stroke: color-mix(in srgb, var(--accent) 32%, #d4d8d3);
+}
+.pillar-relations-graph .pillar-divider { stroke: #e0e2df; stroke-width: 1; }
+.pillar-relations-graph .pillar-name {
+  fill: #89928d;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-anchor: middle;
+}
+.pillar-relations-graph .stem-value,
+.pillar-relations-graph .branch-value {
+  fill: var(--ink);
+  font-size: 22px;
+  font-weight: 760;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.pillar-relations-graph .relation-path {
+  fill: none;
+  stroke-width: 1.7;
+  vector-effect: non-scaling-stroke;
+}
+.pillar-relations-graph .relation-path.five-combination { stroke: #52766b; }
+.pillar-relations-graph .relation-path.six-harmony { stroke: #73877f; }
+.pillar-relations-graph .relation-path.six-clash {
+  stroke: #8e7066;
+  stroke-dasharray: 5 4;
+}
+.pillar-relations-graph .relation-label-bg {
+  fill: color-mix(in srgb, var(--paper) 94%, white);
+  stroke: #d9ddd8;
+  stroke-width: 1;
+}
+.pillar-relations-graph .relation-label {
+  fill: #53635d;
+  font-size: 8px;
+  font-weight: 760;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.pillar-relations-graph .relation-label.six-clash { fill: #765d55; }
+.pillar-relations-empty {
+  display: block;
+  padding: 0 14px 11px;
+  color: #8b928e;
+  font-size: 8px;
+}
+
+.pillar-relations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 13px;
+}
+.pillar-relation-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #d7dad6;
+  border-radius: 9px;
+  background: rgba(255,255,255,.46);
+  color: #5d6762;
+  font-size: 8px;
+}
+.pillar-relation-chip b {
+  color: var(--ink);
+  font-size: 10px;
+  letter-spacing: .03em;
+}
+.pillar-relation-chip strong { color: #355d52; font-size: 8px; }
+.pillar-relation-chip[data-relation-kind="six-clash"] strong { color: #765d55; }
+.pillar-relation-chip i { color: #a0a5a2; font-style: normal; }
+
+@media (max-width: 600px) {
+  .pillar-relations-panel { margin-top: 8px; border-radius: 12px; }
+  .pillar-relations-panel > summary { padding: 10px 11px; gap: 8px; }
+  .pillar-relations-summary-copy strong { font-size: 11px; }
+  .pillar-relations-count { font-size: 7.5px; }
+  .pillar-relations-intro { padding: 10px 11px 8px; font-size: 8px; }
+  .pillar-relations-graph-wrap { margin: 0 11px 9px; border-radius: 10px; }
+  .pillar-relations-graph { min-height: 155px; }
+  .pillar-relations-graph .pillar-name { font-size: 8px; }
+  .pillar-relations-graph .stem-value,
+  .pillar-relations-graph .branch-value { font-size: 19px; }
+  .pillar-relations-list { padding: 0 11px 10px; gap: 5px; }
+  .pillar-relation-chip { padding: 5px 6px; gap: 5px; font-size: 7px; }
+  .pillar-relation-chip b { font-size: 9px; }
+  .pillar-relation-chip strong { font-size: 7px; }
+  .pillar-relations-empty { padding: 0 11px 9px; font-size: 7.5px; }
+  .pillar-relations-footnote { padding: 8px 11px 10px; font-size: 7.5px; }
+}

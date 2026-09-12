@@ -6,6 +6,7 @@ import {
   tenGodForStem,
   tenGodDerivationForDayMaster
 } from "./calendar/ten-gods.js";
+import { visiblePillarPairRelations } from "./calendar/pillar-relations.js";
 
 const form = document.querySelector("#birth-form");
 const yearInput = document.querySelector("#birth-year");
@@ -25,7 +26,9 @@ const pillarSummary = document.querySelector(".pillar-summary");
 const tenGodPanel = document.querySelector("#ten-gods-panel");
 const tenGodGrid = document.querySelector("#ten-gods-grid");
 const tenGodDayMaster = document.querySelector("#ten-gods-day-master");
-const forceTenGodOpen = new URLSearchParams(window.location.search).get("tenGod") === "1";
+const query = new URLSearchParams(window.location.search);
+const forceTenGodOpen = query.get("tenGod") === "1";
+const forceRelationsOpen = query.get("relations") === "1";
 
 const pillarTargets = {
   year: document.querySelector("#year-pillar"),
@@ -48,10 +51,22 @@ const summaryLabels = {
   hour: "時柱"
 };
 
+const shortPillarLabels = {
+  year: "年",
+  month: "月",
+  day: "日",
+  hour: "時"
+};
+
 const summaryCells = {};
 let annualProjectionLink;
 let annualProjectionMeta;
 let tenGodDerivation;
+let pillarRelationsPanel;
+let pillarRelationsCount;
+let pillarRelationsGraph;
+let pillarRelationsList;
+let pillarRelationsEmpty;
 const dayRuleNote = document.querySelector("#day-rule-note");
 
 function installCrossViewLinks() {
@@ -96,6 +111,76 @@ function installTenGodDerivation() {
   tenGodDerivation.className = "ten-gods-derivation";
   tenGodDerivation.setAttribute("aria-label", "十神由五行方向與陰陽同異推導");
   tenGodGrid.insertAdjacentElement("beforebegin", tenGodDerivation);
+}
+
+function installPillarRelations() {
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./pillar-relations.css";
+  stylesheet.dataset.pillarRelationsStyles = "1";
+  document.head.append(stylesheet);
+
+  pillarRelationsPanel = document.createElement("details");
+  pillarRelationsPanel.id = "pillar-relations-panel";
+  pillarRelationsPanel.className = "pillar-relations-panel";
+  if (forceRelationsOpen) pillarRelationsPanel.open = true;
+
+  const summary = document.createElement("summary");
+  const summaryCopy = node("span", "pillar-relations-summary-copy");
+  summaryCopy.append(
+    node("small", null, "VISIBLE PILLAR PAIRS"),
+    node("strong", null, "四柱表面關係 · 五合 / 六合 / 六沖")
+  );
+  pillarRelationsCount = node("span", "pillar-relations-count", "0 命中");
+  summary.append(summaryCopy, pillarRelationsCount);
+
+  const intro = node(
+    "p",
+    "pillar-relations-intro",
+    "只掃年、月、日、時四柱表面的 4 個天干與 4 個地支，共 6 組柱對；不把藏干交叉加入。上排是天干、下排是地支。"
+  );
+
+  const graphWrap = node("div", "pillar-relations-graph-wrap");
+  pillarRelationsGraph = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  pillarRelationsGraph.classList.add("pillar-relations-graph");
+  pillarRelationsGraph.setAttribute("viewBox", "0 0 640 230");
+  pillarRelationsGraph.setAttribute("role", "img");
+  pillarRelationsGraph.setAttribute("aria-label", "四柱明干明支關係圖");
+  graphWrap.append(pillarRelationsGraph);
+
+  pillarRelationsEmpty = node("span", "pillar-relations-empty");
+  pillarRelationsList = node("div", "pillar-relations-list");
+
+  const footnote = node("p", "pillar-relations-footnote");
+  footnote.append(
+    document.createTextNode("這裡的「合／沖」只代表傳統 pair membership；不等於合化成立、力量大小或吉凶判斷。來源交叉："),
+    sourceLink("https://www.donglishuzhai.net/chapter/5615.html", "《淵海子平》天干相合"),
+    document.createTextNode("、"),
+    sourceLink("https://www.donglishuzhai.net/chapter/5620.html", "十二支相沖"),
+    document.createTextNode("、"),
+    sourceLink(
+      "https://libokang.com/zh-hant/guji/bazi/%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE%E5%8E%9F%E6%96%87/",
+      "《子平真詮》刑沖會合"
+    ),
+    document.createTextNode("。")
+  );
+
+  pillarRelationsPanel.append(summary, intro, graphWrap, pillarRelationsEmpty, pillarRelationsList, footnote);
+  tenGodPanel.insertAdjacentElement("afterend", pillarRelationsPanel);
+
+  const footer = document.querySelector(".footer-note");
+  if (footer) {
+    footer.textContent = "計算精確不代表命理解釋必然。本頁的十神與五合／六合／六沖只呈現結構關係，不據此推導性格、吉凶、強弱、喜用神或大運。";
+  }
+}
+
+function sourceLink(href, text) {
+  const link = document.createElement("a");
+  link.href = href;
+  link.target = "_blank";
+  link.rel = "noreferrer";
+  link.textContent = text;
+  return link;
 }
 
 function selectedBoundary() {
@@ -154,6 +239,15 @@ function formatUtcOffset(offset) {
 function node(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function svgNode(tag, attributes = {}, text) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [name, value] of Object.entries(attributes)) {
+    element.setAttribute(name, String(value));
+  }
   if (text !== undefined) element.textContent = text;
   return element;
 }
@@ -267,6 +361,125 @@ function renderTenGodRelationships(pillars) {
   }
 }
 
+function pillarIndex(key) {
+  return ["year", "month", "day", "hour"].indexOf(key);
+}
+
+function renderPillarRelations(pillars) {
+  const relations = visiblePillarPairRelations(pillars);
+  const centers = [80, 240, 400, 560];
+  const cardY = 70;
+  const cardHeight = 104;
+  const cardWidth = 82;
+  const stemAnchorY = cardY;
+  const branchAnchorY = cardY + cardHeight;
+
+  pillarRelationsPanel.hidden = false;
+  if (forceRelationsOpen) pillarRelationsPanel.open = true;
+  pillarRelationsCount.textContent = `${relations.length} 命中`;
+  pillarRelationsCount.dataset.relationCount = String(relations.length);
+  pillarRelationsGraph.replaceChildren();
+  pillarRelationsList.replaceChildren();
+
+  pillarRelationsGraph.append(
+    svgNode("text", { x: 18, y: 112, class: "relation-axis-label" }, "天干"),
+    svgNode("text", { x: 18, y: 155, class: "relation-axis-label" }, "地支")
+  );
+
+  relations.forEach((relation, relationIndex) => {
+    const leftIndex = pillarIndex(relation.left.pillar);
+    const rightIndex = pillarIndex(relation.right.pillar);
+    const x1 = centers[leftIndex];
+    const x2 = centers[rightIndex];
+    const span = Math.max(1, rightIndex - leftIndex);
+    const isStem = relation.domain === "stem";
+    const y = isStem ? stemAnchorY : branchAnchorY;
+    const controlY = isStem
+      ? Math.max(8, 50 - span * 10 - relationIndex * 2)
+      : Math.min(226, 198 + span * 7 + relationIndex * 2);
+    const midX = (x1 + x2) / 2;
+    const midY = (y + controlY) / 2;
+    const group = svgNode("g", {
+      "data-relation-domain": relation.domain,
+      "data-relation-kind": relation.kind,
+      "data-left-pillar": relation.left.pillar,
+      "data-right-pillar": relation.right.pillar
+    });
+    group.append(
+      svgNode("path", {
+        d: `M ${x1} ${y} Q ${midX} ${controlY} ${x2} ${y}`,
+        class: `relation-path ${relation.kind}`
+      }),
+      svgNode("rect", {
+        x: midX - 22,
+        y: midY - 8,
+        width: 44,
+        height: 16,
+        rx: 8,
+        class: "relation-label-bg"
+      }),
+      svgNode("text", {
+        x: midX,
+        y: midY + 0.5,
+        class: `relation-label ${relation.kind}`
+      }, relation.label)
+    );
+    pillarRelationsGraph.append(group);
+  });
+
+  for (const [index, key] of ["year", "month", "day", "hour"].entries()) {
+    const center = centers[index];
+    const pillar = pillars[key];
+    const group = svgNode("g", { "data-pillar-node": key });
+    group.append(
+      svgNode("rect", {
+        x: center - cardWidth / 2,
+        y: cardY,
+        width: cardWidth,
+        height: cardHeight,
+        rx: 13,
+        class: `pillar-card${key === "day" ? " day" : ""}`
+      }),
+      svgNode("text", { x: center, y: 89, class: "pillar-name" }, `${shortPillarLabels[key]}柱`),
+      svgNode("text", { x: center, y: 119, class: "stem-value" }, pillar.stem),
+      svgNode("line", {
+        x1: center - 25,
+        y1: 137,
+        x2: center + 25,
+        y2: 137,
+        class: "pillar-divider"
+      }),
+      svgNode("text", { x: center, y: 157, class: "branch-value" }, pillar.branch)
+    );
+    pillarRelationsGraph.append(group);
+  }
+
+  if (relations.length === 0) {
+    pillarRelationsEmpty.hidden = false;
+    pillarRelationsEmpty.textContent = "目前四柱在這三種 V1 關係中沒有命中；這不代表不存在其他支間關係。";
+  } else {
+    pillarRelationsEmpty.hidden = true;
+    pillarRelationsEmpty.textContent = "";
+  }
+
+  for (const relation of relations) {
+    const chip = node("span", "pillar-relation-chip");
+    chip.dataset.relationDomain = relation.domain;
+    chip.dataset.relationKind = relation.kind;
+    const domainLabel = relation.domain === "stem" ? "干" : "支";
+    chip.append(
+      node("span", null, `${shortPillarLabels[relation.left.pillar]}${domainLabel}`),
+      node("b", null, relation.left.value),
+      node("i", null, "—"),
+      node("strong", null, relation.label),
+      node("i", null, "—"),
+      node("span", null, `${shortPillarLabels[relation.right.pillar]}${domainLabel}`),
+      node("b", null, relation.right.value)
+    );
+    pillarRelationsList.append(chip);
+  }
+}
+
 function renderResult(result, longitude, utcOffsetHours) {
   const { input, pillars, convention } = result;
   readout.textContent = `${pad(input.year, 4)}-${pad(input.month)}-${pad(input.day)} · ${pad(input.hour)}:${pad(input.minute)}`;
@@ -287,6 +500,7 @@ function renderResult(result, longitude, utcOffsetHours) {
   }
 
   renderTenGodRelationships(pillars);
+  renderPillarRelations(pillars);
 
   const lambda = longitude.toFixed(6);
   annualProjectionLink.href = `./?month=${encodeURIComponent(pillars.month.branch)}&lambda=${encodeURIComponent(lambda)}&yearStem=${encodeURIComponent(pillars.year.stem)}`;
@@ -333,6 +547,7 @@ function update() {
   } catch (error) {
     sensitivity.hidden = true;
     tenGodPanel.hidden = true;
+    pillarRelationsPanel.hidden = true;
     errorBox.hidden = false;
     errorBox.textContent = `無法計算：${error.message}`;
   }
@@ -340,6 +555,7 @@ function update() {
 
 installCrossViewLinks();
 installTenGodDerivation();
+installPillarRelations();
 form.addEventListener("input", update);
 form.addEventListener("change", update);
 update();

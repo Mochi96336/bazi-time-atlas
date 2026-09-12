@@ -66,8 +66,8 @@ const cases = [
     },
   },
   {
-    path: "birth.html?tenGod=1",
-    label: "Birth exact Annual link + Ten Gods",
+    path: "birth.html?tenGod=1&relations=1",
+    label: "Birth Annual link + Ten Gods + visible pair relations",
     assert(dom) {
       const groups = dom.match(/data-ten-god-group="[^"]+"/g) ?? [];
       return /class="birth-projection-link"/.test(dom) &&
@@ -88,7 +88,12 @@ const cases = [
         /data-stem="乙"[^>]*data-ten-god="偏財"/.test(dom) &&
         /data-stem="戊"[^>]*data-ten-god="正印"/.test(dom) &&
         /data-stem="壬"[^>]*data-ten-god="傷官"/.test(dom) &&
-        /data-hidden-stem="癸"[^>]*data-ten-god="食神"[^>]*data-hidden-role="主"/.test(dom);
+        /data-hidden-stem="癸"[^>]*data-ten-god="食神"[^>]*data-hidden-role="主"/.test(dom) &&
+        openDetailsById(dom, "pillar-relations-panel") &&
+        /data-relation-count="1"/.test(dom) &&
+        /data-relation-domain="branch"[^>]*data-relation-kind="six-harmony"[^>]*data-left-pillar="year"[^>]*data-right-pillar="hour"/.test(dom) &&
+        /data-relation-kind="six-harmony"/.test(dom) &&
+        /年支/.test(dom) && /時支/.test(dom) && /六合/.test(dom);
     },
   },
   {
