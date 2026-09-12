@@ -6,7 +6,8 @@ import {
   formatSolarTermEvent,
   jieBoundaryContext,
   solarTermEventsBetween,
-  solarTermEventsForCivilYear
+  solarTermEventsForCivilYear,
+  solarTermNamedEventsBetween
 } from "../src/astronomy/solar-term-boundaries.js";
 
 const HOUR_MS = 3_600_000;
@@ -51,4 +52,14 @@ test("eventsBetween keeps exact jie events across a narrow boundary window", () 
   const events = solarTermEventsBetween(jingZhe.instantMs - 2_000, jingZhe.instantMs + 2_000);
   assert.equal(events.length, 1);
   assert.equal(events[0].name, "驚蟄");
+});
+
+test("named range query can build a multi-decade Li Chun rail without expanding all 24 terms", () => {
+  const start = Date.UTC(2020, 0, 1);
+  const end = Date.UTC(2030, 11, 31, 23, 59, 59);
+  const events = solarTermNamedEventsBetween(start, end, ["立春"]);
+  assert.equal(events.length, 11);
+  assert.ok(events.every(event => event.name === "立春"));
+  assert.equal(events[0].referenceFields.year, 2020);
+  assert.equal(events.at(-1).referenceFields.year, 2030);
 });
