@@ -80,7 +80,8 @@ test("子卯 produces one reciprocal event instead of two arrows", () => {
 });
 
 test("self punishment requires duplicate visible occurrences and aggregates supports", () => {
-  assert.equal(visiblePillarPunishments(pillars(["辰", "子", "寅", "卯"])).length, 0);
+  const single = visiblePillarPunishments(pillars(["辰", "子", "寅", "卯"]));
+  assert.equal(single.filter(event => event.kind === "self").length, 0);
 
   assert.deepEqual(visiblePillarPunishments(pillars(["辰", "子", "寅", "辰"])), [{
     kind: "self",
