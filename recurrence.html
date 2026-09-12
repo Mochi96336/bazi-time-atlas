@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="拆開 60 年、400 年、局部重遇與 24,000 年全域閉合的離散週期實驗。">
+  <title>BaZi Time Atlas · Recurrence Lab</title>
+  <link rel="stylesheet" href="./site-nav.css">
+  <link rel="stylesheet" href="./recurrence.css">
+</head>
+<body>
+  <main class="recurrence-shell">
+    <header class="recurrence-topbar">
+      <div class="brand">BaZi Time Atlas</div>
+      <nav class="site-nav" aria-label="Atlas views">
+        <a href="./">時間圖譜</a>
+        <a class="active" href="./recurrence.html" aria-current="page">回歸</a>
+        <a href="./birth.html">出生</a>
+        <a href="./sexagenary.html">六十甲子</a>
+      </nav>
+    </header>
+
+    <section class="recurrence-intro">
+      <div>
+        <div class="eyebrow">Discrete recurrence laboratory</div>
+        <h1>有些齒輪會閉合，<br>有些只是再次相遇。</h1>
+        <p class="lede">這一頁故意先抽掉節氣與長期天文，只看三個可精確做整數運算的離散層：400 年公曆閏年骨架、60 年干支年序、60 日干支日序。這樣可以把「60 年」「某個起點的較早重遇」與「24,000 年全域閉合」分清楚。</p>
+      </div>
+      <p class="scope-note">24,000 年只屬於這個離散模型。把立春／十二節接回去之後，就必須改用天文殘差而不是宣稱同一個 exact period。</p>
+    </section>
+
+    <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散回歸圓盤">
+      <div class="recurrence-toolbar">
+        <div class="base-date" aria-label="基準日期">
+          <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
+          <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
+          <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+        </div>
+        <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="回歸候選"></div>
+      </div>
+
+      <div class="recurrence-legend" aria-hidden="true">
+        <div><i class="gregorian-dot"></i><span>公曆骨架</span><strong id="gregorian-phase-readout">—</strong></div>
+        <div><i class="year-dot"></i><span>干支年序</span><strong id="year-phase-readout">—</strong></div>
+        <div><i class="day-dot"></i><span>干支日序</span><strong id="day-phase-readout">—</strong></div>
+      </div>
+
+      <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="400 年公曆、60 年干支年序與 60 日日序的回歸扇形圓盤">
+        <g id="recurrence-guides"></g>
+        <g id="gregorian-ring"></g>
+        <g id="year-ring"></g>
+        <g id="day-ring"></g>
+        <g id="recurrence-cursor"></g>
+      </svg>
+
+      <div class="recurrence-readout" aria-live="polite">
+        <div class="readout-kicker">Time displacement</div>
+        <div><strong id="delta-readout">0 年</strong> <span>→</span> <strong id="target-date-readout">2026-09-13</strong></div>
+        <p id="closure-summary">基準點：三層都在 0 相位。</p>
+      </div>
+    </section>
+
+    <section class="delta-dock" aria-label="時間差控制">
+      <label>位移年數
+        <input id="delta-number" type="number" min="0" max="24000" step="1" value="0">
+      </label>
+      <div class="delta-slider-wrap">
+        <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年">
+        <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
+      </div>
+      <div class="global-period"><span>全域 exact</span><strong>24,000 年</strong></div>
+    </section>
+
+    <section class="closure-grid" aria-label="目前閉合狀態">
+      <article data-closure="gregorian"><span>Gregorian frame</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
+      <article data-closure="year"><span>Year sequence</span><strong id="year-status">—</strong><small>60 年干支年序</small></article>
+      <article data-closure="day"><span>Day sequence</span><strong id="day-status">—</strong><small>60 日日序</small></article>
+      <article class="local-card"><span>First local Year + Day</span><strong id="local-recurrence">—</strong><small>只要求此基準日期的年序＋日序重遇</small></article>
+    </section>
+
+    <section class="milestone-table" aria-label="典型回歸候選">
+      <div class="milestone-head"><span>Δ years</span><span>公曆</span><span>年序</span><span>日序</span><span>意義</span></div>
+      <div id="milestone-rows"></div>
+    </section>
+
+    <section class="recurrence-notes">
+      <div>
+        <div class="eyebrow">Why 24,000?</div>
+        <h2>400 年不是終點，60 年也不是。</h2>
+        <p>公曆每 400 年重複一次閏年配置，共 146,097 日；這在 60 日日序上等於偏移 57 格。要同時讓公曆骨架、60 年年序與 60 日日序都回到 0，相當於 60 個 400 年區塊，也就是 24,000 年；總日數 8,765,820 日，剛好也是 60 的倍數。</p>
+      </div>
+      <div>
+        <div class="eyebrow">Local ≠ global</div>
+        <h2>同一個日期可以更早撞回來。</h2>
+        <p>以 2026-09-13 為例，年序與日序在 1,980 年後就同時回到 0；但那時公曆的 400 年相位仍沒有回到原點，所以它只是「這個起點」的局部重遇，不是對所有日期都成立的全域週期。</p>
+      </div>
+    </section>
+
+    <details class="model-boundary">
+      <summary>模型邊界</summary>
+      <p>本頁使用向前外推的 proleptic Gregorian 規則與純整數模運算。它不處理立春瞬間、十二節、ΔT、地球軌道演化或歷史上實際使用哪一種曆法；這些屬於下一層 astronomical recurrence residual。</p>
+    </details>
+  </main>
+
+  <script type="module" src="./src/recurrence-view.js"></script>
+</body>
+</html>
