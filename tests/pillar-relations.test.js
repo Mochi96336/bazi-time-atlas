@@ -5,6 +5,7 @@ import {
   STEM_FIVE_COMBINATIONS,
   BRANCH_SIX_HARMONIES,
   BRANCH_SIX_CLASHES,
+  BRANCH_SIX_HARMS,
   relationsForPair,
   visiblePillarPairRelations
 } from "../src/calendar/pillar-relations.js";
@@ -20,7 +21,11 @@ function canonical(pair, order) {
   return [...pair].sort((a, b) => order.indexOf(a) - order.indexOf(b)).join("");
 }
 
-test("canonical pair registries contain exactly five combinations, six harmonies and six clashes", () => {
+function canonicalSet(pairs, order) {
+  return new Set(pairs.map(pair => canonical(pair, order)));
+}
+
+test("canonical pair registries contain five combinations plus six harmony, clash and harm pairs", () => {
   assert.deepEqual(STEM_FIVE_COMBINATIONS, [
     ["甲", "己"], ["乙", "庚"], ["丙", "辛"], ["丁", "壬"], ["戊", "癸"]
   ]);
@@ -30,21 +35,36 @@ test("canonical pair registries contain exactly five combinations, six harmonies
   assert.deepEqual(BRANCH_SIX_CLASHES, [
     ["子", "午"], ["丑", "未"], ["寅", "申"], ["卯", "酉"], ["辰", "戌"], ["巳", "亥"]
   ]);
+  assert.deepEqual(BRANCH_SIX_HARMS, [
+    ["子", "未"], ["丑", "午"], ["寅", "巳"], ["卯", "辰"], ["申", "亥"], ["酉", "戌"]
+  ]);
 });
 
 test("five combinations pair every heavenly stem exactly once", () => {
   assert.deepEqual(flatten(STEM_FIVE_COMBINATIONS).sort(), [...STEMS].sort());
 });
 
-test("six harmonies and six clashes each pair every earthly branch exactly once", () => {
-  assert.deepEqual(flatten(BRANCH_SIX_HARMONIES).sort(), [...BRANCHES].sort());
-  assert.deepEqual(flatten(BRANCH_SIX_CLASHES).sort(), [...BRANCHES].sort());
+test("harmony, clash and harm registries each pair every earthly branch exactly once", () => {
+  for (const pairs of [BRANCH_SIX_HARMONIES, BRANCH_SIX_CLASHES, BRANCH_SIX_HARMS]) {
+    assert.deepEqual(flatten(pairs).sort(), [...BRANCHES].sort());
+  }
 });
 
 test("six clashes are opposite branches six positions apart", () => {
   for (const [a, b] of BRANCH_SIX_CLASHES) {
     const delta = (BRANCHES.indexOf(b) - BRANCHES.indexOf(a) + 12) % 12;
     assert.equal(delta, 6, `${a}${b}`);
+  }
+});
+
+test("harmony, clash and harm pair registries do not reuse the same unordered pair", () => {
+  const registries = [BRANCH_SIX_HARMONIES, BRANCH_SIX_CLASHES, BRANCH_SIX_HARMS]
+    .map(pairs => canonicalSet(pairs, BRANCHES));
+
+  for (let left = 0; left < registries.length; left += 1) {
+    for (let right = left + 1; right < registries.length; right += 1) {
+      assert.deepEqual([...registries[left]].filter(pair => registries[right].has(pair)), []);
+    }
   }
 });
 
@@ -61,6 +81,8 @@ test("pair lookup is symmetric and does not infer non-membership", () => {
   assert.equal(relationsForPair("branch", "辰", "酉")[0].kind, "six-harmony");
   assert.equal(relationsForPair("branch", "子", "午")[0].kind, "six-clash");
   assert.equal(relationsForPair("branch", "午", "子")[0].kind, "six-clash");
+  assert.equal(relationsForPair("branch", "寅", "巳")[0].kind, "six-harm");
+  assert.equal(relationsForPair("branch", "巳", "寅")[0].kind, "six-harm");
   assert.equal(relationsForPair("branch", "子", "寅").length, 0);
 });
 
@@ -68,14 +90,15 @@ test("no canonical pair is duplicated within a registry", () => {
   for (const [pairs, order] of [
     [STEM_FIVE_COMBINATIONS, STEMS],
     [BRANCH_SIX_HARMONIES, BRANCHES],
-    [BRANCH_SIX_CLASHES, BRANCHES]
+    [BRANCH_SIX_CLASHES, BRANCHES],
+    [BRANCH_SIX_HARMS, BRANCHES]
   ]) {
     const keys = pairs.map(pair => canonical(pair, order));
     assert.equal(new Set(keys).size, keys.length);
   }
 });
 
-test("default Birth sample exposes only the visible 辰酉六合", () => {
+test("default Birth sample still exposes only the visible 辰酉六合", () => {
   const relations = visiblePillarPairRelations({
     year: { stem: "乙", branch: "酉" },
     month: { stem: "戊", branch: "子" },
@@ -93,12 +116,12 @@ test("default Birth sample exposes only the visible 辰酉六合", () => {
   }]);
 });
 
-test("six visible pillar pairs can expose multiple independent stem and branch relations", () => {
+test("visible pillar scan can expose 六害 alongside independent relations", () => {
   const relations = visiblePillarPairRelations({
-    year: { stem: "甲", branch: "子" },
-    month: { stem: "己", branch: "午" },
-    day: { stem: "丙", branch: "寅" },
-    hour: { stem: "辛", branch: "申" }
+    year: { stem: "甲", branch: "寅" },
+    month: { stem: "己", branch: "巳" },
+    day: { stem: "丙", branch: "子" },
+    hour: { stem: "辛", branch: "午" }
   });
 
   assert.deepEqual(relations.map(relation => [
@@ -109,9 +132,9 @@ test("six visible pillar pairs can expose multiple independent stem and branch r
     relation.members.join("")
   ]), [
     ["stem", "five-combination", "year", "month", "甲己"],
-    ["branch", "six-clash", "year", "month", "子午"],
+    ["branch", "six-harm", "year", "month", "寅巳"],
     ["stem", "five-combination", "day", "hour", "丙辛"],
-    ["branch", "six-clash", "day", "hour", "寅申"]
+    ["branch", "six-clash", "day", "hour", "子午"]
   ]);
 });
 
