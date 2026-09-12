@@ -110,6 +110,11 @@
   stroke: #8e7066;
   stroke-dasharray: 5 4;
 }
+.pillar-relations-graph .relation-path.six-harm {
+  stroke: #817b72;
+  stroke-dasharray: 1.5 4;
+  stroke-linecap: round;
+}
 .pillar-relations-graph .relation-label-bg {
   fill: color-mix(in srgb, var(--paper) 94%, white);
   stroke: #d9ddd8;
@@ -123,6 +128,7 @@
   dominant-baseline: middle;
 }
 .pillar-relations-graph .relation-label.six-clash { fill: #765d55; }
+.pillar-relations-graph .relation-label.six-harm { fill: #716b63; }
 .pillar-relations-empty {
   display: block;
   padding: 0 14px 11px;
@@ -155,6 +161,7 @@
 }
 .pillar-relation-chip strong { color: #355d52; font-size: 8px; }
 .pillar-relation-chip[data-relation-kind="six-clash"] strong { color: #765d55; }
+.pillar-relation-chip[data-relation-kind="six-harm"] strong { color: #716b63; }
 .pillar-relation-chip i { color: #a0a5a2; font-style: normal; }
 
 .pillar-groups-band {
