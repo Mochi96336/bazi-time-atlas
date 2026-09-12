@@ -13,10 +13,148 @@
 .pillar-summary .day-master-summary[role="link"]:focus-visible {
   background: color-mix(in srgb, var(--accent-soft) 82%, transparent);
 }
-.birth-stage > .track-note a {
-  color: #41655b;
-  font-weight: 720;
-  text-decoration-color: color-mix(in srgb, #41655b 34%, transparent);
-  text-underline-offset: 3px;
+
+.clock-zone-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 9px;
+  align-items: stretch;
 }
-.birth-stage > .track-note a:hover { color: #294b42; }
+.clock-zone-row .time-inputs { max-width: none; }
+.utc-offset-input {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  background: rgba(255,255,255,.55);
+  padding: 0 8px;
+}
+.utc-offset-input:focus-within {
+  border-color: #96aaa3;
+  box-shadow: 0 0 0 3px rgba(92,120,111,.08);
+}
+.utc-offset-input > span {
+  color: #858e89;
+  font-size: 9px;
+  font-weight: 700;
+}
+.utc-offset-input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.utc-offset-input input::-webkit-outer-spin-button,
+.utc-offset-input input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+
+.birth-projection-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+  margin: 11px 0 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--hairline));
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--accent-soft) 36%, transparent);
+}
+.birth-projection-kicker {
+  color: #80918b;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.birth-projection-link a {
+  color: #355d52;
+  font-size: 11px;
+  font-weight: 760;
+  text-decoration: none;
+}
+.birth-projection-link a:hover { color: #24483f; }
+.birth-projection-link a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 48%, transparent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.birth-projection-meta {
+  color: var(--muted);
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.birth-projection { pointer-events: none; }
+.birth-projection-ray {
+  stroke: #355f55;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 3 5;
+  opacity: .92;
+  vector-effect: non-scaling-stroke;
+}
+.birth-projection-month-point {
+  fill: var(--paper);
+  stroke: #355f55;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+.birth-projection-cap {
+  fill: #355f55;
+  stroke: var(--paper);
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+.birth-projection-readout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: baseline;
+  margin: 12px 0 2px;
+  padding: 10px 11px;
+  border-left: 2px solid #5b796f;
+  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+  border-radius: 0 9px 9px 0;
+}
+.birth-projection-readout > span {
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+.birth-projection-readout > strong {
+  justify-self: end;
+  color: #34594f;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.birth-projection-readout > small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .clock-zone-row { grid-template-columns: minmax(0, 1fr) 88px; gap: 6px; }
+  .utc-offset-input { padding-inline: 6px; }
+  .utc-offset-input input { min-height: 39px; font-size: 12px; }
+  .birth-projection-link {
+    grid-template-columns: 1fr auto;
+    gap: 3px 8px;
+    padding: 8px 9px;
+  }
+  .birth-projection-kicker { grid-column: 1 / -1; }
+  .birth-projection-link a { font-size: 10px; }
+  .birth-projection-meta { font-size: 7px; white-space: normal; text-align: right; }
+  .birth-projection-readout > strong { font-size: 16px; }
+}
