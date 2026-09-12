@@ -1,0 +1,115 @@
+.longitude-input {
+  display: grid;
+  grid-template-columns: auto minmax(90px, 130px) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--hairline);
+}
+.longitude-input-label {
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 700;
+}
+.longitude-input input {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid #d7dad6;
+  border-radius: 9px;
+  background: rgba(255,255,255,.52);
+  color: var(--ink);
+  font: inherit;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.longitude-input input[aria-invalid="true"] { border-color: #a96f63; }
+.longitude-input small {
+  color: var(--muted);
+  font-size: 8px;
+  white-space: nowrap;
+}
+.longitude-input-hint {
+  grid-column: 1 / -1;
+  color: #8b928e;
+  font-size: 7.5px;
+  line-height: 1.5;
+}
+
+.mean-solar-preview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 9px;
+  padding: 10px 11px;
+  border: 1px solid #d8ddd9;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--accent-soft) 20%, white);
+}
+.mean-solar-preview-copy {
+  display: grid;
+  gap: 2px;
+}
+.mean-solar-preview-copy small {
+  color: #84908a;
+  font-size: 6.5px;
+  letter-spacing: .09em;
+}
+.mean-solar-preview-copy strong {
+  color: var(--ink);
+  font-size: 10px;
+}
+.mean-solar-preview-copy span {
+  color: var(--muted);
+  font-size: 7.5px;
+}
+.mean-solar-preview-readout {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+.mean-solar-preview-readout b {
+  color: var(--ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.mean-solar-preview-readout span {
+  color: #4d6d63;
+  font-size: 8px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.mean-solar-preview-meta {
+  grid-column: 1 / -1;
+  padding-top: 6px;
+  border-top: 1px solid rgba(90,110,102,.12);
+  color: #7f8984;
+  font-size: 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .longitude-input {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 6px;
+    margin-top: 7px;
+    padding-top: 7px;
+  }
+  .longitude-input-label { font-size: 8px; }
+  .longitude-input input { padding: 7px 8px; font-size: 9px; }
+  .longitude-input small { font-size: 7px; }
+  .longitude-input-hint { font-size: 6.8px; }
+  .mean-solar-preview {
+    gap: 6px 9px;
+    margin-top: 7px;
+    padding: 8px 9px;
+    border-radius: 9px;
+  }
+  .mean-solar-preview-copy strong { font-size: 9px; }
+  .mean-solar-preview-copy span { font-size: 6.8px; }
+  .mean-solar-preview-readout b { font-size: 11px; }
+  .mean-solar-preview-readout span { font-size: 7px; }
+  .mean-solar-preview-meta { font-size: 6.5px; }
+}

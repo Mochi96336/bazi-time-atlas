@@ -29,6 +29,7 @@ jobs:
           node --check src/birth.js
           node --check src/birth-punishments-view.js
           node --check src/birth-relation-model-overview.js
+          node --check src/birth-mean-solar-view.js
           node --check src/sexagenary-data.js
           node --check src/sexagenary.js
           node --check src/sexagenary-deep-link.js
@@ -41,8 +42,10 @@ jobs:
           node --check src/calendar/branch-punishments.js
           node --check src/calendar/relation-models.js
           node --check src/astronomy/solar-longitude.js
+          node --check src/astronomy/mean-solar-time.js
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
+          node --check scripts/check-mean-solar-preview.mjs
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
@@ -61,6 +64,10 @@ jobs:
           exit 1
       - name: Verify cross-view deep links
         run: node scripts/check-deep-links.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify mean solar preview
+        run: node scripts/check-mean-solar-preview.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Capture PNG evidence
