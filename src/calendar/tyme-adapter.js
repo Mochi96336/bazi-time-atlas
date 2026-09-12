@@ -1,5 +1,6 @@
 import {
   DefaultEightCharProvider,
+  JulianDay,
   LunarHour,
   LunarSect2EightCharProvider,
   SolarTime
@@ -9,6 +10,8 @@ export const DAY_BOUNDARY = Object.freeze({
   ZI_INITIAL_NEXT_DAY: "zi-initial-next-day",
   CIVIL_MIDNIGHT: "civil-midnight"
 });
+
+export const SOLAR_TERM_REFERENCE_UTC_OFFSET = 8;
 
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -26,6 +29,12 @@ function validateInput(input) {
   assertInteger("hour", input.hour, 0, 23);
   assertInteger("minute", input.minute ?? 0, 0, 59);
   assertInteger("second", input.second ?? 0, 0, 59);
+}
+
+function validateUtcOffset(value) {
+  if (!Number.isFinite(value) || value < -14 || value > 14) {
+    throw new RangeError("utcOffsetHours must be a finite number from -14 to +14");
+  }
 }
 
 function pillarView(sixtyCycle) {
@@ -83,11 +92,26 @@ function resolveEightChar(solarTime, dayBoundary) {
 }
 
 /**
- * Resolve four pillars from local civil date/time components.
+ * Tyme's solar-term clock is expressed in UTC+8. Convert one birthplace-local
+ * civil timestamp to the UTC+8 clock reading of the SAME physical instant.
+ * This conversion is used only for year/month solar-term boundaries.
+ */
+function toSolarTermReferenceTime(localSolarTime, utcOffsetHours) {
+  const shiftDays = (SOLAR_TERM_REFERENCE_UTC_OFFSET - utcOffsetHours) / 24;
+  return JulianDay
+    .fromJulianDay(localSolarTime.getJulianDay().getDay() + shiftDays)
+    .getSolarTime();
+}
+
+/**
+ * Resolve four pillars from birthplace-local civil date/time components.
  *
- * Deliberately does not create a JavaScript Date: callers must provide the
- * birthplace-local civil clock reading. Time-zone conversion and true-solar
- * correction are separate responsibilities and are not silently applied here.
+ * Year/month are instant-based solar-term rules, so the same physical instant
+ * is converted to Tyme's UTC+8 solar-term reference clock before evaluating
+ * Li Chun / Jie boundaries. Day/hour remain local-clock rules and therefore
+ * stay on the supplied birthplace-local date and time.
+ *
+ * True-solar-time / longitude correction is intentionally NOT applied here.
  */
 export function resolveBirthPillars(input, options = {}) {
   validateInput(input);
@@ -96,9 +120,12 @@ export function resolveBirthPillars(input, options = {}) {
     throw new RangeError(`unsupported dayBoundary: ${dayBoundary}`);
   }
 
+  const utcOffsetHours = options.utcOffsetHours ?? SOLAR_TERM_REFERENCE_UTC_OFFSET;
+  validateUtcOffset(utcOffsetHours);
+
   const minute = input.minute ?? 0;
   const second = input.second ?? 0;
-  const solarTime = SolarTime.fromYmdHms(
+  const localSolarTime = SolarTime.fromYmdHms(
     input.year,
     input.month,
     input.day,
@@ -106,17 +133,28 @@ export function resolveBirthPillars(input, options = {}) {
     minute,
     second
   );
+  const referenceSolarTime = toSolarTermReferenceTime(localSolarTime, utcOffsetHours);
 
-  const eightChar = resolveEightChar(solarTime, dayBoundary);
-  const year = pillarView(eightChar.getYear());
-  const month = pillarView(eightChar.getMonth());
-  const day = pillarView(eightChar.getDay());
-  let hour = pillarView(eightChar.getHour());
+  // Year/month are taken from the same astronomical instant expressed on
+  // Tyme's UTC+8 solar-term reference clock. Day-boundary choice cannot alter
+  // them, so use the default provider for this projection.
+  const referenceEightChar = resolveEightChar(
+    referenceSolarTime,
+    DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+  );
+
+  // Day/hour are birthplace-local civil-time rules.
+  const localEightChar = resolveEightChar(localSolarTime, dayBoundary);
+
+  const year = pillarView(referenceEightChar.getYear());
+  const month = pillarView(referenceEightChar.getMonth());
+  const day = pillarView(localEightChar.getDay());
+  let hour = pillarView(localEightChar.getHour());
 
   // Tyme's Sect2 provider preserves the civil-date day pillar at late Zi but
   // intentionally keeps the library's default Zi-hour stem. Our user-facing
-  // CIVIL_MIDNIGHT mode instead applies one coherent rule: first determine the
-  // effective day pillar, then feed that day stem into Five Rats.
+  // CIVIL_MIDNIGHT mode applies one coherent rule: first determine the
+  // effective local day pillar, then feed that day stem into Five Rats.
   if (dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT && input.hour === 23) {
     hour = hourPillarFromDayStem(day.stem, hour.branch);
   }
@@ -135,7 +173,9 @@ export function resolveBirthPillars(input, options = {}) {
       monthBoundary: "exact-jie",
       dayBoundary,
       hourStemRule: "five-rats-from-effective-day-stem",
-      timeBasis: "local-civil-time"
+      timeBasis: "birthplace-local-civil-time",
+      utcOffsetHours,
+      solarTermReferenceUtcOffset: SOLAR_TERM_REFERENCE_UTC_OFFSET
     },
     pillars: { year, month, day, hour }
   };
