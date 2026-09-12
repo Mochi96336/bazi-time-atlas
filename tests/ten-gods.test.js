@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import {
   HEAVENLY_STEMS,
   TEN_GOD_NAMES,
-  tenGodForStem
+  TEN_GOD_GROUPS,
+  tenGodForStem,
+  tenGodDerivationForDayMaster
 } from "../src/calendar/ten-gods.js";
 
 const XIN_MATRIX = {
@@ -62,7 +64,50 @@ test("Five-Phase direction and yin-yang parity remain explicit in the result", (
   assert.equal(officer.samePolarity, false);
 });
 
+test("Xin derivation map exposes the five relation groups around Yin Metal", () => {
+  const derivation = tenGodDerivationForDayMaster("辛");
+  assert.deepEqual(derivation.map(group => group.group), [...TEN_GOD_GROUPS]);
+
+  const compact = Object.fromEntries(derivation.map(group => [
+    group.group,
+    {
+      label: group.groupLabel,
+      element: group.targetElement,
+      same: `${group.same.other.name}${group.same.name}`,
+      opposite: `${group.opposite.other.name}${group.opposite.name}`
+    }
+  ]));
+
+  assert.deepEqual(compact, {
+    resource: { label: "生我", element: "土", same: "己偏印", opposite: "戊正印" },
+    officer: { label: "剋我", element: "火", same: "丁七殺", opposite: "丙正官" },
+    peer: { label: "同我", element: "金", same: "辛比肩", opposite: "庚劫財" },
+    output: { label: "我生", element: "水", same: "癸食神", opposite: "壬傷官" },
+    wealth: { label: "我剋", element: "木", same: "乙偏財", opposite: "甲正財" }
+  });
+});
+
+test("every derivation map is five polarity pairs covering all ten stems and names", () => {
+  for (const dayMaster of HEAVENLY_STEMS) {
+    const derivation = tenGodDerivationForDayMaster(dayMaster);
+    assert.equal(derivation.length, 5);
+    assert.deepEqual(derivation.map(group => group.group), [...TEN_GOD_GROUPS]);
+
+    const relations = derivation.flatMap(group => [group.same, group.opposite]);
+    assert.equal(new Set(relations.map(relation => relation.other.name)).size, 10);
+    assert.deepEqual(relations.map(relation => relation.name).sort(), [...TEN_GOD_NAMES].sort());
+
+    for (const group of derivation) {
+      assert.equal(group.same.samePolarity, true);
+      assert.equal(group.opposite.samePolarity, false);
+      assert.equal(group.same.other.element, group.targetElement);
+      assert.equal(group.opposite.other.element, group.targetElement);
+    }
+  }
+});
+
 test("unknown stems fail closed", () => {
   assert.throws(() => tenGodForStem("辛", "A"), /unknown heavenly stem/);
   assert.throws(() => tenGodForStem("A", "辛"), /unknown heavenly stem/);
+  assert.throws(() => tenGodDerivationForDayMaster("A"), /unknown heavenly stem/);
 });
