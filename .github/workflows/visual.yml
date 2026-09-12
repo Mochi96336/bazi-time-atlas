@@ -19,6 +19,8 @@ jobs:
           node-version: 22
       - name: Check geometry/data invariants
         run: npm test
+      - name: Check app syntax
+        run: node --check src/app.js
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
