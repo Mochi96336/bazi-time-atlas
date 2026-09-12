@@ -1,7 +1,8 @@
 import {
   formatSolarTermEvent,
   jieBoundaryContext,
-  solarTermEventsBetween
+  solarTermEventsBetween,
+  solarTermNamedEventsBetween
 } from "./astronomy/solar-term-boundaries.js";
 
 const DAY_MS = 86_400_000;
@@ -66,10 +67,9 @@ function renderRail(selectedMs) {
   if (signature === railSignature) return;
   railSignature = signature;
 
-  const candidates = solarTermEventsBetween(window.startMs, window.endMs);
   railEvents = scale === "cycle"
-    ? candidates.filter(event => event.name === "立春")
-    : candidates.filter(event => event.kind === "jie");
+    ? solarTermNamedEventsBetween(window.startMs, window.endMs, ["立春"])
+    : solarTermEventsBetween(window.startMs, window.endMs).filter(event => event.kind === "jie");
 
   boundaryRail.replaceChildren();
   railNodes = railEvents.map(event => {
