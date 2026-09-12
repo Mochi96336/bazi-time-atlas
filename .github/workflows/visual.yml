@@ -43,6 +43,7 @@ jobs:
           node --check src/calendar/relation-models.js
           node --check src/astronomy/solar-longitude.js
           node --check src/astronomy/mean-solar-time.js
+          node --check src/astronomy/equation-of-time.js
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
           node --check scripts/check-mean-solar-preview.mjs
