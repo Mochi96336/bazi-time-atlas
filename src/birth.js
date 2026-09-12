@@ -1,7 +1,11 @@
 import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
 import { apparentSolarLongitude } from "./astronomy/solar-longitude.js";
 import { hiddenStemsForBranch } from "./calendar/hidden-stems.js";
-import { heavenlyStemMeta, tenGodForStem } from "./calendar/ten-gods.js";
+import {
+  heavenlyStemMeta,
+  tenGodForStem,
+  tenGodDerivationForDayMaster
+} from "./calendar/ten-gods.js";
 
 const form = document.querySelector("#birth-form");
 const yearInput = document.querySelector("#birth-year");
@@ -47,6 +51,7 @@ const summaryLabels = {
 const summaryCells = {};
 let annualProjectionLink;
 let annualProjectionMeta;
+let tenGodDerivation;
 const dayRuleNote = document.querySelector("#day-rule-note");
 
 function installCrossViewLinks() {
@@ -83,6 +88,14 @@ function installCrossViewLinks() {
   annualProjectionMeta.textContent = "子月 · 年干乙 · UTC+08:00";
   row.append(label, annualProjectionLink, annualProjectionMeta);
   pillarSummary.insertAdjacentElement("afterend", row);
+}
+
+function installTenGodDerivation() {
+  tenGodDerivation = document.createElement("section");
+  tenGodDerivation.id = "ten-gods-derivation";
+  tenGodDerivation.className = "ten-gods-derivation";
+  tenGodDerivation.setAttribute("aria-label", "十神由五行方向與陰陽同異推導");
+  tenGodGrid.insertAdjacentElement("beforebegin", tenGodDerivation);
 }
 
 function selectedBoundary() {
@@ -149,12 +162,57 @@ function relationMeta(relation) {
   return `${relation.groupLabel} · ${relation.samePolarity ? "同陰陽" : "異陰陽"}`;
 }
 
+function renderTenGodDerivation(dayMaster) {
+  const dayMeta = heavenlyStemMeta(dayMaster);
+  const heading = node("header", "ten-gods-derivation-head");
+  const copy = node("div", null);
+  copy.append(
+    node("small", null, "WHY THIS NAME"),
+    node("strong", null, `${dayMaster}日主 · ${dayMeta.yinYang}${dayMeta.element}`),
+    node("span", null, "先決定五行方向，再用陰陽同異把每組拆成兩個名稱。")
+  );
+  heading.append(copy);
+
+  const map = node("div", "ten-gods-relation-map");
+  for (const group of tenGodDerivationForDayMaster(dayMaster)) {
+    const card = node("article", "ten-gods-relation-group");
+    card.dataset.tenGodGroup = group.group;
+    card.dataset.targetElement = group.targetElement;
+
+    const head = node("header", null);
+    head.append(
+      node("span", null, group.groupLabel),
+      node("strong", null, group.targetElement)
+    );
+
+    const pair = node("div", "ten-gods-polarity-pair");
+    for (const [polarity, relation] of [["same", group.same], ["opposite", group.opposite]]) {
+      const row = node("div", "ten-gods-polarity-row");
+      row.dataset.polarity = polarity;
+      row.dataset.stem = relation.other.name;
+      row.dataset.tenGod = relation.name;
+      row.append(
+        node("small", null, polarity === "same" ? "同陰陽" : "異陰陽"),
+        node("b", null, relation.other.name),
+        node("strong", null, relation.name)
+      );
+      pair.append(row);
+    }
+
+    card.append(head, pair);
+    map.append(card);
+  }
+
+  tenGodDerivation.replaceChildren(heading, map);
+}
+
 function renderTenGodRelationships(pillars) {
   const dayMaster = pillars.day.stem;
   const dayMeta = heavenlyStemMeta(dayMaster);
   tenGodDayMaster.textContent = `${dayMaster} · ${dayMeta.yinYang}${dayMeta.element}`;
   tenGodPanel.hidden = false;
   if (forceTenGodOpen) tenGodPanel.open = true;
+  renderTenGodDerivation(dayMaster);
   tenGodGrid.replaceChildren();
 
   for (const key of ["year", "month", "day", "hour"]) {
@@ -281,6 +339,7 @@ function update() {
 }
 
 installCrossViewLinks();
+installTenGodDerivation();
 form.addEventListener("input", update);
 form.addEventListener("change", update);
 update();
