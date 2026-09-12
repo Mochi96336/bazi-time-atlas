@@ -42,27 +42,24 @@ Run geometry/data invariants with:
 npm test
 ```
 
-### Visual PNG self-check
+### Lightweight PNG visual self-check
 
-The `Visual PNG self-check` workflow opens the real page in headless Chromium and captures both full-page and wheel-focused PNG evidence at three fixed viewports:
+The `Visual PNG self-check` workflow follows the same lightweight pattern used in the Relay project: it calls the system-installed Chromium/Chrome directly in headless mode, with no Playwright or Puppeteer dependency.
 
-- desktop — 1440×1100
-- tablet — 834×1112
-- iPhone-like mobile — 428×926 at 2× device scale
+It captures two deterministic viewports:
 
-It also fails on basic rendering regressions such as a missing wheel or horizontal page overflow. Every run uploads a `visual-png-selfcheck` artifact containing six PNGs plus `diagnostics.json` for seven days.
+- `surface-1440x900.png`
+- `surface-390x844.png`
 
-For local capture:
+Artifacts are written to `tmp/visual-check/` and uploaded as `visual-png-selfcheck` for seven days. This is intentionally a smoke/evidence check rather than a pixel-diff visual regression gate while the layout is still changing.
+
+Local use:
 
 ```bash
-npm install
-npx playwright install chromium
 python -m http.server 4173
-# in another terminal
-npm run visual:capture
+# in another terminal; requires chromium/chrome on PATH
+npm run visual:check
 ```
-
-The current visual check is deliberately evidence-first rather than pixel-diff gating. A stable screenshot baseline can be added after the annual layout settles.
 
 ## Roadmap
 
