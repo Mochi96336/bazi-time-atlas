@@ -1,8 +1,10 @@
 import { chromium } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173";
-const outputDir = new URL("../visual-artifacts/", import.meta.url);
+const outputDir = fileURLToPath(new URL("../visual-artifacts/", import.meta.url));
 
 const viewports = [
   {
@@ -106,13 +108,13 @@ try {
     }
 
     await page.screenshot({
-      path: new URL(`${scenario.name}-full.png`, outputDir),
+      path: path.join(outputDir, `${scenario.name}-full.png`),
       fullPage: true,
       animations: "disabled",
     });
 
     await page.locator(".wheel-frame").screenshot({
-      path: new URL(`${scenario.name}-wheel.png`, outputDir),
+      path: path.join(outputDir, `${scenario.name}-wheel.png`),
       animations: "disabled",
     });
 
@@ -126,7 +128,7 @@ try {
 }
 
 await writeFile(
-  new URL("diagnostics.json", outputDir),
+  path.join(outputDir, "diagnostics.json"),
   `${JSON.stringify(diagnostics, null, 2)}\n`,
   "utf8",
 );
