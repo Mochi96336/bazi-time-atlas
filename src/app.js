@@ -81,13 +81,15 @@ function renderStaticWheel() {
     if (term.kind === "jie") { lineClasses.push("jie"); labelClasses.push("jie"); }
     if (isCardinal) { lineClasses.push("cardinal"); labelClasses.push("cardinal"); }
 
-    svgEl("line", {
+    const line = svgEl("line", {
       x1: lineInner.x,
       y1: lineInner.y,
       x2: lineOuter.x,
       y2: lineOuter.y,
-      class: lineClasses.join(" ")
+      class: lineClasses.join(" "),
+      "data-term": term.name
     }, groups.terms);
+    line.setAttribute("aria-hidden", "true");
 
     const labelRadius = term.kind === "jie" ? 323 : 304;
     const label = textAt(groups.terms, labelRadius, term.longitude, term.name, labelClasses.join(" "));
@@ -106,11 +108,11 @@ function renderStaticWheel() {
   });
 
   [0, 90, 180, 270].forEach(angle => {
-    textAt(groups.zodiac, 423, angle, `${angle}°`, "quadrant-angle");
+    textAt(groups.zodiac, 407, angle, `${angle}°`, "quadrant-angle");
     const p1 = polar(cx, cy, 78, angle);
     const p2 = polar(cx, cy, 420, angle);
     svgEl("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, class: "debug-axis" }, groups.debug);
-    textAt(groups.debug, 410, angle + 2.5, `${angle}°`, "debug-label");
+    textAt(groups.debug, 399, angle + 2.5, `${angle}°`, "debug-label");
   });
 }
 
@@ -135,6 +137,10 @@ function highlightSelector(type, key, className = "is-selected") {
   svg.querySelector(`[data-select-type="${type}"][data-select-key="${key}"]`)?.classList.add(className);
 }
 
+function highlightTerm(name) {
+  svg.querySelectorAll(`[data-term="${name}"]`).forEach(node => node.classList.add("is-related"));
+}
+
 function renderSelectionBand(start, end) {
   groups.selection.replaceChildren();
   svgEl("path", {
@@ -157,7 +163,7 @@ function renderSelection() {
     highlightSelector("month", month.branch);
     solarTerms
       .filter(term => term.name === month.startTerm || term.name === month.endTerm)
-      .forEach(term => svg.querySelector(`[data-term="${term.name}"]`)?.classList.add("is-related"));
+      .forEach(term => highlightTerm(term.name));
     overlappingZodiac(month.start, month.end)
       .forEach(item => highlightSelector("zodiac", item.split(" ")[0], "is-related"));
 
