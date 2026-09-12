@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test",
+    "vendor:prepare": "node scripts/prepare-vendor.mjs",
+    "test": "npm run vendor:prepare && node --test",
     "visual:check": "node scripts/visual-check.mjs"
   },
   "dependencies": {
