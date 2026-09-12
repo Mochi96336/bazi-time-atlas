@@ -99,64 +99,33 @@
           <div class="instant-axis" aria-hidden="true"><span>同一瞬間</span></div>
 
           <article class="pillar-track" data-pillar="year">
-            <div class="track-rule">
-              <span class="track-index">01</span>
-              <div><strong>年界</strong><small>精確立春瞬間</small></div>
-            </div>
+            <div class="track-rule"><span class="track-index">01</span><div><strong>年界</strong><small>精確立春瞬間</small></div></div>
             <div class="track-line" aria-hidden="true"><i></i></div>
-            <div class="pillar-result">
-              <span>年柱</span>
-              <strong id="year-pillar">乙酉</strong>
-              <small>只在立春界前後切換</small>
-            </div>
+            <div class="pillar-result"><span>年柱</span><strong id="year-pillar">乙酉</strong><small>只在立春界前後切換</small></div>
           </article>
 
           <article class="pillar-track" data-pillar="month">
-            <div class="track-rule">
-              <span class="track-index">02</span>
-              <div><strong>月界</strong><small>十二個「節」的精確瞬間</small></div>
-            </div>
+            <div class="track-rule"><span class="track-index">02</span><div><strong>月界</strong><small>十二個「節」的精確瞬間</small></div></div>
             <div class="track-line" aria-hidden="true"><i></i></div>
-            <div class="pillar-result">
-              <span>月柱</span>
-              <strong id="month-pillar">戊子</strong>
-              <small>節界定月支，再依年干起月干</small>
-            </div>
+            <div class="pillar-result"><span>月柱</span><strong id="month-pillar">戊子</strong><small>節界定月支，再依年干起月干</small></div>
           </article>
 
           <article class="pillar-track" data-pillar="day">
-            <div class="track-rule">
-              <span class="track-index">03</span>
-              <div><strong>日序</strong><small>連續六十干支日</small></div>
-            </div>
+            <div class="track-rule"><span class="track-index">03</span><div><strong>日序</strong><small>連續六十干支日</small></div></div>
             <div class="track-line" aria-hidden="true"><i></i></div>
-            <div class="pillar-result">
-              <span>日柱</span>
-              <strong id="day-pillar">辛巳</strong>
-              <small id="day-rule-note">23:00 起計下一干支日</small>
-            </div>
+            <div class="pillar-result"><span>日柱</span><strong id="day-pillar">辛巳</strong><small id="day-rule-note">23:00 起計下一干支日</small></div>
           </article>
 
           <article class="pillar-track" data-pillar="hour">
-            <div class="track-rule">
-              <span class="track-index">04</span>
-              <div><strong>時段</strong><small>十二時支 + 五鼠遁</small></div>
-            </div>
+            <div class="track-rule"><span class="track-index">04</span><div><strong>時段</strong><small>十二時支 + 五鼠遁</small></div></div>
             <div class="track-line" aria-hidden="true"><i></i></div>
-            <div class="pillar-result">
-              <span>時柱</span>
-              <strong id="hour-pillar">壬辰</strong>
-              <small>先定時支，再由有效日干起時干</small>
-            </div>
+            <div class="pillar-result"><span>時柱</span><strong id="hour-pillar">壬辰</strong><small>先定時支，再由有效日干起時干</small></div>
           </article>
         </div>
 
         <details id="ten-gods-panel" class="ten-gods-panel">
           <summary>
-            <span class="ten-gods-summary-copy">
-              <small>Relative to Day Master</small>
-              <strong>日主 <b id="ten-gods-day-master">辛</b> → 十神</strong>
-            </span>
+            <span class="ten-gods-summary-copy"><small>Relative to Day Master</small><strong>日主 <b id="ten-gods-day-master">辛</b> → 十神</strong></span>
             <span class="ten-gods-summary-meta">明干 + 藏干</span>
           </summary>
           <p class="ten-gods-intro">十神是「另一個天干相對日主」的關係名稱：先判五行方向，再判陰陽同異。地支必須先展開藏干後逐一比較；本區不計旺衰、權重、吉凶或性格。</p>
@@ -169,7 +138,6 @@
           <strong>這個時刻會因換日規則得到不同日柱／時柱。</strong>
           <p id="boundary-comparison"></p>
         </div>
-
         <div id="birth-error" class="birth-error" hidden></div>
       </section>
     </section>
@@ -187,33 +155,14 @@
     <details class="sources-panel">
       <summary>計算引擎與規則來源</summary>
       <div class="source-grid">
-        <section class="source-group">
-          <div class="source-kicker">Engine</div>
-          <p>四柱與太陽黃經共用固定版本 Tyme4ts 1.5.2 的天文核心。年度以立春瞬間切換、月份以節令瞬間切換；太陽黃經另以 48 個節氣節點測試鎖住。</p>
-          <div class="source-links">
-            <a href="https://github.com/6tail/tyme4ts" target="_blank" rel="noreferrer">6tail · Tyme4ts</a>
-          </div>
-        </section>
-        <section class="source-group">
-          <div class="source-kicker">Convention</div>
-          <p>23:00 與 00:00 換日是不同排盤口徑。UTC offset 只把同一民用鐘面時間定位成真實瞬間，不等於經度修正或真太陽時。</p>
-          <div class="source-links">
-            <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/zi-hour-day-boundary" target="_blank" rel="noreferrer">OpenFate · 子時換日</a>
-            <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/five-rats-method" target="_blank" rel="noreferrer">OpenFate · 五鼠遁</a>
-          </div>
-        </section>
-        <section class="source-group">
-          <div class="source-kicker">Ten Gods</div>
-          <p>十神以日主為基準，由同我、我生、我剋、剋我、生我五種五行方向，再依陰陽同異分成十個關係名稱。本頁只重現這個分類規則。</p>
-          <div class="source-links">
-            <a href="https://clarifyhk.com/zh-hans/learn/bazi/ten-gods/how-the-ten-gods-are-derived" target="_blank" rel="noreferrer">Clarify · 十神怎麼算</a>
-            <a href="https://wiki.openfate.ai/zh-hant/bazi/foundations/ten-gods-in-bazi" target="_blank" rel="noreferrer">OpenFate · 十神與日主關係</a>
-          </div>
-        </section>
+        <section class="source-group"><div class="source-kicker">Engine</div><p>四柱與太陽黃經共用固定版本 Tyme4ts 1.5.2 的天文核心。年度以立春瞬間切換、月份以節令瞬間切換；太陽黃經另以 48 個節氣節點測試鎖住。</p><div class="source-links"><a href="https://github.com/6tail/tyme4ts" target="_blank" rel="noreferrer">6tail · Tyme4ts</a></div></section>
+        <section class="source-group"><div class="source-kicker">Convention</div><p>23:00 與 00:00 換日是不同排盤口徑。UTC offset 只把同一民用鐘面時間定位成真實瞬間，不等於經度修正或真太陽時。</p><div class="source-links"><a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/zi-hour-day-boundary" target="_blank" rel="noreferrer">OpenFate · 子時換日</a><a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/five-rats-method" target="_blank" rel="noreferrer">OpenFate · 五鼠遁</a></div></section>
+        <section class="source-group"><div class="source-kicker">Ten Gods</div><p>十神以日主為基準，由同我、我生、我剋、剋我、生我五種五行方向，再依陰陽同異分成十個關係名稱。本頁只重現這個分類規則。</p><div class="source-links"><a href="https://clarifyhk.com/zh-hans/learn/bazi/ten-gods/how-the-ten-gods-are-derived" target="_blank" rel="noreferrer">Clarify · 十神怎麼算</a><a href="https://wiki.openfate.ai/zh-hant/bazi/foundations/ten-gods-in-bazi" target="_blank" rel="noreferrer">OpenFate · 十神與日主關係</a></div></section>
       </div>
     </details>
   </main>
 
   <script type="module" src="./src/birth.js"></script>
+  <script type="module" src="./src/birth-punishments-view.js"></script>
 </body>
 </html>
