@@ -17,6 +17,26 @@ const viewports = [
   { key: "390x844", width: 390, height: 844 },
 ];
 
+const captures = pages.flatMap(page =>
+  viewports.map(viewport => ({
+    name: `${page.key}-${viewport.key}.png`,
+    page: page.key,
+    path: page.path,
+    ...viewport,
+  }))
+);
+
+// One taller mobile evidence frame exists only to inspect the complete expanded
+// hidden-stems disclosure. Keep the ordinary 390x844 screenshot as the actual
+// first-viewport regression baseline.
+captures.push({
+  name: "annual-hidden-inspector-390x1320.png",
+  page: "annual-hidden-inspector",
+  path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1",
+  width: 390,
+  height: 1320,
+});
+
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
   for (const candidate of [
@@ -37,49 +57,46 @@ await mkdir(outputDir, { recursive: true });
 const browser = findBrowser();
 const evidence = [];
 
-for (const page of pages) {
-  for (const viewport of viewports) {
-    const name = `${page.key}-${viewport.key}.png`;
-    const outputPath = path.join(outputDir, name);
-    const url = new URL(page.path, baseURL).href;
-    const args = [
-      "--headless=new",
-      "--no-sandbox",
-      "--disable-gpu",
-      "--hide-scrollbars",
-      "--run-all-compositor-stages-before-draw",
-      "--virtual-time-budget=1600",
-      "--force-device-scale-factor=1",
-      `--window-size=${viewport.width},${viewport.height}`,
-      `--screenshot=${outputPath}`,
-      url,
-    ];
+for (const capture of captures) {
+  const outputPath = path.join(outputDir, capture.name);
+  const url = new URL(capture.path, baseURL).href;
+  const args = [
+    "--headless=new",
+    "--no-sandbox",
+    "--disable-gpu",
+    "--hide-scrollbars",
+    "--run-all-compositor-stages-before-draw",
+    "--virtual-time-budget=1600",
+    "--force-device-scale-factor=1",
+    `--window-size=${capture.width},${capture.height}`,
+    `--screenshot=${outputPath}`,
+    url,
+  ];
 
-    const result = spawnSync(browser, args, {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+  const result = spawnSync(browser, args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 
-    if (result.status !== 0) {
-      process.stderr.write(result.stdout ?? "");
-      process.stderr.write(result.stderr ?? "");
-      throw new Error(`Screenshot capture failed for ${name}`);
-    }
-
-    const info = await stat(outputPath);
-    if (info.size < 10_000) {
-      throw new Error(`${name} is unexpectedly small (${info.size} bytes)`);
-    }
-
-    evidence.push({
-      file: name,
-      page: page.key,
-      url,
-      viewport: `${viewport.width}x${viewport.height}`,
-      bytes: info.size,
-    });
-    console.log(`[visual] ${name}: ${info.size} bytes`);
+  if (result.status !== 0) {
+    process.stderr.write(result.stdout ?? "");
+    process.stderr.write(result.stderr ?? "");
+    throw new Error(`Screenshot capture failed for ${capture.name}`);
   }
+
+  const info = await stat(outputPath);
+  if (info.size < 10_000) {
+    throw new Error(`${capture.name} is unexpectedly small (${info.size} bytes)`);
+  }
+
+  evidence.push({
+    file: capture.name,
+    page: capture.page,
+    url,
+    viewport: `${capture.width}x${capture.height}`,
+    bytes: info.size,
+  });
+  console.log(`[visual] ${capture.name}: ${info.size} bytes`);
 }
 
 await writeFile(
