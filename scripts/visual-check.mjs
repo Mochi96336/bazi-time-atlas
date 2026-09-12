@@ -51,6 +51,20 @@ captures.push(
     width: 390,
     height: 2000,
   },
+  {
+    name: "birth-relations-1440x1300.png",
+    page: "birth-relations",
+    path: "birth.html?relations=1",
+    width: 1440,
+    height: 1300,
+  },
+  {
+    name: "birth-relations-390x1700.png",
+    page: "birth-relations",
+    path: "birth.html?relations=1",
+    width: 390,
+    height: 1700,
+  },
 );
 
 function findBrowser() {
