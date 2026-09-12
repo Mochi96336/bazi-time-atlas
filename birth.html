@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="從同一個出生瞬間，分別看年柱、月柱、日柱與時柱如何依不同規則取得。">
+  <title>出生 · BaZi Time Atlas</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./site-nav.css">
+  <link rel="stylesheet" href="./birth.css">
+</head>
+<body>
+  <main class="site-shell birth-shell">
+    <header class="topbar">
+      <div class="brand">BaZi Time Atlas</div>
+      <div class="topbar-actions">
+        <nav class="site-nav" aria-label="Atlas views">
+          <a href="./">年度</a>
+          <a class="active" href="./birth.html" aria-current="page">出生</a>
+          <a href="./sexagenary.html">六十甲子</a>
+        </nav>
+        <div class="topbar-note">Birth · v0.1</div>
+      </div>
+    </header>
+
+    <section class="hero birth-hero">
+      <div class="eyebrow">One instant · four independent rules</div>
+      <h1>同一個出生瞬間，<br>穿過四條不同規則。</h1>
+      <p class="lede">四柱不是「年推月、月推日、日推時」的一條鏈。這裡把同一個當地民用時間，同時投影到年界、月界、連續干支日與十二時辰。</p>
+    </section>
+
+    <section class="birth-layout">
+      <form id="birth-form" class="birth-controls">
+        <div class="eyebrow">輸入</div>
+        <label>
+          <span>出生日期</span>
+          <input id="birth-date" name="birth-date" type="date" value="2005-12-23" required>
+        </label>
+        <label>
+          <span>出生時間</span>
+          <input id="birth-time" name="birth-time" type="time" value="08:37" step="60" required>
+        </label>
+        <fieldset>
+          <legend>換日規則</legend>
+          <label class="boundary-option">
+            <input type="radio" name="day-boundary" value="zi-initial-next-day" checked>
+            <span><strong>23:00 子初換日</strong><small>進入子時即使用下一干支日</small></span>
+          </label>
+          <label class="boundary-option">
+            <input type="radio" name="day-boundary" value="civil-midnight">
+            <span><strong>00:00 午夜換日</strong><small>23:00–23:59 保留當日日柱，再依有效日干起時</small></span>
+          </label>
+        </fieldset>
+        <div class="time-basis-note">
+          <strong>V0.1 時間基準：當地民用時間</strong>
+          <span>請直接輸入出生地當時鐘面上的日期與時間。本版不做時區轉換、經度修正或真太陽時。</span>
+        </div>
+      </form>
+
+      <section class="birth-stage" aria-live="polite">
+        <div class="birth-stage-head">
+          <div>
+            <div class="eyebrow">Birth instant</div>
+            <h2 id="birth-readout">2005-12-23 · 08:37</h2>
+          </div>
+          <span id="boundary-badge" class="boundary-badge">23:00 子初換日</span>
+        </div>
+
+        <p class="track-note">四條軌道代表四種規則，不共用橫向尺度；垂直線只表示「同一個出生瞬間」。</p>
+
+        <div class="pillar-tracks">
+          <div class="instant-axis" aria-hidden="true"></div>
+
+          <article class="pillar-track" data-pillar="year">
+            <div class="track-rule">
+              <span class="track-index">01</span>
+              <div><strong>年界</strong><small>精確立春瞬間</small></div>
+            </div>
+            <div class="track-line"><i></i></div>
+            <div class="pillar-result">
+              <span>年柱</span>
+              <strong id="year-pillar">乙酉</strong>
+              <small>立春前後才切換</small>
+            </div>
+          </article>
+
+          <article class="pillar-track" data-pillar="month">
+            <div class="track-rule">
+              <span class="track-index">02</span>
+              <div><strong>月界</strong><small>十二個「節」的精確瞬間</small></div>
+            </div>
+            <div class="track-line"><i></i></div>
+            <div class="pillar-result">
+              <span>月柱</span>
+              <strong id="month-pillar">戊子</strong>
+              <small>月支由節界，月干隨年干規則取得</small>
+            </div>
+          </article>
+
+          <article class="pillar-track" data-pillar="day">
+            <div class="track-rule">
+              <span class="track-index">03</span>
+              <div><strong>日序</strong><small>連續六十干支日</small></div>
+            </div>
+            <div class="track-line"><i></i></div>
+            <div class="pillar-result">
+              <span>日柱</span>
+              <strong id="day-pillar">辛巳</strong>
+              <small id="day-rule-note">23:00 起計下一干支日</small>
+            </div>
+          </article>
+
+          <article class="pillar-track" data-pillar="hour">
+            <div class="track-rule">
+              <span class="track-index">04</span>
+              <div><strong>時段</strong><small>十二時支 + 五鼠遁</small></div>
+            </div>
+            <div class="track-line"><i></i></div>
+            <div class="pillar-result">
+              <span>時柱</span>
+              <strong id="hour-pillar">壬辰</strong>
+              <small>先定時支，再由有效日干推時干</small>
+            </div>
+          </article>
+        </div>
+
+        <div id="boundary-sensitivity" class="boundary-sensitivity" hidden>
+          <div class="eyebrow">Boundary sensitive</div>
+          <strong>這個時刻會因換日規則得到不同日柱／時柱。</strong>
+          <p id="boundary-comparison"></p>
+        </div>
+
+        <div id="birth-error" class="birth-error" hidden></div>
+      </section>
+    </section>
+
+    <section class="birth-convention-strip" aria-label="目前排盤規則">
+      <div><strong>年</strong><span>立春精確時刻</span></div>
+      <div><strong>月</strong><span>十二「節」精確時刻</span></div>
+      <div><strong>日</strong><span id="convention-day">23:00 換日</span></div>
+      <div><strong>時</strong><span>時支 + 有效日干五鼠遁</span></div>
+      <div><strong>時間</strong><span>當地民用時間</span></div>
+    </section>
+
+    <p class="footer-note">計算精確不代表命理解釋必然。本頁目前只處理四柱如何取得，不做性格、運勢、十神或大運解讀。</p>
+
+    <details class="sources-panel">
+      <summary>計算引擎與規則來源</summary>
+      <div class="source-grid">
+        <section class="source-group">
+          <div class="source-kicker">Engine</div>
+          <p>四柱主計算使用固定版本 Tyme4ts 1.5.2 的精確時刻 API。年度以立春瞬間切換，月份以節令瞬間切換；專案另外用固定測試鎖住邊界行為。</p>
+          <div class="source-links">
+            <a href="https://github.com/6tail/tyme4ts" target="_blank" rel="noreferrer">6tail · Tyme4ts</a>
+          </div>
+        </section>
+        <section class="source-group">
+          <div class="source-kicker">Convention</div>
+          <p>23:00 與 00:00 換日是不同排盤口徑。00:00 模式會先確定有效日干，再依五鼠遁重新取得時干；兩種模式不混用。</p>
+          <div class="source-links">
+            <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/zi-hour-day-boundary" target="_blank" rel="noreferrer">OpenFate · 子時換日</a>
+            <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/five-rats-method" target="_blank" rel="noreferrer">OpenFate · 五鼠遁</a>
+          </div>
+        </section>
+      </div>
+    </details>
+  </main>
+
+  <script type="module" src="./src/birth.js"></script>
+</body>
+</html>
