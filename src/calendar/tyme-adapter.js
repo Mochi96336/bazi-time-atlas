@@ -3,7 +3,7 @@ import {
   LunarHour,
   LunarSect2EightCharProvider,
   SolarTime
-} from "tyme4ts";
+} from "../../vendor/tyme4ts-1.5.2.mjs";
 
 export const DAY_BOUNDARY = Object.freeze({
   ZI_INITIAL_NEXT_DAY: "zi-initial-next-day",

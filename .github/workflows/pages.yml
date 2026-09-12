@@ -34,6 +34,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Stage pinned browser calendar engine
+        run: |
+          npm install --no-audit --no-fund
+          npm run vendor:prepare
+          rm -rf node_modules
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
