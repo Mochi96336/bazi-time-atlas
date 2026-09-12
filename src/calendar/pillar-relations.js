@@ -32,6 +32,15 @@ export const BRANCH_SIX_CLASHES = freezePairs([
   ["巳", "亥"]
 ]);
 
+export const BRANCH_SIX_HARMS = freezePairs([
+  ["子", "未"],
+  ["丑", "午"],
+  ["寅", "巳"],
+  ["卯", "辰"],
+  ["申", "亥"],
+  ["酉", "戌"]
+]);
+
 const RELATION_DEFINITIONS = Object.freeze([
   Object.freeze({
     domain: "stem",
@@ -50,6 +59,12 @@ const RELATION_DEFINITIONS = Object.freeze([
     kind: "six-clash",
     label: "六沖",
     pairs: BRANCH_SIX_CLASHES
+  }),
+  Object.freeze({
+    domain: "branch",
+    kind: "six-harm",
+    label: "六害",
+    pairs: BRANCH_SIX_HARMS
   })
 ]);
 
@@ -67,8 +82,8 @@ function pairMatches(pair, a, b) {
 /**
  * Return static pair membership only.
  *
- * This deliberately does not infer whether a combination transforms, whether
- * a clash is auspicious/inauspicious, or how strong any relation is.
+ * This deliberately does not infer transformation, strength, auspiciousness,
+ * real-world harm, or whether one relation overrides another.
  */
 export function relationsForPair(domain, a, b) {
   if (domain !== "stem" && domain !== "branch") {
@@ -105,7 +120,7 @@ function validatePillars(pillars) {
 
 /**
  * Scan the six unordered pairs among year/month/day/hour visible pillars.
- * Hidden stems are intentionally excluded from V1.
+ * Hidden stems are intentionally excluded from this layer.
  */
 export function visiblePillarPairRelations(pillars) {
   validatePillars(pillars);
