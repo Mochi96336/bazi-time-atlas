@@ -26,16 +26,32 @@ const captures = pages.flatMap(page =>
   }))
 );
 
-// One taller mobile evidence frame exists only to inspect the complete expanded
-// hidden-stems disclosure. Keep the ordinary 390x844 screenshot as the actual
-// first-viewport regression baseline.
-captures.push({
-  name: "annual-hidden-inspector-390x1320.png",
-  page: "annual-hidden-inspector",
-  path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1",
-  width: 390,
-  height: 1320,
-});
+// Review-only frames keep the normal first-viewport regression set small while
+// giving lower collapsible panels enough vertical room to be inspected without
+// browser automation or scroll-dependent screenshots.
+captures.push(
+  {
+    name: "annual-hidden-inspector-390x1320.png",
+    page: "annual-hidden-inspector",
+    path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1",
+    width: 390,
+    height: 1320,
+  },
+  {
+    name: "birth-ten-gods-1440x1400.png",
+    page: "birth-ten-gods",
+    path: "birth.html?tenGod=1",
+    width: 1440,
+    height: 1400,
+  },
+  {
+    name: "birth-ten-gods-390x2000.png",
+    page: "birth-ten-gods",
+    path: "birth.html?tenGod=1",
+    width: 390,
+    height: 2000,
+  },
+);
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;

@@ -1,0 +1,135 @@
+.ten-gods-panel {
+  margin-top: 20px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  overflow: hidden;
+}
+.ten-gods-panel > summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 14px;
+  cursor: pointer;
+}
+.ten-gods-panel > summary::-webkit-details-marker { display: none; }
+.ten-gods-panel > summary::after {
+  content: "+";
+  color: #7e8983;
+  font-size: 18px;
+  line-height: 1;
+}
+.ten-gods-panel[open] > summary::after { content: "−"; }
+.ten-gods-panel[open] > summary { border-bottom: 1px solid var(--hairline); }
+.ten-gods-summary-copy { display: grid; gap: 3px; }
+.ten-gods-summary-copy > small {
+  color: #8c9691;
+  font-size: 8px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.ten-gods-summary-copy > strong { color: var(--ink); font-size: 13px; }
+.ten-gods-summary-copy b { color: #355d52; font-size: 14px; }
+.ten-gods-summary-meta { margin-left: auto; color: var(--muted); font-size: 9px; }
+.ten-gods-intro,
+.ten-gods-footnote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.65;
+}
+.ten-gods-intro { padding: 13px 14px 11px; }
+.ten-gods-footnote { padding: 10px 14px 13px; border-top: 1px solid var(--hairline); }
+.ten-gods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 14px 13px;
+}
+.ten-gods-pillar {
+  min-width: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  background: rgba(255,255,255,.36);
+  overflow: hidden;
+}
+.ten-gods-pillar[data-ten-god-pillar="day"] {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--hairline));
+  background: color-mix(in srgb, var(--accent-soft) 36%, rgba(255,255,255,.36));
+}
+.ten-gods-pillar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 10px 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+.ten-gods-pillar-head span { color: var(--muted); font-size: 8px; }
+.ten-gods-pillar-head strong { font-size: 14px; letter-spacing: .04em; }
+.ten-god-visible {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 3px 7px;
+  padding: 10px;
+}
+.ten-god-visible small {
+  grid-column: 1 / -1;
+  color: #929a96;
+  font-size: 7px;
+  letter-spacing: .08em;
+}
+.ten-god-visible b { font-size: 20px; line-height: 1; }
+.ten-god-visible strong { color: #355d52; font-size: 11px; }
+.ten-god-visible span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 7.5px;
+  line-height: 1.45;
+}
+.ten-god-hidden { padding: 0 10px 10px; }
+.ten-god-hidden > small { display: block; margin-bottom: 5px; color: #929a96; font-size: 7px; }
+.ten-god-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.ten-god-chip {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  gap: 1px 5px;
+  align-items: baseline;
+  padding: 5px 7px;
+  border: 1px solid #d7d9d5;
+  border-radius: 8px;
+  background: rgba(255,255,255,.48);
+}
+.ten-god-chip i {
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: #9a9f9c;
+  font-size: 7px;
+  font-style: normal;
+}
+.ten-god-chip b { font-size: 12px; line-height: 1; }
+.ten-god-chip strong { color: #56645f; font-size: 7.5px; font-weight: 720; }
+
+@media (max-width: 600px) {
+  .ten-gods-panel { margin-top: 14px; border-radius: 12px; }
+  .ten-gods-panel > summary { padding: 10px 11px; gap: 8px; }
+  .ten-gods-summary-copy > strong { font-size: 11px; }
+  .ten-gods-summary-copy b { font-size: 12px; }
+  .ten-gods-summary-meta { font-size: 7.5px; }
+  .ten-gods-intro { padding: 10px 11px 9px; font-size: 8px; }
+  .ten-gods-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 0 11px 10px; }
+  .ten-gods-pillar-head { padding: 7px 8px 6px; }
+  .ten-gods-pillar-head strong { font-size: 12px; }
+  .ten-god-visible { padding: 8px; }
+  .ten-god-visible b { font-size: 17px; }
+  .ten-god-visible strong { font-size: 9px; }
+  .ten-god-visible span { font-size: 6.8px; }
+  .ten-god-hidden { padding: 0 8px 8px; }
+  .ten-god-chip { padding: 4px 5px; gap: 1px 4px; }
+  .ten-god-chip b { font-size: 10px; }
+  .ten-god-chip strong { font-size: 6.8px; }
+  .ten-gods-footnote { padding: 8px 11px 10px; font-size: 7.5px; }
+}

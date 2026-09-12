@@ -30,6 +30,11 @@ function dumpDom(path) {
   return { url, dom: result.stdout };
 }
 
+function openDetailsById(dom, id) {
+  const details = dom.match(new RegExp(`<details[^>]*id="${id}"[^>]*>`))?.[0] ?? "";
+  return /\sopen(?:="")?(?:\s|>)/.test(details);
+}
+
 function openHiddenPanelFor(dom, branch) {
   const details = dom.match(/<details[^>]*id="hidden-stems-panel"[^>]*>/)?.[0] ?? "";
   return details.includes(`data-hidden-branch="${branch}"`) && /\sopen(?:="")?(?:\s|>)/.test(details);
@@ -61,14 +66,20 @@ const cases = [
     },
   },
   {
-    path: "birth.html",
-    label: "Birth exact Annual link",
+    path: "birth.html?tenGod=1",
+    label: "Birth exact Annual link + Ten Gods",
     assert(dom) {
       return /class="birth-projection-link"/.test(dom) &&
         /href="\.\/\?month=[^"]+&amp;lambda=\d+\.\d+&amp;yearStem=%E4%B9%99"/.test(dom) &&
         /年度盤精確定位/.test(dom) &&
         /年干乙/.test(dom) &&
-        /UTC\+08:00/.test(dom);
+        /UTC\+08:00/.test(dom) &&
+        openDetailsById(dom, "ten-gods-panel") &&
+        /id="ten-gods-day-master"[^>]*>辛 · 陰金<\/b>/.test(dom) &&
+        /data-stem="乙"[^>]*data-ten-god="偏財"/.test(dom) &&
+        /data-stem="戊"[^>]*data-ten-god="正印"/.test(dom) &&
+        /data-stem="壬"[^>]*data-ten-god="傷官"/.test(dom) &&
+        /data-hidden-stem="癸"[^>]*data-ten-god="食神"[^>]*data-hidden-role="主"/.test(dom);
     },
   },
   {

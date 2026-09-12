@@ -1,5 +1,7 @@
 import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
 import { apparentSolarLongitude } from "./astronomy/solar-longitude.js";
+import { hiddenStemsForBranch } from "./calendar/hidden-stems.js";
+import { heavenlyStemMeta, tenGodForStem } from "./calendar/ten-gods.js";
 
 const form = document.querySelector("#birth-form");
 const yearInput = document.querySelector("#birth-year");
@@ -16,6 +18,10 @@ const comparison = document.querySelector("#boundary-comparison");
 const conventionDay = document.querySelector("#convention-day");
 const conventionTime = document.querySelector("#convention-time");
 const pillarSummary = document.querySelector(".pillar-summary");
+const tenGodPanel = document.querySelector("#ten-gods-panel");
+const tenGodGrid = document.querySelector("#ten-gods-grid");
+const tenGodDayMaster = document.querySelector("#ten-gods-day-master");
+const forceTenGodOpen = new URLSearchParams(window.location.search).get("tenGod") === "1";
 
 const pillarTargets = {
   year: document.querySelector("#year-pillar"),
@@ -132,6 +138,77 @@ function formatUtcOffset(offset) {
   return `UTC${sign}${pad(hours)}:${pad(minutes)}`;
 }
 
+function node(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function relationMeta(relation) {
+  return `${relation.groupLabel} · ${relation.samePolarity ? "同陰陽" : "異陰陽"}`;
+}
+
+function renderTenGodRelationships(pillars) {
+  const dayMaster = pillars.day.stem;
+  const dayMeta = heavenlyStemMeta(dayMaster);
+  tenGodDayMaster.textContent = `${dayMaster} · ${dayMeta.yinYang}${dayMeta.element}`;
+  tenGodPanel.hidden = false;
+  if (forceTenGodOpen) tenGodPanel.open = true;
+  tenGodGrid.replaceChildren();
+
+  for (const key of ["year", "month", "day", "hour"]) {
+    const pillar = pillars[key];
+    const card = node("article", "ten-gods-pillar");
+    card.dataset.tenGodPillar = key;
+
+    const header = node("header", "ten-gods-pillar-head");
+    header.append(
+      node("span", null, summaryLabels[key]),
+      node("strong", null, pillar.name)
+    );
+
+    const visible = node("div", "ten-god-visible");
+    visible.dataset.stem = pillar.stem;
+    visible.append(node("small", null, key === "day" ? "基準" : "明干"));
+    visible.append(node("b", null, pillar.stem));
+
+    if (key === "day") {
+      visible.dataset.tenGod = "日主";
+      visible.append(node("strong", null, "日主"));
+      visible.append(node("span", null, `${dayMeta.yinYang}${dayMeta.element} · reference`));
+    } else {
+      const relation = tenGodForStem(dayMaster, pillar.stem);
+      visible.dataset.tenGod = relation.name;
+      visible.append(node("strong", null, relation.name));
+      visible.append(node("span", null, relationMeta(relation)));
+    }
+
+    const hidden = node("div", "ten-god-hidden");
+    hidden.append(node("small", null, `${pillar.branch}藏干`));
+    const chips = node("div", "ten-god-chips");
+
+    for (const hiddenStem of hiddenStemsForBranch(pillar.branch)) {
+      const relation = tenGodForStem(dayMaster, hiddenStem.name);
+      const chip = node("span", "ten-god-chip");
+      chip.dataset.hiddenStem = hiddenStem.name;
+      chip.dataset.tenGod = relation.name;
+      chip.dataset.hiddenRole = hiddenStem.role;
+      chip.title = `${hiddenStem.role}藏 ${hiddenStem.name}：${relation.name} · ${relationMeta(relation)}`;
+      chip.append(
+        node("i", null, hiddenStem.role),
+        node("b", null, hiddenStem.name),
+        node("strong", null, relation.name)
+      );
+      chips.append(chip);
+    }
+
+    hidden.append(chips);
+    card.append(header, visible, hidden);
+    tenGodGrid.append(card);
+  }
+}
+
 function renderResult(result, longitude, utcOffsetHours) {
   const { input, pillars, convention } = result;
   readout.textContent = `${pad(input.year, 4)}-${pad(input.month)}-${pad(input.day)} · ${pad(input.hour)}:${pad(input.minute)}`;
@@ -150,6 +227,8 @@ function renderResult(result, longitude, utcOffsetHours) {
     summaryCells[key].setAttribute("aria-label", `${summaryLabels[key]} ${pillars[key].name}，在六十甲子 Reference view 查看`);
     summaryCells[key].title = `在六十甲子查看 ${pillars[key].name}`;
   }
+
+  renderTenGodRelationships(pillars);
 
   const lambda = longitude.toFixed(6);
   annualProjectionLink.href = `./?month=${encodeURIComponent(pillars.month.branch)}&lambda=${encodeURIComponent(lambda)}&yearStem=${encodeURIComponent(pillars.year.stem)}`;
@@ -195,6 +274,7 @@ function update() {
     renderSensitivity(input, boundary, utcOffsetHours);
   } catch (error) {
     sensitivity.hidden = true;
+    tenGodPanel.hidden = true;
     errorBox.hidden = false;
     errorBox.textContent = `無法計算：${error.message}`;
   }
