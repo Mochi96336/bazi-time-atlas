@@ -7,7 +7,7 @@ const outputDir = path.resolve("tmp/visual-check");
 
 const pages = [
   { key: "annual", path: "" },
-  { key: "annual-birth", path: "?lambda=271.25" },
+  { key: "annual-birth", path: "?lambda=271.25&yearStem=%E4%B9%99" },
   { key: "birth", path: "birth.html" },
   { key: "sexagenary", path: "sexagenary.html" },
 ];
