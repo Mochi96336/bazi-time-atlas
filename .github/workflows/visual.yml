@@ -41,6 +41,7 @@ jobs:
           node --check src/calendar/branch-groups.js
           node --check src/calendar/branch-punishments.js
           node --check src/calendar/relation-models.js
+          node --check src/calendar/time-basis-sensitivity.js
           node --check src/astronomy/solar-longitude.js
           node --check src/astronomy/mean-solar-time.js
           node --check src/astronomy/equation-of-time.js

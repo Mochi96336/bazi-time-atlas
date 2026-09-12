@@ -48,10 +48,14 @@ function coherentCorrections(dom, expectedLongitudeMinutes) {
     Math.abs(total - longitude - equation) < 0.0002;
 }
 
+function basisRow(dom, basis) {
+  return dom.match(new RegExp(`<div[^>]*class="time-basis-sensitivity-row"[^>]*data-time-basis="${basis}"[^>]*>`))?.[0] ?? "";
+}
+
 const cases = [
   {
     path: "birth.html",
-    label: "default equivalent meridian keeps LMST unchanged while EoT advances apparent time",
+    label: "default equivalent meridian keeps LMST unchanged and pillars insensitive",
     assert(dom) {
       return /data-longitude="120\.0000"/.test(dom) &&
         /data-mean-solar-correction-minutes="0\.0000"/.test(dom) &&
@@ -62,12 +66,14 @@ const cases = [
         /地方太陽時比較/.test(dom) &&
         /平太陽時/.test(dom) &&
         /均時差 EoT/.test(dom) &&
-        /視太陽時/.test(dom);
+        /視太陽時/.test(dom) &&
+        /data-time-basis-sensitive="0"/.test(dom) &&
+        /id="time-basis-sensitivity-summary"[^>]*>未跨界 · 三種基準皆為 辛巳日 \/ 壬辰時<\/strong>/.test(dom);
     },
   },
   {
     path: "birth.html?lon=121.5",
-    label: "121.5E combines +6 longitude minutes with positive December EoT",
+    label: "121.5E combines longitude and EoT without changing the ordinary chart",
     assert(dom) {
       return /data-longitude="121\.5000"/.test(dom) &&
         /data-mean-solar-correction-minutes="6\.0000"/.test(dom) &&
@@ -78,7 +84,34 @@ const cases = [
         /id="mean-solar-correction"[^>]*>\+6\.00 min<\/em>/.test(dom) &&
         /id="equation-of-time"[^>]*>\+1\.[0-2]\d min<\/b>/.test(dom) &&
         /id="apparent-solar-time"[^>]*>08:44:[0-5]\d<\/b>/.test(dom) &&
+        /data-time-basis-sensitive="0"/.test(dom) &&
         /E121\.5000°/.test(dom);
+    },
+  },
+  {
+    path: "birth.html?date=2005-12-23&time=22%3A55&utc=8&lon=121.5",
+    label: "solar correction crosses Zi-initial and exposes Day + Hour sensitivity",
+    assert(dom) {
+      const civil = basisRow(dom, "civil");
+      const mean = basisRow(dom, "local-mean-solar");
+      const apparent = basisRow(dom, "local-apparent-solar");
+      return /id="birth-readout"[^>]*>2005-12-23 · 22:55<\/h2>/.test(dom) &&
+        /data-time-basis-sensitive="1"/.test(dom) &&
+        /data-day-sensitive="1"/.test(dom) &&
+        /data-hour-sensitive="1"/.test(dom) &&
+        civil.includes('data-day-pillar="辛巳"') &&
+        civil.includes('data-hour-pillar="己亥"') &&
+        civil.includes('data-day-changed="false"') &&
+        civil.includes('data-hour-changed="false"') &&
+        mean.includes('data-day-pillar="壬午"') &&
+        mean.includes('data-hour-pillar="庚子"') &&
+        mean.includes('data-day-changed="true"') &&
+        mean.includes('data-hour-changed="true"') &&
+        apparent.includes('data-day-pillar="壬午"') &&
+        apparent.includes('data-hour-pillar="庚子"') &&
+        apparent.includes('data-day-changed="true"') &&
+        apparent.includes('data-hour-changed="true"') &&
+        /id="time-basis-sensitivity-summary"[^>]*>已跨 日界 \+ 時辰界 · 下列僅比較，不自動改盤<\/strong>/.test(dom);
     },
   },
 ];

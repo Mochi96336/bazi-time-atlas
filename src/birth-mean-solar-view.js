@@ -1,4 +1,4 @@
-import { localApparentSolarTime } from "./astronomy/apparent-solar-time.js";
+import { compareDayHourTimeBases } from "./calendar/time-basis-sensitivity.js";
 
 const form = document.querySelector("#birth-form");
 const utcOffsetInput = document.querySelector("#birth-utc-offset");
@@ -15,6 +15,9 @@ let equationCorrection;
 let apparentSolarTime;
 let totalCorrection;
 let previewMeta;
+let sensitivity;
+let sensitivitySummary;
+let sensitivityRows;
 let longitudeTouched = false;
 
 function numberFrom(selector) {
@@ -57,6 +60,54 @@ function formatSignedMinutes(value) {
   return `${sign}${Math.abs(value).toFixed(2)} min`;
 }
 
+function basisRowNode(row) {
+  const item = document.createElement("div");
+  item.className = "time-basis-sensitivity-row";
+  item.dataset.timeBasis = row.id;
+  item.dataset.dayPillar = row.day.name;
+  item.dataset.hourPillar = row.hour.name;
+  item.dataset.dayChanged = String(row.changedFromCivil.day);
+  item.dataset.hourChanged = String(row.changedFromCivil.hour);
+
+  const label = document.createElement("span");
+  label.textContent = row.label;
+  const clock = document.createElement("small");
+  clock.textContent = formatClock(row.clock, false);
+  label.append(clock);
+
+  const day = document.createElement("b");
+  day.textContent = `日 ${row.day.name}`;
+  const hour = document.createElement("b");
+  hour.textContent = `時 ${row.hour.name}`;
+  if (row.changedFromCivil.day) day.dataset.changed = "1";
+  if (row.changedFromCivil.hour) hour.dataset.changed = "1";
+
+  item.append(label, day, hour);
+  return item;
+}
+
+function renderSensitivity(result) {
+  const civil = result.rows[0];
+  sensitivity.dataset.timeBasisSensitive = result.anyChange ? "1" : "0";
+  sensitivity.dataset.daySensitive = result.anyDayChange ? "1" : "0";
+  sensitivity.dataset.hourSensitive = result.anyHourChange ? "1" : "0";
+
+  if (!result.anyChange) {
+    sensitivitySummary.textContent = `未跨界 · 三種基準皆為 ${civil.day.name}日 / ${civil.hour.name}時`;
+    sensitivityRows.replaceChildren();
+    sensitivityRows.hidden = true;
+    return;
+  }
+
+  const changed = [
+    result.anyDayChange ? "日界" : null,
+    result.anyHourChange ? "時辰界" : null
+  ].filter(Boolean).join(" + ");
+  sensitivitySummary.textContent = `已跨 ${changed} · 下列僅比較，不自動改盤`;
+  sensitivityRows.replaceChildren(...result.rows.map(basisRowNode));
+  sensitivityRows.hidden = false;
+}
+
 function install() {
   if (!form || !utcOffsetInput || !timeGroup || !timeBasisNote || !pillarSummary) return false;
 
@@ -70,7 +121,7 @@ function install() {
   const basisCopy = timeBasisNote.querySelector("span");
   if (basisTitle) basisTitle.textContent = "目前排盤基準：出生地民用時間 + UTC offset";
   if (basisCopy) {
-    basisCopy.textContent = "四柱仍用民用鐘面；下方只比較經度校正與均時差，尚未切換排盤基準。";
+    basisCopy.textContent = "四柱仍用民用鐘面；下方比較太陽時與柱位邊界敏感度，不會自動切換排盤基準。";
   }
 
   const field = document.createElement("label");
@@ -100,7 +151,7 @@ function install() {
   preview = document.createElement("section");
   preview.id = "mean-solar-preview";
   preview.className = "mean-solar-preview";
-  preview.setAttribute("aria-label", "地方平太陽時與地方視太陽時比較");
+  preview.setAttribute("aria-label", "地方太陽時與柱位敏感度比較");
   preview.innerHTML = `
     <div class="mean-solar-preview-copy">
       <small>SOLAR TIME BASIS</small>
@@ -125,6 +176,14 @@ function install() {
       </div>
     </div>
     <div id="mean-solar-meta" class="mean-solar-preview-meta"></div>
+    <div id="time-basis-sensitivity" class="time-basis-sensitivity" data-time-basis-sensitive="0">
+      <div class="time-basis-sensitivity-head">
+        <span>柱位敏感度</span>
+        <strong id="time-basis-sensitivity-summary">計算中…</strong>
+      </div>
+      <div id="time-basis-sensitivity-rows" class="time-basis-sensitivity-rows" hidden></div>
+      <small>年／月固定同一物理瞬間；这里只比較哪個鐘面供給日界與時辰界。</small>
+    </div>
   `;
   meanSolarTime = preview.querySelector("#mean-solar-time");
   longitudeCorrection = preview.querySelector("#mean-solar-correction");
@@ -132,6 +191,9 @@ function install() {
   apparentSolarTime = preview.querySelector("#apparent-solar-time");
   totalCorrection = preview.querySelector("#total-solar-correction");
   previewMeta = preview.querySelector("#mean-solar-meta");
+  sensitivity = preview.querySelector("#time-basis-sensitivity");
+  sensitivitySummary = preview.querySelector("#time-basis-sensitivity-summary");
+  sensitivityRows = preview.querySelector("#time-basis-sensitivity-rows");
 
   const projectionLink = document.querySelector(".birth-projection-link");
   (projectionLink ?? pillarSummary).insertAdjacentElement("afterend", preview);
@@ -163,25 +225,35 @@ function update() {
     const longitudeDegrees = Number(longitudeInput.value);
     if (!Number.isFinite(longitudeDegrees)) throw new RangeError("invalid longitude");
     const utcOffsetHours = numberFrom("#birth-utc-offset");
-    const result = localApparentSolarTime(currentInput(), longitudeDegrees, utcOffsetHours);
-    const meanCrossedDate = !sameDate(result.civil, result.meanSolar);
-    const apparentCrossedDate = !sameDate(result.civil, result.apparentSolar);
+    const dayBoundary = form.elements.namedItem("day-boundary").value;
+    const result = compareDayHourTimeBases(currentInput(), {
+      longitudeDegrees,
+      utcOffsetHours,
+      dayBoundary
+    });
+    const mean = result.rows[1].clock;
+    const apparent = result.rows[2].clock;
+    const civil = result.rows[0].clock;
+    const meanCrossedDate = !sameDate(civil, mean);
+    const apparentCrossedDate = !sameDate(civil, apparent);
 
     preview.hidden = false;
     longitudeInput.removeAttribute("aria-invalid");
-    meanSolarTime.textContent = formatClock(result.meanSolar, meanCrossedDate);
-    longitudeCorrection.textContent = formatSignedMinutes(result.longitudeCorrectionMinutes);
-    equationCorrection.textContent = formatSignedMinutes(result.equationOfTimeMinutes);
-    apparentSolarTime.textContent = formatClock(result.apparentSolar, apparentCrossedDate);
-    totalCorrection.textContent = formatSignedMinutes(result.totalCorrectionMinutes);
+    meanSolarTime.textContent = formatClock(mean, meanCrossedDate);
+    longitudeCorrection.textContent = formatSignedMinutes(result.corrections.longitudeMinutes);
+    equationCorrection.textContent = formatSignedMinutes(result.corrections.equationOfTimeMinutes);
+    apparentSolarTime.textContent = formatClock(apparent, apparentCrossedDate);
+    totalCorrection.textContent = formatSignedMinutes(result.corrections.totalMinutes);
     previewMeta.textContent = `${longitudeDegrees >= 0 ? "E" : "W"}${Math.abs(longitudeDegrees).toFixed(4)}° · UTC${utcOffsetHours >= 0 ? "+" : "−"}${Math.abs(utcOffsetHours)} · EoT = 視太陽時 − 平太陽時 · ${apparentCrossedDate ? "視太陽時已跨民用日期" : "未跨日期"}`;
+    renderSensitivity(result);
 
     form.dataset.longitude = longitudeDegrees.toFixed(4);
-    form.dataset.meanSolarCorrectionMinutes = result.longitudeCorrectionMinutes.toFixed(4);
-    form.dataset.meanSolarClock = `${pad(result.meanSolar.hour)}:${pad(result.meanSolar.minute)}:${pad(result.meanSolar.second)}`;
-    form.dataset.equationOfTimeMinutes = result.equationOfTimeMinutes.toFixed(4);
-    form.dataset.apparentSolarClock = `${pad(result.apparentSolar.hour)}:${pad(result.apparentSolar.minute)}:${pad(result.apparentSolar.second)}`;
-    form.dataset.totalSolarCorrectionMinutes = result.totalCorrectionMinutes.toFixed(4);
+    form.dataset.meanSolarCorrectionMinutes = result.corrections.longitudeMinutes.toFixed(4);
+    form.dataset.meanSolarClock = `${pad(mean.hour)}:${pad(mean.minute)}:${pad(mean.second)}`;
+    form.dataset.equationOfTimeMinutes = result.corrections.equationOfTimeMinutes.toFixed(4);
+    form.dataset.apparentSolarClock = `${pad(apparent.hour)}:${pad(apparent.minute)}:${pad(apparent.second)}`;
+    form.dataset.totalSolarCorrectionMinutes = result.corrections.totalMinutes.toFixed(4);
+    form.dataset.timeBasisSensitive = result.anyChange ? "1" : "0";
   } catch {
     preview.hidden = true;
     longitudeInput.setAttribute("aria-invalid", "true");
@@ -190,6 +262,7 @@ function update() {
     delete form.dataset.equationOfTimeMinutes;
     delete form.dataset.apparentSolarClock;
     delete form.dataset.totalSolarCorrectionMinutes;
+    delete form.dataset.timeBasisSensitive;
   }
 }
 

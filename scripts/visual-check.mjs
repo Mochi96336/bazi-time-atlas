@@ -86,6 +86,13 @@ captures.push(
     width: 390,
     height: 1850,
   },
+  {
+    name: "birth-time-basis-sensitive-390x1280.png",
+    page: "birth-time-basis-sensitive",
+    path: "birth.html?date=2005-12-23&time=22%3A55&utc=8&lon=121.5",
+    width: 390,
+    height: 1280,
+  },
 );
 
 function findBrowser() {
