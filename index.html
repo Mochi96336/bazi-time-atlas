@@ -3,118 +3,127 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="以太陽黃經為共同座標，探索二十四節氣、八字月建、五行與熱帶黃道的關係。">
-  <title>BaZi Time Atlas</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="description" content="把年、月、日干支、節氣與熱帶黃道放進同一個可拖動的多速時間圓盤。">
+  <title>BaZi Time Atlas · Kinetic Atlas</title>
   <link rel="stylesheet" href="./site-nav.css">
-  <link rel="stylesheet" href="./cross-view.css">
-  <link rel="stylesheet" href="./hidden-stems.css">
+  <link rel="stylesheet" href="./kinetic-atlas.css">
 </head>
 <body>
-  <main class="site-shell">
-    <header class="topbar">
+  <main class="kinetic-shell">
+    <header class="kinetic-topbar">
       <div class="brand">BaZi Time Atlas</div>
-      <div class="topbar-actions">
-        <nav class="site-nav" aria-label="Atlas views">
-          <a class="active" href="./" aria-current="page">年度</a>
-          <a href="./birth.html">出生</a>
-          <a href="./sexagenary.html">六十甲子</a>
-        </nav>
-        <div class="topbar-note">Annual atlas · v0.7</div>
-      </div>
+      <nav class="site-nav" aria-label="Atlas views">
+        <a class="active" href="./" aria-current="page">時間圖譜</a>
+        <a href="./birth.html">出生</a>
+        <a href="./sexagenary.html">六十甲子</a>
+      </nav>
     </header>
 
-    <section class="hero">
-      <div class="eyebrow">One solar cycle · multiple systems</div>
-      <h1>同一個太陽週期，<br>不同的切分方式。</h1>
-      <p class="lede">以太陽黃經 0°–360° 為共同座標，把二十四節氣、八字月建、五行與熱帶黃道放回同一個幾何底盤。</p>
+    <section class="atlas-intro">
+      <div class="atlas-intro-copy">
+        <div class="eyebrow">One instant · multiple clocks</div>
+        <h1>同一個時間，<br>每一層跑得不一樣。</h1>
+        <p class="lede">把年柱、月柱、日柱、太陽黃經與熱帶黃道接成同一台時間儀器。拖動時間時，連續層會滑動、離散層會在自己的邊界跳格；重點不是「結果卡片」，而是看它們如何同步、錯位與重新相遇。</p>
+      </div>
+      <p class="atlas-principle">固定的徑向線代表同一個選定瞬間。所有圓環都必須穿過它，但沒有任何一層被強迫使用同一個速度或同一種週期。</p>
     </section>
 
-    <div class="toolbar-wrap">
-      <span class="toolbar-label">圖層</span>
-      <nav class="controls" aria-label="圖層控制">
-        <button class="layer-toggle active" type="button" data-toggle-layer="terms" aria-pressed="true">24 節氣</button>
-        <button class="layer-toggle active" type="button" data-toggle-layer="months" aria-pressed="true">八字月支</button>
-        <button class="layer-toggle active" type="button" data-toggle-layer="seasons" aria-pressed="true">四季</button>
-        <button class="layer-toggle active" type="button" data-toggle-layer="zodiac" aria-pressed="true">熱帶黃道</button>
-        <button class="layer-toggle debug-toggle" type="button" data-toggle-layer="debug" aria-pressed="false">角度校驗</button>
-      </nav>
-    </div>
-
-    <section class="atlas-layout">
-      <div class="wheel-stage">
-        <div class="wheel-frame">
-          <div class="ring-key" aria-label="圓環由內到外的順序">
-            <span class="ring-key-edge">內</span>
-            <strong>四季</strong><i>→</i><strong>八字月支</strong><i>→</i><strong>24 節氣</strong><i>→</i><strong>熱帶黃道</strong>
-            <span class="ring-key-edge">外</span>
-          </div>
-          <svg id="atlas-wheel" viewBox="0 0 860 860" role="img" aria-label="太陽黃經、二十四節氣、八字月支、五行、四季與熱帶黃道的共同圓盤">
-            <g data-layer-group="selection"></g>
-            <g data-layer-group="seasons"></g>
-            <g data-layer-group="months"></g>
-            <g data-layer-group="terms"></g>
-            <g data-layer-group="zodiac"></g>
-            <g data-layer-group="debug" hidden></g>
-            <circle cx="430" cy="430" r="76" class="center-disc"></circle>
-            <text id="center-kicker" x="430" y="405" class="center-title">八字月支</text>
-            <text id="center-value" x="430" y="442" class="center-number">卯月</text>
-            <text id="center-note" x="430" y="466" class="center-note">345° → 15°</text>
-          </svg>
+    <section id="kinetic-instrument" class="instrument-shell" aria-label="多速時間圓盤">
+      <div class="instrument-toolbar" aria-label="時間圓盤控制">
+        <div class="toolbar-group" role="group" aria-label="時間尺度">
+          <button class="scale-button" type="button" data-scale="day">48 小時</button>
+          <button class="scale-button active" type="button" data-scale="year">一年</button>
+          <button class="scale-button" type="button" data-scale="cycle">60 年</button>
         </div>
-        <div class="legend-strip" aria-label="五行圖例">
-          <span><i class="legend-dot" style="background:var(--wood)"></i>木</span>
-          <span><i class="legend-dot" style="background:var(--fire)"></i>火</span>
-          <span><i class="legend-dot" style="background:var(--earth)"></i>土</span>
-          <span><i class="legend-dot" style="background:var(--metal)"></i>金</span>
-          <span><i class="legend-dot" style="background:var(--water)"></i>水</span>
-          <span class="legend-rule">粗刻度＝「節」＝八字月界</span>
+        <div class="toolbar-group">
+          <button id="now-button" class="control-button" type="button">現在</button>
+          <button id="play-button" class="control-button primary" type="button" aria-pressed="false">播放</button>
         </div>
       </div>
 
-      <aside id="inspector" class="inspector" aria-live="polite">
-        <div id="detail-eyebrow" class="eyebrow">八字月支</div>
-        <h2 id="detail-title">卯月</h2>
-        <p id="detail-body">驚蟄 → 清明。由兩個「節」界定的 30° 太陽黃經區段。</p>
-        <div id="detail-facts" class="fact-row"></div>
-        <p id="detail-relation" class="relationship"></p>
-        <details class="reading-notes">
-          <summary>怎麼讀這張圖？</summary>
-          <ul>
-            <li>四季、月支、節氣與熱帶黃道都可以直接點選或用鍵盤操作。</li>
-            <li>選中月支時，Inspector 會提供可展開的藏干結構；藏干不另畫成常駐圓環。</li>
-            <li>所有圓環共用同一個太陽黃經座標。</li>
-            <li>八字月界與熱帶黃道宮界都每 30° 一次，但彼此錯開 15°。</li>
-            <li>中國五行與西方四元素只並列觀察，不畫等號。</li>
-          </ul>
-        </details>
-      </aside>
+      <div class="ring-legend" aria-hidden="true">
+        <div class="ring-legend-row ring-year"><i></i><span>年柱</span><strong id="year-active">—</strong></div>
+        <div class="ring-legend-row ring-month"><i></i><span>月柱</span><strong id="month-active">—</strong></div>
+        <div class="ring-legend-row ring-day"><i></i><span>日柱</span><strong id="day-active">—</strong></div>
+        <div class="ring-legend-row ring-solar"><i></i><span>節氣</span><strong id="solar-active">—</strong></div>
+        <div class="ring-legend-row ring-zodiac"><i></i><span>黃道</span><strong id="zodiac-active">—</strong></div>
+      </div>
+
+      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="年、月、日干支、節氣與熱帶黃道的巨大扇形時間圓盤">
+        <g id="guide-layer"></g>
+        <g id="year-track"></g>
+        <g id="month-track"></g>
+        <g id="day-track"></g>
+        <g id="solar-track"></g>
+        <g id="zodiac-track"></g>
+        <g id="cursor-layer"></g>
+      </svg>
+
+      <div class="instrument-readout" aria-live="polite">
+        <div class="readout-kicker">Selected instant</div>
+        <div id="instant-readout">—</div>
+        <div class="readout-meta">
+          <span>太陽黃經 <strong id="solar-readout">—</strong></span>
+          <span>所在節氣區段 <strong id="term-readout">—</strong></span>
+          <span>時間基準 <strong>UTC+08:00</strong></span>
+        </div>
+        <p class="legacy-note">這是從舊年度盤連結帶入的「黃經投影」：太陽／月支位置沿用連結資料；年、日、時仍以目前選定瞬間計算。改動時間後會自動回到完整瞬時計算。</p>
+      </div>
     </section>
 
-    <p class="footer-note">年度盤本身只處理「一年」的共同幾何。Birth 可帶入精確太陽黃經與年干；藏干則只在選中一個地支時於 Inspector 展開，不把地支內部結構誤畫成另一個年度尺度。</p>
+    <section class="timeline-dock" aria-label="時間游標">
+      <label class="instant-field">選定時間
+        <input id="instant-input" type="datetime-local" step="60" aria-label="選定時間，UTC+8">
+      </label>
+      <div class="slider-wrap">
+        <input id="time-slider" type="range" min="-183" max="183" step="0.25" value="0" aria-label="時間拖曳">
+        <div class="slider-scale"><span id="slider-left">−約半年</span><span>拖曳時間</span><span id="slider-right">+約半年</span></div>
+      </div>
+      <div class="timeline-status"><span>目前尺度</span><strong id="scale-readout">一年</strong></div>
+    </section>
+
+    <section class="state-strip" aria-label="目前狀態摘要">
+      <div class="state-cell"><span>Year pillar</span><strong id="state-year">—</strong><small>立春切換</small></div>
+      <div class="state-cell"><span>Month pillar</span><strong id="state-month">—</strong><small>十二節切換</small></div>
+      <div class="state-cell"><span>Day pillar</span><strong id="state-day">—</strong><small>60 日序列</small></div>
+      <div class="state-cell"><span>Hour pillar</span><strong id="state-hour">—</strong><small>暫列讀值</small></div>
+      <div class="state-cell"><span>Solar / Zodiac</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
+    </section>
+
+    <section class="atlas-notes">
+      <div>
+        <div class="eyebrow">How to read it</div>
+        <h2>不是五個圓餅圖，是五個相接的時間座標。</h2>
+        <p>年、月、日三層都畫成六十甲子的狀態輪；目前成立的干支會被固定游標切中。太陽層則使用真實的視黃經連續旋轉，二十四節氣與熱帶黃道只是這個 0°–360° 座標上的固定分區。因此拖一年時，日輪高速跳動、月輪每逢節界換格、年輪幾乎不動；太陽／黃道層則平滑走完一圈。</p>
+      </div>
+      <div>
+        <div class="eyebrow">Next</div>
+        <ul>
+          <li>把立春與十二「節」的精確交界時刻直接畫成可讀邊界。</li>
+          <li>加入 400 年／24,000 年的離散週期與天文近似回歸實驗。</li>
+          <li>深時間使用獨立天文模型，不讓實用排盤引擎假裝能無限外推。</li>
+          <li><a href="./docs/kinetic-atlas-plan.md">完整 redesign plan</a></li>
+        </ul>
+      </div>
+    </section>
 
     <details class="sources-panel">
-      <summary>資料與規則來源</summary>
-      <div class="source-grid">
-        <section class="source-group">
-          <div class="source-kicker">天文／曆法幾何</div>
-          <p>年度盤以太陽黃經為共同座標；24 節氣以 15° 間隔定位。熱帶黃道也以春分點為 0°，但本圖不把固定 30° 黃道宮當成現代天文星座邊界。</p>
-          <div class="source-links">
-            <a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">Hong Kong Observatory · The 24 Solar Terms</a>
-            <a href="https://ytliu0.github.io/ChineseCalendar/solarTerms.html" target="_blank" rel="noreferrer">Yuk Tung Liu · 24 Solar Terms</a>
-          </div>
-        </section>
-        <section class="source-group">
-          <div class="source-kicker">八字排盤 convention</div>
-          <p>月支由「節」界定、月干由五虎遁取得；地支藏干採十二支的一至三干標準表並保留順序，但不把順序轉成固定百分比或把藏干當成額外明干。</p>
-          <div class="source-links">
-            <a href="https://clarifyhk.com/learn/bazi/calendar/five-tigers-method" target="_blank" rel="noreferrer">Clarify · Five Tigers Method</a>
-            <a href="https://wiki.openfate.ai/en/bazi/hidden-stems-roots/twelve-branch-hidden-stems-table" target="_blank" rel="noreferrer">OpenFate · Twelve-Branch Hidden Stems</a>
-          </div>
-        </section>
-      </div>
+      <summary>資料與規則邊界</summary>
+      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列。太陽層沿用現有視黃經計算模組。熱帶黃道只作固定 30° 分區，不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
     </details>
   </main>
-  <script type="module" src="./src/hidden-stems-view.js"></script>
+
+  <div id="legacy-annual-compat" hidden data-birth-projection="" data-five-tigers="" data-month-stem="" data-month-branch="">
+    <svg aria-hidden="true"><text id="center-value">—</text></svg>
+    <h2 id="detail-title">—</h2>
+    <div id="legacy-five-tigers" class="five-tigers-readout"></div>
+    <details id="hidden-stems-panel" data-hidden-branch="">
+      <summary>Legacy hidden stems projection</summary>
+      <div id="legacy-hidden-list"></div>
+    </details>
+  </div>
+
+  <script type="module" src="./src/kinetic-atlas.js"></script>
+  <script type="module" src="./src/legacy-annual-compat.js"></script>
 </body>
 </html>
