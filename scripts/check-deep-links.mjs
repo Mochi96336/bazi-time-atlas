@@ -40,12 +40,14 @@ const cases = [
     },
   },
   {
-    path: "?lambda=271.25",
-    label: "Annual exact Birth projection",
+    path: "?lambda=271.25&yearStem=%E4%B9%99",
+    label: "Annual exact Birth + Five Tigers projection",
     assert(dom) {
       return /data-birth-projection="271\.250000"/.test(dom) &&
-        /class="birth-projection-readout"/.test(dom) &&
-        /λ 271\.25°/.test(dom) &&
+        /data-five-tigers="乙"/.test(dom) &&
+        /data-month-stem="戊"[^>]*data-month-branch="子"/.test(dom) &&
+        /class="five-tigers-readout"/.test(dom) &&
+        /目前 戊子月/.test(dom) &&
         /id="center-value"[^>]*>子月<\/text>/.test(dom);
     },
   },
@@ -54,8 +56,9 @@ const cases = [
     label: "Birth exact Annual link",
     assert(dom) {
       return /class="birth-projection-link"/.test(dom) &&
-        /href="\.\/\?month=[^"]+&amp;lambda=\d+\.\d+"/.test(dom) &&
+        /href="\.\/\?month=[^"]+&amp;lambda=\d+\.\d+&amp;yearStem=%E4%B9%99"/.test(dom) &&
         /年度盤精確定位/.test(dom) &&
+        /年干乙/.test(dom) &&
         /UTC\+08:00/.test(dom);
     },
   },
