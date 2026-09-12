@@ -1,0 +1,124 @@
+.pillar-punishments-band {
+  margin: 0 14px 13px;
+  padding-top: 11px;
+  border-top: 1px solid var(--hairline);
+}
+.pillar-punishments-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.pillar-punishments-head small {
+  color: #8c9691;
+  font-size: 7px;
+  letter-spacing: .1em;
+}
+.pillar-punishments-head span {
+  color: var(--muted);
+  font-size: 8px;
+}
+.pillar-punishments-body {
+  display: grid;
+  gap: 7px;
+}
+.pillar-punishment-strip {
+  display: grid;
+  grid-template-columns: minmax(96px, .7fr) minmax(0, 1.3fr);
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 1px solid #d8dcd7;
+  border-radius: 10px;
+  background: rgba(255,255,255,.34);
+}
+.pillar-punishment-strip > header {
+  display: grid;
+  gap: 2px;
+}
+.pillar-punishment-strip > header strong {
+  color: #485e57;
+  font-size: 9px;
+}
+.pillar-punishment-strip > header span {
+  color: #8c9691;
+  font-size: 7px;
+}
+.punishment-flow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  min-width: 0;
+}
+.punishment-node {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid #dde1dc;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--paper) 88%, white);
+}
+.punishment-node small {
+  color: #8a948f;
+  font-size: 7px;
+}
+.punishment-node b {
+  color: var(--ink);
+  font-size: 13px;
+}
+.punishment-arrow {
+  color: #6c7f78;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+}
+.pillar-punishment-strip.directed { border-left: 3px solid #7b8d86; }
+.pillar-punishment-strip.mutual { border-left: 3px double #7b8d86; }
+.pillar-punishment-strip.self { border-left: 3px dotted #7b8d86; }
+.pillar-punishments-empty {
+  display: block;
+  color: #8b928e;
+  font-size: 8px;
+  line-height: 1.55;
+}
+.pillar-punishments-empty[hidden] { display: none; }
+.pillar-punishments-note {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 7.5px;
+  line-height: 1.6;
+}
+.pillar-punishments-note a {
+  color: #536d65;
+  text-decoration-color: #b7c3be;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .pillar-punishments-band { margin: 0 11px 10px; padding-top: 9px; }
+  .pillar-punishments-head { margin-bottom: 7px; }
+  .pillar-punishments-head small { font-size: 6.5px; }
+  .pillar-punishments-head span { font-size: 7px; }
+  .pillar-punishments-body { gap: 6px; }
+  .pillar-punishment-strip {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 7px;
+    padding: 7px 7px;
+    border-radius: 9px;
+  }
+  .pillar-punishment-strip > header strong { font-size: 8px; }
+  .pillar-punishment-strip > header span { font-size: 6.5px; }
+  .punishment-flow { gap: 5px; }
+  .punishment-node { gap: 4px; padding: 4px 5px; border-radius: 7px; }
+  .punishment-node small { font-size: 6.5px; }
+  .punishment-node b { font-size: 11px; }
+  .punishment-arrow { font-size: 11px; }
+  .self-flow { flex-wrap: wrap; justify-content: flex-start; }
+  .pillar-punishments-empty { font-size: 7.5px; }
+  .pillar-punishments-note { font-size: 7px; }
+}
