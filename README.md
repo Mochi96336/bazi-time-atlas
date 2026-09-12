@@ -42,6 +42,28 @@ Run geometry/data invariants with:
 npm test
 ```
 
+### Visual PNG self-check
+
+The `Visual PNG self-check` workflow opens the real page in headless Chromium and captures both full-page and wheel-focused PNG evidence at three fixed viewports:
+
+- desktop — 1440×1100
+- tablet — 834×1112
+- iPhone-like mobile — 428×926 at 2× device scale
+
+It also fails on basic rendering regressions such as a missing wheel or horizontal page overflow. Every run uploads a `visual-png-selfcheck` artifact containing six PNGs plus `diagnostics.json` for seven days.
+
+For local capture:
+
+```bash
+npm install
+npx playwright install chromium
+python -m http.server 4173
+# in another terminal
+npm run visual:capture
+```
+
+The current visual check is deliberately evidence-first rather than pixel-diff gating. A stable screenshot baseline can be added after the annual layout settles.
+
 ## Roadmap
 
 1. Annual Atlas — current milestone
