@@ -9,6 +9,7 @@ const pages = [
   { key: "annual", path: "" },
   { key: "annual-birth", path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1" },
   { key: "recurrence", path: "recurrence.html" },
+  { key: "recurrence-local", path: "recurrence.html?date=2026-09-13&delta=1980" },
   { key: "recurrence-global", path: "recurrence.html?date=2026-09-13&delta=24000" },
   { key: "birth", path: "birth.html" },
   { key: "sexagenary", path: "sexagenary.html" },
