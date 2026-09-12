@@ -33,10 +33,6 @@ let currentBase = { year: 2026, month: 9, day: 13 };
 let currentDelta = 0;
 let candidateStates = [];
 
-function normalizeDegrees(value) {
-  return ((value % 360) + 360) % 360;
-}
-
 function polar(radius, angleDegrees) {
   const angle = angleDegrees * Math.PI / 180;
   return { x: CX + Math.cos(angle) * radius, y: CY + Math.sin(angle) * radius };
@@ -97,8 +93,7 @@ function renderRing(key) {
       class: `phase-tick${index % 5 === 0 ? " major" : ""}`
     }, spec.group);
 
-    const showLabel = key === "gregorian" ? index % 10 === 0 : index % 10 === 0;
-    if (showLabel) {
+    if (index % 10 === 0) {
       const radius = (spec.inner + spec.outer) / 2;
       const angle = index * sectorAngle + sectorAngle / 2;
       const p = polar(radius, angle);
@@ -148,6 +143,33 @@ function readBaseDate() {
   };
 }
 
+function parseDateParam(value) {
+  const match = /^(\d{1,7})-(\d{2})-(\d{2})$/.exec(value ?? "");
+  if (!match) return null;
+  const date = { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+  return validateGregorianDate(date) ? date : null;
+}
+
+function applyQueryPreset() {
+  const params = new URLSearchParams(location.search);
+  const queryDate = parseDateParam(params.get("date"));
+  if (queryDate) {
+    currentBase = queryDate;
+    yearInput.value = String(queryDate.year);
+    monthInput.value = String(queryDate.month);
+    dayInput.value = String(queryDate.day);
+  }
+
+  const rawDelta = params.get("delta");
+  const parsedDelta = rawDelta === null ? 0 : Number(rawDelta);
+  const queryDelta = Number.isFinite(parsedDelta)
+    ? Math.max(0, Math.min(GLOBAL_GREGORIAN_YEAR_DAY_PERIOD, Math.round(parsedDelta)))
+    : 0;
+
+  if (queryDate || rawDelta !== null) instrument.dataset.queryPreset = "1";
+  return queryDelta;
+}
+
 function formatDate(date) {
   const pad = value => String(value).padStart(2, "0");
   return `${date.year}-${pad(date.month)}-${pad(date.day)}`;
@@ -194,6 +216,7 @@ function rebuildCandidates() {
   });
 
   setText("local-recurrence", local ? `${local.deltaYears.toLocaleString("en-US")} 年` : "未找到");
+  instrument.dataset.localYearDayRecurrence = local ? String(local.deltaYears) : "none";
 }
 
 function setClosureArticle(key, closed, phase) {
@@ -229,6 +252,7 @@ function renderState() {
   const localYears = findFirstLocalYearDayRecurrence(currentBase)?.deltaYears ?? null;
   setText("closure-summary", stateMeaning(state, localYears));
 
+  instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.deltaYears = String(currentDelta);
   instrument.dataset.gregorianPhase = String(state.phases.gregorian);
   instrument.dataset.yearPhase = String(state.phases.year);
@@ -275,9 +299,11 @@ function initialize() {
   renderRing("year");
   renderRing("day");
   renderCursor();
+  const initialDelta = applyQueryPreset();
   bindControls();
+  instrument.dataset.baseDateValid = "true";
   rebuildCandidates();
-  setDelta(0);
+  setDelta(initialDelta);
 }
 
 initialize();
