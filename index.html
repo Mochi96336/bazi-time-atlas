@@ -19,7 +19,7 @@
           <a href="./birth.html">出生</a>
           <a href="./sexagenary.html">六十甲子</a>
         </nav>
-        <div class="topbar-note">Annual atlas · v0.5</div>
+        <div class="topbar-note">Annual atlas · v0.6</div>
       </div>
     </header>
 
@@ -89,7 +89,7 @@
       </aside>
     </section>
 
-    <p class="footer-note">年度盤本身只處理「一年」的共同幾何。從「出生」view 帶入精確太陽黃經時，會額外畫一條出生瞬間射線；六十甲子仍在獨立 Reference view 呈現。</p>
+    <p class="footer-note">年度盤本身只處理「一年」的共同幾何。從「出生」view 帶入精確太陽黃經時，會額外畫出生瞬間射線；帶入年干時，才依五虎遁動態生成十二個月干，月干不是固定黃經資料。</p>
 
     <details class="sources-panel">
       <summary>資料與規則來源</summary>
@@ -104,10 +104,10 @@
         </section>
         <section class="source-group">
           <div class="source-kicker">八字排盤 convention</div>
-          <p>本專案的年度八字月支採常見子平排盤方式：以十二個「節」作月界，例如立春起寅月、驚蟄起卯月。這是八字排盤 convention，不等同於把官方中國曆法月份規則直接搬過來。</p>
+          <p>八字月支以十二個「節」作月界；月干則在已知年干後依五虎遁（年上起月）取得。年度盤預設只顯示固定的月支幾何，只有 Birth view 帶入年干時才動態加上月干層。</p>
           <div class="source-links">
             <a href="https://clarifyhk.com/learn/bazi/calendar/month-pillar-calculation" target="_blank" rel="noreferrer">Clarify · Month Pillar Calculation</a>
-            <a href="https://clarifyhk.com/learn/bazi/calendar" target="_blank" rel="noreferrer">Clarify · BaZi Calendar</a>
+            <a href="https://clarifyhk.com/learn/bazi/calendar/five-tigers-method" target="_blank" rel="noreferrer">Clarify · Five Tigers Method</a>
           </div>
         </section>
       </div>
