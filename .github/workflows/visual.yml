@@ -33,6 +33,7 @@ jobs:
           node --check src/calendar/tyme-adapter.js
           node --check src/calendar/five-tigers.js
           node --check src/calendar/hidden-stems.js
+          node --check src/calendar/ten-gods.js
           node --check src/astronomy/solar-longitude.js
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
