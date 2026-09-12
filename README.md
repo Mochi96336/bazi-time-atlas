@@ -36,7 +36,8 @@ A single birth instant is resolved through four separate rules instead of a fake
 - Ten Gods remain structural labels only: no strength, weighting, auspiciousness, personality, or event prediction
 - the four visible pillars are scanned pairwise for Heavenly-Stem Five Combinations and Earthly-Branch Six Harmonies / Six Clashes / Six Harms
 - complete visible three-branch sets are scanned separately for 三合 and 三會; two-member "half" patterns are intentionally excluded from V1
-- pair relations and complete three-branch relations use different visual grammar so a triad is not misrepresented as three independent pairs
+- branch punishments are a third model: directed 寅→巳→申→寅 / 丑→戌→未→丑 chains, 子卯 mutual punishment, and repeated 辰午酉亥 self-punishment
+- pair, complete-three-member, and punishment structures use different visual grammar so their arity/direction is not flattened into one relation type
 - Birth inputs can be deep-linked with `date=YYYY-MM-DD`, `time=HH:MM`, and `utc=<offset>` for reproducible examples
 
 ### Sexagenary reference
@@ -55,6 +56,7 @@ The 60 Jiazi are generated from synchronized 10-stem and 12-branch phases. The 6
 - Pairwise stem/branch relations are symmetric registry facts first; transformation and interpretive conditions remain separate.
 - 六害 uses the six explicit pairs in 《三命通會》〈論六害〉: 子未、丑午、寅巳、卯辰、申亥、酉戌. The atlas records pair membership only and does not turn the word "害" into a real-world prediction.
 - Complete 三合 / 三會 require all three canonical visible branches in V1; no automatic half-combination, transit completion, strength, or transformation inference.
+- 刑 is intentionally **not** a symmetric pair registry. The atlas preserves directed cycles, the reciprocal 子卯 relation, and duplicate-support self-punishment separately. Classical moralizing subtype names are omitted because the same classical discussion records alternate naming assignments.
 - 六破 is deliberately **not** in the deterministic core yet. The modern common table is widespread, but its adoption and weighting are school-dependent and the classical Zi Ping source boundary is weaker; if added later it must carry an explicit convention/source label.
 - Interpretive claims must not be smuggled into deterministic calendar or relationship layers.
 
@@ -84,7 +86,7 @@ The baseline set covers desktop/mobile first viewports for:
 - Birth view
 - Sexagenary reference
 
-Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, and a real-chart 六害 example. Artifacts are written to `tmp/visual-check/` and uploaded as `visual-png-selfcheck` for seven days. This remains a smoke/evidence check rather than a pixel-diff regression gate while layout is still evolving.
+Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, and the real-chart 寅巳 example that simultaneously demonstrates 六害 and a directed punishment edge. Browser DOM probes separately verify real-chart 子卯互刑 and 辰自刑 cases without adding more PNG weight.
 
 Local use:
 
@@ -98,7 +100,7 @@ npm run visual:check
 
 1. **Time skeleton — complete:** annual geometry, Birth derivation, 60 Jiazi reference.
 2. **Deterministic BaZi structure — active:** Five Tigers, hidden stems, Day Master → Ten Gods, and the visible derivation map from Five-Phase direction + polarity.
-3. **Stem / branch interactions — active:** visible-stem 五合; visible-branch 六合 / 六沖 / 六害; complete visible 三合 / 三會. Next, model 刑 separately because it includes directed chains and self-punishment. 六破 remains deferred behind an explicit school/convention boundary instead of being flattened into the core table.
+3. **Stem / branch interactions — mature deterministic core:** visible-stem 五合; visible-branch 六合 / 六沖 / 六害; complete visible 三合 / 三會; directed / mutual / self 刑. 六破 remains deferred behind an explicit school/convention boundary instead of being flattened into the core table.
 4. **Seasonal support / strength:** only with explicit convention and weighting boundaries; no universal percentage model.
 5. **Interpretive layer:** optional, clearly separated from the calculation engine, and labelled by source/tradition rather than presented as objective fact.
 

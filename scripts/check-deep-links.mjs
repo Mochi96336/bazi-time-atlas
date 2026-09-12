@@ -94,7 +94,8 @@ const cases = [
         /data-relation-domain="branch"[^>]*data-relation-kind="six-harmony"[^>]*data-left-pillar="year"[^>]*data-right-pillar="hour"/.test(dom) &&
         /data-relation-kind="six-harmony"/.test(dom) &&
         /年支/.test(dom) && /時支/.test(dom) && /六合/.test(dom) &&
-        /目前四柱沒有完整三合／三會/.test(dom);
+        /目前四柱沒有完整三合／三會/.test(dom) &&
+        /data-punishment-count="0"/.test(dom);
     },
   },
   {
@@ -129,14 +130,32 @@ const cases = [
   },
   {
     path: "birth.html?relations=1&date=2022-06-20&time=10%3A00&utc=8",
-    label: "Birth real-chart 寅巳 six-harm deep link",
+    label: "Birth real-chart 寅巳 six-harm + directed punishment",
     assert(dom) {
       return /data-query-preset="1"/.test(dom) &&
         /id="birth-readout"[^>]*>2022-06-20 · 10:00<\/h2>/.test(dom) &&
         openDetailsById(dom, "pillar-relations-panel") &&
         /data-relation-domain="branch"[^>]*data-relation-kind="six-harm"[^>]*data-left-pillar="year"[^>]*data-right-pillar="hour"/.test(dom) &&
-        /data-relation-kind="six-harm"/.test(dom) &&
-        /年支/.test(dom) && /時支/.test(dom) && /六害/.test(dom);
+        /data-punishment-kind="directed"[^>]*data-source-branch="寅"[^>]*data-target-branch="巳"[^>]*data-source-pillar="year"[^>]*data-target-pillar="hour"/.test(dom) &&
+        /寅巳申 · 方向鏈/.test(dom);
+    },
+  },
+  {
+    path: "birth.html?relations=1&date=2020-06-20&time=06%3A00&utc=8",
+    label: "Birth real-chart 子卯 mutual punishment",
+    assert(dom) {
+      return /id="birth-readout"[^>]*>2020-06-20 · 06:00<\/h2>/.test(dom) &&
+        /data-punishment-kind="mutual"[^>]*data-left-branch="子"[^>]*data-right-branch="卯"[^>]*data-left-pillar="year"[^>]*data-right-pillar="hour"/.test(dom) &&
+        /子 ↔ 卯/.test(dom);
+    },
+  },
+  {
+    path: "birth.html?relations=1&date=2024-06-20&time=08%3A00&utc=8",
+    label: "Birth real-chart 辰 self punishment",
+    assert(dom) {
+      return /id="birth-readout"[^>]*>2024-06-20 · 08:00<\/h2>/.test(dom) &&
+        /data-punishment-kind="self"[^>]*data-self-branch="辰"[^>]*data-support-pillars="year,hour"/.test(dom) &&
+        /辰 × 2/.test(dom);
     },
   },
   {
