@@ -25,7 +25,7 @@ body {
   background: radial-gradient(circle at 12% -8%, rgba(255,255,255,.92), transparent 34rem), var(--bg);
 }
 button, input { font: inherit; }
-button:focus-visible, [tabindex]:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+button:focus-visible, [tabindex]:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .site-shell { width: min(1380px, 100%); margin: 0 auto; padding: 24px clamp(18px, 4vw, 54px) 48px; }
 .topbar { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; margin-bottom: 30px; }
 .brand { font-size: 13px; letter-spacing: .16em; font-weight: 780; text-transform: uppercase; }
@@ -107,6 +107,15 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
 .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .legend-rule { margin-left: 4px; }
 .footer-note { margin-top: 34px; max-width: 760px; color: var(--muted); font-size: 11px; line-height: 1.65; }
+.sources-panel { max-width: 920px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--hairline); color: var(--muted); }
+.sources-panel > summary { width: fit-content; cursor: pointer; color: #525a55; font-size: 11px; font-weight: 720; letter-spacing: .02em; }
+.source-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding-top: 16px; }
+.source-group { min-width: 0; }
+.source-kicker { color: #737a76; font-size: 9px; font-weight: 780; letter-spacing: .14em; text-transform: uppercase; }
+.source-group p { margin: 7px 0 10px; color: #717873; font-size: 11px; line-height: 1.72; }
+.source-links { display: grid; gap: 5px; }
+.source-links a { width: fit-content; color: #4a625c; font-size: 11px; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: 3px; }
+.source-links a:hover { color: var(--ink); text-decoration-color: var(--accent); }
 @media (max-width: 900px) {
   .atlas-layout { grid-template-columns: 1fr; }
   .wheel-stage, .inspector { position: static; }
@@ -141,4 +150,6 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
   .inspector p { font-size: 13px; }
   .relationship { font-size: 11px !important; }
   .footer-note { margin: 26px 2px 0; }
+  .sources-panel { margin: 16px 2px 0; padding-top: 12px; }
+  .source-grid { grid-template-columns: 1fr; gap: 16px; }
 }
