@@ -1,12 +1,14 @@
 # BaZi Time Atlas
 
-A data-driven visual atlas for exploring how one solar cycle is partitioned by the 24 solar terms, BaZi month branches, the Five Phases, traditional seasons, and the tropical zodiac.
+A data-driven visual atlas for understanding BaZi as a set of overlapping time, calendar, and symbolic structures rather than as one opaque fortune-telling table.
 
-The project deliberately separates **astronomical/calendar geometry** from later symbolic interpretation. The first milestone is the annual 0°–360° solar-longitude atlas; sexagenary-cycle and birth-chart views come later.
+The project deliberately separates **astronomical/calendar geometry**, **deterministic structural rules**, and later **interpretation**. Geometry and rule-based relationships are implemented first; subjective layers stay explicit and optional.
 
-## V0.1 — Annual Atlas
+## Current views
 
-The first view shares one coordinate system:
+### Annual Atlas
+
+One shared solar-longitude coordinate system:
 
 - solar longitude λ = 0°–360°
 - 24 solar terms at 15° intervals
@@ -14,9 +16,28 @@ The first view shares one coordinate system:
 - traditional seasons beginning at Li Chun / Li Xia / Li Qiu / Li Dong
 - Earthly Branch primary Five-Phase classification
 - 12 tropical zodiac signs at 30° intervals
-- Western element and modality metadata
+- Western element and modality metadata kept separate from Chinese Five Phases
+- exact Birth projection back onto the annual wheel
+- Five Tigers month-stem derivation and collapsible hidden stems
 
-The interface intentionally shows geometric overlap without claiming symbolic equivalence. For example, Mao month (345°–15°) overlaps the last 15° of Pisces and first 15° of Aries; it is **not** labelled as equivalent to either sign.
+The interface shows geometric overlap without claiming symbolic equivalence. For example, Mao month (345°–15°) overlaps the last 15° of Pisces and first 15° of Aries; it is **not** labelled as equivalent to either sign.
+
+### Birth view
+
+A single birth instant is resolved through four separate rules instead of a fake year→month→day→hour dependency chain:
+
+- year pillar changes at the exact Li Chun instant
+- month pillar changes at the exact 12 **jie** boundaries
+- day pillar follows the continuous sexagenary day sequence
+- hour branch follows the local clock while hour stem derives from the effective day stem
+- 23:00 Zi-initial vs 00:00 civil-midnight day boundaries are explicit conventions
+- UTC offset locates the real instant; longitude / true-solar-time correction is not yet applied
+- visible stems and hidden stems can be classified relative to the Day Master through the Ten Gods
+- Ten Gods remain structural labels only: no strength, weighting, auspiciousness, personality, or event prediction
+
+### Sexagenary reference
+
+The 60 Jiazi are generated from synchronized 10-stem and 12-branch phases. The 60-cycle is its own reference system and is **not** drawn as 60 slices of the solar year.
 
 ## Principles
 
@@ -24,8 +45,10 @@ The interface intentionally shows geometric overlap without claiming symbolic eq
 - BaZi month boundaries use the 12 **jie** solar terms.
 - Tropical zodiac signs are a separate 30° system and are not modern astronomical constellation boundaries.
 - Chinese Five Phases and Western four elements remain distinct systems.
-- The 60 Jiazi cycle is **not** represented as 60 slices of the solar year.
-- Ambiguous BaZi conventions (day boundary, civil vs solar time) will be explicit when the Birth view is implemented.
+- Ambiguous conventions are exposed instead of silently chosen.
+- Hidden stems are branch internals, not another permanent annual ring.
+- Ten Gods are derived from Five-Phase direction + yin-yang parity relative to the Day Master.
+- Interpretive claims must not be smuggled into deterministic calendar or relationship layers.
 
 ## Development
 
@@ -36,7 +59,7 @@ python -m http.server 8000
 # open http://localhost:8000
 ```
 
-Run geometry/data invariants with:
+Run all rule/data invariants with:
 
 ```bash
 npm test
@@ -44,14 +67,16 @@ npm test
 
 ### Lightweight PNG visual self-check
 
-The `Visual PNG self-check` workflow follows the same lightweight pattern used in the Relay project: it calls the system-installed Chromium/Chrome directly in headless mode, with no Playwright or Puppeteer dependency.
+The `Visual PNG self-check` workflow calls the system Chromium/Chrome directly in headless mode, with no Playwright or Puppeteer dependency.
 
-It captures two deterministic viewports:
+The baseline set covers desktop/mobile first viewports for:
 
-- `surface-1440x900.png`
-- `surface-390x844.png`
+- Annual Atlas
+- Annual Atlas with an exact Birth projection
+- Birth view
+- Sexagenary reference
 
-Artifacts are written to `tmp/visual-check/` and uploaded as `visual-png-selfcheck` for seven days. This is intentionally a smoke/evidence check rather than a pixel-diff visual regression gate while the layout is still changing.
+Extra bounded review frames expose below-fold details such as expanded hidden stems and Ten-God structure. Artifacts are written to `tmp/visual-check/` and uploaded as `visual-png-selfcheck` for seven days. This remains a smoke/evidence check rather than a pixel-diff regression gate while layout is still evolving.
 
 Local use:
 
@@ -63,11 +88,12 @@ npm run visual:check
 
 ## Roadmap
 
-1. Annual Atlas — current milestone
-2. Birth view — year/month/day/hour derivation shown as separate time rules
-3. Sexagenary reference — dedicated 60 Jiazi explorer
-4. Hidden stems and deeper BaZi structure, only after the time model is stable
+1. **Time skeleton — complete:** annual geometry, Birth derivation, 60 Jiazi reference.
+2. **Deterministic BaZi structure — active:** Five Tigers, hidden stems, Day Master → Ten Gods, and the visible derivation map from Five-Phase direction + polarity.
+3. **Stem / branch interactions:** combinations, clashes and related relations only after each rule can be represented without pretending all schools agree.
+4. **Seasonal support / strength:** only with explicit convention and weighting boundaries; no universal percentage model.
+5. **Interpretive layer:** optional, clearly separated from the calculation engine, and labelled by source/tradition rather than presented as objective fact.
 
 ## Deployment
 
-`.github/workflows/pages.yml` tests the geometry invariants and deploys the repository root to GitHub Pages on pushes to `main`.
+`.github/workflows/pages.yml` tests the rule/data invariants and deploys the repository root to GitHub Pages on pushes to `main`.
