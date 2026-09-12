@@ -36,18 +36,22 @@ const cases = [
     label: "Annual month deep link",
     assert(dom) {
       return /id="center-value"[^>]*>子月<\/text>/.test(dom) &&
-        /id="detail-title"[^>]*>子月<\/h2>/.test(dom);
+        /id="detail-title"[^>]*>子月<\/h2>/.test(dom) &&
+        /id="hidden-stems-panel"[^>]*data-hidden-branch="子"/.test(dom) &&
+        /子 · 癸/.test(dom);
     },
   },
   {
-    path: "?lambda=271.25&yearStem=%E4%B9%99",
-    label: "Annual exact Birth + Five Tigers projection",
+    path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1",
+    label: "Annual exact Birth + Five Tigers + hidden stems",
     assert(dom) {
       return /data-birth-projection="271\.250000"/.test(dom) &&
         /data-five-tigers="乙"/.test(dom) &&
         /data-month-stem="戊"[^>]*data-month-branch="子"/.test(dom) &&
         /class="five-tigers-readout"/.test(dom) &&
         /目前 戊子月/.test(dom) &&
+        /id="hidden-stems-panel"[^>]*open[^>]*data-hidden-branch="子"/.test(dom) &&
+        /data-hidden-stem="癸"[^>]*data-hidden-role="主"/.test(dom) &&
         /id="center-value"[^>]*>子月<\/text>/.test(dom);
     },
   },
