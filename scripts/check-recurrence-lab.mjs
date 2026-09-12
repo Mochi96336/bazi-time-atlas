@@ -47,6 +47,11 @@ function expectCase(path, expected, label) {
   return { url, dom };
 }
 
+function hasReturnMarker(dom, key, angle) {
+  const pattern = new RegExp(`data-return-marker="${key}"[^>]*data-return-angle="${angle.replace(".", "\\.")}"`);
+  return pattern.test(dom);
+}
+
 const local = expectCase(
   "recurrence.html?date=2026-09-13&delta=1980",
   {
@@ -67,7 +72,12 @@ const local = expectCase(
 if (!/此起點年＋日首次重遇/.test(local.dom) || !/1,980 年/.test(local.dom)) {
   throw new Error(`1980-year local recurrence explanation missing: ${local.url}`);
 }
-console.log(`[recurrence] PASS local Year+Day recurrence: ${local.url}`);
+if (!hasReturnMarker(local.dom, "gregorian", "-72.000") ||
+    !hasReturnMarker(local.dom, "year", "-90.000") ||
+    !hasReturnMarker(local.dom, "day", "-90.000")) {
+  throw new Error(`1980-year return markers do not show Gregorian offset vs aligned Year/Day: ${local.url}`);
+}
+console.log(`[recurrence] PASS local Year+Day recurrence + radial offset markers: ${local.url}`);
 
 const global = expectCase(
   "recurrence.html?date=2026-09-13&delta=24000",
@@ -88,7 +98,10 @@ const global = expectCase(
 if (!/三層全域閉合/.test(global.dom) || !/26026-09-13/.test(global.dom)) {
   throw new Error(`24000-year global closure explanation missing: ${global.url}`);
 }
-console.log(`[recurrence] PASS global Gregorian+Year+Day closure: ${global.url}`);
+if (!["gregorian", "year", "day"].every(key => hasReturnMarker(global.dom, key, "-90.000"))) {
+  throw new Error(`24000-year return markers are not all aligned to the reference cursor: ${global.url}`);
+}
+console.log(`[recurrence] PASS global Gregorian+Year+Day closure + radial alignment: ${global.url}`);
 
 const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",
