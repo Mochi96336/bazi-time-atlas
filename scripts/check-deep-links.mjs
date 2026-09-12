@@ -128,6 +128,18 @@ const cases = [
     },
   },
   {
+    path: "birth.html?relations=1&date=2022-06-20&time=10%3A00&utc=8",
+    label: "Birth real-chart 寅巳 six-harm deep link",
+    assert(dom) {
+      return /data-query-preset="1"/.test(dom) &&
+        /id="birth-readout"[^>]*>2022-06-20 · 10:00<\/h2>/.test(dom) &&
+        openDetailsById(dom, "pillar-relations-panel") &&
+        /data-relation-domain="branch"[^>]*data-relation-kind="six-harm"[^>]*data-left-pillar="year"[^>]*data-right-pillar="hour"/.test(dom) &&
+        /data-relation-kind="six-harm"/.test(dom) &&
+        /年支/.test(dom) && /時支/.test(dom) && /六害/.test(dom);
+    },
+  },
+  {
     path: "sexagenary.html?ganzhi=%E4%B9%99%E9%85%89",
     label: "Sexagenary Gan-Zhi deep link",
     assert(dom) {
