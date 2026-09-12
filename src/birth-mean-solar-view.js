@@ -4,6 +4,7 @@ const form = document.querySelector("#birth-form");
 const utcOffsetInput = document.querySelector("#birth-utc-offset");
 const timeGroup = utcOffsetInput?.closest(".birth-field-group");
 const timeBasisNote = form?.querySelector(".time-basis-note");
+const pillarSummary = document.querySelector(".pillar-summary");
 const query = new URLSearchParams(window.location.search);
 
 let longitudeInput;
@@ -54,7 +55,7 @@ function formatSignedMinutes(value) {
 }
 
 function install() {
-  if (!form || !utcOffsetInput || !timeGroup || !timeBasisNote) return false;
+  if (!form || !utcOffsetInput || !timeGroup || !timeBasisNote || !pillarSummary) return false;
 
   const stylesheet = document.createElement("link");
   stylesheet.rel = "stylesheet";
@@ -66,7 +67,7 @@ function install() {
   const basisCopy = timeBasisNote.querySelector("span");
   if (basisTitle) basisTitle.textContent = "目前排盤基準：出生地民用時間 + UTC offset";
   if (basisCopy) {
-    basisCopy.textContent = "四柱仍不套用經度校正；下方只預覽地方平太陽時。尚未加入均時差，因此也不是地方視太陽時／真太陽時。";
+    basisCopy.textContent = "四柱仍用民用鐘面；下方只比較經度校正。未加均時差，因此不是真太陽時。";
   }
 
   const field = document.createElement("label");
@@ -112,7 +113,9 @@ function install() {
   previewTime = preview.querySelector("#mean-solar-time");
   previewCorrection = preview.querySelector("#mean-solar-correction");
   previewMeta = preview.querySelector("#mean-solar-meta");
-  timeBasisNote.insertAdjacentElement("afterend", preview);
+
+  const projectionLink = document.querySelector(".birth-projection-link");
+  (projectionLink ?? pillarSummary).insertAdjacentElement("afterend", preview);
 
   const queryLongitude = query.get("lon");
   if (queryLongitude !== null && Number.isFinite(Number(queryLongitude))) {
