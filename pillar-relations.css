@@ -68,6 +68,13 @@
   height: auto;
   min-height: 190px;
 }
+.pillar-relations-graph .relation-axis-label {
+  fill: #a0a6a2;
+  font-size: 7px;
+  letter-spacing: .08em;
+  text-anchor: middle;
+  writing-mode: vertical-rl;
+}
 .pillar-relations-graph .pillar-card {
   fill: color-mix(in srgb, var(--paper) 88%, white);
   stroke: #d4d8d3;
