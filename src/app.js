@@ -5,6 +5,12 @@ const NS = "http://www.w3.org/2000/svg";
 const svg = document.querySelector("#atlas-wheel");
 const cx = 430, cy = 430;
 const CARDINAL_ANGLES = new Set([0, 90, 180, 270]);
+const SELECTION_LAYER = {
+  month: "months",
+  term: "terms",
+  season: "seasons",
+  zodiac: "zodiac"
+};
 const state = {
   selected: { type: "month", key: "卯" },
   layers: { terms: true, months: true, seasons: true, zodiac: true, debug: false }
@@ -106,7 +112,7 @@ function renderStaticWheel() {
     line.setAttribute("aria-hidden", "true");
 
     const labelRadius = term.kind === "jie" ? 323 : 304;
-    const label = textAt(groups.terms, labelRadius, term.longitude, term.name, labelClasses.join(" "), {
+    textAt(groups.terms, labelRadius, term.longitude, term.name, labelClasses.join(" "), {
       "data-term": term.name,
       "data-select-type": "term",
       "data-select-key": term.name
@@ -225,6 +231,16 @@ function setCenterReadout(kicker, value, note) {
   centerNote.textContent = note;
 }
 
+function renderIdleSelection(eyebrow, title, body, facts, relation) {
+  groups.selection.replaceChildren();
+  setCenterReadout("共同座標", "0–360°", "0° = 春分");
+  eyebrow.textContent = "共同座標";
+  title.textContent = "選擇一個圓環";
+  body.textContent = "點選四季、月支、節氣或熱帶黃道，查看它們在同一太陽黃經座標上的位置與交疊。";
+  facts.innerHTML = `<span>春分 <strong>0°</strong></span><span>一周 <strong>360°</strong></span>`;
+  relation.textContent = "關閉正在選取的圖層時，該選取也會一併清除。";
+}
+
 function renderSelection() {
   clearHighlights();
   const title = document.querySelector("#detail-title");
@@ -232,6 +248,11 @@ function renderSelection() {
   const body = document.querySelector("#detail-body");
   const facts = document.querySelector("#detail-facts");
   const relation = document.querySelector("#detail-relation");
+
+  if (!state.selected) {
+    renderIdleSelection(eyebrow, title, body, facts, relation);
+    return;
+  }
 
   if (state.selected.type === "month") {
     const month = baziMonths.find(item => item.branch === state.selected.key);
@@ -324,6 +345,11 @@ function wireControls() {
       button.classList.toggle("active", state.layers[key]);
       button.setAttribute("aria-pressed", String(state.layers[key]));
       groups[key].hidden = !state.layers[key];
+
+      if (!state.layers[key] && state.selected && SELECTION_LAYER[state.selected.type] === key) {
+        state.selected = null;
+        renderSelection();
+      }
     });
   });
 }
