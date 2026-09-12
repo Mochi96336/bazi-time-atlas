@@ -1,4 +1,5 @@
 import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
+import { apparentSolarLongitude } from "./astronomy/solar-longitude.js";
 
 const form = document.querySelector("#birth-form");
 const yearInput = document.querySelector("#birth-year");
@@ -6,14 +7,15 @@ const monthInput = document.querySelector("#birth-month");
 const dayInput = document.querySelector("#birth-day");
 const hourInput = document.querySelector("#birth-hour");
 const minuteInput = document.querySelector("#birth-minute");
+const utcOffsetInput = document.querySelector("#birth-utc-offset");
 const readout = document.querySelector("#birth-readout");
 const badge = document.querySelector("#boundary-badge");
 const errorBox = document.querySelector("#birth-error");
 const sensitivity = document.querySelector("#boundary-sensitivity");
 const comparison = document.querySelector("#boundary-comparison");
 const conventionDay = document.querySelector("#convention-day");
+const conventionTime = document.querySelector("#convention-time");
 const pillarSummary = document.querySelector(".pillar-summary");
-const trackNote = document.querySelector(".track-note");
 
 const pillarTargets = {
   year: document.querySelector("#year-pillar"),
@@ -37,7 +39,8 @@ const summaryLabels = {
 };
 
 const summaryCells = {};
-let annualMonthLink;
+let annualProjectionLink;
+let annualProjectionMeta;
 const dayRuleNote = document.querySelector("#day-rule-note");
 
 function installCrossViewLinks() {
@@ -61,14 +64,18 @@ function installCrossViewLinks() {
     });
   }
 
-  const row = document.createElement("p");
-  row.className = "track-note";
-  annualMonthLink = document.createElement("a");
-  annualMonthLink.href = "./?month=子";
-  annualMonthLink.textContent = "年度盤定位子月 →";
-  const note = document.createElement("span");
-  note.textContent = "　只定位月支區段，不把出生時刻假畫成精確太陽黃經。";
-  row.append(annualMonthLink, note);
+  const row = document.createElement("div");
+  row.className = "birth-projection-link";
+  const label = document.createElement("span");
+  label.className = "birth-projection-kicker";
+  label.textContent = "出生瞬間 · 太陽黃經";
+  annualProjectionLink = document.createElement("a");
+  annualProjectionLink.href = "./?month=子&lambda=270";
+  annualProjectionLink.textContent = "λ 270.00°　年度盤精確定位 →";
+  annualProjectionMeta = document.createElement("span");
+  annualProjectionMeta.className = "birth-projection-meta";
+  annualProjectionMeta.textContent = "子月 · UTC+08:00 · 不套真太陽時";
+  row.append(label, annualProjectionLink, annualProjectionMeta);
   pillarSummary.insertAdjacentElement("afterend", row);
 }
 
@@ -78,7 +85,9 @@ function selectedBoundary() {
 
 function numberFrom(input) {
   if (input.value.trim() === "") throw new RangeError(`${input.getAttribute("aria-label")}不可空白`);
-  return Number(input.value);
+  const value = Number(input.value);
+  if (!Number.isFinite(value)) throw new RangeError(`${input.getAttribute("aria-label")}格式錯誤`);
+  return value;
 }
 
 function parseInput() {
@@ -90,6 +99,14 @@ function parseInput() {
     minute: numberFrom(minuteInput),
     second: 0
   };
+}
+
+function parseUtcOffset() {
+  const value = numberFrom(utcOffsetInput);
+  if (value < -14 || value > 14) {
+    throw new RangeError("出生當時 UTC offset 必須介於 -14 到 +14 小時");
+  }
+  return value;
 }
 
 function boundaryLabel(boundary) {
@@ -107,11 +124,20 @@ function pad(value, width = 2) {
   return String(value).padStart(width, "0");
 }
 
-function renderResult(result) {
+function formatUtcOffset(offset) {
+  const totalMinutes = Math.round(Math.abs(offset) * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const sign = offset < 0 ? "−" : "+";
+  return `UTC${sign}${pad(hours)}:${pad(minutes)}`;
+}
+
+function renderResult(result, longitude, utcOffsetHours) {
   const { input, pillars, convention } = result;
   readout.textContent = `${pad(input.year, 4)}-${pad(input.month)}-${pad(input.day)} · ${pad(input.hour)}:${pad(input.minute)}`;
   badge.textContent = boundaryLabel(convention.dayBoundary);
   conventionDay.textContent = convention.dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT ? "00:00 換日" : "23:00 換日";
+  conventionTime.textContent = `${formatUtcOffset(utcOffsetHours)} · 當地民用`;
   dayRuleNote.textContent = convention.dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT
     ? "00:00 才進入下一干支日"
     : "23:00 起計下一干支日";
@@ -125,16 +151,24 @@ function renderResult(result) {
     summaryCells[key].title = `在六十甲子查看 ${pillars[key].name}`;
   }
 
-  annualMonthLink.href = `./?month=${encodeURIComponent(pillars.month.branch)}`;
-  annualMonthLink.textContent = `年度盤定位 ${pillars.month.branch}月 →`;
+  const lambda = longitude.toFixed(6);
+  annualProjectionLink.href = `./?month=${encodeURIComponent(pillars.month.branch)}&lambda=${encodeURIComponent(lambda)}`;
+  annualProjectionLink.textContent = `λ ${longitude.toFixed(2)}°　年度盤精確定位 →`;
+  annualProjectionMeta.textContent = `${pillars.month.branch}月 · ${formatUtcOffset(utcOffsetHours)} · 不套真太陽時`;
 }
 
-function renderSensitivity(input, currentBoundary) {
+function renderSensitivity(input, currentBoundary, utcOffsetHours) {
   const alternativeBoundary = currentBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT
     ? DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
     : DAY_BOUNDARY.CIVIL_MIDNIGHT;
-  const current = resolveBirthPillars(input, { dayBoundary: currentBoundary });
-  const alternative = resolveBirthPillars(input, { dayBoundary: alternativeBoundary });
+  const current = resolveBirthPillars(input, {
+    dayBoundary: currentBoundary,
+    utcOffsetHours
+  });
+  const alternative = resolveBirthPillars(input, {
+    dayBoundary: alternativeBoundary,
+    utcOffsetHours
+  });
 
   if (sameDayAndHour(current, alternative)) {
     sensitivity.hidden = true;
@@ -150,10 +184,15 @@ function update() {
   errorBox.hidden = true;
   try {
     const input = parseInput();
+    const utcOffsetHours = parseUtcOffset();
     const boundary = selectedBoundary();
-    const result = resolveBirthPillars(input, { dayBoundary: boundary });
-    renderResult(result);
-    renderSensitivity(input, boundary);
+    const result = resolveBirthPillars(input, {
+      dayBoundary: boundary,
+      utcOffsetHours
+    });
+    const longitude = apparentSolarLongitude(input, utcOffsetHours);
+    renderResult(result, longitude, utcOffsetHours);
+    renderSensitivity(input, boundary, utcOffsetHours);
   } catch (error) {
     sensitivity.hidden = true;
     errorBox.hidden = false;
