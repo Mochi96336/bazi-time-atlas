@@ -1,8 +1,11 @@
 import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
 
 const form = document.querySelector("#birth-form");
-const dateInput = document.querySelector("#birth-date");
-const timeInput = document.querySelector("#birth-time");
+const yearInput = document.querySelector("#birth-year");
+const monthInput = document.querySelector("#birth-month");
+const dayInput = document.querySelector("#birth-day");
+const hourInput = document.querySelector("#birth-hour");
+const minuteInput = document.querySelector("#birth-minute");
 const readout = document.querySelector("#birth-readout");
 const badge = document.querySelector("#boundary-badge");
 const errorBox = document.querySelector("#birth-error");
@@ -17,16 +20,33 @@ const pillarTargets = {
   hour: document.querySelector("#hour-pillar")
 };
 
+const summaryTargets = {
+  year: document.querySelector("#summary-year"),
+  month: document.querySelector("#summary-month"),
+  day: document.querySelector("#summary-day"),
+  hour: document.querySelector("#summary-hour")
+};
+
 const dayRuleNote = document.querySelector("#day-rule-note");
 
 function selectedBoundary() {
   return form.elements.namedItem("day-boundary").value;
 }
 
+function numberFrom(input) {
+  if (input.value.trim() === "") throw new RangeError(`${input.getAttribute("aria-label")}不可空白`);
+  return Number(input.value);
+}
+
 function parseInput() {
-  const [year, month, day] = dateInput.value.split("-").map(Number);
-  const [hour, minute] = timeInput.value.split(":").map(Number);
-  return { year, month, day, hour, minute, second: 0 };
+  return {
+    year: numberFrom(yearInput),
+    month: numberFrom(monthInput),
+    day: numberFrom(dayInput),
+    hour: numberFrom(hourInput),
+    minute: numberFrom(minuteInput),
+    second: 0
+  };
 }
 
 function boundaryLabel(boundary) {
@@ -40,17 +60,22 @@ function sameDayAndHour(a, b) {
     a.pillars.hour.name === b.pillars.hour.name;
 }
 
+function pad(value, width = 2) {
+  return String(value).padStart(width, "0");
+}
+
 function renderResult(result) {
   const { input, pillars, convention } = result;
-  readout.textContent = `${String(input.year).padStart(4, "0")}-${String(input.month).padStart(2, "0")}-${String(input.day).padStart(2, "0")} · ${String(input.hour).padStart(2, "0")}:${String(input.minute).padStart(2, "0")}`;
+  readout.textContent = `${pad(input.year, 4)}-${pad(input.month)}-${pad(input.day)} · ${pad(input.hour)}:${pad(input.minute)}`;
   badge.textContent = boundaryLabel(convention.dayBoundary);
   conventionDay.textContent = convention.dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT ? "00:00 換日" : "23:00 換日";
   dayRuleNote.textContent = convention.dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT
     ? "00:00 才進入下一干支日"
     : "23:00 起計下一干支日";
 
-  for (const [key, node] of Object.entries(pillarTargets)) {
-    node.textContent = pillars[key].name;
+  for (const key of Object.keys(pillarTargets)) {
+    pillarTargets[key].textContent = pillars[key].name;
+    summaryTargets[key].textContent = pillars[key].name;
   }
 }
 
