@@ -52,11 +52,11 @@ captures.push(
     height: 2000,
   },
   {
-    name: "birth-relations-1440x1300.png",
+    name: "birth-relations-1440x1600.png",
     page: "birth-relations",
     path: "birth.html?relations=1",
     width: 1440,
-    height: 1300,
+    height: 1600,
   },
   {
     name: "birth-relations-390x1700.png",
