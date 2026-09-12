@@ -26,8 +26,8 @@ const captures = pages.flatMap(page =>
   }))
 );
 
-// Taller review-only frames preserve the ordinary first-viewport regressions
-// while exposing the complete collapsible detail panels for human inspection.
+// Review-only frames preserve the ordinary first-viewport regressions while
+// focusing directly on expanded detail layers that otherwise sit below fold.
 captures.push(
   {
     name: "annual-hidden-inspector-390x1320.png",
@@ -37,18 +37,18 @@ captures.push(
     height: 1320,
   },
   {
-    name: "birth-ten-gods-1440x1100.png",
+    name: "birth-ten-gods-1440x900.png",
     page: "birth-ten-gods",
-    path: "birth.html?tenGod=1",
+    path: "birth.html?tenGod=1#ten-gods-panel",
     width: 1440,
-    height: 1100,
+    height: 900,
   },
   {
-    name: "birth-ten-gods-390x1320.png",
+    name: "birth-ten-gods-390x844.png",
     page: "birth-ten-gods",
-    path: "birth.html?tenGod=1",
+    path: "birth.html?tenGod=1#ten-gods-panel",
     width: 390,
-    height: 1320,
+    height: 844,
   },
 );
 
