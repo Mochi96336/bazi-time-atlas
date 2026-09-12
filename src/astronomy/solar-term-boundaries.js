@@ -3,6 +3,7 @@ import { solarTerms } from "../data.js";
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
+export const SOLAR_TERM_REFERENCE_UTC_OFFSET = 8;
 
 const TYME_NAMES = Object.freeze({
   春分: "春分",
@@ -33,17 +34,11 @@ const TYME_NAMES = Object.freeze({
 
 const yearCache = new Map();
 
-function assertUtcOffset(utcOffsetHours) {
-  if (!Number.isFinite(utcOffsetHours) || utcOffsetHours < -14 || utcOffsetHours > 14) {
-    throw new RangeError("utcOffsetHours must be a finite number from -14 to +14");
-  }
-}
-
-function utcMillisFromCivilFields(fields, utcOffsetHours) {
+function utcMillisFromReferenceFields(fields) {
   const date = new Date(0);
   date.setUTCFullYear(fields.year, fields.month - 1, fields.day);
   date.setUTCHours(fields.hour, fields.minute, fields.second, 0);
-  return date.getTime() - utcOffsetHours * HOUR_MS;
+  return date.getTime() - SOLAR_TERM_REFERENCE_UTC_OFFSET * HOUR_MS;
 }
 
 function fieldsFromSolarTime(time) {
@@ -57,58 +52,53 @@ function fieldsFromSolarTime(time) {
   };
 }
 
-function eventForTerm(year, term, utcOffsetHours) {
+function eventForTerm(year, term) {
   const tymeName = TYME_NAMES[term.name];
   if (!tymeName) throw new RangeError(`no Tyme solar-term name mapping for ${term.name}`);
   const solarTerm = SolarTerm.fromName(year, tymeName);
   const referenceTime = solarTerm.getJulianDay().getSolarTime();
   const referenceFields = fieldsFromSolarTime(referenceTime);
-  const instantMs = utcMillisFromCivilFields(referenceFields, utcOffsetHours);
 
   return Object.freeze({
     name: term.name,
     kind: term.kind,
     longitude: term.longitude,
-    instantMs,
+    instantMs: utcMillisFromReferenceFields(referenceFields),
     referenceFields: Object.freeze(referenceFields),
-    referenceUtcOffsetHours: utcOffsetHours
+    referenceUtcOffsetHours: SOLAR_TERM_REFERENCE_UTC_OFFSET
   });
 }
 
-export function solarTermEventsForCivilYear(year, utcOffsetHours = 8) {
+export function solarTermEventsForCivilYear(year) {
   if (!Number.isInteger(year) || year < -9999 || year > 9999) {
     throw new RangeError("year must be an integer from -9999 to 9999");
   }
-  assertUtcOffset(utcOffsetHours);
-  const key = `${year}|${utcOffsetHours}`;
-  if (!yearCache.has(key)) {
+  if (!yearCache.has(year)) {
     const events = solarTerms
-      .map(term => eventForTerm(year, term, utcOffsetHours))
+      .map(term => eventForTerm(year, term))
       .sort((a, b) => a.instantMs - b.instantMs);
-    yearCache.set(key, Object.freeze(events));
+    yearCache.set(year, Object.freeze(events));
   }
-  return yearCache.get(key);
+  return yearCache.get(year);
 }
 
-function localCivilYearAtInstant(instantMs, utcOffsetHours) {
-  const shifted = new Date(instantMs + utcOffsetHours * HOUR_MS);
+function referenceCivilYearAtInstant(instantMs) {
+  const shifted = new Date(instantMs + SOLAR_TERM_REFERENCE_UTC_OFFSET * HOUR_MS);
   return shifted.getUTCFullYear();
 }
 
-export function solarTermEventsBetween(startMs, endMs, options = {}) {
+export function solarTermEventsBetween(startMs, endMs) {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
     throw new RangeError("startMs and endMs must be finite");
   }
-  const utcOffsetHours = options.utcOffsetHours ?? 8;
-  assertUtcOffset(utcOffsetHours);
   const lo = Math.min(startMs, endMs);
   const hi = Math.max(startMs, endMs);
-  const firstYear = localCivilYearAtInstant(lo, utcOffsetHours) - 1;
-  const lastYear = localCivilYearAtInstant(hi, utcOffsetHours) + 1;
+  const firstYear = referenceCivilYearAtInstant(lo) - 1;
+  const lastYear = referenceCivilYearAtInstant(hi) + 1;
   const events = [];
 
   for (let year = firstYear; year <= lastYear; year += 1) {
-    for (const event of solarTermEventsForCivilYear(year, utcOffsetHours)) {
+    for (const event of solarTermEventsForCivilYear(year)) {
       if (event.instantMs >= lo && event.instantMs <= hi) events.push(event);
     }
   }
@@ -119,14 +109,11 @@ export function solarTermEventsBetween(startMs, endMs, options = {}) {
 
 export function jieBoundaryContext(instantMs, options = {}) {
   if (!Number.isFinite(instantMs)) throw new RangeError("instantMs must be finite");
-  const utcOffsetHours = options.utcOffsetHours ?? 8;
-  assertUtcOffset(utcOffsetHours);
   const span = options.searchSpanDays ?? 370;
   if (!Number.isFinite(span) || span <= 0) throw new RangeError("searchSpanDays must be positive");
   const events = solarTermEventsBetween(
     instantMs - span * DAY_MS,
-    instantMs + span * DAY_MS,
-    { utcOffsetHours }
+    instantMs + span * DAY_MS
   ).filter(event => event.kind === "jie");
 
   let previous = null;
@@ -147,5 +134,3 @@ export function formatSolarTermEvent(event) {
   const pad = value => String(value).padStart(2, "0");
   return `${event.name} ${fields.year}-${pad(fields.month)}-${pad(fields.day)} ${pad(fields.hour)}:${pad(fields.minute)}:${pad(fields.second)}`;
 }
-
-export const SOLAR_TERM_REFERENCE_UTC_OFFSET = 8;
