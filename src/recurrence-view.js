@@ -22,11 +22,12 @@ const deltaNumber = document.querySelector("#delta-number");
 const deltaSlider = document.querySelector("#delta-slider");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const milestoneRows = document.querySelector("#milestone-rows");
+const cursorGroup = document.querySelector("#recurrence-cursor");
 
 const ringSpecs = Object.freeze({
-  gregorian: { group: document.querySelector("#gregorian-ring"), inner: 270, outer: 360, sectors: 40, sectorYears: 10, className: "gregorian-sector" },
-  year: { group: document.querySelector("#year-ring"), inner: 360, outer: 450, sectors: 60, sectorYears: 1, className: "year-sector" },
-  day: { group: document.querySelector("#day-ring"), inner: 450, outer: 560, sectors: 60, sectorYears: 1, className: "day-sector" }
+  gregorian: { group: document.querySelector("#gregorian-ring"), inner: 270, outer: 360, sectors: 40, sectorYears: 10, modulus: 400, className: "gregorian-sector" },
+  year: { group: document.querySelector("#year-ring"), inner: 360, outer: 450, sectors: 60, sectorYears: 1, modulus: 60, className: "year-sector" },
+  day: { group: document.querySelector("#day-ring"), inner: 450, outer: 560, sectors: 60, sectorYears: 1, modulus: 60, className: "day-sector" }
 });
 
 let currentBase = { year: 2026, month: 9, day: 13 };
@@ -69,6 +70,12 @@ function setText(id, value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
+  for (const [key, spec] of Object.entries(ringSpecs)) {
+    svgEl("path", {
+      d: annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
+      class: `phase-band phase-band-${key}`
+    }, group);
+  }
   [270, 360, 450, 560].forEach(radius => {
     svgEl("path", { d: arcPath(radius, FAN_START, FAN_END), class: "recurrence-guide" }, group);
   });
@@ -106,26 +113,15 @@ function renderRing(key) {
       label.textContent = key === "gregorian" ? String(index * spec.sectorYears) : String(index);
     }
   }
-
-  const zeroInner = polar(spec.inner + 2, 0);
-  const zeroOuter = polar(spec.outer - 2, 0);
-  svgEl("line", {
-    x1: zeroInner.x, y1: zeroInner.y, x2: zeroOuter.x, y2: zeroOuter.y,
-    class: "zero-mark"
-  }, spec.group);
-  const zeroPoint = polar((spec.inner + spec.outer) / 2, 1.5);
-  const zeroLabel = svgEl("text", { x: zeroPoint.x, y: zeroPoint.y, class: "zero-label" }, spec.group);
-  zeroLabel.textContent = "0";
 }
 
 function renderCursor() {
-  const group = document.querySelector("#recurrence-cursor");
   const inner = polar(258, CURSOR_ANGLE);
   const outer = polar(575, CURSOR_ANGLE);
-  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-halo" }, group);
-  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-line" }, group);
+  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-halo" }, cursorGroup);
+  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-line" }, cursorGroup);
   const labelPoint = polar(595, CURSOR_ANGLE);
-  const label = svgEl("text", { x: labelPoint.x, y: labelPoint.y, class: "cursor-label" }, group);
+  const label = svgEl("text", { x: labelPoint.x, y: labelPoint.y, class: "cursor-label" }, cursorGroup);
   label.textContent = "SAME REFERENCE";
 }
 
@@ -133,6 +129,50 @@ function rotateRing(key, phase, modulus) {
   const anglePerUnit = 360 / modulus;
   const rotation = CURSOR_ANGLE - phase * anglePerUnit;
   ringSpecs[key].group.setAttribute("transform", `rotate(${rotation.toFixed(4)} ${CX} ${CY})`);
+}
+
+function visibleEquivalentAngle(rawAngle) {
+  for (const offset of [-720, -360, 0, 360, 720]) {
+    const candidate = rawAngle + offset;
+    if (candidate >= FAN_START && candidate <= FAN_END) return candidate;
+  }
+  return null;
+}
+
+function renderReturnMarkers(state) {
+  cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
+  const phases = {
+    gregorian: state.phases.gregorian,
+    year: state.phases.year,
+    day: state.phases.day
+  };
+
+  for (const [key, spec] of Object.entries(ringSpecs)) {
+    const phase = phases[key];
+    if (phase === null) continue;
+    const rawAngle = CURSOR_ANGLE - phase * (360 / spec.modulus);
+    const angle = visibleEquivalentAngle(rawAngle);
+    if (angle === null) continue;
+    const p1 = polar(spec.inner + 5, angle);
+    const p2 = polar(spec.outer - 5, angle);
+    svgEl("line", {
+      x1: p1.x,
+      y1: p1.y,
+      x2: p2.x,
+      y2: p2.y,
+      class: `return-marker return-marker-${key}${phase === 0 ? " is-closed" : ""}`,
+      "data-return-marker": key,
+      "data-return-angle": angle.toFixed(3)
+    }, cursorGroup);
+    const labelPoint = polar(spec.outer + 9, angle);
+    const label = svgEl("text", {
+      x: labelPoint.x,
+      y: labelPoint.y,
+      class: `return-marker-label return-marker-label-${key}`,
+      "data-return-marker": `${key}-label`
+    }, cursorGroup);
+    label.textContent = "0";
+  }
 }
 
 function readBaseDate() {
@@ -238,6 +278,7 @@ function renderState() {
   rotateRing("gregorian", state.phases.gregorian, 400);
   rotateRing("year", state.phases.year, 60);
   rotateRing("day", state.phases.day ?? 0, 60);
+  renderReturnMarkers(state);
 
   setText("gregorian-phase-readout", `${state.phases.gregorian} / 400`);
   setText("year-phase-readout", `${state.phases.year} / 60`);
