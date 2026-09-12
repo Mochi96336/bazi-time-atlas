@@ -1,4 +1,5 @@
 import "./birth-relation-model-overview.js";
+import "./birth-mean-solar-view.js";
 import { resolveBirthPillars } from "./calendar/tyme-adapter.js";
 import { visiblePillarPunishments } from "./calendar/branch-punishments.js";
 
