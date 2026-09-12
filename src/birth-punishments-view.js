@@ -197,4 +197,5 @@ if (install()) {
   form.addEventListener("input", update);
   form.addEventListener("change", update);
   update();
+  import("./birth-relations-controls.js");
 }
