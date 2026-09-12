@@ -115,7 +115,8 @@
   stroke-width: 4;
   vector-effect: non-scaling-stroke;
 }
-.birth-projection-readout {
+.birth-projection-readout,
+.five-tigers-readout {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px 10px;
@@ -126,22 +127,50 @@
   background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
   border-radius: 0 9px 9px 0;
 }
-.birth-projection-readout > span {
+.five-tigers-readout {
+  margin-top: 6px;
+  border-left-color: #8b7a58;
+  background: color-mix(in srgb, var(--earth) 8%, transparent);
+}
+.birth-projection-readout > span,
+.five-tigers-readout > span {
   color: var(--muted);
   font-size: 8px;
   letter-spacing: .08em;
 }
-.birth-projection-readout > strong {
+.birth-projection-readout > strong,
+.five-tigers-readout > strong {
   justify-self: end;
   color: #34594f;
   font-size: 18px;
   font-variant-numeric: tabular-nums;
 }
-.birth-projection-readout > small {
+.five-tigers-readout > strong { color: #6f6047; }
+.birth-projection-readout > small,
+.five-tigers-readout > small {
   grid-column: 1 / -1;
   color: var(--muted);
   font-size: 8px;
   line-height: 1.5;
+}
+
+.month-stem-overlay { pointer-events: none; }
+.month-stem-label {
+  fill: #59645f;
+  opacity: .72;
+  font-size: 13px;
+  font-weight: 700;
+  paint-order: stroke fill;
+  stroke: rgba(247,246,242,.88);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.month-stem-label.active {
+  fill: #294f45;
+  opacity: 1;
+  font-size: 16px;
+  font-weight: 850;
+  stroke-width: 4px;
 }
 
 @media (max-width: 600px) {
@@ -157,5 +186,8 @@
   .birth-projection-kicker { grid-column: 1 / -1; }
   .birth-projection-link a { font-size: 10px; }
   .birth-projection-meta { font-size: 7px; white-space: normal; text-align: right; }
-  .birth-projection-readout > strong { font-size: 16px; }
+  .birth-projection-readout > strong,
+  .five-tigers-readout > strong { font-size: 16px; }
+  .month-stem-label { font-size: 14px; }
+  .month-stem-label.active { font-size: 18px; }
 }
