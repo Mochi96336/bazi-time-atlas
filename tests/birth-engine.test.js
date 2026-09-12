@@ -1,10 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SolarTerm } from "tyme4ts";
-import { DAY_BOUNDARY, resolveBirthPillars } from "../src/calendar/tyme-adapter.js";
+import { JulianDay, SolarTerm, SolarTime } from "tyme4ts";
+import {
+  DAY_BOUNDARY,
+  SOLAR_TERM_REFERENCE_UTC_OFFSET,
+  resolveBirthPillars
+} from "../src/calendar/tyme-adapter.js";
 
 function names(result) {
   return Object.values(result.pillars).map(pillar => pillar.name);
+}
+
+function toInput(time) {
+  return {
+    year: time.getYear(),
+    month: time.getMonth(),
+    day: time.getDay(),
+    hour: time.getHour(),
+    minute: time.getMinute(),
+    second: time.getSecond()
+  };
+}
+
+function sameInstantAtOffset(timeAtUtc8, utcOffsetHours) {
+  const shifted = timeAtUtc8.getJulianDay().getDay() +
+    (utcOffsetHours - SOLAR_TERM_REFERENCE_UTC_OFFSET) / 24;
+  return JulianDay.fromJulianDay(shifted).getSolarTime();
 }
 
 test("matches upstream exact-time EightChar vector", () => {
@@ -58,25 +79,8 @@ test("switching convention does not leak Tyme's global provider state", () => {
 
 test("year pillar flips across the exact Li Chun instant, not at civil midnight", () => {
   const liChun = SolarTerm.fromName(2024, "立春").getJulianDay().getSolarTime();
-  const before = liChun.next(-1);
-  const after = liChun.next(1);
-
-  const beforeResult = resolveBirthPillars({
-    year: before.getYear(),
-    month: before.getMonth(),
-    day: before.getDay(),
-    hour: before.getHour(),
-    minute: before.getMinute(),
-    second: before.getSecond()
-  });
-  const afterResult = resolveBirthPillars({
-    year: after.getYear(),
-    month: after.getMonth(),
-    day: after.getDay(),
-    hour: after.getHour(),
-    minute: after.getMinute(),
-    second: after.getSecond()
-  });
+  const beforeResult = resolveBirthPillars(toInput(liChun.next(-1)));
+  const afterResult = resolveBirthPillars(toInput(liChun.next(1)));
 
   assert.equal(beforeResult.pillars.year.name, "癸卯");
   assert.equal(afterResult.pillars.year.name, "甲辰");
@@ -84,28 +88,68 @@ test("year pillar flips across the exact Li Chun instant, not at civil midnight"
 
 test("month pillar flips across a Jie instant while year/day remain independent", () => {
   const jingZhe = SolarTerm.fromName(2024, "惊蛰").getJulianDay().getSolarTime();
-  const before = jingZhe.next(-1);
-  const after = jingZhe.next(1);
-
-  const toInput = time => ({
-    year: time.getYear(),
-    month: time.getMonth(),
-    day: time.getDay(),
-    hour: time.getHour(),
-    minute: time.getMinute(),
-    second: time.getSecond()
-  });
-  const beforeResult = resolveBirthPillars(toInput(before));
-  const afterResult = resolveBirthPillars(toInput(after));
+  const beforeResult = resolveBirthPillars(toInput(jingZhe.next(-1)));
+  const afterResult = resolveBirthPillars(toInput(jingZhe.next(1)));
 
   assert.equal(beforeResult.pillars.year.name, afterResult.pillars.year.name);
   assert.notEqual(beforeResult.pillars.month.name, afterResult.pillars.month.name);
   assert.equal(beforeResult.pillars.day.name, afterResult.pillars.day.name);
 });
 
-test("adapter records that it accepts local civil time rather than JS Date/UTC", () => {
-  const result = resolveBirthPillars({ year: 2024, month: 2, day: 9, hour: 13 });
-  assert.equal(result.convention.timeBasis, "local-civil-time");
+test("Li Chun year boundary is the same physical instant in different UTC offsets", () => {
+  const liChunUtc8 = SolarTerm.fromName(2024, "立春").getJulianDay().getSolarTime();
+
+  for (const deltaSeconds of [-1, 1]) {
+    const utc8Time = liChunUtc8.next(deltaSeconds);
+    const utcTime = sameInstantAtOffset(utc8Time, 0);
+    const tokyoTime = sameInstantAtOffset(utc8Time, 9);
+
+    const utc8Result = resolveBirthPillars(toInput(utc8Time), { utcOffsetHours: 8 });
+    const utcResult = resolveBirthPillars(toInput(utcTime), { utcOffsetHours: 0 });
+    const tokyoResult = resolveBirthPillars(toInput(tokyoTime), { utcOffsetHours: 9 });
+
+    assert.equal(utcResult.pillars.year.name, utc8Result.pillars.year.name);
+    assert.equal(utcResult.pillars.month.name, utc8Result.pillars.month.name);
+    assert.equal(tokyoResult.pillars.year.name, utc8Result.pillars.year.name);
+    assert.equal(tokyoResult.pillars.month.name, utc8Result.pillars.month.name);
+  }
+});
+
+test("year/month follow the instant while day/hour stay on the birthplace-local clock", () => {
+  const taipeiClock = { year: 2005, month: 12, day: 23, hour: 0, minute: 30, second: 0 };
+  const taipeiSolar = SolarTime.fromYmdHms(
+    taipeiClock.year,
+    taipeiClock.month,
+    taipeiClock.day,
+    taipeiClock.hour,
+    taipeiClock.minute,
+    taipeiClock.second
+  );
+  const utcClock = toInput(sameInstantAtOffset(taipeiSolar, 0));
+
+  const taipei = resolveBirthPillars(taipeiClock, { utcOffsetHours: 8 });
+  const utc = resolveBirthPillars(utcClock, { utcOffsetHours: 0 });
+
+  assert.equal(utc.pillars.year.name, taipei.pillars.year.name);
+  assert.equal(utc.pillars.month.name, taipei.pillars.month.name);
+  assert.notEqual(utc.pillars.day.name, taipei.pillars.day.name);
+  assert.notEqual(utc.pillars.hour.name, taipei.pillars.hour.name);
+});
+
+test("adapter records explicit local civil time and UTC offset", () => {
+  const result = resolveBirthPillars(
+    { year: 2024, month: 2, day: 9, hour: 13 },
+    { utcOffsetHours: 5.5 }
+  );
+  assert.equal(result.convention.timeBasis, "birthplace-local-civil-time");
+  assert.equal(result.convention.utcOffsetHours, 5.5);
+  assert.equal(result.convention.solarTermReferenceUtcOffset, 8);
   assert.equal(result.convention.yearBoundary, "exact-li-chun");
   assert.equal(result.convention.monthBoundary, "exact-jie");
+});
+
+test("UTC offset is bounded to civil-time-zone range", () => {
+  const input = { year: 2024, month: 2, day: 9, hour: 13 };
+  assert.throws(() => resolveBirthPillars(input, { utcOffsetHours: 15 }), /utcOffsetHours/);
+  assert.throws(() => resolveBirthPillars(input, { utcOffsetHours: Number.NaN }), /utcOffsetHours/);
 });
