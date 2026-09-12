@@ -20,7 +20,7 @@
           <a class="active" href="./birth.html" aria-current="page">出生</a>
           <a href="./sexagenary.html">六十甲子</a>
         </nav>
-        <div class="topbar-note">Birth · v0.2</div>
+        <div class="topbar-note">Birth · v0.3</div>
       </div>
     </header>
 
@@ -71,7 +71,7 @@
           </label>
         </fieldset>
         <div class="time-basis-note">
-          <strong>V0.2 時間基準：出生地民用時間 + UTC offset</strong>
+          <strong>V0.3 時間基準：出生地民用時間 + UTC offset</strong>
           <span>offset 用來把年／月節氣界與太陽黃經對回同一真實瞬間。日／時仍依出生地鐘面時間；本版仍不做經度修正或真太陽時。</span>
         </div>
       </form>
@@ -150,6 +150,19 @@
           </article>
         </div>
 
+        <details id="ten-gods-panel" class="ten-gods-panel">
+          <summary>
+            <span class="ten-gods-summary-copy">
+              <small>Relative to Day Master</small>
+              <strong>日主 <b id="ten-gods-day-master">辛</b> → 十神</strong>
+            </span>
+            <span class="ten-gods-summary-meta">明干 + 藏干</span>
+          </summary>
+          <p class="ten-gods-intro">十神是「另一個天干相對日主」的關係名稱：先判五行方向，再判陰陽同異。地支必須先展開藏干後逐一比較；本區不計旺衰、權重、吉凶或性格。</p>
+          <div id="ten-gods-grid" class="ten-gods-grid" aria-label="四柱相對日主的十神關係"></div>
+          <p class="ten-gods-footnote">日柱天干本身保留標示為「日主」；若只把辛與辛依同一規則比較，結構關係是比肩。</p>
+        </details>
+
         <div id="boundary-sensitivity" class="boundary-sensitivity" hidden>
           <div class="eyebrow">Boundary sensitive</div>
           <strong>這個時刻會因換日規則得到不同日柱／時柱。</strong>
@@ -168,7 +181,7 @@
       <div><strong>時間</strong><span id="convention-time">UTC+08:00 · 當地民用</span></div>
     </section>
 
-    <p class="footer-note">計算精確不代表命理解釋必然。本頁目前只處理四柱如何取得與出生瞬間的天文位置，不做性格、運勢、十神或大運解讀。</p>
+    <p class="footer-note">計算精確不代表命理解釋必然。本頁的十神只呈現日主與明干／藏干的結構關係，不據此推導性格、吉凶、強弱、喜用神或大運。</p>
 
     <details class="sources-panel">
       <summary>計算引擎與規則來源</summary>
@@ -186,6 +199,14 @@
           <div class="source-links">
             <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/zi-hour-day-boundary" target="_blank" rel="noreferrer">OpenFate · 子時換日</a>
             <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/five-rats-method" target="_blank" rel="noreferrer">OpenFate · 五鼠遁</a>
+          </div>
+        </section>
+        <section class="source-group">
+          <div class="source-kicker">Ten Gods</div>
+          <p>十神以日主為基準，由同我、我生、我剋、剋我、生我五種五行方向，再依陰陽同異分成十個關係名稱。本頁只重現這個分類規則。</p>
+          <div class="source-links">
+            <a href="https://clarifyhk.com/zh-hans/learn/bazi/ten-gods/how-the-ten-gods-are-derived" target="_blank" rel="noreferrer">Clarify · 十神怎麼算</a>
+            <a href="https://wiki.openfate.ai/zh-hant/bazi/foundations/ten-gods-in-bazi" target="_blank" rel="noreferrer">OpenFate · 十神與日主關係</a>
           </div>
         </section>
       </div>
