@@ -30,6 +30,11 @@ function dumpDom(path) {
   return { url, dom: result.stdout };
 }
 
+function openHiddenPanelFor(dom, branch) {
+  const details = dom.match(/<details[^>]*id="hidden-stems-panel"[^>]*>/)?.[0] ?? "";
+  return details.includes(`data-hidden-branch="${branch}"`) && /\sopen(?:="")?(?:\s|>)/.test(details);
+}
+
 const cases = [
   {
     path: "?month=%E5%AD%90",
@@ -50,7 +55,7 @@ const cases = [
         /data-month-stem="戊"[^>]*data-month-branch="子"/.test(dom) &&
         /class="five-tigers-readout"/.test(dom) &&
         /目前 戊子月/.test(dom) &&
-        /id="hidden-stems-panel"[^>]*open[^>]*data-hidden-branch="子"/.test(dom) &&
+        openHiddenPanelFor(dom, "子") &&
         /data-hidden-stem="癸"[^>]*data-hidden-role="主"/.test(dom) &&
         /id="center-value"[^>]*>子月<\/text>/.test(dom);
     },
