@@ -1,0 +1,100 @@
+.hidden-stems-panel {
+  margin-top: 14px;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+.hidden-stems-panel[hidden] { display: none; }
+.hidden-stems-panel summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 9px;
+  padding: 11px 1px;
+}
+.hidden-stems-panel summary::-webkit-details-marker { display: none; }
+.hidden-stems-panel summary > span {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.hidden-stems-panel summary > strong {
+  color: #46524d;
+  font-size: 13px;
+  letter-spacing: .08em;
+}
+.hidden-stems-panel summary > small {
+  color: #8c938e;
+  font-size: 8px;
+}
+.hidden-stems-panel summary::after {
+  content: "＋";
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  color: #78827d;
+  font-size: 12px;
+  transform: translateY(-1px);
+}
+.hidden-stems-panel[open] summary::after { content: "−"; }
+.hidden-stems-panel[open] summary > small { visibility: hidden; }
+.hidden-stems-body { padding: 2px 0 13px; }
+.hidden-stems-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.hidden-stem-chip {
+  min-width: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 8px 9px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1px 7px;
+  align-items: baseline;
+  background: rgba(255,255,255,.34);
+}
+.hidden-stem-chip > i {
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-size: 8px;
+  font-weight: 760;
+  color: #59635f;
+  background: rgba(0,0,0,.035);
+}
+.hidden-stem-chip > strong {
+  font-size: 18px;
+  line-height: 1;
+}
+.hidden-stem-chip > small { color: var(--muted); font-size: 8px; }
+.hidden-stem-chip.element-木 { box-shadow: inset 2px 0 0 var(--wood); }
+.hidden-stem-chip.element-火 { box-shadow: inset 2px 0 0 var(--fire); }
+.hidden-stem-chip.element-土 { box-shadow: inset 2px 0 0 var(--earth); }
+.hidden-stem-chip.element-金 { box-shadow: inset 2px 0 0 var(--metal); }
+.hidden-stem-chip.element-水 { box-shadow: inset 2px 0 0 var(--water); }
+.hidden-stems-body > p {
+  margin: 9px 1px 0;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+@media (max-width: 600px) {
+  .hidden-stems-panel { margin-top: 12px; }
+  .hidden-stems-panel summary { gap: 6px; padding-block: 10px; }
+  .hidden-stems-panel summary > strong { font-size: 12px; }
+  .hidden-stems-panel summary > small { font-size: 7px; }
+  .hidden-stems-chips { gap: 5px; }
+  .hidden-stem-chip { padding: 7px 6px; gap: 1px 5px; }
+  .hidden-stem-chip > i { width: 18px; height: 18px; font-size: 7px; }
+  .hidden-stem-chip > strong { font-size: 16px; }
+  .hidden-stem-chip > small { font-size: 7px; }
+}
