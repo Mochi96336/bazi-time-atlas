@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install pinned calendar engine
+        run: npm install --no-audit --no-fund
       - name: Check data and geometry invariants
         run: npm test
       - name: Check app syntax
@@ -24,6 +26,7 @@ jobs:
           node --check src/app.js
           node --check src/sexagenary-data.js
           node --check src/sexagenary.js
+          node --check src/calendar/tyme-adapter.js
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
