@@ -69,6 +69,7 @@ const cases = [
     path: "birth.html?tenGod=1",
     label: "Birth exact Annual link + Ten Gods",
     assert(dom) {
+      const groups = dom.match(/data-ten-god-group="[^"]+"/g) ?? [];
       return /class="birth-projection-link"/.test(dom) &&
         /href="\.\/\?month=[^"]+&amp;lambda=\d+\.\d+&amp;yearStem=%E4%B9%99"/.test(dom) &&
         /年度盤精確定位/.test(dom) &&
@@ -76,6 +77,14 @@ const cases = [
         /UTC\+08:00/.test(dom) &&
         openDetailsById(dom, "ten-gods-panel") &&
         /id="ten-gods-day-master"[^>]*>辛 · 陰金<\/b>/.test(dom) &&
+        /id="ten-gods-derivation"/.test(dom) &&
+        groups.length === 5 &&
+        /data-ten-god-group="resource"[^>]*data-target-element="土"/.test(dom) &&
+        /data-ten-god-group="peer"[^>]*data-target-element="金"/.test(dom) &&
+        /data-ten-god-group="wealth"[^>]*data-target-element="木"/.test(dom) &&
+        /data-polarity="same"[^>]*data-stem="辛"[^>]*data-ten-god="比肩"/.test(dom) &&
+        /data-polarity="opposite"[^>]*data-stem="庚"[^>]*data-ten-god="劫財"/.test(dom) &&
+        /data-polarity="same"[^>]*data-stem="癸"[^>]*data-ten-god="食神"/.test(dom) &&
         /data-stem="乙"[^>]*data-ten-god="偏財"/.test(dom) &&
         /data-stem="戊"[^>]*data-ten-god="正印"/.test(dom) &&
         /data-stem="壬"[^>]*data-ten-god="傷官"/.test(dom) &&
