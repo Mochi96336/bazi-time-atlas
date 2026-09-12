@@ -7,6 +7,7 @@
   <title>BaZi Time Atlas · Kinetic Atlas</title>
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./kinetic-atlas.css">
+  <link rel="stylesheet" href="./kinetic-boundaries.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -67,6 +68,10 @@
           <span>所在節氣區段 <strong id="term-readout">—</strong></span>
           <span>時間基準 <strong>UTC+08:00</strong></span>
         </div>
+        <div class="boundary-meta">
+          <span>上一節界 <strong id="previous-jie-readout">—</strong></span>
+          <span>下一節界 <strong id="next-jie-readout">—</strong></span>
+        </div>
         <p class="legacy-note">這是從舊年度盤連結帶入的「黃經投影」：太陽／月支位置沿用連結資料；年、日、時仍以目前選定瞬間計算。改動時間後會自動回到完整瞬時計算。</p>
       </div>
     </section>
@@ -76,8 +81,12 @@
         <input id="instant-input" type="datetime-local" step="60" aria-label="選定時間，UTC+8">
       </label>
       <div class="slider-wrap">
+        <div class="boundary-rail-wrap" aria-label="精確節界時間軸">
+          <div id="boundary-rail" class="boundary-rail" aria-hidden="true"></div>
+        </div>
         <input id="time-slider" type="range" min="-183" max="183" step="0.25" value="0" aria-label="時間拖曳">
         <div class="slider-scale"><span id="slider-left">−約半年</span><span>拖曳時間</span><span id="slider-right">+約半年</span></div>
+        <div id="boundary-mode-readout" class="boundary-mode">精確「節」界 · UTC+08:00</div>
       </div>
       <div class="timeline-status"><span>目前尺度</span><strong id="scale-readout">一年</strong></div>
     </section>
@@ -94,14 +103,14 @@
       <div>
         <div class="eyebrow">How to read it</div>
         <h2>不是五個圓餅圖，是五個相接的時間座標。</h2>
-        <p>年、月、日三層都畫成六十甲子的狀態輪；目前成立的干支會被固定游標切中。太陽層則使用真實的視黃經連續旋轉，二十四節氣與熱帶黃道只是這個 0°–360° 座標上的固定分區。因此拖一年時，日輪高速跳動、月輪每逢節界換格、年輪幾乎不動；太陽／黃道層則平滑走完一圈。</p>
+        <p>年、月、日三層都畫成六十甲子的狀態輪；目前成立的干支會被固定游標切中。太陽層則使用真實的視黃經連續旋轉，二十四節氣與熱帶黃道只是這個 0°–360° 座標上的固定分區。因此拖一年時，日輪高速跳動、月輪在精確「節」界換格、年輪在立春瞬間換格；太陽／黃道層則平滑走完一圈。</p>
       </div>
       <div>
         <div class="eyebrow">Next</div>
         <ul>
-          <li>把立春與十二「節」的精確交界時刻直接畫成可讀邊界。</li>
-          <li>加入 400 年／24,000 年的離散週期與天文近似回歸實驗。</li>
-          <li>深時間使用獨立天文模型，不讓實用排盤引擎假裝能無限外推。</li>
+          <li>把 60 年／400 年／24,000 年的離散閉合拆成獨立 recurrence lab。</li>
+          <li>加入長期天文模型與 validity range，比較候選回歸的節氣殘差。</li>
+          <li>深時間不沿用實用排盤引擎，不把近回歸誤標成精確週期。</li>
           <li><a href="./docs/kinetic-atlas-plan.md">完整 redesign plan</a></li>
         </ul>
       </div>
@@ -109,7 +118,7 @@
 
     <details class="sources-panel">
       <summary>資料與規則邊界</summary>
-      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列。太陽層沿用現有視黃經計算模組。熱帶黃道只作固定 30° 分區，不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
+      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只作固定 30° 分區，不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
     </details>
   </main>
 
@@ -124,6 +133,7 @@
   </div>
 
   <script type="module" src="./src/kinetic-atlas.js"></script>
+  <script type="module" src="./src/kinetic-boundaries.js"></script>
   <script type="module" src="./src/legacy-annual-compat.js"></script>
 </body>
 </html>
