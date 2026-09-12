@@ -128,22 +128,53 @@
 }
 
 @media (max-width: 600px) {
-  .relation-model-overview { margin: 0 11px 9px; padding: 8px; border-radius: 10px; }
-  .relation-model-overview-head { margin-bottom: 6px; }
-  .relation-model-overview-head span { font-size: 7px; }
-  .relation-model-grid { grid-template-columns: 1fr; gap: 6px; }
-  .relation-model-card {
-    grid-template-columns: 88px 1fr;
-    grid-template-areas:
-      "head labels"
-      "glyph text";
-    align-items: center;
-    gap: 5px 9px;
-    padding: 7px 8px;
+  .relation-model-overview {
+    margin: 0 11px 8px;
+    padding: 7px;
+    border-radius: 10px;
   }
-  .relation-model-card header { grid-area: head; display: grid; justify-content: start; gap: 1px; }
-  .relation-model-glyph { grid-area: glyph; min-height: 28px; }
-  .relation-model-labels { grid-area: labels; justify-content: flex-end; }
-  .relation-model-card p { grid-area: text; font-size: 7px; }
-  .relation-model-bracket { width: 62px; }
+  .relation-model-overview-head { margin-bottom: 5px; }
+  .relation-model-overview-head small { font-size: 6px; }
+  .relation-model-overview-head span { font-size: 6.5px; }
+  .relation-model-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .relation-model-card {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 4px;
+    padding: 6px 4px;
+    border-radius: 8px;
+  }
+  .relation-model-card header {
+    display: block;
+    text-align: center;
+  }
+  .relation-model-card header small,
+  .relation-model-labels,
+  .relation-model-card p {
+    display: none;
+  }
+  .relation-model-card header strong { font-size: 8px; }
+  .relation-model-glyph {
+    width: 100%;
+    min-height: 24px;
+    gap: 3px;
+  }
+  .relation-model-dot { width: 7px; height: 7px; }
+  .relation-model-line { flex-basis: 28px; }
+  .relation-model-bracket { width: 48px; height: 18px; }
+  .relation-model-bracket::before,
+  .relation-model-bracket::after,
+  .relation-model-bracket i { height: 12px; }
+  .relation-model-punishment-glyphs { gap: 3px; }
+  .relation-model-punishment-glyphs span {
+    padding: 2px 3px;
+    border: 0;
+    background: transparent;
+    font-size: 6.5px;
+    white-space: nowrap;
+  }
 }
