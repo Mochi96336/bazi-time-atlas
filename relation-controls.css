@@ -1,0 +1,66 @@
+.relation-layer-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0 14px 11px;
+}
+.relation-layer-toggle {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid #d8dcd7;
+  border-radius: 9px;
+  background: rgba(255,255,255,.26);
+  color: #818b86;
+  font: inherit;
+  cursor: pointer;
+}
+.relation-layer-toggle span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 7px;
+  letter-spacing: .08em;
+}
+.relation-layer-toggle b {
+  min-width: 18px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: #eef0ed;
+  color: #6f7974;
+  font-size: 8px;
+  line-height: 1.25;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.relation-layer-toggle.active {
+  border-color: #b8c7c1;
+  background: color-mix(in srgb, var(--accent-soft) 45%, white);
+  color: #405d54;
+}
+.relation-layer-toggle.active b {
+  background: rgba(255,255,255,.72);
+  color: #35564c;
+}
+.relation-layer-toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .relation-layer-bar {
+    gap: 5px;
+    margin: 0 11px 9px;
+  }
+  .relation-layer-toggle {
+    gap: 5px;
+    padding: 6px 7px;
+    border-radius: 8px;
+  }
+  .relation-layer-toggle span { font-size: 6.5px; }
+  .relation-layer-toggle b { min-width: 16px; padding: 2px 4px; font-size: 7px; }
+}
