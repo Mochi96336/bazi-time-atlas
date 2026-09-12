@@ -21,7 +21,10 @@ const pillarSummary = document.querySelector(".pillar-summary");
 const tenGodPanel = document.querySelector("#ten-gods-panel");
 const tenGodGrid = document.querySelector("#ten-gods-grid");
 const tenGodDayMaster = document.querySelector("#ten-gods-day-master");
-const forceTenGodOpen = new URLSearchParams(window.location.search).get("tenGod") === "1";
+const query = new URLSearchParams(window.location.search);
+const forceTenGodOpen = query.get("tenGod") === "1";
+const reviewFocusTenGod = query.get("reviewFocus") === "tenGod";
+let didReviewFocusTenGod = false;
 
 const pillarTargets = {
   year: document.querySelector("#year-pillar"),
@@ -149,6 +152,14 @@ function relationMeta(relation) {
   return `${relation.groupLabel} · ${relation.samePolarity ? "同陰陽" : "異陰陽"}`;
 }
 
+function focusTenGodPanelForReview() {
+  if (!reviewFocusTenGod || didReviewFocusTenGod) return;
+  didReviewFocusTenGod = true;
+  requestAnimationFrame(() => {
+    tenGodPanel.scrollIntoView({ block: "start" });
+  });
+}
+
 function renderTenGodRelationships(pillars) {
   const dayMaster = pillars.day.stem;
   const dayMeta = heavenlyStemMeta(dayMaster);
@@ -207,6 +218,8 @@ function renderTenGodRelationships(pillars) {
     card.append(header, visible, hidden);
     tenGodGrid.append(card);
   }
+
+  focusTenGodPanelForReview();
 }
 
 function renderResult(result, longitude, utcOffsetHours) {
