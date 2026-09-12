@@ -25,12 +25,14 @@ jobs:
         run: |
           node --check src/app.js
           node --check src/annual-deep-link.js
+          node --check src/hidden-stems-view.js
           node --check src/birth.js
           node --check src/sexagenary-data.js
           node --check src/sexagenary.js
           node --check src/sexagenary-deep-link.js
           node --check src/calendar/tyme-adapter.js
           node --check src/calendar/five-tigers.js
+          node --check src/calendar/hidden-stems.js
           node --check src/astronomy/solar-longitude.js
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
