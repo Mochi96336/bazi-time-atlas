@@ -6,5 +6,8 @@
   "scripts": {
     "test": "node --test",
     "visual:check": "node scripts/visual-check.mjs"
+  },
+  "dependencies": {
+    "tyme4ts": "1.5.2"
   }
 }
