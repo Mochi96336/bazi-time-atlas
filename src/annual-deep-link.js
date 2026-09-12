@@ -1,12 +1,20 @@
 import "./app.js";
 import { baziMonths } from "./data.js";
 import { polar } from "./geometry.js";
+import {
+  FIVE_TIGERS_STEMS,
+  monthPillarForYearStem,
+  monthStemSequenceForYearStem,
+  yinMonthStemForYearStem
+} from "./calendar/five-tigers.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const cx = 430;
 const cy = 430;
 const params = new URLSearchParams(window.location.search);
 const requestedMonth = params.get("month");
+const requestedYearStem = params.get("yearStem");
+const validYearStem = FIVE_TIGERS_STEMS.includes(requestedYearStem);
 const requestedLongitude = Number(params.get("lambda"));
 const hasLongitude = params.has("lambda") && Number.isFinite(requestedLongitude) && requestedLongitude >= 0 && requestedLongitude <= 360;
 const longitude = hasLongitude ? ((requestedLongitude % 360) + 360) % 360 : null;
@@ -18,6 +26,11 @@ function rangeContains(start, end, angle) {
 
 function monthAtLongitude(angle) {
   return baziMonths.find(month => rangeContains(month.start, month.end, angle));
+}
+
+function midpointAngle(start, end) {
+  const span = end < start ? end + 360 - start : end - start;
+  return (start + span / 2) % 360;
 }
 
 function selectMonth(branch) {
@@ -34,6 +47,50 @@ function svgEl(tag, attrs, parent) {
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
   parent.appendChild(node);
   return node;
+}
+
+function renderMonthStems(yearStem, activeBranch) {
+  if (!yearStem) return;
+  const svg = document.querySelector("#atlas-wheel");
+  if (!svg) return;
+
+  svg.querySelector("[data-five-tigers]")?.remove();
+  const sequence = monthStemSequenceForYearStem(yearStem);
+  const byBranch = new Map(sequence.map(item => [item.branch, item]));
+  const group = svgEl("g", {
+    class: "month-stem-overlay",
+    "data-five-tigers": yearStem,
+    "aria-label": `年干 ${yearStem} 的五虎遁月干`
+  }, svg);
+
+  for (const month of baziMonths) {
+    const item = byBranch.get(month.branch);
+    const angle = midpointAngle(month.start, month.end);
+    const point = polar(cx, cy, 163, angle);
+    const label = svgEl("text", {
+      x: point.x,
+      y: point.y,
+      class: `month-stem-label${month.branch === activeBranch ? " active" : ""}`,
+      "data-month-stem": item.stem,
+      "data-month-branch": month.branch,
+      "text-anchor": "middle",
+      "dominant-baseline": "central"
+    }, group);
+    label.textContent = item.stem;
+  }
+
+  const inspector = document.querySelector("#inspector");
+  const facts = document.querySelector("#detail-facts");
+  if (inspector && facts) {
+    inspector.querySelector(".five-tigers-readout")?.remove();
+    const readout = document.createElement("div");
+    readout.className = "five-tigers-readout";
+    const startStem = yinMonthStemForYearStem(yearStem);
+    const activePillar = activeBranch ? monthPillarForYearStem(yearStem, activeBranch) : null;
+    readout.innerHTML = `<span>五虎遁</span><strong>年干 ${yearStem}</strong><small>寅月起 ${startStem}${activePillar ? ` · 目前 ${activePillar}月` : ""}</small>`;
+    const anchor = inspector.querySelector(".birth-projection-readout") ?? facts;
+    anchor.insertAdjacentElement("afterend", readout);
+  }
 }
 
 function renderBirthProjection(angle) {
@@ -87,10 +144,18 @@ function renderBirthProjection(angle) {
   svg.setAttribute("aria-label", `${existingLabel}；出生瞬間太陽黃經 ${angle.toFixed(2)} 度`);
 }
 
+let activeBranch = null;
 if (longitude !== null) {
   const derivedMonth = monthAtLongitude(longitude);
-  if (derivedMonth) selectMonth(derivedMonth.branch);
+  if (derivedMonth) {
+    activeBranch = derivedMonth.branch;
+    selectMonth(activeBranch);
+  }
   renderBirthProjection(longitude);
-} else {
-  selectMonth(requestedMonth);
+} else if (selectMonth(requestedMonth)) {
+  activeBranch = requestedMonth;
+}
+
+if (validYearStem) {
+  renderMonthStems(requestedYearStem, activeBranch);
 }
