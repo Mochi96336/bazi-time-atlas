@@ -42,6 +42,68 @@
 }
 .ten-gods-intro { padding: 13px 14px 11px; }
 .ten-gods-footnote { padding: 10px 14px 13px; border-top: 1px solid var(--hairline); }
+
+.ten-gods-derivation {
+  margin: 0 14px 13px;
+  padding: 12px;
+  border: 1px solid #d9ddd8;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-soft) 22%, rgba(255,255,255,.42));
+}
+.ten-gods-derivation-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.ten-gods-derivation-head > div { display: grid; gap: 2px; }
+.ten-gods-derivation-head small {
+  color: #8c9691;
+  font-size: 7px;
+  letter-spacing: .1em;
+}
+.ten-gods-derivation-head strong { color: var(--ink); font-size: 11px; }
+.ten-gods-derivation-head span { color: var(--muted); font-size: 8px; line-height: 1.5; }
+.ten-gods-relation-map {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.ten-gods-relation-group {
+  min-width: 0;
+  border: 1px solid #daddd8;
+  border-radius: 10px;
+  background: rgba(255,255,255,.5);
+  overflow: hidden;
+}
+.ten-gods-relation-group[data-ten-god-group="peer"] {
+  border-color: color-mix(in srgb, var(--accent) 32%, #daddd8);
+  background: color-mix(in srgb, var(--accent-soft) 45%, rgba(255,255,255,.5));
+}
+.ten-gods-relation-group > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 8px 6px;
+  border-bottom: 1px solid var(--hairline);
+}
+.ten-gods-relation-group > header span { color: #5f6b66; font-size: 8px; font-weight: 720; }
+.ten-gods-relation-group > header strong { color: var(--ink); font-size: 13px; }
+.ten-gods-polarity-pair { display: grid; }
+.ten-gods-polarity-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 5px;
+  align-items: baseline;
+  padding: 6px 8px;
+}
+.ten-gods-polarity-row + .ten-gods-polarity-row { border-top: 1px dashed #dde0dc; }
+.ten-gods-polarity-row small { color: #959d99; font-size: 6.5px; }
+.ten-gods-polarity-row b { color: var(--ink); font-size: 12px; }
+.ten-gods-polarity-row strong { color: #355d52; font-size: 8px; }
+
 .ten-gods-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -113,6 +175,11 @@
 .ten-god-chip b { font-size: 12px; line-height: 1; }
 .ten-god-chip strong { color: #56645f; font-size: 7.5px; font-weight: 720; }
 
+@media (max-width: 800px) {
+  .ten-gods-relation-map { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ten-gods-relation-group[data-ten-god-group="peer"] { grid-column: auto; }
+}
+
 @media (max-width: 600px) {
   .ten-gods-panel { margin-top: 14px; border-radius: 12px; }
   .ten-gods-panel > summary { padding: 10px 11px; gap: 8px; }
@@ -120,6 +187,19 @@
   .ten-gods-summary-copy b { font-size: 12px; }
   .ten-gods-summary-meta { font-size: 7.5px; }
   .ten-gods-intro { padding: 10px 11px 9px; font-size: 8px; }
+  .ten-gods-derivation { margin: 0 11px 10px; padding: 9px; }
+  .ten-gods-derivation-head { margin-bottom: 8px; }
+  .ten-gods-derivation-head strong { font-size: 10px; }
+  .ten-gods-derivation-head span { font-size: 7.2px; }
+  .ten-gods-relation-map { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+  .ten-gods-relation-group[data-ten-god-group="peer"] { grid-column: 1 / -1; }
+  .ten-gods-relation-group > header { padding: 6px 7px 5px; }
+  .ten-gods-relation-group > header span { font-size: 7.5px; }
+  .ten-gods-relation-group > header strong { font-size: 12px; }
+  .ten-gods-polarity-row { padding: 5px 7px; gap: 4px; }
+  .ten-gods-polarity-row small { font-size: 6.2px; }
+  .ten-gods-polarity-row b { font-size: 11px; }
+  .ten-gods-polarity-row strong { font-size: 7.4px; }
   .ten-gods-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 0 11px 10px; }
   .ten-gods-pillar-head { padding: 7px 8px 6px; }
   .ten-gods-pillar-head strong { font-size: 12px; }
