@@ -32,8 +32,9 @@ A single birth instant is resolved through four separate rules instead of a fake
 - hour branch follows the local clock while hour stem derives from the effective day stem
 - 23:00 Zi-initial vs 00:00 civil-midnight day boundaries are explicit conventions
 - UTC offset locates the real instant for solar-term boundaries and exact solar longitude
-- optional east-positive/west-negative birth longitude exposes **local mean solar time** as a comparison preview; it does not yet drive the Four Pillars
-- local mean solar time applies longitude correction only in the UI; a separately reference-tested Equation-of-Time engine now exists, but it is not yet applied to the Birth preview or Four Pillars
+- optional east-positive/west-negative birth longitude exposes a compact three-layer comparison: civil clock → **local mean solar time** → **local apparent solar time**
+- local mean solar time applies longitude correction; local apparent solar time then adds the independently validated Equation of Time (`apparent − mean`)
+- the solar-time comparison is still preview-only: Four Pillars continue to use the existing civil-clock basis until a separate time-basis convention selector is explicitly designed and reviewed
 - visible stems and hidden stems can be classified relative to the Day Master through the Ten Gods
 - Ten Gods remain structural labels only: no strength, weighting, auspiciousness, personality, or event prediction
 - the four visible pillars are scanned pairwise for Heavenly-Stem Five Combinations and Earthly-Branch Six Harmonies / Six Clashes / Six Harms
@@ -79,7 +80,7 @@ Run all rule/data invariants with:
 npm test
 ```
 
-Astronomy tests include the 24 solar-term longitude nodes, local-mean-solar rollover cases, the published NREL SPA Equation-of-Time worked example, an independent USNO approximate-coordinate differential check across the year, and physical-instant invariance across UTC representations.
+Astronomy tests include the 24 solar-term longitude nodes, local-mean-solar rollover cases, the published NREL SPA Equation-of-Time worked example, an independent USNO approximate-coordinate differential check across the year, physical-instant invariance across UTC representations, and local-apparent-solar composition/sign/rollover tests.
 
 ### Lightweight PNG visual self-check
 
@@ -92,7 +93,7 @@ The baseline set covers desktop/mobile first viewports for:
 - Birth view
 - Sexagenary reference
 
-Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, and the real-chart 寅巳 example that simultaneously demonstrates 六害 and a directed punishment edge. Browser DOM probes separately verify real-chart 子卯互刑 and 辰自刑 cases without adding more PNG weight. A dedicated browser probe also locks the local-mean-solar preview at zero correction on the UTC-offset-equivalent meridian and at +6 minutes for 121.5°E / UTC+8.
+Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, and the real-chart 寅巳 example that simultaneously demonstrates 六害 and a directed punishment edge. Browser DOM probes separately verify real-chart 子卯互刑 and 辰自刑 cases without adding more PNG weight. A dedicated solar-time browser probe locks the local-mean layer, Equation of Time, local-apparent clock, and additive correction identity for both the UTC-offset-equivalent meridian and a 121.5°E / UTC+8 example.
 
 Local use:
 
@@ -105,7 +106,7 @@ npm run visual:check
 ## Roadmap
 
 1. **Time skeleton — complete:** annual geometry, Birth derivation, 60 Jiazi reference.
-2. **Time-basis refinement — active:** explicit UTC offset, exact solar longitude, and longitude-based local mean solar time are stable; the Equation-of-Time engine is now validated against NREL SPA and USNO but remains intentionally disconnected from Birth until the local-apparent-time composition and convention selector are reviewed.
+2. **Time-basis refinement — active:** explicit UTC offset, exact solar longitude, local mean solar time, validated Equation of Time, and local apparent solar time comparison are now stable. The remaining step is an explicit, sourced convention selector that decides whether any non-civil basis is allowed to drive day/hour pillars; the preview itself does not make that choice.
 3. **Deterministic BaZi structure — active:** Five Tigers, hidden stems, Day Master → Ten Gods, and the visible derivation map from Five-Phase direction + polarity.
 4. **Stem / branch interactions — mature deterministic core:** visible-stem 五合; visible-branch 六合 / 六沖 / 六害; complete visible 三合 / 三會; directed / mutual / self 刑. 六破 remains deferred behind an explicit school/convention boundary instead of being flattened into the core table.
 5. **Seasonal support / strength:** only with explicit convention and weighting boundaries; no universal percentage model.
