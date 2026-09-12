@@ -7,6 +7,7 @@ const outputDir = path.resolve("tmp/visual-check");
 
 const pages = [
   { key: "annual", path: "" },
+  { key: "birth", path: "birth.html" },
   { key: "sexagenary", path: "sexagenary.html" },
 ];
 
@@ -46,7 +47,7 @@ for (const page of pages) {
       "--disable-gpu",
       "--hide-scrollbars",
       "--run-all-compositor-stages-before-draw",
-      "--virtual-time-budget=1400",
+      "--virtual-time-budget=1600",
       "--force-device-scale-factor=1",
       `--window-size=${viewport.width},${viewport.height}`,
       `--screenshot=${outputPath}`,
