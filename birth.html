@@ -32,14 +32,26 @@
     <section class="birth-layout">
       <form id="birth-form" class="birth-controls">
         <div class="eyebrow">輸入</div>
-        <label>
-          <span>出生日期</span>
-          <input id="birth-date" name="birth-date" type="date" value="2005-12-23" required>
-        </label>
-        <label>
-          <span>出生時間</span>
-          <input id="birth-time" name="birth-time" type="time" value="08:37" step="60" required>
-        </label>
+
+        <div class="birth-field-group">
+          <span class="field-label">出生日期</span>
+          <div class="segmented-input date-inputs">
+            <label><input id="birth-year" name="birth-year" type="number" inputmode="numeric" min="1" max="9999" value="2005" required aria-label="出生年"><small>年</small></label>
+            <label><input id="birth-month" name="birth-month" type="number" inputmode="numeric" min="1" max="12" value="12" required aria-label="出生月"><small>月</small></label>
+            <label><input id="birth-day" name="birth-day" type="number" inputmode="numeric" min="1" max="31" value="23" required aria-label="出生日"><small>日</small></label>
+          </div>
+        </div>
+
+        <div class="birth-field-group">
+          <span class="field-label">出生時間</span>
+          <div class="segmented-input time-inputs">
+            <label><input id="birth-hour" name="birth-hour" type="number" inputmode="numeric" min="0" max="23" value="8" required aria-label="出生小時"><small>時</small></label>
+            <span class="time-colon">:</span>
+            <label><input id="birth-minute" name="birth-minute" type="number" inputmode="numeric" min="0" max="59" value="37" required aria-label="出生分鐘"><small>分</small></label>
+          </div>
+          <span class="field-hint">24 小時制</span>
+        </div>
+
         <fieldset>
           <legend>換日規則</legend>
           <label class="boundary-option">
@@ -53,7 +65,7 @@
         </fieldset>
         <div class="time-basis-note">
           <strong>V0.1 時間基準：當地民用時間</strong>
-          <span>請直接輸入出生地當時鐘面上的日期與時間。本版不做時區轉換、經度修正或真太陽時。</span>
+          <span>直接輸入出生地當時鐘面上的日期與時間。本版不做時區轉換、經度修正或真太陽時。</span>
         </div>
       </form>
 
@@ -66,21 +78,28 @@
           <span id="boundary-badge" class="boundary-badge">23:00 子初換日</span>
         </div>
 
-        <p class="track-note">四條軌道代表四種規則，不共用橫向尺度；垂直線只表示「同一個出生瞬間」。</p>
+        <div class="pillar-summary" aria-label="四柱總覽">
+          <div><span>年柱</span><strong id="summary-year">乙酉</strong></div>
+          <div><span>月柱</span><strong id="summary-month">戊子</strong></div>
+          <div class="day-master-summary"><span>日柱</span><strong id="summary-day">辛巳</strong></div>
+          <div><span>時柱</span><strong id="summary-hour">壬辰</strong></div>
+        </div>
+
+        <p class="track-note"><strong>下方不是共同時間尺。</strong> 四條軌道只用不同紋理表示四種規則；中央虛線只表示它們都接收同一個出生瞬間。</p>
 
         <div class="pillar-tracks">
-          <div class="instant-axis" aria-hidden="true"></div>
+          <div class="instant-axis" aria-hidden="true"><span>同一瞬間</span></div>
 
           <article class="pillar-track" data-pillar="year">
             <div class="track-rule">
               <span class="track-index">01</span>
               <div><strong>年界</strong><small>精確立春瞬間</small></div>
             </div>
-            <div class="track-line"><i></i></div>
+            <div class="track-line" aria-hidden="true"><i></i></div>
             <div class="pillar-result">
               <span>年柱</span>
               <strong id="year-pillar">乙酉</strong>
-              <small>立春前後才切換</small>
+              <small>只在立春界前後切換</small>
             </div>
           </article>
 
@@ -89,11 +108,11 @@
               <span class="track-index">02</span>
               <div><strong>月界</strong><small>十二個「節」的精確瞬間</small></div>
             </div>
-            <div class="track-line"><i></i></div>
+            <div class="track-line" aria-hidden="true"><i></i></div>
             <div class="pillar-result">
               <span>月柱</span>
               <strong id="month-pillar">戊子</strong>
-              <small>月支由節界，月干隨年干規則取得</small>
+              <small>節界定月支，再依年干起月干</small>
             </div>
           </article>
 
@@ -102,7 +121,7 @@
               <span class="track-index">03</span>
               <div><strong>日序</strong><small>連續六十干支日</small></div>
             </div>
-            <div class="track-line"><i></i></div>
+            <div class="track-line" aria-hidden="true"><i></i></div>
             <div class="pillar-result">
               <span>日柱</span>
               <strong id="day-pillar">辛巳</strong>
@@ -115,11 +134,11 @@
               <span class="track-index">04</span>
               <div><strong>時段</strong><small>十二時支 + 五鼠遁</small></div>
             </div>
-            <div class="track-line"><i></i></div>
+            <div class="track-line" aria-hidden="true"><i></i></div>
             <div class="pillar-result">
               <span>時柱</span>
               <strong id="hour-pillar">壬辰</strong>
-              <small>先定時支，再由有效日干推時干</small>
+              <small>先定時支，再由有效日干起時干</small>
             </div>
           </article>
         </div>
