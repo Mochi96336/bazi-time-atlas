@@ -12,6 +12,8 @@ const errorBox = document.querySelector("#birth-error");
 const sensitivity = document.querySelector("#boundary-sensitivity");
 const comparison = document.querySelector("#boundary-comparison");
 const conventionDay = document.querySelector("#convention-day");
+const pillarSummary = document.querySelector(".pillar-summary");
+const trackNote = document.querySelector(".track-note");
 
 const pillarTargets = {
   year: document.querySelector("#year-pillar"),
@@ -27,7 +29,48 @@ const summaryTargets = {
   hour: document.querySelector("#summary-hour")
 };
 
+const summaryLabels = {
+  year: "年柱",
+  month: "月柱",
+  day: "日柱",
+  hour: "時柱"
+};
+
+const summaryCells = {};
+let annualMonthLink;
 const dayRuleNote = document.querySelector("#day-rule-note");
+
+function installCrossViewLinks() {
+  for (const [key, node] of Object.entries(summaryTargets)) {
+    const cell = node.parentElement;
+    summaryCells[key] = cell;
+    cell.tabIndex = 0;
+    cell.setAttribute("role", "link");
+    cell.style.cursor = "pointer";
+    cell.querySelector("span").textContent = `${summaryLabels[key]} ↗`;
+
+    const activate = () => {
+      if (cell.dataset.href) window.location.href = cell.dataset.href;
+    };
+    cell.addEventListener("click", activate);
+    cell.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
+    });
+  }
+
+  const row = document.createElement("p");
+  row.className = "track-note";
+  annualMonthLink = document.createElement("a");
+  annualMonthLink.href = "./?month=子";
+  annualMonthLink.textContent = "年度盤定位子月 →";
+  const note = document.createElement("span");
+  note.textContent = "　只定位月支區段，不把出生時刻假畫成精確太陽黃經。";
+  row.append(annualMonthLink, note);
+  pillarSummary.insertAdjacentElement("afterend", row);
+}
 
 function selectedBoundary() {
   return form.elements.namedItem("day-boundary").value;
@@ -76,7 +119,14 @@ function renderResult(result) {
   for (const key of Object.keys(pillarTargets)) {
     pillarTargets[key].textContent = pillars[key].name;
     summaryTargets[key].textContent = pillars[key].name;
+    const href = `./sexagenary.html?ganzhi=${encodeURIComponent(pillars[key].name)}`;
+    summaryCells[key].dataset.href = href;
+    summaryCells[key].setAttribute("aria-label", `${summaryLabels[key]} ${pillars[key].name}，在六十甲子 Reference view 查看`);
+    summaryCells[key].title = `在六十甲子查看 ${pillars[key].name}`;
   }
+
+  annualMonthLink.href = `./?month=${encodeURIComponent(pillars.month.branch)}`;
+  annualMonthLink.textContent = `年度盤定位 ${pillars.month.branch}月 →`;
 }
 
 function renderSensitivity(input, currentBoundary) {
@@ -111,6 +161,7 @@ function update() {
   }
 }
 
+installCrossViewLinks();
 form.addEventListener("input", update);
 form.addEventListener("change", update);
 update();
