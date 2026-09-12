@@ -62,6 +62,13 @@ function install() {
   stylesheet.dataset.meanSolarStyles = "1";
   document.head.append(stylesheet);
 
+  const basisTitle = timeBasisNote.querySelector("strong");
+  const basisCopy = timeBasisNote.querySelector("span");
+  if (basisTitle) basisTitle.textContent = "目前排盤基準：出生地民用時間 + UTC offset";
+  if (basisCopy) {
+    basisCopy.textContent = "四柱仍不套用經度校正；下方只預覽地方平太陽時。尚未加入均時差，因此也不是地方視太陽時／真太陽時。";
+  }
+
   const field = document.createElement("label");
   field.className = "longitude-input";
   const title = document.createElement("span");
