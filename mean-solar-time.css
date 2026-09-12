@@ -39,7 +39,7 @@
 
 .mean-solar-preview {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(150px, .75fr) minmax(280px, 1.25fr);
   align-items: center;
   gap: 8px 14px;
   margin-top: 9px;
@@ -62,24 +62,61 @@
   font-size: 10px;
 }
 .mean-solar-preview-copy span {
+  max-width: 210px;
   color: var(--muted);
   font-size: 7.5px;
+  line-height: 1.45;
 }
-.mean-solar-preview-readout {
+.solar-time-rows {
   display: grid;
-  justify-items: end;
-  gap: 2px;
+  gap: 3px;
 }
-.mean-solar-preview-readout b {
+.solar-time-row {
+  display: grid;
+  grid-template-columns: 72px minmax(82px, 1fr) auto;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 7px;
+}
+.solar-time-row > span {
+  color: #69766f;
+  font-size: 7.5px;
+  font-weight: 680;
+}
+.solar-time-row b {
   color: var(--ink);
-  font-size: 13px;
+  font-size: 10.5px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.mean-solar-preview-readout span {
-  color: #4d6d63;
-  font-size: 8px;
+.solar-time-row em {
+  color: #62776e;
+  font-size: 7.2px;
+  font-style: normal;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.solar-time-row.eot {
+  border-top: 1px solid rgba(90,110,102,.10);
+  border-bottom: 1px solid rgba(90,110,102,.10);
+  border-radius: 0;
+}
+.solar-time-row.eot b {
+  color: #60736b;
+  font-size: 9px;
+}
+.solar-time-row.eot em {
+  color: #949b97;
+  font-weight: 550;
+}
+.solar-time-row.apparent {
+  background: rgba(255,255,255,.48);
+}
+.solar-time-row.apparent b {
+  font-size: 12px;
 }
 .mean-solar-preview-meta {
   grid-column: 1 / -1;
@@ -102,14 +139,24 @@
   .longitude-input small { font-size: 7px; }
   .longitude-input-hint { font-size: 6.8px; }
   .mean-solar-preview {
-    gap: 6px 9px;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 6px 8px;
     margin-top: 7px;
     padding: 8px 9px;
     border-radius: 9px;
   }
-  .mean-solar-preview-copy strong { font-size: 9px; }
-  .mean-solar-preview-copy span { font-size: 6.8px; }
-  .mean-solar-preview-readout b { font-size: 11px; }
-  .mean-solar-preview-readout span { font-size: 7px; }
-  .mean-solar-preview-meta { font-size: 6.5px; }
+  .mean-solar-preview-copy strong { font-size: 8.8px; }
+  .mean-solar-preview-copy span { font-size: 6.2px; line-height: 1.35; }
+  .solar-time-rows { gap: 2px; }
+  .solar-time-row {
+    grid-template-columns: 50px minmax(64px, 1fr) auto;
+    gap: 5px;
+    padding: 3px 4px;
+  }
+  .solar-time-row > span { font-size: 6.5px; }
+  .solar-time-row b { font-size: 8.7px; }
+  .solar-time-row em { font-size: 6.2px; }
+  .solar-time-row.eot b { font-size: 7.4px; }
+  .solar-time-row.apparent b { font-size: 9.8px; }
+  .mean-solar-preview-meta { font-size: 6.1px; line-height: 1.4; }
 }

@@ -25,33 +25,59 @@ function dumpDom(path) {
 
   if (result.status !== 0) {
     process.stderr.write(result.stderr ?? "");
-    throw new Error(`Chromium mean-solar probe failed: ${url}`);
+    throw new Error(`Chromium solar-time probe failed: ${url}`);
   }
   return { url, dom: result.stdout };
+}
+
+function dataValue(dom, name) {
+  return dom.match(new RegExp(`data-${name}="([^"]+)"`))?.[1] ?? null;
+}
+
+function dataNumber(dom, name) {
+  const value = Number(dataValue(dom, name));
+  return Number.isFinite(value) ? value : Number.NaN;
+}
+
+function coherentCorrections(dom, expectedLongitudeMinutes) {
+  const longitude = dataNumber(dom, "mean-solar-correction-minutes");
+  const equation = dataNumber(dom, "equation-of-time-minutes");
+  const total = dataNumber(dom, "total-solar-correction-minutes");
+  return Math.abs(longitude - expectedLongitudeMinutes) < 0.0001 &&
+    equation > 0.9 && equation < 1.3 &&
+    Math.abs(total - longitude - equation) < 0.0002;
 }
 
 const cases = [
   {
     path: "birth.html",
-    label: "default equivalent-meridian preview stays zero-correction",
+    label: "default equivalent meridian keeps LMST unchanged while EoT advances apparent time",
     assert(dom) {
       return /data-longitude="120\.0000"/.test(dom) &&
         /data-mean-solar-correction-minutes="0\.0000"/.test(dom) &&
         /data-mean-solar-clock="08:37:00"/.test(dom) &&
+        /^08:38:/.test(dataValue(dom, "apparent-solar-clock") ?? "") &&
+        coherentCorrections(dom, 0) &&
         /id="mean-solar-preview"/.test(dom) &&
-        /地方平太陽時/.test(dom) &&
-        /尚未加入均時差/.test(dom);
+        /地方太陽時比較/.test(dom) &&
+        /平太陽時/.test(dom) &&
+        /均時差 EoT/.test(dom) &&
+        /視太陽時/.test(dom);
     },
   },
   {
     path: "birth.html?lon=121.5",
-    label: "121.5E at UTC+8 advances local mean solar time by six minutes",
+    label: "121.5E combines +6 longitude minutes with positive December EoT",
     assert(dom) {
       return /data-longitude="121\.5000"/.test(dom) &&
         /data-mean-solar-correction-minutes="6\.0000"/.test(dom) &&
         /data-mean-solar-clock="08:43:00"/.test(dom) &&
+        /^08:44:/.test(dataValue(dom, "apparent-solar-clock") ?? "") &&
+        coherentCorrections(dom, 6) &&
         /id="mean-solar-time"[^>]*>08:43:00<\/b>/.test(dom) &&
-        /id="mean-solar-correction"[^>]*>\+6\.00 min<\/span>/.test(dom) &&
+        /id="mean-solar-correction"[^>]*>\+6\.00 min<\/em>/.test(dom) &&
+        /id="equation-of-time"[^>]*>\+1\.[0-2]\d min<\/b>/.test(dom) &&
+        /id="apparent-solar-time"[^>]*>08:44:[0-5]\d<\/b>/.test(dom) &&
         /E121\.5000°/.test(dom);
     },
   },
@@ -62,5 +88,5 @@ for (const testCase of cases) {
   if (!testCase.assert(dom)) {
     throw new Error(`${testCase.label} did not resolve expected state: ${url}`);
   }
-  console.log(`[mean-solar] PASS ${testCase.label}: ${url}`);
+  console.log(`[solar-time] PASS ${testCase.label}: ${url}`);
 }
