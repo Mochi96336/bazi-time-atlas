@@ -31,6 +31,7 @@
   text-transform: uppercase;
 }
 .pillar-relations-summary-copy strong { color: var(--ink); font-size: 13px; }
+.pillar-relations-summary-copy strong::after { content: " / 六害"; }
 .pillar-relations-count {
   margin-left: auto;
   color: var(--muted);
@@ -262,10 +263,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pillar-group-member small {
-  color: #9aa19d;
-  font-size: 6.8px;
-}
+.pillar-group-member small { display: none; }
 
 @media (max-width: 600px) {
   .pillar-relations-panel { margin-top: 8px; border-radius: 12px; }
@@ -295,7 +293,6 @@
   .pillar-group-members { gap: 5px; padding-top: 11px; }
   .pillar-group-member b { font-size: 16px; }
   .pillar-group-member span { font-size: 6.8px; }
-  .pillar-group-member small { font-size: 6.2px; }
   .pillar-group-empty { font-size: 7.5px; }
   .pillar-relations-footnote { padding: 8px 11px 10px; font-size: 7.5px; }
 }
