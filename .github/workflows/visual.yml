@@ -44,6 +44,7 @@ jobs:
           node --check src/astronomy/solar-longitude.js
           node --check src/astronomy/mean-solar-time.js
           node --check src/astronomy/equation-of-time.js
+          node --check src/astronomy/apparent-solar-time.js
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
           node --check scripts/check-mean-solar-preview.mjs
@@ -67,7 +68,7 @@ jobs:
         run: node scripts/check-deep-links.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
-      - name: Verify mean solar preview
+      - name: Verify solar time preview
         run: node scripts/check-mean-solar-preview.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
