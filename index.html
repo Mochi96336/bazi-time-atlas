@@ -11,7 +11,7 @@
   <main class="site-shell">
     <header class="topbar">
       <div class="brand">BaZi Time Atlas</div>
-      <div class="topbar-note">Annual atlas · v0.2</div>
+      <div class="topbar-note">Annual atlas · v0.3</div>
     </header>
 
     <section class="hero">
@@ -34,6 +34,11 @@
     <section class="atlas-layout">
       <div class="wheel-stage">
         <div class="wheel-frame">
+          <div class="ring-key" aria-label="圓環由內到外的順序">
+            <span class="ring-key-edge">內</span>
+            <strong>四季</strong><i>→</i><strong>八字月支</strong><i>→</i><strong>24 節氣</strong><i>→</i><strong>熱帶黃道</strong>
+            <span class="ring-key-edge">外</span>
+          </div>
           <svg id="atlas-wheel" viewBox="0 0 860 860" role="img" aria-label="太陽黃經、二十四節氣、八字月支、五行、四季與熱帶黃道的共同圓盤">
             <g data-layer-group="selection"></g>
             <g data-layer-group="seasons"></g>
@@ -42,9 +47,9 @@
             <g data-layer-group="zodiac"></g>
             <g data-layer-group="debug" hidden></g>
             <circle cx="430" cy="430" r="76" class="center-disc"></circle>
-            <text x="430" y="405" class="center-title">共同座標</text>
-            <text x="430" y="442" class="center-number">0–360°</text>
-            <text x="430" y="466" class="center-note">0° = 春分</text>
+            <text id="center-kicker" x="430" y="405" class="center-title">八字月支</text>
+            <text id="center-value" x="430" y="442" class="center-number">卯月</text>
+            <text id="center-note" x="430" y="466" class="center-note">345° → 15°</text>
           </svg>
         </div>
         <div class="legend-strip" aria-label="五行圖例">
@@ -57,7 +62,7 @@
         </div>
       </div>
 
-      <aside class="inspector" aria-live="polite">
+      <aside id="inspector" class="inspector" aria-live="polite">
         <div id="detail-eyebrow" class="eyebrow">八字月支</div>
         <h2 id="detail-title">卯月</h2>
         <p id="detail-body">驚蟄 → 清明。由兩個「節」界定的 30° 太陽黃經區段。</p>
