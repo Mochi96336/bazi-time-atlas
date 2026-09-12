@@ -79,6 +79,13 @@ captures.push(
     width: 390,
     height: 1900,
   },
+  {
+    name: "birth-six-harm-390x1850.png",
+    page: "birth-six-harm",
+    path: "birth.html?relations=1&date=2022-06-20&time=10%3A00&utc=8",
+    width: 390,
+    height: 1850,
+  },
 );
 
 function findBrowser() {
