@@ -27,7 +27,7 @@ const captures = pages.flatMap(page =>
 );
 
 // Review-only frames preserve the ordinary first-viewport regressions while
-// focusing directly on expanded detail layers that otherwise sit below fold.
+// focusing expanded detail layers that normally sit below the fold.
 captures.push(
   {
     name: "annual-hidden-inspector-390x1320.png",
@@ -39,14 +39,14 @@ captures.push(
   {
     name: "birth-ten-gods-1440x900.png",
     page: "birth-ten-gods",
-    path: "birth.html?tenGod=1#ten-gods-panel",
+    path: "birth.html?tenGod=1&reviewFocus=tenGod",
     width: 1440,
     height: 900,
   },
   {
     name: "birth-ten-gods-390x844.png",
     page: "birth-ten-gods",
-    path: "birth.html?tenGod=1#ten-gods-panel",
+    path: "birth.html?tenGod=1&reviewFocus=tenGod",
     width: 390,
     height: 844,
   },
