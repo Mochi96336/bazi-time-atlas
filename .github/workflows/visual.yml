@@ -24,11 +24,14 @@ jobs:
       - name: Check app syntax
         run: |
           node --check src/app.js
+          node --check src/annual-deep-link.js
           node --check src/birth.js
           node --check src/sexagenary-data.js
           node --check src/sexagenary.js
+          node --check src/sexagenary-deep-link.js
           node --check src/calendar/tyme-adapter.js
           node --check scripts/prepare-vendor.mjs
+          node --check scripts/check-deep-links.mjs
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
@@ -45,6 +48,10 @@ jobs:
           done
           cat /tmp/bazi-time-atlas-http.log
           exit 1
+      - name: Verify cross-view deep links
+        run: node scripts/check-deep-links.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Capture PNG evidence
         run: npm run visual:check
         env:
