@@ -44,8 +44,13 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
 .atlas-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(290px, .55fr); gap: clamp(20px, 3vw, 42px); align-items: start; }
 .wheel-stage { min-width: 0; position: sticky; top: 16px; }
 .wheel-frame { background: rgba(251,250,247,.72); border: 1px solid rgba(217,216,209,.88); border-radius: var(--radius); padding: clamp(7px, 1.4vw, 14px); }
+.ring-key { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; padding: 1px 8px 7px; color: #7c837e; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.ring-key::-webkit-scrollbar { display: none; }
+.ring-key strong { color: #4f5752; font-weight: 720; }
+.ring-key i { color: #a9ada9; font-style: normal; }
+.ring-key-edge { color: #a1a6a2; font-size: 9px; letter-spacing: .08em; }
 #atlas-wheel { width: 100%; height: auto; display: block; overflow: hidden; }
-.inspector { position: sticky; top: 16px; background: var(--paper); border: 1px solid var(--hairline); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 28px); box-shadow: 0 16px 42px rgba(48, 52, 48, .045); }
+.inspector { position: sticky; top: 16px; scroll-margin-top: 16px; background: var(--paper); border: 1px solid var(--hairline); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 28px); box-shadow: 0 16px 42px rgba(48, 52, 48, .045); }
 .inspector h2 { margin: 7px 0 10px; font-size: clamp(30px, 3vw, 40px); letter-spacing: -.03em; }
 .inspector p { color: #555c57; line-height: 1.66; margin: 0; font-size: 14px; }
 .fact-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 17px 0; }
@@ -55,10 +60,10 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
 .reading-notes { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--hairline); color: var(--muted); }
 .reading-notes summary { color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 700; }
 .reading-notes ul { padding-left: 18px; margin: 10px 0 0; font-size: 12px; line-height: 1.65; }
-.center-disc { fill: rgba(251,250,247,.96); stroke: var(--hairline); }
-.center-title { text-anchor: middle; fill: var(--muted); font-size: 13px; font-weight: 700; }
-.center-number { text-anchor: middle; fill: var(--ink); font-size: 32px; font-weight: 720; letter-spacing: -.035em; }
-.center-note { text-anchor: middle; fill: var(--muted); font-size: 11px; }
+.center-disc { fill: rgba(251,250,247,.97); stroke: var(--hairline); }
+.center-title { text-anchor: middle; fill: var(--muted); font-size: 11px; font-weight: 760; }
+.center-number { text-anchor: middle; fill: var(--ink); font-size: 31px; font-weight: 740; letter-spacing: -.03em; }
+.center-note { text-anchor: middle; fill: var(--muted); font-size: 10px; font-weight: 580; }
 .selection-band { fill: color-mix(in srgb, var(--accent) 7%, transparent); stroke: color-mix(in srgb, var(--accent) 34%, transparent); stroke-width: 1; pointer-events: none; }
 .season-sector { stroke: var(--hairline); stroke-width: 1; }
 .season-0 { fill: color-mix(in srgb, var(--wood) 9%, transparent); }
@@ -74,9 +79,11 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
 .element-水 { fill: color-mix(in srgb, var(--water) 34%, transparent); }
 .month-branch { text-anchor: middle; dominant-baseline: middle; fill: var(--ink); font-size: 29px; font-weight: 780; pointer-events: none; }
 .term-line { stroke: #c6c8c2; stroke-width: 1.15; }
+.term-line.zhongqi { opacity: .72; }
 .term-line.jie { stroke: #68716c; stroke-width: 2; }
-.term-line.cardinal { stroke: #4d5752; stroke-width: 1.8; }
+.term-line.cardinal { stroke: #4d5752; stroke-width: 1.8; opacity: 1; }
 .term-label { text-anchor: middle; dominant-baseline: middle; fill: #828985; font-size: 17px; font-weight: 580; }
+.term-label.zhongqi:not(.cardinal) { fill: #959b97; font-size: 15px; font-weight: 520; }
 .term-label.jie { fill: #353b37; font-size: 19px; font-weight: 760; }
 .term-label.cardinal { fill: var(--ink); font-size: 20px; font-weight: 800; }
 .zodiac-sector { fill: rgba(255,255,255,.30); stroke: var(--hairline); stroke-width: 1.1; transition: opacity 140ms ease, stroke 140ms ease; }
@@ -85,7 +92,7 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
 .selectable:hover { opacity: .8; }
 .is-selected { stroke: var(--accent) !important; stroke-width: 3.2 !important; }
 .is-related { stroke: var(--accent) !important; stroke-width: 2 !important; opacity: .9; }
-.term-label.is-related { fill: var(--accent); stroke: none !important; font-weight: 820; }
+.term-label.is-related { fill: var(--accent); stroke: none !important; font-weight: 820; display: block !important; }
 .debug-axis { stroke: #a15e5e; stroke-width: 1.1; stroke-dasharray: 5 5; }
 .debug-label { text-anchor: middle; fill: #9f5c5c; font-size: 12px; }
 .quadrant-angle { text-anchor: middle; dominant-baseline: middle; fill: #969c98; font-size: 12px; font-weight: 650; pointer-events: none; }
@@ -116,10 +123,14 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
   .layer-toggle { flex: 0 0 auto; min-height: 36px; padding-inline: 11px; font-size: 11px; }
   .atlas-layout { gap: 12px; }
   .wheel-frame { border-radius: 18px; padding: 0; overflow: hidden; }
+  .ring-key { justify-content: flex-start; padding: 9px 11px 4px; font-size: 9px; }
+  .ring-key-edge { font-size: 8px; }
   #atlas-wheel { width: calc(100% + 8px); margin-left: -4px; }
+  .term-label.zhongqi:not(.cardinal):not(.is-related) { display: none; }
+  .term-line.zhongqi:not(.cardinal) { opacity: .48; stroke-width: .9; }
   .legend-strip { gap: 8px 10px; margin: 9px 2px 0; font-size: 10px; }
   .legend-rule { flex-basis: 100%; margin-left: 0; }
-  .inspector { border-radius: 18px; padding: 18px; box-shadow: none; }
+  .inspector { border-radius: 18px; padding: 18px; box-shadow: none; scroll-margin-top: 12px; }
   .inspector h2 { font-size: 31px; }
   .inspector p { font-size: 13px; }
   .relationship { font-size: 11px !important; }
