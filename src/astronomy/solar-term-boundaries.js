@@ -32,7 +32,14 @@ const TYME_NAMES = Object.freeze({
   驚蟄: "惊蛰"
 });
 
+const eventCache = new Map();
 const yearCache = new Map();
+
+function validateYear(year) {
+  if (!Number.isInteger(year) || year < -9999 || year > 9999) {
+    throw new RangeError("year must be an integer from -9999 to 9999");
+  }
+}
 
 function utcMillisFromReferenceFields(fields) {
   const date = new Date(0);
@@ -52,6 +59,12 @@ function fieldsFromSolarTime(time) {
   };
 }
 
+function termDefinition(name) {
+  const term = solarTerms.find(item => item.name === name);
+  if (!term) throw new RangeError(`unknown solar term: ${name}`);
+  return term;
+}
+
 function eventForTerm(year, term) {
   const tymeName = TYME_NAMES[term.name];
   if (!tymeName) throw new RangeError(`no Tyme solar-term name mapping for ${term.name}`);
@@ -69,13 +82,18 @@ function eventForTerm(year, term) {
   });
 }
 
+export function solarTermEventForCivilYear(year, name) {
+  validateYear(year);
+  const key = `${year}|${name}`;
+  if (!eventCache.has(key)) eventCache.set(key, eventForTerm(year, termDefinition(name)));
+  return eventCache.get(key);
+}
+
 export function solarTermEventsForCivilYear(year) {
-  if (!Number.isInteger(year) || year < -9999 || year > 9999) {
-    throw new RangeError("year must be an integer from -9999 to 9999");
-  }
+  validateYear(year);
   if (!yearCache.has(year)) {
     const events = solarTerms
-      .map(term => eventForTerm(year, term))
+      .map(term => solarTermEventForCivilYear(year, term.name))
       .sort((a, b) => a.instantMs - b.instantMs);
     yearCache.set(year, Object.freeze(events));
   }
@@ -87,18 +105,49 @@ function referenceCivilYearAtInstant(instantMs) {
   return shifted.getUTCFullYear();
 }
 
+function yearRangeForInstants(startMs, endMs) {
+  const lo = Math.min(startMs, endMs);
+  const hi = Math.max(startMs, endMs);
+  return {
+    lo,
+    hi,
+    firstYear: referenceCivilYearAtInstant(lo) - 1,
+    lastYear: referenceCivilYearAtInstant(hi) + 1
+  };
+}
+
 export function solarTermEventsBetween(startMs, endMs) {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
     throw new RangeError("startMs and endMs must be finite");
   }
-  const lo = Math.min(startMs, endMs);
-  const hi = Math.max(startMs, endMs);
-  const firstYear = referenceCivilYearAtInstant(lo) - 1;
-  const lastYear = referenceCivilYearAtInstant(hi) + 1;
+  const { lo, hi, firstYear, lastYear } = yearRangeForInstants(startMs, endMs);
   const events = [];
 
   for (let year = firstYear; year <= lastYear; year += 1) {
     for (const event of solarTermEventsForCivilYear(year)) {
+      if (event.instantMs >= lo && event.instantMs <= hi) events.push(event);
+    }
+  }
+
+  events.sort((a, b) => a.instantMs - b.instantMs);
+  return events;
+}
+
+export function solarTermNamedEventsBetween(startMs, endMs, names) {
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+    throw new RangeError("startMs and endMs must be finite");
+  }
+  if (!Array.isArray(names) || names.length === 0) {
+    throw new RangeError("names must be a non-empty array");
+  }
+  const uniqueNames = [...new Set(names)];
+  uniqueNames.forEach(termDefinition);
+  const { lo, hi, firstYear, lastYear } = yearRangeForInstants(startMs, endMs);
+  const events = [];
+
+  for (let year = firstYear; year <= lastYear; year += 1) {
+    for (const name of uniqueNames) {
+      const event = solarTermEventForCivilYear(year, name);
       if (event.instantMs >= lo && event.instantMs <= hi) events.push(event);
     }
   }
