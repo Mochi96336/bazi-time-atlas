@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { JulianDay, SolarTerm } from "tyme4ts";
+import { JulianDay, SolarTerm, SolarTime } from "tyme4ts";
 import {
   DAY_BOUNDARY,
   SOLAR_TERM_REFERENCE_UTC_OFFSET,
@@ -117,7 +117,7 @@ test("Li Chun year boundary is the same physical instant in different UTC offset
 
 test("year/month follow the instant while day/hour stay on the birthplace-local clock", () => {
   const taipeiClock = { year: 2005, month: 12, day: 23, hour: 0, minute: 30, second: 0 };
-  const taipeiSolar = (await import("tyme4ts")).SolarTime.fromYmdHms(
+  const taipeiSolar = SolarTime.fromYmdHms(
     taipeiClock.year,
     taipeiClock.month,
     taipeiClock.day,
