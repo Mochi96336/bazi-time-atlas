@@ -34,7 +34,10 @@ A single birth instant is resolved through four separate rules instead of a fake
 - UTC offset locates the real instant for solar-term boundaries and exact solar longitude
 - optional east-positive/west-negative birth longitude exposes a compact three-layer comparison: civil clock → **local mean solar time** → **local apparent solar time**
 - local mean solar time applies longitude correction; local apparent solar time then adds the independently validated Equation of Time (`apparent − mean`)
-- the solar-time comparison is still preview-only: Four Pillars continue to use the existing civil-clock basis until a separate time-basis convention selector is explicitly designed and reviewed
+- a **time-basis sensitivity** comparison evaluates Day/Hour outcomes under civil, mean-solar, and apparent-solar clock hypotheses using the same selected day-boundary and Five-Rats rules
+- sensitivity keeps Year/Month anchored to the original physical instant; only the Day/Hour clock basis is varied, so a corrected clock label cannot drag solar-term boundaries with it
+- ordinary cases collapse to one “unchanged” status line; only an actual Day/Hour boundary crossing expands the three basis results
+- the solar-time and sensitivity layers are what-if previews, not a school selector: Four Pillars continue to use the civil-clock basis until a separate, sourced convention selector is explicitly designed and reviewed
 - visible stems and hidden stems can be classified relative to the Day Master through the Ten Gods
 - Ten Gods remain structural labels only: no strength, weighting, auspiciousness, personality, or event prediction
 - the four visible pillars are scanned pairwise for Heavenly-Stem Five Combinations and Earthly-Branch Six Harmonies / Six Clashes / Six Harms
@@ -56,6 +59,7 @@ The 60 Jiazi are generated from synchronized 10-stem and 12-branch phases. The 6
 - Ambiguous conventions are exposed instead of silently chosen.
 - A civil timestamp, local mean solar time, and local apparent solar time are separate layers; the atlas does not call longitude-only correction “true solar time.”
 - Equation of Time uses the astronomical sign convention `apparent solar time − mean solar time`; its engine is reference-tested independently before it is allowed to drive any Birth convention.
+- Time-basis sensitivity is explicitly counterfactual: it answers whether a clock correction would cross a selected Day/Hour boundary, without changing the canonical chart or pretending all BaZi schools use the same corrected-time rule.
 - Hidden stems are branch internals, not another permanent annual ring.
 - Ten Gods are derived from Five-Phase direction + yin-yang parity relative to the Day Master.
 - Pairwise stem/branch relations are symmetric registry facts first; transformation and interpretive conditions remain separate.
@@ -80,7 +84,7 @@ Run all rule/data invariants with:
 npm test
 ```
 
-Astronomy tests include the 24 solar-term longitude nodes, local-mean-solar rollover cases, the published NREL SPA Equation-of-Time worked example, an independent USNO approximate-coordinate differential check across the year, physical-instant invariance across UTC representations, and local-apparent-solar composition/sign/rollover tests.
+Astronomy/calendar tests include the 24 solar-term longitude nodes, local-mean-solar rollover cases, the published NREL SPA Equation-of-Time worked example, an independent USNO approximate-coordinate differential check across the year, physical-instant invariance across UTC representations, local-apparent-solar composition/sign/rollover tests, and Day/Hour time-basis sensitivity cases for both 23:00 Zi-initial and 00:00 civil-midnight boundaries.
 
 ### Lightweight PNG visual self-check
 
@@ -93,7 +97,7 @@ The baseline set covers desktop/mobile first viewports for:
 - Birth view
 - Sexagenary reference
 
-Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, and the real-chart 寅巳 example that simultaneously demonstrates 六害 and a directed punishment edge. Browser DOM probes separately verify real-chart 子卯互刑 and 辰自刑 cases without adding more PNG weight. A dedicated solar-time browser probe locks the local-mean layer, Equation of Time, local-apparent clock, and additive correction identity for both the UTC-offset-equivalent meridian and a 121.5°E / UTC+8 example.
+Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, the real-chart 寅巳 example that simultaneously demonstrates 六害 and a directed punishment edge, and one 390px time-basis-sensitive case where solar correction crosses the 23:00 Day/Hour boundary. Browser DOM probes separately verify real-chart 子卯互刑 and 辰自刑 cases without adding more PNG weight. A dedicated solar-time browser probe locks the local-mean layer, Equation of Time, local-apparent clock, additive correction identity, normal unchanged sensitivity state, and a real boundary-crossing sensitivity state.
 
 Local use:
 
@@ -106,7 +110,7 @@ npm run visual:check
 ## Roadmap
 
 1. **Time skeleton — complete:** annual geometry, Birth derivation, 60 Jiazi reference.
-2. **Time-basis refinement — active:** explicit UTC offset, exact solar longitude, local mean solar time, validated Equation of Time, and local apparent solar time comparison are now stable. The remaining step is an explicit, sourced convention selector that decides whether any non-civil basis is allowed to drive day/hour pillars; the preview itself does not make that choice.
+2. **Time-basis refinement — mature preview layer:** explicit UTC offset, exact solar longitude, local mean solar time, validated Equation of Time, local apparent solar time, and Day/Hour sensitivity comparison are stable. The remaining work is a sourced convention model that can represent multiple school choices before any non-civil basis is allowed to become the canonical chart input.
 3. **Deterministic BaZi structure — active:** Five Tigers, hidden stems, Day Master → Ten Gods, and the visible derivation map from Five-Phase direction + polarity.
 4. **Stem / branch interactions — mature deterministic core:** visible-stem 五合; visible-branch 六合 / 六沖 / 六害; complete visible 三合 / 三會; directed / mutual / self 刑. 六破 remains deferred behind an explicit school/convention boundary instead of being flattened into the core table.
 5. **Seasonal support / strength:** only with explicit convention and weighting boundaries; no universal percentage model.
