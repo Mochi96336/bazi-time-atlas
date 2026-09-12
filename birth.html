@@ -20,14 +20,14 @@
           <a class="active" href="./birth.html" aria-current="page">出生</a>
           <a href="./sexagenary.html">六十甲子</a>
         </nav>
-        <div class="topbar-note">Birth · v0.1</div>
+        <div class="topbar-note">Birth · v0.2</div>
       </div>
     </header>
 
     <section class="hero birth-hero">
       <div class="eyebrow">One instant · four independent rules</div>
       <h1>同一個出生瞬間，<br>穿過四條不同規則。</h1>
-      <p class="lede">四柱不是「年推月、月推日、日推時」的一條鏈。這裡把同一個當地民用時間，同時投影到年界、月界、連續干支日與十二時辰。</p>
+      <p class="lede">四柱不是「年推月、月推日、日推時」的一條鏈。這裡把同一個出生地民用時間，同時投影到年界、月界、連續干支日與十二時辰。</p>
     </section>
 
     <section class="birth-layout">
@@ -44,13 +44,19 @@
         </div>
 
         <div class="birth-field-group">
-          <span class="field-label">出生時間</span>
-          <div class="segmented-input time-inputs">
-            <label><input id="birth-hour" name="birth-hour" type="number" inputmode="numeric" min="0" max="23" value="8" required aria-label="出生小時"><small>時</small></label>
-            <span class="time-colon">:</span>
-            <label><input id="birth-minute" name="birth-minute" type="number" inputmode="numeric" min="0" max="59" value="37" required aria-label="出生分鐘"><small>分</small></label>
+          <span class="field-label">出生時間與 UTC offset</span>
+          <div class="clock-zone-row">
+            <div class="segmented-input time-inputs">
+              <label><input id="birth-hour" name="birth-hour" type="number" inputmode="numeric" min="0" max="23" value="8" required aria-label="出生小時"><small>時</small></label>
+              <span class="time-colon">:</span>
+              <label><input id="birth-minute" name="birth-minute" type="number" inputmode="numeric" min="0" max="59" value="37" required aria-label="出生分鐘"><small>分</small></label>
+            </div>
+            <label class="utc-offset-input">
+              <span>UTC</span>
+              <input id="birth-utc-offset" name="birth-utc-offset" type="number" inputmode="decimal" min="-14" max="14" step="0.25" value="8" required aria-label="出生當時 UTC offset">
+            </label>
           </div>
-          <span class="field-hint">24 小時制</span>
+          <span class="field-hint">24 小時制；offset 填出生當時的實際 UTC 差，例如台灣 +8、印度 +5.5。</span>
         </div>
 
         <fieldset>
@@ -65,8 +71,8 @@
           </label>
         </fieldset>
         <div class="time-basis-note">
-          <strong>V0.1 時間基準：當地民用時間</strong>
-          <span>直接輸入出生地當時鐘面上的日期與時間。本版不做時區轉換、經度修正或真太陽時。</span>
+          <strong>V0.2 時間基準：出生地民用時間 + UTC offset</strong>
+          <span>offset 用來把年／月節氣界與太陽黃經對回同一真實瞬間。日／時仍依出生地鐘面時間；本版仍不做經度修正或真太陽時。</span>
         </div>
       </form>
 
@@ -159,24 +165,24 @@
       <div><strong>月</strong><span>十二「節」精確時刻</span></div>
       <div><strong>日</strong><span id="convention-day">23:00 換日</span></div>
       <div><strong>時</strong><span>時支 + 有效日干五鼠遁</span></div>
-      <div><strong>時間</strong><span>當地民用時間</span></div>
+      <div><strong>時間</strong><span id="convention-time">UTC+08:00 · 當地民用</span></div>
     </section>
 
-    <p class="footer-note">計算精確不代表命理解釋必然。本頁目前只處理四柱如何取得，不做性格、運勢、十神或大運解讀。</p>
+    <p class="footer-note">計算精確不代表命理解釋必然。本頁目前只處理四柱如何取得與出生瞬間的天文位置，不做性格、運勢、十神或大運解讀。</p>
 
     <details class="sources-panel">
       <summary>計算引擎與規則來源</summary>
       <div class="source-grid">
         <section class="source-group">
           <div class="source-kicker">Engine</div>
-          <p>四柱主計算使用固定版本 Tyme4ts 1.5.2 的精確時刻 API。年度以立春瞬間切換，月份以節令瞬間切換；專案另外用固定測試鎖住邊界行為。</p>
+          <p>四柱與太陽黃經共用固定版本 Tyme4ts 1.5.2 的天文核心。年度以立春瞬間切換、月份以節令瞬間切換；太陽黃經另以 48 個節氣節點測試鎖住。</p>
           <div class="source-links">
             <a href="https://github.com/6tail/tyme4ts" target="_blank" rel="noreferrer">6tail · Tyme4ts</a>
           </div>
         </section>
         <section class="source-group">
           <div class="source-kicker">Convention</div>
-          <p>23:00 與 00:00 換日是不同排盤口徑。00:00 模式會先確定有效日干，再依五鼠遁重新取得時干；兩種模式不混用。</p>
+          <p>23:00 與 00:00 換日是不同排盤口徑。UTC offset 只把同一民用鐘面時間定位成真實瞬間，不等於經度修正或真太陽時。</p>
           <div class="source-links">
             <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/zi-hour-day-boundary" target="_blank" rel="noreferrer">OpenFate · 子時換日</a>
             <a href="https://wiki.openfate.ai/zh-hant/bazi/calendar/five-rats-method" target="_blank" rel="noreferrer">OpenFate · 五鼠遁</a>
