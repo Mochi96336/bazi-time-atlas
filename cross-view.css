@@ -145,8 +145,9 @@
 }
 
 @media (max-width: 600px) {
-  .clock-zone-row { grid-template-columns: minmax(0, 1fr) 88px; gap: 6px; }
-  .utc-offset-input { padding-inline: 6px; }
+  .birth-controls > .birth-field-group { grid-column: 1 / -1; }
+  .clock-zone-row { grid-template-columns: minmax(0, 1fr) 96px; gap: 7px; }
+  .utc-offset-input { padding-inline: 7px; }
   .utc-offset-input input { min-height: 39px; font-size: 12px; }
   .birth-projection-link {
     grid-template-columns: 1fr auto;
