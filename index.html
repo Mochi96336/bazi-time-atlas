@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="以太陽黃經為共同座標，探索二十四節氣、八字月建、五行與熱帶黃道的關係。">
+  <title>BaZi Time Atlas</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="site-shell">
+    <header class="topbar">
+      <div class="brand">BaZi Time Atlas</div>
+      <div class="topbar-note">Annual atlas · v0.1</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">One solar cycle · multiple symbolic systems</div>
+      <h1>同一個太陽週期，<br>不同的切分方式。</h1>
+      <p class="lede">以太陽黃經 0°–360° 為共同座標，先把二十四節氣、八字月建、五行與熱帶黃道放回同一個幾何底盤。先看清楚它們在哪裡重疊，再談它們代表什麼。</p>
+    </section>
+
+    <nav class="controls" aria-label="圖層控制">
+      <button class="layer-toggle active" type="button" data-toggle-layer="terms" aria-pressed="true">24 節氣</button>
+      <button class="layer-toggle active" type="button" data-toggle-layer="months" aria-pressed="true">八字月支</button>
+      <button class="layer-toggle active" type="button" data-toggle-layer="seasons" aria-pressed="true">四季</button>
+      <button class="layer-toggle active" type="button" data-toggle-layer="zodiac" aria-pressed="true">熱帶黃道</button>
+      <button class="layer-toggle active" type="button" data-toggle-layer="metadata" aria-pressed="true">西方元素／模式</button>
+      <button class="layer-toggle" type="button" data-toggle-layer="debug" aria-pressed="false">角度校驗</button>
+    </nav>
+
+    <section class="atlas-layout">
+      <div class="wheel-stage">
+        <div class="wheel-frame">
+          <svg id="atlas-wheel" viewBox="-45 -45 950 950" role="img" aria-label="太陽黃經、二十四節氣、八字月支、五行、四季與熱帶黃道的共同圓盤">
+            <g data-layer-group="seasons"></g>
+            <g data-layer-group="months"></g>
+            <g data-layer-group="terms"></g>
+            <g data-layer-group="zodiac"></g>
+            <g data-layer-group="debug" hidden></g>
+            <circle cx="430" cy="430" r="91" class="center-disc"></circle>
+            <text x="430" y="397" class="center-title">太陽黃經</text>
+            <text x="430" y="438" class="center-number">0–360°</text>
+            <text x="430" y="465" class="center-note">0° = 春分點</text>
+          </svg>
+        </div>
+        <div class="legend-strip" aria-label="五行圖例">
+          <span><i class="legend-dot" style="background:var(--wood)"></i>木</span>
+          <span><i class="legend-dot" style="background:var(--fire)"></i>火</span>
+          <span><i class="legend-dot" style="background:var(--earth)"></i>土</span>
+          <span><i class="legend-dot" style="background:var(--metal)"></i>金</span>
+          <span><i class="legend-dot" style="background:var(--water)"></i>水</span>
+          <span>粗節氣刻度 = 「節」 = 八字月界</span>
+        </div>
+      </div>
+
+      <aside class="inspector" aria-live="polite">
+        <div id="detail-eyebrow" class="eyebrow">八字月支</div>
+        <h2 id="detail-title">卯月</h2>
+        <p id="detail-body">驚蟄 → 清明。這是一個由兩個「節」界定的 30° 太陽黃經區段。</p>
+        <div id="detail-facts" class="fact-row"></div>
+        <p id="detail-relation" class="relationship"></p>
+        <div class="explain">
+          <strong>讀圖方式</strong>
+          <ul>
+            <li>所有圓環共用同一個太陽黃經座標。</li>
+            <li>八字月界與熱帶黃道宮界都每 30° 一次，但彼此錯開 15°。</li>
+            <li>中國五行與西方四元素只並列觀察，不畫等號。</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <p class="footer-note">這一版只處理「一年」的共同幾何。六十甲子不是一年 60 等分，因此暫時不放進年度圓盤；日柱、時柱與出生排盤會在獨立視圖中處理。</p>
+  </main>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
