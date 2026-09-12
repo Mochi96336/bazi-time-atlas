@@ -18,7 +18,7 @@ function dumpDom(path) {
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
-    "--virtual-time-budget=900",
+    "--virtual-time-budget=1200",
     "--dump-dom",
     url,
   ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
@@ -40,6 +40,26 @@ const cases = [
     },
   },
   {
+    path: "?lambda=271.25",
+    label: "Annual exact Birth projection",
+    assert(dom) {
+      return /data-birth-projection="271\.250000"/.test(dom) &&
+        /class="birth-projection-readout"/.test(dom) &&
+        /λ 271\.25°/.test(dom) &&
+        /id="center-value"[^>]*>子月<\/text>/.test(dom);
+    },
+  },
+  {
+    path: "birth.html",
+    label: "Birth exact Annual link",
+    assert(dom) {
+      return /class="birth-projection-link"/.test(dom) &&
+        /href="\.\/\?month=[^"]+&amp;lambda=\d+\.\d+"/.test(dom) &&
+        /年度盤精確定位/.test(dom) &&
+        /UTC\+08:00/.test(dom);
+    },
+  },
+  {
     path: "sexagenary.html?ganzhi=%E4%B9%99%E9%85%89",
     label: "Sexagenary Gan-Zhi deep link",
     assert(dom) {
@@ -52,7 +72,7 @@ const cases = [
 for (const testCase of cases) {
   const { url, dom } = dumpDom(testCase.path);
   if (!testCase.assert(dom)) {
-    throw new Error(`${testCase.label} did not resolve expected selection: ${url}`);
+    throw new Error(`${testCase.label} did not resolve expected state: ${url}`);
   }
   console.log(`[deep-link] PASS ${testCase.label}: ${url}`);
 }
