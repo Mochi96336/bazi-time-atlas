@@ -1,0 +1,22 @@
+.pillar-summary [role="link"] {
+  outline: none;
+  transition: background 130ms ease, box-shadow 130ms ease;
+}
+.pillar-summary [role="link"]:hover {
+  background: color-mix(in srgb, var(--accent-soft) 44%, transparent);
+}
+.pillar-summary [role="link"]:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 68%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 54%, transparent);
+}
+.pillar-summary .day-master-summary[role="link"]:hover,
+.pillar-summary .day-master-summary[role="link"]:focus-visible {
+  background: color-mix(in srgb, var(--accent-soft) 82%, transparent);
+}
+.birth-stage > .track-note a {
+  color: #41655b;
+  font-weight: 720;
+  text-decoration-color: color-mix(in srgb, #41655b 34%, transparent);
+  text-underline-offset: 3px;
+}
+.birth-stage > .track-note a:hover { color: #294b42; }
