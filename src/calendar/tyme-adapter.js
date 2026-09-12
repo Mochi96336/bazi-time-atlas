@@ -37,6 +37,12 @@ function validateUtcOffset(value) {
   }
 }
 
+function validateDayBoundary(dayBoundary) {
+  if (!Object.values(DAY_BOUNDARY).includes(dayBoundary)) {
+    throw new RangeError(`unsupported dayBoundary: ${dayBoundary}`);
+  }
+}
+
 function pillarView(sixtyCycle) {
   return {
     name: sixtyCycle.getName(),
@@ -91,6 +97,61 @@ function resolveEightChar(solarTime, dayBoundary) {
   throw new RangeError(`unsupported dayBoundary: ${dayBoundary}`);
 }
 
+function dayHourFromSolarTime(solarTime, sourceHour, dayBoundary) {
+  const eightChar = resolveEightChar(solarTime, dayBoundary);
+  const day = pillarView(eightChar.getDay());
+  let hour = pillarView(eightChar.getHour());
+
+  if (dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT && sourceHour === 23) {
+    hour = hourPillarFromDayStem(day.stem, hour.branch);
+  }
+
+  return { day, hour };
+}
+
+/**
+ * Resolve only Day + Hour pillars from one already-normalized local clock.
+ *
+ * This helper deliberately knows nothing about UTC, longitude, solar terms or
+ * which clock basis produced the supplied fields. Callers may therefore use
+ * the exact same day-boundary + Five-Rats logic for civil, mean-solar or
+ * apparent-solar what-if comparisons without moving the Year/Month instant.
+ */
+export function resolveDayHourPillars(input, options = {}) {
+  validateInput(input);
+  const dayBoundary = options.dayBoundary ?? DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY;
+  validateDayBoundary(dayBoundary);
+
+  const minute = input.minute ?? 0;
+  const second = input.second ?? 0;
+  const solarTime = SolarTime.fromYmdHms(
+    input.year,
+    input.month,
+    input.day,
+    input.hour,
+    minute,
+    second
+  );
+  const pillars = dayHourFromSolarTime(solarTime, input.hour, dayBoundary);
+
+  return {
+    input: {
+      year: input.year,
+      month: input.month,
+      day: input.day,
+      hour: input.hour,
+      minute,
+      second
+    },
+    convention: {
+      dayBoundary,
+      hourStemRule: "five-rats-from-effective-day-stem",
+      timeBasis: options.timeBasis ?? "provided-local-clock"
+    },
+    pillars
+  };
+}
+
 /**
  * Tyme's solar-term clock is expressed in UTC+8. Convert one birthplace-local
  * civil timestamp to the UTC+8 clock reading of the SAME physical instant.
@@ -116,9 +177,7 @@ function toSolarTermReferenceTime(localSolarTime, utcOffsetHours) {
 export function resolveBirthPillars(input, options = {}) {
   validateInput(input);
   const dayBoundary = options.dayBoundary ?? DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY;
-  if (!Object.values(DAY_BOUNDARY).includes(dayBoundary)) {
-    throw new RangeError(`unsupported dayBoundary: ${dayBoundary}`);
-  }
+  validateDayBoundary(dayBoundary);
 
   const utcOffsetHours = options.utcOffsetHours ?? SOLAR_TERM_REFERENCE_UTC_OFFSET;
   validateUtcOffset(utcOffsetHours);
@@ -144,20 +203,10 @@ export function resolveBirthPillars(input, options = {}) {
   );
 
   // Day/hour are birthplace-local civil-time rules.
-  const localEightChar = resolveEightChar(localSolarTime, dayBoundary);
+  const { day, hour } = dayHourFromSolarTime(localSolarTime, input.hour, dayBoundary);
 
   const year = pillarView(referenceEightChar.getYear());
   const month = pillarView(referenceEightChar.getMonth());
-  const day = pillarView(localEightChar.getDay());
-  let hour = pillarView(localEightChar.getHour());
-
-  // Tyme's Sect2 provider preserves the civil-date day pillar at late Zi but
-  // intentionally keeps the library's default Zi-hour stem. Our user-facing
-  // CIVIL_MIDNIGHT mode applies one coherent rule: first determine the
-  // effective local day pillar, then feed that day stem into Five Rats.
-  if (dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT && input.hour === 23) {
-    hour = hourPillarFromDayStem(day.stem, hour.branch);
-  }
 
   return {
     input: {
