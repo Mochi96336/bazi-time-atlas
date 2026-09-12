@@ -22,20 +22,25 @@ function contains(month, longitude) {
     : angle >= month.start || angle < month.end;
 }
 
+function queryLongitude() {
+  if (!params.has("lambda")) return Number.NaN;
+  return Number(params.get("lambda"));
+}
+
 function monthFromQuery() {
   const requested = params.get("month");
   if (requested) {
     const exact = baziMonths.find(month => month.branch === requested);
     if (exact) return exact;
   }
-  const longitude = Number(params.get("lambda"));
+  const longitude = queryLongitude();
   if (Number.isFinite(longitude)) return baziMonths.find(month => contains(month, longitude)) ?? null;
   return null;
 }
 
 if (compat) {
   const month = monthFromQuery();
-  const rawLongitude = Number(params.get("lambda"));
+  const rawLongitude = queryLongitude();
   const yearStem = params.get("yearStem");
 
   if (Number.isFinite(rawLongitude)) {
