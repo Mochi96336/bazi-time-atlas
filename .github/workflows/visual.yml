@@ -24,9 +24,11 @@ jobs:
       - name: Check app syntax
         run: |
           node --check src/app.js
+          node --check src/birth.js
           node --check src/sexagenary-data.js
           node --check src/sexagenary.js
           node --check src/calendar/tyme-adapter.js
+          node --check scripts/prepare-vendor.mjs
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
