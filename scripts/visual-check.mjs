@@ -65,6 +65,20 @@ captures.push(
     width: 390,
     height: 1700,
   },
+  {
+    name: "birth-three-harmony-1440x1750.png",
+    page: "birth-three-harmony",
+    path: "birth.html?relations=1&date=2016-12-20&time=08%3A00&utc=8",
+    width: 1440,
+    height: 1750,
+  },
+  {
+    name: "birth-three-meeting-390x1900.png",
+    page: "birth-three-meeting",
+    path: "birth.html?relations=1&date=2022-03-20&time=08%3A00&utc=8",
+    width: 390,
+    height: 1900,
+  },
 );
 
 function findBrowser() {
