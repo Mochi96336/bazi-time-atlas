@@ -1,0 +1,46 @@
+name: Visual PNG self-check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Locate system Chromium
+        run: |
+          command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/bazi-time-atlas-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/bazi-time-atlas-http.log
+          exit 1
+      - name: Capture PNG evidence
+        run: npm run visual:check
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-png-selfcheck
+          path: tmp/visual-check/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6

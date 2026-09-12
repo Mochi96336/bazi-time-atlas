@@ -42,6 +42,25 @@ Run geometry/data invariants with:
 npm test
 ```
 
+### Lightweight PNG visual self-check
+
+The `Visual PNG self-check` workflow follows the same lightweight pattern used in the Relay project: it calls the system-installed Chromium/Chrome directly in headless mode, with no Playwright or Puppeteer dependency.
+
+It captures two deterministic viewports:
+
+- `surface-1440x900.png`
+- `surface-390x844.png`
+
+Artifacts are written to `tmp/visual-check/` and uploaded as `visual-png-selfcheck` for seven days. This is intentionally a smoke/evidence check rather than a pixel-diff visual regression gate while the layout is still changing.
+
+Local use:
+
+```bash
+python -m http.server 4173
+# in another terminal; requires chromium/chrome on PATH
+npm run visual:check
+```
+
 ## Roadmap
 
 1. Annual Atlas — current milestone
