@@ -32,8 +32,8 @@ A single birth instant is resolved through four separate rules instead of a fake
 - hour branch follows the local clock while hour stem derives from the effective day stem
 - 23:00 Zi-initial vs 00:00 civil-midnight day boundaries are explicit conventions
 - UTC offset locates the real instant for solar-term boundaries and exact solar longitude
-- optional east-positive/west-negative birth longitude now exposes **local mean solar time** as a comparison preview; it does not yet drive the Four Pillars
-- local mean solar time applies longitude correction only; the Equation of Time is still deliberately absent, so the preview is not labelled local apparent / “true” solar time
+- optional east-positive/west-negative birth longitude exposes **local mean solar time** as a comparison preview; it does not yet drive the Four Pillars
+- local mean solar time applies longitude correction only in the UI; a separately reference-tested Equation-of-Time engine now exists, but it is not yet applied to the Birth preview or Four Pillars
 - visible stems and hidden stems can be classified relative to the Day Master through the Ten Gods
 - Ten Gods remain structural labels only: no strength, weighting, auspiciousness, personality, or event prediction
 - the four visible pillars are scanned pairwise for Heavenly-Stem Five Combinations and Earthly-Branch Six Harmonies / Six Clashes / Six Harms
@@ -54,6 +54,7 @@ The 60 Jiazi are generated from synchronized 10-stem and 12-branch phases. The 6
 - Chinese Five Phases and Western four elements remain distinct systems.
 - Ambiguous conventions are exposed instead of silently chosen.
 - A civil timestamp, local mean solar time, and local apparent solar time are separate layers; the atlas does not call longitude-only correction “true solar time.”
+- Equation of Time uses the astronomical sign convention `apparent solar time − mean solar time`; its engine is reference-tested independently before it is allowed to drive any Birth convention.
 - Hidden stems are branch internals, not another permanent annual ring.
 - Ten Gods are derived from Five-Phase direction + yin-yang parity relative to the Day Master.
 - Pairwise stem/branch relations are symmetric registry facts first; transformation and interpretive conditions remain separate.
@@ -77,6 +78,8 @@ Run all rule/data invariants with:
 ```bash
 npm test
 ```
+
+Astronomy tests include the 24 solar-term longitude nodes, local-mean-solar rollover cases, the published NREL SPA Equation-of-Time worked example, an independent USNO approximate-coordinate differential check across the year, and physical-instant invariance across UTC representations.
 
 ### Lightweight PNG visual self-check
 
@@ -102,7 +105,7 @@ npm run visual:check
 ## Roadmap
 
 1. **Time skeleton — complete:** annual geometry, Birth derivation, 60 Jiazi reference.
-2. **Time-basis refinement — active:** explicit UTC offset and exact solar longitude are stable; longitude-based local mean solar time is now exposed as a preview. Local apparent solar time / Equation of Time remains separate work and will not be approximated silently.
+2. **Time-basis refinement — active:** explicit UTC offset, exact solar longitude, and longitude-based local mean solar time are stable; the Equation-of-Time engine is now validated against NREL SPA and USNO but remains intentionally disconnected from Birth until the local-apparent-time composition and convention selector are reviewed.
 3. **Deterministic BaZi structure — active:** Five Tigers, hidden stems, Day Master → Ten Gods, and the visible derivation map from Five-Phase direction + polarity.
 4. **Stem / branch interactions — mature deterministic core:** visible-stem 五合; visible-branch 六合 / 六沖 / 六害; complete visible 三合 / 三會; directed / mutual / self 刑. 六破 remains deferred behind an explicit school/convention boundary instead of being flattened into the core table.
 5. **Seasonal support / strength:** only with explicit convention and weighting boundaries; no universal percentage model.
