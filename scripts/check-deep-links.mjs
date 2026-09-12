@@ -90,10 +90,41 @@ const cases = [
         /data-stem="壬"[^>]*data-ten-god="傷官"/.test(dom) &&
         /data-hidden-stem="癸"[^>]*data-ten-god="食神"[^>]*data-hidden-role="主"/.test(dom) &&
         openDetailsById(dom, "pillar-relations-panel") &&
-        /data-relation-count="1"/.test(dom) &&
+        /data-relation-count="1"[^>]*data-group-count="0"/.test(dom) &&
         /data-relation-domain="branch"[^>]*data-relation-kind="six-harmony"[^>]*data-left-pillar="year"[^>]*data-right-pillar="hour"/.test(dom) &&
         /data-relation-kind="six-harmony"/.test(dom) &&
-        /年支/.test(dom) && /時支/.test(dom) && /六合/.test(dom);
+        /年支/.test(dom) && /時支/.test(dom) && /六合/.test(dom) &&
+        /目前四柱沒有完整三合／三會/.test(dom);
+    },
+  },
+  {
+    path: "birth.html?relations=1&date=2016-12-20&time=08%3A00&utc=8",
+    label: "Birth complete 申子辰 three-harmony deep link",
+    assert(dom) {
+      return /data-query-preset="1"/.test(dom) &&
+        /id="birth-readout"[^>]*>2016-12-20 · 08:00<\/h2>/.test(dom) &&
+        openDetailsById(dom, "pillar-relations-panel") &&
+        /data-group-count="1"/.test(dom) &&
+        /data-group-kind="three-harmony"[^>]*data-group-element="水"[^>]*data-group-members="申子辰"/.test(dom) &&
+        /data-group-member="申"[^>]*data-support-pillars="year"/.test(dom) &&
+        /data-group-member="子"[^>]*data-support-pillars="month,day"/.test(dom) &&
+        /data-group-member="辰"[^>]*data-support-pillars="hour"/.test(dom) &&
+        /三合/.test(dom) && /完整三支/.test(dom);
+    },
+  },
+  {
+    path: "birth.html?relations=1&date=2022-03-20&time=08%3A00&utc=8",
+    label: "Birth complete 寅卯辰 three-meeting deep link",
+    assert(dom) {
+      return /data-query-preset="1"/.test(dom) &&
+        /id="birth-readout"[^>]*>2022-03-20 · 08:00<\/h2>/.test(dom) &&
+        openDetailsById(dom, "pillar-relations-panel") &&
+        /data-group-count="1"/.test(dom) &&
+        /data-group-kind="three-meeting"[^>]*data-group-element="木"[^>]*data-group-members="寅卯辰"/.test(dom) &&
+        /data-group-member="寅"[^>]*data-support-pillars="year"/.test(dom) &&
+        /data-group-member="卯"[^>]*data-support-pillars="month"/.test(dom) &&
+        /data-group-member="辰"[^>]*data-support-pillars="hour"/.test(dom) &&
+        /春 · 東方 · 完整三支/.test(dom);
     },
   },
   {
