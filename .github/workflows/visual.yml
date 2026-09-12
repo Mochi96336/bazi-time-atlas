@@ -24,6 +24,7 @@ jobs:
       - name: Check app syntax
         run: |
           node --check src/kinetic-atlas.js
+          node --check src/kinetic-boundaries.js
           node --check src/legacy-annual-compat.js
           node --check src/app.js
           node --check src/annual-deep-link.js
@@ -45,12 +46,14 @@ jobs:
           node --check src/calendar/relation-models.js
           node --check src/calendar/time-basis-sensitivity.js
           node --check src/astronomy/solar-longitude.js
+          node --check src/astronomy/solar-term-boundaries.js
           node --check src/astronomy/mean-solar-time.js
           node --check src/astronomy/equation-of-time.js
           node --check src/astronomy/apparent-solar-time.js
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
           node --check scripts/check-mean-solar-preview.mjs
+          node --check scripts/check-kinetic-boundaries.mjs
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
@@ -73,6 +76,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify solar time preview
         run: node scripts/check-mean-solar-preview.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify exact kinetic boundaries
+        run: node scripts/check-kinetic-boundaries.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Capture PNG evidence
