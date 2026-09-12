@@ -7,6 +7,7 @@ import {
   tenGodDerivationForDayMaster
 } from "./calendar/ten-gods.js";
 import { visiblePillarPairRelations } from "./calendar/pillar-relations.js";
+import { visiblePillarBranchGroups } from "./calendar/branch-groups.js";
 
 const form = document.querySelector("#birth-form");
 const yearInput = document.querySelector("#birth-year");
@@ -67,6 +68,7 @@ let pillarRelationsCount;
 let pillarRelationsGraph;
 let pillarRelationsList;
 let pillarRelationsEmpty;
+let pillarGroupsBody;
 const dayRuleNote = document.querySelector("#day-rule-note");
 
 function installCrossViewLinks() {
@@ -128,16 +130,16 @@ function installPillarRelations() {
   const summary = document.createElement("summary");
   const summaryCopy = node("span", "pillar-relations-summary-copy");
   summaryCopy.append(
-    node("small", null, "VISIBLE PILLAR PAIRS"),
-    node("strong", null, "四柱表面關係 · 五合 / 六合 / 六沖")
+    node("small", null, "VISIBLE PILLARS · PAIRS + COMPLETE GROUPS"),
+    node("strong", null, "四柱表面關係 · 五合 / 六合 / 六沖 / 三合 / 三會")
   );
-  pillarRelationsCount = node("span", "pillar-relations-count", "0 命中");
+  pillarRelationsCount = node("span", "pillar-relations-count", "0 對 · 0 組");
   summary.append(summaryCopy, pillarRelationsCount);
 
   const intro = node(
     "p",
     "pillar-relations-intro",
-    "只掃年、月、日、時四柱表面的 4 個天干與 4 個地支，共 6 組柱對；不把藏干交叉加入。上排是天干、下排是地支。"
+    "Pair layer 掃年、月、日、時四柱表面的 6 組柱對；三支 layer 只認四柱中完整出現的三合／三會。兩層都不把藏干交叉加入，也不把缺一支的情況自動當成半合或半會。"
   );
 
   const graphWrap = node("div", "pillar-relations-graph-wrap");
@@ -145,32 +147,46 @@ function installPillarRelations() {
   pillarRelationsGraph.classList.add("pillar-relations-graph");
   pillarRelationsGraph.setAttribute("viewBox", "0 0 640 230");
   pillarRelationsGraph.setAttribute("role", "img");
-  pillarRelationsGraph.setAttribute("aria-label", "四柱明干明支關係圖");
+  pillarRelationsGraph.setAttribute("aria-label", "四柱明干明支 pair 關係圖");
   graphWrap.append(pillarRelationsGraph);
 
   pillarRelationsEmpty = node("span", "pillar-relations-empty");
   pillarRelationsList = node("div", "pillar-relations-list");
 
+  const groupsBand = node("section", "pillar-groups-band");
+  const groupsHead = node("div", "pillar-groups-head");
+  groupsHead.append(
+    node("small", null, "FULL 3-BRANCH SET"),
+    node("span", null, "完整三支才顯示")
+  );
+  pillarGroupsBody = node("div", "pillar-groups-body");
+  groupsBand.append(groupsHead, pillarGroupsBody);
+
   const footnote = node("p", "pillar-relations-footnote");
   footnote.append(
-    document.createTextNode("這裡的「合／沖」只代表傳統 pair membership；不等於合化成立、力量大小或吉凶判斷。來源交叉："),
-    sourceLink("https://www.donglishuzhai.net/chapter/5615.html", "《淵海子平》天干相合"),
-    document.createTextNode("、"),
-    sourceLink("https://www.donglishuzhai.net/chapter/5620.html", "十二支相沖"),
-    document.createTextNode("、"),
-    sourceLink(
-      "https://libokang.com/zh-hant/guji/bazi/%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE%E5%8E%9F%E6%96%87/",
-      "《子平真詮》刑沖會合"
-    ),
+    document.createTextNode("這裡的關係只表示傳統固定成員 membership；不等於合化成立、五行已轉化、力量大小或吉凶判斷。三合完整成員可對照 "),
+    sourceLink("https://zh.wikisource.org/zh-hant/%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%8C", "《三命通會》卷二"),
+    document.createTextNode("；寅卯辰、巳午未、申酉戌、亥子丑的連續方位結構可對照 "),
+    sourceLink("https://zh.wikisource.org/zh-hant/%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_%28%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC%29/%E5%8D%B706", "《三命通會》卷六"),
+    document.createTextNode("；今日常用「三會」名稱與完整度邊界另參 "),
+    sourceLink("https://wiki.openfate.ai/zh-hant/bazi/classics-schools-cases/case-method-for-three-meeting-frames", "OpenFate 三會局方法"),
     document.createTextNode("。")
   );
 
-  pillarRelationsPanel.append(summary, intro, graphWrap, pillarRelationsEmpty, pillarRelationsList, footnote);
+  pillarRelationsPanel.append(
+    summary,
+    intro,
+    graphWrap,
+    pillarRelationsEmpty,
+    pillarRelationsList,
+    groupsBand,
+    footnote
+  );
   tenGodPanel.insertAdjacentElement("afterend", pillarRelationsPanel);
 
   const footer = document.querySelector(".footer-note");
   if (footer) {
-    footer.textContent = "計算精確不代表命理解釋必然。本頁的十神與五合／六合／六沖只呈現結構關係，不據此推導性格、吉凶、強弱、喜用神或大運。";
+    footer.textContent = "計算精確不代表命理解釋必然。本頁的十神、五合／六合／六沖與完整三合／三會只呈現結構關係，不據此推導性格、吉凶、強弱、喜用神或大運。";
   }
 }
 
@@ -181,6 +197,36 @@ function sourceLink(href, text) {
   link.rel = "noreferrer";
   link.textContent = text;
   return link;
+}
+
+function applyBirthQueryInputs() {
+  let applied = false;
+  const date = query.get("date");
+  const dateMatch = date?.match(/^(\d{1,4})-(\d{1,2})-(\d{1,2})$/);
+  if (dateMatch) {
+    const [, year, month, day] = dateMatch;
+    yearInput.value = String(Number(year));
+    monthInput.value = String(Number(month));
+    dayInput.value = String(Number(day));
+    applied = true;
+  }
+
+  const time = query.get("time");
+  const timeMatch = time?.match(/^(\d{1,2}):(\d{2})$/);
+  if (timeMatch) {
+    const [, hour, minute] = timeMatch;
+    hourInput.value = String(Number(hour));
+    minuteInput.value = String(Number(minute));
+    applied = true;
+  }
+
+  const utc = query.get("utc");
+  if (utc !== null && utc.trim() !== "" && Number.isFinite(Number(utc))) {
+    utcOffsetInput.value = String(Number(utc));
+    applied = true;
+  }
+
+  if (applied) form.dataset.queryPreset = "1";
 }
 
 function selectedBoundary() {
@@ -365,8 +411,59 @@ function pillarIndex(key) {
   return ["year", "month", "day", "hour"].indexOf(key);
 }
 
+function renderCompleteBranchGroups(groups) {
+  pillarGroupsBody.replaceChildren();
+
+  if (groups.length === 0) {
+    const empty = node(
+      "span",
+      "pillar-group-empty",
+      "目前四柱沒有完整三合／三會。V1 不把只出現兩個成員的情況標成半合或半會。"
+    );
+    pillarGroupsBody.append(empty);
+    return;
+  }
+
+  for (const group of groups) {
+    const strip = node("article", "pillar-group-strip");
+    strip.dataset.groupKind = group.kind;
+    strip.dataset.groupElement = group.element;
+    strip.dataset.groupMembers = group.members.join("");
+
+    const head = document.createElement("header");
+    head.append(
+      node("strong", null, group.label),
+      node("b", null, group.element),
+      node(
+        "span",
+        null,
+        group.kind === "three-meeting"
+          ? `${group.season} · ${group.direction}方 · 完整三支`
+          : "完整三支"
+      )
+    );
+
+    const members = node("div", "pillar-group-members");
+    for (const support of group.support) {
+      const member = node("div", "pillar-group-member");
+      member.dataset.groupMember = support.value;
+      member.dataset.supportPillars = support.pillars.join(",");
+      member.append(
+        node("b", null, support.value),
+        node("span", null, support.pillars.map(key => `${shortPillarLabels[key]}支`).join(" / ")),
+        node("small", null, "member")
+      );
+      members.append(member);
+    }
+
+    strip.append(head, members);
+    pillarGroupsBody.append(strip);
+  }
+}
+
 function renderPillarRelations(pillars) {
   const relations = visiblePillarPairRelations(pillars);
+  const groups = visiblePillarBranchGroups(pillars);
   const centers = [80, 240, 400, 560];
   const cardY = 70;
   const cardHeight = 104;
@@ -376,8 +473,9 @@ function renderPillarRelations(pillars) {
 
   pillarRelationsPanel.hidden = false;
   if (forceRelationsOpen) pillarRelationsPanel.open = true;
-  pillarRelationsCount.textContent = `${relations.length} 命中`;
+  pillarRelationsCount.textContent = `${relations.length} 對 · ${groups.length} 組`;
   pillarRelationsCount.dataset.relationCount = String(relations.length);
+  pillarRelationsCount.dataset.groupCount = String(groups.length);
   pillarRelationsGraph.replaceChildren();
   pillarRelationsList.replaceChildren();
 
@@ -456,7 +554,7 @@ function renderPillarRelations(pillars) {
 
   if (relations.length === 0) {
     pillarRelationsEmpty.hidden = false;
-    pillarRelationsEmpty.textContent = "目前四柱在這三種 V1 關係中沒有命中；這不代表不存在其他支間關係。";
+    pillarRelationsEmpty.textContent = "目前四柱在五合／六合／六沖中沒有 pair 命中；完整三支組另見下方。";
   } else {
     pillarRelationsEmpty.hidden = true;
     pillarRelationsEmpty.textContent = "";
@@ -478,6 +576,8 @@ function renderPillarRelations(pillars) {
     );
     pillarRelationsList.append(chip);
   }
+
+  renderCompleteBranchGroups(groups);
 }
 
 function renderResult(result, longitude, utcOffsetHours) {
@@ -556,6 +656,7 @@ function update() {
 installCrossViewLinks();
 installTenGodDerivation();
 installPillarRelations();
+applyBirthQueryInputs();
 form.addEventListener("input", update);
 form.addEventListener("change", update);
 update();
