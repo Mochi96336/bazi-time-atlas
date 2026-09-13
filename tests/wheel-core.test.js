@@ -44,28 +44,39 @@ import { ringAtWorldPoint } from "../src/wheel/ring-drag-controller.js";
 const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 const boundaryCss = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 
-test("six primary rings form one contiguous radial stack without moving the established outer five", () => {
+test("five primary rings encode increasing temporal scale with zodiac inside the annual band", () => {
   assert.equal(assertWheelModel(), true);
-  assert.equal(RINGS.length, 6);
-  assert.deepEqual(SEXAGENARY_RING_IDS, ["hour", "year", "month", "day"]);
-  assert.deepEqual(GUIDE_RADII, [686, 760, 834, 908, 982, 1072, 1182]);
+  assert.deepEqual(RINGS.map(ring => ring.id), ["hour", "day", "solar", "month", "year"]);
+  assert.equal(RINGS.length, 5);
+  assert.deepEqual(SEXAGENARY_RING_IDS, ["hour", "day", "month", "year"]);
+  assert.deepEqual(GUIDE_RADII, [686, 760, 834, 916, 982, 1072, 1182]);
 
   for (let i = 1; i < RINGS.length; i += 1) {
     assert.equal(RINGS[i].innerRadius, RINGS[i - 1].outerRadius);
   }
   assert.equal(RINGS[0].innerRadius, RADII.inner);
-  assert.equal(RINGS.at(-1).outerRadius, RADII.zodiacOuter);
+  assert.equal(RINGS.at(-1).outerRadius, RADII.outer);
 
-  assert.equal(RADII.hourOuter, 760, "hour ring should grow inward from the former envelope");
-  assert.equal(ringModel("year").innerRadius, 760, "existing year ring must stay at its previous radius");
-  assert.equal(RADII.yearOuter, 834);
-  assert.equal(RADII.monthOuter, 908);
-  assert.equal(RADII.dayOuter, 982);
-  assert.equal(RADII.solarOuter, 1072);
-  assert.equal(RADII.zodiacOuter, 1182);
+  assert.equal(RADII.hourOuter, 760);
+  assert.equal(RADII.dayOuter, 834);
+  assert.equal(RADII.solarTermOuter, 916);
+  assert.equal(RADII.solarOuter, 982);
+  assert.equal(RADII.monthOuter, 1072);
+  assert.equal(RADII.yearOuter, 1182);
+  assert.equal(ringModel("hour").cycleScale, "~5 days");
+  assert.equal(ringModel("day").cycleScale, "60 days");
+  assert.equal(ringModel("solar").cycleScale, "1 year");
+  assert.equal(ringModel("month").cycleScale, "~5 years");
+  assert.equal(ringModel("year").cycleScale, "60 years");
+
+  const zodiac = ringModel("zodiac");
+  assert.equal(zodiac.phaseKind, "derived");
+  assert.equal(zodiac.innerRadius, RADII.solarTermOuter);
+  assert.equal(zodiac.outerRadius, RADII.solarOuter);
+  assert.equal(zodiac.linkedPhaseId, "solar");
 });
 
-test("ring model carries linked/free drag contracts for all six layers", () => {
+test("five primary rings carry drag contracts while zodiac remains derived metadata", () => {
   for (const ring of RINGS) {
     assert.equal(ring.draggable, true, `${ring.id} should be draggable`);
     assert.equal(ring.defaultLinked, true, `${ring.id} should start linked to time`);
@@ -75,20 +86,23 @@ test("ring model carries linked/free drag contracts for all six layers", () => {
   assert.equal(ringModel("hour").phaseSource, "hour-pillar");
   assert.equal(ringModel("year").snapDegrees, 6);
   assert.equal(ringModel("solar").snapDegrees, 15);
-  assert.equal(ringModel("zodiac").snapDegrees, 30);
   assert.equal(ringModel("solar").phaseSource, "solar-longitude");
+  assert.equal(ringModel("zodiac").snapDegrees, 30);
   assert.equal(ringModel("zodiac").phaseSource, "solar-longitude");
   assert.equal(ringModel("zodiac").linkedPhaseId, "solar");
+  assert.equal(ringModel("zodiac").draggable, undefined);
 });
 
-test("radial hit testing selects every ring without DOM bounding boxes", () => {
+test("radial hit testing selects primary rings and never exposes zodiac as a separate target", () => {
   for (const ring of RINGS) {
     const radius = (ring.innerRadius + ring.outerRadius) / 2;
     const point = pointAt(WHEEL_CENTER, radius, -90);
     assert.equal(ringAtWorldPoint(point)?.id, ring.id);
   }
+  const zodiacRadius = (ringModel("zodiac").innerRadius + ringModel("zodiac").outerRadius) / 2;
+  assert.equal(ringAtWorldPoint(pointAt(WHEEL_CENTER, zodiacRadius, -90))?.id, "solar");
   assert.equal(ringAtWorldPoint(pointAt(WHEEL_CENTER, RADII.inner - 5, -90)), null);
-  assert.equal(ringAtWorldPoint(pointAt(WHEEL_CENTER, RADII.zodiacOuter + 5, -90)), null);
+  assert.equal(ringAtWorldPoint(pointAt(WHEEL_CENTER, RADII.outer + 5, -90)), null);
 });
 
 test("linked and detached ring pose never mutates the model angle", () => {
@@ -130,34 +144,34 @@ test("polar geometry uses one SVG-world center and round-trips angles", () => {
 
 test("paths are derived from the canonical center rather than CSS transforms", () => {
   const hourAnnulus = annularSectorPath(WHEEL_CENTER, RADII.inner, RADII.hourOuter, 0, 6);
-  const fan = fanSectorPath(WHEEL_CENTER, RADII.zodiacOuter + 28, FAN.start, FAN.end);
+  const fan = fanSectorPath(WHEEL_CENTER, RADII.outer + 28, FAN.start, FAN.end);
   assert.match(hourAnnulus, /^M /);
   assert.match(hourAnnulus, /A 760 760/);
   assert.match(hourAnnulus, /A 686 686/);
   assert.match(fan, new RegExp(`^M ${WHEEL_CENTER.x.toFixed(3)} ${WHEEL_CENTER.y.toFixed(3)}`));
 });
 
-test("camera is a separate view over the world geometry", () => {
-  const camera = instrumentViewBox({ center: WHEEL_CENTER, outerRadius: RADII.zodiacOuter });
+test("camera is a separate view over the unchanged world envelope", () => {
+  const camera = instrumentViewBox({ center: WHEEL_CENTER, outerRadius: RADII.outer });
   assert.deepEqual(camera, { x: 0, y: 58, width: 1200, height: 760 });
   assert.equal(viewBoxString(camera), "0.000 58.000 1200.000 760.000");
   assert.equal(DEFAULT_VIEWPORT.width, 1200);
   assert.equal(CURSOR_ANGLE, -90);
 });
 
-test("responsive camera replaces the old CSS fake zoom with centered viewBox crops", () => {
+test("responsive camera keeps the same crops after the internal radial hierarchy changes", () => {
   assert.equal(cameraModeForWidth(1440), "desktop");
   assert.equal(cameraModeForWidth(820), "compact");
   assert.equal(cameraModeForWidth(481), "compact");
   assert.equal(cameraModeForWidth(480), "mobile");
   assert.equal(cameraModeForWidth(390), "mobile");
 
-  const desktop = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.zodiacOuter, viewportWidth: 1440 });
+  const desktop = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 1440 });
   assert.equal(desktop.mode, "desktop");
   assert.equal(desktop.zoom, 1);
   assert.deepEqual(desktop.viewBox, { x: 0, y: 58, width: 1200, height: 760 });
 
-  const compact = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.zodiacOuter, viewportWidth: 700 });
+  const compact = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 700 });
   assert.equal(compact.mode, "compact");
   assert.equal(compact.zoom, CAMERA_ZOOM.compact);
   assert.ok(Math.abs(compact.viewBox.x - 145.4545454545) < 1e-9);
@@ -165,7 +179,7 @@ test("responsive camera replaces the old CSS fake zoom with centered viewBox cro
   assert.equal(compact.viewBox.y, 58);
   assert.equal(compact.viewBox.height, 760);
 
-  const mobile = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.zodiacOuter, viewportWidth: 390 });
+  const mobile = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 390 });
   assert.equal(mobile.mode, "mobile");
   assert.equal(mobile.zoom, CAMERA_ZOOM.mobile);
   assert.ok(Math.abs(mobile.viewBox.x - 339.1304347826) < 1e-9);
