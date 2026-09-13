@@ -28,21 +28,28 @@ export function createRingDragController({
   onPoseChange,
   onDragStart,
   onDragEnd,
+  onLinkedDragStart,
+  onLinkedDragDelta,
+  onLinkedDragEnd,
   onModeChange
 }) {
   let compareMode = false;
   let active = null;
 
+  function updatePointerStyle() {
+    svg.style.touchAction = "none";
+    svg.style.cursor = active ? "grabbing" : "grab";
+  }
+
   function setCompareMode(enabled) {
     compareMode = Boolean(enabled);
-    svg.style.touchAction = compareMode ? "none" : "";
-    svg.style.cursor = compareMode ? "grab" : "";
-    if (!compareMode) active = null;
+    active = null;
+    updatePointerStyle();
     onModeChange?.(compareMode);
   }
 
   function begin(event) {
-    if (!compareMode || event.button > 0) return;
+    if (event.button > 0) return;
     const world = screenToWorld(svg, event.clientX, event.clientY);
     if (!world) return;
     const ring = ringAtWorldPoint(world);
@@ -55,10 +62,12 @@ export function createRingDragController({
     active = {
       pointerId: event.pointerId,
       ringId: ring.id,
+      mode: compareMode ? "free" : "linked",
       lastAngle: angleAt(WHEEL_CENTER, world)
     };
-    svg.style.cursor = "grabbing";
-    onDragStart?.(ring.id, state);
+    updatePointerStyle();
+    if (active.mode === "free") onDragStart?.(ring.id, state);
+    else onLinkedDragStart?.(ring.id, state);
   }
 
   function move(event) {
@@ -72,28 +81,35 @@ export function createRingDragController({
     if (Math.abs(delta) < 1e-9) return;
 
     const state = ringStates[active.ringId];
-    setManualOffset(state, state.manualOffset + delta);
-    onPoseChange?.(active.ringId, state);
+    if (active.mode === "free") {
+      setManualOffset(state, state.manualOffset + delta);
+      onPoseChange?.(active.ringId, state, delta);
+    } else {
+      onLinkedDragDelta?.(active.ringId, delta, state);
+    }
   }
 
   function finish(event) {
     if (!active || event.pointerId !== active.pointerId) return;
-    const ringId = active.ringId;
+    const { ringId, mode } = active;
     const state = ringStates[ringId];
     active = null;
     try { svg.releasePointerCapture(event.pointerId); } catch {}
-    svg.style.cursor = compareMode ? "grab" : "";
-    onDragEnd?.(ringId, state);
+    updatePointerStyle();
+    if (mode === "free") onDragEnd?.(ringId, state);
+    else onLinkedDragEnd?.(ringId, state);
   }
 
   svg.addEventListener("pointerdown", begin);
   svg.addEventListener("pointermove", move);
   svg.addEventListener("pointerup", finish);
   svg.addEventListener("pointercancel", finish);
+  updatePointerStyle();
 
   return Object.freeze({
     setCompareMode,
     get compareMode() { return compareMode; },
+    get activeMode() { return active?.mode ?? null; },
     destroy() {
       svg.removeEventListener("pointerdown", begin);
       svg.removeEventListener("pointermove", move);
