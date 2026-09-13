@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="拆開離散週期閉合與十二節長期天文形狀殘差的回歸實驗。">
+  <meta name="description" content="拆開離散週期閉合、十二節長期天文形狀殘差與模型範圍內近回歸搜尋的實驗。">
   <title>BaZi Time Atlas · Recurrence Lab</title>
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./recurrence.css">
   <link rel="stylesheet" href="./astronomical-residuals.css">
+  <link rel="stylesheet" href="./near-recurrence.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -93,6 +94,23 @@
     </section>
     <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
+    <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
+      <div class="near-search-head">
+        <div class="near-search-copy">
+          <div class="eyebrow">Exact-discrete candidates · astronomical ranking</div>
+          <h2>只在內圈全閉合的時刻，找外圈最接近的一次。</h2>
+          <p>搜尋只評估 24,000 年的整數倍，因此每個候選都保證公曆骨架、年序、日序 exact 回到 0；排序只看十二節形狀的最大絕對殘差，再以 RMS 打破平手。這是「近回歸」搜尋，不會把最接近的候選標成真正週期。</p>
+        </div>
+        <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
+        <div class="near-stat best"><span>目前最佳</span><strong id="near-best-delta">—</strong><small>仍是 24,000 年的整數倍</small></div>
+        <div class="near-stat"><span>最佳殘差</span><strong id="near-best-residual">—</strong><small>max absolute / RMS</small></div>
+      </div>
+      <div class="near-search-body">
+        <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
+        <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名"></div>
+      </div>
+    </section>
+
     <section class="closure-grid" aria-label="目前閉合狀態">
       <article data-closure="gregorian"><span>Gregorian frame</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
       <article data-closure="year"><span>Year sequence</span><strong id="year-status">—</strong><small>60 年干支年序</small></article>
@@ -114,17 +132,18 @@
       <div>
         <div class="eyebrow">Exact ≠ astronomical</div>
         <h2>齒輪全回來，不代表十二節也回來。</h2>
-        <p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。若 24,000 年後外圈仍有殘差，就代表月柱依賴的交節結構並沒有跟離散年／日週期一起閉合。</p>
+        <p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。下方搜尋器再問一步：在 Berger 模型可用範圍內，所有離散 exact 閉合點之中，哪一個天文形狀最接近基準年？</p>
       </div>
     </section>
 
     <details class="model-boundary">
       <summary>模型邊界與來源</summary>
-      <p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把結果稱為遠未來精確節氣時刻。</p>
+      <p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把任何搜尋結果稱為遠未來精確節氣時刻或真正週期。</p>
     </details>
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
+  <script type="module" src="./src/near-recurrence-view.js"></script>
 </body>
 </html>
