@@ -163,6 +163,133 @@ body:has(.sexagenary-shell) .lede { color: #9ba49e; }
 .birth-shell details > summary { color: #b3c0b8; }
 .birth-shell .source-links a { color: #adbbb2; }
 
+/* Birth secondary modules used to retain the white report palette. Keep them inside the instrument family. */
+.birth-shell .longitude-input input {
+  border-color: var(--hairline);
+  background: rgba(255,255,255,.025);
+  color: var(--ink);
+}
+.birth-shell .longitude-input-label { color: #aab4ad; }
+.birth-shell .longitude-input-hint,
+.birth-shell .longitude-input small { color: #758079; }
+
+.birth-shell .mean-solar-preview {
+  border-color: var(--hairline);
+  background: linear-gradient(180deg, rgba(199,217,205,.055), rgba(255,255,255,.015));
+}
+.birth-shell .mean-solar-preview-copy small,
+.birth-shell .mean-solar-preview-meta,
+.birth-shell .time-basis-sensitivity > small { color: #758079; }
+.birth-shell .mean-solar-preview-copy strong,
+.birth-shell .solar-time-row b { color: #e8ede9; }
+.birth-shell .mean-solar-preview-copy span,
+.birth-shell .solar-time-row > span,
+.birth-shell .time-basis-sensitivity-head > span { color: #8d9891; }
+.birth-shell .solar-time-row em,
+.birth-shell .solar-time-row.eot b,
+.birth-shell .time-basis-sensitivity-head > strong { color: #a7b6ad; }
+.birth-shell .solar-time-row.eot,
+.birth-shell .mean-solar-preview-meta,
+.birth-shell .time-basis-sensitivity { border-color: var(--hairline); }
+.birth-shell .solar-time-row.apparent,
+.birth-shell .time-basis-sensitivity-row {
+  background: rgba(199,217,205,.055);
+  border-color: rgba(199,217,205,.10);
+}
+.birth-shell .time-basis-sensitivity-row > span,
+.birth-shell .time-basis-sensitivity-row > b { color: #aab5ae; }
+.birth-shell .time-basis-sensitivity-row > span small { color: #768179; }
+.birth-shell .time-basis-sensitivity-row > b[data-changed="1"] {
+  color: #d4e1d8;
+  text-decoration-color: rgba(199,217,205,.35);
+}
+
+.birth-shell .ten-gods-summary-copy b,
+.birth-shell .ten-gods-relation-group > header strong,
+.birth-shell .ten-gods-polarity-row b,
+.birth-shell .ten-god-visible b,
+.birth-shell .ten-gods-pillar-head strong,
+.birth-shell .ten-god-chip b { color: #eef2ed; }
+.birth-shell .ten-gods-derivation,
+.birth-shell .relation-model-overview,
+.birth-shell .pillar-relations-graph-wrap {
+  border-color: var(--hairline);
+  background: rgba(255,255,255,.018);
+}
+.birth-shell .ten-gods-relation-group,
+.birth-shell .ten-gods-pillar,
+.birth-shell .relation-model-card,
+.birth-shell .pillar-group-strip,
+.birth-shell .pillar-punishment-strip {
+  border-color: rgba(238,242,237,.11);
+  background: rgba(255,255,255,.025);
+}
+.birth-shell .ten-gods-relation-group[data-ten-god-group="peer"],
+.birth-shell .ten-gods-pillar[data-ten-god-pillar="day"] {
+  border-color: rgba(199,217,205,.30);
+  background: rgba(199,217,205,.07);
+}
+.birth-shell .ten-gods-polarity-row + .ten-gods-polarity-row { border-color: rgba(238,242,237,.10); }
+.birth-shell .ten-gods-relation-group > header span,
+.birth-shell .ten-gods-polarity-row small,
+.birth-shell .ten-god-visible small,
+.birth-shell .ten-god-hidden > small,
+.birth-shell .relation-model-overview-head small,
+.birth-shell .relation-model-card header small { color: #78837c; }
+.birth-shell .ten-gods-polarity-row strong,
+.birth-shell .ten-god-visible strong,
+.birth-shell .ten-god-chip strong,
+.birth-shell .pillar-relation-chip strong,
+.birth-shell .relation-model-glyph { color: #9fb9aa; }
+.birth-shell .ten-god-chip,
+.birth-shell .relation-model-punishment-glyphs span,
+.birth-shell .pillar-relation-chip,
+.birth-shell .punishment-node {
+  border-color: rgba(238,242,237,.12);
+  background: rgba(255,255,255,.035);
+  color: #9aa59e;
+}
+.birth-shell .relation-model-labels span {
+  background: rgba(199,217,205,.07);
+  color: #89968e;
+}
+.birth-shell .relation-model-dot { background: #111613; border-color: #81948a; }
+.birth-shell .relation-model-line,
+.birth-shell .relation-model-bracket,
+.birth-shell .relation-model-bracket::before,
+.birth-shell .relation-model-bracket::after,
+.birth-shell .relation-model-bracket i { border-color: #81948a; }
+
+.birth-shell .pillar-relations-graph-wrap { background: #101512; }
+.birth-shell .pillar-relations-graph .pillar-card {
+  fill: #151b17;
+  stroke: rgba(238,242,237,.14);
+}
+.birth-shell .pillar-relations-graph .pillar-card.day {
+  fill: #19221d;
+  stroke: rgba(199,217,205,.34);
+}
+.birth-shell .pillar-relations-graph .pillar-divider { stroke: rgba(238,242,237,.10); }
+.birth-shell .pillar-relations-graph .pillar-name { fill: #7f8b84; }
+.birth-shell .pillar-relations-graph .stem-value,
+.birth-shell .pillar-relations-graph .branch-value { fill: #eef2ed; }
+.birth-shell .pillar-relations-graph .relation-label-bg {
+  fill: #111713;
+  stroke: rgba(238,242,237,.14);
+}
+.birth-shell .pillar-relations-graph .relation-label { fill: #a8b8af; }
+.birth-shell .pillar-relations-graph .relation-label.six-clash { fill: #c59a8d; }
+.birth-shell .pillar-relations-graph .relation-label.six-harm { fill: #b7aa94; }
+.birth-shell .pillar-group-strip > header strong,
+.birth-shell .pillar-punishment-strip > header strong,
+.birth-shell .pillar-relations-footnote a,
+.birth-shell .pillar-punishments-note a { color: #9fb9aa; }
+.birth-shell .pillar-group-member span,
+.birth-shell .pillar-punishment-strip > header span,
+.birth-shell .punishment-node small { color: #7e8a83; }
+.birth-shell .pillar-group-member b,
+.birth-shell .punishment-node b { color: #eef2ed; }
+
 /* Sexagenary: retain the diagram but remove the white reference-page look. */
 .sexagenary-shell { width: min(1540px, 100%); }
 .sexagenary-shell .cycle-layout {
@@ -251,26 +378,58 @@ body:has(.sexagenary-shell) .lede { color: #9ba49e; }
   body:has(.birth-shell) .site-shell,
   body:has(.sexagenary-shell) .site-shell { padding: 14px 10px 38px; }
   body:has(.birth-shell) .topbar,
-  body:has(.sexagenary-shell) .topbar { margin-bottom: 24px; }
+  body:has(.sexagenary-shell) .topbar { margin-bottom: 20px; }
   body:has(.birth-shell) .site-nav,
-  body:has(.sexagenary-shell) .site-nav { gap: 2px; }
+  body:has(.sexagenary-shell) .site-nav { gap: 1px; }
   body:has(.birth-shell) .site-nav a,
-  body:has(.sexagenary-shell) .site-nav a { padding: 6px 7px; font-size: 9.5px; }
+  body:has(.sexagenary-shell) .site-nav a { padding: 6px 6px; font-size: 9px; }
   body:has(.birth-shell) h1,
-  body:has(.sexagenary-shell) h1 { font-size: 34px; }
+  body:has(.sexagenary-shell) h1 { font-size: 32px; }
 
-  .birth-shell .birth-layout { display: flex; flex-direction: column; }
-  .birth-shell .birth-stage { order: 1; }
-  .birth-shell .birth-controls { order: 2; grid-template-columns: 1fr; }
-  .birth-shell .birth-convention-strip { display: none; }
+  /* Birth mobile is a form/result flow, not a long report with the editor buried at the end. */
+  .birth-shell .birth-hero { margin-bottom: 14px; }
+  .birth-shell .birth-hero .lede { display: none; }
+  .birth-shell .birth-layout { display: flex; flex-direction: column; gap: 10px; }
+  .birth-shell .birth-controls { order: 1; grid-template-columns: 1fr; padding: 12px; gap: 9px; }
+  .birth-shell .birth-stage { order: 2; }
+  .birth-shell .birth-controls > .eyebrow { display: none; }
+  .birth-shell .birth-field-group { gap: 4px; }
+  .birth-shell .field-label { font-size: 9px; }
+  .birth-shell .field-hint,
+  .birth-shell .time-basis-note,
+  .birth-shell .longitude-input-hint { display: none; }
+  .birth-shell .birth-controls fieldset {
+    grid-column: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .birth-shell .birth-controls legend {
+    grid-column: 1 / -1;
+    margin-bottom: 1px;
+    font-size: 9px;
+  }
+  .birth-shell .boundary-option {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 7px 8px;
+  }
+  .birth-shell .boundary-option input { margin: 0; }
+  .birth-shell .boundary-option strong { font-size: 9.5px; }
+  .birth-shell .boundary-option small { display: none; }
+  .birth-shell .longitude-input {
+    margin-top: 5px;
+    padding-top: 5px;
+  }
   .birth-shell .birth-controls,
   .birth-shell .birth-stage,
   .sexagenary-shell .cycle-frame,
   .sexagenary-shell .cycle-inspector { border-radius: 20px; box-shadow: none; }
-  .birth-shell .birth-controls > .eyebrow,
-  .birth-shell .birth-controls fieldset,
-  .birth-shell .time-basis-note { grid-column: auto; }
   .birth-shell .track-rule small,
   .birth-shell .pillar-result > small { display: none; }
+
+  /* The wheel already carries the selected pair and phase. Avoid repeating the same facts below it on phones. */
+  .sexagenary-shell .cycle-inspector,
+  .sexagenary-shell .cycle-explainer { display: none; }
   .sexagenary-shell .cycle-phase-note { color: #727d76; }
 }
