@@ -37,11 +37,13 @@ function mergeLinearWindows(windows) {
   return Object.freeze(merged.map(window => Object.freeze(window)));
 }
 
-export function monthBoundaryDisagreementExposure(baseYear, targetYear) {
-  const residuals = solarTermShapeResiduals(baseYear, targetYear);
+export function monthBoundaryDisagreementExposureFromResiduals(residuals) {
+  if (!residuals || !Array.isArray(residuals.terms) || !Number.isFinite(residuals.normalizationDays)) {
+    throw new TypeError("valid solar-term residual result required");
+  }
+
   const windows = Object.freeze(residuals.terms.map(freezeWindow));
   const mergedWindows = mergeLinearWindows(windows);
-
   const rawSweepHours = windows.reduce((sum, window) => sum + window.widthHours, 0);
   const unionExposureHours = mergedWindows.reduce(
     (sum, window) => sum + (window.endDay - window.startDay) * 24,
@@ -57,8 +59,8 @@ export function monthBoundaryDisagreementExposure(baseYear, targetYear) {
 
   return Object.freeze({
     model: residuals.model,
-    baseYear,
-    targetYear,
+    baseYear: residuals.baseYear,
+    targetYear: residuals.targetYear,
     anchor: residuals.anchor,
     normalizationDays: residuals.normalizationDays,
     normalizedYearHours,
@@ -72,4 +74,10 @@ export function monthBoundaryDisagreementExposure(baseYear, targetYear) {
     largestWindow,
     closed: unionExposureHours < 1e-9
   });
+}
+
+export function monthBoundaryDisagreementExposure(baseYear, targetYear) {
+  return monthBoundaryDisagreementExposureFromResiduals(
+    solarTermShapeResiduals(baseYear, targetYear)
+  );
 }
