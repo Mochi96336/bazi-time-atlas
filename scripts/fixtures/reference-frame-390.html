@@ -42,8 +42,11 @@
       const solarRow = doc.querySelector('[data-ring-toggle="solar"]');
       const dayTrace = doc.querySelector('[data-motion-ring="day"]');
       const solarTrace = doc.querySelector('[data-motion-ring="solar"]');
-      if (!instrument || !svg || !select || !slider || !solarRow || !dayTrace || !solarTrace) return;
+      const motionLayer = doc.querySelector("#motion-layer");
+      const cursorLayer = doc.querySelector("#cursor-layer");
+      if (!instrument || !svg || !select || !slider || !solarRow || !dayTrace || !solarTrace || !motionLayer || !cursorLayer) return;
       if (RINGS.some(id => !Number.isFinite(rotation(doc, id)))) return;
+      if (instrument.dataset.fanClip !== "active") return;
 
       exercised = true;
       probe.dataset.innerWidth = String(childWindow.innerWidth);
@@ -51,6 +54,10 @@
       probe.dataset.initialReference = instrument.dataset.referenceFrame ?? "";
       probe.dataset.initialOffset = svg.dataset.referenceFrameOffsetDegrees ?? "";
       probe.dataset.initialCursor = svg.dataset.referenceCursorAngle ?? "";
+      probe.dataset.motionFanClipped = motionLayer.dataset.fanClipped ?? "";
+      probe.dataset.cursorFanClipped = cursorLayer.dataset.fanClipped ?? "";
+      probe.dataset.motionClipPath = motionLayer.getAttribute("clip-path") ?? "";
+      probe.dataset.cursorClipPath = cursorLayer.getAttribute("clip-path") ?? "";
       const instantBefore = num(instrument.dataset.selectedInstantMs);
       const dayModelBefore = num(doc.querySelector("#day-track").dataset.modelRotation);
       const dayRenderedBefore = rotation(doc, "day");
