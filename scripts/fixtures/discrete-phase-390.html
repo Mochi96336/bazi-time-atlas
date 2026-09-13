@@ -21,8 +21,13 @@
     let phaseObserver = null;
     frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
 
+    // Production phase updates are driven by MutationObserver -> queueMicrotask.
+    // Stay on that same lifecycle here instead of waiting for requestAnimationFrame:
+    // virtual-time headless Chromium can legitimately stop producing another rAF
+    // after the DOM is otherwise settled, which used to leave a fully-ready probe
+    // stuck at data-ready=false.
     function afterSettled(callback) {
-      queueMicrotask(() => queueMicrotask(() => requestAnimationFrame(callback)));
+      queueMicrotask(() => queueMicrotask(callback));
     }
 
     function phaseSnapshot(childWindow, doc) {
