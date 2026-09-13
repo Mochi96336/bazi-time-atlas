@@ -25,6 +25,15 @@ import {
   instrumentViewBox,
   viewBoxString
 } from "../src/wheel/camera.js";
+import {
+  createRingState,
+  detachRing,
+  effectiveRotation,
+  resetManualOffset,
+  setManualOffset,
+  setModelRotation,
+  snappedOffset
+} from "../src/wheel/ring-state.js";
 
 test("five primary rings form one contiguous radial stack", () => {
   assert.equal(assertWheelModel(), true);
@@ -51,6 +60,30 @@ test("ring model already carries the future independent-drag contract", () => {
   assert.equal(ringModel("solar").phaseSource, "solar-longitude");
   assert.equal(ringModel("zodiac").phaseSource, "solar-longitude");
   assert.equal(ringModel("zodiac").linkedPhaseId, "solar");
+});
+
+test("linked and detached ring pose never mutates the model angle", () => {
+  const state = createRingState("day");
+  setModelRotation(state, 121.5);
+  assert.equal(state.linked, true);
+  assert.equal(effectiveRotation(state), 121.5);
+
+  detachRing(state);
+  setManualOffset(state, 17.25);
+  assert.equal(state.modelRotation, 121.5);
+  assert.equal(state.manualOffset, 17.25);
+  assert.equal(state.linked, false);
+  assert.equal(effectiveRotation(state), 138.75);
+
+  resetManualOffset(state);
+  assert.equal(state.modelRotation, 121.5);
+  assert.equal(state.manualOffset, 0);
+  assert.equal(state.linked, true);
+  assert.equal(effectiveRotation(state), 121.5);
+
+  assert.equal(snappedOffset("day", 17.2), 18);
+  assert.equal(snappedOffset("solar", 22), 15);
+  assert.equal(snappedOffset("zodiac", 22), 30);
 });
 
 test("polar geometry uses one SVG-world center and round-trips angles", () => {
