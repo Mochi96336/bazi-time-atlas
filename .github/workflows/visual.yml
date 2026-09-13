@@ -27,11 +27,13 @@ jobs:
           node --check src/kinetic-boundaries.js
           node --check src/recurrence-view.js
           node --check src/astronomical-residuals-view.js
+          node --check src/four-pillar-determinacy-view.js
           node --check src/near-recurrence-view.js
           node --check src/recurrence/gregorian-cycle.js
           node --check src/recurrence/berger-orbit.js
           node --check src/recurrence/near-recurrence.js
           node --check src/recurrence/month-boundary-risk.js
+          node --check src/recurrence/four-pillar-determinacy.js
           node --check src/legacy-annual-compat.js
           node --check src/app.js
           node --check src/annual-deep-link.js
@@ -64,6 +66,7 @@ jobs:
           node --check scripts/check-kinetic-boundaries.mjs
           node --check scripts/check-recurrence-lab.mjs
           node --check scripts/check-astronomical-residuals.mjs
+          node --check scripts/check-four-pillar-determinacy.mjs
           node --check scripts/check-near-recurrence.mjs
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
@@ -99,6 +102,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify astronomical residual states
         run: node scripts/check-astronomical-residuals.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify four-pillar determinacy boundary
+        run: node scripts/check-four-pillar-determinacy.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify exact-closure near-recurrence search
