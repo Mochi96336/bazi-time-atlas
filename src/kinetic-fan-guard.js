@@ -12,7 +12,9 @@ import { SVG_NS } from "./wheel/svg-renderer.js";
 const CLIP_ID = "kinetic-master-fan-clip";
 const WRAPPER_ID = "kinetic-fan-layer";
 const MOBILE_QUERY = "(max-width: 480px)";
-const CLIP_MARGIN = 28;
+// Cursor label sits 40 world units outside the zodiac ring. Keep enough radial
+// headroom for it while still enforcing the same angular fan on cursor/traces.
+const CLIP_MARGIN = 58;
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -78,6 +80,17 @@ function installMasterFanClip() {
     wrapper.appendChild(track);
     track.dataset.fanClipped = "true";
   });
+
+  // The cursor was fixed at -90° before relative frames existed, so it could
+  // never leave the fan. In a co-rotating frame the read-head itself moves.
+  // Clip cursor and transient traces to the same angular aperture so long
+  // playback cannot draw a ghost read-head outside the instrument.
+  [svg.querySelector("#motion-layer"), svg.querySelector("#cursor-layer")]
+    .filter(Boolean)
+    .forEach(layer => {
+      layer.setAttribute("clip-path", `url(#${CLIP_ID})`);
+      layer.dataset.fanClipped = "true";
+    });
 
   applyResponsiveCamera();
 
