@@ -259,11 +259,14 @@ body:has(.sexagenary-shell) .lede { color: #9ba49e; }
   body:has(.birth-shell) h1,
   body:has(.sexagenary-shell) h1 { font-size: 34px; }
 
+  .birth-shell .birth-layout { display: flex; flex-direction: column; }
+  .birth-shell .birth-stage { order: 1; }
+  .birth-shell .birth-controls { order: 2; grid-template-columns: 1fr; }
+  .birth-shell .birth-convention-strip { display: none; }
   .birth-shell .birth-controls,
   .birth-shell .birth-stage,
   .sexagenary-shell .cycle-frame,
   .sexagenary-shell .cycle-inspector { border-radius: 20px; box-shadow: none; }
-  .birth-shell .birth-controls { grid-template-columns: 1fr; }
   .birth-shell .birth-controls > .eyebrow,
   .birth-shell .birth-controls fieldset,
   .birth-shell .time-basis-note { grid-column: auto; }
