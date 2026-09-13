@@ -45,6 +45,7 @@ jobs:
           node --check src/sexagenary-deep-link.js
           node --check src/calendar/tyme-adapter.js
           node --check src/calendar/five-tigers.js
+          node --check src/calendar/sexagenary-year.js
           node --check src/calendar/hidden-stems.js
           node --check src/calendar/ten-gods.js
           node --check src/calendar/pillar-relations.js
