@@ -67,16 +67,22 @@ const center = requireAttr(instrument, "data-geometry-center", "desktop", deskto
 const innerRadius = Number(requireAttr(instrument, "data-geometry-inner-radius", "desktop", desktop.url));
 const outerRadius = Number(requireAttr(instrument, "data-geometry-outer-radius", "desktop", desktop.url));
 const radiusRatio = Number(requireAttr(instrument, "data-geometry-radius-ratio", "desktop", desktop.url));
+const cameraY = Number(requireAttr(instrument, "data-geometry-camera-y", "desktop", desktop.url));
 if (center.length !== 2 || !center.every(Number.isFinite) || center[1] <= 1000) {
   throw new Error(`desktop: disk center is not far enough below the viewport (${center.join(",")}): ${desktop.url}`);
 }
-if (!Number.isFinite(innerRadius) || !Number.isFinite(outerRadius) || !Number.isFinite(radiusRatio)) {
-  throw new Error(`desktop: missing giant-disk radius diagnostics: ${desktop.url}`);
+if (![innerRadius, outerRadius, radiusRatio, cameraY].every(Number.isFinite)) {
+  throw new Error(`desktop: missing giant-disk/camera diagnostics: ${desktop.url}`);
 }
 if (outerRadius < 1100 || radiusRatio < 0.60) {
   throw new Error(`desktop: disk curvature is too tight (inner=${innerRadius}, outer=${outerRadius}, ratio=${radiusRatio}): ${desktop.url}`);
 }
-console.log(`[kinetic-composition] PASS desktop shared giant-disk geometry; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}, ratio=${radiusRatio}: ${desktop.url}`);
+const outerTopInView = center[1] - outerRadius - cameraY;
+const innerTopInView = center[1] - innerRadius - cameraY;
+if (outerTopInView < 70 || outerTopInView > 180 || innerTopInView <= outerTopInView || innerTopInView > 700) {
+  throw new Error(`desktop: five-ring stack is not fully framed (outerTop=${outerTopInView}, innerTop=${innerTopInView}, cameraY=${cameraY}): ${desktop.url}`);
+}
+console.log(`[kinetic-composition] PASS desktop shared giant-disk geometry; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}, ratio=${radiusRatio}, cameraY=${cameraY}, stack=${outerTopInView}..${innerTopInView}: ${desktop.url}`);
 
 // Headless Chromium clamps top-level windows narrower than 500 CSS px. The
 // same-origin iframe fixture gives the atlas a real 390px layout viewport.
