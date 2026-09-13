@@ -18,9 +18,11 @@
     const requestedHeight = Math.max(320, Math.min(6000, Number(params.get("height")) || 844));
     const requestedTarget = params.get("target") || "../../?instant=2027-03-15T13%3A20%3A09.000Z";
     const exerciseDrag = params.get("exerciseDrag") === "1";
+    const exerciseLinkedDrag = params.get("exerciseLinkedDrag") === "1";
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     let dragExercised = false;
+    let linkedDragExercised = false;
     frame.style.height = `${requestedHeight}px`;
     document.documentElement.style.height = `${requestedHeight}px`;
     document.body.style.height = `${requestedHeight}px`;
@@ -128,6 +130,35 @@
       });
     }
 
+    function exerciseLinkedDayDrag(childWindow, doc, instrument) {
+      if (!exerciseLinkedDrag || linkedDragExercised) return;
+      const geometry = ringGeometry(childWindow, doc, instrument);
+      const dayTrack = doc.querySelector("#day-track");
+      const solarTrack = doc.querySelector("#solar-track");
+      if (!geometry || !dayTrack || !solarTrack || instrument?.dataset.scrubMode !== "linked-time") return;
+      linkedDragExercised = true;
+      const radius = (geometry.radii[2] + geometry.radii[3]) / 2;
+      const instantBefore = Number(instrument.dataset.selectedInstantMs);
+      const dayModelBefore = Number(dayTrack.dataset.modelRotation);
+      const solarModelBefore = Number(solarTrack.dataset.modelRotation);
+      const dayOffsetBefore = Number(dayTrack.dataset.manualOffset);
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -90, "pointerdown", 81));
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -83.5, "pointermove", 81));
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -83.5, "pointerup", 81));
+      probe.dataset.linkedDragReady = "true";
+      probe.dataset.linkedDragRing = instrument.dataset.lastLinkedScrubRing ?? "";
+      probe.dataset.linkedInstantBefore = String(instantBefore);
+      probe.dataset.linkedInstantAfter = instrument.dataset.selectedInstantMs ?? "";
+      probe.dataset.linkedDayModelBefore = String(dayModelBefore);
+      probe.dataset.linkedDayModelAfter = dayTrack.dataset.modelRotation ?? "";
+      probe.dataset.linkedSolarModelBefore = String(solarModelBefore);
+      probe.dataset.linkedSolarModelAfter = solarTrack.dataset.modelRotation ?? "";
+      probe.dataset.linkedDayOffsetBefore = String(dayOffsetBefore);
+      probe.dataset.linkedDayOffsetAfter = dayTrack.dataset.manualOffset ?? "";
+      probe.dataset.linkedDayState = dayTrack.dataset.linked ?? "";
+      probe.dataset.linkedScrubMode = instrument.dataset.scrubMode ?? "";
+    }
+
     function exerciseIndependentDrag(childWindow, doc, instrument) {
       if (!exerciseDrag || dragExercised) return;
       const geometry = ringGeometry(childWindow, doc, instrument);
@@ -198,6 +229,7 @@
       probe.dataset.ringHitClasses = ringHits.classes;
       probe.dataset.ringHitDebug = ringHits.debug;
       probe.dataset.target = frame.src;
+      exerciseLinkedDayDrag(childWindow, doc, instrument);
       exerciseIndependentDrag(childWindow, doc, instrument);
     }
 
