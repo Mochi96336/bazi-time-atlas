@@ -81,15 +81,18 @@ function installMasterFanClip() {
     track.dataset.fanClipped = "true";
   });
 
-  // The cursor was fixed at -90° before relative frames existed, so it could
-  // never leave the fan. In a co-rotating frame the read-head itself moves.
-  // Clip cursor and transient traces to the same angular aperture so long
-  // playback cannot draw a ghost read-head outside the instrument.
+  // The wrapper owns the fixed screen-space aperture. Rings rotate inside it,
+  // and relative-frame overlays must do the same: clipping a transformed cursor
+  // on the cursor node itself would make transform/clip coordinate ownership
+  // browser-sensitive. Moving both overlays under the untransformed wrapper keeps
+  // the fan fixed while the cursor can rotate freely inside it.
   [svg.querySelector("#motion-layer"), svg.querySelector("#cursor-layer")]
     .filter(Boolean)
     .forEach(layer => {
-      layer.setAttribute("clip-path", `url(#${CLIP_ID})`);
+      layer.removeAttribute("clip-path");
+      wrapper.appendChild(layer);
       layer.dataset.fanClipped = "true";
+      layer.dataset.fanClipOwner = WRAPPER_ID;
     });
 
   applyResponsiveCamera();
