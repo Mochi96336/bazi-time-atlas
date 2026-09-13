@@ -4,44 +4,33 @@ import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
 import { monthPillarForYearStem } from "./calendar/five-tigers.js";
 import {
   CURSOR_ANGLE,
+  RINGS,
   SEXAGENARY_RING_IDS,
   assertWheelModel
 } from "./wheel/ring-model.js";
-import {
-  normalizeDegrees,
-  shortestAngleDelta
-} from "./wheel/polar-geometry.js";
+import { normalizeDegrees, shortestAngleDelta } from "./wheel/polar-geometry.js";
 import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
+import {
+  createRingState,
+  effectiveRotation,
+  resetManualOffset,
+  setModelRotation
+} from "./wheel/ring-state.js";
+import { createRingDragController } from "./wheel/ring-drag-controller.js";
 
 const DAY_MS = 86_400_000;
 const UTC_OFFSET_HOURS = 8;
+const OFFSET_EPSILON = 0.001;
 
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 const SEXAGENARY = Array.from({ length: 60 }, (_, index) => `${STEMS[index % 10]}${BRANCHES[index % 12]}`);
+const RING_LABELS = Object.freeze({ year: "年", month: "月", day: "日", solar: "節氣", zodiac: "黃道" });
 
 const SCALE_CONFIG = Object.freeze({
-  day: {
-    label: "日內 / 48 小時",
-    spanDays: 1,
-    sliderStep: 1 / 144,
-    playDaysPerSecond: .25,
-    edgeLabel: "1 日"
-  },
-  year: {
-    label: "一年",
-    spanDays: 183,
-    sliderStep: .25,
-    playDaysPerSecond: 6,
-    edgeLabel: "約半年"
-  },
-  cycle: {
-    label: "六十年",
-    spanDays: 365.2422 * 30,
-    sliderStep: 1,
-    playDaysPerSecond: 365.2422,
-    edgeLabel: "約 30 年"
-  }
+  day: { label: "日內 / 48 小時", spanDays: 1, sliderStep: 1 / 144, playDaysPerSecond: .25, edgeLabel: "1 日" },
+  year: { label: "一年", spanDays: 183, sliderStep: .25, playDaysPerSecond: 6, edgeLabel: "約半年" },
+  cycle: { label: "六十年", spanDays: 365.2422 * 30, sliderStep: 1, playDaysPerSecond: 365.2422, edgeLabel: "約 30 年" }
 });
 
 const svg = document.querySelector("#kinetic-wheel");
@@ -52,12 +41,7 @@ const playButton = document.querySelector("#play-button");
 const nowButton = document.querySelector("#now-button");
 const scaleButtons = [...document.querySelectorAll("[data-scale]")];
 
-const renderer = createKineticRenderer({
-  svg,
-  sexagenary: SEXAGENARY,
-  solarTerms,
-  zodiacSigns
-});
+const renderer = createKineticRenderer({ svg, sexagenary: SEXAGENARY, solarTerms, zodiacSigns });
 
 const state = {
   anchorMs: Date.now(),
@@ -69,12 +53,15 @@ const state = {
   legacyProjection: null
 };
 
-const ringRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, {
-  lastIndex: null,
-  modelRotation: null
-}]));
-let solarModelRotation = null;
+const ringStates = Object.fromEntries(RINGS.map(ring => [ring.id, createRingState(ring.id)]));
+const cycleRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, { lastIndex: null }]));
 let lastSolarLongitude = null;
+let longitudeModelRotation = null;
+let currentDisplay = null;
+let dragController = null;
+let compareButton = null;
+let resetRingsButton = null;
+let compareStatus = null;
 
 function ganzhiIndex(name) {
   return SEXAGENARY.indexOf(name);
@@ -87,37 +74,60 @@ function shortestCycleDelta(nextIndex, previousIndex, size = 60) {
   return delta;
 }
 
-function alignCycleRing(id, index) {
-  const runtime = ringRuntime[id];
-  if (index < 0) return;
-  if (runtime.modelRotation === null || runtime.lastIndex === null) {
-    runtime.modelRotation = CURSOR_ANGLE - (index * 6 + 3);
-  } else {
-    runtime.modelRotation -= shortestCycleDelta(index, runtime.lastIndex) * 6;
+function setTrackDiagnostics(id) {
+  const track = document.querySelector(`#${id}-track`);
+  const pose = ringStates[id];
+  if (!track || !pose) return;
+  track.dataset.modelRotation = pose.modelRotation.toFixed(4);
+  track.dataset.manualOffset = pose.manualOffset.toFixed(4);
+  track.dataset.linked = String(pose.linked);
+}
+
+function renderRingPose(id) {
+  const pose = ringStates[id];
+  if (!pose || !currentDisplay) return;
+  if (SEXAGENARY_RING_IDS.includes(id)) {
+    const activeIndex = id === "year" ? currentDisplay.yearIndex : id === "month" ? currentDisplay.monthIndex : currentDisplay.dayIndex;
+    renderer.setCyclePose(id, effectiveRotation(pose), activeIndex);
+  } else if (id === "solar") {
+    renderer.setSolarRingPose(effectiveRotation(pose), currentDisplay.longitude);
+  } else if (id === "zodiac") {
+    renderer.setZodiacRingPose(effectiveRotation(pose), currentDisplay.longitude);
   }
+  setTrackDiagnostics(id);
+}
+
+function renderAllRingPoses() {
+  RINGS.forEach(ring => renderRingPose(ring.id));
+}
+
+function alignCycleRing(id, index) {
+  const runtime = cycleRuntime[id];
+  const pose = ringStates[id];
+  if (index < 0) return;
+  let nextRotation;
+  if (runtime.lastIndex === null) nextRotation = CURSOR_ANGLE - (index * 6 + 3);
+  else nextRotation = pose.modelRotation - shortestCycleDelta(index, runtime.lastIndex) * 6;
   runtime.lastIndex = index;
-  renderer.setCyclePose(id, runtime.modelRotation, index);
+  setModelRotation(pose, nextRotation);
 }
 
 function alignLongitudeTracks(longitude) {
-  if (solarModelRotation === null || lastSolarLongitude === null) {
-    solarModelRotation = CURSOR_ANGLE - longitude;
+  if (longitudeModelRotation === null || lastSolarLongitude === null) {
+    longitudeModelRotation = CURSOR_ANGLE - longitude;
   } else {
-    solarModelRotation -= shortestAngleDelta(longitude, lastSolarLongitude);
+    longitudeModelRotation -= shortestAngleDelta(longitude, lastSolarLongitude);
   }
   lastSolarLongitude = longitude;
-  renderer.setSolarPose(solarModelRotation, longitude);
+  setModelRotation(ringStates.solar, longitudeModelRotation);
+  setModelRotation(ringStates.zodiac, longitudeModelRotation);
 }
 
 function fieldsFromInstant(ms) {
   const shifted = new Date(ms + UTC_OFFSET_HOURS * 3_600_000);
   return {
-    year: shifted.getUTCFullYear(),
-    month: shifted.getUTCMonth() + 1,
-    day: shifted.getUTCDate(),
-    hour: shifted.getUTCHours(),
-    minute: shifted.getUTCMinutes(),
-    second: shifted.getUTCSeconds()
+    year: shifted.getUTCFullYear(), month: shifted.getUTCMonth() + 1, day: shifted.getUTCDate(),
+    hour: shifted.getUTCHours(), minute: shifted.getUTCMinutes(), second: shifted.getUTCSeconds()
   };
 }
 
@@ -130,8 +140,7 @@ function instantFromLocalInput(value) {
 
 function inputValueFromFields(fields) {
   const pad = value => String(value).padStart(2, "0");
-  const year = String(fields.year).padStart(4, "0");
-  return `${year}-${pad(fields.month)}-${pad(fields.day)}T${pad(fields.hour)}:${pad(fields.minute)}`;
+  return `${String(fields.year).padStart(4, "0")}-${pad(fields.month)}-${pad(fields.day)}T${pad(fields.hour)}:${pad(fields.minute)}`;
 }
 
 function formatCivil(fields) {
@@ -158,14 +167,11 @@ function termAt(longitude) {
 }
 
 function midpoint(start, end) {
-  const span = normalizeDegrees(end - start);
-  return normalizeDegrees(start + span / 2);
+  return normalizeDegrees(start + normalizeDegrees(end - start) / 2);
 }
 
 function nearestCycleIndexForBranch(branch, preferredIndex) {
-  const candidates = SEXAGENARY
-    .map((name, index) => ({ name, index }))
-    .filter(item => item.name.endsWith(branch));
+  const candidates = SEXAGENARY.map((name, index) => ({ name, index })).filter(item => item.name.endsWith(branch));
   return candidates.reduce((best, candidate) => {
     const distance = Math.abs(shortestCycleDelta(candidate.index, preferredIndex));
     return !best || distance < best.distance ? { index: candidate.index, distance } : best;
@@ -182,24 +188,19 @@ function parseLegacyProjection() {
       return;
     }
   }
-
   const rawLongitude = params.has("lambda") ? Number(params.get("lambda")) : Number.NaN;
   const requestedMonth = params.get("month");
   const yearStem = params.get("yearStem");
   let longitude = Number.isFinite(rawLongitude) ? normalizeDegrees(rawLongitude) : null;
   let monthBranch = baziMonths.some(month => month.branch === requestedMonth) ? requestedMonth : null;
-
   if (longitude === null && monthBranch) {
     const month = baziMonths.find(item => item.branch === monthBranch);
     longitude = midpoint(month.start, month.end);
   }
   if (longitude !== null && !monthBranch) monthBranch = baziMonthAt(longitude)?.branch ?? null;
   if (longitude === null && !monthBranch) return;
-
   let monthPillar = null;
-  if (yearStem && STEMS.includes(yearStem) && monthBranch) {
-    monthPillar = monthPillarForYearStem(yearStem, monthBranch);
-  }
+  if (yearStem && STEMS.includes(yearStem) && monthBranch) monthPillar = monthPillarForYearStem(yearStem, monthBranch);
   state.legacyProjection = { longitude, monthBranch, yearStem, monthPillar };
   document.body.classList.add("legacy-projection");
 }
@@ -213,38 +214,23 @@ function clearLegacyProjection() {
 
 function resolveDisplayState() {
   const fields = fieldsFromInstant(state.selectedMs);
-  const result = resolveBirthPillars(fields, {
-    utcOffsetHours: UTC_OFFSET_HOURS,
-    dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
-  });
+  const result = resolveBirthPillars(fields, { utcOffsetHours: UTC_OFFSET_HOURS, dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY });
   const actualLongitude = apparentSolarLongitude(fields, UTC_OFFSET_HOURS);
   const longitude = state.legacyProjection?.longitude ?? actualLongitude;
-
   const yearName = result.pillars.year.name;
   let monthName = result.pillars.month.name;
   let monthBranch = result.pillars.month.branch;
   if (state.legacyProjection?.monthBranch) monthBranch = state.legacyProjection.monthBranch;
   if (state.legacyProjection?.monthPillar) monthName = state.legacyProjection.monthPillar;
-
   let monthIndex = ganzhiIndex(monthName);
   if (monthIndex < 0 || !monthName.endsWith(monthBranch)) {
     monthIndex = nearestCycleIndexForBranch(monthBranch, ganzhiIndex(result.pillars.month.name));
     monthName = SEXAGENARY[monthIndex];
   }
-
   return {
-    fields,
-    longitude,
-    actualLongitude,
-    pillars: result.pillars,
-    yearName,
-    monthName,
-    monthBranch,
-    monthIndex,
-    yearIndex: ganzhiIndex(yearName),
-    dayIndex: ganzhiIndex(result.pillars.day.name),
-    activeTerm: termAt(longitude),
-    activeZodiac: zodiacAt(longitude)
+    fields, longitude, actualLongitude, pillars: result.pillars, yearName, monthName, monthBranch, monthIndex,
+    yearIndex: ganzhiIndex(yearName), dayIndex: ganzhiIndex(result.pillars.day.name),
+    activeTerm: termAt(longitude), activeZodiac: zodiacAt(longitude)
   };
 }
 
@@ -263,14 +249,12 @@ function updateReadout(display) {
   setText("day-active", pillars.day.name);
   setText("solar-active", `${activeTerm.name} ${longitude.toFixed(1)}°`);
   setText("zodiac-active", activeZodiac.name);
-
   setText("state-year", yearName);
   setText("state-month", monthName);
   setText("state-day", pillars.day.name);
   setText("state-hour", pillars.hour.name);
   setText("state-zodiac", activeZodiac.name);
   setText("state-term", activeTerm.name);
-
   instrument.dataset.yearPillar = yearName;
   instrument.dataset.monthPillar = monthName;
   instrument.dataset.dayPillar = pillars.day.name;
@@ -278,7 +262,6 @@ function updateReadout(display) {
   instrument.dataset.solarLongitude = longitude.toFixed(6);
   instrument.dataset.term = activeTerm.name;
   instrument.dataset.zodiac = activeZodiac.name;
-
   if (state.legacyProjection) {
     instrument.dataset.projectionMode = "legacy-longitude";
     instrument.dataset.projectionLongitude = longitude.toFixed(6);
@@ -290,17 +273,18 @@ function updateReadout(display) {
     delete instrument.dataset.focusMonth;
     delete instrument.dataset.yearStem;
   }
-
   if (document.activeElement !== instantInput) instantInput.value = inputValueFromFields(fields);
 }
 
 function updateWheel() {
-  const display = resolveDisplayState();
-  alignCycleRing("year", display.yearIndex);
-  alignCycleRing("month", display.monthIndex);
-  alignCycleRing("day", display.dayIndex);
-  alignLongitudeTracks(display.longitude);
-  updateReadout(display);
+  currentDisplay = resolveDisplayState();
+  alignCycleRing("year", currentDisplay.yearIndex);
+  alignCycleRing("month", currentDisplay.monthIndex);
+  alignCycleRing("day", currentDisplay.dayIndex);
+  alignLongitudeTracks(currentDisplay.longitude);
+  renderAllRingPoses();
+  updateReadout(currentDisplay);
+  updateCompareUi();
 }
 
 function setSliderForScale() {
@@ -322,6 +306,108 @@ function stopPlayback() {
   state.animationFrame = null;
   playButton.textContent = "播放";
   playButton.setAttribute("aria-pressed", "false");
+}
+
+function resetAllRingOffsets() {
+  RINGS.forEach(ring => resetManualOffset(ringStates[ring.id]));
+  renderAllRingPoses();
+  updateCompareUi();
+}
+
+function detachedRings() {
+  return RINGS.filter(ring => Math.abs(ringStates[ring.id].manualOffset) > OFFSET_EPSILON);
+}
+
+function offsetLabel(value) {
+  const sign = value >= 0 ? "+" : "−";
+  return `${sign}${Math.abs(value).toFixed(1)}°`;
+}
+
+function updateCompareUi() {
+  if (!compareButton || !compareStatus) return;
+  const compareMode = Boolean(dragController?.compareMode);
+  const detached = detachedRings();
+  compareButton.setAttribute("aria-pressed", String(compareMode));
+  compareButton.textContent = compareMode ? "比較中" : "比較";
+  if (resetRingsButton) resetRingsButton.hidden = detached.length === 0;
+  instrument.dataset.compareMode = String(compareMode);
+  instrument.dataset.detachedRings = detached.map(ring => ring.id).join(",");
+  if (!compareMode) {
+    compareStatus.hidden = true;
+    compareStatus.textContent = "";
+    return;
+  }
+  compareStatus.hidden = false;
+  compareStatus.textContent = detached.length
+    ? `FREE · ${detached.map(ring => `${RING_LABELS[ring.id]} ${offsetLabel(ringStates[ring.id].manualOffset)}`).join(" · ")}`
+    : "FREE COMPARE · 拖動任一圓環";
+}
+
+function setCompareMode(enabled) {
+  if (!dragController) return;
+  if (!enabled) resetAllRingOffsets();
+  else stopPlayback();
+  dragController.setCompareMode(enabled);
+  updateCompareUi();
+}
+
+function installCompareControls() {
+  const controlGroup = nowButton?.parentElement;
+  if (!controlGroup) return;
+  compareButton = document.createElement("button");
+  compareButton.id = "compare-rings-button";
+  compareButton.type = "button";
+  compareButton.className = "control-button";
+  compareButton.textContent = "比較";
+  compareButton.setAttribute("aria-pressed", "false");
+  compareButton.title = "自由比較：每一層可獨立拖動，不改變真實時間";
+  controlGroup.prepend(compareButton);
+
+  resetRingsButton = document.createElement("button");
+  resetRingsButton.id = "reset-rings-button";
+  resetRingsButton.type = "button";
+  resetRingsButton.className = "control-button";
+  resetRingsButton.textContent = "歸位";
+  resetRingsButton.hidden = true;
+  controlGroup.insertBefore(resetRingsButton, nowButton);
+
+  compareStatus = document.createElement("div");
+  compareStatus.id = "ring-compare-status";
+  compareStatus.hidden = true;
+  Object.assign(compareStatus.style, {
+    position: "absolute", zIndex: "5", right: "12px", top: "58px", pointerEvents: "none",
+    color: "#d4bd8d", fontSize: "9px", fontWeight: "700", letterSpacing: ".05em"
+  });
+  instrument.appendChild(compareStatus);
+
+  compareButton.addEventListener("click", () => setCompareMode(!dragController.compareMode));
+  resetRingsButton.addEventListener("click", resetAllRingOffsets);
+}
+
+function installRingDrag() {
+  dragController = createRingDragController({
+    svg,
+    ringStates,
+    onDragStart(id) {
+      stopPlayback();
+      instrument.dataset.dragRing = id;
+    },
+    onPoseChange(id) {
+      renderRingPose(id);
+      instrument.dataset.lastDraggedRing = id;
+      updateCompareUi();
+    },
+    onDragEnd(id) {
+      instrument.dataset.lastDraggedRing = id;
+      delete instrument.dataset.dragRing;
+      updateCompareUi();
+    },
+    onModeChange() {
+      updateCompareUi();
+    }
+  });
+  installCompareControls();
+  updateCompareUi();
 }
 
 function animationTick(timestamp) {
@@ -346,6 +432,7 @@ function animationTick(timestamp) {
 }
 
 function startPlayback() {
+  if (dragController?.compareMode) setCompareMode(false);
   clearLegacyProjection();
   state.playing = true;
   state.lastAnimationTs = null;
@@ -365,19 +452,13 @@ function bindControls() {
       updateWheel();
     });
   });
-
   slider.addEventListener("input", () => {
     stopPlayback();
     clearLegacyProjection();
     state.selectedMs = state.anchorMs + Number(slider.value) * DAY_MS;
     updateWheel();
   });
-
-  playButton.addEventListener("click", () => {
-    if (state.playing) stopPlayback();
-    else startPlayback();
-  });
-
+  playButton.addEventListener("click", () => state.playing ? stopPlayback() : startPlayback());
   nowButton.addEventListener("click", () => {
     stopPlayback();
     clearLegacyProjection();
@@ -386,7 +467,6 @@ function bindControls() {
     setSliderForScale();
     updateWheel();
   });
-
   instantInput.addEventListener("change", () => {
     const instant = instantFromLocalInput(instantInput.value);
     if (instant === null || !Number.isFinite(instant)) return;
@@ -406,6 +486,7 @@ function initialize() {
   setSliderForScale();
   bindControls();
   updateWheel();
+  installRingDrag();
 }
 
 initialize();

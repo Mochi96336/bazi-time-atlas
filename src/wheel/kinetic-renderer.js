@@ -175,17 +175,20 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
   }
 
-  function setSolarPose(rotationDegrees, solarLongitude) {
-    const transform = rotationTransform(rotationDegrees, WHEEL_CENTER);
-    solarTrack.setAttribute("transform", transform);
-    zodiacTrack.setAttribute("transform", transform);
+  function setSolarRingPose(rotationDegrees, solarLongitude) {
+    solarTrack.setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
     setActiveSector(termSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 15) % 24);
+  }
+
+  function setZodiacRingPose(rotationDegrees, solarLongitude) {
+    zodiacTrack.setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
     setActiveSector(zodiacSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 30) % 12);
   }
 
   return Object.freeze({
     renderStatic,
     setCyclePose,
-    setSolarPose
+    setSolarRingPose,
+    setZodiacRingPose
   });
 }
