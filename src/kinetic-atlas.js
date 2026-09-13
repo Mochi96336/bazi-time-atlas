@@ -17,6 +17,7 @@ import {
   setModelRotation
 } from "./wheel/ring-state.js";
 import { createRingDragController } from "./wheel/ring-drag-controller.js";
+import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 
 const DAY_MS = 86_400_000;
 const UTC_OFFSET_HOURS = 8;
@@ -55,6 +56,7 @@ const state = {
 
 const ringStates = Object.fromEntries(RINGS.map(ring => [ring.id, createRingState(ring.id)]));
 const cycleRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, { lastIndex: null }]));
+const linkedDragRemainders = Object.fromEntries(RINGS.map(ring => [ring.id, 0]));
 let lastSolarLongitude = null;
 let longitudeModelRotation = null;
 let currentDisplay = null;
@@ -129,6 +131,10 @@ function fieldsFromInstant(ms) {
     year: shifted.getUTCFullYear(), month: shifted.getUTCMonth() + 1, day: shifted.getUTCDate(),
     hour: shifted.getUTCHours(), minute: shifted.getUTCMinutes(), second: shifted.getUTCSeconds()
   };
+}
+
+function longitudeAtInstant(ms) {
+  return apparentSolarLongitude(fieldsFromInstant(ms), UTC_OFFSET_HOURS);
 }
 
 function instantFromLocalInput(value) {
@@ -255,6 +261,7 @@ function updateReadout(display) {
   setText("state-hour", pillars.hour.name);
   setText("state-zodiac", activeZodiac.name);
   setText("state-term", activeTerm.name);
+  instrument.dataset.selectedInstantMs = String(Math.round(state.selectedMs));
   instrument.dataset.yearPillar = yearName;
   instrument.dataset.monthPillar = monthName;
   instrument.dataset.dayPillar = pillars.day.name;
@@ -331,6 +338,7 @@ function updateCompareUi() {
   compareButton.textContent = compareMode ? "比較中" : "比較";
   if (resetRingsButton) resetRingsButton.hidden = detached.length === 0;
   instrument.dataset.compareMode = String(compareMode);
+  instrument.dataset.scrubMode = compareMode ? "free-compare" : "linked-time";
   instrument.dataset.detachedRings = detached.map(ring => ring.id).join(",");
   if (!compareMode) {
     compareStatus.hidden = true;
@@ -384,6 +392,28 @@ function installCompareControls() {
   resetRingsButton.addEventListener("click", resetAllRingOffsets);
 }
 
+function applyLinkedDragToTime(id, deltaDegrees) {
+  const beforeMs = state.selectedMs;
+  const result = applyLinkedRingDrag({
+    ringId: id,
+    instantMs: beforeMs,
+    deltaDegrees,
+    remainderDegrees: linkedDragRemainders[id],
+    longitudeAtMs: longitudeAtInstant
+  });
+  linkedDragRemainders[id] = result.remainderDegrees;
+  instrument.dataset.linkedScrubRemainder = result.remainderDegrees.toFixed(4);
+  instrument.dataset.linkedScrubSteps = String(result.appliedSteps);
+  if (result.instantMs === beforeMs) return;
+
+  state.selectedMs = result.instantMs;
+  state.anchorMs = result.instantMs;
+  setSliderForScale();
+  updateWheel();
+  instrument.dataset.lastLinkedScrubRing = id;
+  instrument.dataset.lastLinkedScrubDeltaMs = String(Math.round(result.instantMs - beforeMs));
+}
+
 function installRingDrag() {
   dragController = createRingDragController({
     svg,
@@ -391,6 +421,7 @@ function installRingDrag() {
     onDragStart(id) {
       stopPlayback();
       instrument.dataset.dragRing = id;
+      instrument.dataset.dragMode = "free";
     },
     onPoseChange(id) {
       renderRingPose(id);
@@ -400,7 +431,31 @@ function installRingDrag() {
     onDragEnd(id) {
       instrument.dataset.lastDraggedRing = id;
       delete instrument.dataset.dragRing;
+      delete instrument.dataset.dragMode;
       updateCompareUi();
+    },
+    onLinkedDragStart(id) {
+      stopPlayback();
+      if (state.legacyProjection) {
+        clearLegacyProjection();
+        updateWheel();
+      }
+      linkedDragRemainders[id] = 0;
+      instrument.dataset.dragRing = id;
+      instrument.dataset.dragMode = "linked";
+      instrument.dataset.linkedScrubStartMs = String(Math.round(state.selectedMs));
+    },
+    onLinkedDragDelta(id, deltaDegrees) {
+      applyLinkedDragToTime(id, deltaDegrees);
+    },
+    onLinkedDragEnd(id) {
+      instrument.dataset.lastLinkedScrubRing = id;
+      instrument.dataset.linkedScrubEndMs = String(Math.round(state.selectedMs));
+      linkedDragRemainders[id] = 0;
+      delete instrument.dataset.dragRing;
+      delete instrument.dataset.dragMode;
+      delete instrument.dataset.linkedScrubRemainder;
+      delete instrument.dataset.linkedScrubSteps;
     },
     onModeChange() {
       updateCompareUi();
