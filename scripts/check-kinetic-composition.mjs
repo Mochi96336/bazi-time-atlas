@@ -60,7 +60,23 @@ for (const id of ["year-track", "month-track", "day-track", "solar-track", "zodi
     throw new Error(`desktop: ${id} is not under the shared fan guard: ${desktop.url}`);
   }
 }
-console.log(`[kinetic-composition] PASS desktop shared fan geometry: ${desktop.url}`);
+
+const center = requireAttr(instrument, "data-geometry-center", "desktop", desktop.url)
+  .split(",")
+  .map(Number);
+const innerRadius = Number(requireAttr(instrument, "data-geometry-inner-radius", "desktop", desktop.url));
+const outerRadius = Number(requireAttr(instrument, "data-geometry-outer-radius", "desktop", desktop.url));
+const radiusRatio = Number(requireAttr(instrument, "data-geometry-radius-ratio", "desktop", desktop.url));
+if (center.length !== 2 || !center.every(Number.isFinite) || center[1] <= 1000) {
+  throw new Error(`desktop: disk center is not far enough below the viewport (${center.join(",")}): ${desktop.url}`);
+}
+if (!Number.isFinite(innerRadius) || !Number.isFinite(outerRadius) || !Number.isFinite(radiusRatio)) {
+  throw new Error(`desktop: missing giant-disk radius diagnostics: ${desktop.url}`);
+}
+if (outerRadius < 1100 || radiusRatio < 0.60) {
+  throw new Error(`desktop: disk curvature is too tight (inner=${innerRadius}, outer=${outerRadius}, ratio=${radiusRatio}): ${desktop.url}`);
+}
+console.log(`[kinetic-composition] PASS desktop shared giant-disk geometry; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}, ratio=${radiusRatio}: ${desktop.url}`);
 
 // Headless Chromium clamps top-level windows narrower than 500 CSS px. The
 // same-origin iframe fixture gives the atlas a real 390px layout viewport.
