@@ -11,12 +11,14 @@ function source(value) {
 }
 
 /**
- * Audit sources against a stricter question than "can this source describe the
- * orbit in that year?": can it place a seasonal longitude crossing on an
- * absolute continuous dynamical-time axis?
+ * Audit source coverage without conflating an absolute numerical ephemeris with
+ * a ready-made solar-term timestamp.
  *
- * This distinction prevents long-term insolation/orbital-parameter solutions
- * from being silently promoted into civil-time solar-term ephemerides.
+ * An ephemeris basis must provide an absolute state vector on a continuous
+ * dynamical-time axis. Turning that state into a Jie crossing still requires an
+ * app-side apparent/geocentric solar-longitude-of-date transform and root solve.
+ * Long-term orbital / insolation parameter sets can cover an epoch while still
+ * lacking the annual absolute phase needed for that job.
  */
 export const SEASONAL_EPOCH_SOURCES = Object.freeze([
   source({
@@ -31,13 +33,13 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     },
     capabilities:{
       relativeSeasonGeometry:true,
-      absoluteOrbitalPhase:false,
-      absoluteDynamicalEpoch:false,
-      equinoxOfDateFrame:false
+      absoluteStateVector:false,
+      continuousDynamicalTime:false,
+      directSeasonalEpoch:false
     },
     implementation:"bundled-shape-only",
     timeScale:"spring-equinox-normalized phase",
-    note:"repo 內已實作長期 eccentricity / perihelion 幾何，但主動移除共同季節平移。"
+    note:"repo 內已實作長期 eccentricity / perihelion 幾何，但主動移除共同季節平移；不是逐年絕對 state ephemeris。"
   }),
   source({
     id:"jpl-de441",
@@ -47,13 +49,13 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     coverage:{ mode:"absolute-year", minYear:-13_200, maxYear:17_191 },
     capabilities:{
       relativeSeasonGeometry:true,
-      absoluteOrbitalPhase:true,
-      absoluteDynamicalEpoch:true,
-      equinoxOfDateFrame:true
+      absoluteStateVector:true,
+      continuousDynamicalTime:true,
+      directSeasonalEpoch:false
     },
     implementation:"not-bundled",
-    timeScale:"JED / ephemeris dynamical time family",
-    note:"可提供高品質絕對太陽系狀態，但正式解只延伸到 AD 17191。"
+    timeScale:"JED / ephemeris dynamical-time family",
+    note:"可作為高品質絕對 Earth/Sun state basis；仍須在 app 內做視／地心太陽黃經-of-date 轉換與交點 root solve。正式解只延伸到 AD 17191。"
   }),
   source({
     id:"la2004-insolation-parameters",
@@ -67,13 +69,13 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     },
     capabilities:{
       relativeSeasonGeometry:true,
-      absoluteOrbitalPhase:false,
-      absoluteDynamicalEpoch:false,
-      equinoxOfDateFrame:true
+      absoluteStateVector:false,
+      continuousDynamicalTime:false,
+      directSeasonalEpoch:false
     },
     implementation:"not-bundled",
     timeScale:"orbital/precessional solution indexed from J2000",
-    note:"公開 insolation parameter 檔提供 e、obliquity、moving-equinox perihelion 等長期量；不是逐年絕對節氣 timestamp。"
+    note:"公開 insolation parameter 檔提供 e、obliquity、moving-equinox perihelion 等長期量；年份 coverage 很長，但不是逐年 Earth/Sun absolute state 或節氣 timestamp。"
   })
 ]);
 
@@ -94,17 +96,19 @@ function coverageBounds(source) {
 function evaluateSource(source, targetYear) {
   const bounds = coverageBounds(source);
   const coversTarget = targetYear >= bounds.minYear && targetYear <= bounds.maxYear;
-  const absoluteEpochCapable = source.capabilities.absoluteOrbitalPhase
-    && source.capabilities.absoluteDynamicalEpoch
-    && source.capabilities.equinoxOfDateFrame;
-  const implementedForEpoch = source.implementation === "bundled-absolute-epoch";
-  const qualifiedCoverage = coversTarget && absoluteEpochCapable;
-  const usableNow = qualifiedCoverage && implementedForEpoch;
+  const ephemerisBasisCapable = source.capabilities.absoluteStateVector
+    && source.capabilities.continuousDynamicalTime;
+  const implementedAsBasis = source.implementation === "bundled-absolute-state";
+  const qualifiedCoverage = coversTarget && ephemerisBasisCapable;
+  // No registered source currently bypasses the app-side longitude/root solver.
+  const directSeasonalEpoch = source.capabilities.directSeasonalEpoch;
+  const usableNow = coversTarget && directSeasonalEpoch
+    || qualifiedCoverage && implementedAsBasis;
 
   let reason;
   if (!coversTarget) reason = "outside-source-coverage";
-  else if (!absoluteEpochCapable) reason = "shape-or-parameter-source-without-absolute-phase";
-  else if (!implementedForEpoch) reason = "qualified-source-not-integrated";
+  else if (!ephemerisBasisCapable && !directSeasonalEpoch) reason = "parameter-source-without-absolute-state";
+  else if (!usableNow) reason = "qualified-ephemeris-basis-not-integrated";
   else reason = "usable";
 
   return Object.freeze({
@@ -115,8 +119,9 @@ function evaluateSource(source, targetYear) {
     targetYear,
     coverage:bounds,
     coversTarget,
-    absoluteEpochCapable,
-    implementedForEpoch,
+    ephemerisBasisCapable,
+    directSeasonalEpoch,
+    implementedAsBasis,
     qualifiedCoverage,
     usableNow,
     reason,
@@ -126,8 +131,8 @@ function evaluateSource(source, targetYear) {
   });
 }
 
-function nearestAbsoluteCoverageBoundary(evaluations, targetYear) {
-  const absoluteSources = evaluations.filter(item => item.absoluteEpochCapable);
+function nearestEphemerisCoverageBoundary(evaluations, targetYear) {
+  const absoluteSources = evaluations.filter(item => item.ephemerisBasisCapable || item.directSeasonalEpoch);
   if (!absoluteSources.length) return null;
   let best = null;
   for (const item of absoluteSources) {
@@ -146,9 +151,9 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
   assertYear(targetYear, "targetYear");
   const identity = baseYear === targetYear;
   const evaluations = Object.freeze(SEASONAL_EPOCH_SOURCES.map(item => evaluateSource(item, targetYear)));
-  const qualified = evaluations.filter(item => item.qualifiedCoverage);
+  const qualified = evaluations.filter(item => item.qualifiedCoverage || item.coversTarget && item.directSeasonalEpoch);
   const usable = evaluations.filter(item => item.usableNow);
-  const nearestAbsoluteBoundary = nearestAbsoluteCoverageBoundary(evaluations, targetYear);
+  const nearestEphemerisBoundary = nearestEphemerisCoverageBoundary(evaluations, targetYear);
 
   let status;
   let blocker;
@@ -159,11 +164,11 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
     status = "resolved";
     blocker = null;
   } else if (qualified.length) {
-    status = "qualified-source-not-integrated";
-    blocker = "implementation";
+    status = "qualified-ephemeris-basis-not-integrated";
+    blocker = "implementation-and-seasonal-epoch-solver";
   } else {
-    status = "absolute-phase-coverage-gap";
-    blocker = "source-coverage";
+    status = "absolute-state-coverage-gap";
+    blocker = "ephemeris-source-coverage";
   }
 
   return Object.freeze({
@@ -176,6 +181,7 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
     evaluations,
     qualifiedSourceIds:Object.freeze(qualified.map(item => item.id)),
     usableSourceIds:Object.freeze(usable.map(item => item.id)),
-    nearestAbsoluteBoundary
+    nearestEphemerisBoundary,
+    seasonalEpochSolverRequired:!identity && !usable.length
   });
 }
