@@ -18,7 +18,7 @@ function dumpDom(path) {
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
-    "--virtual-time-budget=1800",
+    "--virtual-time-budget=2100",
     "--dump-dom",
     url,
   ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
@@ -59,6 +59,17 @@ function expect(path, checks, label) {
   return { url, dom, tag };
 }
 
+function exposure(tag) {
+  return {
+    hours:Number(attr(tag, "data-month-boundary-exposure-hours")),
+    percent:Number(attr(tag, "data-month-boundary-exposure-percent")),
+    largest:Number(attr(tag, "data-month-boundary-largest-window-hours")),
+    overlap:Number(attr(tag, "data-month-boundary-overlap-hours")),
+    windows:Number(attr(tag, "data-month-boundary-window-count")),
+    merged:Number(attr(tag, "data-month-boundary-merged-window-count"))
+  };
+}
+
 const zero = expect(
   "recurrence.html?date=2026-09-13&delta=0",
   {
@@ -66,16 +77,23 @@ const zero = expect(
       "data-astronomy-model": "berger-1978",
       "data-astronomy-validity": "within-range",
       "data-astronomy-shape-closed": "true",
-      "data-astronomy-term-count": "12"
+      "data-astronomy-term-count": "12",
+      "data-month-boundary-exposure-validity": "within-range",
+      "data-month-boundary-window-count": "12",
+      "data-month-boundary-closed": "true"
     },
     float: [
-      { name: "data-astronomy-max-residual-hours", expected: 0, tolerance: 1e-9 }
+      { name: "data-astronomy-max-residual-hours", expected: 0, tolerance: 1e-9 },
+      { name: "data-month-boundary-exposure-hours", expected: 0, tolerance: 1e-9 }
     ]
   },
   "zero-year astronomical identity"
 );
 if ((zero.dom.match(/data-astro-term=/g) ?? []).length !== 12) {
   throw new Error(`zero-year astronomical identity: expected 12 SVG residual whiskers: ${zero.url}`);
+}
+if ((zero.dom.match(/class="month-boundary-window/g) ?? []).length !== 12) {
+  throw new Error(`zero-year month-boundary exposure: expected 12 window cells: ${zero.url}`);
 }
 console.log(`[astronomy-residual] PASS zero identity: ${zero.url}`);
 
@@ -86,7 +104,8 @@ const local = expect(
       "data-year-closed": "true",
       "data-day-closed": "true",
       "data-global-closed": "false",
-      "data-astronomy-shape-closed": "false"
+      "data-astronomy-shape-closed": "false",
+      "data-month-boundary-closed": "false"
     },
     float: [
       { name: "data-astronomy-max-residual-hours", expected: 41.355249, tolerance: 0.0001 },
@@ -110,12 +129,17 @@ const global = expect(
       "data-year-closed": "true",
       "data-day-closed": "true",
       "data-astronomy-shape-closed": "false",
-      "data-astronomy-target-year": "26026"
+      "data-astronomy-target-year": "26026",
+      "data-month-boundary-exposure-validity": "within-range",
+      "data-month-boundary-window-count": "12",
+      "data-month-boundary-merged-window-count": "12",
+      "data-month-boundary-closed": "false"
     },
     float: [
       { name: "data-astronomy-max-residual-hours", expected: 95.109375, tolerance: 0.0001 },
       { name: "data-astronomy-min-residual-hours", expected: 1.363468, tolerance: 0.0001 },
-      { name: "data-astronomy-max-signed-residual-hours", expected: 95.109375, tolerance: 0.0001 }
+      { name: "data-astronomy-max-signed-residual-hours", expected: 95.109375, tolerance: 0.0001 },
+      { name: "data-month-boundary-largest-window-hours", expected: 95.109375, tolerance: 0.0001 }
     ]
   },
   "24000-year discrete closure with astronomical non-closure"
@@ -123,4 +147,38 @@ const global = expect(
 if (!/95\.11 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
   throw new Error(`24000-year astronomical residual readout missing: ${global.url}`);
 }
-console.log(`[astronomy-residual] PASS 24000-year non-closure: ${global.url}`);
+const globalExposure = exposure(global.tag);
+if (!(globalExposure.hours > 500 && globalExposure.percent > 5 && globalExposure.percent < 10)) {
+  throw new Error(`24000-year month-boundary exposure unexpectedly small/large: ${JSON.stringify(globalExposure)}: ${global.url}`);
+}
+if (globalExposure.overlap > 0.001) {
+  throw new Error(`24000-year reference windows unexpectedly overlap: ${globalExposure.overlap}: ${global.url}`);
+}
+console.log(`[astronomy-residual] PASS 24000-year non-closure; month-boundary union=${globalExposure.hours.toFixed(3)} h (${globalExposure.percent.toFixed(3)}%): ${global.url}`);
+
+const near = expect(
+  "recurrence.html?date=2026-09-13&delta=792000",
+  {
+    exact: {
+      "data-global-closed": "true",
+      "data-astronomy-validity": "within-range",
+      "data-month-boundary-exposure-validity": "within-range",
+      "data-month-boundary-window-count": "12",
+      "data-month-boundary-merged-window-count": "12",
+      "data-month-boundary-closed": "false"
+    },
+    float: [
+      { name: "data-astronomy-max-residual-hours", expected: 10.619909, tolerance: 0.001 },
+      { name: "data-month-boundary-largest-window-hours", expected: 10.619909, tolerance: 0.001 }
+    ]
+  },
+  "792000-year exact-discrete near recurrence"
+);
+const nearExposure = exposure(near.tag);
+if (!(nearExposure.hours > 0 && nearExposure.hours < globalExposure.hours)) {
+  throw new Error(`792000-year exposure did not improve on 24000 years: near=${nearExposure.hours}, global=${globalExposure.hours}: ${near.url}`);
+}
+if (!(nearExposure.percent > 0 && nearExposure.percent < globalExposure.percent)) {
+  throw new Error(`792000-year exposure percent did not improve: near=${nearExposure.percent}, global=${globalExposure.percent}: ${near.url}`);
+}
+console.log(`[astronomy-residual] PASS 792000-year near recurrence; month-boundary union=${nearExposure.hours.toFixed(3)} h (${nearExposure.percent.toFixed(3)}%): ${near.url}`);
