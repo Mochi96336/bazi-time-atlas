@@ -87,7 +87,7 @@
   border-radius: 8px;
   padding: 2px 4px;
   margin: -2px -4px;
-  transition: opacity 140ms ease, background 140ms ease;
+  transition: opacity 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 .ring-legend-row[data-ring-toggle]:hover,
 .ring-legend-row[data-ring-toggle]:focus-visible { background: rgba(255,255,255,.045); }
@@ -97,6 +97,42 @@
 }
 .ring-legend-row[data-ring-toggle][aria-pressed="false"] { opacity: .42; }
 .ring-legend-row[data-ring-toggle][aria-pressed="false"] strong { color: #778078; }
+.ring-legend-row[data-reference-active="true"] {
+  background: rgba(244,230,183,.055);
+  box-shadow: inset 2px 0 rgba(244,230,183,.58);
+}
+
+/* Relative reference frame is a render-only coordinate transform. The native
+   selector sits with the layer legend because it chooses which layer is held as
+   the angular frame; it never changes Selected Instant or the underlying pose. */
+.reference-frame-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 0 0 3px;
+  pointer-events: auto;
+  color: #778179;
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: .08em;
+}
+.reference-frame-control select {
+  min-height: 24px;
+  border: 1px solid rgba(238,242,237,.14);
+  border-radius: 999px;
+  padding: 0 22px 0 8px;
+  color: #cbd1cc;
+  background: rgba(15,19,16,.78);
+  color-scheme: dark;
+  font: inherit;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+.reference-frame-control select:focus-visible {
+  outline: 1px solid var(--cursor);
+  outline-offset: 2px;
+}
 
 /* Motion traces exist only while a phase actually moves. Discrete pillar wheels
    use a broken tooth-like stroke; astronomical/derived longitude stays smooth. */
@@ -231,6 +267,17 @@
     display: flex;
     gap: 4px 9px;
     flex-wrap: wrap;
+  }
+  .reference-frame-control {
+    flex: 0 0 100%;
+    gap: 5px;
+    padding-bottom: 0;
+    font-size: 7px;
+  }
+  .reference-frame-control select {
+    min-height: 20px;
+    padding: 0 18px 0 6px;
+    font-size: 7px;
   }
   .ring-legend-row {
     display: flex;
