@@ -1,6 +1,12 @@
 import { RINGS, WHEEL_CENTER } from "./ring-model.js";
 import { angleAt, shortestAngleDelta } from "./polar-geometry.js";
-import { setManualOffset } from "./ring-state.js";
+import {
+  resetManualOffset,
+  setManualOffset,
+  snappedOffset
+} from "./ring-state.js";
+
+const DETENT_EPSILON = 1e-9;
 
 function screenToWorld(svg, clientX, clientY) {
   const matrix = svg.getScreenCTM();
@@ -35,15 +41,35 @@ export function createRingDragController({
 }) {
   let compareMode = false;
   let active = null;
+  let hoverRingId = null;
 
   function updatePointerStyle() {
     svg.style.touchAction = "none";
-    svg.style.cursor = active ? "grabbing" : "grab";
+    svg.style.cursor = active ? "grabbing" : hoverRingId ? "grab" : "";
+  }
+
+  function setHoverRing(ringId) {
+    hoverRingId = ringId ?? null;
+    if (hoverRingId) svg.dataset.hoverRing = hoverRingId;
+    else delete svg.dataset.hoverRing;
+    updatePointerStyle();
+  }
+
+  function updateHover(event) {
+    if (active) return;
+    const world = screenToWorld(svg, event.clientX, event.clientY);
+    if (!world) {
+      setHoverRing(null);
+      return;
+    }
+    const ring = ringAtWorldPoint(world);
+    setHoverRing(ring?.draggable ? ring.id : null);
   }
 
   function setCompareMode(enabled) {
     compareMode = Boolean(enabled);
     active = null;
+    delete svg.dataset.activeRing;
     updatePointerStyle();
     onModeChange?.(compareMode);
   }
@@ -59,31 +85,37 @@ export function createRingDragController({
 
     event.preventDefault();
     try { svg.setPointerCapture(event.pointerId); } catch {}
+    setHoverRing(ring.id);
     active = {
       pointerId: event.pointerId,
       ringId: ring.id,
       mode: compareMode ? "free" : "linked",
       lastAngle: angleAt(WHEEL_CENTER, world)
     };
+    svg.dataset.activeRing = ring.id;
     updatePointerStyle();
     if (active.mode === "free") onDragStart?.(ring.id, state);
     else onLinkedDragStart?.(ring.id, state);
   }
 
   function move(event) {
-    if (!active || event.pointerId !== active.pointerId) return;
+    if (!active) {
+      updateHover(event);
+      return;
+    }
+    if (event.pointerId !== active.pointerId) return;
     const world = screenToWorld(svg, event.clientX, event.clientY);
     if (!world) return;
     event.preventDefault();
     const nextAngle = angleAt(WHEEL_CENTER, world);
     const delta = shortestAngleDelta(nextAngle, active.lastAngle);
     active.lastAngle = nextAngle;
-    if (Math.abs(delta) < 1e-9) return;
+    if (Math.abs(delta) < DETENT_EPSILON) return;
 
     const state = ringStates[active.ringId];
     if (active.mode === "free") {
       setManualOffset(state, state.manualOffset + delta);
-      onPoseChange?.(active.ringId, state, delta);
+      onPoseChange?.(active.ringId, state, delta, { phase:"drag" });
     } else {
       onLinkedDragDelta?.(active.ringId, delta, state);
     }
@@ -94,27 +126,52 @@ export function createRingDragController({
     const { ringId, mode } = active;
     const state = ringStates[ringId];
     active = null;
+    delete svg.dataset.activeRing;
     try { svg.releasePointerCapture(event.pointerId); } catch {}
+
+    if (mode === "free") {
+      const unsnappedOffset = state.manualOffset;
+      const detentOffset = snappedOffset(ringId, unsnappedOffset);
+      if (Math.abs(detentOffset) < DETENT_EPSILON) resetManualOffset(state);
+      else setManualOffset(state, detentOffset);
+      if (Math.abs(detentOffset - unsnappedOffset) >= DETENT_EPSILON) {
+        onPoseChange?.(ringId, state, detentOffset - unsnappedOffset, {
+          phase:"detent",
+          unsnappedOffset,
+          detentOffset
+        });
+      }
+      onDragEnd?.(ringId, state, { unsnappedOffset, detentOffset });
+    } else {
+      onLinkedDragEnd?.(ringId, state);
+    }
     updatePointerStyle();
-    if (mode === "free") onDragEnd?.(ringId, state);
-    else onLinkedDragEnd?.(ringId, state);
+  }
+
+  function leave() {
+    if (!active) setHoverRing(null);
   }
 
   svg.addEventListener("pointerdown", begin);
   svg.addEventListener("pointermove", move);
   svg.addEventListener("pointerup", finish);
   svg.addEventListener("pointercancel", finish);
+  svg.addEventListener("pointerleave", leave);
   updatePointerStyle();
 
   return Object.freeze({
     setCompareMode,
     get compareMode() { return compareMode; },
     get activeMode() { return active?.mode ?? null; },
+    get hoverRingId() { return hoverRingId; },
     destroy() {
       svg.removeEventListener("pointerdown", begin);
       svg.removeEventListener("pointermove", move);
       svg.removeEventListener("pointerup", finish);
       svg.removeEventListener("pointercancel", finish);
+      svg.removeEventListener("pointerleave", leave);
+      delete svg.dataset.hoverRing;
+      delete svg.dataset.activeRing;
       svg.style.touchAction = "";
       svg.style.cursor = "";
     }
