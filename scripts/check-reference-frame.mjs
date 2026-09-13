@@ -81,10 +81,13 @@ if (attr(probe, "data-initial-reference") !== "world" || Math.abs(initialOffset)
 if (
   attr(probe, "data-motion-fan-clipped") !== "true" ||
   attr(probe, "data-cursor-fan-clipped") !== "true" ||
-  attr(probe, "data-motion-clip-path") !== "url(#kinetic-master-fan-clip)" ||
-  attr(probe, "data-cursor-clip-path") !== "url(#kinetic-master-fan-clip)"
+  attr(probe, "data-motion-clip-owner") !== "kinetic-fan-layer" ||
+  attr(probe, "data-cursor-clip-owner") !== "kinetic-fan-layer" ||
+  attr(probe, "data-motion-parent") !== "kinetic-fan-layer" ||
+  attr(probe, "data-cursor-parent") !== "kinetic-fan-layer" ||
+  attr(probe, "data-fan-wrapper-clip") !== "url(#kinetic-master-fan-clip)"
 ) {
-  throw new Error(`reference-frame: moving cursor/traces are not governed by the master fan clip: ${url}`);
+  throw new Error(`reference-frame: moving overlays are not children of the fixed master fan clip: ${url}`);
 }
 if (attr(probe, "data-day-reference") !== "day") {
   throw new Error(`reference-frame: Day reference did not activate: ${url}`);
@@ -140,4 +143,4 @@ if (numberAttr(probe, "data-world-trace-count") !== 0) {
   throw new Error(`reference-frame: frame reset emitted fake motion traces: ${url}`);
 }
 
-console.log(`[reference-frame] PASS 390px Day/Solar co-rotating frames; Day model=${dayModelDelta.toFixed(3)}°, Solar relative=${solarRelativeDelta.toFixed(3)}°, hidden-ref Day drift=${hiddenDayRenderedDelta.toFixed(3)}°; cursor/traces fan-clipped: ${url}`);
+console.log(`[reference-frame] PASS 390px Day/Solar co-rotating frames; Day model=${dayModelDelta.toFixed(3)}°, Solar relative=${solarRelativeDelta.toFixed(3)}°, hidden-ref Day drift=${hiddenDayRenderedDelta.toFixed(3)}°; overlays inside fixed fan wrapper: ${url}`);
