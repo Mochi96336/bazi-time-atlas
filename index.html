@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./kinetic-boundaries.css">
   <link rel="stylesheet" href="./discrete-phase.css">
   <link rel="stylesheet" href="./radial-hierarchy.css">
+  <link rel="stylesheet" href="./scale-emphasis.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -110,12 +111,12 @@
         <p>時柱 60 格約五天一圈，日柱 60 格是六十天；中間的年度座標以太陽黃經連續走完一年，內列標 24 節氣、外列標 12 個熱帶黃道區段。再往外是約五年才走完 60 格的月柱，最外層則是 60 年一圈的年柱。五個時間層仍由同一 Selected Instant 驅動，但不再用歷史實作順序排列。</p>
       </div>
       <div>
-        <div class="eyebrow">Current frontier</div>
+        <div class="eyebrow">Scale focus</div>
         <ul>
-          <li><a href="./recurrence.html">Recurrence lab 已能拆開精確離散閉合、天文殘差、近回歸與四柱可判定性。</a></li>
-          <li>主圓盤已具相對參考系、格內真實進度與「只有時間戳完全相同才亮起」的共享邊界。</li>
-          <li>下一個盤面工作會讓 48 小時 / 一年 / 60 年 preset 改變閱讀 emphasis，而不是再改真實時間語意。</li>
-          <li><a href="./docs/current-status.md">目前實作狀態</a> · <a href="./docs/kinetic-atlas-plan.md">原始 redesign plan</a></li>
+          <li><strong>48 小時</strong>：時柱／日柱前景化，觀察高速離散跳格。</li>
+          <li><strong>一年</strong>：年度黃經／月柱前景化，觀察節界如何驅動月柱。</li>
+          <li><strong>60 年</strong>：最外年柱成為主角，內層保留為相位脈絡而不消失。</li>
+          <li><a href="./docs/current-status.md">目前實作狀態</a> · <a href="./recurrence.html">深時間回歸實驗</a></li>
         </ul>
       </div>
     </section>
@@ -137,6 +138,7 @@
   </div>
 
   <script type="module" src="./src/kinetic-atlas.js"></script>
+  <script type="module" src="./src/scale-emphasis-view.js"></script>
   <script type="module" src="./src/kinetic-boundaries.js"></script>
   <script type="module" src="./src/legacy-annual-compat.js"></script>
 </body>
