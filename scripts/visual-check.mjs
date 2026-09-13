@@ -30,8 +30,7 @@ const captures = pages.flatMap(page =>
 );
 
 // Review-only frames keep the normal first-viewport regression set small while
-// giving lower collapsible panels enough vertical room to be inspected without
-// browser automation or scroll-dependent screenshots.
+// giving lower panels enough vertical room to be inspected without scroll automation.
 captures.push(
   {
     name: "annual-hidden-inspector-390x1320.png",
@@ -39,6 +38,20 @@ captures.push(
     path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1",
     width: 390,
     height: 1320,
+  },
+  {
+    name: "recurrence-search-1440x1500.png",
+    page: "recurrence-search",
+    path: "recurrence.html?date=2026-09-13&delta=24000",
+    width: 1440,
+    height: 1500,
+  },
+  {
+    name: "recurrence-search-390x1800.png",
+    page: "recurrence-search",
+    path: "recurrence.html?date=2026-09-13&delta=24000",
+    width: 390,
+    height: 1800,
   },
   {
     name: "birth-ten-gods-1440x1400.png",
