@@ -11,8 +11,8 @@ function findBrowser() {
   throw new Error("No system Chromium/Chrome executable found");
 }
 
-function dump(width, height) {
-  const url = new URL("?instant=2027-03-15T13%3A20%3A09.000Z", baseURL).href;
+function dump(path, width, height) {
+  const url = new URL(path, baseURL).href;
   const result = spawnSync(findBrowser(), [
     "--headless=new",
     "--no-sandbox",
@@ -20,7 +20,7 @@ function dump(width, height) {
     "--force-device-scale-factor=1",
     "--hide-scrollbars",
     "--run-all-compositor-stages-before-draw",
-    "--virtual-time-budget=2600",
+    "--virtual-time-budget=3000",
     `--window-size=${width},${height}`,
     "--dump-dom",
     url
@@ -46,7 +46,7 @@ function requireAttr(tag, name, label, url) {
   return value;
 }
 
-const desktop = dump(1440, 900);
+const desktop = dump("?instant=2027-03-15T13%3A20%3A09.000Z", 1440, 900);
 const instrument = tagById(desktop.dom, "kinetic-instrument");
 if (attr(instrument, "data-master-geometry") !== "shared-fan" || attr(instrument, "data-fan-clip") !== "active") {
   throw new Error(`desktop: shared master fan clip was not installed: ${desktop.url}`);
@@ -62,24 +62,29 @@ for (const id of ["year-track", "month-track", "day-track", "solar-track", "zodi
 }
 console.log(`[kinetic-composition] PASS desktop shared fan geometry: ${desktop.url}`);
 
-const mobile = dump(390, 844);
-const mobileInstrument = tagById(mobile.dom, "kinetic-instrument");
-const actualWidth = Number(requireAttr(mobileInstrument, "data-mobile-inner-width", "mobile", mobile.url));
-const mediaMatched = requireAttr(mobileInstrument, "data-mobile-media-matched", "mobile", mobile.url);
-if (actualWidth > 480 || mediaMatched !== "true") {
-  throw new Error(`mobile: Chromium did not enter mobile CSS (innerWidth=${actualWidth}, match=${mediaMatched}): ${mobile.url}`);
+// Headless Chromium clamps top-level windows narrower than 500 CSS px. The
+// same-origin iframe fixture gives the atlas a real 390px layout viewport.
+const mobile = dump("scripts/fixtures/mobile-390.html", 500, 844);
+const probe = tagById(mobile.dom, "probe");
+if (requireAttr(probe, "data-ready", "mobile", mobile.url) !== "true") {
+  throw new Error(`mobile: iframe probe did not settle: ${mobile.url}`);
 }
-const fit = requireAttr(mobileInstrument, "data-mobile-viewport-fit", "mobile", mobile.url);
-const hidden = requireAttr(mobileInstrument, "data-mobile-secondary-hidden", "mobile", mobile.url);
-const share = Number(requireAttr(mobileInstrument, "data-mobile-instrument-share", "mobile", mobile.url));
-const scrollHeight = Number(requireAttr(mobileInstrument, "data-mobile-scroll-height", "mobile", mobile.url));
-const viewportHeight = Number(requireAttr(mobileInstrument, "data-mobile-viewport-height", "mobile", mobile.url));
+const actualWidth = Number(requireAttr(probe, "data-inner-width", "mobile", mobile.url));
+const mediaMatched = requireAttr(probe, "data-media-matched", "mobile", mobile.url);
+const fit = requireAttr(probe, "data-viewport-fit", "mobile", mobile.url);
+const hidden = requireAttr(probe, "data-secondary-hidden", "mobile", mobile.url);
+const share = Number(requireAttr(probe, "data-instrument-share", "mobile", mobile.url));
+const scrollHeight = Number(requireAttr(probe, "data-scroll-height", "mobile", mobile.url));
+const viewportHeight = Number(requireAttr(probe, "data-viewport-height", "mobile", mobile.url));
+if (actualWidth !== 390 || mediaMatched !== "true") {
+  throw new Error(`mobile: fixture is not a true 390px CSS viewport (innerWidth=${actualWidth}, match=${mediaMatched}): ${mobile.url}`);
+}
 if (fit !== "true") throw new Error(`mobile: page still scrolls (${scrollHeight} > ${viewportHeight}): ${mobile.url}`);
 if (hidden !== "true") throw new Error(`mobile: secondary dashboard sections were not collapsed: ${mobile.url}`);
 if (!Number.isFinite(share) || share < 0.70) {
   throw new Error(`mobile: instrument occupies too little of first viewport (${share}): ${mobile.url}`);
 }
-if (attr(mobileInstrument, "data-fan-clip") !== "active") {
-  throw new Error(`mobile: fan clip inactive: ${mobile.url}`);
+if (attr(probe, "data-fan-clip") !== "active" || attr(probe, "data-master-geometry") !== "shared-fan") {
+  throw new Error(`mobile: shared fan geometry inactive inside 390px fixture: ${mobile.url}`);
 }
-console.log(`[kinetic-composition] PASS mobile first viewport; innerWidth=${actualWidth}, instrument share=${share}, scroll=${scrollHeight}/${viewportHeight}: ${mobile.url}`);
+console.log(`[kinetic-composition] PASS true 390px first viewport; instrument share=${share}, scroll=${scrollHeight}/${viewportHeight}: ${mobile.url}`);
