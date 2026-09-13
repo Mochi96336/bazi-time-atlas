@@ -31,6 +31,7 @@ jobs:
           node --check src/recurrence/gregorian-cycle.js
           node --check src/recurrence/berger-orbit.js
           node --check src/recurrence/near-recurrence.js
+          node --check src/recurrence/month-boundary-risk.js
           node --check src/legacy-annual-compat.js
           node --check src/app.js
           node --check src/annual-deep-link.js
