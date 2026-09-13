@@ -55,7 +55,10 @@ function requireFinite(values, label, url) {
 const interactive = dump("scripts/fixtures/discrete-phase-390.html", 500, 844, 7000);
 const probe = tagById(interactive.dom, "probe");
 if (!probe || attr(probe, "data-ready") !== "true") {
-  throw new Error(`discrete-phase fixture did not settle: ${interactive.url}`);
+  const diagnostics = probe
+    ? `phaseInit=${attr(probe, "data-phase-init")}, phaseMode=${attr(probe, "data-phase-mode")}, rings=${attr(probe, "data-phase-rings")}, slots=${attr(probe, "data-phase-slot-count")}, active=${attr(probe, "data-phase-active-count")}, finite=${attr(probe, "data-phase-finite-count")}, hour=${attr(probe, "data-bootstrap-hour-progress")}, year=${attr(probe, "data-bootstrap-year-progress")}, month=${attr(probe, "data-bootstrap-month-progress")}, day=${attr(probe, "data-bootstrap-day-progress")}`
+    : "probe=missing";
+  throw new Error(`discrete-phase fixture did not settle (${diagnostics}): ${interactive.url}`);
 }
 
 if (num(probe, "data-inner-width") !== 390) {
@@ -66,7 +69,6 @@ if (attr(probe, "data-phase-mode") !== "true-boundaries" || attr(probe, "data-ph
 }
 
 const ids = ["hour", "year", "month", "day"];
-const cap = id => id[0].toUpperCase() + id.slice(1);
 const read = (prefix, id, field) => num(probe, `data-${prefix}-${id}-${field}`);
 const text = (prefix, id, field) => attr(probe, `data-${prefix}-${id}-${field}`);
 

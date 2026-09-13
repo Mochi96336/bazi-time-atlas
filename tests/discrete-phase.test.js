@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   dayPhaseWindow,
   discretePhaseWindows,
+  exactNextBoundaryGroups,
   hourPhaseWindow,
   monthPhaseWindow,
   phaseAngleWithinTooth,
@@ -81,6 +82,37 @@ test("all four phase windows share one selected instant but preserve their own l
   }
   assert.notEqual(phases.hour.endMs - phases.hour.startMs, phases.day.endMs - phases.day.startMs);
   assert.notEqual(phases.month.endMs - phases.month.startMs, phases.year.endMs - phases.year.startMs);
+});
+
+test("Zi-initial exposes an exact shared next boundary for Hour and Day", () => {
+  const groups = exactNextBoundaryGroups(discretePhaseWindows(SAMPLE));
+  const shared = groups.filter(group => group.shared);
+  assert.equal(shared.length, 1);
+  assert.deepEqual(shared[0].ringIds, ["hour", "day"]);
+  assert.equal(shared[0].instantMs, Date.parse("2027-03-15T15:00:00.000Z"));
+});
+
+test("pre-Li-Chun Chou month exposes an exact shared Month and Year boundary", () => {
+  const instantMs = Date.parse("2027-02-01T04:00:00.000Z"); // UTC+8 = 12:00
+  const groups = exactNextBoundaryGroups(discretePhaseWindows(instantMs));
+  const shared = groups.find(group => group.shared && group.ringIds.includes("year"));
+  assert.ok(shared);
+  assert.deepEqual(shared.ringIds, ["year", "month"]);
+  assert.equal(shared.instantMs, solarTermEventForCivilYear(2027, "立春").instantMs);
+});
+
+test("exact boundary grouping has no near-event tolerance", () => {
+  const groups = exactNextBoundaryGroups({
+    hour: { endMs:1_000 },
+    year: { endMs:2_000 },
+    month: { endMs:2_001 },
+    day: { endMs:1_000 }
+  });
+  assert.deepEqual(groups.map(group => [group.instantMs, group.ringIds, group.shared]), [
+    [1_000, ["hour", "day"], true],
+    [2_000, ["year"], false],
+    [2_001, ["month"], false]
+  ]);
 });
 
 test("phase marker sweeps only inside one six-degree active tooth", () => {

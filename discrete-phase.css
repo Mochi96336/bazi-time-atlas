@@ -1,5 +1,7 @@
 .state-phase-progress,
-.state-phase-bead {
+.state-phase-bead,
+.state-boundary-gate,
+.state-boundary-shared-halo {
   pointer-events: none;
 }
 
@@ -16,10 +18,33 @@
   opacity: .96;
 }
 
-.state-phase-progress.phase-hour { stroke: var(--hour); }
-.state-phase-progress.phase-year { stroke: var(--year); }
-.state-phase-progress.phase-month { stroke: var(--month); }
-.state-phase-progress.phase-day { stroke: var(--day); }
+.state-boundary-gate {
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  opacity: .34;
+}
+
+.state-boundary-gate.is-shared {
+  stroke: var(--cursor) !important;
+  stroke-width: 2.1;
+  opacity: .94;
+}
+
+.state-boundary-shared-halo {
+  fill: none;
+  stroke: var(--cursor);
+  stroke-width: 1.15;
+  opacity: .7;
+}
+
+.state-phase-progress.phase-hour,
+.state-boundary-gate.phase-hour { stroke: var(--hour); }
+.state-phase-progress.phase-year,
+.state-boundary-gate.phase-year { stroke: var(--year); }
+.state-phase-progress.phase-month,
+.state-boundary-gate.phase-month { stroke: var(--month); }
+.state-phase-progress.phase-day,
+.state-boundary-gate.phase-day { stroke: var(--day); }
 .state-phase-bead.phase-hour { fill: var(--hour); }
 .state-phase-bead.phase-year { fill: var(--year); }
 .state-phase-bead.phase-month { fill: var(--month); }
@@ -38,7 +63,13 @@
   stroke-dasharray: none;
 }
 
+/* Every discrete layer owns a faint terminal gate. Only boundaries whose exact
+   resolved endMs is identical receive the common cursor-colored halo; visual
+   collinearity alone is never treated as evidence of temporal concurrence. */
+
 @media (max-width: 480px) {
   .state-phase-progress { stroke-width: 4; }
   .state-phase-bead { r: 3.2px; }
+  .state-boundary-gate { stroke-width: 1.7; }
+  .state-boundary-gate.is-shared { stroke-width: 2.5; }
 }

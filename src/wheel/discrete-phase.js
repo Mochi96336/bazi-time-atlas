@@ -5,6 +5,7 @@ import {
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
+const DISCRETE_RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
 export const PHASE_REFERENCE_UTC_OFFSET_HOURS = 8;
 
 function localFieldsAt(instantMs) {
@@ -96,6 +97,31 @@ export function discretePhaseWindows(instantMs) {
     month: monthPhaseWindow(instantMs),
     day: dayPhaseWindow(instantMs)
   });
+}
+
+// Exact concurrence is intentionally strict. Two boundaries are grouped only
+// when their resolved end instants are the same millisecond; there is no
+// tolerance window that could turn merely-near events into a claimed alignment.
+export function exactNextBoundaryGroups(phases) {
+  if (!phases || typeof phases !== "object") return Object.freeze([]);
+  const grouped = new Map();
+  for (const id of DISCRETE_RING_IDS) {
+    const endMs = phases[id]?.endMs;
+    if (!Number.isFinite(endMs)) continue;
+    const key = String(endMs);
+    if (!grouped.has(key)) grouped.set(key, { instantMs:endMs, ringIds:[] });
+    grouped.get(key).ringIds.push(id);
+  }
+
+  return Object.freeze(
+    [...grouped.values()]
+      .sort((a, b) => a.instantMs - b.instantMs)
+      .map(group => Object.freeze({
+        instantMs: group.instantMs,
+        ringIds: Object.freeze([...group.ringIds]),
+        shared: group.ringIds.length > 1
+      }))
+  );
 }
 
 export function phaseAngleWithinTooth(activeIndex, progress, insetDegrees = 0.45) {
