@@ -23,6 +23,7 @@ test("same-year comparison has no month-boundary disagreement window", () => {
   assert.ok(exposure.windows.every(window => Math.abs(window.widthHours) < 1e-9));
   assert.ok(exposure.unionExposureHours < 1e-9);
   assert.ok(exposure.yearPercent < 1e-9);
+  assert.equal(exposure.yearSequenceAligned, true);
   assert.equal(exposure.closed, true);
 });
 
@@ -38,6 +39,17 @@ test("all 12 jie map to the canonical BaZi month-branch transition", () => {
   );
 });
 
+test("spring-equinox cycle assigns the correct Li-Chun year-label offsets", () => {
+  const exposure = monthBoundaryDisagreementExposure(2026, 26026);
+  const qingMing = exposure.windows.find(window => window.name === "清明");
+  const liChun = exposure.windows.find(window => window.name === "立春");
+  const jingZhe = exposure.windows.find(window => window.name === "驚蟄");
+
+  assert.deepEqual([qingMing.beforeYearOffset, qingMing.afterYearOffset], [0, 0]);
+  assert.deepEqual([liChun.beforeYearOffset, liChun.afterYearOffset], [0, 1]);
+  assert.deepEqual([jingZhe.beforeYearOffset, jingZhe.afterYearOffset], [1, 1]);
+});
+
 test("only Li Chun is classified as a simultaneous year and month boundary", () => {
   const exposure = monthBoundaryDisagreementExposure(2026, 26026);
   const yearMonth = exposure.windows.filter(window => window.pillarImpact === "year+month");
@@ -49,6 +61,66 @@ test("only Li Chun is classified as a simultaneous year and month boundary", () 
   assert.deepEqual(yearMonth[0].affectedPillars, ["year", "month"]);
   assert.equal(monthOnly.length, 11);
   assert.ok(monthOnly.every(window => window.affectedPillars.length === 1 && window.affectedPillars[0] === "month"));
+});
+
+test("24000-year exact closure isolates concrete Ganzhi changes inside swept windows", () => {
+  const exposure = monthBoundaryDisagreementExposure(2026, 26026);
+  assert.equal(exposure.yearSequenceAligned, true);
+  assert.equal(exposure.fullPillarAttribution, "boundary-isolated");
+
+  const qingMing = exposure.windows.find(window => window.name === "清明");
+  assert.equal(qingMing.direction, "target-later");
+  assert.deepEqual(qingMing.baseWindowPillars, {
+    activeYearLabel:2026,
+    yearPillar:"丙午",
+    yearStem:"丙",
+    yearBranch:"午",
+    monthBranch:"辰",
+    monthPillar:"壬辰"
+  });
+  assert.deepEqual(qingMing.targetWindowPillars, {
+    activeYearLabel:26026,
+    yearPillar:"丙午",
+    yearStem:"丙",
+    yearBranch:"午",
+    monthBranch:"卯",
+    monthPillar:"辛卯"
+  });
+
+  const liChun = exposure.windows.find(window => window.name === "立春");
+  assert.equal(liChun.direction, "target-later");
+  assert.deepEqual(liChun.baseWindowPillars, {
+    activeYearLabel:2027,
+    yearPillar:"丁未",
+    yearStem:"丁",
+    yearBranch:"未",
+    monthBranch:"寅",
+    monthPillar:"壬寅"
+  });
+  assert.deepEqual(liChun.targetWindowPillars, {
+    activeYearLabel:26026,
+    yearPillar:"丙午",
+    yearStem:"丙",
+    yearBranch:"午",
+    monthBranch:"丑",
+    monthPillar:"辛丑"
+  });
+
+  const jingZhe = exposure.windows.find(window => window.name === "驚蟄");
+  assert.equal(jingZhe.direction, "target-later");
+  assert.equal(jingZhe.baseWindowPillars.activeYearLabel, 2027);
+  assert.equal(jingZhe.targetWindowPillars.activeYearLabel, 26027);
+  assert.equal(jingZhe.baseWindowPillars.yearPillar, "丁未");
+  assert.equal(jingZhe.targetWindowPillars.yearPillar, "丁未");
+  assert.equal(jingZhe.baseWindowPillars.monthPillar, "癸卯");
+  assert.equal(jingZhe.targetWindowPillars.monthPillar, "壬寅");
+});
+
+test("non-60-year comparisons are marked as mixed with background year-sequence offset", () => {
+  const exposure = monthBoundaryDisagreementExposure(2026, 2426);
+  assert.equal(exposure.yearSequenceAligned, false);
+  assert.equal(exposure.fullPillarAttribution, "mixed-with-year-sequence-offset");
+  assert.ok(exposure.windows.every(window => window.pureBoundaryAttribution === false));
 });
 
 test("24000-year exact discrete closure still sweeps substantial month-boundary time", () => {
@@ -78,6 +150,7 @@ test("792000-year near recurrence reduces month-boundary disagreement exposure",
   assert.ok(near.largestWindow.widthHours > 10 && near.largestWindow.widthHours < 11);
   assert.ok(near.yearMonthExposureHours < first.yearMonthExposureHours);
   assert.ok(near.monthOnlyExposureHours < first.monthOnlyExposureHours);
+  assert.equal(near.yearSequenceAligned, true);
 });
 
 test("window direction identifies which month branch each comparison occupies inside the swept interval", () => {
@@ -92,12 +165,18 @@ test("window direction identifies which month branch each comparison occupies in
     if (window.direction === "target-later") {
       assert.equal(window.baseWindowBranch, window.afterBranch);
       assert.equal(window.targetWindowBranch, window.beforeBranch);
+      assert.equal(window.baseWindowPillars.monthBranch, window.afterBranch);
+      assert.equal(window.targetWindowPillars.monthBranch, window.beforeBranch);
     } else if (window.direction === "target-earlier") {
       assert.equal(window.baseWindowBranch, window.beforeBranch);
       assert.equal(window.targetWindowBranch, window.afterBranch);
+      assert.equal(window.baseWindowPillars.monthBranch, window.beforeBranch);
+      assert.equal(window.targetWindowPillars.monthBranch, window.afterBranch);
     } else {
       assert.equal(window.baseWindowBranch, null);
       assert.equal(window.targetWindowBranch, null);
+      assert.equal(window.baseWindowPillars, null);
+      assert.equal(window.targetWindowPillars, null);
     }
   }
 });

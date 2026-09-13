@@ -98,7 +98,8 @@ function ensureMonthBoundaryPanel() {
         <small id="pillar-impact-year-month-percent">—</small>
       </div>
     </div>
-    <div id="month-boundary-window-grid" class="month-boundary-window-grid" aria-label="十二個交節分歧窗口與月支跨界"></div>
+    <div id="full-pillar-attribution-note" class="full-pillar-attribution" aria-live="polite">—</div>
+    <div id="month-boundary-window-grid" class="month-boundary-window-grid" aria-label="十二個交節分歧窗口、月支跨界與完整干支狀態"></div>
   `;
   termGrid.insertAdjacentElement("afterend", panel);
   monthBoundaryPanel = panel;
@@ -110,10 +111,29 @@ function windowTitle(window) {
   if (window.direction === "aligned") {
     return `${window.name} · ${window.monthTransition} · ${impact} · 基準與目標邊界重合`;
   }
+  const base = window.baseWindowPillars;
+  const target = window.targetWindowPillars;
   const yearSide = window.isYearBoundary
     ? ` · 年界：基準=${window.baseYearSide === "new" ? "新年柱" : "前一年柱"}，目標=${window.targetYearSide === "new" ? "新年柱" : "前一年柱"}`
     : "";
-  return `${window.name} · ${window.monthTransition} · ${impact} · 窗口內基準=${window.baseWindowBranch}月、目標=${window.targetWindowBranch}月${yearSide}`;
+  const ganzhi = base && target
+    ? ` · 完整柱：基準 ${base.yearPillar}/${base.monthPillar}；目標 ${target.yearPillar}/${target.monthPillar}`
+    : "";
+  const attribution = window.pureBoundaryAttribution ? " · 年序閉合，可作純交節歸因" : " · 年序未閉合，完整柱另含背景年序偏移";
+  return `${window.name} · ${window.monthTransition} · ${impact} · 窗口內基準=${window.baseWindowBranch}月、目標=${window.targetWindowBranch}月${yearSide}${ganzhi}${attribution}`;
+}
+
+function fullPillarMarkup(window, yearSequenceAligned) {
+  if (window.direction === "aligned") return `<em class="window-ganzhi aligned">邊界重合</em>`;
+  if (!yearSequenceAligned) return `<em class="window-ganzhi mixed">年序未閉合</em>`;
+  const base = window.baseWindowPillars;
+  const target = window.targetWindowPillars;
+  if (!base || !target) return `<em class="window-ganzhi mixed">—</em>`;
+
+  if (window.isYearBoundary) {
+    return `<em class="window-ganzhi year-month-ganzhi"><span>${base.yearPillar}·${base.monthPillar}</span><b>↔</b><span>${target.yearPillar}·${target.monthPillar}</span></em>`;
+  }
+  return `<em class="window-ganzhi"><span>${base.monthPillar}</span><b>↔</b><span>${target.monthPillar}</span></em>`;
 }
 
 function renderMonthBoundaryExposure(result) {
@@ -140,6 +160,13 @@ function renderMonthBoundaryExposure(result) {
   setText("pillar-impact-month-only-percent", `${exposure.monthOnlyPercent.toFixed(3)}% of normalized year`);
   setText("pillar-impact-year-month-hours", `${exposure.yearMonthExposureHours.toFixed(2)} h`);
   setText("pillar-impact-year-month-percent", `${exposure.yearMonthPercent.toFixed(3)}% of normalized year`);
+  setText(
+    "full-pillar-attribution-note",
+    exposure.yearSequenceAligned
+      ? "年序已閉合：下方完整干支固定為「左＝基準、右＝目標」，差異可隔離為交節邊界移動的結果。"
+      : "年序未閉合：月支窗口仍有效，但完整年／月干支另含 60 年年序背景偏移，因此不作純交節歸因。"
+  );
+  panel.classList.toggle("year-sequence-misaligned", !exposure.yearSequenceAligned);
 
   grid?.replaceChildren();
   exposure.windows.forEach(window => {
@@ -150,8 +177,19 @@ function renderMonthBoundaryExposure(result) {
     item.dataset.beforeBranch = window.beforeBranch;
     item.dataset.afterBranch = window.afterBranch;
     item.dataset.pillarImpact = window.pillarImpact;
+    item.dataset.pureBoundaryAttribution = String(window.pureBoundaryAttribution);
     if (window.baseWindowBranch) item.dataset.baseWindowBranch = window.baseWindowBranch;
     if (window.targetWindowBranch) item.dataset.targetWindowBranch = window.targetWindowBranch;
+    if (window.baseWindowPillars) {
+      item.dataset.baseYearPillar = window.baseWindowPillars.yearPillar;
+      item.dataset.baseMonthPillar = window.baseWindowPillars.monthPillar;
+      item.dataset.baseActiveYearLabel = String(window.baseWindowPillars.activeYearLabel);
+    }
+    if (window.targetWindowPillars) {
+      item.dataset.targetYearPillar = window.targetWindowPillars.yearPillar;
+      item.dataset.targetMonthPillar = window.targetWindowPillars.monthPillar;
+      item.dataset.targetActiveYearLabel = String(window.targetWindowPillars.activeYearLabel);
+    }
     item.title = windowTitle(window);
     item.style.setProperty("--window-width", `${Math.max(0, window.widthHours / maxWindow * 100).toFixed(3)}%`);
     item.innerHTML = `
@@ -159,6 +197,7 @@ function renderMonthBoundaryExposure(result) {
       <i aria-hidden="true"><b></b></i>
       <strong>${window.widthHours.toFixed(2)} h</strong>
       <small>${window.monthTransition} · ${window.isYearBoundary ? "年＋月" : "月"}</small>
+      ${fullPillarMarkup(window, exposure.yearSequenceAligned)}
     `;
     grid?.appendChild(item);
   });
@@ -176,17 +215,24 @@ function renderMonthBoundaryExposure(result) {
   instrument.dataset.monthOnlyExposurePercent = exposure.monthOnlyPercent.toFixed(6);
   instrument.dataset.yearMonthExposureHours = exposure.yearMonthExposureHours.toFixed(6);
   instrument.dataset.yearMonthExposurePercent = exposure.yearMonthPercent.toFixed(6);
+  instrument.dataset.yearSequenceAligned = String(exposure.yearSequenceAligned);
+  instrument.dataset.fullPillarAttribution = exposure.fullPillarAttribution;
   instrument.dataset.yearBoundaryLiChunWindowHours = (liChunWindow?.widthHours ?? 0).toFixed(6);
   instrument.dataset.yearBoundaryLiChunBeforeBranch = liChunWindow?.beforeBranch ?? "none";
   instrument.dataset.yearBoundaryLiChunAfterBranch = liChunWindow?.afterBranch ?? "none";
   instrument.dataset.yearBoundaryLiChunBaseMonthBranch = liChunWindow?.baseWindowBranch ?? "aligned";
   instrument.dataset.yearBoundaryLiChunTargetMonthBranch = liChunWindow?.targetWindowBranch ?? "aligned";
+  instrument.dataset.yearBoundaryLiChunBaseYearPillar = liChunWindow?.baseWindowPillars?.yearPillar ?? "aligned";
+  instrument.dataset.yearBoundaryLiChunTargetYearPillar = liChunWindow?.targetWindowPillars?.yearPillar ?? "aligned";
+  instrument.dataset.yearBoundaryLiChunBaseMonthPillar = liChunWindow?.baseWindowPillars?.monthPillar ?? "aligned";
+  instrument.dataset.yearBoundaryLiChunTargetMonthPillar = liChunWindow?.targetWindowPillars?.monthPillar ?? "aligned";
   instrument.dataset.monthBoundaryClosed = String(exposure.closed);
 }
 
 function renderMonthBoundaryUnavailable() {
   const panel = ensureMonthBoundaryPanel();
   panel?.querySelector("#month-boundary-window-grid")?.replaceChildren();
+  panel?.classList.remove("year-sequence-misaligned");
   setText("month-boundary-exposure-hours", "model unavailable");
   setText("month-boundary-exposure-percent", "—");
   setText("month-boundary-largest", "—");
@@ -195,6 +241,7 @@ function renderMonthBoundaryUnavailable() {
   setText("pillar-impact-month-only-percent", "—");
   setText("pillar-impact-year-month-hours", "—");
   setText("pillar-impact-year-month-percent", "—");
+  setText("full-pillar-attribution-note", "—");
   instrument.dataset.monthBoundaryExposureValidity = "outside-range";
   delete instrument.dataset.monthBoundaryExposureHours;
   delete instrument.dataset.monthBoundaryExposurePercent;
@@ -208,11 +255,17 @@ function renderMonthBoundaryUnavailable() {
   delete instrument.dataset.monthOnlyExposurePercent;
   delete instrument.dataset.yearMonthExposureHours;
   delete instrument.dataset.yearMonthExposurePercent;
+  delete instrument.dataset.yearSequenceAligned;
+  delete instrument.dataset.fullPillarAttribution;
   delete instrument.dataset.yearBoundaryLiChunWindowHours;
   delete instrument.dataset.yearBoundaryLiChunBeforeBranch;
   delete instrument.dataset.yearBoundaryLiChunAfterBranch;
   delete instrument.dataset.yearBoundaryLiChunBaseMonthBranch;
   delete instrument.dataset.yearBoundaryLiChunTargetMonthBranch;
+  delete instrument.dataset.yearBoundaryLiChunBaseYearPillar;
+  delete instrument.dataset.yearBoundaryLiChunTargetYearPillar;
+  delete instrument.dataset.yearBoundaryLiChunBaseMonthPillar;
+  delete instrument.dataset.yearBoundaryLiChunTargetMonthPillar;
   delete instrument.dataset.monthBoundaryClosed;
 }
 
