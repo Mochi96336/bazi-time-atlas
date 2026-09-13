@@ -77,6 +77,7 @@ jobs:
           node --check scripts/check-ring-visibility.mjs
           node --check scripts/check-reference-frame.mjs
           node --check scripts/check-discrete-phase.mjs
+          node --check scripts/check-boundary-gates.mjs
           node --check scripts/check-recurrence-lab.mjs
           node --check scripts/check-astronomical-residuals.mjs
           node --check scripts/check-four-pillar-determinacy.mjs
@@ -126,6 +127,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify discrete intra-state phase
         run: node scripts/check-discrete-phase.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify exact shared boundary gates
+        run: node scripts/check-boundary-gates.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify discrete recurrence states
