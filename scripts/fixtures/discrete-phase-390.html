@@ -18,6 +18,7 @@
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     let exercised = false;
+    let phaseObserver = null;
     frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
 
     function afterSettled(callback) {
@@ -68,6 +69,17 @@
       }
     }
 
+    function writeBootstrapDiagnostics(childWindow, doc, instrument) {
+      const current = phaseSnapshot(childWindow, doc);
+      probe.dataset.phaseInit = instrument.dataset.discretePhaseInit ?? "";
+      probe.dataset.phaseMode = instrument.dataset.discretePhaseMode ?? "";
+      probe.dataset.phaseRings = instrument.dataset.discretePhaseRings ?? "";
+      probe.dataset.phaseSlotCount = String(RINGS.filter(id => doc.querySelector(`#${id}-track .state-phase-progress[data-phase-ring="${id}"]`)).length);
+      probe.dataset.phaseActiveCount = String(RINGS.filter(id => doc.querySelector(`#${id}-track .cycle-sector.is-active`)).length);
+      probe.dataset.phaseFiniteCount = String(RINGS.filter(id => Number.isFinite(current[id].progress)).length);
+      writeSnapshot("bootstrap", current);
+    }
+
     function snapshot() {
       if (exercised) return;
       const childWindow = frame.contentWindow;
@@ -78,11 +90,15 @@
       const dayScale = doc.querySelector('[data-scale="day"]');
       const input = doc.querySelector("#instant-input");
       if (!instrument || !slider || !dayScale || !input) return;
+
+      writeBootstrapDiagnostics(childWindow, doc, instrument);
       if (instrument.dataset.discretePhaseMode !== "true-boundaries") return;
       const initial = phaseSnapshot(childWindow, doc);
       if (RINGS.some(id => !Number.isFinite(initial[id].progress))) return;
 
       exercised = true;
+      phaseObserver?.disconnect();
+      phaseObserver = null;
       probe.dataset.innerWidth = String(childWindow.innerWidth);
       probe.dataset.phaseMode = instrument.dataset.discretePhaseMode ?? "";
       probe.dataset.phaseRings = instrument.dataset.discretePhaseRings ?? "";
@@ -120,10 +136,20 @@
     }
 
     frame.addEventListener("load", () => {
+      const instrument = frame.contentDocument?.querySelector("#kinetic-instrument");
+      if (instrument) {
+        phaseObserver = new MutationObserver(snapshot);
+        phaseObserver.observe(instrument, {
+          attributes:true,
+          attributeFilter:["data-discrete-phase-init", "data-discrete-phase-mode", "data-selected-instant-ms"]
+        });
+      }
       snapshot();
       queueMicrotask(snapshot);
       setTimeout(snapshot, 150);
       setTimeout(snapshot, 700);
+      setTimeout(snapshot, 1500);
+      setTimeout(snapshot, 3000);
     });
   </script>
 </body>
