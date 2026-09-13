@@ -11,6 +11,10 @@ function ringIds() {
   return RINGS.map(ring => ring.id);
 }
 
+function trackIdsForRing(id) {
+  return id === "solar" ? ["solar-track", "zodiac-track"] : [`${id}-track`];
+}
+
 function syncDiagnostics() {
   if (!svg || !instrument) return;
   const hidden = ringIds().filter(id => hiddenRings.has(id));
@@ -27,9 +31,11 @@ function setRingVisible(id, visible) {
   else hiddenRings.add(id);
 
   const hidden = !visible;
-  const track = svg?.querySelector(`#${id}-track`);
+  for (const trackId of trackIdsForRing(id)) {
+    const track = svg?.querySelector(`#${trackId}`);
+    if (track) track.dataset.layerHidden = String(hidden);
+  }
   const trace = svg?.querySelector(`[data-motion-ring="${id}"]`);
-  if (track) track.dataset.layerHidden = String(hidden);
   if (trace) {
     trace.dataset.layerHidden = String(hidden);
     trace.classList.remove("is-visible");
