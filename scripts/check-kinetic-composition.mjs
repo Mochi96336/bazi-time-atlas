@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
+const DAY_MS = 86_400_000;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -118,6 +119,42 @@ if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelT
 }
 if (ringHitMask !== "11111") throw new Error(`mobile: not all five ring midpoints are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}; debug=${ringHitDebug}): ${mobile.url}`);
 console.log(`[kinetic-composition] PASS true 390px camera-owned composition; instrument share=${share}, camera=${mobileCameraMode}@${mobileCameraZoom}, wheelWidth=${wheelWidthRatio}, ringHits=${ringHitMask}: ${mobile.url}`);
+
+const linked = dump("scripts/fixtures/mobile-390.html?exerciseLinkedDrag=1", 500, 844);
+const linkedProbe = tagById(linked.dom, "probe");
+if (requireAttr(linkedProbe, "data-linked-drag-ready", "linked-drag", linked.url) !== "true") {
+  throw new Error(`linked-drag: fixture did not exercise normal-mode ring scrub: ${linked.url}`);
+}
+const linkedRing = requireAttr(linkedProbe, "data-linked-drag-ring", "linked-drag", linked.url);
+const linkedInstantBefore = Number(requireAttr(linkedProbe, "data-linked-instant-before", "linked-drag", linked.url));
+const linkedInstantAfter = Number(requireAttr(linkedProbe, "data-linked-instant-after", "linked-drag", linked.url));
+const linkedDayModelBefore = Number(requireAttr(linkedProbe, "data-linked-day-model-before", "linked-drag", linked.url));
+const linkedDayModelAfter = Number(requireAttr(linkedProbe, "data-linked-day-model-after", "linked-drag", linked.url));
+const linkedSolarModelBefore = Number(requireAttr(linkedProbe, "data-linked-solar-model-before", "linked-drag", linked.url));
+const linkedSolarModelAfter = Number(requireAttr(linkedProbe, "data-linked-solar-model-after", "linked-drag", linked.url));
+const linkedDayOffsetBefore = Number(requireAttr(linkedProbe, "data-linked-day-offset-before", "linked-drag", linked.url));
+const linkedDayOffsetAfter = Number(requireAttr(linkedProbe, "data-linked-day-offset-after", "linked-drag", linked.url));
+const linkedDayState = requireAttr(linkedProbe, "data-linked-day-state", "linked-drag", linked.url);
+const linkedScrubMode = requireAttr(linkedProbe, "data-linked-scrub-mode", "linked-drag", linked.url);
+if (linkedRing !== "day" || linkedScrubMode !== "linked-time") {
+  throw new Error(`linked-drag: normal drag was not routed through linked day scrub (ring=${linkedRing}, mode=${linkedScrubMode}): ${linked.url}`);
+}
+if (![linkedInstantBefore, linkedInstantAfter, linkedDayModelBefore, linkedDayModelAfter, linkedSolarModelBefore, linkedSolarModelAfter, linkedDayOffsetBefore, linkedDayOffsetAfter].every(Number.isFinite)) {
+  throw new Error(`linked-drag: non-finite diagnostics: ${linked.url}`);
+}
+if (Math.abs((linkedInstantAfter - linkedInstantBefore) + DAY_MS) > 1) {
+  throw new Error(`linked-drag: +6.5° day drag should move master time one day backward (${linkedInstantBefore} -> ${linkedInstantAfter}): ${linked.url}`);
+}
+if (Math.abs((linkedDayModelAfter - linkedDayModelBefore) - 6) > 0.01) {
+  throw new Error(`linked-drag: day model should advance visually +6° (${linkedDayModelBefore} -> ${linkedDayModelAfter}): ${linked.url}`);
+}
+if (Math.abs(linkedDayOffsetBefore) > 1e-6 || Math.abs(linkedDayOffsetAfter) > 1e-6 || linkedDayState !== "true") {
+  throw new Error(`linked-drag: normal scrub must stay linked with zero manual offset (before=${linkedDayOffsetBefore}, after=${linkedDayOffsetAfter}, linked=${linkedDayState}): ${linked.url}`);
+}
+if (Math.abs(linkedSolarModelAfter - linkedSolarModelBefore) < 0.5) {
+  throw new Error(`linked-drag: coupled solar layer did not move with master time (${linkedSolarModelBefore} -> ${linkedSolarModelAfter}): ${linked.url}`);
+}
+console.log(`[kinetic-composition] PASS linked day-ring scrub; master=${linkedInstantBefore}->${linkedInstantAfter}, day=${linkedDayModelBefore}->${linkedDayModelAfter}, solar=${linkedSolarModelBefore}->${linkedSolarModelAfter}: ${linked.url}`);
 
 const drag = dump("scripts/fixtures/mobile-390.html?exerciseDrag=1", 500, 844);
 const dragProbe = tagById(drag.dom, "probe");
