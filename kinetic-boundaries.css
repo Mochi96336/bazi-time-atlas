@@ -78,6 +78,28 @@
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 23%, transparent); }
 #guide-layer .guide-arc { stroke: rgba(238, 242, 237, .13); }
 
+/* Motion traces exist only while a phase actually moves. Discrete pillar wheels
+   use a broken tooth-like stroke; astronomical/derived longitude stays smooth. */
+#motion-layer { pointer-events: none; }
+.motion-trace {
+  fill: none;
+  opacity: 0;
+  stroke-linecap: round;
+  transition: opacity 280ms ease-out;
+}
+.motion-trace.is-visible {
+  opacity: .82;
+  transition: none;
+}
+.motion-trace.discrete { stroke-width: 2.8; stroke-dasharray: 4 5; }
+.motion-trace.continuous { stroke-width: 2.2; }
+.motion-hour { stroke: var(--hour); }
+.motion-year { stroke: var(--year); }
+.motion-month { stroke: var(--month); }
+.motion-day { stroke: var(--day); }
+.motion-solar { stroke: var(--solar); }
+.motion-zodiac { stroke: var(--zodiac); }
+
 /* Pointer feedback is transient: the resting atlas remains unchanged. The
    controller exposes the geometrically hit-tested ring instead of CSS guessing
    from DOM bounds, so camera zoom and mobile crops do not change the target. */

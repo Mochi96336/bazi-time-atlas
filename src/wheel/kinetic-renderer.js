@@ -3,6 +3,7 @@ import {
   FAN,
   GUIDE_RADII,
   RADII,
+  RINGS,
   SEXAGENARY_RING_IDS,
   WHEEL_CENTER,
   ringModel
@@ -13,12 +14,21 @@ import {
   pointAt,
   rotationTransform
 } from "./polar-geometry.js";
+import {
+  MOTION_TRACE_MIN_DEGREES,
+  signedMotionArcPath
+} from "./motion-trace.js";
 import { addTitle, setActiveSector, svgElement } from "./svg-renderer.js";
+
+const MOTION_TRACE_TTL_MS = 420;
 
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
   const termSectorNodes = [];
   const zodiacSectorNodes = [];
+  const motionTraceNodes = new Map();
+  const lastRotation = new Map();
+  const motionTimers = new Map();
 
   const groupFor = id => svg.querySelector(`#${ringModel(id).groupId}`);
   const guides = svg.querySelector("#guide-layer");
@@ -28,6 +38,12 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
   const el = (tag, attrs = {}, parent = svg) => svgElement(tag, attrs, parent);
   const polar = (radius, angle) => pointAt(WHEEL_CENTER, radius, angle);
+
+  let motionLayer = svg.querySelector("#motion-layer");
+  if (!motionLayer) {
+    motionLayer = el("g", { id:"motion-layer", "aria-hidden":"true" }, svg);
+    if (cursorLayer) svg.insertBefore(motionLayer, cursorLayer);
+  }
 
   function renderGuides() {
     GUIDE_RADII.forEach(radius => {
@@ -147,6 +163,44 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     });
   }
 
+  function renderMotionTraces() {
+    RINGS.forEach(ring => {
+      const kind = ring.phaseKind === "sexagenary" ? "discrete" : "continuous";
+      const path = el("path", {
+        class: `motion-trace motion-${ring.id} ${kind}`,
+        "data-motion-ring": ring.id,
+        "data-motion-kind": kind
+      }, motionLayer);
+      motionTraceNodes.set(ring.id, path);
+    });
+  }
+
+  function updateMotionTrace(id, rotationDegrees) {
+    const node = motionTraceNodes.get(id);
+    if (!node) return;
+    const previous = lastRotation.get(id);
+    lastRotation.set(id, rotationDegrees);
+    if (!Number.isFinite(previous)) return;
+
+    const delta = rotationDegrees - previous;
+    node.dataset.lastDelta = delta.toFixed(4);
+    if (Math.abs(delta) < MOTION_TRACE_MIN_DEGREES) return;
+
+    const model = ringModel(id);
+    const radius = (model.innerRadius + model.outerRadius) / 2;
+    const d = signedMotionArcPath(WHEEL_CENTER, radius, CURSOR_ANGLE, delta);
+    if (!d) return;
+    node.setAttribute("d", d);
+    node.classList.add("is-visible");
+
+    const priorTimer = motionTimers.get(id);
+    if (priorTimer) clearTimeout(priorTimer);
+    motionTimers.set(id, setTimeout(() => {
+      node.classList.remove("is-visible");
+      motionTimers.delete(id);
+    }, MOTION_TRACE_TTL_MS));
+  }
+
   function renderCursor() {
     const inner = polar(RADII.inner - 12, CURSOR_ANGLE);
     const outer = polar(RADII.zodiacOuter + 12, CURSOR_ANGLE);
@@ -167,22 +221,26 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     SEXAGENARY_RING_IDS.forEach(renderCycleRing);
     renderSolarRing();
     renderZodiacRing();
+    renderMotionTraces();
     renderCursor();
   }
 
   function setCyclePose(id, rotationDegrees, activeIndex) {
     groupFor(id).setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
+    updateMotionTrace(id, rotationDegrees);
   }
 
   function setSolarRingPose(rotationDegrees, solarLongitude) {
     solarTrack.setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
     setActiveSector(termSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 15) % 24);
+    updateMotionTrace("solar", rotationDegrees);
   }
 
   function setZodiacRingPose(rotationDegrees, solarLongitude) {
     zodiacTrack.setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
     setActiveSector(zodiacSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 30) % 12);
+    updateMotionTrace("zodiac", rotationDegrees);
   }
 
   return Object.freeze({
