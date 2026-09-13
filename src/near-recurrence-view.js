@@ -4,6 +4,7 @@ const NS = "http://www.w3.org/2000/svg";
 const instrument = document.querySelector("#recurrence-instrument");
 const ranking = document.querySelector("#near-recurrence-ranking");
 const chart = document.querySelector("#near-recurrence-chart");
+const deepTimeBadge = document.querySelector("#deep-time-badge");
 let currentSearch = null;
 
 function svgEl(tag, attrs = {}, parent = chart) {
@@ -127,6 +128,10 @@ function renderChart(search) {
 function renderSelection() {
   const selectedDelta = selectedDeltaFromInstrument();
   const exactCandidate = currentSearch?.chronological.find(candidate => candidate.deltaYears === selectedDelta) ?? null;
+  const deep = Number.isFinite(selectedDelta) && selectedDelta > 24_000;
+
+  if (deepTimeBadge) deepTimeBadge.hidden = !deep;
+  setText("deep-time-badge-value", deep ? `+${formatYears(selectedDelta)} 年` : "—");
 
   ranking?.querySelectorAll(".near-ranking-row").forEach(row => {
     const selected = Number(row.dataset.deltaYears) === selectedDelta;
