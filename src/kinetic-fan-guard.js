@@ -3,6 +3,7 @@ const TRACK_IDS = ["year-track", "month-track", "day-track", "solar-track", "zod
 const CLIP_ID = "kinetic-master-fan-clip";
 const WRAPPER_ID = "kinetic-fan-layer";
 const MOBILE_QUERY = "(max-width: 480px)";
+const CAMERA_TOP_MARGIN = 120;
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -111,6 +112,16 @@ function installMasterFanClip() {
     track.dataset.fanClipped = "true";
   });
 
+  // Keep the large-radius wheel rigid and concentric. Move the SVG camera,
+  // rather than individual rings, so all five adjacent tracks cross the same
+  // visible fan segment without reintroducing the old small-radius curvature.
+  const currentViewBox = svg.viewBox.baseVal;
+  const cameraY = center.cy - envelope.radius - CAMERA_TOP_MARGIN;
+  svg.setAttribute(
+    "viewBox",
+    `${currentViewBox.x.toFixed(3)} ${cameraY.toFixed(3)} ${currentViewBox.width.toFixed(3)} ${currentViewBox.height.toFixed(3)}`
+  );
+
   instrument.dataset.masterGeometry = "shared-fan";
   instrument.dataset.fanClip = "active";
   instrument.dataset.geometryCenter = `${center.cx.toFixed(3)},${center.cy.toFixed(3)}`;
@@ -119,6 +130,7 @@ function installMasterFanClip() {
   instrument.dataset.geometryInnerRadius = envelope.innerRadius.toFixed(3);
   instrument.dataset.geometryOuterRadius = envelope.radius.toFixed(3);
   instrument.dataset.geometryRadiusRatio = (envelope.innerRadius / envelope.radius).toFixed(4);
+  instrument.dataset.geometryCameraY = cameraY.toFixed(3);
   return true;
 }
 
