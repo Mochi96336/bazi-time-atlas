@@ -131,7 +131,7 @@
     line-height: 1.02;
     letter-spacing: -.045em;
   }
-  .atlas-intro h1 br { display: none; }
+  .atlas-intro h1 br { display: initial; }
   .atlas-intro .lede,
   .atlas-principle { display: none; }
 
