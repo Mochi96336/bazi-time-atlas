@@ -66,10 +66,11 @@
 
     <section class="delta-dock" aria-label="時間差控制">
       <label>位移年數
-        <input id="delta-number" type="number" min="0" max="24000" step="1" value="0">
+        <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
+        <small id="delta-range-note">滑桿：0–24,000 年；深時間 exact 候選可由下方排名直接跳轉。</small>
       </label>
       <div class="delta-slider-wrap">
-        <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年">
+        <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年的細部尺度" aria-describedby="delta-range-note">
         <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
       </div>
       <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
@@ -99,7 +100,7 @@
         <div class="near-search-copy">
           <div class="eyebrow">Exact-discrete candidates · astronomical ranking</div>
           <h2>只在內圈全閉合的時刻，找外圈最接近的一次。</h2>
-          <p>搜尋只評估 24,000 年的整數倍，因此每個候選都保證公曆骨架、年序、日序 exact 回到 0；排序只看十二節形狀的最大絕對殘差，再以 RMS 打破平手。這是「近回歸」搜尋，不會把最接近的候選標成真正週期。</p>
+          <p>搜尋只評估 24,000 年的整數倍，因此每個候選都保證公曆骨架、年序、日序 exact 回到 0；排序只看十二節形狀的最大絕對殘差，再以 RMS 打破平手。點任一排名或散點會把上方主圓盤直接跳到該深時間候選，URL 也同步成可重現狀態。這是「近回歸」搜尋，不會把最接近的候選標成真正週期。</p>
         </div>
         <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
         <div class="near-stat best"><span>目前最佳</span><strong id="near-best-delta">—</strong><small>仍是 24,000 年的整數倍</small></div>
