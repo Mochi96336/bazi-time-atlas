@@ -1,4 +1,5 @@
 import { fourPillarDeterminacy } from "./recurrence/four-pillar-determinacy.js";
+import "./day-hour-proof-chain-view.js";
 
 const instrument = document.querySelector("#recurrence-instrument");
 const panel = document.querySelector("#four-pillar-determinacy");
