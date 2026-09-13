@@ -92,7 +92,7 @@ const zero = expect(
 if ((zero.dom.match(/data-astro-term=/g) ?? []).length !== 12) {
   throw new Error(`zero-year astronomical identity: expected 12 SVG residual whiskers: ${zero.url}`);
 }
-if ((zero.dom.match(/class="month-boundary-window/g) ?? []).length !== 12) {
+if ((zero.dom.match(/class="month-boundary-window /g) ?? []).length !== 12) {
   throw new Error(`zero-year month-boundary exposure: expected 12 window cells: ${zero.url}`);
 }
 console.log(`[astronomy-residual] PASS zero identity: ${zero.url}`);
