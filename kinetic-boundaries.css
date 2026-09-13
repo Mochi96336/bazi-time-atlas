@@ -65,11 +65,6 @@
   text-align: center;
 }
 
-/* The SVG groups already receive rotate(angle cx cy) with the master center.
-   Reset the old 600/850 CSS transform-origin from the pre-giant-disk layout;
-   keeping both would apply a second, stale pivot and throw rings off-axis. */
-.ring-track { transform-origin: 0 0; }
-
 /* The three sexagenary rings were mathematically adjacent but visually merged
    into the background. Keep the palette restrained while making each band a
    real readable layer of the same instrument. */
@@ -177,20 +172,6 @@
   .ring-legend-row i { width: 5px; height: 5px; }
   .ring-legend-row span { font-size: 7px; letter-spacing: .04em; }
   .ring-legend-row strong { font-size: 8px; }
-
-  /* Keep the SVG viewport itself at its native aspect ratio and zoom it as a
-     single rigid object. Lift the complete object as one camera composition;
-     never offset an individual ring. */
-  #kinetic-wheel {
-    top: auto;
-    right: auto;
-    bottom: 86px;
-    left: 50%;
-    width: 230%;
-    height: auto;
-    aspect-ratio: 1200 / 760;
-    transform: translateX(-50%);
-  }
 
   .instrument-readout {
     bottom: 11px;

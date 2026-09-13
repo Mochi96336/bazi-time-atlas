@@ -165,6 +165,9 @@
       const doc = frame.contentDocument;
       if (!childWindow || !doc) return;
       const instrument = doc.querySelector("#kinetic-instrument");
+      const svg = doc.querySelector("#kinetic-wheel");
+      const instrumentRect = instrument?.getBoundingClientRect();
+      const svgRect = svg?.getBoundingClientRect();
       const scrollHeight = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
       const viewportHeight = childWindow.innerHeight;
       const secondary = [".timeline-dock", ".state-strip", ".atlas-notes", ".sources-panel"]
@@ -181,6 +184,16 @@
       probe.dataset.secondaryHidden = String(secondary.every(node => childWindow.getComputedStyle(node).display === "none"));
       probe.dataset.fanClip = instrument?.dataset.fanClip ?? "not-applicable";
       probe.dataset.masterGeometry = instrument?.dataset.masterGeometry ?? "not-applicable";
+      probe.dataset.cameraMode = instrument?.dataset.geometryCameraMode ?? "";
+      probe.dataset.cameraZoom = instrument?.dataset.geometryCameraZoom ?? "";
+      probe.dataset.cameraX = instrument?.dataset.geometryCameraX ?? "";
+      probe.dataset.cameraY = instrument?.dataset.geometryCameraY ?? "";
+      probe.dataset.cameraWidth = instrument?.dataset.geometryCameraWidth ?? "";
+      probe.dataset.cameraHeight = instrument?.dataset.geometryCameraHeight ?? "";
+      probe.dataset.wheelWidthRatio = instrumentRect && svgRect && instrumentRect.width > 0
+        ? (svgRect.width / instrumentRect.width).toFixed(4)
+        : "";
+      probe.dataset.wheelTransform = svg ? childWindow.getComputedStyle(svg).transform : "";
       probe.dataset.ringHitMask = ringHits.mask;
       probe.dataset.ringHitClasses = ringHits.classes;
       probe.dataset.ringHitDebug = ringHits.debug;
