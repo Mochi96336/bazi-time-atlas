@@ -1,0 +1,44 @@
+.state-phase-progress,
+.state-phase-bead {
+  pointer-events: none;
+}
+
+.state-phase-progress {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: .82;
+}
+
+.state-phase-bead {
+  stroke: rgba(11, 15, 12, .78);
+  stroke-width: 1.4;
+  opacity: .96;
+}
+
+.state-phase-progress.phase-hour { stroke: var(--hour); }
+.state-phase-progress.phase-year { stroke: var(--year); }
+.state-phase-progress.phase-month { stroke: var(--month); }
+.state-phase-progress.phase-day { stroke: var(--day); }
+.state-phase-bead.phase-hour { fill: var(--hour); }
+.state-phase-bead.phase-year { fill: var(--year); }
+.state-phase-bead.phase-month { fill: var(--month); }
+.state-phase-bead.phase-day { fill: var(--day); }
+
+/* The arc lives inside the currently active six-degree tooth. It represents
+   elapsed time inside that real state interval; the Ganzhi wheel itself still
+   snaps only at its actual boundary and is never tweened between identities. */
+#hour-track[data-phase-boundary-kind="calendar-discrete"] .state-phase-progress,
+#day-track[data-phase-boundary-kind="calendar-discrete"] .state-phase-progress {
+  stroke-dasharray: 1.8 1.8;
+}
+
+#year-track[data-phase-boundary-kind="astronomical-discrete"] .state-phase-progress,
+#month-track[data-phase-boundary-kind="astronomical-discrete"] .state-phase-progress {
+  stroke-dasharray: none;
+}
+
+@media (max-width: 480px) {
+  .state-phase-progress { stroke-width: 4; }
+  .state-phase-bead { r: 3.2px; }
+}

@@ -28,7 +28,9 @@ jobs:
           node --check src/kinetic-fan-guard.js
           node --check src/ring-visibility-controls.js
           node --check src/reference-frame-controls.js
+          node --check src/discrete-phase-view.js
           node --check src/wheel/reference-frame.js
+          node --check src/wheel/discrete-phase.js
           node --check src/recurrence-view.js
           node --check src/astronomical-residuals-view.js
           node --check src/four-pillar-determinacy-view.js
@@ -74,6 +76,7 @@ jobs:
           node --check scripts/check-kinetic-composition.mjs
           node --check scripts/check-ring-visibility.mjs
           node --check scripts/check-reference-frame.mjs
+          node --check scripts/check-discrete-phase.mjs
           node --check scripts/check-recurrence-lab.mjs
           node --check scripts/check-astronomical-residuals.mjs
           node --check scripts/check-four-pillar-determinacy.mjs
@@ -119,6 +122,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify relative reference frames
         run: node scripts/check-reference-frame.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify discrete intra-state phase
+        run: node scripts/check-discrete-phase.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify discrete recurrence states

@@ -104,6 +104,20 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         text.textContent = label;
       }
     });
+
+    el("path", {
+      class: `state-phase-progress phase-${id}`,
+      "data-phase-ring": id,
+      "aria-hidden": "true"
+    }, group);
+    el("circle", {
+      class: `state-phase-bead phase-${id}`,
+      "data-phase-ring": id,
+      r: 2.8,
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, group);
+
     cycleSectors.set(id, sectors);
   }
 
