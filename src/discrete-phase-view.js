@@ -4,21 +4,38 @@ import { arcPath, pointAt } from "./wheel/polar-geometry.js";
 
 const RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
 const PHASE_INSET_DEGREES = 0.45;
+const MAX_INITIALIZATION_FRAMES = 120;
 
 const instrument = document.querySelector("#kinetic-instrument");
 const svg = document.querySelector("#kinetic-wheel");
 let scheduled = false;
+let initializationFrames = 0;
+let initialized = false;
+
+function phaseNodes(id) {
+  const group = document.querySelector(`#${id}-track`);
+  return {
+    group,
+    path: group?.querySelector(`.state-phase-progress[data-phase-ring="${id}"]`) ?? null,
+    bead: group?.querySelector(`.state-phase-bead[data-phase-ring="${id}"]`) ?? null,
+    active: group?.querySelector(".cycle-sector.is-active") ?? null
+  };
+}
+
+function phaseSlotsReady() {
+  return RING_IDS.every(id => {
+    const { group, path, bead, active } = phaseNodes(id);
+    return Boolean(group && path && bead && active);
+  });
+}
 
 function activeIndex(id) {
-  const active = document.querySelector(`#${id}-track .cycle-sector.is-active`);
-  const index = Number(active?.dataset.cycleIndex);
+  const index = Number(phaseNodes(id).active?.dataset.cycleIndex);
   return Number.isInteger(index) ? index : null;
 }
 
 function clearPhase(id) {
-  const group = document.querySelector(`#${id}-track`);
-  const path = group?.querySelector(`.state-phase-progress[data-phase-ring="${id}"]`);
-  const bead = group?.querySelector(`.state-phase-bead[data-phase-ring="${id}"]`);
+  const { group, path, bead } = phaseNodes(id);
   path?.removeAttribute("d");
   if (path) path.dataset.phaseVisible = "false";
   if (bead) {
@@ -38,9 +55,7 @@ function renderPhase(id, activeIndexValue, phase) {
     clearPhase(id);
     return;
   }
-  const group = document.querySelector(`#${id}-track`);
-  const path = group?.querySelector(`.state-phase-progress[data-phase-ring="${id}"]`);
-  const bead = group?.querySelector(`.state-phase-bead[data-phase-ring="${id}"]`);
+  const { group, path, bead } = phaseNodes(id);
   if (!group || !path || !bead) return;
 
   const angle = phaseAngleWithinTooth(activeIndexValue, phase.progress, PHASE_INSET_DEGREES);
@@ -73,12 +88,23 @@ function renderPhase(id, activeIndexValue, phase) {
   group.dataset.phaseBoundaryKind = phase.boundaryKind;
 }
 
+function retryInitialization() {
+  if (initialized || initializationFrames >= MAX_INITIALIZATION_FRAMES) return;
+  initializationFrames += 1;
+  requestAnimationFrame(scheduleRefresh);
+}
+
 function refresh() {
   scheduled = false;
   if (!instrument || !svg) return;
   const instantMs = Number(instrument.dataset.selectedInstantMs);
-  if (!Number.isFinite(instantMs)) return;
+  if (!Number.isFinite(instantMs) || !phaseSlotsReady()) {
+    retryInitialization();
+    return;
+  }
 
+  initialized = true;
+  initializationFrames = 0;
   const phases = { ...discretePhaseWindows(instantMs) };
   // Legacy annual links can override the displayed month branch/longitude without
   // representing a complete physical instant. Do not attach a real-time month
