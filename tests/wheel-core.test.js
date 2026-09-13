@@ -34,6 +34,7 @@ import {
   setModelRotation,
   snappedOffset
 } from "../src/wheel/ring-state.js";
+import { ringAtWorldPoint } from "../src/wheel/ring-drag-controller.js";
 
 test("five primary rings form one contiguous radial stack", () => {
   assert.equal(assertWheelModel(), true);
@@ -60,6 +61,16 @@ test("ring model already carries the future independent-drag contract", () => {
   assert.equal(ringModel("solar").phaseSource, "solar-longitude");
   assert.equal(ringModel("zodiac").phaseSource, "solar-longitude");
   assert.equal(ringModel("zodiac").linkedPhaseId, "solar");
+});
+
+test("radial hit testing selects every ring without DOM bounding boxes", () => {
+  for (const ring of RINGS) {
+    const radius = (ring.innerRadius + ring.outerRadius) / 2;
+    const point = pointAt(WHEEL_CENTER, radius, -90);
+    assert.equal(ringAtWorldPoint(point)?.id, ring.id);
+  }
+  assert.equal(ringAtWorldPoint(pointAt(WHEEL_CENTER, RADII.inner - 5, -90)), null);
+  assert.equal(ringAtWorldPoint(pointAt(WHEEL_CENTER, RADII.zodiacOuter + 5, -90)), null);
 });
 
 test("linked and detached ring pose never mutates the model angle", () => {
