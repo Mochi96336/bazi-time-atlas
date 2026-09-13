@@ -6,6 +6,7 @@ import {
   jieBoundaryContext,
   solarTermNamedEventsBetween
 } from "../src/astronomy/solar-term-boundaries.js";
+import { DAY_BOUNDARY, resolveBirthPillars } from "../src/calendar/tyme-adapter.js";
 import { shortestAngleDelta } from "../src/wheel/polar-geometry.js";
 import {
   LINKED_SCRUB_CONSTANTS,
@@ -17,6 +18,9 @@ import {
 
 const DAY_MS = 86_400_000;
 const UTC_OFFSET_HOURS = 8;
+const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const SEXAGENARY = Array.from({ length:60 }, (_, index) => `${STEMS[index % 10]}${BRANCHES[index % 12]}`);
 
 function fieldsFromInstant(ms) {
   const shifted = new Date(ms + UTC_OFFSET_HOURS * 3_600_000);
@@ -34,6 +38,14 @@ function longitudeAtMs(ms) {
   return apparentSolarLongitude(fieldsFromInstant(ms), UTC_OFFSET_HOURS);
 }
 
+function hourPillarIndex(ms) {
+  const resolved = resolveBirthPillars(fieldsFromInstant(ms), {
+    utcOffsetHours:UTC_OFFSET_HOURS,
+    dayBoundary:DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+  });
+  return SEXAGENARY.indexOf(resolved.pillars.hour.name);
+}
+
 test("discrete linked drag consumes six-degree teeth without losing remainder", () => {
   assert.deepEqual(consumeDiscreteDrag(0, 5.9), { steps:0, remainderDegrees:5.9 });
   assert.deepEqual(consumeDiscreteDrag(5.9, 0.2), { steps:1, remainderDegrees:0.10000000000000053 });
@@ -41,6 +53,33 @@ test("discrete linked drag consumes six-degree teeth without losing remainder", 
   const multi = consumeDiscreteDrag(1.5, 17);
   assert.equal(multi.steps, 3);
   assert.ok(Math.abs(multi.remainderDegrees - 0.5) < 1e-12);
+});
+
+test("hour gear maps one six-degree tooth to one two-hour pillar interval", () => {
+  const start = Date.parse("2027-03-15T13:20:09.000Z");
+  const result = applyLinkedRingDrag({ ringId:"hour", instantMs:start, deltaDegrees:6, remainderDegrees:0 });
+  assert.equal(result.appliedSteps, 1);
+  assert.equal(result.instantMs, start - LINKED_SCRUB_CONSTANTS.hourPillarMs);
+  assert.equal(result.remainderDegrees, 0);
+
+  const beforeIndex = hourPillarIndex(start);
+  const afterIndex = hourPillarIndex(result.instantMs);
+  assert.ok(beforeIndex >= 0 && afterIndex >= 0);
+  assert.equal(afterIndex, (beforeIndex + 59) % 60, "one earlier shichen should be one earlier sexagenary hour tooth");
+
+  const reverse = applyLinkedRingDrag({ ringId:"hour", instantMs:start, deltaDegrees:-6, remainderDegrees:0 });
+  assert.equal(reverse.appliedSteps, -1);
+  assert.equal(reverse.instantMs, start + LINKED_SCRUB_CONSTANTS.hourPillarMs);
+  assert.equal(hourPillarIndex(reverse.instantMs), (beforeIndex + 1) % 60);
+});
+
+test("hour gear remains one-tooth continuous across the Zi-initial day boundary", () => {
+  const afterZiStart = Date.parse("2027-03-15T16:20:09.000Z"); // 2027-03-16 00:20 UTC+8
+  const earlier = stepLinkedDiscreteInstant("hour", afterZiStart, -1);
+  assert.equal(earlier, afterZiStart - LINKED_SCRUB_CONSTANTS.hourPillarMs);
+  const beforeIndex = hourPillarIndex(afterZiStart);
+  const earlierIndex = hourPillarIndex(earlier);
+  assert.equal(earlierIndex, (beforeIndex + 59) % 60);
 });
 
 test("day gear maps clockwise ring drag to one earlier civil day", () => {
