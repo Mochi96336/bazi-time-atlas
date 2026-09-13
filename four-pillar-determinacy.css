@@ -113,19 +113,71 @@
 .proof-chain-foot strong { display:block; margin-top:3px; color:#bd9380; font-size:11px; }
 .proof-chain-foot small { display:block; margin-top:3px; color:#69736c; font-size:7.5px; line-height:1.5; }
 
+.epoch-audit-panel {
+  margin-top:10px;
+  padding:14px 15px 15px;
+  border:1px solid var(--hairline);
+  border-radius:18px;
+  background:rgba(255,255,255,.009);
+}
+.epoch-audit-head {
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(230px,.75fr);
+  gap:18px;
+  align-items:end;
+}
+.epoch-audit-head h2 { margin:5px 0 6px; font-size:17px; line-height:1.22; letter-spacing:-.018em; font-weight:650; }
+.epoch-audit-head p { margin:0; max-width:820px; color:#748078; font-size:9px; line-height:1.68; }
+.epoch-audit-summary { padding-left:12px; border-left:2px solid rgba(126,158,184,.34); }
+.epoch-audit-summary span { display:block; color:#6c777e; font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
+.epoch-audit-summary strong { display:block; margin-top:4px; color:#b6c6d1; font-size:12px; line-height:1.38; }
+.epoch-audit-summary small { display:block; margin-top:3px; color:#6b7479; font-size:8px; line-height:1.5; }
+.epoch-audit-sources {
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+.epoch-audit-source {
+  min-width:0;
+  padding:9px 10px 10px;
+  border:1px solid rgba(238,242,237,.065);
+  border-radius:11px;
+  background:rgba(255,255,255,.01);
+}
+.epoch-audit-source header { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.epoch-audit-source header div { min-width:0; }
+.epoch-audit-source header span { display:block; color:#65716a; font-size:7px; line-height:1.35; }
+.epoch-audit-source header strong { display:block; margin-top:3px; color:#c1c9c4; font-size:10px; line-height:1.3; }
+.epoch-audit-source header b { flex:0 0 auto; color:#9b8278; font-size:7px; line-height:1.35; text-align:right; font-weight:650; }
+.epoch-audit-source[data-qualified-coverage="true"] { border-color:rgba(137,176,198,.22); background:rgba(137,176,198,.014); }
+.epoch-audit-source[data-qualified-coverage="true"] header b { color:#9cbccd; }
+.epoch-audit-source[data-covers-target="true"][data-ephemeris-basis-capable="false"] { border-color:rgba(190,154,111,.16); }
+.epoch-audit-facts { margin-top:8px; display:grid; grid-template-columns:1.4fr .8fr .7fr; gap:5px; }
+.epoch-audit-facts span { min-width:0; padding-top:5px; border-top:1px solid rgba(238,242,237,.05); }
+.epoch-audit-facts em { display:block; color:#5e6962; font-size:6.5px; font-style:normal; letter-spacing:.04em; text-transform:uppercase; }
+.epoch-audit-facts strong { display:block; margin-top:3px; color:#89938c; font-size:7px; line-height:1.35; overflow-wrap:anywhere; }
+.epoch-audit-source p { margin:7px 0 0; color:#626d66; font-size:7.5px; line-height:1.52; }
+.epoch-audit-foot { margin-top:9px; padding-top:8px; border-top:1px solid rgba(238,242,237,.06); color:#6c7670; font-size:8px; line-height:1.55; }
+
 @media (max-width:820px) {
   .determinacy-head { grid-template-columns:1fr; gap:10px; }
   .determinacy-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .proof-chain-head { grid-template-columns:1fr; gap:10px; }
+  .proof-chain-head,.epoch-audit-head { grid-template-columns:1fr; gap:10px; }
   .proof-chain-stages { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .epoch-audit-sources { grid-template-columns:1fr; }
 }
 
 @media (max-width:480px) {
-  .determinacy-panel,.proof-chain-panel { padding:12px 11px 13px; }
-  .determinacy-head h2,.proof-chain-head h2 { font-size:16px; }
+  .determinacy-panel,.proof-chain-panel,.epoch-audit-panel { padding:12px 11px 13px; }
+  .determinacy-head h2,.proof-chain-head h2,.epoch-audit-head h2 { font-size:16px; }
   .determinacy-grid { grid-template-columns:1fr; gap:6px; }
   .determinacy-card { min-height:0; }
   .proof-chain-stages { grid-template-columns:1fr; gap:5px; }
   .proof-chain-stage { min-height:0; }
   .proof-chain-foot { grid-template-columns:1fr; gap:4px; }
+  .epoch-audit-sources { gap:6px; }
+  .epoch-audit-source header { flex-direction:column; }
+  .epoch-audit-source header b { text-align:left; }
+  .epoch-audit-facts { grid-template-columns:1fr; gap:3px; }
 }

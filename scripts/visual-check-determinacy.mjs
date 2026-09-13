@@ -7,16 +7,16 @@ const outputDir = path.resolve("tmp/visual-check");
 
 const captures = [
   {
-    name:"recurrence-proof-chain-1440x2450.png",
+    name:"recurrence-epoch-audit-1440x2850.png",
     path:"recurrence.html?date=2026-09-13&delta=24000",
     width:1440,
-    height:2450
+    height:2850
   },
   {
-    name:"recurrence-proof-chain-390x3900.png",
+    name:"recurrence-epoch-audit-390x4700.png",
     path:"recurrence.html?date=2026-09-13&delta=24000",
     width:390,
-    height:3900
+    height:4700
   }
 ];
 
@@ -41,7 +41,7 @@ for (const capture of captures) {
     "--disable-gpu",
     "--hide-scrollbars",
     "--run-all-compositor-stages-before-draw",
-    "--virtual-time-budget=2400",
+    "--virtual-time-budget=2600",
     "--force-device-scale-factor=1",
     `--window-size=${capture.width},${capture.height}`,
     `--screenshot=${outputPath}`,
@@ -51,9 +51,9 @@ for (const capture of captures) {
   if (result.status !== 0) {
     process.stderr.write(result.stdout ?? "");
     process.stderr.write(result.stderr ?? "");
-    throw new Error(`Proof-chain screenshot failed for ${capture.name}`);
+    throw new Error(`Epoch-audit screenshot failed for ${capture.name}`);
   }
   const info = await stat(outputPath);
   if (info.size < 10_000) throw new Error(`${capture.name} is unexpectedly small (${info.size} bytes)`);
-  console.log(`[visual-proof-chain] ${capture.name}: ${info.size} bytes`);
+  console.log(`[visual-epoch-audit] ${capture.name}: ${info.size} bytes`);
 }
