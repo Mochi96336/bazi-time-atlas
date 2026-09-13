@@ -124,17 +124,24 @@ function recordMobileComposition() {
   instrument.dataset.mobileViewportFit = String(scrollHeight <= viewportHeight + 2);
   instrument.dataset.mobileViewportHeight = String(Math.round(viewportHeight));
   instrument.dataset.mobileScrollHeight = String(Math.round(scrollHeight));
-  instrument.dataset.mobileInstrumentShare = (rect.height / viewportHeight).toFixed(3);
+  instrument.dataset.mobileInstrumentShare = viewportHeight > 0 ? (rect.height / viewportHeight).toFixed(3) : "0.000";
   instrument.dataset.mobileSecondaryHidden = String(hidden);
+}
+
+function refreshCompositionDiagnostics() {
+  recordMobileComposition();
+  queueMicrotask(recordMobileComposition);
+  requestAnimationFrame(recordMobileComposition);
+  setTimeout(recordMobileComposition, 50);
 }
 
 function boot(attempt = 0) {
   if (installMasterFanClip()) {
-    requestAnimationFrame(() => requestAnimationFrame(recordMobileComposition));
+    refreshCompositionDiagnostics();
     return;
   }
   if (attempt < 12) requestAnimationFrame(() => boot(attempt + 1));
 }
 
 boot();
-window.addEventListener("resize", () => requestAnimationFrame(recordMobileComposition), { passive:true });
+window.addEventListener("resize", refreshCompositionDiagnostics, { passive:true });
