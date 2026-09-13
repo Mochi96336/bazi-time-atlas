@@ -142,22 +142,31 @@ function findBrowser() {
   throw new Error("No system Chromium/Chrome executable found");
 }
 
+function mobileHarnessPath(capture) {
+  const target = capture.path ? `../../${capture.path}` : "../../";
+  const params = new URLSearchParams({ target, height:String(capture.height) });
+  return `scripts/fixtures/mobile-390.html?${params.toString()}`;
+}
+
 await mkdir(outputDir, { recursive: true });
 const browser = findBrowser();
 const evidence = [];
 
 for (const capture of captures) {
   const outputPath = path.join(outputDir, capture.name);
-  const url = new URL(capture.path, baseURL).href;
+  const mobileLayout = capture.width === 390;
+  const requestedPath = mobileLayout ? mobileHarnessPath(capture) : capture.path;
+  const browserWidth = mobileLayout ? 500 : capture.width;
+  const url = new URL(requestedPath, baseURL).href;
   const args = [
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
     "--hide-scrollbars",
     "--run-all-compositor-stages-before-draw",
-    "--virtual-time-budget=1600",
+    "--virtual-time-budget=2200",
     "--force-device-scale-factor=1",
-    `--window-size=${capture.width},${capture.height}`,
+    `--window-size=${browserWidth},${capture.height}`,
     `--screenshot=${outputPath}`,
     url,
   ];
@@ -182,10 +191,12 @@ for (const capture of captures) {
     file: capture.name,
     page: capture.page,
     url,
-    viewport: `${capture.width}x${capture.height}`,
+    layoutViewport: `${capture.width}x${capture.height}`,
+    browserWindow: `${browserWidth}x${capture.height}`,
+    trueMobileHarness: mobileLayout,
     bytes: info.size,
   });
-  console.log(`[visual] ${capture.name}: ${info.size} bytes`);
+  console.log(`[visual] ${capture.name}: ${info.size} bytes${mobileLayout ? " · true 390px iframe" : ""}`);
 }
 
 await writeFile(

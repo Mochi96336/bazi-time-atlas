@@ -1,3 +1,4 @@
+import "./kinetic-fan-guard.js";
 import {
   formatSolarTermEvent,
   jieBoundaryContext,

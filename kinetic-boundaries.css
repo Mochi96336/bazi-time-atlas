@@ -65,9 +65,150 @@
   text-align: center;
 }
 
+/* The SVG groups already receive rotate(angle cx cy) with the master center.
+   Reset the old 600/850 CSS transform-origin from the pre-giant-disk layout;
+   keeping both would apply a second, stale pivot and throw rings off-axis. */
+.ring-track { transform-origin: 0 0; }
+
+/* The three sexagenary rings were mathematically adjacent but visually merged
+   into the background. Keep the palette restrained while making each band a
+   real readable layer of the same instrument. */
+#year-track .year-sector { fill: color-mix(in srgb, var(--year) 24%, transparent); }
+#month-track .month-sector { fill: color-mix(in srgb, var(--month) 22%, transparent); }
+#day-track .day-sector { fill: color-mix(in srgb, var(--day) 23%, transparent); }
+#guide-layer .guide-arc { stroke: rgba(238, 242, 237, .13); }
+
 @media (max-width: 820px) {
   .boundary-meta { justify-content: flex-start; text-align: left; }
   .boundary-marker i { display: none; }
   .boundary-rail-wrap { min-height: 20px; }
   .boundary-mode { text-align: left; }
+}
+
+/* Mobile composition is intentionally instrument-first. The deep explanatory
+   sections remain available on larger screens / dedicated views instead of
+   turning the first phone viewport into a vertically stacked dashboard. */
+@media (max-width: 480px) {
+  html, body { height: 100%; overflow: hidden; }
+  body { min-height: 0; }
+
+  .kinetic-shell {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    padding: 6px 8px 8px;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  .kinetic-topbar {
+    min-height: 28px;
+    align-items: center;
+    gap: 4px;
+  }
+  .kinetic-topbar .brand { display: none; }
+  .site-nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 2px;
+  }
+  .site-nav a {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+
+  .atlas-intro {
+    margin: 4px 2px 7px;
+    display: block;
+  }
+  .atlas-intro .eyebrow { font-size: 7px; letter-spacing: .13em; }
+  .atlas-intro h1 {
+    margin: 3px 0 0;
+    max-width: none;
+    font-size: clamp(24px, 7.2vw, 28px);
+    line-height: 1.02;
+    letter-spacing: -.045em;
+  }
+  .atlas-intro h1 br { display: initial; }
+  .atlas-intro .lede,
+  .atlas-principle { display: none; }
+
+  .instrument-shell {
+    min-height: 0;
+    height: 100%;
+    border-radius: 20px;
+  }
+  .instrument-toolbar {
+    inset: 8px 8px auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+  }
+  .toolbar-group {
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  .toolbar-group + .toolbar-group { margin-top: 0; }
+  .control-button,
+  .scale-button {
+    min-height: 27px;
+    padding: 0 8px;
+    font-size: 9px;
+  }
+  .control-button.primary { min-width: 48px; }
+
+  .ring-legend {
+    top: 42px;
+    left: 9px;
+    right: 9px;
+    display: flex;
+    gap: 4px 9px;
+    flex-wrap: wrap;
+  }
+  .ring-legend-row {
+    display: flex;
+    grid-template-columns: none;
+    gap: 4px;
+    align-items: center;
+  }
+  .ring-legend-row i { width: 5px; height: 5px; }
+  .ring-legend-row span { font-size: 7px; letter-spacing: .04em; }
+  .ring-legend-row strong { font-size: 8px; }
+
+  /* Keep the SVG viewport itself at its native aspect ratio and zoom it as a
+     single rigid object. Lift the complete object as one camera composition;
+     never offset an individual ring. */
+  #kinetic-wheel {
+    top: auto;
+    right: auto;
+    bottom: 86px;
+    left: 50%;
+    width: 230%;
+    height: auto;
+    aspect-ratio: 1200 / 760;
+    transform: translateX(-50%);
+  }
+
+  .instrument-readout {
+    bottom: 11px;
+    width: calc(100% - 16px);
+  }
+  .readout-kicker { display: none; }
+  #instant-readout {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .readout-meta,
+  .boundary-meta,
+  .legacy-note,
+  body.legacy-projection .legacy-note { display: none; }
+
+  .timeline-dock,
+  .state-strip,
+  .atlas-notes,
+  .sources-panel { display: none; }
 }
