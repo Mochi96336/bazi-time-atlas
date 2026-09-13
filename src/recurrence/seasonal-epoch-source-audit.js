@@ -11,6 +11,18 @@ function source(value) {
 }
 
 /**
+ * Deep-time absolute-state support is deliberately separate from the modern
+ * Tyme/ShouXing solar-longitude path. A future state adapter must not silently
+ * unlock Day/Hour until the same deep-time pipeline also owns the longitude-of-
+ * date transform and crossing solve.
+ */
+export const SEASONAL_EPOCH_PIPELINE = Object.freeze({
+  absoluteStateAdapterIds:Object.freeze([]),
+  apparentGeocentricSolarLongitudeOfDate:false,
+  crossingRootSolve:false
+});
+
+/**
  * Audit source coverage without conflating an absolute numerical ephemeris with
  * a ready-made solar-term timestamp.
  *
@@ -93,22 +105,30 @@ function coverageBounds(source) {
   });
 }
 
+function solverReady() {
+  return SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate
+    && SEASONAL_EPOCH_PIPELINE.crossingRootSolve;
+}
+
 function evaluateSource(source, targetYear) {
   const bounds = coverageBounds(source);
   const coversTarget = targetYear >= bounds.minYear && targetYear <= bounds.maxYear;
   const ephemerisBasisCapable = source.capabilities.absoluteStateVector
     && source.capabilities.continuousDynamicalTime;
-  const implementedAsBasis = source.implementation === "bundled-absolute-state";
+  const implementedAsBasis = SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds.includes(source.id);
   const qualifiedCoverage = coversTarget && ephemerisBasisCapable;
-  // No registered source currently bypasses the app-side longitude/root solver.
   const directSeasonalEpoch = source.capabilities.directSeasonalEpoch;
-  const usableNow = coversTarget && directSeasonalEpoch
-    || qualifiedCoverage && implementedAsBasis;
+  const deepTimeSolverReady = solverReady();
+  const usableNow = coversTarget && (
+    directSeasonalEpoch
+    || qualifiedCoverage && implementedAsBasis && deepTimeSolverReady
+  );
 
   let reason;
   if (!coversTarget) reason = "outside-source-coverage";
   else if (!ephemerisBasisCapable && !directSeasonalEpoch) reason = "parameter-source-without-absolute-state";
-  else if (!usableNow) reason = "qualified-ephemeris-basis-not-integrated";
+  else if (!implementedAsBasis) reason = "qualified-ephemeris-basis-not-integrated";
+  else if (!deepTimeSolverReady) reason = "deep-time-seasonal-epoch-solver-incomplete";
   else reason = "usable";
 
   return Object.freeze({
@@ -122,6 +142,7 @@ function evaluateSource(source, targetYear) {
     ephemerisBasisCapable,
     directSeasonalEpoch,
     implementedAsBasis,
+    deepTimeSolverReady,
     qualifiedCoverage,
     usableNow,
     reason,
@@ -154,6 +175,7 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
   const qualified = evaluations.filter(item => item.qualifiedCoverage || item.coversTarget && item.directSeasonalEpoch);
   const usable = evaluations.filter(item => item.usableNow);
   const nearestEphemerisBoundary = nearestEphemerisCoverageBoundary(evaluations, targetYear);
+  const deepTimeSolverReady = solverReady();
 
   let status;
   let blocker;
@@ -182,6 +204,8 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
     qualifiedSourceIds:Object.freeze(qualified.map(item => item.id)),
     usableSourceIds:Object.freeze(usable.map(item => item.id)),
     nearestEphemerisBoundary,
+    appPipeline:SEASONAL_EPOCH_PIPELINE,
+    deepTimeSolverReady,
     seasonalEpochSolverRequired:!identity && !usable.length
   });
 }
