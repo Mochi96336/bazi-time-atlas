@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px discrete phase harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px discrete phase probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const RINGS = ["hour", "year", "month", "day"];
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    let exercised = false;
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    function afterSettled(callback) {
+      queueMicrotask(() => queueMicrotask(() => requestAnimationFrame(callback)));
+    }
+
+    function phaseSnapshot(childWindow, doc) {
+      return Object.fromEntries(RINGS.map(id => {
+        const track = doc.querySelector(`#${id}-track`);
+        const path = track?.querySelector(`.state-phase-progress[data-phase-ring="${id}"]`);
+        const bead = track?.querySelector(`.state-phase-bead[data-phase-ring="${id}"]`);
+        const active = track?.querySelector(".cycle-sector.is-active");
+        const style = path ? childWindow.getComputedStyle(path) : null;
+        return [id, {
+          progress:Number(track?.dataset.phaseProgress),
+          startMs:Number(track?.dataset.phaseStartMs),
+          endMs:Number(track?.dataset.phaseEndMs),
+          source:track?.dataset.phaseSource ?? "",
+          kind:track?.dataset.phaseBoundaryKind ?? "",
+          model:Number(track?.dataset.modelRotation),
+          activeIndex:Number(active?.dataset.cycleIndex),
+          pathVisible:path?.dataset.phaseVisible ?? "",
+          beadVisible:bead?.dataset.phaseVisible ?? "",
+          beadX:Number(bead?.getAttribute("cx")),
+          beadY:Number(bead?.getAttribute("cy")),
+          strokeWidth:style?.strokeWidth ?? "",
+          stroke:style?.stroke ?? ""
+        }];
+      }));
+    }
+
+    function writeSnapshot(prefix, snapshot) {
+      for (const [id, value] of Object.entries(snapshot)) {
+        const cap = id[0].toUpperCase() + id.slice(1);
+        probe.dataset[`${prefix}${cap}Progress`] = String(value.progress);
+        probe.dataset[`${prefix}${cap}Start`] = String(value.startMs);
+        probe.dataset[`${prefix}${cap}End`] = String(value.endMs);
+        probe.dataset[`${prefix}${cap}Source`] = value.source;
+        probe.dataset[`${prefix}${cap}Kind`] = value.kind;
+        probe.dataset[`${prefix}${cap}Model`] = String(value.model);
+        probe.dataset[`${prefix}${cap}ActiveIndex`] = String(value.activeIndex);
+        probe.dataset[`${prefix}${cap}PathVisible`] = value.pathVisible;
+        probe.dataset[`${prefix}${cap}BeadVisible`] = value.beadVisible;
+        probe.dataset[`${prefix}${cap}BeadX`] = String(value.beadX);
+        probe.dataset[`${prefix}${cap}BeadY`] = String(value.beadY);
+        probe.dataset[`${prefix}${cap}StrokeWidth`] = value.strokeWidth;
+        probe.dataset[`${prefix}${cap}Stroke`] = value.stroke;
+      }
+    }
+
+    function snapshot() {
+      if (exercised) return;
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!childWindow || !doc) return;
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const slider = doc.querySelector("#time-slider");
+      const dayScale = doc.querySelector('[data-scale="day"]');
+      const input = doc.querySelector("#instant-input");
+      if (!instrument || !slider || !dayScale || !input) return;
+      if (instrument.dataset.discretePhaseMode !== "true-boundaries") return;
+      const initial = phaseSnapshot(childWindow, doc);
+      if (RINGS.some(id => !Number.isFinite(initial[id].progress))) return;
+
+      exercised = true;
+      probe.dataset.innerWidth = String(childWindow.innerWidth);
+      probe.dataset.phaseMode = instrument.dataset.discretePhaseMode ?? "";
+      probe.dataset.phaseRings = instrument.dataset.discretePhaseRings ?? "";
+      writeSnapshot("initial", initial);
+
+      dayScale.click();
+      afterSettled(() => {
+        slider.value = String(1 / 144); // +10 minutes on the 48-hour scale
+        slider.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
+        afterSettled(() => {
+          const stepped = phaseSnapshot(childWindow, doc);
+          writeSnapshot("step", stepped);
+          probe.dataset.stepInstant = instrument.dataset.selectedInstantMs ?? "";
+
+          input.value = "2027-03-15T22:59";
+          input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+          afterSettled(() => {
+            const beforeBoundary = phaseSnapshot(childWindow, doc);
+            writeSnapshot("before", beforeBoundary);
+            probe.dataset.beforeHourPillar = instrument.dataset.hourPillar ?? "";
+            probe.dataset.beforeDayPillar = instrument.dataset.dayPillar ?? "";
+
+            input.value = "2027-03-15T23:00";
+            input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+            afterSettled(() => {
+              const afterBoundary = phaseSnapshot(childWindow, doc);
+              writeSnapshot("after", afterBoundary);
+              probe.dataset.afterHourPillar = instrument.dataset.hourPillar ?? "";
+              probe.dataset.afterDayPillar = instrument.dataset.dayPillar ?? "";
+              probe.dataset.ready = "true";
+            });
+          });
+        });
+      });
+    }
+
+    frame.addEventListener("load", () => {
+      snapshot();
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 150);
+      setTimeout(snapshot, 700);
+    });
+  </script>
+</body>
+</html>
