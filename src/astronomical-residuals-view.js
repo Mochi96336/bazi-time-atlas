@@ -2,6 +2,7 @@ import {
   BERGER_MODEL,
   solarTermShapeResiduals
 } from "./recurrence/berger-orbit.js";
+import { monthBoundaryDisagreementExposureFromResiduals } from "./recurrence/month-boundary-risk.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -15,6 +16,7 @@ const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
 const group = document.querySelector("#astronomy-residual-ring");
 const termGrid = document.querySelector("#astronomy-term-grid");
+let monthBoundaryPanel = null;
 
 function polar(radius, angleDegrees) {
   const angle = angleDegrees * Math.PI / 180;
@@ -60,9 +62,107 @@ function currentDelta() {
   return Number.isFinite(value) ? value : null;
 }
 
+function ensureMonthBoundaryPanel() {
+  if (monthBoundaryPanel?.isConnected) return monthBoundaryPanel;
+  if (!termGrid) return null;
+
+  const panel = document.createElement("section");
+  panel.id = "month-boundary-exposure";
+  panel.className = "month-boundary-exposure";
+  panel.setAttribute("aria-label", "十二節位移對八字月界判定的潛在分歧窗口");
+  panel.innerHTML = `
+    <div class="month-boundary-copy">
+      <div class="eyebrow">BaZi month-boundary exposure</div>
+      <h3>不是全年都偏，只在被交節邊界掃過的窗口可能分到另一個月。</h3>
+      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份的月界 sector 才會站在不同側；下方比例是 12 個窗口的聯集占 365.2422 日正規化年的比例，不是統計上的「八字錯誤率」。</p>
+    </div>
+    <div class="month-boundary-stat">
+      <span>窗口聯集</span>
+      <strong id="month-boundary-exposure-hours">—</strong>
+      <small id="month-boundary-exposure-percent">—</small>
+    </div>
+    <div class="month-boundary-stat">
+      <span>最大單一月界</span>
+      <strong id="month-boundary-largest">—</strong>
+      <small id="month-boundary-overlap">—</small>
+    </div>
+    <div id="month-boundary-window-grid" class="month-boundary-window-grid" aria-label="十二個月界分歧窗口"></div>
+  `;
+  termGrid.insertAdjacentElement("afterend", panel);
+  monthBoundaryPanel = panel;
+  return panel;
+}
+
+function renderMonthBoundaryExposure(result) {
+  const panel = ensureMonthBoundaryPanel();
+  if (!panel) return;
+  const exposure = monthBoundaryDisagreementExposureFromResiduals(result);
+  const grid = panel.querySelector("#month-boundary-window-grid");
+  const maxWindow = Math.max(...exposure.windows.map(window => window.widthHours), 1e-9);
+
+  setText("month-boundary-exposure-hours", `${exposure.unionExposureHours.toFixed(2)} h`);
+  setText("month-boundary-exposure-percent", `${exposure.yearPercent.toFixed(3)}% of normalized year`);
+  setText(
+    "month-boundary-largest",
+    exposure.largestWindow ? `${exposure.largestWindow.name} · ${exposure.largestWindow.widthHours.toFixed(2)} h` : "0.00 h"
+  );
+  setText(
+    "month-boundary-overlap",
+    exposure.overlapHours > 0.005
+      ? `窗口重疊 ${exposure.overlapHours.toFixed(2)} h；聯集已去重。`
+      : `${exposure.mergedWindows.length} 個不重疊窗口`
+  );
+
+  grid?.replaceChildren();
+  exposure.windows.forEach(window => {
+    const item = document.createElement("div");
+    item.className = `month-boundary-window ${window.direction}`;
+    item.dataset.term = window.name;
+    item.dataset.windowHours = window.widthHours.toFixed(6);
+    item.style.setProperty("--window-width", `${Math.max(0, window.widthHours / maxWindow * 100).toFixed(3)}%`);
+    item.innerHTML = `
+      <span>${window.name}</span>
+      <i aria-hidden="true"><b></b></i>
+      <strong>${window.widthHours.toFixed(2)} h</strong>
+    `;
+    grid?.appendChild(item);
+  });
+
+  instrument.dataset.monthBoundaryExposureValidity = "within-range";
+  instrument.dataset.monthBoundaryExposureHours = exposure.unionExposureHours.toFixed(6);
+  instrument.dataset.monthBoundaryExposurePercent = exposure.yearPercent.toFixed(6);
+  instrument.dataset.monthBoundaryRawSweepHours = exposure.rawSweepHours.toFixed(6);
+  instrument.dataset.monthBoundaryOverlapHours = exposure.overlapHours.toFixed(6);
+  instrument.dataset.monthBoundaryWindowCount = String(exposure.windows.length);
+  instrument.dataset.monthBoundaryMergedWindowCount = String(exposure.mergedWindows.length);
+  instrument.dataset.monthBoundaryLargestTerm = exposure.largestWindow?.name ?? "none";
+  instrument.dataset.monthBoundaryLargestWindowHours = (exposure.largestWindow?.widthHours ?? 0).toFixed(6);
+  instrument.dataset.monthBoundaryClosed = String(exposure.closed);
+}
+
+function renderMonthBoundaryUnavailable() {
+  const panel = ensureMonthBoundaryPanel();
+  panel?.querySelector("#month-boundary-window-grid")?.replaceChildren();
+  setText("month-boundary-exposure-hours", "model unavailable");
+  setText("month-boundary-exposure-percent", "—");
+  setText("month-boundary-largest", "—");
+  setText("month-boundary-overlap", "—");
+  instrument.dataset.monthBoundaryExposureValidity = "outside-range";
+  delete instrument.dataset.monthBoundaryExposureHours;
+  delete instrument.dataset.monthBoundaryExposurePercent;
+  delete instrument.dataset.monthBoundaryRawSweepHours;
+  delete instrument.dataset.monthBoundaryOverlapHours;
+  delete instrument.dataset.monthBoundaryWindowCount;
+  delete instrument.dataset.monthBoundaryMergedWindowCount;
+  delete instrument.dataset.monthBoundaryLargestTerm;
+  delete instrument.dataset.monthBoundaryLargestWindowHours;
+  delete instrument.dataset.monthBoundaryClosed;
+}
+
 function renderUnavailable(message) {
   group.replaceChildren();
   termGrid?.replaceChildren();
+  renderMonthBoundaryUnavailable();
   setResidualHeadline("model unavailable");
   setText("astronomy-rms-residual", "—");
   setText("astronomy-orbit-readout", message);
@@ -155,6 +255,7 @@ function renderResidualRing(result) {
 function renderResult(result) {
   renderResidualRing(result);
   renderTermGrid(result);
+  renderMonthBoundaryExposure(result);
 
   setResidualHeadline(`${result.maxAbsHours.toFixed(2)} h`);
   setText("astronomy-rms-residual", `${result.rmsHours.toFixed(2)} h RMS`);
