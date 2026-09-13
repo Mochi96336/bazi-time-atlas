@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px reference frame harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px relative reference frame probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const DAY_MS = 86_400_000;
+    const RINGS = ["hour", "year", "month", "day", "solar", "zodiac"];
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    let exercised = false;
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    const num = value => Number(value);
+    const rotation = (doc, id, kind = "rendered") => num(doc.querySelector(`#${id}-track`)?.dataset[`${kind}Rotation`]);
+    const maxRotationDiff = (doc, before, kind = "rendered") => Math.max(...RINGS.map(id => Math.abs(rotation(doc, id, kind) - before[id])));
+    const rotationSnapshot = doc => Object.fromEntries(RINGS.map(id => [id, rotation(doc, id)]));
+
+    function afterFlush(callback) {
+      queueMicrotask(() => queueMicrotask(callback));
+    }
+
+    function snapshot() {
+      if (exercised) return;
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!childWindow || !doc) return;
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const svg = doc.querySelector("#kinetic-wheel");
+      const select = doc.querySelector("#reference-frame-select");
+      const slider = doc.querySelector("#time-slider");
+      const solarRow = doc.querySelector('[data-ring-toggle="solar"]');
+      const dayTrace = doc.querySelector('[data-motion-ring="day"]');
+      const solarTrace = doc.querySelector('[data-motion-ring="solar"]');
+      const fanLayer = doc.querySelector("#kinetic-fan-layer");
+      const motionLayer = doc.querySelector("#motion-layer");
+      const cursorLayer = doc.querySelector("#cursor-layer");
+      if (!instrument || !svg || !select || !slider || !solarRow || !dayTrace || !solarTrace || !fanLayer || !motionLayer || !cursorLayer) return;
+      if (RINGS.some(id => !Number.isFinite(rotation(doc, id)))) return;
+      if (instrument.dataset.fanClip !== "active") return;
+
+      exercised = true;
+      probe.dataset.innerWidth = String(childWindow.innerWidth);
+      probe.dataset.options = [...select.options].map(option => option.value).join(",");
+      probe.dataset.initialReference = instrument.dataset.referenceFrame ?? "";
+      probe.dataset.initialOffset = svg.dataset.referenceFrameOffsetDegrees ?? "";
+      probe.dataset.initialCursor = svg.dataset.referenceCursorAngle ?? "";
+      probe.dataset.motionFanClipped = motionLayer.dataset.fanClipped ?? "";
+      probe.dataset.cursorFanClipped = cursorLayer.dataset.fanClipped ?? "";
+      probe.dataset.motionClipOwner = motionLayer.dataset.fanClipOwner ?? "";
+      probe.dataset.cursorClipOwner = cursorLayer.dataset.fanClipOwner ?? "";
+      probe.dataset.motionParent = motionLayer.parentElement?.id ?? "";
+      probe.dataset.cursorParent = cursorLayer.parentElement?.id ?? "";
+      probe.dataset.fanWrapperClip = fanLayer.getAttribute("clip-path") ?? "";
+      const instantBefore = num(instrument.dataset.selectedInstantMs);
+      const dayModelBefore = num(doc.querySelector("#day-track").dataset.modelRotation);
+      const dayRenderedBefore = rotation(doc, "day");
+      const solarRenderedBefore = rotation(doc, "solar");
+
+      select.value = "day";
+      select.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+      afterFlush(() => {
+        probe.dataset.dayReference = instrument.dataset.referenceFrame ?? "";
+        probe.dataset.dayAnchor = svg.dataset.referenceAnchorRotation ?? "";
+        const dayRefRendered = rotation(doc, "day");
+        probe.dataset.dayRefRendered = String(dayRefRendered);
+
+        slider.value = "1";
+        slider.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
+        afterFlush(() => {
+          const instantAfterDay = num(instrument.dataset.selectedInstantMs);
+          const dayModelAfter = num(doc.querySelector("#day-track").dataset.modelRotation);
+          const dayRenderedAfter = rotation(doc, "day");
+          const solarRenderedAfter = rotation(doc, "solar");
+          const dayOffset = num(svg.dataset.referenceFrameOffsetDegrees);
+          const dayCursor = num(svg.dataset.referenceCursorAngle);
+          probe.dataset.instantDeltaDay = String(instantAfterDay - instantBefore);
+          probe.dataset.dayModelDelta = String(dayModelAfter - dayModelBefore);
+          probe.dataset.dayRenderedDelta = String(dayRenderedAfter - dayRefRendered);
+          probe.dataset.dayFrameOffset = String(dayOffset);
+          probe.dataset.dayCursor = String(dayCursor);
+          probe.dataset.dayCursorEquationError = String(dayCursor - (-90 - dayOffset));
+          probe.dataset.solarRelativeDelta = String(solarRenderedAfter - solarRenderedBefore);
+          probe.dataset.dayTraceVisible = String(dayTrace.classList.contains("is-visible"));
+          probe.dataset.solarTraceVisible = String(solarTrace.classList.contains("is-visible"));
+          probe.dataset.dayExpectedMs = String(DAY_MS);
+
+          const beforeSwitch = rotationSnapshot(doc);
+          const offsetBeforeSwitch = dayOffset;
+          select.value = "solar";
+          select.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+          afterFlush(() => {
+            probe.dataset.solarReference = instrument.dataset.referenceFrame ?? "";
+            probe.dataset.switchJump = String(maxRotationDiff(doc, beforeSwitch));
+            probe.dataset.switchOffsetDelta = String(num(svg.dataset.referenceFrameOffsetDegrees) - offsetBeforeSwitch);
+            probe.dataset.switchTraceCount = String(doc.querySelectorAll(".motion-trace.is-visible").length);
+
+            const solarRenderedBeforeHiddenStep = rotation(doc, "solar");
+            const zodiacRenderedBeforeHiddenStep = rotation(doc, "zodiac");
+            const dayRenderedBeforeHiddenStep = rotation(doc, "day");
+            solarRow.click();
+            probe.dataset.hiddenReference = instrument.dataset.referenceFrame ?? "";
+            probe.dataset.solarHidden = doc.querySelector("#solar-track").dataset.layerHidden ?? "";
+
+            slider.value = "1.25";
+            slider.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
+            afterFlush(() => {
+              const solarRenderedAfterHiddenStep = rotation(doc, "solar");
+              const zodiacRenderedAfterHiddenStep = rotation(doc, "zodiac");
+              const dayRenderedAfterHiddenStep = rotation(doc, "day");
+              probe.dataset.hiddenSolarRenderedDelta = String(solarRenderedAfterHiddenStep - solarRenderedBeforeHiddenStep);
+              probe.dataset.hiddenZodiacRenderedDelta = String(zodiacRenderedAfterHiddenStep - zodiacRenderedBeforeHiddenStep);
+              probe.dataset.hiddenDayRenderedDelta = String(dayRenderedAfterHiddenStep - dayRenderedBeforeHiddenStep);
+              probe.dataset.hiddenSolarTraceVisible = String(solarTrace.classList.contains("is-visible"));
+              probe.dataset.hiddenReferenceOffset = svg.dataset.referenceFrameOffsetDegrees ?? "";
+
+              solarRow.click();
+              probe.dataset.solarRestored = doc.querySelector("#solar-track").dataset.layerHidden ?? "";
+              probe.dataset.solarRestoredRendered = String(rotation(doc, "solar"));
+              probe.dataset.solarRestoredTraceVisible = String(solarTrace.classList.contains("is-visible"));
+
+              select.value = "world";
+              select.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+              afterFlush(() => {
+                const worldErrors = RINGS.map(id => Math.abs(rotation(doc, id) - rotation(doc, id, "world")));
+                probe.dataset.worldReference = instrument.dataset.referenceFrame ?? "";
+                probe.dataset.worldOffset = svg.dataset.referenceFrameOffsetDegrees ?? "";
+                probe.dataset.worldCursor = svg.dataset.referenceCursorAngle ?? "";
+                probe.dataset.worldMaxRotationError = String(Math.max(...worldErrors));
+                probe.dataset.worldTraceCount = String(doc.querySelectorAll(".motion-trace.is-visible").length);
+                probe.dataset.initialDayRendered = String(dayRenderedBefore);
+                probe.dataset.ready = "true";
+              });
+            });
+          });
+        });
+      });
+    }
+
+    frame.addEventListener("load", () => {
+      snapshot();
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 100);
+      setTimeout(snapshot, 500);
+      setTimeout(snapshot, 1200);
+    });
+  </script>
+</body>
+</html>

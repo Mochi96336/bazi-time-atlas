@@ -12,7 +12,9 @@ import { SVG_NS } from "./wheel/svg-renderer.js";
 const CLIP_ID = "kinetic-master-fan-clip";
 const WRAPPER_ID = "kinetic-fan-layer";
 const MOBILE_QUERY = "(max-width: 480px)";
-const CLIP_MARGIN = 28;
+// Cursor label sits 40 world units outside the zodiac ring. Keep enough radial
+// headroom for it while still enforcing the same angular fan on cursor/traces.
+const CLIP_MARGIN = 58;
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -78,6 +80,20 @@ function installMasterFanClip() {
     wrapper.appendChild(track);
     track.dataset.fanClipped = "true";
   });
+
+  // The wrapper owns the fixed screen-space aperture. Rings rotate inside it,
+  // and relative-frame overlays must do the same: clipping a transformed cursor
+  // on the cursor node itself would make transform/clip coordinate ownership
+  // browser-sensitive. Moving both overlays under the untransformed wrapper keeps
+  // the fan fixed while the cursor can rotate freely inside it.
+  [svg.querySelector("#motion-layer"), svg.querySelector("#cursor-layer")]
+    .filter(Boolean)
+    .forEach(layer => {
+      layer.removeAttribute("clip-path");
+      wrapper.appendChild(layer);
+      layer.dataset.fanClipped = "true";
+      layer.dataset.fanClipOwner = WRAPPER_ID;
+    });
 
   applyResponsiveCamera();
 

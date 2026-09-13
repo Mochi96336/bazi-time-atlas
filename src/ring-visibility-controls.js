@@ -1,3 +1,4 @@
+import "./reference-frame-controls.js";
 import { RINGS } from "./wheel/ring-model.js";
 
 const svg = document.querySelector("#kinetic-wheel");
