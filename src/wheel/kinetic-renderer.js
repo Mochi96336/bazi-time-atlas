@@ -117,6 +117,19 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       "aria-hidden": "true",
       visibility: "hidden"
     }, group);
+    el("line", {
+      class: `state-boundary-gate phase-${id}`,
+      "data-boundary-ring": id,
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, group);
+    el("circle", {
+      class: `state-boundary-shared-halo phase-${id}`,
+      "data-boundary-ring": id,
+      r: 5.2,
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, group);
 
     cycleSectors.set(id, sectors);
   }
