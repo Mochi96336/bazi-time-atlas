@@ -213,7 +213,7 @@ const linkedReset = requireAttr(dragProbe, "data-drag-linked-reset", "drag", dra
 if (draggedRing !== "day") throw new Error(`drag: expected day ring, got ${draggedRing}: ${drag.url}`);
 if (![modelBefore, modelAfter, offsetAfter, offsetReset].every(Number.isFinite)) throw new Error(`drag: non-finite pose diagnostics: ${drag.url}`);
 if (Math.abs(modelAfter - modelBefore) > 1e-6) throw new Error(`drag: manual drag mutated model rotation (${modelBefore} -> ${modelAfter}): ${drag.url}`);
-if (Math.abs(offsetAfter - 10) > 0.25) throw new Error(`drag: expected about +10° manual offset, got ${offsetAfter}: ${drag.url}`);
+if (Math.abs(offsetAfter - 12) > 0.01) throw new Error(`drag: +10° free gesture should release onto the 12° day-ring detent, got ${offsetAfter}: ${drag.url}`);
 if (linkedAfter !== "false" || detachedAfter !== "day" || !statusAfter.includes("日")) throw new Error(`drag: detached state was not explicit (linked=${linkedAfter}, detached=${detachedAfter}, status=${statusAfter}): ${drag.url}`);
 if (Math.abs(offsetReset) > 1e-6 || linkedReset !== "true") throw new Error(`drag: reset did not relink day ring (offset=${offsetReset}, linked=${linkedReset}): ${drag.url}`);
-console.log(`[kinetic-composition] PASS independent day-ring drag; model=${modelBefore}, manual=${offsetAfter.toFixed(3)}°, reset=${offsetReset}: ${drag.url}`);
+console.log(`[kinetic-composition] PASS independent day-ring detent; model=${modelBefore}, snappedManual=${offsetAfter.toFixed(3)}°, reset=${offsetReset}: ${drag.url}`);
