@@ -78,6 +78,14 @@ if (attr(probe, "data-options") !== "world,hour,year,month,day,solar") {
 if (attr(probe, "data-initial-reference") !== "world" || Math.abs(initialOffset) > 1e-6 || Math.abs(initialCursor + 90) > 1e-6) {
   throw new Error(`reference-frame: initial world frame is not canonical (ref=${attr(probe, "data-initial-reference")}, offset=${initialOffset}, cursor=${initialCursor}): ${url}`);
 }
+if (
+  attr(probe, "data-motion-fan-clipped") !== "true" ||
+  attr(probe, "data-cursor-fan-clipped") !== "true" ||
+  attr(probe, "data-motion-clip-path") !== "url(#kinetic-master-fan-clip)" ||
+  attr(probe, "data-cursor-clip-path") !== "url(#kinetic-master-fan-clip)"
+) {
+  throw new Error(`reference-frame: moving cursor/traces are not governed by the master fan clip: ${url}`);
+}
 if (attr(probe, "data-day-reference") !== "day") {
   throw new Error(`reference-frame: Day reference did not activate: ${url}`);
 }
@@ -132,4 +140,4 @@ if (numberAttr(probe, "data-world-trace-count") !== 0) {
   throw new Error(`reference-frame: frame reset emitted fake motion traces: ${url}`);
 }
 
-console.log(`[reference-frame] PASS 390px Day/Solar co-rotating frames; Day model=${dayModelDelta.toFixed(3)}°, Solar relative=${solarRelativeDelta.toFixed(3)}°, hidden-ref Day drift=${hiddenDayRenderedDelta.toFixed(3)}°: ${url}`);
+console.log(`[reference-frame] PASS 390px Day/Solar co-rotating frames; Day model=${dayModelDelta.toFixed(3)}°, Solar relative=${solarRelativeDelta.toFixed(3)}°, hidden-ref Day drift=${hiddenDayRenderedDelta.toFixed(3)}°; cursor/traces fan-clipped: ${url}`);
