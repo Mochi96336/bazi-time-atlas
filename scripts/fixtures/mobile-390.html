@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>390px visual harness</title>
   <style>
-    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
-    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    html, body { margin:0; width:500px; min-height:100%; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; border:0; background:#0b0f0c; }
     #probe { display:none; }
   </style>
 </head>
@@ -14,20 +14,23 @@
   <iframe id="stage" title="390px atlas viewport"></iframe>
   <output id="probe" data-ready="false"></output>
   <script>
+    const params = new URLSearchParams(location.search);
+    const requestedHeight = Math.max(320, Math.min(6000, Number(params.get("height")) || 844));
+    const requestedTarget = params.get("target") || "../../?instant=2027-03-15T13%3A20%3A09.000Z";
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
-    const target = new URL("../../", location.href);
-    target.searchParams.set("instant", "2027-03-15T13:20:09.000Z");
-    frame.src = target.href;
+    frame.style.height = `${requestedHeight}px`;
+    document.documentElement.style.height = `${requestedHeight}px`;
+    document.body.style.height = `${requestedHeight}px`;
+    frame.src = new URL(requestedTarget, location.href).href;
 
     function snapshot() {
       const childWindow = frame.contentWindow;
       const doc = frame.contentDocument;
-      const instrument = doc?.querySelector("#kinetic-instrument");
-      if (!childWindow || !doc || !instrument) return;
+      if (!childWindow || !doc) return;
+      const instrument = doc.querySelector("#kinetic-instrument");
       const scrollHeight = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
       const viewportHeight = childWindow.innerHeight;
-      const rect = instrument.getBoundingClientRect();
       const secondary = [".timeline-dock", ".state-strip", ".atlas-notes", ".sources-panel"]
         .map(selector => doc.querySelector(selector))
         .filter(Boolean);
@@ -38,10 +41,13 @@
       probe.dataset.viewportFit = String(scrollHeight <= viewportHeight + 2);
       probe.dataset.scrollHeight = String(scrollHeight);
       probe.dataset.viewportHeight = String(viewportHeight);
-      probe.dataset.instrumentShare = viewportHeight > 0 ? (rect.height / viewportHeight).toFixed(3) : "0.000";
+      probe.dataset.instrumentShare = instrument && viewportHeight > 0
+        ? (instrument.getBoundingClientRect().height / viewportHeight).toFixed(3)
+        : "0.000";
       probe.dataset.secondaryHidden = String(secondary.every(node => childWindow.getComputedStyle(node).display === "none"));
-      probe.dataset.fanClip = instrument.dataset.fanClip ?? "missing";
-      probe.dataset.masterGeometry = instrument.dataset.masterGeometry ?? "missing";
+      probe.dataset.fanClip = instrument?.dataset.fanClip ?? "not-applicable";
+      probe.dataset.masterGeometry = instrument?.dataset.masterGeometry ?? "not-applicable";
+      probe.dataset.target = frame.src;
     }
 
     frame.addEventListener("load", () => {
