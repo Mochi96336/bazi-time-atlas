@@ -44,25 +44,35 @@ import { ringAtWorldPoint } from "../src/wheel/ring-drag-controller.js";
 const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 const boundaryCss = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 
-test("five primary rings form one contiguous radial stack", () => {
+test("six primary rings form one contiguous radial stack without moving the established outer five", () => {
   assert.equal(assertWheelModel(), true);
-  assert.equal(RINGS.length, 5);
-  assert.deepEqual(SEXAGENARY_RING_IDS, ["year", "month", "day"]);
-  assert.deepEqual(GUIDE_RADII, [760, 834, 908, 982, 1072, 1182]);
+  assert.equal(RINGS.length, 6);
+  assert.deepEqual(SEXAGENARY_RING_IDS, ["hour", "year", "month", "day"]);
+  assert.deepEqual(GUIDE_RADII, [686, 760, 834, 908, 982, 1072, 1182]);
 
   for (let i = 1; i < RINGS.length; i += 1) {
     assert.equal(RINGS[i].innerRadius, RINGS[i - 1].outerRadius);
   }
   assert.equal(RINGS[0].innerRadius, RADII.inner);
   assert.equal(RINGS.at(-1).outerRadius, RADII.zodiacOuter);
+
+  assert.equal(RADII.hourOuter, 760, "hour ring should grow inward from the former envelope");
+  assert.equal(ringModel("year").innerRadius, 760, "existing year ring must stay at its previous radius");
+  assert.equal(RADII.yearOuter, 834);
+  assert.equal(RADII.monthOuter, 908);
+  assert.equal(RADII.dayOuter, 982);
+  assert.equal(RADII.solarOuter, 1072);
+  assert.equal(RADII.zodiacOuter, 1182);
 });
 
-test("ring model already carries the future independent-drag contract", () => {
+test("ring model carries linked/free drag contracts for all six layers", () => {
   for (const ring of RINGS) {
     assert.equal(ring.draggable, true, `${ring.id} should be draggable`);
     assert.equal(ring.defaultLinked, true, `${ring.id} should start linked to time`);
     assert.ok(ring.snapDegrees > 0, `${ring.id} needs a semantic snap interval`);
   }
+  assert.equal(ringModel("hour").snapDegrees, 6);
+  assert.equal(ringModel("hour").phaseSource, "hour-pillar");
   assert.equal(ringModel("year").snapDegrees, 6);
   assert.equal(ringModel("solar").snapDegrees, 15);
   assert.equal(ringModel("zodiac").snapDegrees, 30);
@@ -82,7 +92,7 @@ test("radial hit testing selects every ring without DOM bounding boxes", () => {
 });
 
 test("linked and detached ring pose never mutates the model angle", () => {
-  const state = createRingState("day");
+  const state = createRingState("hour");
   setModelRotation(state, 121.5);
   assert.equal(state.linked, true);
   assert.equal(effectiveRotation(state), 121.5);
@@ -100,6 +110,7 @@ test("linked and detached ring pose never mutates the model angle", () => {
   assert.equal(state.linked, true);
   assert.equal(effectiveRotation(state), 121.5);
 
+  assert.equal(snappedOffset("hour", 17.2), 18);
   assert.equal(snappedOffset("day", 17.2), 18);
   assert.equal(snappedOffset("solar", 22), 15);
   assert.equal(snappedOffset("zodiac", 22), 30);
@@ -118,11 +129,11 @@ test("polar geometry uses one SVG-world center and round-trips angles", () => {
 });
 
 test("paths are derived from the canonical center rather than CSS transforms", () => {
-  const annulus = annularSectorPath(WHEEL_CENTER, RADII.inner, RADII.yearOuter, 0, 6);
+  const hourAnnulus = annularSectorPath(WHEEL_CENTER, RADII.inner, RADII.hourOuter, 0, 6);
   const fan = fanSectorPath(WHEEL_CENTER, RADII.zodiacOuter + 28, FAN.start, FAN.end);
-  assert.match(annulus, /^M /);
-  assert.match(annulus, /A 834 834/);
-  assert.match(annulus, /A 760 760/);
+  assert.match(hourAnnulus, /^M /);
+  assert.match(hourAnnulus, /A 760 760/);
+  assert.match(hourAnnulus, /A 686 686/);
   assert.match(fan, new RegExp(`^M ${WHEEL_CENTER.x.toFixed(3)} ${WHEEL_CENTER.y.toFixed(3)}`));
 });
 
