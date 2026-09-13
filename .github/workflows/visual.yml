@@ -36,6 +36,7 @@ jobs:
           node --check src/recurrence/month-boundary-risk.js
           node --check src/recurrence/four-pillar-determinacy.js
           node --check src/recurrence/day-hour-proof-chain.js
+          node --check src/recurrence/seasonal-epoch-source-audit.js
           node --check src/legacy-annual-compat.js
           node --check src/app.js
           node --check src/annual-deep-link.js
@@ -70,6 +71,7 @@ jobs:
           node --check scripts/check-astronomical-residuals.mjs
           node --check scripts/check-four-pillar-determinacy.mjs
           node --check scripts/check-day-hour-proof-chain.mjs
+          node --check scripts/check-seasonal-epoch-source-audit.mjs
           node --check scripts/check-near-recurrence.mjs
           node --check scripts/visual-check-determinacy.mjs
       - name: Install lightweight CJK font for screenshots
@@ -114,6 +116,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify Day Hour proof chain
         run: node scripts/check-day-hour-proof-chain.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify seasonal epoch source audit
+        run: node scripts/check-seasonal-epoch-source-audit.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify exact-closure near-recurrence search
