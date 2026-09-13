@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="拆開 60 年、400 年、局部重遇與 24,000 年全域閉合的離散週期實驗。">
+  <meta name="description" content="拆開離散週期閉合與十二節長期天文形狀殘差的回歸實驗。">
   <title>BaZi Time Atlas · Recurrence Lab</title>
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./recurrence.css">
+  <link rel="stylesheet" href="./astronomical-residuals.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -22,14 +23,14 @@
 
     <section class="recurrence-intro">
       <div>
-        <div class="eyebrow">Discrete recurrence laboratory</div>
-        <h1>有些齒輪會閉合，<br>有些只是再次相遇。</h1>
-        <p class="lede">這一頁故意先抽掉節氣與長期天文，只看三個可精確做整數運算的離散層：400 年公曆閏年骨架、60 年干支年序、60 日干支日序。這樣可以把「60 年」「某個起點的較早重遇」與「24,000 年全域閉合」分清楚。</p>
+        <div class="eyebrow">Recurrence laboratory</div>
+        <h1>內圈可以回原點，<br>外圈仍然在變形。</h1>
+        <p class="lede">內側三層只做精確整數運算：400 年公曆骨架、60 年干支年序、60 日干支日序。最外層再接回長期天文，但只比較十二「節」相對春分的時間形狀；因此可以直接看到「離散齒輪閉合」和「天文形狀不閉合」其實是兩件事。</p>
       </div>
-      <p class="scope-note">24,000 年只屬於這個離散模型。把立春／十二節接回去之後，就必須改用天文殘差而不是宣稱同一個 exact period。</p>
+      <p class="scope-note">外圈採 Berger 1978 長期軌道近似，春分固定為共同 0 點、全年正規化為 365.2422 日。它顯示軌道形狀殘差，不是西元 26026 年節氣的民用時刻預報。</p>
     </section>
 
-    <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散回歸圓盤">
+    <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散與天文回歸圓盤">
       <div class="recurrence-toolbar">
         <div class="base-date" aria-label="基準日期">
           <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
@@ -43,13 +44,15 @@
         <div><i class="gregorian-dot"></i><span>公曆骨架</span><strong id="gregorian-phase-readout">—</strong></div>
         <div><i class="year-dot"></i><span>干支年序</span><strong id="year-phase-readout">—</strong></div>
         <div><i class="day-dot"></i><span>干支日序</span><strong id="day-phase-readout">—</strong></div>
+        <div><i class="astronomy-dot"></i><span>十二節形狀</span><strong id="astronomy-max-residual">—</strong></div>
       </div>
 
-      <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="400 年公曆、60 年干支年序與 60 日日序的回歸扇形圓盤">
+      <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆、干支年日序與十二節天文殘差的巨大扇形回歸圓盤">
         <g id="recurrence-guides"></g>
         <g id="gregorian-ring"></g>
         <g id="year-ring"></g>
         <g id="day-ring"></g>
+        <g id="astronomy-residual-ring"></g>
         <g id="recurrence-cursor"></g>
       </svg>
 
@@ -68,8 +71,27 @@
         <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年">
         <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
       </div>
-      <div class="global-period"><span>全域 exact</span><strong>24,000 年</strong></div>
+      <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
     </section>
+
+    <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
+      <div>
+        <span>Solar-term shape residual</span>
+        <strong id="astronomy-max-residual">—</strong>
+        <small id="astronomy-rms-residual">—</small>
+      </div>
+      <div>
+        <span>Orbital parameters</span>
+        <div id="astronomy-orbit-readout">—</div>
+        <small>殘差定義：目標年「自春分起的節氣偏移」−基準年同一偏移。</small>
+      </div>
+      <div>
+        <span>Visual scale</span>
+        <strong id="astronomy-scale-readout">—</strong>
+        <small>基準節點在虛線弧；目標節點依殘差徑向偏移。正值向外、負值向內。</small>
+      </div>
+    </section>
+    <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
     <section class="closure-grid" aria-label="目前閉合狀態">
       <article data-closure="gregorian"><span>Gregorian frame</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
@@ -90,18 +112,19 @@
         <p>公曆每 400 年重複一次閏年配置，共 146,097 日；這在 60 日日序上等於偏移 57 格。要同時讓公曆骨架、60 年年序與 60 日日序都回到 0，相當於 60 個 400 年區塊，也就是 24,000 年；總日數 8,765,820 日，剛好也是 60 的倍數。</p>
       </div>
       <div>
-        <div class="eyebrow">Local ≠ global</div>
-        <h2>同一個日期可以更早撞回來。</h2>
-        <p>以 2026-09-13 為例，年序與日序在 1,980 年後就同時回到 0；但那時公曆的 400 年相位仍沒有回到原點，所以它只是「這個起點」的局部重遇，不是對所有日期都成立的全域週期。</p>
+        <div class="eyebrow">Exact ≠ astronomical</div>
+        <h2>齒輪全回來，不代表十二節也回來。</h2>
+        <p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。若 24,000 年後外圈仍有殘差，就代表月柱依賴的交節結構並沒有跟離散年／日週期一起閉合。</p>
       </div>
     </section>
 
     <details class="model-boundary">
-      <summary>模型邊界</summary>
-      <p>本頁使用向前外推的 proleptic Gregorian 規則與純整數模運算。它不處理立春瞬間、十二節、ΔT、地球軌道演化或歷史上實際使用哪一種曆法；這些屬於下一層 astronomical recurrence residual。</p>
+      <summary>模型邊界與來源</summary>
+      <p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把結果稱為遠未來精確節氣時刻。</p>
     </details>
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
+  <script type="module" src="./src/astronomical-residuals-view.js"></script>
 </body>
 </html>
