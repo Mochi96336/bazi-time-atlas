@@ -48,9 +48,17 @@ if (attr(instrument, "data-master-geometry") !== "shared-fan" || attr(instrument
 if (!desktop.dom.includes('id="kinetic-master-fan-clip"') || !desktop.dom.includes('id="kinetic-fan-layer"')) {
   throw new Error(`desktop: fan clip/wrapper missing from SVG DOM: ${desktop.url}`);
 }
-for (const id of ["hour-track", "year-track", "month-track", "day-track", "solar-track", "zodiac-track"]) {
+for (const id of ["hour-track", "day-track", "solar-track", "zodiac-track", "month-track", "year-track"]) {
   const tag = tagById(desktop.dom, id);
   if (attr(tag, "data-fan-clipped") !== "true") throw new Error(`desktop: ${id} is not under the shared fan guard: ${desktop.url}`);
+}
+const zodiacDesktop = tagById(desktop.dom, "zodiac-track");
+const solarDesktop = tagById(desktop.dom, "solar-track");
+if (attr(zodiacDesktop, "data-derived-from") !== "solar") {
+  throw new Error(`desktop: Zodiac is not owned by the annual Solar frame: ${desktop.url}`);
+}
+if (attr(zodiacDesktop, "transform") !== attr(solarDesktop, "transform")) {
+  throw new Error(`desktop: Zodiac and Solar do not share one annual transform: ${desktop.url}`);
 }
 
 const center = requireAttr(instrument, "data-geometry-center", "desktop", desktop.url).split(",").map(Number);
@@ -76,9 +84,9 @@ if (outerRadius < 1100 || radiusRatio < 0.55) throw new Error(`desktop: disk cur
 const outerTopInView = center[1] - outerRadius - cameraY;
 const innerTopInView = center[1] - innerRadius - cameraY;
 if (outerTopInView < 70 || outerTopInView > 180 || innerTopInView <= outerTopInView || innerTopInView > 700) {
-  throw new Error(`desktop: six-ring stack is not fully framed (outerTop=${outerTopInView}, innerTop=${innerTopInView}, cameraY=${cameraY}): ${desktop.url}`);
+  throw new Error(`desktop: radial scale stack is not fully framed (outerTop=${outerTopInView}, innerTop=${innerTopInView}, cameraY=${cameraY}): ${desktop.url}`);
 }
-console.log(`[kinetic-composition] PASS desktop shared six-ring giant-disk geometry; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}, camera=${cameraMode}@${cameraZoom} box=${cameraX},${cameraY},${cameraWidth},${cameraHeight}: ${desktop.url}`);
+console.log(`[kinetic-composition] PASS desktop five-primary-ring radial hierarchy + annual overlay; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}: ${desktop.url}`);
 
 const mobile = dump("scripts/fixtures/mobile-390.html", 500, 844);
 const probe = tagById(mobile.dom, "probe");
@@ -118,8 +126,14 @@ if (Math.abs(mobileCameraX - 339.13) > 0.02 || Math.abs(mobileCameraY - 58) > 0.
 if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelTransform !== "matrix(1, 0, 0, 1, 0, 0)")) {
   throw new Error(`mobile: CSS still owns wheel zoom (widthRatio=${wheelWidthRatio}, transform=${wheelTransform}): ${mobile.url}`);
 }
-if (ringHitMask !== "111111") throw new Error(`mobile: not all six ring midpoints are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}; debug=${ringHitDebug}): ${mobile.url}`);
-console.log(`[kinetic-composition] PASS true 390px six-ring composition; instrument share=${share}, camera=${mobileCameraMode}@${mobileCameraZoom}, wheelWidth=${wheelWidthRatio}, ringHits=${ringHitMask}: ${mobile.url}`);
+if (ringHitMask !== "11111") throw new Error(`mobile: not all five primary time rings are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}; debug=${ringHitDebug}): ${mobile.url}`);
+if (requireAttr(probe, "data-zodiac-derived-from", "mobile", mobile.url) !== "solar" || requireAttr(probe, "data-zodiac-transform-matches-solar", "mobile", mobile.url) !== "true") {
+  throw new Error(`mobile: Zodiac escaped the shared annual Solar transform: ${mobile.url}`);
+}
+if (requireAttr(probe, "data-zodiac-pointer-events", "mobile", mobile.url) !== "none") {
+  throw new Error(`mobile: derived Zodiac overlay became an independent pointer target: ${mobile.url}`);
+}
+console.log(`[kinetic-composition] PASS true 390px five-ring composition + derived Zodiac overlay; instrument share=${share}, ringHits=${ringHitMask}: ${mobile.url}`);
 
 const hour = dump("scripts/fixtures/mobile-390.html?exerciseHourDrag=1", 500, 844);
 const hourProbe = tagById(hour.dom, "probe");
@@ -160,7 +174,7 @@ if (!hourPillarBefore || !hourPillarAfter || hourPillarBefore === hourPillarAfte
 if (Math.abs(hourSolarAfter - hourSolarBefore) < 0.02) {
   throw new Error(`hour-drag: coupled solar layer did not move over two hours (${hourSolarBefore} -> ${hourSolarAfter}): ${hour.url}`);
 }
-console.log(`[kinetic-composition] PASS linked hour-ring scrub; master=${hourInstantBefore}->${hourInstantAfter}, hour=${hourPillarBefore}->${hourPillarAfter}, model=${hourModelBefore}->${hourModelAfter}: ${hour.url}`);
+console.log(`[kinetic-composition] PASS linked hour-ring scrub: ${hour.url}`);
 
 const linked = dump("scripts/fixtures/mobile-390.html?exerciseLinkedDrag=1", 500, 844);
 const linkedProbe = tagById(linked.dom, "probe");
@@ -191,12 +205,12 @@ if (Math.abs((linkedDayModelAfter - linkedDayModelBefore) - 6) > 0.01) {
   throw new Error(`linked-drag: day model should advance visually +6° (${linkedDayModelBefore} -> ${linkedDayModelAfter}): ${linked.url}`);
 }
 if (Math.abs(linkedDayOffsetBefore) > 1e-6 || Math.abs(linkedDayOffsetAfter) > 1e-6 || linkedDayState !== "true") {
-  throw new Error(`linked-drag: normal scrub must stay linked with zero manual offset (before=${linkedDayOffsetBefore}, after=${linkedDayOffsetAfter}, linked=${linkedDayState}): ${linked.url}`);
+  throw new Error(`linked-drag: normal scrub must stay linked with zero manual offset: ${linked.url}`);
 }
 if (Math.abs(linkedSolarModelAfter - linkedSolarModelBefore) < 0.5) {
-  throw new Error(`linked-drag: coupled solar layer did not move with master time (${linkedSolarModelBefore} -> ${linkedSolarModelAfter}): ${linked.url}`);
+  throw new Error(`linked-drag: coupled solar layer did not move with master time: ${linked.url}`);
 }
-console.log(`[kinetic-composition] PASS linked day-ring scrub; master=${linkedInstantBefore}->${linkedInstantAfter}, day=${linkedDayModelBefore}->${linkedDayModelAfter}, solar=${linkedSolarModelBefore}->${linkedSolarModelAfter}: ${linked.url}`);
+console.log(`[kinetic-composition] PASS linked day-ring scrub: ${linked.url}`);
 
 const drag = dump("scripts/fixtures/mobile-390.html?exerciseDrag=1", 500, 844);
 const dragProbe = tagById(drag.dom, "probe");
@@ -214,6 +228,6 @@ if (draggedRing !== "day") throw new Error(`drag: expected day ring, got ${dragg
 if (![modelBefore, modelAfter, offsetAfter, offsetReset].every(Number.isFinite)) throw new Error(`drag: non-finite pose diagnostics: ${drag.url}`);
 if (Math.abs(modelAfter - modelBefore) > 1e-6) throw new Error(`drag: manual drag mutated model rotation (${modelBefore} -> ${modelAfter}): ${drag.url}`);
 if (Math.abs(offsetAfter - 12) > 0.01) throw new Error(`drag: +10° free gesture should release onto the 12° day-ring detent, got ${offsetAfter}: ${drag.url}`);
-if (linkedAfter !== "false" || detachedAfter !== "day" || !statusAfter.includes("日")) throw new Error(`drag: detached state was not explicit (linked=${linkedAfter}, detached=${detachedAfter}, status=${statusAfter}): ${drag.url}`);
-if (Math.abs(offsetReset) > 1e-6 || linkedReset !== "true") throw new Error(`drag: reset did not relink day ring (offset=${offsetReset}, linked=${linkedReset}): ${drag.url}`);
-console.log(`[kinetic-composition] PASS independent day-ring detent; model=${modelBefore}, snappedManual=${offsetAfter.toFixed(3)}°, reset=${offsetReset}: ${drag.url}`);
+if (linkedAfter !== "false" || detachedAfter !== "day" || !statusAfter.includes("日")) throw new Error(`drag: detached state was not explicit: ${drag.url}`);
+if (Math.abs(offsetReset) > 1e-6 || linkedReset !== "true") throw new Error(`drag: reset did not relink day ring: ${drag.url}`);
+console.log(`[kinetic-composition] PASS independent day-ring detent: ${drag.url}`);
