@@ -112,7 +112,6 @@ h1 { margin: 8px 0 8px; max-width: 850px; font-size: clamp(38px, 5.3vw, 76px); l
 .ring-zodiac i { background: var(--zodiac); }
 
 #kinetic-wheel { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.ring-track { transform-origin: 600px 850px; }
 .cycle-sector { stroke: rgba(14,18,16,.72); stroke-width: 1.2; transition: fill 140ms ease, opacity 140ms ease; }
 .year-sector { fill: color-mix(in srgb, var(--year) 17%, transparent); }
 .month-sector { fill: color-mix(in srgb, var(--month) 18%, transparent); }
@@ -216,7 +215,6 @@ body.legacy-projection .legacy-note { display: block; }
   .ring-legend-row { grid-template-columns: 7px 44px minmax(46px, auto); gap: 6px; }
   .ring-legend-row span { font-size: 8px; }
   .ring-legend-row strong { font-size: 10px; }
-  #kinetic-wheel { width: 132%; left: -16%; }
   .timeline-dock { grid-template-columns: 1fr; gap: 10px; }
   .timeline-status { text-align: left; display: flex; gap: 8px; align-items: baseline; }
   .state-strip { grid-template-columns: repeat(3, 1fr); }
@@ -231,7 +229,6 @@ body.legacy-projection .legacy-note { display: block; }
   .instrument-shell { min-height: 570px; }
   .control-button, .scale-button { min-height: 32px; padding: 0 10px; font-size: 10px; }
   .ring-legend { top: 92px; }
-  #kinetic-wheel { width: 154%; left: -27%; }
   .instrument-readout { bottom: 14px; }
   #instant-readout { font-size: 17px; }
   .readout-meta { font-size: 9px; gap: 5px 10px; }
