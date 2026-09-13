@@ -3,7 +3,8 @@ export const CURSOR_ANGLE = -90;
 export const FAN = Object.freeze({ start: -170, end: -10 });
 
 export const RADII = Object.freeze({
-  inner: 760,
+  inner: 686,
+  hourOuter: 760,
   yearOuter: 834,
   monthOuter: 908,
   dayOuter: 982,
@@ -13,6 +14,7 @@ export const RADII = Object.freeze({
 
 export const GUIDE_RADII = Object.freeze([
   RADII.inner,
+  RADII.hourOuter,
   RADII.yearOuter,
   RADII.monthOuter,
   RADII.dayOuter,
@@ -30,9 +32,20 @@ function ring(definition) {
 
 export const RINGS = Object.freeze([
   ring({
+    id: "hour",
+    groupId: "hour-track",
+    innerRadius: RADII.inner,
+    outerRadius: RADII.hourOuter,
+    phaseKind: "sexagenary",
+    phaseSource: "hour-pillar",
+    steps: 60,
+    snapDegrees: 6,
+    className: "hour-sector"
+  }),
+  ring({
     id: "year",
     groupId: "year-track",
-    innerRadius: RADII.inner,
+    innerRadius: RADII.hourOuter,
     outerRadius: RADII.yearOuter,
     phaseKind: "sexagenary",
     phaseSource: "year-pillar",
@@ -87,7 +100,7 @@ export const RINGS = Object.freeze([
   })
 ]);
 
-export const SEXAGENARY_RING_IDS = Object.freeze(["year", "month", "day"]);
+export const SEXAGENARY_RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
 export const TRACK_IDS = Object.freeze(RINGS.map(ring => ring.groupId));
 
 export function ringModel(id) {
@@ -95,7 +108,7 @@ export function ringModel(id) {
 }
 
 export function assertWheelModel() {
-  if (RINGS.length !== 5) throw new Error("wheel must contain exactly five primary rings");
+  if (RINGS.length !== 6) throw new Error("wheel must contain exactly six primary rings");
   if (new Set(RINGS.map(ring => ring.id)).size !== RINGS.length) throw new Error("ring ids must be unique");
   if (new Set(RINGS.map(ring => ring.groupId)).size !== RINGS.length) throw new Error("ring group ids must be unique");
 
