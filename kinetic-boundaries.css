@@ -65,6 +65,11 @@
   text-align: center;
 }
 
+/* The SVG groups already receive rotate(angle cx cy) with the master center.
+   Reset the old 600/850 CSS transform-origin from the pre-giant-disk layout;
+   keeping both would apply a second, stale pivot and throw rings off-axis. */
+.ring-track { transform-origin: 0 0; }
+
 /* The three sexagenary rings were mathematically adjacent but visually merged
    into the background. Keep the palette restrained while making each band a
    real readable layer of the same instrument. */
@@ -199,7 +204,8 @@
   }
   .readout-meta,
   .boundary-meta,
-  .legacy-note { display: none; }
+  .legacy-note,
+  body.legacy-projection .legacy-note { display: none; }
 
   .timeline-dock,
   .state-strip,
