@@ -1,4 +1,4 @@
-export const REFERENCE_RING_IDS = Object.freeze(["hour", "year", "month", "day", "solar"]);
+export const REFERENCE_RING_IDS = Object.freeze(["hour", "day", "solar", "month", "year"]);
 
 export function validReferenceRing(id) {
   return REFERENCE_RING_IDS.includes(id);
