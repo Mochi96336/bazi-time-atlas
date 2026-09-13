@@ -54,11 +54,11 @@ const hiddenDragAfter = Number(attr(probe, "data-hidden-drag-after"));
 const dayOffset = Number(attr(probe, "data-day-offset"));
 
 if (innerWidth !== 390) throw new Error(`visibility: fixture is not true 390px (innerWidth=${innerWidth}): ${url}`);
-if (initialVisible !== 6) throw new Error(`visibility: expected six visible rings initially, got ${initialVisible}: ${url}`);
+if (initialVisible !== 5) throw new Error(`visibility: expected five primary time layers initially, got ${initialVisible}: ${url}`);
 if (attr(probe, "data-hidden-pressed") !== "false" || attr(probe, "data-hidden-track") !== "true" || attr(probe, "data-hidden-trace") !== "true" || attr(probe, "data-hidden-display") !== "none") {
   throw new Error(`visibility: Day toggle did not hide track and trace cleanly: ${url}`);
 }
-if (attr(probe, "data-hidden-list") !== "day" || hiddenVisible !== 5) {
+if (attr(probe, "data-hidden-list") !== "day" || hiddenVisible !== 4) {
   throw new Error(`visibility: hidden-ring diagnostics disagree (hidden=${attr(probe, "data-hidden-list")}, visible=${hiddenVisible}): ${url}`);
 }
 if (![instantBefore, instantAfterStep, modelBefore, modelAfterStep, hiddenTraceDelta, hiddenDragBefore, hiddenDragAfter, dayOffset].every(Number.isFinite)) {
@@ -82,7 +82,7 @@ if (attr(probe, "data-restored-pressed") !== "true" || attr(probe, "data-restore
 if (attr(probe, "data-restored-trace-visible") !== "false") {
   throw new Error(`visibility: restoring Day exposed a trace from hidden-time motion: ${url}`);
 }
-if (attr(probe, "data-restored-hidden-list") !== "" || restoredVisible !== 6) {
+if (attr(probe, "data-restored-hidden-list") !== "" || restoredVisible !== 5) {
   throw new Error(`visibility: restored diagnostics disagree (hidden=${attr(probe, "data-restored-hidden-list")}, visible=${restoredVisible}): ${url}`);
 }
 if (Math.abs(dayOffset) > 1e-6 || attr(probe, "data-day-linked") !== "true") {
@@ -92,4 +92,4 @@ if (attr(probe, "data-day-role") !== "button" || attr(probe, "data-day-tab-index
   throw new Error(`visibility: legend toggle is not keyboard reachable: ${url}`);
 }
 
-console.log(`[ring-visibility] PASS true 390px hide/update/isolate/restore; Day model ${modelBefore}->${modelAfterStep}, hidden trace baseline ${hiddenTraceDelta}°, master +${DAY_MS}ms: ${url}`);
+console.log(`[ring-visibility] PASS true 390px five-primary-layer hide/update/isolate/restore; Day model ${modelBefore}->${modelAfterStep}: ${url}`);

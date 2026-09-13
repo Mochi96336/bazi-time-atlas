@@ -67,8 +67,8 @@
   text-align: center;
 }
 
-/* Four adjacent sexagenary state wheels. The hour ring extends inward, so the
-   already-stable year/month/day/solar/zodiac world radii stay unchanged. */
+/* Four sexagenary state wheels surround one shared annual coordinate band:
+   Hour/Day inside, Month/Year outside. Radial position therefore carries scale. */
 .ring-hour i { background: var(--hour); }
 .hour-track { color: var(--hour); }
 .hour-sector { fill: color-mix(in srgb, var(--hour) 18%, transparent); }
@@ -134,8 +134,8 @@
   outline-offset: 2px;
 }
 
-/* Motion traces exist only while a phase actually moves. Discrete pillar wheels
-   use a broken tooth-like stroke; astronomical/derived longitude stays smooth. */
+/* Motion traces exist only while a primary time layer actually moves. Discrete
+   pillar wheels use a broken tooth-like stroke; continuous Solar stays smooth. */
 #motion-layer { pointer-events: none; }
 .motion-trace {
   fill: none;
@@ -154,17 +154,15 @@
 .motion-month { stroke: var(--month); }
 .motion-day { stroke: var(--day); }
 .motion-solar { stroke: var(--solar); }
-.motion-zodiac { stroke: var(--zodiac); }
 
 /* Pointer feedback is transient: the resting atlas remains unchanged. The
-   controller exposes the geometrically hit-tested ring instead of CSS guessing
-   from DOM bounds, so camera zoom and mobile crops do not change the target. */
+   controller exposes the geometrically hit-tested primary ring instead of CSS
+   guessing from DOM bounds, so camera zoom/mobile crops do not change targets. */
 #kinetic-wheel[data-hover-ring="hour"] #hour-track .cycle-sector,
 #kinetic-wheel[data-hover-ring="year"] #year-track .cycle-sector,
 #kinetic-wheel[data-hover-ring="month"] #month-track .cycle-sector,
 #kinetic-wheel[data-hover-ring="day"] #day-track .cycle-sector,
-#kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
-#kinetic-wheel[data-hover-ring="zodiac"] #zodiac-track .zodiac-sector {
+#kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector {
   stroke: rgba(238, 242, 237, .27);
 }
 
@@ -172,8 +170,7 @@
 #kinetic-wheel[data-active-ring="year"] #year-track .cycle-sector,
 #kinetic-wheel[data-active-ring="month"] #month-track .cycle-sector,
 #kinetic-wheel[data-active-ring="day"] #day-track .cycle-sector,
-#kinetic-wheel[data-active-ring="solar"] #solar-track .term-sector,
-#kinetic-wheel[data-active-ring="zodiac"] #zodiac-track .zodiac-sector {
+#kinetic-wheel[data-active-ring="solar"] #solar-track .term-sector {
   stroke: rgba(244, 230, 183, .58);
   stroke-width: 1.65;
 }

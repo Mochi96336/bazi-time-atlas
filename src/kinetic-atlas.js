@@ -55,6 +55,9 @@ const state = {
 };
 
 const ringStates = Object.fromEntries(RINGS.map(ring => [ring.id, createRingState(ring.id)]));
+// Zodiac remains a rendered layer for independent Free Compare pose only; it is
+// no longer a primary radial hit target or independent time coordinate.
+ringStates.zodiac = createRingState("zodiac");
 const cycleRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, { lastIndex: null }]));
 const linkedDragRemainders = Object.fromEntries(RINGS.map(ring => [ring.id, 0]));
 let lastSolarLongitude = null;
@@ -108,6 +111,7 @@ function renderRingPose(id) {
 
 function renderAllRingPoses() {
   RINGS.forEach(ring => renderRingPose(ring.id));
+  renderRingPose("zodiac");
 }
 
 function alignCycleRing(id, index) {
@@ -271,7 +275,7 @@ function updateReadout(display) {
   setText("year-active", yearName);
   setText("month-active", monthName);
   setText("day-active", pillars.day.name);
-  setText("solar-active", `${activeTerm.name} ${longitude.toFixed(1)}°`);
+  setText("solar-active", `${activeTerm.name} · ${activeZodiac.name} · ${longitude.toFixed(1)}°`);
   setText("zodiac-active", activeZodiac.name);
   setText("state-year", yearName);
   setText("state-month", monthName);
@@ -304,9 +308,9 @@ function updateReadout(display) {
 function updateWheel() {
   currentDisplay = resolveDisplayState();
   alignCycleRing("hour", currentDisplay.hourIndex);
-  alignCycleRing("year", currentDisplay.yearIndex);
-  alignCycleRing("month", currentDisplay.monthIndex);
   alignCycleRing("day", currentDisplay.dayIndex);
+  alignCycleRing("month", currentDisplay.monthIndex);
+  alignCycleRing("year", currentDisplay.yearIndex);
   alignLongitudeTracks(currentDisplay.longitude);
   renderAllRingPoses();
   updateReadout(currentDisplay);
@@ -336,6 +340,7 @@ function stopPlayback() {
 
 function resetAllRingOffsets() {
   RINGS.forEach(ring => resetManualOffset(ringStates[ring.id]));
+  resetManualOffset(ringStates.zodiac);
   renderAllRingPoses();
   updateCompareUi();
 }

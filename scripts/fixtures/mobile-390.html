@@ -34,37 +34,6 @@
       return Number.isFinite(value) ? Number(value.toFixed(digits)) : null;
     }
 
-    function activePathDiagnostic(childWindow, doc, svg, center, radii, index, trackId, expectedClass, screenPoint) {
-      const track = doc.querySelector(`#${trackId}`);
-      const active = track?.querySelector(`.${expectedClass}.is-active`) ?? track?.querySelector(".is-active");
-      const style = active ? childWindow.getComputedStyle(active) : null;
-      const bbox = active?.getBoundingClientRect?.();
-      let inFill = false;
-      let localPoint = null;
-      try {
-        if (active?.isPointInFill && active.getScreenCTM()) {
-          const inverse = active.getScreenCTM().inverse();
-          localPoint = new childWindow.DOMPoint(screenPoint.x, screenPoint.y).matrixTransform(inverse);
-          inFill = active.isPointInFill(localPoint);
-        }
-      } catch {}
-      return {
-        track:trackId,
-        transform:track?.getAttribute("transform") ?? "none",
-        sectors:track?.querySelectorAll(`.${expectedClass}`).length ?? 0,
-        activeClass:active?.getAttribute("class") ?? "none",
-        fill:style?.fill ?? "none",
-        opacity:style?.opacity ?? "none",
-        visibility:style?.visibility ?? "none",
-        display:style?.display ?? "none",
-        pointerEvents:style?.pointerEvents ?? "none",
-        bbox:bbox ? [safeNumber(bbox.left), safeNumber(bbox.top), safeNumber(bbox.width), safeNumber(bbox.height)] : null,
-        sampleRadius:safeNumber((radii[index] + radii[index + 1]) / 2),
-        localPoint:localPoint ? [safeNumber(localPoint.x), safeNumber(localPoint.y)] : null,
-        inFill
-      };
-    }
-
     function ringGeometry(childWindow, doc, instrument) {
       const svg = doc.querySelector("#kinetic-wheel");
       const ctm = svg?.getScreenCTM();
@@ -83,34 +52,39 @@
 
     function ringHitDiagnostic(childWindow, doc, instrument) {
       const geometry = ringGeometry(childWindow, doc, instrument);
-      if (!geometry) return { mask:"000000", classes:"geometry-unavailable", debug:"geometry-unavailable" };
-      const { svg, ctm, center, radii } = geometry;
+      if (!geometry) return { mask:"00000", classes:"geometry-unavailable", debug:"geometry-unavailable" };
+      const { ctm, center, radii } = geometry;
+      // Five primary time targets. Interval 3 (916–982) is the non-interactive
+      // Zodiac overlay inside Solar and intentionally has no separate hit target.
       const expected = [
-        { track:"hour-track", className:"hour-sector" },
-        { track:"year-track", className:"year-sector" },
-        { track:"month-track", className:"month-sector" },
-        { track:"day-track", className:"day-sector" },
-        { track:"solar-track", className:"term-sector" },
-        { track:"zodiac-track", className:"zodiac-sector" }
+        { interval:0, className:"hour-sector", id:"hour" },
+        { interval:1, className:"day-sector", id:"day" },
+        { interval:2, className:"term-sector", id:"solar" },
+        { interval:4, className:"month-sector", id:"month" },
+        { interval:5, className:"year-sector", id:"year" }
       ];
       const angle = -89 * Math.PI / 180;
-      const hits = expected.map((item, index) => {
-        const radius = (radii[index] + radii[index + 1]) / 2;
+      const hits = expected.map(item => {
+        const radius = (radii[item.interval] + radii[item.interval + 1]) / 2;
         const svgPoint = new childWindow.DOMPoint(center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius);
         const screenPoint = svgPoint.matrixTransform(ctm);
-        const stack = doc.elementsFromPoint(screenPoint.x, screenPoint.y)
-          .slice(0, 8)
-          .map(node => node.getAttribute?.("class") || node.id || node.tagName || "unknown");
         const hit = doc.elementFromPoint(screenPoint.x, screenPoint.y);
+        const stack = doc.elementsFromPoint(screenPoint.x, screenPoint.y)
+          .slice(0, 6)
+          .map(node => node.getAttribute?.("class") || node.id || node.tagName || "unknown");
         return {
+          id:item.id,
           ok:Boolean(hit?.classList?.contains(item.className)),
           className:hit?.getAttribute?.("class") ?? hit?.tagName ?? "none",
           stack,
-          screen:[safeNumber(screenPoint.x), safeNumber(screenPoint.y)],
-          active:activePathDiagnostic(childWindow, doc, svg, center, radii, index, item.track, item.className, screenPoint)
+          radius:safeNumber(radius)
         };
       });
-      return { mask:hits.map(hit => hit.ok ? "1" : "0").join(""), classes:hits.map(hit => hit.className).join(" | "), debug:JSON.stringify(hits) };
+      return {
+        mask:hits.map(hit => hit.ok ? "1" : "0").join(""),
+        classes:hits.map(hit => hit.className).join(" | "),
+        debug:JSON.stringify(hits)
+      };
     }
 
     function pointerAt(childWindow, geometry, radius, angleDegrees, type, pointerId = 71) {
@@ -172,7 +146,7 @@
       const solarTrack = doc.querySelector("#solar-track");
       if (!geometry || !dayTrack || !solarTrack || instrument?.dataset.scrubMode !== "linked-time") return;
       linkedDragExercised = true;
-      const radius = (geometry.radii[3] + geometry.radii[4]) / 2;
+      const radius = (geometry.radii[1] + geometry.radii[2]) / 2;
       const instantBefore = Number(instrument.dataset.selectedInstantMs);
       const dayModelBefore = Number(dayTrack.dataset.modelRotation);
       const solarModelBefore = Number(solarTrack.dataset.modelRotation);
@@ -202,7 +176,7 @@
       const dayTrack = doc.querySelector("#day-track");
       if (!geometry || !compareButton || !resetButton || !dayTrack) return;
       dragExercised = true;
-      const radius = (geometry.radii[3] + geometry.radii[4]) / 2;
+      const radius = (geometry.radii[1] + geometry.radii[2]) / 2;
       const modelBefore = Number(dayTrack.dataset.modelRotation);
       compareButton.click();
       geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -90, "pointerdown"));
@@ -232,6 +206,8 @@
       if (!childWindow || !doc) return;
       const instrument = doc.querySelector("#kinetic-instrument");
       const svg = doc.querySelector("#kinetic-wheel");
+      const solarTrack = doc.querySelector("#solar-track");
+      const zodiacTrack = doc.querySelector("#zodiac-track");
       const instrumentRect = instrument?.getBoundingClientRect();
       const svgRect = svg?.getBoundingClientRect();
       const scrollHeight = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
@@ -263,6 +239,11 @@
       probe.dataset.ringHitMask = ringHits.mask;
       probe.dataset.ringHitClasses = ringHits.classes;
       probe.dataset.ringHitDebug = ringHits.debug;
+      probe.dataset.zodiacDerivedFrom = zodiacTrack?.dataset.derivedFrom ?? "";
+      probe.dataset.zodiacPointerEvents = zodiacTrack ? childWindow.getComputedStyle(zodiacTrack).pointerEvents : "";
+      probe.dataset.zodiacTransformMatchesSolar = String(
+        Boolean(solarTrack && zodiacTrack && solarTrack.getAttribute("transform") === zodiacTrack.getAttribute("transform"))
+      );
       probe.dataset.target = frame.src;
       exerciseLinkedHourDrag(childWindow, doc, instrument);
       exerciseLinkedDayDrag(childWindow, doc, instrument);

@@ -58,7 +58,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     GUIDE_RADII.forEach(radius => {
       el("path", {
         d: arcPath(WHEEL_CENTER, radius, FAN.start, FAN.end),
-        class: "guide-arc"
+        class: `guide-arc${radius === RADII.solarTermOuter ? " annual-subdivide" : ""}`
       }, guides);
     });
   }
@@ -135,12 +135,14 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   }
 
   function renderSolarRing() {
+    const model = ringModel("solar");
+    solarTrack.classList.add("ring-track", "solar-track", "annual-coordinate-band");
     solarTerms.forEach((term, index) => {
       const path = el("path", {
         d: annularSectorPath(
           WHEEL_CENTER,
-          RADII.dayOuter,
-          RADII.solarOuter,
+          model.innerRadius,
+          RADII.solarTermOuter,
           term.longitude + .15,
           term.longitude + 15 - .15
         ),
@@ -150,8 +152,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       addTitle(path, `${term.name} · ${term.longitude}°`);
       termSectorNodes.push(path);
 
-      const markInner = polar(RADII.dayOuter, term.longitude);
-      const markOuter = polar(term.kind === "jie" ? RADII.solarOuter : RADII.solarOuter - 12, term.longitude);
+      const markInner = polar(model.innerRadius, term.longitude);
+      const markOuter = polar(term.kind === "jie" ? RADII.solarTermOuter : RADII.solarTermOuter - 12, term.longitude);
       el("line", {
         x1: markInner.x,
         y1: markInner.y,
@@ -160,7 +162,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         class: `term-mark ${term.kind}`
       }, solarTrack);
 
-      const labelPoint = polar(term.kind === "jie" ? RADII.solarOuter - 32 : RADII.solarOuter - 44, term.longitude + 7.5);
+      const labelPoint = polar(term.kind === "jie" ? RADII.solarTermOuter - 32 : RADII.solarTermOuter - 44, term.longitude + 7.5);
       const label = el("text", {
         x: labelPoint.x,
         y: labelPoint.y,
@@ -172,12 +174,14 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   }
 
   function renderZodiacRing() {
+    const model = ringModel("zodiac");
+    zodiacTrack.classList.add("annual-coordinate-overlay", "zodiac-overlay");
     zodiacSigns.forEach((sign, index) => {
       const path = el("path", {
         d: annularSectorPath(
           WHEEL_CENTER,
-          RADII.solarOuter,
-          RADII.zodiacOuter,
+          model.innerRadius,
+          model.outerRadius,
           sign.start + .15,
           sign.end - .15
         ),
@@ -188,7 +192,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       zodiacSectorNodes.push(path);
 
       const angle = sign.start + 15;
-      const point = polar((RADII.solarOuter + RADII.zodiacOuter) / 2, angle);
+      const point = polar((model.innerRadius + model.outerRadius) / 2, angle);
       const label = el("text", {
         x: point.x,
         y: point.y,
@@ -297,6 +301,17 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       renderedRotations.set(ring.id, renderedRotation);
     });
 
+    // Zodiac is a classification overlay inside the annual solar coordinate band,
+    // so it inherits Solar's world/reference transform instead of owning one.
+    const solarWorldRotation = worldRotations.get("solar");
+    const solarRenderedRotation = renderedRotations.get("solar");
+    if (Number.isFinite(solarWorldRotation) && Number.isFinite(solarRenderedRotation)) {
+      zodiacTrack.setAttribute("transform", rotationTransform(solarRenderedRotation, WHEEL_CENTER));
+      zodiacTrack.dataset.worldRotation = solarWorldRotation.toFixed(4);
+      zodiacTrack.dataset.renderedRotation = solarRenderedRotation.toFixed(4);
+      zodiacTrack.dataset.derivedFrom = "solar";
+    }
+
     RINGS.forEach(ring => {
       const renderedRotation = renderedRotations.get(ring.id);
       if (Number.isFinite(renderedRotation)) updateMotionTrace(ring.id, renderedRotation, cursorAngle);
@@ -312,15 +327,15 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
   function renderCursor() {
     const inner = polar(RADII.inner - 12, CURSOR_ANGLE);
-    const outer = polar(RADII.zodiacOuter + 12, CURSOR_ANGLE);
+    const outer = polar(RADII.outer + 12, CURSOR_ANGLE);
     el("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-halo" }, cursorLayer);
     el("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-line" }, cursorLayer);
-    const cap = polar(RADII.zodiacOuter + 21, CURSOR_ANGLE);
+    const cap = polar(RADII.outer + 21, CURSOR_ANGLE);
     el("path", {
       d: `M ${cap.x - 6} ${cap.y - 1} L ${cap.x + 6} ${cap.y - 1} L ${cap.x} ${cap.y + 10} Z`,
       class: "cursor-cap"
     }, cursorLayer);
-    const label = polar(RADII.zodiacOuter + 40, CURSOR_ANGLE);
+    const label = polar(RADII.outer + 40, CURSOR_ANGLE);
     const text = el("text", { x: label.x, y: label.y, class: "cursor-note" }, cursorLayer);
     text.textContent = "SELECTED INSTANT";
   }
@@ -342,14 +357,17 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
   function setSolarRingPose(rotationDegrees, solarLongitude) {
     worldRotations.set("solar", rotationDegrees);
-    setActiveSector(termSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 15) % 24);
+    const normalized = ((solarLongitude % 360) + 360) % 360;
+    setActiveSector(termSectorNodes, Math.floor(normalized / 15) % 24);
+    setActiveSector(zodiacSectorNodes, Math.floor(normalized / 30) % 12);
     scheduleReferenceFrameFlush();
   }
 
-  function setZodiacRingPose(rotationDegrees, solarLongitude) {
-    worldRotations.set("zodiac", rotationDegrees);
-    setActiveSector(zodiacSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 30) % 12);
-    scheduleReferenceFrameFlush();
+  // Compatibility shim for callers during the radial-hierarchy migration. It
+  // updates only active Zodiac classification; transform ownership stays Solar.
+  function setZodiacRingPose(_rotationDegrees, solarLongitude) {
+    const normalized = ((solarLongitude % 360) + 360) % 360;
+    setActiveSector(zodiacSectorNodes, Math.floor(normalized / 30) % 12);
   }
 
   svg.addEventListener(REFERENCE_FRAME_EVENT, () => {

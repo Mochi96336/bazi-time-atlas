@@ -12,8 +12,8 @@ import { SVG_NS } from "./wheel/svg-renderer.js";
 const CLIP_ID = "kinetic-master-fan-clip";
 const WRAPPER_ID = "kinetic-fan-layer";
 const MOBILE_QUERY = "(max-width: 480px)";
-// Cursor label sits 40 world units outside the zodiac ring. Keep enough radial
-// headroom for it while still enforcing the same angular fan on cursor/traces.
+// Cursor label sits 40 world units outside the slowest outer ring. Keep enough
+// radial headroom while enforcing the same fixed angular fan on all overlays.
 const CLIP_MARGIN = 58;
 
 const svg = document.querySelector("#kinetic-wheel");
@@ -23,7 +23,7 @@ function applyResponsiveCamera() {
   if (!svg || !instrument) return null;
   const camera = responsiveInstrumentCamera({
     center: WHEEL_CENTER,
-    outerRadius: RADII.zodiacOuter,
+    outerRadius: RADII.outer,
     viewportWidth: window.innerWidth
   });
   svg.setAttribute("viewBox", viewBoxString(camera.viewBox));
@@ -65,7 +65,7 @@ function installMasterFanClip() {
   }
   clipPath.setAttribute(
     "d",
-    fanSectorPath(WHEEL_CENTER, RADII.zodiacOuter + CLIP_MARGIN, FAN.start, FAN.end)
+    fanSectorPath(WHEEL_CENTER, RADII.outer + CLIP_MARGIN, FAN.start, FAN.end)
   );
 
   let wrapper = svg.querySelector(`#${WRAPPER_ID}`);
@@ -104,8 +104,8 @@ function installMasterFanClip() {
   instrument.dataset.geometryFanStart = FAN.start.toFixed(3);
   instrument.dataset.geometryFanEnd = FAN.end.toFixed(3);
   instrument.dataset.geometryInnerRadius = RADII.inner.toFixed(3);
-  instrument.dataset.geometryOuterRadius = RADII.zodiacOuter.toFixed(3);
-  instrument.dataset.geometryRadiusRatio = (RADII.inner / RADII.zodiacOuter).toFixed(4);
+  instrument.dataset.geometryOuterRadius = RADII.outer.toFixed(3);
+  instrument.dataset.geometryRadiusRatio = (RADII.inner / RADII.outer).toFixed(4);
   return true;
 }
 

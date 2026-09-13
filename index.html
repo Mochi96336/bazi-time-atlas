@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="./kinetic-atlas.css">
   <link rel="stylesheet" href="./kinetic-boundaries.css">
   <link rel="stylesheet" href="./discrete-phase.css">
+  <link rel="stylesheet" href="./radial-hierarchy.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -26,9 +27,9 @@
       <div class="atlas-intro-copy">
         <div class="eyebrow">One instant · multiple clocks</div>
         <h1>同一個時間，<br>每一層跑得不一樣。</h1>
-        <p class="lede">把年柱、月柱、日柱、時柱、太陽黃經與熱帶黃道接成同一台時間儀器。直接拖任一層會推動同一個時間：連續層滑動，離散層在自己的真實邊界跳格；重點不是「結果卡片」，而是看它們如何同步、錯位與重新相遇。</p>
+        <p class="lede">把時、日、太陽年度座標、月與年依時間尺度由內向外接成一台儀器。越內圈越快、越外圈越慢；節氣與熱帶黃道共用同一個太陽黃經年度座標，不再假裝是兩個獨立時鐘。</p>
       </div>
-      <p class="atlas-principle">固定的徑向線代表同一個選定瞬間。所有圓環都必須穿過它，但沒有任何一層被強迫使用同一個速度或同一種週期。</p>
+      <p class="atlas-principle">固定的徑向線代表同一個選定瞬間。所有時間層都穿過它；半徑現在同時表示尺度：短週期靠內，長週期靠外。</p>
     </section>
 
     <section id="kinetic-instrument" class="instrument-shell" aria-label="多速時間圓盤">
@@ -46,21 +47,20 @@
 
       <div class="ring-legend" aria-hidden="true">
         <div class="ring-legend-row ring-hour"><i></i><span>時柱</span><strong id="hour-active">—</strong></div>
-        <div class="ring-legend-row ring-year"><i></i><span>年柱</span><strong id="year-active">—</strong></div>
-        <div class="ring-legend-row ring-month"><i></i><span>月柱</span><strong id="month-active">—</strong></div>
         <div class="ring-legend-row ring-day"><i></i><span>日柱</span><strong id="day-active">—</strong></div>
-        <div class="ring-legend-row ring-solar"><i></i><span>節氣</span><strong id="solar-active">—</strong></div>
-        <div class="ring-legend-row ring-zodiac"><i></i><span>黃道</span><strong id="zodiac-active">—</strong></div>
+        <div class="ring-legend-row ring-solar"><i></i><span>年度座標</span><strong id="solar-active">—</strong></div>
+        <div class="ring-legend-row ring-month"><i></i><span>月柱</span><strong id="month-active">—</strong></div>
+        <div class="ring-legend-row ring-year"><i></i><span>年柱</span><strong id="year-active">—</strong></div>
       </div>
 
-      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="年、月、日、時干支、節氣與熱帶黃道的巨大扇形時間圓盤">
+      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="由內向外依時間尺度排列的時、日、太陽年度座標、月、年扇形時間圓盤">
         <g id="guide-layer"></g>
         <g id="hour-track"></g>
-        <g id="year-track"></g>
-        <g id="month-track"></g>
         <g id="day-track"></g>
         <g id="solar-track"></g>
         <g id="zodiac-track"></g>
+        <g id="month-track"></g>
+        <g id="year-track"></g>
         <g id="cursor-layer"></g>
       </svg>
 
@@ -106,15 +106,15 @@
     <section class="atlas-notes">
       <div>
         <div class="eyebrow">How to read it</div>
-        <h2>不是六個圓餅圖，是六個相接的時間座標。</h2>
-        <p>時、年、月、日四層都是六十甲子的狀態輪；目前成立的干支會被固定游標切中。時輪每兩小時跳一格，是最容易看見速度差的高速內環；日輪每日跳格，月輪只在精確「節」界換格，年輪在立春瞬間換格。太陽層則使用真實視黃經連續旋轉，熱帶黃道只是同一個 0°–360° 座標上的固定分區。</p>
+        <h2>半徑就是尺度：越外圈，時間越大。</h2>
+        <p>時柱 60 格約五天一圈，日柱 60 格是六十天；中間的年度座標以太陽黃經連續走完一年，內列標 24 節氣、外列標 12 個熱帶黃道區段。再往外是約五年才走完 60 格的月柱，最外層則是 60 年一圈的年柱。五個時間層仍由同一 Selected Instant 驅動，但不再用歷史實作順序排列。</p>
       </div>
       <div>
         <div class="eyebrow">Current frontier</div>
         <ul>
           <li><a href="./recurrence.html">Recurrence lab 已能拆開精確離散閉合、天文殘差、近回歸與四柱可判定性。</a></li>
           <li>主圓盤已具相對參考系、格內真實進度與「只有時間戳完全相同才亮起」的共享邊界。</li>
-          <li>下一個硬問題是來源可追溯的絕對節氣 epoch／ephemeris pipeline，補上深時間 Day／Hour proof chain，而不是把近似模型當成排盤真值。</li>
+          <li>下一個盤面工作會讓 48 小時 / 一年 / 60 年 preset 改變閱讀 emphasis，而不是再改真實時間語意。</li>
           <li><a href="./docs/current-status.md">目前實作狀態</a> · <a href="./docs/kinetic-atlas-plan.md">原始 redesign plan</a></li>
         </ul>
       </div>
@@ -122,7 +122,7 @@
 
     <details class="sources-panel">
       <summary>資料與規則邊界</summary>
-      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列，時柱沿十二個雙時辰推進。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只作固定 30° 分區，不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
+      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列，時柱沿十二個雙時辰推進。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只是同一太陽黃經年度座標上的固定 30° 分類，不是另一個時間環，也不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
     </details>
   </main>
 

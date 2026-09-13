@@ -2,24 +2,28 @@ export const WHEEL_CENTER = Object.freeze({ x: 600, y: 1360 });
 export const CURSOR_ANGLE = -90;
 export const FAN = Object.freeze({ start: -170, end: -10 });
 
+// Radial position now carries temporal meaning: fast / short cycles live inside,
+// slow / long cycles live outside. Solar longitude owns one annual coordinate
+// band; zodiac is only a derived classification overlay inside that same band.
 export const RADII = Object.freeze({
   inner: 686,
   hourOuter: 760,
-  yearOuter: 834,
-  monthOuter: 908,
-  dayOuter: 982,
-  solarOuter: 1072,
-  zodiacOuter: 1182
+  dayOuter: 834,
+  solarTermOuter: 916,
+  solarOuter: 982,
+  monthOuter: 1072,
+  yearOuter: 1182,
+  outer: 1182
 });
 
 export const GUIDE_RADII = Object.freeze([
   RADII.inner,
   RADII.hourOuter,
-  RADII.yearOuter,
-  RADII.monthOuter,
   RADII.dayOuter,
+  RADII.solarTermOuter,
   RADII.solarOuter,
-  RADII.zodiacOuter
+  RADII.monthOuter,
+  RADII.yearOuter
 ]);
 
 function ring(definition) {
@@ -40,40 +44,20 @@ export const RINGS = Object.freeze([
     phaseSource: "hour-pillar",
     steps: 60,
     snapDegrees: 6,
-    className: "hour-sector"
-  }),
-  ring({
-    id: "year",
-    groupId: "year-track",
-    innerRadius: RADII.hourOuter,
-    outerRadius: RADII.yearOuter,
-    phaseKind: "sexagenary",
-    phaseSource: "year-pillar",
-    steps: 60,
-    snapDegrees: 6,
-    className: "year-sector"
-  }),
-  ring({
-    id: "month",
-    groupId: "month-track",
-    innerRadius: RADII.yearOuter,
-    outerRadius: RADII.monthOuter,
-    phaseKind: "sexagenary",
-    phaseSource: "month-pillar",
-    steps: 60,
-    snapDegrees: 6,
-    className: "month-sector"
+    className: "hour-sector",
+    cycleScale: "~5 days"
   }),
   ring({
     id: "day",
     groupId: "day-track",
-    innerRadius: RADII.monthOuter,
+    innerRadius: RADII.hourOuter,
     outerRadius: RADII.dayOuter,
     phaseKind: "sexagenary",
     phaseSource: "day-pillar",
     steps: 60,
     snapDegrees: 6,
-    className: "day-sector"
+    className: "day-sector",
+    cycleScale: "60 days"
   }),
   ring({
     id: "solar",
@@ -84,31 +68,58 @@ export const RINGS = Object.freeze([
     phaseSource: "solar-longitude",
     steps: 24,
     snapDegrees: 15,
-    className: "term-sector"
+    className: "term-sector",
+    cycleScale: "1 year"
   }),
   ring({
-    id: "zodiac",
-    groupId: "zodiac-track",
+    id: "month",
+    groupId: "month-track",
     innerRadius: RADII.solarOuter,
-    outerRadius: RADII.zodiacOuter,
-    phaseKind: "derived",
-    phaseSource: "solar-longitude",
-    linkedPhaseId: "solar",
-    steps: 12,
-    snapDegrees: 30,
-    className: "zodiac-sector"
+    outerRadius: RADII.monthOuter,
+    phaseKind: "sexagenary",
+    phaseSource: "month-pillar",
+    steps: 60,
+    snapDegrees: 6,
+    className: "month-sector",
+    cycleScale: "~5 years"
+  }),
+  ring({
+    id: "year",
+    groupId: "year-track",
+    innerRadius: RADII.monthOuter,
+    outerRadius: RADII.yearOuter,
+    phaseKind: "sexagenary",
+    phaseSource: "year-pillar",
+    steps: 60,
+    snapDegrees: 6,
+    className: "year-sector",
+    cycleScale: "60 years"
   })
 ]);
 
-export const SEXAGENARY_RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
-export const TRACK_IDS = Object.freeze(RINGS.map(ring => ring.groupId));
+export const ZODIAC_OVERLAY = Object.freeze({
+  id: "zodiac",
+  groupId: "zodiac-track",
+  innerRadius: RADII.solarTermOuter,
+  outerRadius: RADII.solarOuter,
+  phaseKind: "derived",
+  phaseSource: "solar-longitude",
+  linkedPhaseId: "solar",
+  steps: 12,
+  snapDegrees: 30,
+  className: "zodiac-sector"
+});
+
+export const SEXAGENARY_RING_IDS = Object.freeze(["hour", "day", "month", "year"]);
+export const TRACK_IDS = Object.freeze([...RINGS.map(ring => ring.groupId), ZODIAC_OVERLAY.groupId]);
 
 export function ringModel(id) {
+  if (id === ZODIAC_OVERLAY.id) return ZODIAC_OVERLAY;
   return RINGS.find(ring => ring.id === id) ?? null;
 }
 
 export function assertWheelModel() {
-  if (RINGS.length !== 6) throw new Error("wheel must contain exactly six primary rings");
+  if (RINGS.length !== 5) throw new Error("wheel must contain exactly five primary time rings");
   if (new Set(RINGS.map(ring => ring.id)).size !== RINGS.length) throw new Error("ring ids must be unique");
   if (new Set(RINGS.map(ring => ring.groupId)).size !== RINGS.length) throw new Error("ring group ids must be unique");
 
@@ -119,8 +130,12 @@ export function assertWheelModel() {
     }
   });
 
-  if (RINGS[0].innerRadius !== RADII.inner || RINGS.at(-1).outerRadius !== RADII.zodiacOuter) {
+  if (RINGS[0].innerRadius !== RADII.inner || RINGS.at(-1).outerRadius !== RADII.outer) {
     throw new Error("ring envelope must match canonical wheel radii");
+  }
+  if (!(RINGS.find(ring => ring.id === "solar").innerRadius < ZODIAC_OVERLAY.innerRadius
+    && ZODIAC_OVERLAY.outerRadius === RINGS.find(ring => ring.id === "solar").outerRadius)) {
+    throw new Error("zodiac overlay must remain inside the shared annual solar band");
   }
   return true;
 }
