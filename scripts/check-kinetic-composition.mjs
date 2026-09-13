@@ -98,6 +98,8 @@ const hidden = requireAttr(probe, "data-secondary-hidden", "mobile", mobile.url)
 const share = Number(requireAttr(probe, "data-instrument-share", "mobile", mobile.url));
 const scrollHeight = Number(requireAttr(probe, "data-scroll-height", "mobile", mobile.url));
 const viewportHeight = Number(requireAttr(probe, "data-viewport-height", "mobile", mobile.url));
+const ringHitMask = requireAttr(probe, "data-ring-hit-mask", "mobile", mobile.url);
+const ringHitClasses = requireAttr(probe, "data-ring-hit-classes", "mobile", mobile.url);
 if (actualWidth !== 390 || mediaMatched !== "true") {
   throw new Error(`mobile: fixture is not a true 390px CSS viewport (innerWidth=${actualWidth}, match=${mediaMatched}): ${mobile.url}`);
 }
@@ -109,4 +111,7 @@ if (!Number.isFinite(share) || share < 0.70) {
 if (attr(probe, "data-fan-clip") !== "active" || attr(probe, "data-master-geometry") !== "shared-fan") {
   throw new Error(`mobile: shared fan geometry inactive inside 390px fixture: ${mobile.url}`);
 }
-console.log(`[kinetic-composition] PASS true 390px first viewport; instrument share=${share}, scroll=${scrollHeight}/${viewportHeight}: ${mobile.url}`);
+if (ringHitMask !== "11111") {
+  throw new Error(`mobile: not all five ring midpoints are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}): ${mobile.url}`);
+}
+console.log(`[kinetic-composition] PASS true 390px first viewport; instrument share=${share}, scroll=${scrollHeight}/${viewportHeight}, ringHits=${ringHitMask}: ${mobile.url}`);
