@@ -55,6 +55,20 @@ captures.push(
     height: 1800,
   },
   {
+    name: "recurrence-near-best-risk-1440x1450.png",
+    page: "recurrence-near-best-risk",
+    path: "recurrence.html?date=2026-09-13&delta=792000",
+    width: 1440,
+    height: 1450,
+  },
+  {
+    name: "recurrence-near-best-risk-390x1750.png",
+    page: "recurrence-near-best-risk",
+    path: "recurrence.html?date=2026-09-13&delta=792000",
+    width: 390,
+    height: 1750,
+  },
+  {
     name: "birth-ten-gods-1440x1400.png",
     page: "birth-ten-gods",
     path: "birth.html?tenGod=1",

@@ -43,13 +43,59 @@
 .astronomy-term-cell.positive strong { color:#cba77c; }
 .astronomy-term-cell.negative strong { color:#89aebc; }
 
+.month-boundary-exposure {
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:minmax(0,1.65fr) minmax(150px,.55fr) minmax(170px,.65fr);
+  gap:16px;
+  align-items:end;
+  padding:15px 2px 16px;
+  border-top:1px solid var(--hairline);
+  border-bottom:1px solid var(--hairline);
+}
+.month-boundary-copy h3 { margin:5px 0 6px; font-size:17px; line-height:1.2; letter-spacing:-.018em; font-weight:650; }
+.month-boundary-copy p { margin:0; max-width:760px; color:#79847c; font-size:9px; line-height:1.68; }
+.month-boundary-stat span { display:block; color:#68736b; font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
+.month-boundary-stat strong { display:block; margin-top:4px; color:#d7ddd8; font-size:16px; }
+.month-boundary-stat small { display:block; margin-top:2px; color:#707a73; font-size:8px; line-height:1.4; }
+.month-boundary-window-grid {
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:5px;
+  margin-top:2px;
+}
+.month-boundary-window { min-width:0; }
+.month-boundary-window > span { display:block; color:#67716a; font-size:8px; text-align:center; }
+.month-boundary-window > i {
+  position:relative;
+  display:block;
+  height:4px;
+  margin:5px 0 4px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(238,242,237,.055);
+}
+.month-boundary-window > i > b { display:block; width:var(--window-width); height:100%; border-radius:inherit; }
+.month-boundary-window.target-later > i > b { background:#c59a6e; }
+.month-boundary-window.target-earlier > i > b { background:#779daa; }
+.month-boundary-window.aligned > i > b { background:#7b867f; }
+.month-boundary-window > strong { display:block; color:#8c968f; font-size:8px; text-align:center; white-space:nowrap; }
+
 @media (max-width:820px) {
   .astronomy-term-label.minor { display:none; }
   .astronomy-panel { grid-template-columns:1fr; }
   .astronomy-term-grid { grid-template-columns:repeat(6,1fr); }
+  .month-boundary-exposure { grid-template-columns:1fr 1fr; }
+  .month-boundary-copy { grid-column:1 / -1; }
+  .month-boundary-window-grid { grid-template-columns:repeat(6,1fr); row-gap:9px; }
 }
 
 @media (max-width:480px) {
   .astronomy-term-grid { grid-template-columns:repeat(4,1fr); }
   .astronomy-panel strong { font-size:16px; }
+  .month-boundary-exposure { gap:10px; }
+  .month-boundary-copy h3 { font-size:15px; }
+  .month-boundary-window-grid { grid-template-columns:repeat(4,1fr); }
+  .month-boundary-stat strong { font-size:14px; }
 }
