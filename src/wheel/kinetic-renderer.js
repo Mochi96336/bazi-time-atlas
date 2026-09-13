@@ -184,6 +184,13 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
     const delta = rotationDegrees - previous;
     node.dataset.lastDelta = delta.toFixed(4);
+    if (node.dataset.layerHidden === "true") {
+      node.classList.remove("is-visible");
+      const priorTimer = motionTimers.get(id);
+      if (priorTimer) clearTimeout(priorTimer);
+      motionTimers.delete(id);
+      return;
+    }
     if (Math.abs(delta) < MOTION_TRACE_MIN_DEGREES) return;
 
     const model = ringModel(id);

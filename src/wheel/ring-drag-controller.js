@@ -28,6 +28,11 @@ export function ringAtWorldPoint(point) {
   return RINGS.find(ring => radius >= ring.innerRadius && radius <= ring.outerRadius) ?? null;
 }
 
+function ringIsVisible(svg, ringId) {
+  const hidden = (svg.dataset.hiddenRings ?? "").split(",").filter(Boolean);
+  return !hidden.includes(ringId);
+}
+
 export function createRingDragController({
   svg,
   ringStates,
@@ -63,7 +68,7 @@ export function createRingDragController({
       return;
     }
     const ring = ringAtWorldPoint(world);
-    setHoverRing(ring?.draggable ? ring.id : null);
+    setHoverRing(ring?.draggable && ringIsVisible(svg, ring.id) ? ring.id : null);
   }
 
   function setCompareMode(enabled) {
@@ -79,7 +84,7 @@ export function createRingDragController({
     const world = screenToWorld(svg, event.clientX, event.clientY);
     if (!world) return;
     const ring = ringAtWorldPoint(world);
-    if (!ring?.draggable) return;
+    if (!ring?.draggable || !ringIsVisible(svg, ring.id)) return;
     const state = ringStates[ring.id];
     if (!state) return;
 

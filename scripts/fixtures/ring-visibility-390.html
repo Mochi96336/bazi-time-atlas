@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px ring visibility harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px ring visibility probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const DAY_MS = 86_400_000;
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    let exercised = false;
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    function ringGeometry(childWindow, doc, instrument) {
+      const svg = doc.querySelector("#kinetic-wheel");
+      const ctm = svg?.getScreenCTM();
+      const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
+      if (!svg || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value))) return null;
+      const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
+        .map(path => {
+          const point = path.getPointAtLength(0);
+          return Math.hypot(point.x - center[0], point.y - center[1]);
+        })
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (radii.length !== 7) return null;
+      return { svg, ctm, center, radii };
+    }
+
+    function pointerAt(childWindow, geometry, radius, angleDegrees, type, pointerId = 121) {
+      const angle = angleDegrees * Math.PI / 180;
+      const world = new childWindow.DOMPoint(
+        geometry.center[0] + Math.cos(angle) * radius,
+        geometry.center[1] + Math.sin(angle) * radius
+      );
+      const screen = world.matrixTransform(geometry.ctm);
+      return new childWindow.PointerEvent(type, {
+        bubbles:true,
+        cancelable:true,
+        pointerId,
+        pointerType:"touch",
+        isPrimary:true,
+        button:0,
+        buttons:type === "pointerup" ? 0 : 1,
+        clientX:screen.x,
+        clientY:screen.y
+      });
+    }
+
+    function snapshot() {
+      if (exercised) return;
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!childWindow || !doc) return;
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const dayToggle = doc.querySelector('[data-ring-toggle="day"]');
+      const dayTrack = doc.querySelector("#day-track");
+      const dayTrace = doc.querySelector('[data-motion-ring="day"]');
+      const slider = doc.querySelector("#time-slider");
+      const geometry = ringGeometry(childWindow, doc, instrument);
+      if (!instrument || !dayToggle || !dayTrack || !dayTrace || !slider || !geometry) return;
+      if (!dayTrack.dataset.modelRotation || instrument.dataset.visibleRingCount !== "6") return;
+
+      exercised = true;
+      probe.dataset.innerWidth = String(childWindow.innerWidth);
+      probe.dataset.initialVisibleCount = instrument.dataset.visibleRingCount ?? "";
+      const instantBefore = Number(instrument.dataset.selectedInstantMs);
+      const modelBefore = Number(dayTrack.dataset.modelRotation);
+
+      dayToggle.click();
+      probe.dataset.hiddenPressed = dayToggle.getAttribute("aria-pressed") ?? "";
+      probe.dataset.hiddenTrack = dayTrack.dataset.layerHidden ?? "";
+      probe.dataset.hiddenTrace = dayTrace.dataset.layerHidden ?? "";
+      probe.dataset.hiddenDisplay = childWindow.getComputedStyle(dayTrack).display;
+      probe.dataset.hiddenList = instrument.dataset.hiddenRings ?? "";
+      probe.dataset.hiddenVisibleCount = instrument.dataset.visibleRingCount ?? "";
+
+      slider.value = "1";
+      slider.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
+      const instantAfterStep = Number(instrument.dataset.selectedInstantMs);
+      const modelAfterStep = Number(dayTrack.dataset.modelRotation);
+      probe.dataset.instantBefore = String(instantBefore);
+      probe.dataset.instantAfterStep = String(instantAfterStep);
+      probe.dataset.dayModelBefore = String(modelBefore);
+      probe.dataset.dayModelAfterStep = String(modelAfterStep);
+      probe.dataset.stepDeltaMs = String(instantAfterStep - instantBefore);
+      probe.dataset.hiddenModelDelta = String(modelAfterStep - modelBefore);
+      probe.dataset.hiddenTraceVisibleAfterStep = String(dayTrace.classList.contains("is-visible"));
+      probe.dataset.hiddenTraceDelta = dayTrace.dataset.lastDelta ?? "";
+
+      const hiddenDragBefore = Number(instrument.dataset.selectedInstantMs);
+      const dayRadius = (geometry.radii[3] + geometry.radii[4]) / 2;
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, dayRadius, -90, "pointerdown"));
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, dayRadius, -83.5, "pointermove"));
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, dayRadius, -83.5, "pointerup"));
+      const hiddenDragAfter = Number(instrument.dataset.selectedInstantMs);
+      probe.dataset.hiddenDragBefore = String(hiddenDragBefore);
+      probe.dataset.hiddenDragAfter = String(hiddenDragAfter);
+      probe.dataset.hiddenDragRing = instrument.dataset.lastLinkedScrubRing ?? "";
+
+      dayToggle.click();
+      probe.dataset.restoredPressed = dayToggle.getAttribute("aria-pressed") ?? "";
+      probe.dataset.restoredTrack = dayTrack.dataset.layerHidden ?? "";
+      probe.dataset.restoredTrace = dayTrace.dataset.layerHidden ?? "";
+      probe.dataset.restoredTraceVisible = String(dayTrace.classList.contains("is-visible"));
+      probe.dataset.restoredDisplay = childWindow.getComputedStyle(dayTrack).display;
+      probe.dataset.restoredHiddenList = instrument.dataset.hiddenRings ?? "";
+      probe.dataset.restoredVisibleCount = instrument.dataset.visibleRingCount ?? "";
+      probe.dataset.dayOffset = dayTrack.dataset.manualOffset ?? "";
+      probe.dataset.dayLinked = dayTrack.dataset.linked ?? "";
+      probe.dataset.dayModelRestored = dayTrack.dataset.modelRotation ?? "";
+      probe.dataset.dayRole = dayToggle.getAttribute("role") ?? "";
+      probe.dataset.dayTabIndex = String(dayToggle.tabIndex);
+      probe.dataset.dayExpectedStepMs = String(DAY_MS);
+      probe.dataset.ready = "true";
+    }
+
+    frame.addEventListener("load", () => {
+      snapshot();
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 100);
+      setTimeout(snapshot, 400);
+      setTimeout(snapshot, 900);
+    });
+  </script>
+</body>
+</html>

@@ -26,6 +26,7 @@ jobs:
           node --check src/kinetic-atlas.js
           node --check src/kinetic-boundaries.js
           node --check src/kinetic-fan-guard.js
+          node --check src/ring-visibility-controls.js
           node --check src/recurrence-view.js
           node --check src/astronomical-residuals-view.js
           node --check src/four-pillar-determinacy-view.js
@@ -69,6 +70,7 @@ jobs:
           node --check scripts/check-mean-solar-preview.mjs
           node --check scripts/check-kinetic-boundaries.mjs
           node --check scripts/check-kinetic-composition.mjs
+          node --check scripts/check-ring-visibility.mjs
           node --check scripts/check-recurrence-lab.mjs
           node --check scripts/check-astronomical-residuals.mjs
           node --check scripts/check-four-pillar-determinacy.mjs
@@ -106,6 +108,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify master fan geometry and mobile composition
         run: node scripts/check-kinetic-composition.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify layer visibility isolation
+        run: node scripts/check-ring-visibility.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify discrete recurrence states

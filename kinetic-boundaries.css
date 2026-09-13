@@ -78,6 +78,26 @@
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 23%, transparent); }
 #guide-layer .guide-arc { stroke: rgba(238, 242, 237, .13); }
 
+/* Layer visibility changes only presentation. Hidden tracks keep receiving model
+   updates, so restoring a layer reveals its current phase rather than stale state. */
+#kinetic-wheel [data-layer-hidden="true"] { display: none; }
+.ring-legend-row[data-ring-toggle] {
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: opacity 140ms ease, background 140ms ease;
+}
+.ring-legend-row[data-ring-toggle]:hover,
+.ring-legend-row[data-ring-toggle]:focus-visible { background: rgba(255,255,255,.045); }
+.ring-legend-row[data-ring-toggle]:focus-visible {
+  outline: 1px solid var(--cursor);
+  outline-offset: 2px;
+}
+.ring-legend-row[data-ring-toggle][aria-pressed="false"] { opacity: .42; }
+.ring-legend-row[data-ring-toggle][aria-pressed="false"] strong { color: #778078; }
+
 /* Motion traces exist only while a phase actually moves. Discrete pillar wheels
    use a broken tooth-like stroke; astronomical/derived longitude stays smooth. */
 #motion-layer { pointer-events: none; }
