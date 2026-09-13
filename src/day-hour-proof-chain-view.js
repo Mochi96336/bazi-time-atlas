@@ -1,8 +1,10 @@
 import { currentRecurrenceDayHourProof } from "./recurrence/day-hour-proof-chain.js";
+import { seasonalEpochSourceAudit } from "./recurrence/seasonal-epoch-source-audit.js";
 
 const instrument = document.querySelector("#recurrence-instrument");
 const determinacyPanel = document.querySelector("#four-pillar-determinacy");
 let proofPanel = null;
+let epochAuditPanel = null;
 
 const STATUS_LABELS = Object.freeze({
   satisfied:"已有",
@@ -12,6 +14,13 @@ const STATUS_LABELS = Object.freeze({
   "unbound-convention":"尚未綁定",
   conditional:"條件式",
   "not-required":"不需要"
+});
+
+const AUDIT_STATUS_LABELS = Object.freeze({
+  "identity-bypass":"同一狀態 · 不需跨 epoch",
+  resolved:"已有可用 absolute-epoch source",
+  "qualified-source-not-integrated":"有合格 source coverage · app 尚未整合",
+  "absolute-phase-coverage-gap":"absolute-phase coverage gap"
 });
 
 function setText(id, value) {
@@ -51,6 +60,35 @@ function ensurePanel() {
   return panel;
 }
 
+function ensureEpochAuditPanel() {
+  const proof = ensurePanel();
+  if (epochAuditPanel?.isConnected) return epochAuditPanel;
+  if (!proof) return null;
+  const panel = document.createElement("section");
+  panel.id = "seasonal-epoch-source-audit";
+  panel.className = "epoch-audit-panel";
+  panel.setAttribute("aria-label", "絕對季節 epoch 的天文資料來源能力稽核");
+  panel.innerHTML = `
+    <div class="epoch-audit-head">
+      <div>
+        <div class="eyebrow">Absolute seasonal epoch · source audit</div>
+        <h2>覆蓋到那一年，不代表能給出那一年的絕對節氣時刻。</h2>
+        <p>這裡分開檢查年份 coverage、absolute orbital phase、連續動力時間 epoch 與 repo 整合狀態。長期軌道／insolation 參數可以描述季節幾何，但只有含絕對相位的 ephemeris 才能把春分／節氣放回時間軸。</p>
+      </div>
+      <div class="epoch-audit-summary">
+        <span>Target / verdict</span>
+        <strong id="epoch-audit-target">—</strong>
+        <small id="epoch-audit-verdict">—</small>
+      </div>
+    </div>
+    <div id="epoch-audit-sources" class="epoch-audit-sources"></div>
+    <div class="epoch-audit-foot" id="epoch-audit-footnote">—</div>
+  `;
+  proof.insertAdjacentElement("afterend", panel);
+  epochAuditPanel = panel;
+  return panel;
+}
+
 function statusLabel(status) {
   return STATUS_LABELS[status] ?? status;
 }
@@ -86,13 +124,94 @@ function renderStage(stage) {
   return item;
 }
 
+function formatYear(year) {
+  return year >= 0 ? String(year) : `${Math.abs(year)} BCE*`;
+}
+
+function renderEpochSource(item) {
+  const article = document.createElement("article");
+  article.className = "epoch-audit-source";
+  article.dataset.epochSource = item.id;
+  article.dataset.coversTarget = String(item.coversTarget);
+  article.dataset.absoluteEpochCapable = String(item.absoluteEpochCapable);
+  article.dataset.implementedForEpoch = String(item.implementedForEpoch);
+  article.dataset.qualifiedCoverage = String(item.qualifiedCoverage);
+  article.dataset.reason = item.reason;
+
+  const coverage = `${formatYear(item.coverage.minYear)} → ${formatYear(item.coverage.maxYear)}`;
+  const verdict = item.usableNow
+    ? "可直接使用"
+    : item.qualifiedCoverage
+      ? "absolute phase ✓ · 尚未整合"
+      : item.coversTarget
+        ? "coverage ✓ · 缺 absolute phase"
+        : "超出 coverage";
+
+  article.innerHTML = `
+    <header><div><span>${item.authority}</span><strong>${item.label}</strong></div><b>${verdict}</b></header>
+    <div class="epoch-audit-facts">
+      <span><em>Coverage</em><strong>${coverage}</strong></span>
+      <span><em>Absolute phase</em><strong>${item.absoluteEpochCapable ? "yes" : "no"}</strong></span>
+      <span><em>In app</em><strong>${item.implementedForEpoch ? "yes" : "no"}</strong></span>
+    </div>
+    <p>${item.note}</p>
+  `;
+  return article;
+}
+
+function renderEpochAudit(baseYear, targetYear) {
+  const panel = ensureEpochAuditPanel();
+  if (!panel || !instrument) return;
+  const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
+  panel.querySelector("#epoch-audit-sources")?.replaceChildren(...audit.evaluations.map(renderEpochSource));
+  setText("epoch-audit-target", `${targetYear} · ${AUDIT_STATUS_LABELS[audit.status] ?? audit.status}`);
+  setText("epoch-audit-verdict", audit.identity
+    ? "Δ=0 不需要跨 epoch source。"
+    : audit.status === "qualified-source-not-integrated"
+      ? `JPL DE441 涵蓋目標年；目前 blocker 是工程整合，不是 coverage。`
+      : audit.status === "absolute-phase-coverage-gap"
+        ? `現有 registry 沒有同時涵蓋 ${targetYear} 且提供 absolute phase 的 source。`
+        : "absolute seasonal epoch source 已可用。"
+  );
+  const gap = audit.nearestAbsoluteBoundary;
+  setText("epoch-audit-footnote", gap && !audit.identity
+    ? `最近的 absolute ephemeris 邊界：${gap.sourceId} → ${formatYear(gap.boundaryYear)}；距目標 ${gap.gapYears.toLocaleString("en-US")} 年。長期 shape/parameter coverage 不會被當成 absolute timestamp coverage。`
+    : "source coverage 與 absolute-epoch capability 分開記錄。"
+  );
+
+  panel.dataset.ready = "true";
+  panel.dataset.baseYear = String(baseYear);
+  panel.dataset.targetYear = String(targetYear);
+  panel.dataset.auditStatus = audit.status;
+  panel.dataset.blocker = audit.blocker ?? "none";
+  panel.dataset.qualifiedSourceCount = String(audit.qualifiedSourceIds.length);
+  panel.dataset.usableSourceCount = String(audit.usableSourceIds.length);
+  panel.dataset.nearestAbsoluteBoundaryYear = gap ? String(gap.boundaryYear) : "none";
+  panel.dataset.nearestAbsoluteGapYears = gap ? String(gap.gapYears) : "none";
+
+  const de441 = audit.evaluations.find(item => item.id === "jpl-de441");
+  instrument.dataset.seasonalEpochAuditStatus = audit.status;
+  instrument.dataset.seasonalEpochAuditTargetYear = String(targetYear);
+  instrument.dataset.seasonalEpochDe441Covered = String(de441?.coversTarget ?? false);
+  instrument.dataset.seasonalEpochQualifiedSourceCount = String(audit.qualifiedSourceIds.length);
+  instrument.dataset.seasonalEpochNearestAbsoluteGapYears = gap ? String(gap.gapYears) : "none";
+}
+
+function parseBaseYear() {
+  const value = instrument?.dataset?.baseDate ?? "";
+  const match = /^(\d+)-/.exec(value);
+  return match ? Number(match[1]) : null;
+}
+
 function refresh() {
   const panel = ensurePanel();
   if (!panel || !instrument) return;
   const deltaYears = Number(instrument.dataset.deltaYears);
   const astronomyValidity = instrument.dataset.astronomyValidity;
-  if (!Number.isInteger(deltaYears) || !astronomyValidity) {
+  const baseYear = parseBaseYear();
+  if (!Number.isInteger(deltaYears) || !astronomyValidity || !Number.isInteger(baseYear)) {
     panel.dataset.ready = "false";
+    if (epochAuditPanel) epochAuditPanel.dataset.ready = "false";
     return;
   }
 
@@ -140,6 +259,8 @@ function refresh() {
   instrument.dataset.dayHourProofDayResolved = String(proof.day.resolved);
   instrument.dataset.dayHourProofHourResolved = String(proof.hour.resolved);
   instrument.dataset.dayHourProofStageCount = String(proof.stages.length);
+
+  renderEpochAudit(baseYear, baseYear + deltaYears);
 }
 
 let queued = false;
@@ -155,7 +276,7 @@ function scheduleRefresh() {
 if (instrument && determinacyPanel) {
   new MutationObserver(scheduleRefresh).observe(instrument, {
     attributes:true,
-    attributeFilter:["data-delta-years", "data-astronomy-validity"]
+    attributeFilter:["data-base-date", "data-delta-years", "data-astronomy-validity"]
   });
   scheduleRefresh();
 }
