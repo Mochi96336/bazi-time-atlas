@@ -72,7 +72,7 @@
       const slider = doc.querySelector("#time-slider");
       const geometry = ringGeometry(childWindow, doc, instrument);
       if (!instrument || !dayToggle || !dayTrack || !dayTrace || !slider || !geometry) return;
-      if (!dayTrack.dataset.modelRotation || instrument.dataset.visibleRingCount !== "6") return;
+      if (!dayTrack.dataset.modelRotation || instrument.dataset.visibleRingCount !== "5") return;
 
       exercised = true;
       probe.dataset.innerWidth = String(childWindow.innerWidth);
@@ -103,7 +103,7 @@
         probe.dataset.hiddenTraceDelta = dayTrace.dataset.lastDelta ?? "";
 
         const hiddenDragBefore = Number(instrument.dataset.selectedInstantMs);
-        const dayRadius = (geometry.radii[3] + geometry.radii[4]) / 2;
+        const dayRadius = (geometry.radii[1] + geometry.radii[2]) / 2;
         geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, dayRadius, -90, "pointerdown"));
         geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, dayRadius, -83.5, "pointermove"));
         geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, dayRadius, -83.5, "pointerup"));
