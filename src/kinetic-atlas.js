@@ -2,31 +2,28 @@ import { baziMonths, solarTerms, zodiacSigns } from "./data.js";
 import { apparentSolarLongitude } from "./astronomy/solar-longitude.js";
 import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
 import { monthPillarForYearStem } from "./calendar/five-tigers.js";
+import {
+  CURSOR_ANGLE,
+  FAN,
+  GUIDE_RADII,
+  RADII,
+  SEXAGENARY_RING_IDS,
+  WHEEL_CENTER,
+  assertWheelModel,
+  ringModel
+} from "./wheel/ring-model.js";
+import {
+  annularSectorPath as coreAnnularSectorPath,
+  arcPath as coreArcPath,
+  normalizeDegrees,
+  pointAt,
+  rotationTransform,
+  shortestAngleDelta
+} from "./wheel/polar-geometry.js";
+import { addTitle, setActiveSector, svgElement } from "./wheel/svg-renderer.js";
 
-const NS = "http://www.w3.org/2000/svg";
 const DAY_MS = 86_400_000;
 const UTC_OFFSET_HOURS = 8;
-const CX = 600;
-const CY = 1360;
-const CURSOR_ANGLE = -90;
-const FAN_START = -170;
-const FAN_END = -10;
-const RADII = Object.freeze({
-  inner: 760,
-  yearOuter: 834,
-  monthOuter: 908,
-  dayOuter: 982,
-  solarOuter: 1072,
-  zodiacOuter: 1182
-});
-const GUIDE_RADII = Object.freeze([
-  RADII.inner,
-  RADII.yearOuter,
-  RADII.monthOuter,
-  RADII.dayOuter,
-  RADII.solarOuter,
-  RADII.zodiacOuter
-]);
 
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -74,66 +71,38 @@ const state = {
   legacyProjection: null
 };
 
-const ringSpecs = {
-  year: { group: document.querySelector("#year-track"), inner: RADII.inner, outer: RADII.yearOuter, className: "year-sector" },
-  month: { group: document.querySelector("#month-track"), inner: RADII.yearOuter, outer: RADII.monthOuter, className: "month-sector" },
-  day: { group: document.querySelector("#day-track"), inner: RADII.monthOuter, outer: RADII.dayOuter, className: "day-sector" }
-};
+const ringSpecs = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => {
+  const model = ringModel(id);
+  return [id, {
+    ...model,
+    group: document.querySelector(`#${model.groupId}`),
+    inner: model.innerRadius,
+    outer: model.outerRadius
+  }];
+}));
 
 const ringRuntime = {};
-const solarTrack = document.querySelector("#solar-track");
-const zodiacTrack = document.querySelector("#zodiac-track");
+const solarTrack = document.querySelector(`#${ringModel("solar").groupId}`);
+const zodiacTrack = document.querySelector(`#${ringModel("zodiac").groupId}`);
 const termSectorNodes = [];
 const zodiacSectorNodes = [];
 let solarRotation = null;
 let lastSolarLongitude = null;
 
-function normalizeDegrees(value) {
-  return ((value % 360) + 360) % 360;
-}
-
 function polar(radius, angleDegrees) {
-  const angle = angleDegrees * Math.PI / 180;
-  return { x: CX + Math.cos(angle) * radius, y: CY + Math.sin(angle) * radius };
+  return pointAt(WHEEL_CENTER, radius, angleDegrees);
 }
 
 function annularSectorPath(inner, outer, startDegrees, endDegrees) {
-  let start = startDegrees;
-  let end = endDegrees;
-  while (end <= start) end += 360;
-  const span = end - start;
-  const largeArc = span > 180 ? 1 : 0;
-  const p1 = polar(outer, start);
-  const p2 = polar(outer, end);
-  const p3 = polar(inner, end);
-  const p4 = polar(inner, start);
-  return [
-    `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)}`,
-    `A ${outer} ${outer} 0 ${largeArc} 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`,
-    `L ${p3.x.toFixed(3)} ${p3.y.toFixed(3)}`,
-    `A ${inner} ${inner} 0 ${largeArc} 0 ${p4.x.toFixed(3)} ${p4.y.toFixed(3)}`,
-    "Z"
-  ].join(" ");
+  return coreAnnularSectorPath(WHEEL_CENTER, inner, outer, startDegrees, endDegrees);
 }
 
 function arcPath(radius, startDegrees, endDegrees) {
-  const p1 = polar(radius, startDegrees);
-  const p2 = polar(radius, endDegrees);
-  const span = ((endDegrees - startDegrees) % 360 + 360) % 360;
-  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${radius} ${radius} 0 ${span > 180 ? 1 : 0} 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`;
+  return coreArcPath(WHEEL_CENTER, radius, startDegrees, endDegrees);
 }
 
 function svgEl(tag, attrs = {}, parent = svg) {
-  const node = document.createElementNS(NS, tag);
-  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
-  parent.appendChild(node);
-  return node;
-}
-
-function addTitle(node, text) {
-  const title = document.createElementNS(NS, "title");
-  title.textContent = text;
-  node.appendChild(title);
+  return svgElement(tag, attrs, parent);
 }
 
 function ganzhiIndex(name) {
@@ -147,17 +116,10 @@ function shortestCycleDelta(nextIndex, previousIndex, size = 60) {
   return delta;
 }
 
-function shortestAngleDelta(nextAngle, previousAngle) {
-  let delta = normalizeDegrees(nextAngle) - normalizeDegrees(previousAngle);
-  if (delta > 180) delta -= 360;
-  if (delta < -180) delta += 360;
-  return delta;
-}
-
 function renderGuides() {
   const guides = document.querySelector("#guide-layer");
   GUIDE_RADII.forEach(radius => {
-    svgEl("path", { d: arcPath(radius, FAN_START, FAN_END), class: "guide-arc" }, guides);
+    svgEl("path", { d: arcPath(radius, FAN.start, FAN.end), class: "guide-arc" }, guides);
   });
 }
 
@@ -282,10 +244,6 @@ function renderCursor() {
   text.textContent = "SELECTED INSTANT";
 }
 
-function setActiveSector(nodes, index) {
-  nodes.forEach((node, nodeIndex) => node.classList.toggle("is-active", nodeIndex === index));
-}
-
 function alignCycleRing(key, index) {
   const runtime = ringRuntime[key];
   if (index < 0) return;
@@ -295,7 +253,7 @@ function alignCycleRing(key, index) {
     runtime.rotation -= shortestCycleDelta(index, runtime.lastIndex) * 6;
   }
   runtime.lastIndex = index;
-  runtime.group.setAttribute("transform", `rotate(${runtime.rotation.toFixed(4)} ${CX} ${CY})`);
+  runtime.group.setAttribute("transform", rotationTransform(runtime.rotation, WHEEL_CENTER));
   setActiveSector(runtime.sectors, index);
 }
 
@@ -306,7 +264,7 @@ function alignLongitudeTracks(longitude) {
     solarRotation -= shortestAngleDelta(longitude, lastSolarLongitude);
   }
   lastSolarLongitude = longitude;
-  const transform = `rotate(${solarRotation.toFixed(4)} ${CX} ${CY})`;
+  const transform = rotationTransform(solarRotation, WHEEL_CENTER);
   solarTrack.setAttribute("transform", transform);
   zodiacTrack.setAttribute("transform", transform);
   setActiveSector(termSectorNodes, Math.floor(normalizeDegrees(longitude) / 15) % 24);
@@ -604,6 +562,7 @@ function bindControls() {
 }
 
 function initialize() {
+  assertWheelModel();
   renderGuides();
   renderCycleRing("year");
   renderCycleRing("month");
