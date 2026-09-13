@@ -6,7 +6,7 @@ import {
   assertWheelModel
 } from "./wheel/ring-model.js";
 import { fanSectorPath } from "./wheel/polar-geometry.js";
-import { instrumentViewBox, viewBoxString } from "./wheel/camera.js";
+import { responsiveInstrumentCamera, viewBoxString } from "./wheel/camera.js";
 import { SVG_NS } from "./wheel/svg-renderer.js";
 
 const CLIP_ID = "kinetic-master-fan-clip";
@@ -16,6 +16,23 @@ const CLIP_MARGIN = 28;
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
+
+function applyResponsiveCamera() {
+  if (!svg || !instrument) return null;
+  const camera = responsiveInstrumentCamera({
+    center: WHEEL_CENTER,
+    outerRadius: RADII.zodiacOuter,
+    viewportWidth: window.innerWidth
+  });
+  svg.setAttribute("viewBox", viewBoxString(camera.viewBox));
+  instrument.dataset.geometryCameraMode = camera.mode;
+  instrument.dataset.geometryCameraZoom = camera.zoom.toFixed(4);
+  instrument.dataset.geometryCameraX = camera.viewBox.x.toFixed(3);
+  instrument.dataset.geometryCameraY = camera.viewBox.y.toFixed(3);
+  instrument.dataset.geometryCameraWidth = camera.viewBox.width.toFixed(3);
+  instrument.dataset.geometryCameraHeight = camera.viewBox.height.toFixed(3);
+  return camera;
+}
 
 function installMasterFanClip() {
   if (!svg || !instrument) return false;
@@ -62,11 +79,7 @@ function installMasterFanClip() {
     track.dataset.fanClipped = "true";
   });
 
-  const camera = instrumentViewBox({
-    center: WHEEL_CENTER,
-    outerRadius: RADII.zodiacOuter
-  });
-  svg.setAttribute("viewBox", viewBoxString(camera));
+  applyResponsiveCamera();
 
   instrument.dataset.masterGeometry = "shared-fan";
   instrument.dataset.fanClip = "active";
@@ -77,7 +90,6 @@ function installMasterFanClip() {
   instrument.dataset.geometryInnerRadius = RADII.inner.toFixed(3);
   instrument.dataset.geometryOuterRadius = RADII.zodiacOuter.toFixed(3);
   instrument.dataset.geometryRadiusRatio = (RADII.inner / RADII.zodiacOuter).toFixed(4);
-  instrument.dataset.geometryCameraY = camera.y.toFixed(3);
   return true;
 }
 
@@ -103,6 +115,7 @@ function recordCompositionDiagnostics() {
 }
 
 function refreshCompositionDiagnostics() {
+  applyResponsiveCamera();
   recordCompositionDiagnostics();
   queueMicrotask(recordCompositionDiagnostics);
   requestAnimationFrame(recordCompositionDiagnostics);
