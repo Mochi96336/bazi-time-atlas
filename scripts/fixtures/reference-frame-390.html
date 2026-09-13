@@ -42,9 +42,10 @@
       const solarRow = doc.querySelector('[data-ring-toggle="solar"]');
       const dayTrace = doc.querySelector('[data-motion-ring="day"]');
       const solarTrace = doc.querySelector('[data-motion-ring="solar"]');
+      const fanLayer = doc.querySelector("#kinetic-fan-layer");
       const motionLayer = doc.querySelector("#motion-layer");
       const cursorLayer = doc.querySelector("#cursor-layer");
-      if (!instrument || !svg || !select || !slider || !solarRow || !dayTrace || !solarTrace || !motionLayer || !cursorLayer) return;
+      if (!instrument || !svg || !select || !slider || !solarRow || !dayTrace || !solarTrace || !fanLayer || !motionLayer || !cursorLayer) return;
       if (RINGS.some(id => !Number.isFinite(rotation(doc, id)))) return;
       if (instrument.dataset.fanClip !== "active") return;
 
@@ -56,8 +57,11 @@
       probe.dataset.initialCursor = svg.dataset.referenceCursorAngle ?? "";
       probe.dataset.motionFanClipped = motionLayer.dataset.fanClipped ?? "";
       probe.dataset.cursorFanClipped = cursorLayer.dataset.fanClipped ?? "";
-      probe.dataset.motionClipPath = motionLayer.getAttribute("clip-path") ?? "";
-      probe.dataset.cursorClipPath = cursorLayer.getAttribute("clip-path") ?? "";
+      probe.dataset.motionClipOwner = motionLayer.dataset.fanClipOwner ?? "";
+      probe.dataset.cursorClipOwner = cursorLayer.dataset.fanClipOwner ?? "";
+      probe.dataset.motionParent = motionLayer.parentElement?.id ?? "";
+      probe.dataset.cursorParent = cursorLayer.parentElement?.id ?? "";
+      probe.dataset.fanWrapperClip = fanLayer.getAttribute("clip-path") ?? "";
       const instantBefore = num(instrument.dataset.selectedInstantMs);
       const dayModelBefore = num(doc.querySelector("#day-track").dataset.modelRotation);
       const dayRenderedBefore = rotation(doc, "day");
