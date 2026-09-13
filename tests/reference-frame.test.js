@@ -9,8 +9,8 @@ import {
   validReferenceRing
 } from "../src/wheel/reference-frame.js";
 
-test("reference-frame ring set excludes the derived zodiac duplicate", () => {
-  assert.deepEqual(REFERENCE_RING_IDS, ["hour", "year", "month", "day", "solar"]);
+test("reference-frame ring set follows radial temporal scale and excludes zodiac overlay", () => {
+  assert.deepEqual(REFERENCE_RING_IDS, ["hour", "day", "solar", "month", "year"]);
   for (const id of REFERENCE_RING_IDS) assert.equal(validReferenceRing(id), true);
   assert.equal(validReferenceRing("zodiac"), false);
   assert.equal(validReferenceRing("world"), false);
@@ -38,17 +38,15 @@ test("day reference freezes the day wheel and exposes relative drift", () => {
   assert.equal(rotationInReferenceFrame(rotations.get("solar"), offset), -37.486);
 });
 
-test("solar reference also freezes the derived zodiac longitude frame", () => {
+test("solar reference freezes the shared annual longitude frame", () => {
   const anchor = -30;
   const rotations = new Map([
     ["solar", -30.75],
-    ["zodiac", -30.75],
     ["day", -100]
   ]);
   const offset = referenceFrameOffset({ referenceId:"solar", anchorRotation:anchor, worldRotations:rotations });
   assert.equal(offset, -0.75);
   assert.equal(rotationInReferenceFrame(rotations.get("solar"), offset), -30);
-  assert.equal(rotationInReferenceFrame(rotations.get("zodiac"), offset), -30);
   assert.equal(rotationInReferenceFrame(rotations.get("day"), offset), -99.25);
 });
 
