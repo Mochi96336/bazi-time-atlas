@@ -4,13 +4,11 @@ import { arcPath, pointAt } from "./wheel/polar-geometry.js";
 
 const RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
 const PHASE_INSET_DEGREES = 0.45;
-const MAX_INITIALIZATION_FRAMES = 120;
 
 const instrument = document.querySelector("#kinetic-instrument");
 const svg = document.querySelector("#kinetic-wheel");
 let scheduled = false;
-let initializationFrames = 0;
-let initialized = false;
+let initializationObserver = null;
 
 function phaseNodes(id) {
   const group = document.querySelector(`#${id}-track`);
@@ -88,10 +86,10 @@ function renderPhase(id, activeIndexValue, phase) {
   group.dataset.phaseBoundaryKind = phase.boundaryKind;
 }
 
-function retryInitialization() {
-  if (initialized || initializationFrames >= MAX_INITIALIZATION_FRAMES) return;
-  initializationFrames += 1;
-  requestAnimationFrame(scheduleRefresh);
+function finishInitialization() {
+  initializationObserver?.disconnect();
+  initializationObserver = null;
+  if (instrument) instrument.dataset.discretePhaseInit = "ready";
 }
 
 function refresh() {
@@ -99,12 +97,10 @@ function refresh() {
   if (!instrument || !svg) return;
   const instantMs = Number(instrument.dataset.selectedInstantMs);
   if (!Number.isFinite(instantMs) || !phaseSlotsReady()) {
-    retryInitialization();
+    instrument.dataset.discretePhaseInit = "waiting-slots";
     return;
   }
 
-  initialized = true;
-  initializationFrames = 0;
   const phases = { ...discretePhaseWindows(instantMs) };
   // Legacy annual links can override the displayed month branch/longitude without
   // representing a complete physical instant. Do not attach a real-time month
@@ -114,6 +110,7 @@ function refresh() {
   for (const id of RING_IDS) renderPhase(id, activeIndex(id), phases[id]);
   instrument.dataset.discretePhaseMode = "true-boundaries";
   instrument.dataset.discretePhaseRings = RING_IDS.filter(id => phases[id]).join(",");
+  finishInitialization();
 }
 
 function scheduleRefresh() {
@@ -127,6 +124,19 @@ if (instrument && svg) {
     attributes:true,
     attributeFilter:["data-selected-instant-ms", "data-projection-mode"]
   });
+
+  // The view can be evaluated before the wheel renderer has appended all SVG
+  // slots or marked the first active sectors. Watch only that bootstrap phase;
+  // once all four discrete overlays render successfully, normal Selected Instant
+  // mutations are the sole update clock and this observer is disconnected.
+  initializationObserver = new MutationObserver(scheduleRefresh);
+  initializationObserver.observe(svg, {
+    childList:true,
+    subtree:true,
+    attributes:true,
+    attributeFilter:["class"]
+  });
+
+  instrument.dataset.discretePhaseInit = "waiting-slots";
   scheduleRefresh();
-  requestAnimationFrame(scheduleRefresh);
 }
