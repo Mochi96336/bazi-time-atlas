@@ -78,6 +78,28 @@
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 23%, transparent); }
 #guide-layer .guide-arc { stroke: rgba(238, 242, 237, .13); }
 
+/* Pointer feedback is transient: the resting atlas remains unchanged. The
+   controller exposes the geometrically hit-tested ring instead of CSS guessing
+   from DOM bounds, so camera zoom and mobile crops do not change the target. */
+#kinetic-wheel[data-hover-ring="hour"] #hour-track .cycle-sector,
+#kinetic-wheel[data-hover-ring="year"] #year-track .cycle-sector,
+#kinetic-wheel[data-hover-ring="month"] #month-track .cycle-sector,
+#kinetic-wheel[data-hover-ring="day"] #day-track .cycle-sector,
+#kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
+#kinetic-wheel[data-hover-ring="zodiac"] #zodiac-track .zodiac-sector {
+  stroke: rgba(238, 242, 237, .27);
+}
+
+#kinetic-wheel[data-active-ring="hour"] #hour-track .cycle-sector,
+#kinetic-wheel[data-active-ring="year"] #year-track .cycle-sector,
+#kinetic-wheel[data-active-ring="month"] #month-track .cycle-sector,
+#kinetic-wheel[data-active-ring="day"] #day-track .cycle-sector,
+#kinetic-wheel[data-active-ring="solar"] #solar-track .term-sector,
+#kinetic-wheel[data-active-ring="zodiac"] #zodiac-track .zodiac-sector {
+  stroke: rgba(244, 230, 183, .58);
+  stroke-width: 1.65;
+}
+
 @media (max-width: 820px) {
   .boundary-meta { justify-content: flex-start; text-align: left; }
   .boundary-marker i { display: none; }
