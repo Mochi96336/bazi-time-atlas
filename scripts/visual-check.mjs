@@ -11,6 +11,7 @@ const pages = [
   { key: "recurrence", path: "recurrence.html" },
   { key: "recurrence-local", path: "recurrence.html?date=2026-09-13&delta=1980" },
   { key: "recurrence-global", path: "recurrence.html?date=2026-09-13&delta=24000" },
+  { key: "recurrence-near-best", path: "recurrence.html?date=2026-09-13&delta=792000" },
   { key: "birth", path: "birth.html" },
   { key: "sexagenary", path: "sexagenary.html" },
 ];
