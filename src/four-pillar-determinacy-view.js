@@ -43,7 +43,7 @@ function renderPillar(name, pillar) {
   if (!card) return;
   card.dataset.status = pillar.status;
   card.dataset.resolved = String(pillar.resolved);
-  card.dataset.pureBoundaryAttribution = String(pillar.pureBoundaryAttribution);
+  card.dataset.determinacyPureBoundaryAttribution = String(pillar.pureBoundaryAttribution);
   if ("discretePhaseClosed" in pillar) {
     card.dataset.discretePhaseClosed = String(pillar.discretePhaseClosed);
   } else {
