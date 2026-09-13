@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>Cross-view shell regression fixture</title>
+  <style>
+    html, body { margin:0; width:1700px; min-height:2200px; background:#080b09; }
+    .frames { display:flex; flex-wrap:wrap; gap:8px; }
+    iframe { border:0; display:block; }
+    .mobile { width:390px; height:844px; }
+    .desktop { width:1200px; height:900px; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <div class="frames">
+    <iframe id="atlas-mobile" class="mobile" title="atlas mobile"></iframe>
+    <iframe id="recurrence-mobile" class="mobile" title="recurrence mobile"></iframe>
+    <iframe id="birth-mobile" class="mobile" title="birth mobile"></iframe>
+    <iframe id="sexagenary-mobile" class="mobile" title="sexagenary mobile"></iframe>
+    <iframe id="sexagenary-desktop" class="desktop" title="sexagenary desktop"></iframe>
+  </div>
+  <output id="probe" data-ready="false"></output>
+
+  <script>
+    const EXPECTED_NAV = ["時間圖譜", "回歸", "出生", "六十甲子"];
+    const probe = document.querySelector("#probe");
+    const specs = [
+      ["atlas-mobile", "../../"],
+      ["recurrence-mobile", "../../recurrence.html"],
+      ["birth-mobile", "../../birth.html"],
+      ["sexagenary-mobile", "../../sexagenary.html"],
+      ["sexagenary-desktop", "../../sexagenary.html"]
+    ];
+
+    const loaded = new Set();
+    let settleTimer = null;
+
+    function navLabels(doc) {
+      return [...doc.querySelectorAll(".site-nav a")].map(node => node.textContent.trim());
+    }
+
+    function surfaceToken(win, node) {
+      if (!node) return "missing";
+      const style = win.getComputedStyle(node);
+      return [style.backgroundColor, style.backgroundImage, style.borderColor].join("|");
+    }
+
+    function hidden(win, node) {
+      return !node || win.getComputedStyle(node).display === "none";
+    }
+
+    function capture() {
+      if (loaded.size !== specs.length) return;
+
+      const docs = Object.fromEntries(specs.map(([id]) => {
+        const frame = document.querySelector(`#${id}`);
+        return [id, [frame.contentWindow, frame.contentDocument]];
+      }));
+      if (Object.values(docs).some(([, doc]) => !doc?.body)) return;
+
+      const navMatches = {};
+      for (const [id, [win, doc]] of Object.entries(docs)) {
+        const labels = navLabels(doc);
+        navMatches[id] = labels.length === EXPECTED_NAV.length
+          && labels.every((label, index) => label === EXPECTED_NAV[index]);
+        probe.dataset[`${id.replaceAll("-", "")}Nav`] = labels.join("|");
+        probe.dataset[`${id.replaceAll("-", "")}Width`] = String(win.innerWidth);
+      }
+
+      const [birthWin, birthDoc] = docs["birth-mobile"];
+      const birthBody = birthDoc.body;
+      const controls = birthDoc.querySelector("#birth-form");
+      const stage = birthDoc.querySelector(".birth-stage");
+      const solar = birthDoc.querySelector("#mean-solar-preview");
+      const tenGodDerivation = birthDoc.querySelector("#ten-gods-derivation");
+      const relationOverview = birthDoc.querySelector("#relation-model-overview");
+      const fieldHint = birthDoc.querySelector(".field-hint");
+      const timeBasisNote = birthDoc.querySelector(".time-basis-note");
+
+      probe.dataset.birthColorScheme = birthWin.getComputedStyle(birthBody).colorScheme;
+      probe.dataset.birthPaper = birthWin.getComputedStyle(birthBody).getPropertyValue("--paper").trim();
+      probe.dataset.birthControlsTop = String(Math.round(controls?.getBoundingClientRect().top ?? -1));
+      probe.dataset.birthStageTop = String(Math.round(stage?.getBoundingClientRect().top ?? -1));
+      probe.dataset.birthFieldHintHidden = String(hidden(birthWin, fieldHint));
+      probe.dataset.birthTimeBasisHidden = String(hidden(birthWin, timeBasisNote));
+      probe.dataset.birthSolarSurface = surfaceToken(birthWin, solar);
+      probe.dataset.birthTenGodSurface = surfaceToken(birthWin, tenGodDerivation);
+      probe.dataset.birthRelationSurface = surfaceToken(birthWin, relationOverview);
+
+      const [sexMobileWin, sexMobileDoc] = docs["sexagenary-mobile"];
+      probe.dataset.sexColorScheme = sexMobileWin.getComputedStyle(sexMobileDoc.body).colorScheme;
+      probe.dataset.sexInspectorHidden = String(hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-inspector")));
+      probe.dataset.sexExplainerHidden = String(hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-explainer")));
+      probe.dataset.sexWheelVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector("#sexagenary-wheel")));
+      probe.dataset.sexNeighborsVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector("#cycle-neighbors")));
+      probe.dataset.sexIndexVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-index-panel")));
+
+      const [sexDesktopWin, sexDesktopDoc] = docs["sexagenary-desktop"];
+      probe.dataset.sexDesktopInspectorVisible = String(!hidden(sexDesktopWin, sexDesktopDoc.querySelector(".cycle-inspector")));
+
+      probe.dataset.allNavMatch = String(Object.values(navMatches).every(Boolean));
+      probe.dataset.ready = "true";
+    }
+
+    function scheduleCapture() {
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(capture, 250);
+    }
+
+    for (const [id, path] of specs) {
+      const frame = document.querySelector(`#${id}`);
+      frame.addEventListener("load", () => {
+        loaded.add(id);
+        scheduleCapture();
+        setTimeout(capture, 800);
+        setTimeout(capture, 1800);
+      });
+      frame.src = new URL(path, location.href).href;
+    }
+  </script>
+</body>
+</html>

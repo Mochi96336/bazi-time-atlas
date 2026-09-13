@@ -72,6 +72,7 @@ jobs:
           node --check scripts/prepare-vendor.mjs
           node --check scripts/check-deep-links.mjs
           node --check scripts/check-mean-solar-preview.mjs
+          node --check scripts/check-view-shells.mjs
           node --check scripts/check-kinetic-boundaries.mjs
           node --check scripts/check-kinetic-composition.mjs
           node --check scripts/check-ring-visibility.mjs
@@ -107,6 +108,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify solar time preview
         run: node scripts/check-mean-solar-preview.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Verify cross-view shell consistency
+        run: node scripts/check-view-shells.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Verify exact kinetic boundaries
