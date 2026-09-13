@@ -2,6 +2,7 @@ const NS = "http://www.w3.org/2000/svg";
 const TRACK_IDS = ["year-track", "month-track", "day-track", "solar-track", "zodiac-track"];
 const CLIP_ID = "kinetic-master-fan-clip";
 const WRAPPER_ID = "kinetic-fan-layer";
+const MOBILE_QUERY = "(max-width: 480px)";
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -112,8 +113,13 @@ function installMasterFanClip() {
   return true;
 }
 
-function recordMobileComposition() {
-  if (!instrument || window.innerWidth > 480) return;
+function recordCompositionDiagnostics() {
+  if (!instrument) return;
+  const mediaMatched = window.matchMedia(MOBILE_QUERY).matches;
+  instrument.dataset.mobileInnerWidth = String(Math.round(window.innerWidth));
+  instrument.dataset.mobileMediaMatched = String(mediaMatched);
+  if (!mediaMatched) return;
+
   const rect = instrument.getBoundingClientRect();
   const secondary = [".timeline-dock", ".state-strip", ".atlas-notes", ".sources-panel"]
     .map(selector => document.querySelector(selector))
@@ -129,10 +135,10 @@ function recordMobileComposition() {
 }
 
 function refreshCompositionDiagnostics() {
-  recordMobileComposition();
-  queueMicrotask(recordMobileComposition);
-  requestAnimationFrame(recordMobileComposition);
-  setTimeout(recordMobileComposition, 50);
+  recordCompositionDiagnostics();
+  queueMicrotask(recordCompositionDiagnostics);
+  requestAnimationFrame(recordCompositionDiagnostics);
+  setTimeout(recordCompositionDiagnostics, 50);
 }
 
 function boot(attempt = 0) {
