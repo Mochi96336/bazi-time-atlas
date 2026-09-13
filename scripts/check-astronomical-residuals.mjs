@@ -66,8 +66,32 @@ function exposure(tag) {
     largest:Number(attr(tag, "data-month-boundary-largest-window-hours")),
     overlap:Number(attr(tag, "data-month-boundary-overlap-hours")),
     windows:Number(attr(tag, "data-month-boundary-window-count")),
-    merged:Number(attr(tag, "data-month-boundary-merged-window-count"))
+    merged:Number(attr(tag, "data-month-boundary-merged-window-count")),
+    monthOnlyHours:Number(attr(tag, "data-month-only-exposure-hours")),
+    monthOnlyPercent:Number(attr(tag, "data-month-only-exposure-percent")),
+    yearMonthHours:Number(attr(tag, "data-year-month-exposure-hours")),
+    yearMonthPercent:Number(attr(tag, "data-year-month-exposure-percent"))
   };
+}
+
+function assertPillarDecomposition(result, label) {
+  const values = exposure(result.tag);
+  if (Math.abs(values.monthOnlyHours + values.yearMonthHours - values.hours) > 0.001) {
+    throw new Error(`${label}: pillar exposure does not sum to union: ${JSON.stringify(values)}: ${result.url}`);
+  }
+  if (Math.abs(values.monthOnlyPercent + values.yearMonthPercent - values.percent) > 0.001) {
+    throw new Error(`${label}: pillar percent does not sum to union: ${JSON.stringify(values)}: ${result.url}`);
+  }
+  if ((result.dom.match(/data-pillar-impact="month-only"/g) ?? []).length !== 11) {
+    throw new Error(`${label}: expected 11 month-only jie cells: ${result.url}`);
+  }
+  if ((result.dom.match(/data-pillar-impact="year\+month"/g) ?? []).length !== 1) {
+    throw new Error(`${label}: expected one year+month Li Chun cell: ${result.url}`);
+  }
+  if (!result.dom.includes("丑→寅 · 年＋月")) {
+    throw new Error(`${label}: Li Chun month transition / pillar label missing: ${result.url}`);
+  }
+  return values;
 }
 
 const zero = expect(
@@ -80,11 +104,15 @@ const zero = expect(
       "data-astronomy-term-count": "12",
       "data-month-boundary-exposure-validity": "within-range",
       "data-month-boundary-window-count": "12",
-      "data-month-boundary-closed": "true"
+      "data-month-boundary-closed": "true",
+      "data-year-boundary-li-chun-before-branch": "丑",
+      "data-year-boundary-li-chun-after-branch": "寅"
     },
     float: [
       { name: "data-astronomy-max-residual-hours", expected: 0, tolerance: 1e-9 },
-      { name: "data-month-boundary-exposure-hours", expected: 0, tolerance: 1e-9 }
+      { name: "data-month-boundary-exposure-hours", expected: 0, tolerance: 1e-9 },
+      { name: "data-month-only-exposure-hours", expected: 0, tolerance: 1e-9 },
+      { name: "data-year-month-exposure-hours", expected: 0, tolerance: 1e-9 }
     ]
   },
   "zero-year astronomical identity"
@@ -95,7 +123,8 @@ if ((zero.dom.match(/data-astro-term=/g) ?? []).length !== 12) {
 if ((zero.dom.match(/class="month-boundary-window /g) ?? []).length !== 12) {
   throw new Error(`zero-year month-boundary exposure: expected 12 window cells: ${zero.url}`);
 }
-console.log(`[astronomy-residual] PASS zero identity: ${zero.url}`);
+assertPillarDecomposition(zero, "zero-year astronomical identity");
+console.log(`[astronomy-residual] PASS zero identity + canonical pillar transitions: ${zero.url}`);
 
 const local = expect(
   "recurrence.html?date=2026-09-13&delta=1980",
@@ -118,7 +147,8 @@ const local = expect(
 if (!/41\.36 h/.test(local.dom)) {
   throw new Error(`1980-year astronomy residual headline missing: ${local.url}`);
 }
-console.log(`[astronomy-residual] PASS local non-closure: ${local.url}`);
+assertPillarDecomposition(local, "1980-year local recurrence");
+console.log(`[astronomy-residual] PASS local non-closure + pillar classification: ${local.url}`);
 
 const global = expect(
   "recurrence.html?date=2026-09-13&delta=24000",
@@ -133,7 +163,11 @@ const global = expect(
       "data-month-boundary-exposure-validity": "within-range",
       "data-month-boundary-window-count": "12",
       "data-month-boundary-merged-window-count": "12",
-      "data-month-boundary-closed": "false"
+      "data-month-boundary-closed": "false",
+      "data-year-boundary-li-chun-before-branch": "丑",
+      "data-year-boundary-li-chun-after-branch": "寅",
+      "data-year-boundary-li-chun-base-month-branch": "寅",
+      "data-year-boundary-li-chun-target-month-branch": "丑"
     },
     float: [
       { name: "data-astronomy-max-residual-hours", expected: 95.109375, tolerance: 0.0001 },
@@ -147,14 +181,17 @@ const global = expect(
 if (!/95\.11 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
   throw new Error(`24000-year astronomical residual readout missing: ${global.url}`);
 }
-const globalExposure = exposure(global.tag);
+const globalExposure = assertPillarDecomposition(global, "24000-year global recurrence");
 if (!(globalExposure.hours > 500 && globalExposure.percent > 5 && globalExposure.percent < 10)) {
   throw new Error(`24000-year month-boundary exposure unexpectedly small/large: ${JSON.stringify(globalExposure)}: ${global.url}`);
+}
+if (!(globalExposure.monthOnlyHours > globalExposure.yearMonthHours && globalExposure.yearMonthHours > 0)) {
+  throw new Error(`24000-year pillar decomposition is not meaningful: ${JSON.stringify(globalExposure)}: ${global.url}`);
 }
 if (globalExposure.overlap > 0.001) {
   throw new Error(`24000-year reference windows unexpectedly overlap: ${globalExposure.overlap}: ${global.url}`);
 }
-console.log(`[astronomy-residual] PASS 24000-year non-closure; month-boundary union=${globalExposure.hours.toFixed(3)} h (${globalExposure.percent.toFixed(3)}%): ${global.url}`);
+console.log(`[astronomy-residual] PASS 24000-year non-closure; union=${globalExposure.hours.toFixed(3)} h, month-only=${globalExposure.monthOnlyHours.toFixed(3)} h, year+month=${globalExposure.yearMonthHours.toFixed(3)} h: ${global.url}`);
 
 const near = expect(
   "recurrence.html?date=2026-09-13&delta=792000",
@@ -165,7 +202,9 @@ const near = expect(
       "data-month-boundary-exposure-validity": "within-range",
       "data-month-boundary-window-count": "12",
       "data-month-boundary-merged-window-count": "12",
-      "data-month-boundary-closed": "false"
+      "data-month-boundary-closed": "false",
+      "data-year-boundary-li-chun-before-branch": "丑",
+      "data-year-boundary-li-chun-after-branch": "寅"
     },
     float: [
       { name: "data-astronomy-max-residual-hours", expected: 10.619909, tolerance: 0.001 },
@@ -174,11 +213,14 @@ const near = expect(
   },
   "792000-year exact-discrete near recurrence"
 );
-const nearExposure = exposure(near.tag);
+const nearExposure = assertPillarDecomposition(near, "792000-year near recurrence");
 if (!(nearExposure.hours > 0 && nearExposure.hours < globalExposure.hours)) {
   throw new Error(`792000-year exposure did not improve on 24000 years: near=${nearExposure.hours}, global=${globalExposure.hours}: ${near.url}`);
 }
 if (!(nearExposure.percent > 0 && nearExposure.percent < globalExposure.percent)) {
   throw new Error(`792000-year exposure percent did not improve: near=${nearExposure.percent}, global=${globalExposure.percent}: ${near.url}`);
 }
-console.log(`[astronomy-residual] PASS 792000-year near recurrence; month-boundary union=${nearExposure.hours.toFixed(3)} h (${nearExposure.percent.toFixed(3)}%): ${near.url}`);
+if (!(nearExposure.monthOnlyHours < globalExposure.monthOnlyHours && nearExposure.yearMonthHours < globalExposure.yearMonthHours)) {
+  throw new Error(`792000-year pillar decomposition did not improve on 24000 years: near=${JSON.stringify(nearExposure)}, global=${JSON.stringify(globalExposure)}: ${near.url}`);
+}
+console.log(`[astronomy-residual] PASS 792000-year near recurrence; union=${nearExposure.hours.toFixed(3)} h, month-only=${nearExposure.monthOnlyHours.toFixed(3)} h, year+month=${nearExposure.yearMonthHours.toFixed(3)} h: ${near.url}`);
