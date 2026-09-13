@@ -152,7 +152,7 @@
 .epoch-audit-source header b { flex:0 0 auto; color:#9b8278; font-size:7px; line-height:1.35; text-align:right; font-weight:650; }
 .epoch-audit-source[data-qualified-coverage="true"] { border-color:rgba(137,176,198,.22); background:rgba(137,176,198,.014); }
 .epoch-audit-source[data-qualified-coverage="true"] header b { color:#9cbccd; }
-.epoch-audit-source[data-covers-target="true"][data-absolute-epoch-capable="false"] { border-color:rgba(190,154,111,.16); }
+.epoch-audit-source[data-covers-target="true"][data-ephemeris-basis-capable="false"] { border-color:rgba(190,154,111,.16); }
 .epoch-audit-facts { margin-top:8px; display:grid; grid-template-columns:1.4fr .8fr .7fr; gap:5px; }
 .epoch-audit-facts span { min-width:0; padding-top:5px; border-top:1px solid rgba(238,242,237,.05); }
 .epoch-audit-facts em { display:block; color:#5e6962; font-size:6.5px; font-style:normal; letter-spacing:.04em; text-transform:uppercase; }
