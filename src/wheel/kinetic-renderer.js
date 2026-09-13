@@ -23,13 +23,16 @@ import {
   rotationInReferenceFrame,
   validReferenceRing
 } from "./reference-frame.js";
+import { phaseAngleWithinTooth } from "./discrete-phase.js";
 import { addTitle, setActiveSector, svgElement } from "./svg-renderer.js";
 
 const MOTION_TRACE_TTL_MS = 420;
 const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
+const PHASE_INSET_DEGREES = 0.45;
 
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
+  const cyclePhaseNodes = new Map();
   const termSectorNodes = [];
   const zodiacSectorNodes = [];
   const motionTraceNodes = new Map();
@@ -104,6 +107,19 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         text.textContent = label;
       }
     });
+
+    const phasePath = el("path", {
+      class: `state-phase-progress phase-${id}`,
+      "data-phase-ring": id,
+      "aria-hidden": "true"
+    }, group);
+    const phaseBead = el("circle", {
+      class: `state-phase-bead phase-${id}`,
+      "data-phase-ring": id,
+      r: 2.8,
+      "aria-hidden": "true"
+    }, group);
+    cyclePhaseNodes.set(id, { path:phasePath, bead:phaseBead });
     cycleSectors.set(id, sectors);
   }
 
@@ -226,6 +242,49 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     }, MOTION_TRACE_TTL_MS));
   }
 
+  function updateCyclePhase(id, activeIndex, phase) {
+    const nodes = cyclePhaseNodes.get(id);
+    const group = groupFor(id);
+    if (!nodes || !group) return;
+    const progress = phase?.progress;
+    const angle = phaseAngleWithinTooth(activeIndex, progress, PHASE_INSET_DEGREES);
+    if (!Number.isFinite(angle)) {
+      nodes.path.removeAttribute("d");
+      nodes.path.dataset.phaseVisible = "false";
+      nodes.bead.dataset.phaseVisible = "false";
+      nodes.bead.setAttribute("visibility", "hidden");
+      delete group.dataset.phaseProgress;
+      delete group.dataset.phaseStartMs;
+      delete group.dataset.phaseEndMs;
+      delete group.dataset.phaseSource;
+      delete group.dataset.phaseBoundaryKind;
+      return;
+    }
+
+    const model = ringModel(id);
+    const radius = model.innerRadius + 6;
+    const startAngle = activeIndex * 6 + PHASE_INSET_DEGREES;
+    const bead = polar(radius, angle);
+    nodes.bead.setAttribute("cx", bead.x);
+    nodes.bead.setAttribute("cy", bead.y);
+    nodes.bead.removeAttribute("visibility");
+    nodes.bead.dataset.phaseVisible = "true";
+
+    if (progress > 0.002) {
+      nodes.path.setAttribute("d", arcPath(WHEEL_CENTER, radius, startAngle, angle));
+      nodes.path.dataset.phaseVisible = "true";
+    } else {
+      nodes.path.removeAttribute("d");
+      nodes.path.dataset.phaseVisible = "false";
+    }
+
+    group.dataset.phaseProgress = progress.toFixed(6);
+    group.dataset.phaseStartMs = String(Math.round(phase.startMs));
+    group.dataset.phaseEndMs = String(Math.round(phase.endMs));
+    group.dataset.phaseSource = phase.source;
+    group.dataset.phaseBoundaryKind = phase.boundaryKind;
+  }
+
   function frameSettings() {
     const referenceId = validReferenceRing(svg.dataset.referenceRing)
       ? svg.dataset.referenceRing
@@ -307,9 +366,10 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     renderCursor();
   }
 
-  function setCyclePose(id, rotationDegrees, activeIndex) {
+  function setCyclePose(id, rotationDegrees, activeIndex, phase = null) {
     worldRotations.set(id, rotationDegrees);
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
+    updateCyclePhase(id, activeIndex, phase);
     scheduleReferenceFrameFlush();
   }
 
