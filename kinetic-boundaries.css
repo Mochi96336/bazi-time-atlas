@@ -1,3 +1,5 @@
+:root { --hour: #6f8f88; }
+
 .boundary-meta {
   margin-top: 8px;
   display: flex;
@@ -65,9 +67,12 @@
   text-align: center;
 }
 
-/* The three sexagenary rings were mathematically adjacent but visually merged
-   into the background. Keep the palette restrained while making each band a
-   real readable layer of the same instrument. */
+/* Four adjacent sexagenary state wheels. The hour ring extends inward, so the
+   already-stable year/month/day/solar/zodiac world radii stay unchanged. */
+.ring-hour i { background: var(--hour); }
+.hour-track { color: var(--hour); }
+.hour-sector { fill: color-mix(in srgb, var(--hour) 18%, transparent); }
+#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 24%, transparent); }
 #year-track .year-sector { fill: color-mix(in srgb, var(--year) 24%, transparent); }
 #month-track .month-sector { fill: color-mix(in srgb, var(--month) 22%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 23%, transparent); }
