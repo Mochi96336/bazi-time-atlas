@@ -37,6 +37,12 @@ function attr(tag, name) {
   return tag.match(new RegExp(`${name}="([^"]*)"`))?.[1] ?? null;
 }
 
+function requireAttr(tag, name, label, url) {
+  const value = attr(tag, name);
+  if (value === null) throw new Error(`${label}: missing ${name}: ${url}`);
+  return value;
+}
+
 const desktop = dump(1440, 900);
 const instrument = tagById(desktop.dom, "kinetic-instrument");
 if (attr(instrument, "data-master-geometry") !== "shared-fan" || attr(instrument, "data-fan-clip") !== "active") {
@@ -55,11 +61,11 @@ console.log(`[kinetic-composition] PASS desktop shared fan geometry: ${desktop.u
 
 const mobile = dump(390, 844);
 const mobileInstrument = tagById(mobile.dom, "kinetic-instrument");
-const fit = attr(mobileInstrument, "data-mobile-viewport-fit");
-const hidden = attr(mobileInstrument, "data-mobile-secondary-hidden");
-const share = Number(attr(mobileInstrument, "data-mobile-instrument-share"));
-const scrollHeight = Number(attr(mobileInstrument, "data-mobile-scroll-height"));
-const viewportHeight = Number(attr(mobileInstrument, "data-mobile-viewport-height"));
+const fit = requireAttr(mobileInstrument, "data-mobile-viewport-fit", "mobile", mobile.url);
+const hidden = requireAttr(mobileInstrument, "data-mobile-secondary-hidden", "mobile", mobile.url);
+const share = Number(requireAttr(mobileInstrument, "data-mobile-instrument-share", "mobile", mobile.url));
+const scrollHeight = Number(requireAttr(mobileInstrument, "data-mobile-scroll-height", "mobile", mobile.url));
+const viewportHeight = Number(requireAttr(mobileInstrument, "data-mobile-viewport-height", "mobile", mobile.url));
 if (fit !== "true") throw new Error(`mobile: page still scrolls (${scrollHeight} > ${viewportHeight}): ${mobile.url}`);
 if (hidden !== "true") throw new Error(`mobile: secondary dashboard sections were not collapsed: ${mobile.url}`);
 if (!Number.isFinite(share) || share < 0.70) {
