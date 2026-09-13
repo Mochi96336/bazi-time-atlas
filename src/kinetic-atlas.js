@@ -7,10 +7,26 @@ const NS = "http://www.w3.org/2000/svg";
 const DAY_MS = 86_400_000;
 const UTC_OFFSET_HOURS = 8;
 const CX = 600;
-const CY = 850;
+const CY = 1360;
 const CURSOR_ANGLE = -90;
 const FAN_START = -170;
 const FAN_END = -10;
+const RADII = Object.freeze({
+  inner: 760,
+  yearOuter: 834,
+  monthOuter: 908,
+  dayOuter: 982,
+  solarOuter: 1072,
+  zodiacOuter: 1182
+});
+const GUIDE_RADII = Object.freeze([
+  RADII.inner,
+  RADII.yearOuter,
+  RADII.monthOuter,
+  RADII.dayOuter,
+  RADII.solarOuter,
+  RADII.zodiacOuter
+]);
 
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -59,9 +75,9 @@ const state = {
 };
 
 const ringSpecs = {
-  year: { group: document.querySelector("#year-track"), inner: 258, outer: 332, className: "year-sector" },
-  month: { group: document.querySelector("#month-track"), inner: 332, outer: 406, className: "month-sector" },
-  day: { group: document.querySelector("#day-track"), inner: 406, outer: 480, className: "day-sector" }
+  year: { group: document.querySelector("#year-track"), inner: RADII.inner, outer: RADII.yearOuter, className: "year-sector" },
+  month: { group: document.querySelector("#month-track"), inner: RADII.yearOuter, outer: RADII.monthOuter, className: "month-sector" },
+  day: { group: document.querySelector("#day-track"), inner: RADII.monthOuter, outer: RADII.dayOuter, className: "day-sector" }
 };
 
 const ringRuntime = {};
@@ -140,7 +156,7 @@ function shortestAngleDelta(nextAngle, previousAngle) {
 
 function renderGuides() {
   const guides = document.querySelector("#guide-layer");
-  [258, 332, 406, 480, 570, 680].forEach(radius => {
+  GUIDE_RADII.forEach(radius => {
     svgEl("path", { d: arcPath(radius, FAN_START, FAN_END), class: "guide-arc" }, guides);
   });
 }
@@ -200,15 +216,15 @@ function renderSolarRing() {
     const start = term.longitude;
     const end = term.longitude + 15;
     const path = svgEl("path", {
-      d: annularSectorPath(480, 570, start + .15, end - .15),
+      d: annularSectorPath(RADII.dayOuter, RADII.solarOuter, start + .15, end - .15),
       class: `term-sector ${term.kind}`,
       "data-term-index": index
     }, solarTrack);
     addTitle(path, `${term.name} · ${term.longitude}°`);
     termSectorNodes.push(path);
 
-    const markInner = polar(480, term.longitude);
-    const markOuter = polar(term.kind === "jie" ? 570 : 558, term.longitude);
+    const markInner = polar(RADII.dayOuter, term.longitude);
+    const markOuter = polar(term.kind === "jie" ? RADII.solarOuter : RADII.solarOuter - 12, term.longitude);
     svgEl("line", {
       x1: markInner.x,
       y1: markInner.y,
@@ -217,7 +233,7 @@ function renderSolarRing() {
       class: `term-mark ${term.kind}`
     }, solarTrack);
 
-    const labelPoint = polar(term.kind === "jie" ? 538 : 526, term.longitude + 7.5);
+    const labelPoint = polar(term.kind === "jie" ? RADII.solarOuter - 32 : RADII.solarOuter - 44, term.longitude + 7.5);
     const label = svgEl("text", {
       x: labelPoint.x,
       y: labelPoint.y,
@@ -231,7 +247,7 @@ function renderSolarRing() {
 function renderZodiacRing() {
   zodiacSigns.forEach((sign, index) => {
     const path = svgEl("path", {
-      d: annularSectorPath(570, 680, sign.start + .15, sign.end - .15),
+      d: annularSectorPath(RADII.solarOuter, RADII.zodiacOuter, sign.start + .15, sign.end - .15),
       class: "zodiac-sector",
       "data-zodiac-index": index
     }, zodiacTrack);
@@ -239,7 +255,7 @@ function renderZodiacRing() {
     zodiacSectorNodes.push(path);
 
     const angle = sign.start + 15;
-    const point = polar(625, angle);
+    const point = polar((RADII.solarOuter + RADII.zodiacOuter) / 2, angle);
     const label = svgEl("text", {
       x: point.x,
       y: point.y,
@@ -252,16 +268,16 @@ function renderZodiacRing() {
 
 function renderCursor() {
   const cursorLayer = document.querySelector("#cursor-layer");
-  const inner = polar(246, CURSOR_ANGLE);
-  const outer = polar(692, CURSOR_ANGLE);
+  const inner = polar(RADII.inner - 12, CURSOR_ANGLE);
+  const outer = polar(RADII.zodiacOuter + 12, CURSOR_ANGLE);
   svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-halo" }, cursorLayer);
   svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-line" }, cursorLayer);
-  const cap = polar(701, CURSOR_ANGLE);
+  const cap = polar(RADII.zodiacOuter + 21, CURSOR_ANGLE);
   svgEl("path", {
     d: `M ${cap.x - 6} ${cap.y - 1} L ${cap.x + 6} ${cap.y - 1} L ${cap.x} ${cap.y + 10} Z`,
     class: "cursor-cap"
   }, cursorLayer);
-  const label = polar(720, CURSOR_ANGLE);
+  const label = polar(RADII.zodiacOuter + 40, CURSOR_ANGLE);
   const text = svgEl("text", { x: label.x, y: label.y, class: "cursor-note" }, cursorLayer);
   text.textContent = "SELECTED INSTANT";
 }
