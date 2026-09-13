@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./recurrence.css">
   <link rel="stylesheet" href="./astronomical-residuals.css">
+  <link rel="stylesheet" href="./four-pillar-determinacy.css">
   <link rel="stylesheet" href="./near-recurrence.css">
 </head>
 <body>
@@ -99,6 +100,27 @@
     </section>
     <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
+    <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">
+      <div class="determinacy-head">
+        <div>
+          <div class="eyebrow">Four-pillar determinacy boundary</div>
+          <h2>內圈「閉合」不等於四柱都已被外圈模型證明。</h2>
+          <p>十二節比較先把春分共同平移拿掉，所以能隔離立春與各月節的相對位置；但這個轉換也刻意丟掉了絕對民用日期與地方時相位。下列矩陣只陳述目前模型真正能支持的柱位，不把缺少的 civil-time 證據補成推論。</p>
+        </div>
+        <div class="determinacy-scope">
+          <span>Strongest supported claim</span>
+          <strong id="determinacy-scope-value">等待回歸／天文狀態</strong>
+        </div>
+      </div>
+      <div class="determinacy-grid">
+        <article class="determinacy-card" data-determinacy-pillar="year" data-status="pending" data-resolved="false"><header><span>Year</span><strong>年柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+        <article class="determinacy-card" data-determinacy-pillar="month" data-status="pending" data-resolved="false"><header><span>Month</span><strong>月柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+        <article class="determinacy-card" data-determinacy-pillar="day" data-status="pending" data-resolved="false"><header><span>Day</span><strong>日柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+        <article class="determinacy-card" data-determinacy-pillar="hour" data-status="pending" data-resolved="false"><header><span>Hour</span><strong>時柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+      </div>
+      <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
+    </section>
+
     <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
       <div class="near-search-head">
         <div class="near-search-copy">
@@ -129,26 +151,16 @@
     </section>
 
     <section class="recurrence-notes">
-      <div>
-        <div class="eyebrow">Why 24,000?</div>
-        <h2>400 年不是終點，60 年也不是。</h2>
-        <p>公曆每 400 年重複一次閏年配置，共 146,097 日；這在 60 日日序上等於偏移 57 格。要同時讓公曆骨架、60 年年序與 60 日日序都回到 0，相當於 60 個 400 年區塊，也就是 24,000 年；總日數 8,765,820 日，剛好也是 60 的倍數。</p>
-      </div>
-      <div>
-        <div class="eyebrow">Exact ≠ astronomical</div>
-        <h2>齒輪全回來，不代表十二節也回來。</h2>
-        <p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。下方搜尋器再問一步：在 Berger 模型可用範圍內，所有離散 exact 閉合點之中，哪一個天文形狀最接近基準年？</p>
-      </div>
+      <div><div class="eyebrow">Why 24,000?</div><h2>400 年不是終點，60 年也不是。</h2><p>公曆每 400 年重複一次閏年配置，共 146,097 日；這在 60 日日序上等於偏移 57 格。要同時讓公曆骨架、60 年年序與 60 日日序都回到 0，相當於 60 個 400 年區塊，也就是 24,000 年；總日數 8,765,820 日，剛好也是 60 的倍數。</p></div>
+      <div><div class="eyebrow">Exact ≠ astronomical</div><h2>齒輪全回來，不代表十二節也回來。</h2><p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。下方搜尋器再問一步：在 Berger 模型可用範圍內，所有離散 exact 閉合點之中，哪一個天文形狀最接近基準年？</p></div>
     </section>
 
-    <details class="model-boundary">
-      <summary>模型邊界與來源</summary>
-      <p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把任何搜尋結果稱為遠未來精確節氣時刻或真正週期。</p>
-    </details>
+    <details class="model-boundary"><summary>模型邊界與來源</summary><p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把任何搜尋結果稱為遠未來精確節氣時刻或真正週期。</p></details>
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
+  <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>
 </body>
 </html>
