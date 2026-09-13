@@ -69,12 +69,12 @@ function ensureMonthBoundaryPanel() {
   const panel = document.createElement("section");
   panel.id = "month-boundary-exposure";
   panel.className = "month-boundary-exposure";
-  panel.setAttribute("aria-label", "十二節位移對八字月界判定的潛在分歧窗口");
+  panel.setAttribute("aria-label", "十二節位移對八字月界與年界判定的潛在分歧窗口");
   panel.innerHTML = `
     <div class="month-boundary-copy">
-      <div class="eyebrow">BaZi month-boundary exposure</div>
-      <h3>不是全年都偏，只在被交節邊界掃過的窗口可能分到另一個月。</h3>
-      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份的月界 sector 才會站在不同側；下方比例是 12 個窗口的聯集占 365.2422 日正規化年的比例，不是統計上的「八字錯誤率」。其中立春同時是本站採用的年柱切換邊界，所以立春窗口也可能讓年柱站到不同側。</p>
+      <div class="eyebrow">BaZi pillar-boundary exposure</div>
+      <h3>交節窗口不只告訴你偏了多久，也能指出會差在哪一柱。</h3>
+      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份才會站在不同的月支 sector；11 個節只影響月柱，立春的 丑→寅 同時也是本站採用的年柱切換邊界。比例仍是幾何相位窗口，不是人口上的「八字錯誤率」。</p>
     </div>
     <div class="month-boundary-stat">
       <span>窗口聯集</span>
@@ -82,15 +82,38 @@ function ensureMonthBoundaryPanel() {
       <small id="month-boundary-exposure-percent">—</small>
     </div>
     <div class="month-boundary-stat">
-      <span>最大單一月界</span>
+      <span>最大單一邊界</span>
       <strong id="month-boundary-largest">—</strong>
       <small id="month-boundary-overlap">—</small>
     </div>
-    <div id="month-boundary-window-grid" class="month-boundary-window-grid" aria-label="十二個月界分歧窗口"></div>
+    <div class="pillar-impact-strip" aria-label="分歧窗口依受影響柱位分解">
+      <div class="pillar-impact-item month-only">
+        <span>Month only · 11 節</span>
+        <strong id="pillar-impact-month-only-hours">—</strong>
+        <small id="pillar-impact-month-only-percent">—</small>
+      </div>
+      <div class="pillar-impact-item year-month">
+        <span>Year + Month · 立春</span>
+        <strong id="pillar-impact-year-month-hours">—</strong>
+        <small id="pillar-impact-year-month-percent">—</small>
+      </div>
+    </div>
+    <div id="month-boundary-window-grid" class="month-boundary-window-grid" aria-label="十二個交節分歧窗口與月支跨界"></div>
   `;
   termGrid.insertAdjacentElement("afterend", panel);
   monthBoundaryPanel = panel;
   return panel;
+}
+
+function windowTitle(window) {
+  const impact = window.isYearBoundary ? "年柱＋月柱" : "月柱";
+  if (window.direction === "aligned") {
+    return `${window.name} · ${window.monthTransition} · ${impact} · 基準與目標邊界重合`;
+  }
+  const yearSide = window.isYearBoundary
+    ? ` · 年界：基準=${window.baseYearSide === "new" ? "新年柱" : "前一年柱"}，目標=${window.targetYearSide === "new" ? "新年柱" : "前一年柱"}`
+    : "";
+  return `${window.name} · ${window.monthTransition} · ${impact} · 窗口內基準=${window.baseWindowBranch}月、目標=${window.targetWindowBranch}月${yearSide}`;
 }
 
 function renderMonthBoundaryExposure(result) {
@@ -99,7 +122,7 @@ function renderMonthBoundaryExposure(result) {
   const exposure = monthBoundaryDisagreementExposureFromResiduals(result);
   const grid = panel.querySelector("#month-boundary-window-grid");
   const maxWindow = Math.max(...exposure.windows.map(window => window.widthHours), 1e-9);
-  const liChunWindow = exposure.windows.find(window => window.name === "立春") ?? null;
+  const liChunWindow = exposure.yearMonthWindow;
 
   setText("month-boundary-exposure-hours", `${exposure.unionExposureHours.toFixed(2)} h`);
   setText("month-boundary-exposure-percent", `${exposure.yearPercent.toFixed(3)}% of normalized year`);
@@ -113,19 +136,29 @@ function renderMonthBoundaryExposure(result) {
       ? `窗口重疊 ${exposure.overlapHours.toFixed(2)} h；聯集已去重。`
       : `${exposure.mergedWindows.length} 個不重疊窗口`
   );
+  setText("pillar-impact-month-only-hours", `${exposure.monthOnlyExposureHours.toFixed(2)} h`);
+  setText("pillar-impact-month-only-percent", `${exposure.monthOnlyPercent.toFixed(3)}% of normalized year`);
+  setText("pillar-impact-year-month-hours", `${exposure.yearMonthExposureHours.toFixed(2)} h`);
+  setText("pillar-impact-year-month-percent", `${exposure.yearMonthPercent.toFixed(3)}% of normalized year`);
 
   grid?.replaceChildren();
   exposure.windows.forEach(window => {
-    const isYearBoundary = window.name === "立春";
     const item = document.createElement("div");
-    item.className = `month-boundary-window ${window.direction}${isYearBoundary ? " year-boundary" : ""}`;
+    item.className = `month-boundary-window ${window.direction}${window.isYearBoundary ? " year-boundary" : ""}`;
     item.dataset.term = window.name;
     item.dataset.windowHours = window.widthHours.toFixed(6);
+    item.dataset.beforeBranch = window.beforeBranch;
+    item.dataset.afterBranch = window.afterBranch;
+    item.dataset.pillarImpact = window.pillarImpact;
+    if (window.baseWindowBranch) item.dataset.baseWindowBranch = window.baseWindowBranch;
+    if (window.targetWindowBranch) item.dataset.targetWindowBranch = window.targetWindowBranch;
+    item.title = windowTitle(window);
     item.style.setProperty("--window-width", `${Math.max(0, window.widthHours / maxWindow * 100).toFixed(3)}%`);
     item.innerHTML = `
-      <span>${window.name}${isYearBoundary ? " · 年界" : ""}</span>
+      <span>${window.name}${window.isYearBoundary ? " · 年界" : ""}</span>
       <i aria-hidden="true"><b></b></i>
       <strong>${window.widthHours.toFixed(2)} h</strong>
+      <small>${window.monthTransition} · ${window.isYearBoundary ? "年＋月" : "月"}</small>
     `;
     grid?.appendChild(item);
   });
@@ -139,7 +172,15 @@ function renderMonthBoundaryExposure(result) {
   instrument.dataset.monthBoundaryMergedWindowCount = String(exposure.mergedWindows.length);
   instrument.dataset.monthBoundaryLargestTerm = exposure.largestWindow?.name ?? "none";
   instrument.dataset.monthBoundaryLargestWindowHours = (exposure.largestWindow?.widthHours ?? 0).toFixed(6);
+  instrument.dataset.monthOnlyExposureHours = exposure.monthOnlyExposureHours.toFixed(6);
+  instrument.dataset.monthOnlyExposurePercent = exposure.monthOnlyPercent.toFixed(6);
+  instrument.dataset.yearMonthExposureHours = exposure.yearMonthExposureHours.toFixed(6);
+  instrument.dataset.yearMonthExposurePercent = exposure.yearMonthPercent.toFixed(6);
   instrument.dataset.yearBoundaryLiChunWindowHours = (liChunWindow?.widthHours ?? 0).toFixed(6);
+  instrument.dataset.yearBoundaryLiChunBeforeBranch = liChunWindow?.beforeBranch ?? "none";
+  instrument.dataset.yearBoundaryLiChunAfterBranch = liChunWindow?.afterBranch ?? "none";
+  instrument.dataset.yearBoundaryLiChunBaseMonthBranch = liChunWindow?.baseWindowBranch ?? "aligned";
+  instrument.dataset.yearBoundaryLiChunTargetMonthBranch = liChunWindow?.targetWindowBranch ?? "aligned";
   instrument.dataset.monthBoundaryClosed = String(exposure.closed);
 }
 
@@ -150,6 +191,10 @@ function renderMonthBoundaryUnavailable() {
   setText("month-boundary-exposure-percent", "—");
   setText("month-boundary-largest", "—");
   setText("month-boundary-overlap", "—");
+  setText("pillar-impact-month-only-hours", "—");
+  setText("pillar-impact-month-only-percent", "—");
+  setText("pillar-impact-year-month-hours", "—");
+  setText("pillar-impact-year-month-percent", "—");
   instrument.dataset.monthBoundaryExposureValidity = "outside-range";
   delete instrument.dataset.monthBoundaryExposureHours;
   delete instrument.dataset.monthBoundaryExposurePercent;
@@ -159,7 +204,15 @@ function renderMonthBoundaryUnavailable() {
   delete instrument.dataset.monthBoundaryMergedWindowCount;
   delete instrument.dataset.monthBoundaryLargestTerm;
   delete instrument.dataset.monthBoundaryLargestWindowHours;
+  delete instrument.dataset.monthOnlyExposureHours;
+  delete instrument.dataset.monthOnlyExposurePercent;
+  delete instrument.dataset.yearMonthExposureHours;
+  delete instrument.dataset.yearMonthExposurePercent;
   delete instrument.dataset.yearBoundaryLiChunWindowHours;
+  delete instrument.dataset.yearBoundaryLiChunBeforeBranch;
+  delete instrument.dataset.yearBoundaryLiChunAfterBranch;
+  delete instrument.dataset.yearBoundaryLiChunBaseMonthBranch;
+  delete instrument.dataset.yearBoundaryLiChunTargetMonthBranch;
   delete instrument.dataset.monthBoundaryClosed;
 }
 
