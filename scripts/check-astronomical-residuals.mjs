@@ -1,0 +1,126 @@
+import { spawnSync } from "node:child_process";
+
+const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
+
+function findBrowser() {
+  if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
+  for (const candidate of ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"]) {
+    const probe = spawnSync("sh", ["-lc", `command -v ${candidate}`], { encoding: "utf8" });
+    if (probe.status === 0 && probe.stdout.trim()) return probe.stdout.trim();
+  }
+  throw new Error("No system Chromium/Chrome executable found");
+}
+
+function dumpDom(path) {
+  const browser = findBrowser();
+  const url = new URL(path, baseURL).href;
+  const result = spawnSync(browser, [
+    "--headless=new",
+    "--no-sandbox",
+    "--disable-gpu",
+    "--virtual-time-budget=1800",
+    "--dump-dom",
+    url,
+  ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
+  if (result.status !== 0) {
+    process.stderr.write(result.stderr ?? "");
+    throw new Error(`Chromium DOM probe failed: ${url}`);
+  }
+  return { url, dom: result.stdout };
+}
+
+function instrumentTag(dom) {
+  return dom.match(/<section[^>]*id="recurrence-instrument"[^>]*>/)?.[0] ?? "";
+}
+
+function attr(tag, name) {
+  return tag.match(new RegExp(`${name}="([^"]*)"`))?.[1] ?? null;
+}
+
+function expectFloat(tag, name, expected, tolerance, label) {
+  const value = Number(attr(tag, name));
+  if (!Number.isFinite(value) || Math.abs(value - expected) > tolerance) {
+    throw new Error(`${label}: expected ${name}≈${expected}, got ${attr(tag, name)}`);
+  }
+}
+
+function expect(path, checks, label) {
+  const { url, dom } = dumpDom(path);
+  const tag = instrumentTag(dom);
+  for (const [name, expected] of Object.entries(checks.exact ?? {})) {
+    const actual = attr(tag, name);
+    if (actual !== String(expected)) {
+      throw new Error(`${label}: expected ${name}=${expected}, got ${actual}: ${url}`);
+    }
+  }
+  for (const check of checks.float ?? []) {
+    expectFloat(tag, check.name, check.expected, check.tolerance, label);
+  }
+  return { url, dom, tag };
+}
+
+const zero = expect(
+  "recurrence.html?date=2026-09-13&delta=0",
+  {
+    exact: {
+      "data-astronomy-model": "berger-1978",
+      "data-astronomy-validity": "within-range",
+      "data-astronomy-shape-closed": "true",
+      "data-astronomy-term-count": "12"
+    },
+    float: [
+      { name: "data-astronomy-max-residual-hours", expected: 0, tolerance: 1e-9 }
+    ]
+  },
+  "zero-year astronomical identity"
+);
+if ((zero.dom.match(/data-astro-term=/g) ?? []).length !== 12) {
+  throw new Error(`zero-year astronomical identity: expected 12 SVG residual whiskers: ${zero.url}`);
+}
+console.log(`[astronomy-residual] PASS zero identity: ${zero.url}`);
+
+const local = expect(
+  "recurrence.html?date=2026-09-13&delta=1980",
+  {
+    exact: {
+      "data-year-closed": "true",
+      "data-day-closed": "true",
+      "data-global-closed": "false",
+      "data-astronomy-shape-closed": "false"
+    },
+    float: [
+      { name: "data-astronomy-max-residual-hours", expected: 41.355249, tolerance: 0.0001 },
+      { name: "data-astronomy-min-residual-hours", expected: -11.325575, tolerance: 0.0001 },
+      { name: "data-astronomy-max-signed-residual-hours", expected: 41.355249, tolerance: 0.0001 }
+    ]
+  },
+  "1980-year local discrete recurrence with astronomy residual"
+);
+if (!/41\.36 h/.test(local.dom)) {
+  throw new Error(`1980-year astronomy residual headline missing: ${local.url}`);
+}
+console.log(`[astronomy-residual] PASS local non-closure: ${local.url}`);
+
+const global = expect(
+  "recurrence.html?date=2026-09-13&delta=24000",
+  {
+    exact: {
+      "data-global-closed": "true",
+      "data-gregorian-closed": "true",
+      "data-year-closed": "true",
+      "data-day-closed": "true",
+      "data-astronomy-shape-closed": "false",
+      "data-astronomy-target-year": "26026"
+    },
+    float: [
+      { name: "data-astronomy-max-residual-hours", expected: 95.109375, tolerance: 0.0001 },
+      { name: "data-astronomy-min-residual-hours", expected: 1.363468, tolerance: 0.0001 },
+      { name: "data-astronomy-max-signed-residual-hours", expected: 95.109375, tolerance: 0.0001 }
+    ]
+  },
+  "24000-year discrete closure with astronomical non-closure"
+);
+if (!/95\.11 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
+  throw new Error(`24000-year astronomical residual readout missing: ${global.url}`);
+}
+console.log(`[astronomy-residual] PASS 24000-year non-closure: ${global.url}`);
