@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px exact boundary gate harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px exact boundary gate probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const RINGS = ["hour", "year", "month", "day"];
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    let exercised = false;
+    let observer = null;
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    function afterSettled(callback) {
+      queueMicrotask(() => queueMicrotask(() => requestAnimationFrame(callback)));
+    }
+
+    function boundarySnapshot(childWindow, doc) {
+      return Object.fromEntries(RINGS.map(id => {
+        const track = doc.querySelector(`#${id}-track`);
+        const gate = track?.querySelector(`.state-boundary-gate[data-boundary-ring="${id}"]`);
+        const halo = track?.querySelector(`.state-boundary-shared-halo[data-boundary-ring="${id}"]`);
+        const gateStyle = gate ? childWindow.getComputedStyle(gate) : null;
+        return [id, {
+          endMs:Number(track?.dataset.nextBoundaryMs),
+          shared:track?.dataset.nextBoundaryShared ?? "",
+          sharedWith:track?.dataset.nextBoundarySharedWith ?? "",
+          gateShared:gate?.dataset.boundaryShared ?? "",
+          gateClass:gate?.classList.contains("is-shared") ? "true" : "false",
+          gateVisibility:gate?.getAttribute("visibility") ?? "",
+          haloVisibility:halo?.getAttribute("visibility") ?? "",
+          gateX1:Number(gate?.getAttribute("x1")),
+          gateY1:Number(gate?.getAttribute("y1")),
+          gateX2:Number(gate?.getAttribute("x2")),
+          gateY2:Number(gate?.getAttribute("y2")),
+          strokeWidth:gateStyle?.strokeWidth ?? "",
+          stroke:gateStyle?.stroke ?? "",
+          transform:track?.getAttribute("transform") ?? ""
+        }];
+      }));
+    }
+
+    function write(prefix, instrument, snapshot) {
+      probe.dataset[`${prefix}SharedCount`] = instrument.dataset.exactSharedBoundaryCount ?? "";
+      probe.dataset[`${prefix}SharedGroups`] = instrument.dataset.exactSharedBoundaryGroups ?? "";
+      for (const [id, value] of Object.entries(snapshot)) {
+        const cap = id[0].toUpperCase() + id.slice(1);
+        for (const [field, raw] of Object.entries(value)) {
+          const fieldCap = field[0].toUpperCase() + field.slice(1);
+          probe.dataset[`${prefix}${cap}${fieldCap}`] = String(raw);
+        }
+      }
+    }
+
+    function snapshot() {
+      if (exercised) return;
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!childWindow || !doc) return;
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const input = doc.querySelector("#instant-input");
+      const reference = doc.querySelector("#reference-frame-select");
+      if (!instrument || !input || !reference) return;
+      if (instrument.dataset.discretePhaseInit !== "ready") return;
+      if (instrument.dataset.exactSharedBoundaryCount !== "1") return;
+
+      const initial = boundarySnapshot(childWindow, doc);
+      if (RINGS.some(id => !Number.isFinite(initial[id].endMs))) return;
+      exercised = true;
+      observer?.disconnect();
+      observer = null;
+      probe.dataset.innerWidth = String(childWindow.innerWidth);
+      write("initial", instrument, initial);
+
+      reference.value = "day";
+      reference.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+      afterSettled(() => {
+        probe.dataset.referenceFrame = instrument.dataset.referenceFrame ?? "";
+        write("reference", instrument, boundarySnapshot(childWindow, doc));
+
+        input.value = "2027-03-15T20:00";
+        input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+        afterSettled(() => {
+          write("ordinary", instrument, boundarySnapshot(childWindow, doc));
+
+          input.value = "2027-02-01T12:00";
+          input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+          afterSettled(() => {
+            write("lichun", instrument, boundarySnapshot(childWindow, doc));
+            probe.dataset.ready = "true";
+          });
+        });
+      });
+    }
+
+    frame.addEventListener("load", () => {
+      const instrument = frame.contentDocument?.querySelector("#kinetic-instrument");
+      if (instrument) {
+        observer = new MutationObserver(snapshot);
+        observer.observe(instrument, {
+          attributes:true,
+          attributeFilter:[
+            "data-discrete-phase-init",
+            "data-exact-shared-boundary-count",
+            "data-exact-shared-boundary-groups"
+          ]
+        });
+      }
+      snapshot();
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 200);
+      setTimeout(snapshot, 800);
+    });
+  </script>
+</body>
+</html>
