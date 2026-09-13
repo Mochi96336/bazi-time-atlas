@@ -24,6 +24,45 @@
     document.body.style.height = `${requestedHeight}px`;
     frame.src = new URL(requestedTarget, location.href).href;
 
+    function ringHitDiagnostic(childWindow, doc, instrument) {
+      const svg = doc.querySelector("#kinetic-wheel");
+      const ctm = svg?.getScreenCTM();
+      const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
+      if (!svg || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value))) {
+        return { mask:"00000", classes:"geometry-unavailable" };
+      }
+
+      const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
+        .map(path => {
+          const point = path.getPointAtLength(0);
+          return Math.hypot(point.x - center[0], point.y - center[1]);
+        })
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (radii.length !== 6) return { mask:"00000", classes:`guide-count-${radii.length}` };
+
+      const expected = ["year-sector", "month-sector", "day-sector", "term-sector", "zodiac-sector"];
+      // Offset one degree from the selected ray so the cursor halo itself does
+      // not win hit-testing while still staying inside the selected 6° cell.
+      const angle = -89 * Math.PI / 180;
+      const hits = expected.map((className, index) => {
+        const radius = (radii[index] + radii[index + 1]) / 2;
+        const local = new childWindow.DOMPoint(
+          center[0] + Math.cos(angle) * radius,
+          center[1] + Math.sin(angle) * radius
+        ).matrixTransform(ctm);
+        const hit = doc.elementFromPoint(local.x, local.y);
+        return {
+          ok:Boolean(hit?.classList?.contains(className)),
+          className:hit?.getAttribute?.("class") ?? hit?.tagName ?? "none"
+        };
+      });
+      return {
+        mask:hits.map(hit => hit.ok ? "1" : "0").join(""),
+        classes:hits.map(hit => hit.className).join(" | ")
+      };
+    }
+
     function snapshot() {
       const childWindow = frame.contentWindow;
       const doc = frame.contentDocument;
@@ -34,6 +73,7 @@
       const secondary = [".timeline-dock", ".state-strip", ".atlas-notes", ".sources-panel"]
         .map(selector => doc.querySelector(selector))
         .filter(Boolean);
+      const ringHits = ringHitDiagnostic(childWindow, doc, instrument);
       probe.dataset.ready = "true";
       probe.dataset.innerWidth = String(childWindow.innerWidth);
       probe.dataset.innerHeight = String(childWindow.innerHeight);
@@ -47,6 +87,8 @@
       probe.dataset.secondaryHidden = String(secondary.every(node => childWindow.getComputedStyle(node).display === "none"));
       probe.dataset.fanClip = instrument?.dataset.fanClip ?? "not-applicable";
       probe.dataset.masterGeometry = instrument?.dataset.masterGeometry ?? "not-applicable";
+      probe.dataset.ringHitMask = ringHits.mask;
+      probe.dataset.ringHitClasses = ringHits.classes;
       probe.dataset.target = frame.src;
     }
 
