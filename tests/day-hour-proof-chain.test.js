@@ -1,0 +1,139 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  currentRecurrenceDayHourProof,
+  dayHourResolutionProof
+} from "../src/recurrence/day-hour-proof-chain.js";
+
+test("current deep-time recurrence stops first at the missing absolute seasonal epoch", () => {
+  const proof = currentRecurrenceDayHourProof({ identity:false, astronomyWithinRange:true });
+  assert.equal(proof.firstHardBlocker, "absolute-seasonal-epoch");
+  assert.equal(proof.day.resolved, false);
+  assert.equal(proof.hour.resolved, false);
+  assert.ok(proof.day.blockers.includes("absoluteSeasonalEpoch"));
+  assert.ok(proof.day.blockers.includes("earthRotationBridge"));
+  assert.ok(proof.day.blockers.includes("civilZoneBound"));
+  assert.ok(proof.day.blockers.includes("dayBoundaryBound"));
+  assert.equal(proof.stages.find(stage => stage.id === "relative-term-geometry").status, "satisfied");
+  assert.equal(proof.stages.find(stage => stage.id === "sexagenary-day-arithmetic").status, "satisfied");
+});
+
+test("identity bypasses cross-era projection without pretending the missing deep-time models exist", () => {
+  const proof = currentRecurrenceDayHourProof({ identity:true, astronomyWithinRange:true });
+  assert.equal(proof.day.status, "identical-by-definition");
+  assert.equal(proof.hour.status, "identical-by-definition");
+  assert.equal(proof.day.resolved, true);
+  assert.equal(proof.hour.resolved, true);
+  assert.equal(proof.stages.find(stage => stage.id === "absolute-seasonal-epoch").status, "missing-deep-time-model");
+});
+
+test("Day becomes resolvable only after the absolute epoch is projected through Earth rotation and civil day rules", () => {
+  const proof = dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:true,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:null,
+    longitudeBound:false,
+    equationOfTimeModel:false,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  });
+  assert.equal(proof.day.resolved, true);
+  assert.equal(proof.day.blockers.length, 0);
+  assert.equal(proof.hour.resolved, false);
+  assert.deepEqual(proof.hour.blockers, ["clockBasisBound"]);
+});
+
+test("civil-clock Hour needs no longitude or Equation of Time once Day is resolved", () => {
+  const proof = dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:true,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:"civil",
+    longitudeBound:false,
+    equationOfTimeModel:false,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  });
+  assert.equal(proof.day.resolved, true);
+  assert.equal(proof.hour.resolved, true);
+  assert.equal(proof.needsLongitude, false);
+  assert.equal(proof.needsEquationOfTime, false);
+  assert.equal(proof.stages.find(stage => stage.id === "longitude").status, "not-required");
+  assert.equal(proof.stages.find(stage => stage.id === "equation-of-time").status, "not-required");
+});
+
+test("mean-solar Hour adds longitude but not Equation of Time", () => {
+  const proof = dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:true,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:"mean-solar",
+    longitudeBound:false,
+    equationOfTimeModel:false,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  });
+  assert.equal(proof.hour.resolved, false);
+  assert.deepEqual(proof.hour.blockers, ["longitudeBound"]);
+  assert.equal(proof.needsLongitude, true);
+  assert.equal(proof.needsEquationOfTime, false);
+});
+
+test("apparent-solar Hour requires both longitude and an epoch-valid Equation of Time model", () => {
+  const blocked = dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:true,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:"apparent-solar",
+    longitudeBound:true,
+    equationOfTimeModel:false,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  });
+  assert.equal(blocked.hour.resolved, false);
+  assert.deepEqual(blocked.hour.blockers, ["equationOfTimeModel"]);
+
+  const resolved = dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:true,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:"apparent-solar",
+    longitudeBound:true,
+    equationOfTimeModel:true,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  });
+  assert.equal(resolved.hour.resolved, true);
+});
+
+test("invalid clock basis fails closed", () => {
+  assert.throws(() => dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:true,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:"sundial-ish",
+    longitudeBound:true,
+    equationOfTimeModel:true,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  }), /clockBasis/);
+});
