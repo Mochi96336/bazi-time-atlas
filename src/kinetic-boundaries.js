@@ -1,3 +1,4 @@
+import "./ring-visibility-controls.js";
 import "./kinetic-fan-guard.js";
 import {
   formatSolarTermEvent,
