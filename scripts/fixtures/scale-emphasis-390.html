@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px scale emphasis harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px scale emphasis probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    const RINGS = ["hour", "day", "solar", "month", "year"];
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    function opacity(win, doc, id) {
+      return Number(win.getComputedStyle(doc.querySelector(`#${id}-track`)).opacity);
+    }
+
+    function displays(win, doc) {
+      return Object.fromEntries(RINGS.map(id => [id, win.getComputedStyle(doc.querySelector(`#${id}-track`)).display]));
+    }
+
+    function snapshotOpacities(win, doc, prefix) {
+      for (const id of RINGS) probe.dataset[`${prefix}${id[0].toUpperCase()}${id.slice(1)}Opacity`] = String(opacity(win, doc, id));
+      probe.dataset[`${prefix}ZodiacOpacity`] = String(opacity(win, doc, "zodiac"));
+    }
+
+    function settle(callback) {
+      requestAnimationFrame(() => requestAnimationFrame(callback));
+    }
+
+    frame.addEventListener("load", () => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      if (!win || !doc || !instrument) return;
+
+      const disableTransitions = doc.createElement("style");
+      disableTransitions.textContent = "#hour-track,#day-track,#solar-track,#zodiac-track,#month-track,#year-track,.ring-legend-row{transition:none!important}";
+      doc.head.append(disableTransitions);
+
+      const waitForApp = () => {
+        if (!instrument.dataset.selectedInstantMs || !instrument.dataset.scaleWindow) {
+          setTimeout(waitForApp, 50);
+          return;
+        }
+
+        const selectedBefore = instrument.dataset.selectedInstantMs;
+        probe.dataset.innerWidth = String(win.innerWidth);
+        probe.dataset.initialWindow = instrument.dataset.scaleWindow;
+        probe.dataset.initialFocus = instrument.dataset.scaleFocusRings ?? "";
+        probe.dataset.initialContext = instrument.dataset.scaleContextRings ?? "";
+        probe.dataset.initialAmbient = instrument.dataset.scaleAmbientRings ?? "";
+        probe.dataset.initialReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
+        snapshotOpacities(win, doc, "year");
+
+        doc.querySelector('[data-scale="day"]')?.click();
+        settle(() => {
+          probe.dataset.dayWindow = instrument.dataset.scaleWindow ?? "";
+          probe.dataset.dayFocus = instrument.dataset.scaleFocusRings ?? "";
+          probe.dataset.dayContext = instrument.dataset.scaleContextRings ?? "";
+          probe.dataset.dayAmbient = instrument.dataset.scaleAmbientRings ?? "";
+          probe.dataset.dayReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
+          probe.dataset.daySelectedInstant = instrument.dataset.selectedInstantMs ?? "";
+          snapshotOpacities(win, doc, "day");
+
+          doc.querySelector('[data-scale="cycle"]')?.click();
+          settle(() => {
+            probe.dataset.cycleWindow = instrument.dataset.scaleWindow ?? "";
+            probe.dataset.cycleFocus = instrument.dataset.scaleFocusRings ?? "";
+            probe.dataset.cycleContext = instrument.dataset.scaleContextRings ?? "";
+            probe.dataset.cycleAmbient = instrument.dataset.scaleAmbientRings ?? "";
+            probe.dataset.cycleReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
+            probe.dataset.cycleSelectedInstant = instrument.dataset.selectedInstantMs ?? "";
+            snapshotOpacities(win, doc, "cycle");
+
+            const displayState = displays(win, doc);
+            probe.dataset.allPrimaryDisplayed = String(Object.values(displayState).every(value => value !== "none"));
+            probe.dataset.zodiacDisplayed = String(win.getComputedStyle(doc.querySelector("#zodiac-track")).display !== "none");
+            probe.dataset.selectedInstantBefore = selectedBefore;
+            probe.dataset.activeScaleButtons = String(doc.querySelectorAll('.scale-button.active').length);
+            probe.dataset.currentScaleButton = doc.querySelector('.scale-button.active')?.dataset.scale ?? "";
+            probe.dataset.currentAriaScale = doc.querySelector('.scale-button[aria-current="true"]')?.dataset.scale ?? "";
+            probe.dataset.ready = "true";
+          });
+        });
+      };
+      waitForApp();
+    });
+  </script>
+</body>
+</html>
