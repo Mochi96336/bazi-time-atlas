@@ -18,17 +18,26 @@ import {
   MOTION_TRACE_MIN_DEGREES,
   signedMotionArcPath
 } from "./motion-trace.js";
+import {
+  referenceFrameOffset,
+  rotationInReferenceFrame,
+  validReferenceRing
+} from "./reference-frame.js";
 import { addTitle, setActiveSector, svgElement } from "./svg-renderer.js";
 
 const MOTION_TRACE_TTL_MS = 420;
+const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
 
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
   const termSectorNodes = [];
   const zodiacSectorNodes = [];
   const motionTraceNodes = new Map();
-  const lastRotation = new Map();
+  const worldRotations = new Map();
+  const lastRenderedRotation = new Map();
   const motionTimers = new Map();
+  let frameFlushQueued = false;
+  let resetTraceBaselineBeforeFlush = false;
 
   const groupFor = id => svg.querySelector(`#${ringModel(id).groupId}`);
   const guides = svg.querySelector("#guide-layer");
@@ -175,27 +184,36 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     });
   }
 
-  function updateMotionTrace(id, rotationDegrees) {
+  function clearMotionTrace(id) {
+    const node = motionTraceNodes.get(id);
+    if (node) node.classList.remove("is-visible");
+    const timer = motionTimers.get(id);
+    if (timer) clearTimeout(timer);
+    motionTimers.delete(id);
+  }
+
+  function clearAllMotionTraces() {
+    RINGS.forEach(ring => clearMotionTrace(ring.id));
+  }
+
+  function updateMotionTrace(id, rotationDegrees, cursorAngle) {
     const node = motionTraceNodes.get(id);
     if (!node) return;
-    const previous = lastRotation.get(id);
-    lastRotation.set(id, rotationDegrees);
+    const previous = lastRenderedRotation.get(id);
+    lastRenderedRotation.set(id, rotationDegrees);
     if (!Number.isFinite(previous)) return;
 
     const delta = rotationDegrees - previous;
     node.dataset.lastDelta = delta.toFixed(4);
     if (node.dataset.layerHidden === "true") {
-      node.classList.remove("is-visible");
-      const priorTimer = motionTimers.get(id);
-      if (priorTimer) clearTimeout(priorTimer);
-      motionTimers.delete(id);
+      clearMotionTrace(id);
       return;
     }
     if (Math.abs(delta) < MOTION_TRACE_MIN_DEGREES) return;
 
     const model = ringModel(id);
     const radius = (model.innerRadius + model.outerRadius) / 2;
-    const d = signedMotionArcPath(WHEEL_CENTER, radius, CURSOR_ANGLE, delta);
+    const d = signedMotionArcPath(WHEEL_CENTER, radius, cursorAngle, delta);
     if (!d) return;
     node.setAttribute("d", d);
     node.classList.add("is-visible");
@@ -206,6 +224,63 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       node.classList.remove("is-visible");
       motionTimers.delete(id);
     }, MOTION_TRACE_TTL_MS));
+  }
+
+  function frameSettings() {
+    const referenceId = validReferenceRing(svg.dataset.referenceRing)
+      ? svg.dataset.referenceRing
+      : null;
+    const anchorRotation = Number(svg.dataset.referenceAnchorRotation);
+    const frameOffset = referenceFrameOffset({
+      referenceId,
+      anchorRotation,
+      worldRotations
+    });
+    return { referenceId, frameOffset };
+  }
+
+  function flushReferenceFrame() {
+    frameFlushQueued = false;
+    if (resetTraceBaselineBeforeFlush) {
+      resetTraceBaselineBeforeFlush = false;
+      clearAllMotionTraces();
+      lastRenderedRotation.clear();
+    }
+
+    const { referenceId, frameOffset } = frameSettings();
+    const cursorAngle = CURSOR_ANGLE - frameOffset;
+    svg.dataset.referenceFrame = referenceId ?? "world";
+    svg.dataset.referenceFrameOffsetDegrees = frameOffset.toFixed(4);
+    svg.dataset.referenceCursorAngle = cursorAngle.toFixed(4);
+
+    if (cursorLayer) {
+      cursorLayer.setAttribute("transform", rotationTransform(-frameOffset, WHEEL_CENTER));
+    }
+
+    const renderedRotations = new Map();
+    RINGS.forEach(ring => {
+      const worldRotation = worldRotations.get(ring.id);
+      if (!Number.isFinite(worldRotation)) return;
+      const renderedRotation = rotationInReferenceFrame(worldRotation, frameOffset);
+      if (!Number.isFinite(renderedRotation)) return;
+      const group = groupFor(ring.id);
+      group.setAttribute("transform", rotationTransform(renderedRotation, WHEEL_CENTER));
+      group.dataset.worldRotation = worldRotation.toFixed(4);
+      group.dataset.renderedRotation = renderedRotation.toFixed(4);
+      renderedRotations.set(ring.id, renderedRotation);
+    });
+
+    RINGS.forEach(ring => {
+      const renderedRotation = renderedRotations.get(ring.id);
+      if (Number.isFinite(renderedRotation)) updateMotionTrace(ring.id, renderedRotation, cursorAngle);
+    });
+  }
+
+  function scheduleReferenceFrameFlush({ resetTraceBaseline = false } = {}) {
+    if (resetTraceBaseline) resetTraceBaselineBeforeFlush = true;
+    if (frameFlushQueued) return;
+    frameFlushQueued = true;
+    queueMicrotask(flushReferenceFrame);
   }
 
   function renderCursor() {
@@ -233,22 +308,26 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   }
 
   function setCyclePose(id, rotationDegrees, activeIndex) {
-    groupFor(id).setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
+    worldRotations.set(id, rotationDegrees);
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
-    updateMotionTrace(id, rotationDegrees);
+    scheduleReferenceFrameFlush();
   }
 
   function setSolarRingPose(rotationDegrees, solarLongitude) {
-    solarTrack.setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
+    worldRotations.set("solar", rotationDegrees);
     setActiveSector(termSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 15) % 24);
-    updateMotionTrace("solar", rotationDegrees);
+    scheduleReferenceFrameFlush();
   }
 
   function setZodiacRingPose(rotationDegrees, solarLongitude) {
-    zodiacTrack.setAttribute("transform", rotationTransform(rotationDegrees, WHEEL_CENTER));
+    worldRotations.set("zodiac", rotationDegrees);
     setActiveSector(zodiacSectorNodes, Math.floor(((solarLongitude % 360) + 360) % 360 / 30) % 12);
-    updateMotionTrace("zodiac", rotationDegrees);
+    scheduleReferenceFrameFlush();
   }
+
+  svg.addEventListener(REFERENCE_FRAME_EVENT, () => {
+    scheduleReferenceFrameFlush({ resetTraceBaseline:true });
+  });
 
   return Object.freeze({
     renderStatic,
