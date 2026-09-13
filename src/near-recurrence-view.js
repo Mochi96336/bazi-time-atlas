@@ -4,6 +4,8 @@ const NS = "http://www.w3.org/2000/svg";
 const instrument = document.querySelector("#recurrence-instrument");
 const ranking = document.querySelector("#near-recurrence-ranking");
 const chart = document.querySelector("#near-recurrence-chart");
+const deepTimeBadge = document.querySelector("#deep-time-badge");
+let currentSearch = null;
 
 function svgEl(tag, attrs = {}, parent = chart) {
   const node = document.createElementNS(NS, tag);
@@ -22,25 +24,61 @@ function baseYearFromInstrument() {
   return match ? Number(match[1]) : null;
 }
 
+function selectedDeltaFromInstrument() {
+  const value = Number(instrument?.dataset.deltaYears);
+  return Number.isFinite(value) ? value : null;
+}
+
 function formatYears(value) {
   return value.toLocaleString("en-US");
+}
+
+function selectCandidate(candidate) {
+  window.dispatchEvent(new CustomEvent("recurrence:select-delta", {
+    detail: {
+      deltaYears: candidate.deltaYears,
+      source: "near-recurrence"
+    }
+  }));
+  instrument?.scrollIntoView({
+    behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "start"
+  });
 }
 
 function renderRanking(search) {
   if (!ranking) return;
   ranking.replaceChildren();
   search.ranked.slice(0, 6).forEach((candidate, index) => {
-    const row = document.createElement("div");
+    const row = document.createElement("button");
+    row.type = "button";
     row.className = `near-ranking-row${index === 0 ? " best" : ""}`;
     row.dataset.deltaYears = String(candidate.deltaYears);
     row.dataset.maxResidualHours = candidate.maxAbsHours.toFixed(6);
+    row.setAttribute(
+      "aria-label",
+      `跳到 +${formatYears(candidate.deltaYears)} 年，十二節最大殘差 ${candidate.maxAbsHours.toFixed(2)} 小時`
+    );
     row.innerHTML = `
       <span>${index + 1}</span>
       <strong>+${formatYears(candidate.deltaYears)} 年</strong>
       <em>${candidate.maxAbsHours.toFixed(2)} h max</em>
       <small>${candidate.rmsHours.toFixed(2)} h RMS</small>
     `;
+    row.addEventListener("click", () => selectCandidate(candidate));
     ranking.appendChild(row);
+  });
+}
+
+function makeDotInteractive(dot, candidate) {
+  dot.setAttribute("role", "button");
+  dot.setAttribute("tabindex", "0");
+  dot.setAttribute("aria-label", `跳到 +${formatYears(candidate.deltaYears)} 年`);
+  dot.addEventListener("click", () => selectCandidate(candidate));
+  dot.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    selectCandidate(candidate);
   });
 }
 
@@ -74,6 +112,7 @@ function renderChart(search) {
       "data-delta-years":candidate.deltaYears,
       "data-max-residual-hours":candidate.maxAbsHours.toFixed(6)
     });
+    makeDotInteractive(dot, candidate);
     const title = document.createElementNS(NS, "title");
     title.textContent = `+${formatYears(candidate.deltaYears)} 年 · max ${candidate.maxAbsHours.toFixed(2)} h · RMS ${candidate.rmsHours.toFixed(2)} h`;
     dot.appendChild(title);
@@ -86,11 +125,40 @@ function renderChart(search) {
   }
 }
 
+function renderSelection() {
+  const selectedDelta = selectedDeltaFromInstrument();
+  const exactCandidate = currentSearch?.chronological.find(candidate => candidate.deltaYears === selectedDelta) ?? null;
+  const deep = Number.isFinite(selectedDelta) && selectedDelta > 24_000;
+
+  if (deepTimeBadge) deepTimeBadge.hidden = !deep;
+  setText("deep-time-badge-value", deep ? `+${formatYears(selectedDelta)} 年` : "—");
+
+  ranking?.querySelectorAll(".near-ranking-row").forEach(row => {
+    const selected = Number(row.dataset.deltaYears) === selectedDelta;
+    row.classList.toggle("selected", selected);
+    row.setAttribute("aria-pressed", String(selected));
+  });
+  chart?.querySelectorAll(".near-dot").forEach(dot => {
+    const selected = Number(dot.dataset.deltaYears) === selectedDelta;
+    dot.classList.toggle("selected", selected);
+    dot.setAttribute("aria-pressed", String(selected));
+  });
+
+  if (exactCandidate) {
+    instrument.dataset.nearSearchSelectedDeltaYears = String(exactCandidate.deltaYears);
+    instrument.dataset.nearSearchSelectedMaxResidualHours = exactCandidate.maxAbsHours.toFixed(6);
+  } else {
+    delete instrument.dataset.nearSearchSelectedDeltaYears;
+    delete instrument.dataset.nearSearchSelectedMaxResidualHours;
+  }
+}
+
 function renderSearch(baseYear) {
   try {
     const search = rankExactDiscreteAstronomyCandidates(baseYear);
     const best = search.best;
     if (!best) throw new Error("no future exact-discrete candidate exists inside the model horizon");
+    currentSearch = search;
 
     renderRanking(search);
     renderChart(search);
@@ -104,7 +172,9 @@ function renderSearch(baseYear) {
     instrument.dataset.nearSearchBestMaxResidualHours = best.maxAbsHours.toFixed(6);
     instrument.dataset.nearSearchBestRmsHours = best.rmsHours.toFixed(6);
     instrument.dataset.nearSearchLastDeltaYears = String(search.chronological.at(-1).deltaYears);
+    renderSelection();
   } catch (error) {
+    currentSearch = null;
     ranking?.replaceChildren();
     chart?.replaceChildren();
     setText("near-candidate-count", "—");
@@ -116,18 +186,23 @@ function renderSearch(baseYear) {
     delete instrument.dataset.nearSearchBestMaxResidualHours;
     delete instrument.dataset.nearSearchBestRmsHours;
     delete instrument.dataset.nearSearchLastDeltaYears;
+    delete instrument.dataset.nearSearchSelectedDeltaYears;
+    delete instrument.dataset.nearSearchSelectedMaxResidualHours;
   }
 }
 
-function refresh() {
+function refreshSearch() {
   const baseYear = baseYearFromInstrument();
   if (Number.isFinite(baseYear)) renderSearch(baseYear);
 }
 
 if (instrument && ranking && chart) {
-  new MutationObserver(refresh).observe(instrument, {
+  new MutationObserver(records => {
+    if (records.some(record => record.attributeName === "data-base-date")) refreshSearch();
+    else if (records.some(record => record.attributeName === "data-delta-years")) renderSelection();
+  }).observe(instrument, {
     attributes:true,
-    attributeFilter:["data-base-date"]
+    attributeFilter:["data-base-date", "data-delta-years"]
   });
-  queueMicrotask(refresh);
+  queueMicrotask(refreshSearch);
 }

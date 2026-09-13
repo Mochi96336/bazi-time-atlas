@@ -5,6 +5,7 @@ import {
   recurrenceState,
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
+import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -12,6 +13,8 @@ const CY = 820;
 const CURSOR_ANGLE = -90;
 const FAN_START = -170;
 const FAN_END = -10;
+const MAX_GREGORIAN_YEAR = 10_000_000;
+const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_DAY_PERIOD;
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -190,6 +193,19 @@ function parseDateParam(value) {
   return validateGregorianDate(date) ? date : null;
 }
 
+function maxSelectableDelta(baseYear = currentBase.year) {
+  const gregorianLimit = Math.max(0, MAX_GREGORIAN_YEAR - baseYear);
+  const fineLimit = Math.min(FINE_SLIDER_MAX, gregorianLimit);
+  const modelUpperYear = BERGER_MODEL.epochYear + BERGER_MODEL.validityYearsFromEpoch;
+  const modelForwardLimit = Math.max(0, Math.floor(modelUpperYear - baseYear));
+  return Math.min(gregorianLimit, Math.max(fineLimit, modelForwardLimit));
+}
+
+function clampDelta(value) {
+  const numeric = Math.round(Number(value) || 0);
+  return Math.max(0, Math.min(maxSelectableDelta(), numeric));
+}
+
 function applyQueryPreset() {
   const params = new URLSearchParams(location.search);
   const queryDate = parseDateParam(params.get("date"));
@@ -202,9 +218,7 @@ function applyQueryPreset() {
 
   const rawDelta = params.get("delta");
   const parsedDelta = rawDelta === null ? 0 : Number(rawDelta);
-  const queryDelta = Number.isFinite(parsedDelta)
-    ? Math.max(0, Math.min(GLOBAL_GREGORIAN_YEAR_DAY_PERIOD, Math.round(parsedDelta)))
-    : 0;
+  const queryDelta = Number.isFinite(parsedDelta) ? clampDelta(parsedDelta) : 0;
 
   if (queryDate || rawDelta !== null) instrument.dataset.queryPreset = "1";
   return queryDelta;
@@ -213,6 +227,32 @@ function applyQueryPreset() {
 function formatDate(date) {
   const pad = value => String(value).padStart(2, "0");
   return `${date.year}-${pad(date.month)}-${pad(date.day)}`;
+}
+
+function syncQueryState() {
+  const url = new URL(location.href);
+  url.searchParams.set("date", formatDate(currentBase));
+  url.searchParams.set("delta", String(currentDelta));
+  history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+function updateDeltaControlBounds() {
+  const max = maxSelectableDelta();
+  deltaNumber.max = String(max);
+  instrument.dataset.maxSelectableDeltaYears = String(max);
+}
+
+function updateDeltaScaleMode() {
+  const deep = currentDelta > FINE_SLIDER_MAX;
+  deltaSlider.value = String(Math.min(currentDelta, FINE_SLIDER_MAX));
+  deltaSlider.dataset.outOfRange = String(deep);
+  instrument.dataset.deltaMode = deep ? "deep" : "fine";
+  setText(
+    "delta-range-note",
+    deep
+      ? `深時間 +${currentDelta.toLocaleString("en-US")} 年；滑桿仍保留 0–24,000 年細部尺度。`
+      : "滑桿：0–24,000 年；深時間 exact 候選可由下方排名直接跳轉。"
+  );
 }
 
 function stateMeaning(state, localYears) {
@@ -244,14 +284,14 @@ function rebuildCandidates() {
     button.type = "button";
     button.dataset.deltaYears = String(state.deltaYears);
     button.textContent = state.deltaYears === localYears ? `局部 ${state.deltaYears}` : state.deltaYears.toLocaleString("en-US");
-    button.addEventListener("click", () => setDelta(state.deltaYears));
+    button.addEventListener("click", () => setDelta(state.deltaYears, { source:"canonical" }));
     candidateButtons.appendChild(button);
 
     const row = document.createElement("div");
     row.className = "milestone-row";
     row.dataset.deltaYears = String(state.deltaYears);
     row.innerHTML = `<strong>${state.deltaYears.toLocaleString("en-US")}</strong>${phaseCell(state.closed.gregorian, state.phases.gregorian)}${phaseCell(state.closed.year, state.phases.year)}${phaseCell(state.closed.day, state.phases.day)}<span>${stateMeaning(state, localYears)}</span>`;
-    row.addEventListener("click", () => setDelta(state.deltaYears));
+    row.addEventListener("click", () => setDelta(state.deltaYears, { source:"milestone" }));
     milestoneRows.appendChild(row);
   });
 
@@ -307,12 +347,14 @@ function renderState() {
   milestoneRows.querySelectorAll(".milestone-row").forEach(row => row.classList.toggle("active", Number(row.dataset.deltaYears) === currentDelta));
 }
 
-function setDelta(value) {
-  const next = Math.max(0, Math.min(GLOBAL_GREGORIAN_YEAR_DAY_PERIOD, Math.round(Number(value) || 0)));
+function setDelta(value, options = {}) {
+  const next = clampDelta(value);
   currentDelta = next;
   deltaNumber.value = String(next);
-  deltaSlider.value = String(next);
+  instrument.dataset.deltaSource = options.source ?? "control";
+  updateDeltaScaleMode();
   renderState();
+  if (options.syncQuery !== false) syncQueryState();
 }
 
 function updateBaseDate() {
@@ -324,14 +366,20 @@ function updateBaseDate() {
   }
   currentBase = next;
   instrument.dataset.baseDateValid = "true";
+  updateDeltaControlBounds();
   rebuildCandidates();
-  renderState();
+  setDelta(currentDelta, { source:"base-date" });
 }
 
 function bindControls() {
   [yearInput, monthInput, dayInput].forEach(input => input.addEventListener("change", updateBaseDate));
-  deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value));
-  deltaSlider.addEventListener("input", () => setDelta(deltaSlider.value));
+  deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value, { source:"number" }));
+  deltaSlider.addEventListener("input", () => setDelta(deltaSlider.value, { source:"slider" }));
+  window.addEventListener("recurrence:select-delta", event => {
+    const deltaYears = Number(event.detail?.deltaYears);
+    if (!Number.isFinite(deltaYears)) return;
+    setDelta(deltaYears, { source:event.detail?.source ?? "external" });
+  });
 }
 
 function initialize() {
@@ -343,8 +391,9 @@ function initialize() {
   const initialDelta = applyQueryPreset();
   bindControls();
   instrument.dataset.baseDateValid = "true";
+  updateDeltaControlBounds();
   rebuildCandidates();
-  setDelta(initialDelta);
+  setDelta(initialDelta, { syncQuery:false, source:"initial" });
 }
 
 initialize();
