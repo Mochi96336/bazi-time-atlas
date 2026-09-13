@@ -1,4 +1,5 @@
 import "./ring-visibility-controls.js";
+import "./discrete-phase-view.js";
 import "./kinetic-fan-guard.js";
 import {
   formatSolarTermEvent,
