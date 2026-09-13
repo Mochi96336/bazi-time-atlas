@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  SEASONAL_EPOCH_PIPELINE,
   SEASONAL_EPOCH_SOURCES,
   seasonalEpochSourceAudit
 } from "../src/recurrence/seasonal-epoch-source-audit.js";
@@ -16,6 +17,16 @@ test("source registry keeps long-term geometry separate from absolute state ephe
   assert.equal(byId["la2004-insolation-parameters"].capabilities.absoluteStateVector, false);
 });
 
+test("deep-time app pipeline cannot unlock from a state adapter alone", () => {
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
+  assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
+
+  const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
+  assert.equal(result.deepTimeSolverReady, false);
+  assert.equal(result.seasonalEpochSolverRequired, true);
+});
+
 test("1980-year recurrence lands inside DE441 state coverage but still needs app integration and a seasonal-epoch solver", () => {
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
   assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
@@ -29,6 +40,7 @@ test("1980-year recurrence lands inside DE441 state coverage but still needs app
   assert.equal(de441.ephemerisBasisCapable, true);
   assert.equal(de441.directSeasonalEpoch, false);
   assert.equal(de441.implementedAsBasis, false);
+  assert.equal(de441.deepTimeSolverReady, false);
   assert.equal(de441.reason, "qualified-ephemeris-basis-not-integrated");
 });
 
