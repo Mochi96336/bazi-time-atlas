@@ -74,7 +74,7 @@ function ensureMonthBoundaryPanel() {
     <div class="month-boundary-copy">
       <div class="eyebrow">BaZi month-boundary exposure</div>
       <h3>不是全年都偏，只在被交節邊界掃過的窗口可能分到另一個月。</h3>
-      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份的月界 sector 才會站在不同側；下方比例是 12 個窗口的聯集占 365.2422 日正規化年的比例，不是統計上的「八字錯誤率」。</p>
+      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份的月界 sector 才會站在不同側；下方比例是 12 個窗口的聯集占 365.2422 日正規化年的比例，不是統計上的「八字錯誤率」。其中立春同時是本站採用的年柱切換邊界，所以立春窗口也可能讓年柱站到不同側。</p>
     </div>
     <div class="month-boundary-stat">
       <span>窗口聯集</span>
@@ -99,6 +99,7 @@ function renderMonthBoundaryExposure(result) {
   const exposure = monthBoundaryDisagreementExposureFromResiduals(result);
   const grid = panel.querySelector("#month-boundary-window-grid");
   const maxWindow = Math.max(...exposure.windows.map(window => window.widthHours), 1e-9);
+  const liChunWindow = exposure.windows.find(window => window.name === "立春") ?? null;
 
   setText("month-boundary-exposure-hours", `${exposure.unionExposureHours.toFixed(2)} h`);
   setText("month-boundary-exposure-percent", `${exposure.yearPercent.toFixed(3)}% of normalized year`);
@@ -115,13 +116,14 @@ function renderMonthBoundaryExposure(result) {
 
   grid?.replaceChildren();
   exposure.windows.forEach(window => {
+    const isYearBoundary = window.name === "立春";
     const item = document.createElement("div");
-    item.className = `month-boundary-window ${window.direction}`;
+    item.className = `month-boundary-window ${window.direction}${isYearBoundary ? " year-boundary" : ""}`;
     item.dataset.term = window.name;
     item.dataset.windowHours = window.widthHours.toFixed(6);
     item.style.setProperty("--window-width", `${Math.max(0, window.widthHours / maxWindow * 100).toFixed(3)}%`);
     item.innerHTML = `
-      <span>${window.name}</span>
+      <span>${window.name}${isYearBoundary ? " · 年界" : ""}</span>
       <i aria-hidden="true"><b></b></i>
       <strong>${window.widthHours.toFixed(2)} h</strong>
     `;
@@ -137,6 +139,7 @@ function renderMonthBoundaryExposure(result) {
   instrument.dataset.monthBoundaryMergedWindowCount = String(exposure.mergedWindows.length);
   instrument.dataset.monthBoundaryLargestTerm = exposure.largestWindow?.name ?? "none";
   instrument.dataset.monthBoundaryLargestWindowHours = (exposure.largestWindow?.widthHours ?? 0).toFixed(6);
+  instrument.dataset.yearBoundaryLiChunWindowHours = (liChunWindow?.widthHours ?? 0).toFixed(6);
   instrument.dataset.monthBoundaryClosed = String(exposure.closed);
 }
 
@@ -156,6 +159,7 @@ function renderMonthBoundaryUnavailable() {
   delete instrument.dataset.monthBoundaryMergedWindowCount;
   delete instrument.dataset.monthBoundaryLargestTerm;
   delete instrument.dataset.monthBoundaryLargestWindowHours;
+  delete instrument.dataset.yearBoundaryLiChunWindowHours;
   delete instrument.dataset.monthBoundaryClosed;
 }
 
