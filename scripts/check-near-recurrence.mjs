@@ -54,8 +54,9 @@ if ((dom.match(/class="near-dot/g) ?? []).length !== 41) {
 if ((dom.match(/class="near-ranking-row/g) ?? []).length !== 6) {
   throw new Error(`expected top-six near-recurrence ranking: ${url}`);
 }
-if (!new RegExp(`\+${bestDelta.toLocaleString("en-US")} 年`).test(dom)) {
-  throw new Error(`best candidate headline missing: ${url}`);
+const bestLabel = `+${bestDelta.toLocaleString("en-US")} 年`;
+if (!dom.includes(bestLabel)) {
+  throw new Error(`best candidate headline missing (${bestLabel}): ${url}`);
 }
 
 console.log(`[near-recurrence] PASS ${count} candidates; best +${bestDelta} y; max=${bestMax.toFixed(3)} h; RMS=${bestRms.toFixed(3)} h; horizon=+${lastDelta} y`);
