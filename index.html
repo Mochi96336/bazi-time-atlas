@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="把年、月、日干支、節氣與熱帶黃道放進同一個可拖動的多速時間圓盤。">
+  <meta name="description" content="把年、月、日、時干支、節氣與熱帶黃道放進同一個可拖動的多速時間圓盤。">
   <title>BaZi Time Atlas · Kinetic Atlas</title>
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./kinetic-atlas.css">
@@ -25,7 +25,7 @@
       <div class="atlas-intro-copy">
         <div class="eyebrow">One instant · multiple clocks</div>
         <h1>同一個時間，<br>每一層跑得不一樣。</h1>
-        <p class="lede">把年柱、月柱、日柱、太陽黃經與熱帶黃道接成同一台時間儀器。拖動時間時，連續層會滑動、離散層會在自己的邊界跳格；重點不是「結果卡片」，而是看它們如何同步、錯位與重新相遇。</p>
+        <p class="lede">把年柱、月柱、日柱、時柱、太陽黃經與熱帶黃道接成同一台時間儀器。直接拖任一層會推動同一個時間：連續層滑動，離散層在自己的真實邊界跳格；重點不是「結果卡片」，而是看它們如何同步、錯位與重新相遇。</p>
       </div>
       <p class="atlas-principle">固定的徑向線代表同一個選定瞬間。所有圓環都必須穿過它，但沒有任何一層被強迫使用同一個速度或同一種週期。</p>
     </section>
@@ -44,6 +44,7 @@
       </div>
 
       <div class="ring-legend" aria-hidden="true">
+        <div class="ring-legend-row ring-hour"><i></i><span>時柱</span><strong id="hour-active">—</strong></div>
         <div class="ring-legend-row ring-year"><i></i><span>年柱</span><strong id="year-active">—</strong></div>
         <div class="ring-legend-row ring-month"><i></i><span>月柱</span><strong id="month-active">—</strong></div>
         <div class="ring-legend-row ring-day"><i></i><span>日柱</span><strong id="day-active">—</strong></div>
@@ -51,8 +52,9 @@
         <div class="ring-legend-row ring-zodiac"><i></i><span>黃道</span><strong id="zodiac-active">—</strong></div>
       </div>
 
-      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="年、月、日干支、節氣與熱帶黃道的巨大扇形時間圓盤">
+      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="年、月、日、時干支、節氣與熱帶黃道的巨大扇形時間圓盤">
         <g id="guide-layer"></g>
+        <g id="hour-track"></g>
         <g id="year-track"></g>
         <g id="month-track"></g>
         <g id="day-track"></g>
@@ -96,15 +98,15 @@
       <div class="state-cell"><span>Year pillar</span><strong id="state-year">—</strong><small>立春切換</small></div>
       <div class="state-cell"><span>Month pillar</span><strong id="state-month">—</strong><small>十二節切換</small></div>
       <div class="state-cell"><span>Day pillar</span><strong id="state-day">—</strong><small>60 日序列</small></div>
-      <div class="state-cell"><span>Hour pillar</span><strong id="state-hour">—</strong><small>暫列讀值</small></div>
+      <div class="state-cell"><span>Hour pillar</span><strong id="state-hour">—</strong><small>2 小時一格</small></div>
       <div class="state-cell"><span>Solar / Zodiac</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
     </section>
 
     <section class="atlas-notes">
       <div>
         <div class="eyebrow">How to read it</div>
-        <h2>不是五個圓餅圖，是五個相接的時間座標。</h2>
-        <p>年、月、日三層都畫成六十甲子的狀態輪；目前成立的干支會被固定游標切中。太陽層則使用真實的視黃經連續旋轉，二十四節氣與熱帶黃道只是這個 0°–360° 座標上的固定分區。因此拖一年時，日輪高速跳動、月輪在精確「節」界換格、年輪在立春瞬間換格；太陽／黃道層則平滑走完一圈。</p>
+        <h2>不是六個圓餅圖，是六個相接的時間座標。</h2>
+        <p>時、年、月、日四層都是六十甲子的狀態輪；目前成立的干支會被固定游標切中。時輪每兩小時跳一格，是最容易看見速度差的高速內環；日輪每日跳格，月輪只在精確「節」界換格，年輪在立春瞬間換格。太陽層則使用真實視黃經連續旋轉，熱帶黃道只是同一個 0°–360° 座標上的固定分區。</p>
       </div>
       <div>
         <div class="eyebrow">Next</div>
@@ -119,7 +121,7 @@
 
     <details class="sources-panel">
       <summary>資料與規則邊界</summary>
-      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只作固定 30° 分區，不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
+      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列，時柱沿十二個雙時辰推進。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只作固定 30° 分區，不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
     </details>
   </main>
 
