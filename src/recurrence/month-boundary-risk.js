@@ -1,4 +1,8 @@
-import { FIVE_TIGERS_MONTH_BRANCHES } from "../calendar/five-tigers.js";
+import {
+  FIVE_TIGERS_MONTH_BRANCHES,
+  monthPillarForYearStem
+} from "../calendar/five-tigers.js";
+import { sexagenaryYearPillarForLiChunYear } from "../calendar/sexagenary-year.js";
 import { solarTermShapeResiduals } from "./berger-orbit.js";
 
 const EPSILON_DAYS = 1e-12;
@@ -20,7 +24,27 @@ function monthTransitionAtLongitude(longitude) {
   return Object.freeze({ beforeBranch, afterBranch });
 }
 
-function freezeWindow(term) {
+function yearOffsetsAtLongitude(longitude) {
+  return Object.freeze({
+    before: longitude > LI_CHUN_LONGITUDE ? 1 : 0,
+    after: longitude >= LI_CHUN_LONGITUDE ? 1 : 0
+  });
+}
+
+function pillarState(cycleStartYear, yearOffset, monthBranch) {
+  const activeYearLabel = cycleStartYear + yearOffset;
+  const yearPillar = sexagenaryYearPillarForLiChunYear(activeYearLabel);
+  return Object.freeze({
+    activeYearLabel,
+    yearPillar: yearPillar.name,
+    yearStem: yearPillar.stem,
+    yearBranch: yearPillar.branch,
+    monthBranch,
+    monthPillar: monthPillarForYearStem(yearPillar.stem, monthBranch)
+  });
+}
+
+function freezeWindow(term, baseYear, targetYear, yearSequenceAligned) {
   const startDay = Math.min(term.baseOffsetDays, term.targetOffsetDays);
   const endDay = Math.max(term.baseOffsetDays, term.targetOffsetDays);
   const widthHours = (endDay - startDay) * 24;
@@ -30,15 +54,21 @@ function freezeWindow(term) {
       ? "target-earlier"
       : "aligned";
   const { beforeBranch, afterBranch } = monthTransitionAtLongitude(term.longitude);
+  const yearOffsets = yearOffsetsAtLongitude(term.longitude);
   const isYearBoundary = term.name === "立春";
 
   let baseWindowBranch = null;
   let targetWindowBranch = null;
   let baseYearSide = null;
   let targetYearSide = null;
+  let baseWindowPillars = null;
+  let targetWindowPillars = null;
+
   if (direction === "target-later") {
     baseWindowBranch = afterBranch;
     targetWindowBranch = beforeBranch;
+    baseWindowPillars = pillarState(baseYear, yearOffsets.after, afterBranch);
+    targetWindowPillars = pillarState(targetYear, yearOffsets.before, beforeBranch);
     if (isYearBoundary) {
       baseYearSide = "new";
       targetYearSide = "previous";
@@ -46,6 +76,8 @@ function freezeWindow(term) {
   } else if (direction === "target-earlier") {
     baseWindowBranch = beforeBranch;
     targetWindowBranch = afterBranch;
+    baseWindowPillars = pillarState(baseYear, yearOffsets.before, beforeBranch);
+    targetWindowPillars = pillarState(targetYear, yearOffsets.after, afterBranch);
     if (isYearBoundary) {
       baseYearSide = "previous";
       targetYearSide = "new";
@@ -65,8 +97,14 @@ function freezeWindow(term) {
     beforeBranch,
     afterBranch,
     monthTransition: `${beforeBranch}→${afterBranch}`,
+    beforeYearOffset: yearOffsets.before,
+    afterYearOffset: yearOffsets.after,
     baseWindowBranch,
     targetWindowBranch,
+    baseWindowPillars,
+    targetWindowPillars,
+    yearSequenceAligned,
+    pureBoundaryAttribution: yearSequenceAligned,
     isYearBoundary,
     pillarImpact: isYearBoundary ? "year+month" : "month-only",
     affectedPillars: Object.freeze(isYearBoundary ? ["year", "month"] : ["month"]),
@@ -98,7 +136,11 @@ export function monthBoundaryDisagreementExposureFromResiduals(residuals) {
     throw new TypeError("valid solar-term residual result required");
   }
 
-  const windows = Object.freeze(residuals.terms.map(freezeWindow));
+  const yearDelta = residuals.targetYear - residuals.baseYear;
+  const yearSequenceAligned = Number.isInteger(yearDelta) && mod(yearDelta, 60) === 0;
+  const windows = Object.freeze(
+    residuals.terms.map(term => freezeWindow(term, residuals.baseYear, residuals.targetYear, yearSequenceAligned))
+  );
   const mergedWindows = mergeLinearWindows(windows);
   const rawSweepHours = windows.reduce((sum, window) => sum + window.widthHours, 0);
   const unionExposureHours = mergedWindows.reduce(
@@ -120,6 +162,9 @@ export function monthBoundaryDisagreementExposureFromResiduals(residuals) {
     model: residuals.model,
     baseYear: residuals.baseYear,
     targetYear: residuals.targetYear,
+    yearDelta,
+    yearSequenceAligned,
+    fullPillarAttribution: yearSequenceAligned ? "boundary-isolated" : "mixed-with-year-sequence-offset",
     anchor: residuals.anchor,
     normalizationDays: residuals.normalizationDays,
     normalizedYearHours,
