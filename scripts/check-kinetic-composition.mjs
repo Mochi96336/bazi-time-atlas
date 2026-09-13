@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const DAY_MS = 86_400_000;
+const HOUR_PILLAR_MS = 7_200_000;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -47,7 +48,7 @@ if (attr(instrument, "data-master-geometry") !== "shared-fan" || attr(instrument
 if (!desktop.dom.includes('id="kinetic-master-fan-clip"') || !desktop.dom.includes('id="kinetic-fan-layer"')) {
   throw new Error(`desktop: fan clip/wrapper missing from SVG DOM: ${desktop.url}`);
 }
-for (const id of ["year-track", "month-track", "day-track", "solar-track", "zodiac-track"]) {
+for (const id of ["hour-track", "year-track", "month-track", "day-track", "solar-track", "zodiac-track"]) {
   const tag = tagById(desktop.dom, id);
   if (attr(tag, "data-fan-clipped") !== "true") throw new Error(`desktop: ${id} is not under the shared fan guard: ${desktop.url}`);
 }
@@ -71,13 +72,13 @@ if (![innerRadius, outerRadius, radiusRatio, cameraZoom, cameraX, cameraY, camer
 if (cameraMode !== "desktop" || Math.abs(cameraZoom - 1) > 1e-6 || Math.abs(cameraX) > 1e-6 || Math.abs(cameraWidth - 1200) > 1e-6 || Math.abs(cameraHeight - 760) > 1e-6) {
   throw new Error(`desktop: unexpected responsive camera (${cameraMode}, zoom=${cameraZoom}, box=${cameraX},${cameraY},${cameraWidth},${cameraHeight}): ${desktop.url}`);
 }
-if (outerRadius < 1100 || radiusRatio < 0.60) throw new Error(`desktop: disk curvature is too tight (inner=${innerRadius}, outer=${outerRadius}, ratio=${radiusRatio}): ${desktop.url}`);
+if (outerRadius < 1100 || radiusRatio < 0.55) throw new Error(`desktop: disk curvature is too tight (inner=${innerRadius}, outer=${outerRadius}, ratio=${radiusRatio}): ${desktop.url}`);
 const outerTopInView = center[1] - outerRadius - cameraY;
 const innerTopInView = center[1] - innerRadius - cameraY;
 if (outerTopInView < 70 || outerTopInView > 180 || innerTopInView <= outerTopInView || innerTopInView > 700) {
-  throw new Error(`desktop: five-ring stack is not fully framed (outerTop=${outerTopInView}, innerTop=${innerTopInView}, cameraY=${cameraY}): ${desktop.url}`);
+  throw new Error(`desktop: six-ring stack is not fully framed (outerTop=${outerTopInView}, innerTop=${innerTopInView}, cameraY=${cameraY}): ${desktop.url}`);
 }
-console.log(`[kinetic-composition] PASS desktop shared giant-disk geometry; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}, camera=${cameraMode}@${cameraZoom} box=${cameraX},${cameraY},${cameraWidth},${cameraHeight}: ${desktop.url}`);
+console.log(`[kinetic-composition] PASS desktop shared six-ring giant-disk geometry; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}, camera=${cameraMode}@${cameraZoom} box=${cameraX},${cameraY},${cameraWidth},${cameraHeight}: ${desktop.url}`);
 
 const mobile = dump("scripts/fixtures/mobile-390.html", 500, 844);
 const probe = tagById(mobile.dom, "probe");
@@ -117,8 +118,49 @@ if (Math.abs(mobileCameraX - 339.13) > 0.02 || Math.abs(mobileCameraY - 58) > 0.
 if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelTransform !== "matrix(1, 0, 0, 1, 0, 0)")) {
   throw new Error(`mobile: CSS still owns wheel zoom (widthRatio=${wheelWidthRatio}, transform=${wheelTransform}): ${mobile.url}`);
 }
-if (ringHitMask !== "11111") throw new Error(`mobile: not all five ring midpoints are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}; debug=${ringHitDebug}): ${mobile.url}`);
-console.log(`[kinetic-composition] PASS true 390px camera-owned composition; instrument share=${share}, camera=${mobileCameraMode}@${mobileCameraZoom}, wheelWidth=${wheelWidthRatio}, ringHits=${ringHitMask}: ${mobile.url}`);
+if (ringHitMask !== "111111") throw new Error(`mobile: not all six ring midpoints are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}; debug=${ringHitDebug}): ${mobile.url}`);
+console.log(`[kinetic-composition] PASS true 390px six-ring composition; instrument share=${share}, camera=${mobileCameraMode}@${mobileCameraZoom}, wheelWidth=${wheelWidthRatio}, ringHits=${ringHitMask}: ${mobile.url}`);
+
+const hour = dump("scripts/fixtures/mobile-390.html?exerciseHourDrag=1", 500, 844);
+const hourProbe = tagById(hour.dom, "probe");
+if (requireAttr(hourProbe, "data-hour-drag-ready", "hour-drag", hour.url) !== "true") {
+  throw new Error(`hour-drag: fixture did not exercise linked hour scrub: ${hour.url}`);
+}
+const hourRing = requireAttr(hourProbe, "data-hour-drag-ring", "hour-drag", hour.url);
+const hourInstantBefore = Number(requireAttr(hourProbe, "data-hour-instant-before", "hour-drag", hour.url));
+const hourInstantAfter = Number(requireAttr(hourProbe, "data-hour-instant-after", "hour-drag", hour.url));
+const hourModelBefore = Number(requireAttr(hourProbe, "data-hour-model-before", "hour-drag", hour.url));
+const hourModelAfter = Number(requireAttr(hourProbe, "data-hour-model-after", "hour-drag", hour.url));
+const hourSolarBefore = Number(requireAttr(hourProbe, "data-hour-solar-model-before", "hour-drag", hour.url));
+const hourSolarAfter = Number(requireAttr(hourProbe, "data-hour-solar-model-after", "hour-drag", hour.url));
+const hourOffsetBefore = Number(requireAttr(hourProbe, "data-hour-offset-before", "hour-drag", hour.url));
+const hourOffsetAfter = Number(requireAttr(hourProbe, "data-hour-offset-after", "hour-drag", hour.url));
+const hourLinkedState = requireAttr(hourProbe, "data-hour-linked-state", "hour-drag", hour.url);
+const hourPillarBefore = requireAttr(hourProbe, "data-hour-pillar-before", "hour-drag", hour.url);
+const hourPillarAfter = requireAttr(hourProbe, "data-hour-pillar-after", "hour-drag", hour.url);
+const hourScrubMode = requireAttr(hourProbe, "data-hour-scrub-mode", "hour-drag", hour.url);
+if (hourRing !== "hour" || hourScrubMode !== "linked-time") {
+  throw new Error(`hour-drag: normal drag was not routed through linked hour scrub (ring=${hourRing}, mode=${hourScrubMode}): ${hour.url}`);
+}
+if (![hourInstantBefore, hourInstantAfter, hourModelBefore, hourModelAfter, hourSolarBefore, hourSolarAfter, hourOffsetBefore, hourOffsetAfter].every(Number.isFinite)) {
+  throw new Error(`hour-drag: non-finite diagnostics: ${hour.url}`);
+}
+if (Math.abs((hourInstantAfter - hourInstantBefore) + HOUR_PILLAR_MS) > 1) {
+  throw new Error(`hour-drag: +6.5° hour drag should move master time two hours backward (${hourInstantBefore} -> ${hourInstantAfter}): ${hour.url}`);
+}
+if (Math.abs((hourModelAfter - hourModelBefore) - 6) > 0.01) {
+  throw new Error(`hour-drag: hour model should advance visually +6° (${hourModelBefore} -> ${hourModelAfter}): ${hour.url}`);
+}
+if (Math.abs(hourOffsetBefore) > 1e-6 || Math.abs(hourOffsetAfter) > 1e-6 || hourLinkedState !== "true") {
+  throw new Error(`hour-drag: linked scrub must keep zero manual offset (before=${hourOffsetBefore}, after=${hourOffsetAfter}, linked=${hourLinkedState}): ${hour.url}`);
+}
+if (!hourPillarBefore || !hourPillarAfter || hourPillarBefore === hourPillarAfter) {
+  throw new Error(`hour-drag: resolved hour pillar did not change (${hourPillarBefore} -> ${hourPillarAfter}): ${hour.url}`);
+}
+if (Math.abs(hourSolarAfter - hourSolarBefore) < 0.02) {
+  throw new Error(`hour-drag: coupled solar layer did not move over two hours (${hourSolarBefore} -> ${hourSolarAfter}): ${hour.url}`);
+}
+console.log(`[kinetic-composition] PASS linked hour-ring scrub; master=${hourInstantBefore}->${hourInstantAfter}, hour=${hourPillarBefore}->${hourPillarAfter}, model=${hourModelBefore}->${hourModelAfter}: ${hour.url}`);
 
 const linked = dump("scripts/fixtures/mobile-390.html?exerciseLinkedDrag=1", 500, 844);
 const linkedProbe = tagById(linked.dom, "probe");

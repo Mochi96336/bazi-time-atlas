@@ -19,10 +19,12 @@
     const requestedTarget = params.get("target") || "../../?instant=2027-03-15T13%3A20%3A09.000Z";
     const exerciseDrag = params.get("exerciseDrag") === "1";
     const exerciseLinkedDrag = params.get("exerciseLinkedDrag") === "1";
+    const exerciseHourDrag = params.get("exerciseHourDrag") === "1";
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     let dragExercised = false;
     let linkedDragExercised = false;
+    let hourDragExercised = false;
     frame.style.height = `${requestedHeight}px`;
     document.documentElement.style.height = `${requestedHeight}px`;
     document.body.style.height = `${requestedHeight}px`;
@@ -75,15 +77,16 @@
         })
         .filter(Number.isFinite)
         .sort((a, b) => a - b);
-      if (radii.length !== 6) return null;
+      if (radii.length !== 7) return null;
       return { svg, ctm, center, radii };
     }
 
     function ringHitDiagnostic(childWindow, doc, instrument) {
       const geometry = ringGeometry(childWindow, doc, instrument);
-      if (!geometry) return { mask:"00000", classes:"geometry-unavailable", debug:"geometry-unavailable" };
+      if (!geometry) return { mask:"000000", classes:"geometry-unavailable", debug:"geometry-unavailable" };
       const { svg, ctm, center, radii } = geometry;
       const expected = [
+        { track:"hour-track", className:"hour-sector" },
         { track:"year-track", className:"year-sector" },
         { track:"month-track", className:"month-sector" },
         { track:"day-track", className:"day-sector" },
@@ -130,6 +133,38 @@
       });
     }
 
+    function exerciseLinkedHourDrag(childWindow, doc, instrument) {
+      if (!exerciseHourDrag || hourDragExercised) return;
+      const geometry = ringGeometry(childWindow, doc, instrument);
+      const hourTrack = doc.querySelector("#hour-track");
+      const solarTrack = doc.querySelector("#solar-track");
+      if (!geometry || !hourTrack || !solarTrack || instrument?.dataset.scrubMode !== "linked-time") return;
+      hourDragExercised = true;
+      const radius = (geometry.radii[0] + geometry.radii[1]) / 2;
+      const instantBefore = Number(instrument.dataset.selectedInstantMs);
+      const hourModelBefore = Number(hourTrack.dataset.modelRotation);
+      const solarModelBefore = Number(solarTrack.dataset.modelRotation);
+      const hourOffsetBefore = Number(hourTrack.dataset.manualOffset);
+      const hourPillarBefore = instrument.dataset.hourPillar ?? "";
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -90, "pointerdown", 91));
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -83.5, "pointermove", 91));
+      geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -83.5, "pointerup", 91));
+      probe.dataset.hourDragReady = "true";
+      probe.dataset.hourDragRing = instrument.dataset.lastLinkedScrubRing ?? "";
+      probe.dataset.hourInstantBefore = String(instantBefore);
+      probe.dataset.hourInstantAfter = instrument.dataset.selectedInstantMs ?? "";
+      probe.dataset.hourModelBefore = String(hourModelBefore);
+      probe.dataset.hourModelAfter = hourTrack.dataset.modelRotation ?? "";
+      probe.dataset.hourSolarModelBefore = String(solarModelBefore);
+      probe.dataset.hourSolarModelAfter = solarTrack.dataset.modelRotation ?? "";
+      probe.dataset.hourOffsetBefore = String(hourOffsetBefore);
+      probe.dataset.hourOffsetAfter = hourTrack.dataset.manualOffset ?? "";
+      probe.dataset.hourLinkedState = hourTrack.dataset.linked ?? "";
+      probe.dataset.hourPillarBefore = hourPillarBefore;
+      probe.dataset.hourPillarAfter = instrument.dataset.hourPillar ?? "";
+      probe.dataset.hourScrubMode = instrument.dataset.scrubMode ?? "";
+    }
+
     function exerciseLinkedDayDrag(childWindow, doc, instrument) {
       if (!exerciseLinkedDrag || linkedDragExercised) return;
       const geometry = ringGeometry(childWindow, doc, instrument);
@@ -137,7 +172,7 @@
       const solarTrack = doc.querySelector("#solar-track");
       if (!geometry || !dayTrack || !solarTrack || instrument?.dataset.scrubMode !== "linked-time") return;
       linkedDragExercised = true;
-      const radius = (geometry.radii[2] + geometry.radii[3]) / 2;
+      const radius = (geometry.radii[3] + geometry.radii[4]) / 2;
       const instantBefore = Number(instrument.dataset.selectedInstantMs);
       const dayModelBefore = Number(dayTrack.dataset.modelRotation);
       const solarModelBefore = Number(solarTrack.dataset.modelRotation);
@@ -167,7 +202,7 @@
       const dayTrack = doc.querySelector("#day-track");
       if (!geometry || !compareButton || !resetButton || !dayTrack) return;
       dragExercised = true;
-      const radius = (geometry.radii[2] + geometry.radii[3]) / 2;
+      const radius = (geometry.radii[3] + geometry.radii[4]) / 2;
       const modelBefore = Number(dayTrack.dataset.modelRotation);
       compareButton.click();
       geometry.svg.dispatchEvent(pointerAt(childWindow, geometry, radius, -90, "pointerdown"));
@@ -229,6 +264,7 @@
       probe.dataset.ringHitClasses = ringHits.classes;
       probe.dataset.ringHitDebug = ringHits.debug;
       probe.dataset.target = frame.src;
+      exerciseLinkedHourDrag(childWindow, doc, instrument);
       exerciseLinkedDayDrag(childWindow, doc, instrument);
       exerciseIndependentDrag(childWindow, doc, instrument);
     }

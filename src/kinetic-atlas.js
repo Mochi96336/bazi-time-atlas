@@ -26,7 +26,7 @@ const OFFSET_EPSILON = 0.001;
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 const SEXAGENARY = Array.from({ length: 60 }, (_, index) => `${STEMS[index % 10]}${BRANCHES[index % 12]}`);
-const RING_LABELS = Object.freeze({ year: "年", month: "月", day: "日", solar: "節氣", zodiac: "黃道" });
+const RING_LABELS = Object.freeze({ hour: "時", year: "年", month: "月", day: "日", solar: "節氣", zodiac: "黃道" });
 
 const SCALE_CONFIG = Object.freeze({
   day: { label: "日內 / 48 小時", spanDays: 1, sliderStep: 1 / 144, playDaysPerSecond: .25, edgeLabel: "1 日" },
@@ -76,6 +76,14 @@ function shortestCycleDelta(nextIndex, previousIndex, size = 60) {
   return delta;
 }
 
+function cycleIndexForRing(id, display) {
+  if (id === "hour") return display.hourIndex;
+  if (id === "year") return display.yearIndex;
+  if (id === "month") return display.monthIndex;
+  if (id === "day") return display.dayIndex;
+  return -1;
+}
+
 function setTrackDiagnostics(id) {
   const track = document.querySelector(`#${id}-track`);
   const pose = ringStates[id];
@@ -89,8 +97,7 @@ function renderRingPose(id) {
   const pose = ringStates[id];
   if (!pose || !currentDisplay) return;
   if (SEXAGENARY_RING_IDS.includes(id)) {
-    const activeIndex = id === "year" ? currentDisplay.yearIndex : id === "month" ? currentDisplay.monthIndex : currentDisplay.dayIndex;
-    renderer.setCyclePose(id, effectiveRotation(pose), activeIndex);
+    renderer.setCyclePose(id, effectiveRotation(pose), cycleIndexForRing(id, currentDisplay));
   } else if (id === "solar") {
     renderer.setSolarRingPose(effectiveRotation(pose), currentDisplay.longitude);
   } else if (id === "zodiac") {
@@ -234,9 +241,19 @@ function resolveDisplayState() {
     monthName = SEXAGENARY[monthIndex];
   }
   return {
-    fields, longitude, actualLongitude, pillars: result.pillars, yearName, monthName, monthBranch, monthIndex,
-    yearIndex: ganzhiIndex(yearName), dayIndex: ganzhiIndex(result.pillars.day.name),
-    activeTerm: termAt(longitude), activeZodiac: zodiacAt(longitude)
+    fields,
+    longitude,
+    actualLongitude,
+    pillars: result.pillars,
+    yearName,
+    monthName,
+    monthBranch,
+    monthIndex,
+    hourIndex: ganzhiIndex(result.pillars.hour.name),
+    yearIndex: ganzhiIndex(yearName),
+    dayIndex: ganzhiIndex(result.pillars.day.name),
+    activeTerm: termAt(longitude),
+    activeZodiac: zodiacAt(longitude)
   };
 }
 
@@ -250,6 +267,7 @@ function updateReadout(display) {
   setText("instant-readout", `${formatCivil(fields)} · UTC+08:00`);
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
+  setText("hour-active", pillars.hour.name);
   setText("year-active", yearName);
   setText("month-active", monthName);
   setText("day-active", pillars.day.name);
@@ -285,6 +303,7 @@ function updateReadout(display) {
 
 function updateWheel() {
   currentDisplay = resolveDisplayState();
+  alignCycleRing("hour", currentDisplay.hourIndex);
   alignCycleRing("year", currentDisplay.yearIndex);
   alignCycleRing("month", currentDisplay.monthIndex);
   alignCycleRing("day", currentDisplay.dayIndex);

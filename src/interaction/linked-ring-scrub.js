@@ -6,6 +6,7 @@ import { normalizeDegrees, shortestAngleDelta } from "../wheel/polar-geometry.js
 
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
+const HOUR_PILLAR_MS = 2 * HOUR_MS;
 const BOUNDARY_ENTRY_EPSILON_MS = 1_000;
 const MONTH_SEARCH_DAYS = 400;
 const YEAR_SEARCH_DAYS = 800;
@@ -63,6 +64,7 @@ export function stepLinkedDiscreteInstant(ringId, instantMs, timeDirection) {
   assertDirection(timeDirection);
   if (!Number.isFinite(instantMs)) throw new RangeError("instantMs must be finite");
 
+  if (ringId === "hour") return instantMs + timeDirection * HOUR_PILLAR_MS;
   if (ringId === "day") return instantMs + timeDirection * DAY_MS;
   if (ringId === "month" || ringId === "year") {
     return stepIntervalByStarts(instantMs, boundaryStartsAround(instantMs, ringId), timeDirection);
@@ -129,7 +131,7 @@ export function applyLinkedRingDrag({
     });
   }
 
-  if (ringId === "year" || ringId === "month" || ringId === "day") {
+  if (ringId === "hour" || ringId === "year" || ringId === "month" || ringId === "day") {
     const consumed = consumeDiscreteDrag(remainderDegrees, deltaDegrees, 6);
     let nextMs = instantMs;
     if (consumed.steps !== 0) {
@@ -150,5 +152,6 @@ export function applyLinkedRingDrag({
 
 export const LINKED_SCRUB_CONSTANTS = Object.freeze({
   dayMs: DAY_MS,
+  hourPillarMs: HOUR_PILLAR_MS,
   boundaryEntryEpsilonMs: BOUNDARY_ENTRY_EPSILON_MS
 });
