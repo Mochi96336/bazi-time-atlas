@@ -39,6 +39,11 @@ function setText(id, value) {
   if (node) node.textContent = value;
 }
 
+function setResidualHeadline(value) {
+  setText("astronomy-legend-readout", value);
+  setText("astronomy-max-residual", value);
+}
+
 function formatSignedHours(value) {
   if (!Number.isFinite(value)) return "—";
   if (Math.abs(value) < 0.005) return "0.00 h";
@@ -58,7 +63,7 @@ function currentDelta() {
 function renderUnavailable(message) {
   group.replaceChildren();
   termGrid?.replaceChildren();
-  setText("astronomy-max-residual", "model unavailable");
+  setResidualHeadline("model unavailable");
   setText("astronomy-rms-residual", "—");
   setText("astronomy-orbit-readout", message);
   setText("astronomy-scale-readout", "—");
@@ -151,7 +156,7 @@ function renderResult(result) {
   renderResidualRing(result);
   renderTermGrid(result);
 
-  setText("astronomy-max-residual", `${result.maxAbsHours.toFixed(2)} h`);
+  setResidualHeadline(`${result.maxAbsHours.toFixed(2)} h`);
   setText("astronomy-rms-residual", `${result.rmsHours.toFixed(2)} h RMS`);
   setText(
     "astronomy-orbit-readout",
