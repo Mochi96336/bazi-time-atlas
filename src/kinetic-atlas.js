@@ -4,23 +4,14 @@ import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
 import { monthPillarForYearStem } from "./calendar/five-tigers.js";
 import {
   CURSOR_ANGLE,
-  FAN,
-  GUIDE_RADII,
-  RADII,
   SEXAGENARY_RING_IDS,
-  WHEEL_CENTER,
-  assertWheelModel,
-  ringModel
+  assertWheelModel
 } from "./wheel/ring-model.js";
 import {
-  annularSectorPath as coreAnnularSectorPath,
-  arcPath as coreArcPath,
   normalizeDegrees,
-  pointAt,
-  rotationTransform,
   shortestAngleDelta
 } from "./wheel/polar-geometry.js";
-import { addTitle, setActiveSector, svgElement } from "./wheel/svg-renderer.js";
+import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
 
 const DAY_MS = 86_400_000;
 const UTC_OFFSET_HOURS = 8;
@@ -61,6 +52,13 @@ const playButton = document.querySelector("#play-button");
 const nowButton = document.querySelector("#now-button");
 const scaleButtons = [...document.querySelectorAll("[data-scale]")];
 
+const renderer = createKineticRenderer({
+  svg,
+  sexagenary: SEXAGENARY,
+  solarTerms,
+  zodiacSigns
+});
+
 const state = {
   anchorMs: Date.now(),
   selectedMs: Date.now(),
@@ -71,39 +69,12 @@ const state = {
   legacyProjection: null
 };
 
-const ringSpecs = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => {
-  const model = ringModel(id);
-  return [id, {
-    ...model,
-    group: document.querySelector(`#${model.groupId}`),
-    inner: model.innerRadius,
-    outer: model.outerRadius
-  }];
-}));
-
-const ringRuntime = {};
-const solarTrack = document.querySelector(`#${ringModel("solar").groupId}`);
-const zodiacTrack = document.querySelector(`#${ringModel("zodiac").groupId}`);
-const termSectorNodes = [];
-const zodiacSectorNodes = [];
-let solarRotation = null;
+const ringRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, {
+  lastIndex: null,
+  modelRotation: null
+}]));
+let solarModelRotation = null;
 let lastSolarLongitude = null;
-
-function polar(radius, angleDegrees) {
-  return pointAt(WHEEL_CENTER, radius, angleDegrees);
-}
-
-function annularSectorPath(inner, outer, startDegrees, endDegrees) {
-  return coreAnnularSectorPath(WHEEL_CENTER, inner, outer, startDegrees, endDegrees);
-}
-
-function arcPath(radius, startDegrees, endDegrees) {
-  return coreArcPath(WHEEL_CENTER, radius, startDegrees, endDegrees);
-}
-
-function svgEl(tag, attrs = {}, parent = svg) {
-  return svgElement(tag, attrs, parent);
-}
 
 function ganzhiIndex(name) {
   return SEXAGENARY.indexOf(name);
@@ -116,159 +87,26 @@ function shortestCycleDelta(nextIndex, previousIndex, size = 60) {
   return delta;
 }
 
-function renderGuides() {
-  const guides = document.querySelector("#guide-layer");
-  GUIDE_RADII.forEach(radius => {
-    svgEl("path", { d: arcPath(radius, FAN.start, FAN.end), class: "guide-arc" }, guides);
-  });
-}
-
-function renderCycleRing(key) {
-  const spec = ringSpecs[key];
-  const sectors = [];
-  const group = spec.group;
-  group.classList.add("ring-track", `${key}-track`);
-
-  SEXAGENARY.forEach((label, index) => {
-    const start = index * 6 + .18;
-    const end = (index + 1) * 6 - .18;
-    const path = svgEl("path", {
-      d: annularSectorPath(spec.inner, spec.outer, start, end),
-      class: `cycle-sector ${spec.className}`,
-      "data-cycle-index": index,
-      "data-cycle-label": label
-    }, group);
-    addTitle(path, `${index + 1} · ${label}`);
-    sectors.push(path);
-
-    const tickAngle = index * 6;
-    const inner = polar(spec.outer - 8, tickAngle);
-    const outer = polar(spec.outer, tickAngle);
-    svgEl("line", {
-      x1: inner.x,
-      y1: inner.y,
-      x2: outer.x,
-      y2: outer.y,
-      class: `ring-tick${index % 5 === 0 ? " major" : ""}`
-    }, group);
-
-    if (index % 5 === 0) {
-      const radius = (spec.inner + spec.outer) / 2;
-      const point = polar(radius, index * 6 + 3);
-      const text = svgEl("text", {
-        x: point.x,
-        y: point.y,
-        class: "cycle-label",
-        transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
-      }, group);
-      text.textContent = label;
-    }
-  });
-
-  ringRuntime[key] = {
-    ...spec,
-    sectors,
-    lastIndex: null,
-    rotation: null
-  };
-}
-
-function renderSolarRing() {
-  solarTerms.forEach((term, index) => {
-    const start = term.longitude;
-    const end = term.longitude + 15;
-    const path = svgEl("path", {
-      d: annularSectorPath(RADII.dayOuter, RADII.solarOuter, start + .15, end - .15),
-      class: `term-sector ${term.kind}`,
-      "data-term-index": index
-    }, solarTrack);
-    addTitle(path, `${term.name} · ${term.longitude}°`);
-    termSectorNodes.push(path);
-
-    const markInner = polar(RADII.dayOuter, term.longitude);
-    const markOuter = polar(term.kind === "jie" ? RADII.solarOuter : RADII.solarOuter - 12, term.longitude);
-    svgEl("line", {
-      x1: markInner.x,
-      y1: markInner.y,
-      x2: markOuter.x,
-      y2: markOuter.y,
-      class: `term-mark ${term.kind}`
-    }, solarTrack);
-
-    const labelPoint = polar(term.kind === "jie" ? RADII.solarOuter - 32 : RADII.solarOuter - 44, term.longitude + 7.5);
-    const label = svgEl("text", {
-      x: labelPoint.x,
-      y: labelPoint.y,
-      class: `term-label ${term.kind}`,
-      transform: `rotate(${term.longitude + 97.5} ${labelPoint.x} ${labelPoint.y})`
-    }, solarTrack);
-    label.textContent = term.name;
-  });
-}
-
-function renderZodiacRing() {
-  zodiacSigns.forEach((sign, index) => {
-    const path = svgEl("path", {
-      d: annularSectorPath(RADII.solarOuter, RADII.zodiacOuter, sign.start + .15, sign.end - .15),
-      class: "zodiac-sector",
-      "data-zodiac-index": index
-    }, zodiacTrack);
-    addTitle(path, `${sign.name} · ${sign.element} · ${sign.modality}`);
-    zodiacSectorNodes.push(path);
-
-    const angle = sign.start + 15;
-    const point = polar((RADII.solarOuter + RADII.zodiacOuter) / 2, angle);
-    const label = svgEl("text", {
-      x: point.x,
-      y: point.y,
-      class: "zodiac-label",
-      transform: `rotate(${angle + 90} ${point.x} ${point.y})`
-    }, zodiacTrack);
-    label.textContent = sign.name;
-  });
-}
-
-function renderCursor() {
-  const cursorLayer = document.querySelector("#cursor-layer");
-  const inner = polar(RADII.inner - 12, CURSOR_ANGLE);
-  const outer = polar(RADII.zodiacOuter + 12, CURSOR_ANGLE);
-  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-halo" }, cursorLayer);
-  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-line" }, cursorLayer);
-  const cap = polar(RADII.zodiacOuter + 21, CURSOR_ANGLE);
-  svgEl("path", {
-    d: `M ${cap.x - 6} ${cap.y - 1} L ${cap.x + 6} ${cap.y - 1} L ${cap.x} ${cap.y + 10} Z`,
-    class: "cursor-cap"
-  }, cursorLayer);
-  const label = polar(RADII.zodiacOuter + 40, CURSOR_ANGLE);
-  const text = svgEl("text", { x: label.x, y: label.y, class: "cursor-note" }, cursorLayer);
-  text.textContent = "SELECTED INSTANT";
-}
-
-function alignCycleRing(key, index) {
-  const runtime = ringRuntime[key];
+function alignCycleRing(id, index) {
+  const runtime = ringRuntime[id];
   if (index < 0) return;
-  if (runtime.rotation === null || runtime.lastIndex === null) {
-    runtime.rotation = CURSOR_ANGLE - (index * 6 + 3);
+  if (runtime.modelRotation === null || runtime.lastIndex === null) {
+    runtime.modelRotation = CURSOR_ANGLE - (index * 6 + 3);
   } else {
-    runtime.rotation -= shortestCycleDelta(index, runtime.lastIndex) * 6;
+    runtime.modelRotation -= shortestCycleDelta(index, runtime.lastIndex) * 6;
   }
   runtime.lastIndex = index;
-  runtime.group.setAttribute("transform", rotationTransform(runtime.rotation, WHEEL_CENTER));
-  setActiveSector(runtime.sectors, index);
+  renderer.setCyclePose(id, runtime.modelRotation, index);
 }
 
 function alignLongitudeTracks(longitude) {
-  if (solarRotation === null || lastSolarLongitude === null) {
-    solarRotation = CURSOR_ANGLE - longitude;
+  if (solarModelRotation === null || lastSolarLongitude === null) {
+    solarModelRotation = CURSOR_ANGLE - longitude;
   } else {
-    solarRotation -= shortestAngleDelta(longitude, lastSolarLongitude);
+    solarModelRotation -= shortestAngleDelta(longitude, lastSolarLongitude);
   }
   lastSolarLongitude = longitude;
-  const transform = rotationTransform(solarRotation, WHEEL_CENTER);
-  solarTrack.setAttribute("transform", transform);
-  zodiacTrack.setAttribute("transform", transform);
-  setActiveSector(termSectorNodes, Math.floor(normalizeDegrees(longitude) / 15) % 24);
-  setActiveSector(zodiacSectorNodes, Math.floor(normalizeDegrees(longitude) / 30) % 12);
+  renderer.setSolarPose(solarModelRotation, longitude);
 }
 
 function fieldsFromInstant(ms) {
@@ -563,13 +401,7 @@ function bindControls() {
 
 function initialize() {
   assertWheelModel();
-  renderGuides();
-  renderCycleRing("year");
-  renderCycleRing("month");
-  renderCycleRing("day");
-  renderSolarRing();
-  renderZodiacRing();
-  renderCursor();
+  renderer.renderStatic();
   parseLegacyProjection();
   setSliderForScale();
   bindControls();
