@@ -64,9 +64,10 @@
       const instrument = doc.querySelector("#kinetic-instrument");
       const dayToggle = doc.querySelector('[data-ring-toggle="day"]');
       const dayTrack = doc.querySelector("#day-track");
+      const dayTrace = doc.querySelector('[data-motion-ring="day"]');
       const slider = doc.querySelector("#time-slider");
       const geometry = ringGeometry(childWindow, doc, instrument);
-      if (!instrument || !dayToggle || !dayTrack || !slider || !geometry) return;
+      if (!instrument || !dayToggle || !dayTrack || !dayTrace || !slider || !geometry) return;
       if (!dayTrack.dataset.modelRotation || instrument.dataset.visibleRingCount !== "6") return;
 
       exercised = true;
@@ -78,6 +79,7 @@
       dayToggle.click();
       probe.dataset.hiddenPressed = dayToggle.getAttribute("aria-pressed") ?? "";
       probe.dataset.hiddenTrack = dayTrack.dataset.layerHidden ?? "";
+      probe.dataset.hiddenTrace = dayTrace.dataset.layerHidden ?? "";
       probe.dataset.hiddenDisplay = childWindow.getComputedStyle(dayTrack).display;
       probe.dataset.hiddenList = instrument.dataset.hiddenRings ?? "";
       probe.dataset.hiddenVisibleCount = instrument.dataset.visibleRingCount ?? "";
@@ -92,6 +94,8 @@
       probe.dataset.dayModelAfterStep = String(modelAfterStep);
       probe.dataset.stepDeltaMs = String(instantAfterStep - instantBefore);
       probe.dataset.hiddenModelDelta = String(modelAfterStep - modelBefore);
+      probe.dataset.hiddenTraceVisibleAfterStep = String(dayTrace.classList.contains("is-visible"));
+      probe.dataset.hiddenTraceDelta = dayTrace.dataset.lastDelta ?? "";
 
       const hiddenDragBefore = Number(instrument.dataset.selectedInstantMs);
       const dayRadius = (geometry.radii[3] + geometry.radii[4]) / 2;
@@ -106,6 +110,8 @@
       dayToggle.click();
       probe.dataset.restoredPressed = dayToggle.getAttribute("aria-pressed") ?? "";
       probe.dataset.restoredTrack = dayTrack.dataset.layerHidden ?? "";
+      probe.dataset.restoredTrace = dayTrace.dataset.layerHidden ?? "";
+      probe.dataset.restoredTraceVisible = String(dayTrace.classList.contains("is-visible"));
       probe.dataset.restoredDisplay = childWindow.getComputedStyle(dayTrack).display;
       probe.dataset.restoredHiddenList = instrument.dataset.hiddenRings ?? "";
       probe.dataset.restoredVisibleCount = instrument.dataset.visibleRingCount ?? "";
