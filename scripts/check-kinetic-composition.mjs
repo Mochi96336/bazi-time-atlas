@@ -17,6 +17,9 @@ function dump(width, height) {
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
+    "--force-device-scale-factor=1",
+    "--hide-scrollbars",
+    "--run-all-compositor-stages-before-draw",
     "--virtual-time-budget=2600",
     `--window-size=${width},${height}`,
     "--dump-dom",
@@ -61,6 +64,11 @@ console.log(`[kinetic-composition] PASS desktop shared fan geometry: ${desktop.u
 
 const mobile = dump(390, 844);
 const mobileInstrument = tagById(mobile.dom, "kinetic-instrument");
+const actualWidth = Number(requireAttr(mobileInstrument, "data-mobile-inner-width", "mobile", mobile.url));
+const mediaMatched = requireAttr(mobileInstrument, "data-mobile-media-matched", "mobile", mobile.url);
+if (actualWidth > 480 || mediaMatched !== "true") {
+  throw new Error(`mobile: Chromium did not enter mobile CSS (innerWidth=${actualWidth}, match=${mediaMatched}): ${mobile.url}`);
+}
 const fit = requireAttr(mobileInstrument, "data-mobile-viewport-fit", "mobile", mobile.url);
 const hidden = requireAttr(mobileInstrument, "data-mobile-secondary-hidden", "mobile", mobile.url);
 const share = Number(requireAttr(mobileInstrument, "data-mobile-instrument-share", "mobile", mobile.url));
@@ -74,4 +82,4 @@ if (!Number.isFinite(share) || share < 0.70) {
 if (attr(mobileInstrument, "data-fan-clip") !== "active") {
   throw new Error(`mobile: fan clip inactive: ${mobile.url}`);
 }
-console.log(`[kinetic-composition] PASS mobile first viewport; instrument share=${share}, scroll=${scrollHeight}/${viewportHeight}: ${mobile.url}`);
+console.log(`[kinetic-composition] PASS mobile first viewport; innerWidth=${actualWidth}, instrument share=${share}, scroll=${scrollHeight}/${viewportHeight}: ${mobile.url}`);
