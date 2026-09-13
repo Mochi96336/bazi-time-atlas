@@ -68,6 +68,7 @@ jobs:
           node --check scripts/check-astronomical-residuals.mjs
           node --check scripts/check-four-pillar-determinacy.mjs
           node --check scripts/check-near-recurrence.mjs
+          node --check scripts/visual-check-determinacy.mjs
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
@@ -113,7 +114,9 @@ jobs:
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Capture PNG evidence
-        run: npm run visual:check
+        run: |
+          npm run visual:check
+          node scripts/visual-check-determinacy.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Upload visual evidence
