@@ -39,8 +39,15 @@ function guideEnvelope(center) {
       start:angleFrom(center, start),
       end:angleFrom(center, end)
     };
-  });
-  return candidates.sort((a, b) => b.radius - a.radius)[0] ?? null;
+  }).sort((a, b) => a.radius - b.radius);
+  const outer = candidates.at(-1);
+  const inner = candidates[0];
+  if (!outer || !inner) return null;
+  return {
+    ...outer,
+    innerRadius:inner.radius,
+    radii:candidates.map(candidate => candidate.radius)
+  };
 }
 
 function sectorClipPath(center, radius, startDegrees, endDegrees) {
@@ -109,7 +116,9 @@ function installMasterFanClip() {
   instrument.dataset.geometryCenter = `${center.cx.toFixed(3)},${center.cy.toFixed(3)}`;
   instrument.dataset.geometryFanStart = envelope.start.toFixed(3);
   instrument.dataset.geometryFanEnd = envelope.end.toFixed(3);
+  instrument.dataset.geometryInnerRadius = envelope.innerRadius.toFixed(3);
   instrument.dataset.geometryOuterRadius = envelope.radius.toFixed(3);
+  instrument.dataset.geometryRadiusRatio = (envelope.innerRadius / envelope.radius).toFixed(4);
   return true;
 }
 
