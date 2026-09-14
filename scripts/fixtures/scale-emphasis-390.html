@@ -33,7 +33,7 @@
     }
 
     function settle(callback) {
-      requestAnimationFrame(() => requestAnimationFrame(callback));
+      queueMicrotask(() => queueMicrotask(callback));
     }
 
     frame.addEventListener("load", () => {
