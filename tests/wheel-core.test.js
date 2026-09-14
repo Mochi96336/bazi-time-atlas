@@ -50,7 +50,7 @@ test("five primary rings encode increasing temporal scale with zodiac inside the
   assert.deepEqual(RINGS.map(ring => ring.id), ["hour", "day", "solar", "month", "year"]);
   assert.equal(RINGS.length, 5);
   assert.deepEqual(SEXAGENARY_RING_IDS, ["hour", "day", "month", "year"]);
-  assert.deepEqual(GUIDE_RADII, [686, 760, 834, 916, 982, 1072, 1182]);
+  assert.deepEqual(GUIDE_RADII, [686, 744, 812, 868, 908, 1028, 1182]);
 
   for (let i = 1; i < RINGS.length; i += 1) {
     assert.equal(RINGS[i].innerRadius, RINGS[i - 1].outerRadius);
@@ -58,11 +58,17 @@ test("five primary rings encode increasing temporal scale with zodiac inside the
   assert.equal(RINGS[0].innerRadius, RADII.inner);
   assert.equal(RINGS.at(-1).outerRadius, RADII.outer);
 
-  assert.equal(RADII.hourOuter, 760);
-  assert.equal(RADII.dayOuter, 834);
-  assert.equal(RADII.solarTermOuter, 916);
-  assert.equal(RADII.solarOuter, 982);
-  assert.equal(RADII.monthOuter, 1072);
+  const thicknesses = RINGS.map(ring => ring.outerRadius - ring.innerRadius);
+  assert.deepEqual(thicknesses, [58, 68, 96, 120, 154]);
+  for (let i = 1; i < thicknesses.length; i += 1) {
+    assert.ok(thicknesses[i] > thicknesses[i - 1], `${RINGS[i].id} should be wider than ${RINGS[i - 1].id}`);
+  }
+
+  assert.equal(RADII.hourOuter, 744);
+  assert.equal(RADII.dayOuter, 812);
+  assert.equal(RADII.solarTermOuter, 868);
+  assert.equal(RADII.solarOuter, 908);
+  assert.equal(RADII.monthOuter, 1028);
   assert.equal(RADII.yearOuter, 1182);
   assert.equal(ringModel("hour").cycleScale, "~5 days");
   assert.equal(ringModel("day").cycleScale, "60 days");
@@ -74,6 +80,7 @@ test("five primary rings encode increasing temporal scale with zodiac inside the
   assert.equal(zodiac.phaseKind, "derived");
   assert.equal(zodiac.innerRadius, RADII.solarTermOuter);
   assert.equal(zodiac.outerRadius, RADII.solarOuter);
+  assert.equal(zodiac.outerRadius - zodiac.innerRadius, 40);
   assert.equal(zodiac.linkedPhaseId, "solar");
 });
 
@@ -147,7 +154,7 @@ test("paths are derived from the canonical center rather than CSS transforms", (
   const hourAnnulus = annularSectorPath(WHEEL_CENTER, RADII.inner, RADII.hourOuter, 0, 6);
   const fan = fanSectorPath(WHEEL_CENTER, RADII.outer + 28, FAN.start, FAN.end);
   assert.match(hourAnnulus, /^M /);
-  assert.match(hourAnnulus, /A 760 760/);
+  assert.match(hourAnnulus, /A 744 744/);
   assert.match(hourAnnulus, /A 686 686/);
   assert.match(fan, new RegExp(`^M ${WHEEL_CENTER.x.toFixed(3)} ${WHEEL_CENTER.y.toFixed(3)}`));
 });
