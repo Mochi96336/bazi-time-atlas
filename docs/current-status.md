@@ -1,8 +1,8 @@
 # BaZi Time Atlas — current implementation checkpoint
 
-Updated through the repository-health, kinetic ownership, navigation, wheel hierarchy, deep-time solver-core and deterministic browser-harness work merged through PR #85.
+Updated through the repository-health, kinetic ownership, navigation, wheel hierarchy, deep-time solver-core and deterministic browser-harness work merged through PR #103.
 
-This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is retained as historical design rationale and must not override the behavior described here or locked by current tests.
+This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is retained as historical design rationale and must not override the behavior described here or locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
 
 ## Product state
 
@@ -36,7 +36,7 @@ Implemented on the current instrument:
 - responsive SVG camera with true 390 px mobile first-viewport framing;
 - linked ring scrubbing that changes the master Selected Instant using each primary ring's real semantics;
 - Free Compare with independent manual offsets that do not mutate canonical time;
-- geometry-aware grab / active feedback;
+- geometry-aware grab / active feedback with drag lifecycle deferred until the activation threshold is crossed;
 - transient motion traces derived from actual rendered rotation deltas;
 - non-destructive primary-layer visibility controls, with Solar owning the Zodiac sub-band;
 - co-rotating reference frames in radial order: World / Hour / Day / Solar / Month / Year;
@@ -56,7 +56,7 @@ Visual collinearity alone is never treated as temporal concurrence.
 
 ## Architecture ownership
 
-The main page has been split so domain/display semantics do not accumulate indefinitely inside the browser controller.
+The main page has been split so domain/display and interaction semantics do not accumulate indefinitely inside the browser bootstrap.
 
 `src/wheel/atlas-display-model.js` owns the pure Selected Instant → display/domain mapping used by the kinetic atlas, including:
 
@@ -67,7 +67,15 @@ The main page has been split so domain/display semantics do not accumulate indef
 - BaZi month, solar-term, zodiac and sexagenary display selection;
 - legacy `instant` / `lambda` / `month` / `yearStem` projection interpretation.
 
-`src/kinetic-atlas.js` remains the page controller. It owns DOM mutation, renderer coordination, playback, compare controls, drag wiring and page lifecycle, while delegating the above domain/display computation.
+`src/kinetic-atlas.js` remains the page/root orchestrator. It owns canonical page state, DOM readout mutation, renderer coordination and component wiring, while delegating interaction lifecycles instead of implementing them inline.
+
+Current interaction ownership is explicit:
+
+- `src/wheel/ring-drag-controller.js` — pointer capture, activation threshold and free/linked drag lifecycle dispatch;
+- `src/interaction/linked-ring-scrub.js` — linked angular drag → canonical Selected Instant conversion;
+- `src/interaction/free-compare-controller.js` — Free Compare UI/mode and manual-offset reset/view state;
+- `src/interaction/kinetic-playback.js` — pure scale, slider and playback advance mathematics;
+- `src/interaction/kinetic-playback-controller.js` — RAF plus playback start/stop/toggle and play-button lifecycle.
 
 Other ownership boundaries remain:
 
@@ -75,7 +83,9 @@ Other ownership boundaries remain:
 - `src/astronomy/` — solar, Equation-of-Time, long-term and seasonal source/solver components;
 - `src/recurrence/` — recurrence, residual, determinacy and proof-chain models;
 - `src/wheel/` — geometry, renderer, ring state, temporal tracks and drag contracts;
-- `src/interaction/` — interaction laws such as linked-time scrubbing.
+- `src/interaction/` — interaction laws/controllers that act on the page state without becoming domain authorities.
+
+The normative cross-cutting version of these boundaries is recorded in `docs/architecture-contracts.md`.
 
 ## Boundary truth
 
@@ -168,10 +178,11 @@ The repository now has a reproducible baseline rather than an implicit local-mac
 - CI and deployment install with `npm ci`;
 - `npm run check` runs the test suite plus an automatic recursive JavaScript syntax scan, so new JS/MJS files are not silently omitted from syntax validation;
 - the project runtime remains Node 22;
-- GitHub-maintained checkout/setup/artifact actions use Node-24 action majors;
+- GitHub-maintained checkout/setup/artifact actions use their current pinned majors in the workflows;
 - **Quality Gate** provides the fast locked-install + repository-check boundary;
 - **Visual PNG self-check** provides the browser-contract + PNG-evidence boundary;
-- GitHub Pages deploys only after a successful Visual workflow caused by a push to `main`, and checks out that workflow's exact `head_sha` before deployment.
+- GitHub Pages deploys only after a successful Visual workflow caused by a push to `main`, and checks out that workflow's exact `head_sha` before deployment;
+- Pages concurrency is scoped to the eligible deploy job, so skipped PR-triggered `workflow_run` shells cannot cancel a legitimate production deployment while successive eligible main deploys retain latest-wins behavior.
 
 The exact shared-boundary browser fixture no longer relies on opportunistic load timing plus a few fixed-delay snapshots. It advances through bounded, condition-driven states and records the stalled phase/error if it cannot settle, while preserving the existing outer fail-closed time budget.
 
