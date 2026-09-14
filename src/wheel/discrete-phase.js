@@ -5,7 +5,7 @@ import {
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
-const DISCRETE_RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
+export const DISCRETE_RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
 export const PHASE_REFERENCE_UTC_OFFSET_HOURS = 8;
 
 function localFieldsAt(instantMs) {
@@ -88,6 +88,14 @@ export function yearPhaseWindow(instantMs) {
   }
   if (!previous || !next) return null;
   return phaseWindow("year", instantMs, previous.instantMs, next.instantMs, "li-chun", "astronomical-discrete");
+}
+
+export function discretePhaseWindowForRing(id, instantMs) {
+  if (id === "hour") return hourPhaseWindow(instantMs);
+  if (id === "day") return dayPhaseWindow(instantMs);
+  if (id === "month") return monthPhaseWindow(instantMs);
+  if (id === "year") return yearPhaseWindow(instantMs);
+  throw new RangeError(`unknown discrete phase ring: ${id}`);
 }
 
 export function discretePhaseWindows(instantMs) {
