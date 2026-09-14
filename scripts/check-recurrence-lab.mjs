@@ -76,12 +76,27 @@ function expectFixedGauge(dom, url) {
   if (attr(instrument, "data-phase-radial-order") !== "day,year,gregorian,astronomy") {
     throw new Error(`recurrence radial scale order is wrong: ${url}`);
   }
+  if (attr(instrument, "data-phase-display") !== "signed-shortest") {
+    throw new Error(`recurrence visible phase copy is not signed-shortest: ${url}`);
+  }
   for (const id of ["day-ring", "year-ring", "gregorian-ring"]) {
     const tag = tagById(dom, id);
     if (attr(tag, "data-phase-geometry") !== "signed-shortest-fan") {
       throw new Error(`${id} missing fixed fan gauge semantics: ${url}`);
     }
     if (/\stransform=/.test(tag)) throw new Error(`${id} must not rotate to hide its phase error: ${url}`);
+  }
+}
+
+function expectVisibleSignedCopy(dom, { year, day }, label, url) {
+  if (!dom.includes(`id="year-status">偏移 ${year}<`)) {
+    throw new Error(`${label}: visible Year status does not match signed gauge ${year}: ${url}`);
+  }
+  if (!dom.includes(`id="day-status">偏移 ${day}<`)) {
+    throw new Error(`${label}: visible Day status does not match signed gauge ${day}: ${url}`);
+  }
+  if (!dom.includes(`40 / 60 · 最短 ${year}`) || !dom.includes(`57 / 60 · 最短 ${day}`)) {
+    throw new Error(`${label}: raw/signed legend provenance is inconsistent: ${url}`);
   }
 }
 
@@ -93,8 +108,11 @@ const local = expectCase(
     "data-delta-years":"1980",
     "data-local-year-day-recurrence":"1980",
     "data-gregorian-phase":"380",
+    "data-gregorian-phase-signed":"-20",
     "data-year-phase":"0",
+    "data-year-phase-signed":"0",
     "data-day-phase":"0",
+    "data-day-phase-signed":"0",
     "data-gregorian-closed":"false",
     "data-year-closed":"true",
     "data-day-closed":"true",
@@ -118,8 +136,11 @@ const global = expectCase(
     "data-base-date":"2026-09-13",
     "data-delta-years":"24000",
     "data-gregorian-phase":"0",
+    "data-gregorian-phase-signed":"0",
     "data-year-phase":"0",
+    "data-year-phase-signed":"0",
     "data-day-phase":"0",
+    "data-day-phase-signed":"0",
     "data-gregorian-closed":"true",
     "data-year-closed":"true",
     "data-day-closed":"true",
@@ -138,8 +159,11 @@ const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",
   {
     "data-gregorian-phase":"0",
+    "data-gregorian-phase-signed":"0",
     "data-year-phase":"40",
+    "data-year-phase-signed":"-20",
     "data-day-phase":"57",
+    "data-day-phase-signed":"-3",
     "data-gregorian-closed":"true",
     "data-year-closed":"false",
     "data-day-closed":"false",
@@ -154,4 +178,9 @@ if (!/公曆閏年骨架回原位/.test(gregorian.dom)) {
 expectMarker(gregorian.dom, "gregorian", "-90.000", "0", "400-year Gregorian recurrence", gregorian.url);
 expectMarker(gregorian.dom, "year", "-143.333", "-20", "400-year Gregorian recurrence", gregorian.url);
 expectMarker(gregorian.dom, "day", "-98.000", "-3", "400-year Gregorian recurrence", gregorian.url);
-console.log(`[recurrence] PASS 400-year case keeps Gregorian closed while Year/Day offsets stay visible: ${gregorian.url}`);
+expectVisibleSignedCopy(gregorian.dom, { year:"−20", day:"−3" }, "400-year Gregorian recurrence", gregorian.url);
+if (!/data-phase-raw="40" data-phase-signed="-20" data-phase-modulus="60">−20<\/span>/.test(gregorian.dom) ||
+    !/data-phase-raw="57" data-phase-signed="-3" data-phase-modulus="60">−3<\/span>/.test(gregorian.dom)) {
+  throw new Error(`400-year milestone rows do not use signed shortest phase copy: ${gregorian.url}`);
+}
+console.log(`[recurrence] PASS 400-year case keeps Gregorian closed while Year/Day signed offsets stay visible and text-consistent: ${gregorian.url}`);
