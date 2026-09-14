@@ -74,6 +74,18 @@ for (const id of ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarym
 }
 requireEqual(attr(probe, "data-sexagenarydesktop-width"), "1200", "sexagenary desktop fixture width drifted", url);
 
+requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile long lede returned above the instrument", url);
+requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note returned above the instrument", url);
+requireEqual(attr(probe, "data-recurrence-instrument-in-first-viewport"), "true", "Recurrence mobile instrument no longer fits the first viewport", url);
+const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
+const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
+if (!Number.isFinite(recurrenceTop) || recurrenceTop < 80 || recurrenceTop > 210) {
+  throw new Error(`Recurrence mobile instrument must begin near the top of the first viewport (top=${recurrenceTop}): ${url}`);
+}
+if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
+  throw new Error(`Recurrence mobile instrument became too shallow (${recurrenceHeight}px): ${url}`);
+}
+
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
 requireEqual(attr(probe, "data-sex-color-scheme"), "dark", "Sexagenary left the dark instrument color scheme", url);
 if (!/^#?131915$/i.test(attr(probe, "data-birth-paper") ?? "")) {
@@ -106,4 +118,4 @@ requireEqual(attr(probe, "data-sex-neighbors-visible"), "true", "Sexagenary mobi
 requireEqual(attr(probe, "data-sex-index-visible"), "true", "Sexagenary mobile full-cycle disclosure disappeared", url);
 requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "Sexagenary desktop inspector should remain visible", url);
 
-console.log(`[view-shells] PASS shared nav + dark Birth surfaces + compact Birth/Sexagenary 390px hierarchy: ${url}`);
+console.log(`[view-shells] PASS shared nav + instrument-first Recurrence + compact dark Birth/Sexagenary 390px hierarchy: ${url}`);
