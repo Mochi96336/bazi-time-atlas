@@ -15,6 +15,7 @@ export const TYME_SHOUXING_DIRECT_PROVIDER = defineSeasonalEpochProvider({
   label:"Tyme 1.5.2 · ShouXing direct seasonal event",
   authority:"vendored tyme4ts 1.5.2 / ShouXing astronomical calendar core",
   sourceUrl:"https://github.com/6tail/tyme4ts",
+  modelFamily:"shouxing",
   coverage:{ mode:"absolute-year", minYear:1900, maxYear:2100 },
   capabilities:{
     relativeSeasonGeometry:true,
