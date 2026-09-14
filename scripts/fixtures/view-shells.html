@@ -23,7 +23,7 @@
   <output id="probe" data-ready="false"></output>
 
   <script>
-    const EXPECTED_NAV = ["時間圖譜", "回歸", "出生", "六十甲子"];
+    const EXPECTED_NAV = ["時間圖譜", "出生", "六十甲子", "研究"];
     const probe = document.querySelector("#probe");
     const specs = [
       ["atlas-mobile", "../../"],
@@ -36,8 +36,8 @@
     const loaded = new Set();
     let settleTimer = null;
 
-    function navLabels(doc) {
-      return [...doc.querySelectorAll(".site-nav a")].map(node => node.textContent.trim());
+    function navLinks(doc) {
+      return [...doc.querySelectorAll(".site-nav a")];
     }
 
     function surfaceToken(win, node) {
@@ -61,11 +61,30 @@
 
       const navMatches = {};
       for (const [id, [win, doc]] of Object.entries(docs)) {
-        const labels = navLabels(doc);
+        const links = navLinks(doc);
+        const labels = links.map(node => node.textContent.trim());
+        const researchLinks = links.filter(node => node.dataset.navRole === "research");
+        const research = researchLinks[0] ?? null;
+        const primary = links.find(node => node.dataset.navRole !== "research") ?? null;
+        const researchStyle = research ? win.getComputedStyle(research) : null;
+        const primaryStyle = primary ? win.getComputedStyle(primary) : null;
+        const prefix = id.replaceAll("-", "");
+        const researchContract = researchLinks.length === 1
+          && research === links.at(-1)
+          && research?.classList.contains("research-link")
+          && research?.getAttribute("href") === "./recurrence.html";
+
         navMatches[id] = labels.length === EXPECTED_NAV.length
-          && labels.every((label, index) => label === EXPECTED_NAV[index]);
-        probe.dataset[`${id.replaceAll("-", "")}Nav`] = labels.join("|");
-        probe.dataset[`${id.replaceAll("-", "")}Width`] = String(win.innerWidth);
+          && labels.every((label, index) => label === EXPECTED_NAV[index])
+          && researchContract;
+        probe.dataset[`${prefix}Nav`] = labels.join("|");
+        probe.dataset[`${prefix}Width`] = String(win.innerWidth);
+        probe.dataset[`${prefix}ResearchCount`] = String(researchLinks.length);
+        probe.dataset[`${prefix}ResearchLast`] = String(research === links.at(-1));
+        probe.dataset[`${prefix}ResearchClass`] = String(Boolean(research?.classList.contains("research-link")));
+        probe.dataset[`${prefix}ResearchHref`] = research?.getAttribute("href") ?? "missing";
+        probe.dataset[`${prefix}ResearchFontSize`] = researchStyle?.fontSize ?? "missing";
+        probe.dataset[`${prefix}PrimaryFontSize`] = primaryStyle?.fontSize ?? "missing";
       }
 
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
