@@ -1,6 +1,14 @@
 /* Radial hierarchy: short cycles inside, long cycles outside.
-   This layer intentionally overrides only spatial semantics introduced by the
-   five-primary-ring model; motion/boundary colors stay in their owning sheets. */
+   This sheet changes presentation only. Ring geometry, motion and boundary
+   semantics remain owned by the wheel model and renderer. */
+
+/* Read the legend the same way the eye reads the fan: outer / slow first,
+   then walk inward toward the fast clocks. */
+.ring-year { order: 1; }
+.ring-month { order: 2; }
+.ring-solar { order: 3; }
+.ring-day { order: 4; }
+.ring-hour { order: 5; }
 
 .ring-legend-row { grid-template-columns: 8px 92px minmax(72px, auto); }
 .ring-legend-row span::after {
@@ -14,48 +22,124 @@
 .ring-solar span::after { content: " · 1年"; }
 .ring-month span::after { content: " · ~5年"; }
 .ring-year span::after { content: " · 60年"; }
+.ring-year strong { color: #e4ddc4; font-weight: 800; }
+.ring-month strong { color: #d4dfd7; font-weight: 760; }
+.ring-solar strong { color: #c7b89f; font-weight: 700; }
+.ring-day strong,
+.ring-hour strong { color: #9da8a1; font-weight: 660; }
 
-/* Solar terms and zodiac are two readings of one annual longitude coordinate.
-   The internal guide is intentionally weaker than the five primary boundaries. */
-#guide-layer .guide-arc.annual-subdivide {
-  stroke: rgba(213, 163, 109, .17);
-  stroke-dasharray: 3 5;
+/* Fast inner clocks need less label ink. Their geometry remains fully present,
+   but only every second rendered five-step label is shown (10-step cadence).
+   Slow shells keep the denser five-step labels because they are the structural
+   frame of the instrument. */
+#hour-track .cycle-label:nth-of-type(2n),
+#day-track .cycle-label:nth-of-type(2n) { display: none; }
+#hour-track .cycle-label {
+  fill: rgba(202,216,208,.36);
+  font-size: 8.5px;
+  font-weight: 620;
 }
-#solar-track .term-sector { stroke: rgba(238,242,237,.08); }
+#day-track .cycle-label {
+  fill: rgba(211,222,217,.44);
+  font-size: 9px;
+  font-weight: 640;
+}
+#month-track .cycle-label {
+  fill: rgba(222,234,225,.72);
+  font-size: 10px;
+  font-weight: 720;
+}
+#year-track .cycle-label {
+  fill: rgba(244,236,207,.84);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+/* Radial mass should increase perceptually with temporal scale. This is an
+   optical hierarchy only; the SVG annuli and hit targets are unchanged. */
+#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 15%, transparent); }
+#day-track .day-sector { fill: color-mix(in srgb, var(--day) 18%, transparent); }
+#month-track .month-sector { fill: color-mix(in srgb, var(--month) 27%, transparent); }
+#year-track .year-sector { fill: color-mix(in srgb, var(--year) 36%, transparent); }
+
+#hour-track .cycle-sector.is-active,
+#day-track .cycle-sector.is-active {
+  fill: color-mix(in srgb, currentColor 40%, transparent);
+}
+#month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 58%, transparent); }
+#year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 66%, transparent); }
+
+#hour-track .ring-tick { stroke: rgba(238,242,237,.13); }
+#day-track .ring-tick { stroke: rgba(238,242,237,.17); }
+#month-track .ring-tick { stroke: rgba(238,242,237,.28); }
+#year-track .ring-tick { stroke: rgba(238,242,237,.32); }
+#month-track .ring-tick.major { stroke: rgba(238,242,237,.47); }
+#year-track .ring-tick.major { stroke: rgba(244,238,218,.62); stroke-width: 1.4; }
+
+/* Solar terms and zodiac are two readings of one annual longitude coordinate,
+   not two more peer clocks. Make the shared band read like a reference scale
+   between the inner clocks and the slow outer shells. */
+#guide-layer .guide-arc.annual-subdivide {
+  stroke: rgba(213,163,109,.12);
+  stroke-dasharray: 3 6;
+}
+#solar-track .term-sector {
+  fill: rgba(213,163,109,.045);
+  stroke: rgba(238,242,237,.065);
+}
+#solar-track .term-sector.jie { fill: rgba(213,163,109,.075); }
+#solar-track .term-sector.is-active { fill: rgba(213,163,109,.19); }
+#solar-track .term-mark { opacity: .72; }
+#solar-track .term-label {
+  fill: #aa9c86;
+  font-size: 10px;
+  font-weight: 650;
+}
+#solar-track .term-label.jie { fill: #cfb58f; font-weight: 760; }
+
 #zodiac-track {
   pointer-events: none;
-  opacity: .92;
+  opacity: .78;
 }
 #zodiac-track .zodiac-sector {
-  stroke: rgba(214,204,231,.13);
+  fill: rgba(153,139,180,.055);
+  stroke: rgba(214,204,231,.10);
 }
-#zodiac-track .zodiac-label { font-size: 11px; }
+#zodiac-track .zodiac-sector.is-active { fill: rgba(153,139,180,.15); }
+#zodiac-track .zodiac-label {
+  fill: #a49ab8;
+  font-size: 10px;
+  font-weight: 680;
+}
 
-/* The whole annual band is one drag/reference target. */
+/* The whole annual band is still one drag/reference target. Interaction wins
+   over the quieter resting treatment. */
 #kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
 #kinetic-wheel[data-hover-ring="solar"] #zodiac-track .zodiac-sector {
-  stroke: rgba(238, 242, 237, .27);
+  stroke: rgba(238,242,237,.27);
 }
 #kinetic-wheel[data-active-ring="solar"] #solar-track .term-sector,
 #kinetic-wheel[data-active-ring="solar"] #zodiac-track .zodiac-sector {
-  stroke: rgba(244, 230, 183, .58);
+  stroke: rgba(244,230,183,.58);
   stroke-width: 1.65;
 }
-
-/* Visually acknowledge the slow outer shells without changing their semantics. */
-#month-track .cycle-label { fill: rgba(222,234,225,.62); }
-#year-track .cycle-label { fill: rgba(239,231,199,.68); }
-#year-track .ring-tick.major { stroke: rgba(238,242,237,.52); }
 
 @media (max-width: 820px) {
   .ring-legend-row { grid-template-columns: 7px 74px minmax(58px, auto); gap: 6px; }
   .ring-legend-row span::after { font-size: 6.5px; }
+  #year-track .cycle-label { font-size: 10.5px; }
+  #month-track .cycle-label { font-size: 9.5px; }
 }
 
 @media (max-width: 480px) {
-  .ring-legend { gap: 5px; }
-  .ring-legend-row { grid-template-columns: 6px 68px minmax(54px, auto); gap: 5px; }
+  .ring-legend { gap: 5px 9px; }
+  .ring-legend-row { grid-template-columns: none; gap: 4px; }
   .ring-legend-row span { font-size: 7.5px; }
-  .ring-legend-row span::after { font-size: 6px; }
+  .ring-legend-row span::after { display: none; }
   .ring-legend-row strong { font-size: 9px; }
+  #hour-track .cycle-label,
+  #day-track .cycle-label { font-size: 8px; }
+  #month-track .cycle-label { font-size: 9px; }
+  #year-track .cycle-label { font-size: 10px; }
 }
