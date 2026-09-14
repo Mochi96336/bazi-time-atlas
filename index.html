@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./discrete-phase.css">
   <link rel="stylesheet" href="./radial-hierarchy.css">
   <link rel="stylesheet" href="./scale-emphasis.css">
+  <link rel="stylesheet" href="./classification-overlay.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -41,6 +42,7 @@
           <button class="scale-button" type="button" data-scale="cycle">60 年</button>
         </div>
         <div class="toolbar-group">
+          <button id="classification-overlay-button" class="control-button" type="button" aria-pressed="false" aria-controls="classification-overlay-legend" title="並列查看干支五行與黃道四元素／模式；不建立兩套系統的等價關係">分類</button>
           <button id="now-button" class="control-button" type="button">現在</button>
           <button id="play-button" class="control-button primary" type="button" aria-pressed="false">播放</button>
         </div>
@@ -53,6 +55,21 @@
         <div class="ring-legend-row ring-month"><i></i><span>月柱</span><strong id="month-active">—</strong></div>
         <div class="ring-legend-row ring-year"><i></i><span>年柱</span><strong id="year-active">—</strong></div>
       </div>
+
+      <aside id="classification-overlay-legend" class="classification-overlay-legend" hidden aria-label="分類對照圖例">
+        <div class="classification-row">
+          <header><span>干支五行</span><small>底色＝天干 · 邊線＝地支</small></header>
+          <div class="classification-keys" data-five-elements aria-hidden="true"></div>
+          <strong id="classification-bazi-current" class="classification-current">—</strong>
+        </div>
+        <div class="classification-row">
+          <header><span>黃道分類</span><small>底色＝四元素 · 邊線＝模式</small></header>
+          <div class="classification-keys" data-zodiac-elements aria-hidden="true"></div>
+          <div class="classification-keys" data-zodiac-modalities aria-hidden="true"></div>
+          <strong id="classification-zodiac-current" class="classification-current">—</strong>
+        </div>
+        <small class="classification-warning">並列觀察；五行 ≠ 黃道四元素，沒有一對一對應。</small>
+      </aside>
 
       <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="由內向外依時間尺度排列的時、日、太陽年度座標、月、年扇形時間圓盤">
         <g id="guide-layer"></g>
@@ -116,6 +133,7 @@
           <li><strong>48 小時</strong>：時柱／日柱前景化，觀察高速離散跳格。</li>
           <li><strong>一年</strong>：年度黃經／月柱前景化，觀察節界如何驅動月柱。</li>
           <li><strong>60 年</strong>：最外年柱成為主角，內層保留為相位脈絡而不消失。</li>
+          <li><strong>分類</strong>：可選擇性顯示干支五行與黃道四元素／模式；只並列，不建立跨系統等價。</li>
           <li><a href="./docs/current-status.md">目前實作狀態</a> · <a href="./recurrence.html">深時間回歸實驗</a></li>
         </ul>
       </div>
@@ -123,7 +141,7 @@
 
     <details class="sources-panel">
       <summary>資料與規則邊界</summary>
-      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列，時柱沿十二個雙時辰推進。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只是同一太陽黃經年度座標上的固定 30° 分類，不是另一個時間環，也不等同現代天文星座邊界。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
+      <p>年／月／日／時柱沿用現有 Tyme adapter；年柱以立春瞬間切換、月柱以十二個「節」切換，日柱沿連續六十日序列，時柱沿十二個雙時辰推進。時間軸上的「節」界直接讀 Tyme 的精確節氣 Julian Day，並明示其 UTC+08:00 參考鐘；太陽層沿用現有視黃經計算模組。熱帶黃道只是同一太陽黃經年度座標上的固定 30° 分類，不是另一個時間環，也不等同現代天文星座邊界。分類 overlay 只把干支天干／地支五行與熱帶黃道的四元素／模式並列成不同視覺語法，不主張兩套元素系統互相對應。<a href="https://www.hko.gov.hk/en/gts/time/24solarterms.htm" target="_blank" rel="noreferrer">24 Solar Terms</a></p>
     </details>
   </main>
 
@@ -139,6 +157,7 @@
 
   <script type="module" src="./src/kinetic-atlas.js"></script>
   <script type="module" src="./src/scale-emphasis-view.js"></script>
+  <script type="module" src="./src/classification-overlay-view.js"></script>
   <script type="module" src="./src/kinetic-boundaries.js"></script>
   <script type="module" src="./src/legacy-annual-compat.js"></script>
 </body>

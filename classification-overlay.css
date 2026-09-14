@@ -1,0 +1,132 @@
+/* Optional classification comparison. The two systems are rendered in separate
+   visual grammars and are never presented as equivalent element sets. */
+:root {
+  --five-wood: #73977d;
+  --five-fire: #b77b68;
+  --five-earth: #a8956d;
+  --five-metal: #9ca8a8;
+  --five-water: #6f8fa3;
+  --z-fire: #c58a70;
+  --z-earth: #91a07e;
+  --z-air: #8da9ad;
+  --z-water: #858fb4;
+}
+
+#classification-overlay-button.active {
+  color: #111512;
+  background: #cbd8cf;
+  border-color: #cbd8cf;
+}
+
+.classification-overlay-legend {
+  position: absolute;
+  z-index: 5;
+  top: 84px;
+  right: 18px;
+  width: min(330px, calc(100% - 36px));
+  padding: 10px 11px;
+  border: 1px solid rgba(238,242,237,.13);
+  border-radius: 14px;
+  background: rgba(13,17,14,.84);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 14px 42px rgba(0,0,0,.22);
+  pointer-events: none;
+}
+.classification-overlay-legend[hidden] { display: none; }
+.classification-row + .classification-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(238,242,237,.08); }
+.classification-row header { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.classification-row header span { color:#d7ddd8; font-size:9px; font-weight:800; letter-spacing:.08em; }
+.classification-row header small { color:#69736c; font-size:7px; }
+.classification-keys { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+.classification-keys i {
+  min-width:20px;
+  height:18px;
+  display:inline-grid;
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(238,242,237,.12);
+  color:#e4e8e4;
+  font-size:7px;
+  font-style:normal;
+  font-weight:760;
+}
+.classification-current { display:block; margin-top:5px; color:#9ca69e; font-size:8px; font-weight:650; line-height:1.45; }
+.classification-warning { display:block; margin-top:8px; color:#c9bc95; font-size:7px; line-height:1.4; }
+
+.classification-keys [data-five-element="木"] { background: color-mix(in srgb, var(--five-wood) 58%, transparent); }
+.classification-keys [data-five-element="火"] { background: color-mix(in srgb, var(--five-fire) 58%, transparent); }
+.classification-keys [data-five-element="土"] { background: color-mix(in srgb, var(--five-earth) 58%, transparent); }
+.classification-keys [data-five-element="金"] { background: color-mix(in srgb, var(--five-metal) 58%, transparent); }
+.classification-keys [data-five-element="水"] { background: color-mix(in srgb, var(--five-water) 58%, transparent); }
+.classification-keys [data-zodiac-element-key="火"] { background: color-mix(in srgb, var(--z-fire) 58%, transparent); }
+.classification-keys [data-zodiac-element-key="土"] { background: color-mix(in srgb, var(--z-earth) 58%, transparent); }
+.classification-keys [data-zodiac-element-key="風"] { background: color-mix(in srgb, var(--z-air) 58%, transparent); }
+.classification-keys [data-zodiac-element-key="水"] { background: color-mix(in srgb, var(--z-water) 58%, transparent); }
+.classification-keys [data-zodiac-modality-key] { background: transparent; }
+.classification-keys [data-zodiac-modality-key="基本"] { border-style:solid; }
+.classification-keys [data-zodiac-modality-key="固定"] { border-style:dotted; }
+.classification-keys [data-zodiac-modality-key="變動"] { border-style:dashed; }
+
+/* BaZi: sector fill = heavenly-stem element, outline = earthly-branch element. */
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-stem-element="木"] { fill: color-mix(in srgb, var(--five-wood) 34%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-stem-element="火"] { fill: color-mix(in srgb, var(--five-fire) 34%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-stem-element="土"] { fill: color-mix(in srgb, var(--five-earth) 34%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-stem-element="金"] { fill: color-mix(in srgb, var(--five-metal) 34%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-stem-element="水"] { fill: color-mix(in srgb, var(--five-water) 34%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-branch-element="木"] { stroke: var(--five-wood); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-branch-element="火"] { stroke: var(--five-fire); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-branch-element="土"] { stroke: var(--five-earth); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-branch-element="金"] { stroke: var(--five-metal); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector[data-branch-element="水"] { stroke: var(--five-water); }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector { stroke-width:1.45; }
+#kinetic-instrument[data-classification-overlay="on"] .cycle-sector.is-active { stroke-width:2.2; filter:brightness(1.2); }
+
+/* Zodiac: fill = Western four-element classification, border rhythm = modality. */
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="火"] { fill: color-mix(in srgb, var(--z-fire) 36%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="土"] { fill: color-mix(in srgb, var(--z-earth) 36%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="風"] { fill: color-mix(in srgb, var(--z-air) 36%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="水"] { fill: color-mix(in srgb, var(--z-water) 36%, transparent); }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="基本"] { stroke-dasharray:none; }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="固定"] { stroke-dasharray:1.5 3; }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="變動"] { stroke-dasharray:5 3; }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector { stroke-width:1.7; }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector.is-active { stroke-width:2.3; filter:brightness(1.18); }
+
+@media (max-width: 480px) {
+  .classification-overlay-legend {
+    top: 112px;
+    left: 9px;
+    right: 9px;
+    width: auto;
+    padding: 6px 8px 5px;
+    border-radius: 11px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 5px 10px;
+    align-items: start;
+    background: rgba(13,17,14,.76);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  }
+  .classification-overlay-legend[hidden] { display: none; }
+  .classification-row + .classification-row {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .classification-row header { gap: 4px; }
+  .classification-row header span { font-size:7px; }
+  .classification-row header small { font-size:5px; white-space:nowrap; }
+  .classification-keys { gap:3px; margin-top:3px; flex-wrap:nowrap; }
+  .classification-keys + .classification-keys { margin-top:3px; }
+  .classification-keys i { min-width:15px; height:14px; font-size:5.5px; }
+  .classification-current { display:none; }
+  .classification-warning {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    padding-top: 4px;
+    border-top: 1px solid rgba(238,242,237,.08);
+    font-size:5.5px;
+    line-height:1.25;
+  }
+}
