@@ -1,40 +1,35 @@
 import { BERGER_MODEL } from "./berger-orbit.js";
-
-const J2000_YEAR = 2000;
-
-function source(value) {
-  return Object.freeze({
-    ...value,
-    capabilities:Object.freeze({ ...value.capabilities }),
-    coverage:Object.freeze({ ...value.coverage })
-  });
-}
+import {
+  SEASONAL_EPOCH_PROVIDER_ROLES,
+  defineSeasonalEpochProvider,
+  seasonalEpochProviderAvailability
+} from "./seasonal-epoch-provider.js";
 
 /**
- * Deep-time absolute-state support is deliberately separate from the modern
- * Tyme/ShouXing solar-longitude path. A future state adapter must not silently
- * unlock Day/Hour until the same deep-time pipeline also owns the longitude-of-
- * date transform and crossing solve.
+ * Deep-time provider integration is deliberately split by source role.
+ *
+ * - absolute-state adapters expose an Earth/Sun state basis and therefore still
+ *   need the app-owned apparent longitude-of-date transform + crossing solver.
+ * - direct-event providers already solve the seasonal longitude crossing and
+ *   only need an explicit integration entry here; they must never masquerade
+ *   as a DE441/state-vector adapter.
  */
 export const SEASONAL_EPOCH_PIPELINE = Object.freeze({
   absoluteStateAdapterIds:Object.freeze([]),
+  directEventProviderIds:Object.freeze([]),
   apparentGeocentricSolarLongitudeOfDate:false,
   crossingRootSolve:false
 });
 
 /**
- * Audit source coverage without conflating an absolute numerical ephemeris with
- * a ready-made solar-term timestamp.
- *
- * An ephemeris basis must provide an absolute state vector on a continuous
- * dynamical-time axis. Turning that state into a Jie crossing still requires an
- * app-side apparent/geocentric solar-longitude-of-date transform and root solve.
- * Long-term orbital / insolation parameter sets can cover an epoch while still
- * lacking the annual absolute phase needed for that job.
+ * Registry of source capabilities. Coverage alone is not enough: every source
+ * has an explicit role describing what it can actually contribute to an
+ * absolute seasonal epoch proof.
  */
 export const SEASONAL_EPOCH_SOURCES = Object.freeze([
-  source({
+  defineSeasonalEpochProvider({
     id:"berger-1978-shape",
+    role:SEASONAL_EPOCH_PROVIDER_ROLES.SHAPE_PARAMETERS,
     label:"Berger 1978 · shape model",
     authority:"Berger 1978 / current atlas implementation",
     sourceUrl:"https://doi.org/10.1175/1520-0469(1978)035%3C2362:LTVODI%3E2.0.CO;2",
@@ -51,10 +46,11 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     },
     implementation:"bundled-shape-only",
     timeScale:"spring-equinox-normalized phase",
-    note:"repo 內已實作長期 eccentricity / perihelion 幾何，但主動移除共同季節平移；不是逐年絕對 state ephemeris。"
+    note:"repo 內已實作長期 eccentricity / perihelion 幾何，但主動移除共同季節平移；它只提供 shape，不是逐年 absolute state 或 seasonal-event timestamp。"
   }),
-  source({
+  defineSeasonalEpochProvider({
     id:"jpl-de441",
+    role:SEASONAL_EPOCH_PROVIDER_ROLES.ABSOLUTE_STATE_BASIS,
     label:"JPL DE441",
     authority:"NASA/JPL numerical planetary ephemeris",
     sourceUrl:"https://ssd.jpl.nasa.gov/doc/de440_de441.html",
@@ -67,10 +63,11 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     },
     implementation:"not-bundled",
     timeScale:"JED / ephemeris dynamical-time family",
-    note:"可作為高品質絕對 Earth/Sun state basis；仍須在 app 內做視／地心太陽黃經-of-date 轉換與交點 root solve。正式解只延伸到 AD 17191。"
+    note:"高品質 absolute Earth/Sun state basis；它本身不是本 app 的節氣 timestamp API，仍須做視／地心太陽黃經-of-date 轉換與 crossing root solve。正式解只延伸到 AD 17191。"
   }),
-  source({
+  defineSeasonalEpochProvider({
     id:"la2004-insolation-parameters",
+    role:SEASONAL_EPOCH_PROVIDER_ROLES.SHAPE_PARAMETERS,
     label:"La2004 · public insolation parameters",
     authority:"Laskar et al. 2004 / IMCCE public insolation files",
     sourceUrl:"https://vo.imcce.fr/insola/earth/online/earth/La2004/index.html",
@@ -87,7 +84,7 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     },
     implementation:"not-bundled",
     timeScale:"orbital/precessional solution indexed from J2000",
-    note:"公開 insolation parameter 檔提供 e、obliquity、moving-equinox perihelion 等長期量；年份 coverage 很長，但不是逐年 Earth/Sun absolute state 或節氣 timestamp。"
+    note:"公開 insolation parameter 檔提供 e、obliquity、moving-equinox perihelion 等長期量；年份 coverage 很長，但角色仍是 shape/parameters，不是 absolute state 或 direct seasonal event。"
   })
 ]);
 
@@ -95,64 +92,21 @@ function assertYear(value, name) {
   if (!Number.isInteger(value)) throw new RangeError(`${name} must be an integer year`);
 }
 
-function coverageBounds(source) {
-  if (source.coverage.mode === "absolute-year") {
-    return Object.freeze({ minYear:source.coverage.minYear, maxYear:source.coverage.maxYear });
-  }
-  return Object.freeze({
-    minYear:J2000_YEAR + source.coverage.minOffsetYears,
-    maxYear:J2000_YEAR + source.coverage.maxOffsetYears
-  });
-}
-
-function solverReady() {
-  return SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate
-    && SEASONAL_EPOCH_PIPELINE.crossingRootSolve;
-}
-
 function evaluateSource(source, targetYear) {
-  const bounds = coverageBounds(source);
-  const coversTarget = targetYear >= bounds.minYear && targetYear <= bounds.maxYear;
-  const ephemerisBasisCapable = source.capabilities.absoluteStateVector
-    && source.capabilities.continuousDynamicalTime;
-  const implementedAsBasis = SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds.includes(source.id);
-  const qualifiedCoverage = coversTarget && ephemerisBasisCapable;
-  const directSeasonalEpoch = source.capabilities.directSeasonalEpoch;
-  const deepTimeSolverReady = solverReady();
-  const usableNow = coversTarget && (
-    directSeasonalEpoch
-    || qualifiedCoverage && implementedAsBasis && deepTimeSolverReady
-  );
-
-  let reason;
-  if (!coversTarget) reason = "outside-source-coverage";
-  else if (!ephemerisBasisCapable && !directSeasonalEpoch) reason = "parameter-source-without-absolute-state";
-  else if (!implementedAsBasis) reason = "qualified-ephemeris-basis-not-integrated";
-  else if (!deepTimeSolverReady) reason = "deep-time-seasonal-epoch-solver-incomplete";
-  else reason = "usable";
-
+  const availability = seasonalEpochProviderAvailability(source, targetYear, SEASONAL_EPOCH_PIPELINE);
   return Object.freeze({
-    id:source.id,
+    ...availability,
     label:source.label,
     authority:source.authority,
     sourceUrl:source.sourceUrl,
-    targetYear,
-    coverage:bounds,
-    coversTarget,
-    ephemerisBasisCapable,
-    directSeasonalEpoch,
-    implementedAsBasis,
-    deepTimeSolverReady,
-    qualifiedCoverage,
-    usableNow,
-    reason,
     timeScale:source.timeScale,
     note:source.note,
+    implementation:source.implementation,
     capabilities:source.capabilities
   });
 }
 
-function nearestEphemerisCoverageBoundary(evaluations, targetYear) {
+function nearestAbsoluteEpochCoverageBoundary(evaluations, targetYear) {
   const absoluteSources = evaluations.filter(item => item.ephemerisBasisCapable || item.directSeasonalEpoch);
   if (!absoluteSources.length) return null;
   let best = null;
@@ -161,7 +115,7 @@ function nearestEphemerisCoverageBoundary(evaluations, targetYear) {
     const boundaryYear = targetYear < minYear ? minYear : targetYear > maxYear ? maxYear : targetYear;
     const gapYears = Math.abs(targetYear - boundaryYear);
     if (!best || gapYears < best.gapYears) {
-      best = Object.freeze({ sourceId:item.id, boundaryYear, gapYears });
+      best = Object.freeze({ sourceId:item.id, role:item.role, boundaryYear, gapYears });
     }
   }
   return best;
@@ -172,10 +126,13 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
   assertYear(targetYear, "targetYear");
   const identity = baseYear === targetYear;
   const evaluations = Object.freeze(SEASONAL_EPOCH_SOURCES.map(item => evaluateSource(item, targetYear)));
-  const qualified = evaluations.filter(item => item.qualifiedCoverage || item.coversTarget && item.directSeasonalEpoch);
+  const qualified = evaluations.filter(item => item.qualifiedCoverage);
+  const qualifiedDirect = qualified.filter(item => item.directSeasonalEpoch);
+  const qualifiedState = qualified.filter(item => item.ephemerisBasisCapable);
   const usable = evaluations.filter(item => item.usableNow);
-  const nearestEphemerisBoundary = nearestEphemerisCoverageBoundary(evaluations, targetYear);
-  const deepTimeSolverReady = solverReady();
+  const nearestEphemerisBoundary = nearestAbsoluteEpochCoverageBoundary(evaluations, targetYear);
+  const deepTimeSolverReady = SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate
+    && SEASONAL_EPOCH_PIPELINE.crossingRootSolve;
 
   let status;
   let blocker;
@@ -185,10 +142,15 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
   } else if (usable.length) {
     status = "resolved";
     blocker = null;
-  } else if (qualified.length) {
+  } else if (qualifiedDirect.length) {
+    status = "qualified-direct-event-provider-not-integrated";
+    blocker = "direct-event-provider-integration";
+  } else if (qualifiedState.length) {
     status = "qualified-ephemeris-basis-not-integrated";
     blocker = "implementation-and-seasonal-epoch-solver";
   } else {
+    // Kept for compatibility with existing evidence. The gap now means there is
+    // neither an absolute-state basis nor a direct-event provider covering the target.
     status = "absolute-state-coverage-gap";
     blocker = "ephemeris-source-coverage";
   }
@@ -202,10 +164,14 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
     blocker,
     evaluations,
     qualifiedSourceIds:Object.freeze(qualified.map(item => item.id)),
+    qualifiedStateBasisSourceIds:Object.freeze(qualifiedState.map(item => item.id)),
+    qualifiedDirectEventSourceIds:Object.freeze(qualifiedDirect.map(item => item.id)),
     usableSourceIds:Object.freeze(usable.map(item => item.id)),
     nearestEphemerisBoundary,
     appPipeline:SEASONAL_EPOCH_PIPELINE,
     deepTimeSolverReady,
-    seasonalEpochSolverRequired:!identity && !usable.length
+    absoluteSeasonalEpochAvailable:identity || usable.length > 0,
+    seasonalEpochProviderIntegrationRequired:!identity && !usable.length && qualifiedDirect.length > 0,
+    seasonalEpochSolverRequired:!identity && !usable.length && qualifiedDirect.length === 0
   });
 }
