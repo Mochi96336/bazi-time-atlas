@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px Free Compare drag harness</title>
+  <style>
+    html, body { margin:0; width:390px; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; opacity:0; pointer-events:none; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Free Compare production harness"></iframe>
+  <output id="probe" data-ready="false"></output>
+
+  <script type="module">
+    const START_MS = Date.parse("2024-06-15T04:00:00.000Z");
+    const START_ANGLE = -90;
+    const END_ANGLE = -84;
+    const DAY_RING_INTERVAL = 1;
+    const probe = document.querySelector("#probe");
+    const frame = document.querySelector("#stage");
+
+    function appUrl() {
+      const url = new URL("../../", location.href);
+      url.searchParams.set("instant", new Date(START_MS).toISOString());
+      return url.href;
+    }
+
+    function settle() {
+      return new Promise(resolve => queueMicrotask(() => queueMicrotask(resolve)));
+    }
+
+    async function waitFor(predicate, label, timeoutMs = 5000) {
+      const started = performance.now();
+      while (performance.now() - started < timeoutMs) {
+        if (predicate()) return;
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+      throw new Error(`timeout waiting for ${label}`);
+    }
+
+    function geometry() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const svg = doc?.querySelector("#kinetic-wheel");
+      const track = doc?.querySelector("#day-track");
+      const compareButton = doc?.querySelector("#compare-rings-button");
+      const resetButton = doc?.querySelector("#reset-rings-button");
+      const status = doc?.querySelector("#ring-compare-status");
+      const ctm = svg?.getScreenCTM();
+      const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
+      if (!win || !doc || !instrument || !svg || !track || !compareButton || !resetButton || !status || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value))) return null;
+      const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
+        .map(path => {
+          const point = path.getPointAtLength(0);
+          return Math.hypot(point.x - center[0], point.y - center[1]);
+        })
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (radii.length !== 7) return null;
+      return { win, doc, instrument, svg, track, compareButton, resetButton, status, ctm, center, radii };
+    }
+
+    function pointerAt(g, radius, angleDegrees, type, pointerId) {
+      const angle = angleDegrees * Math.PI / 180;
+      const world = new g.win.DOMPoint(
+        g.center[0] + Math.cos(angle) * radius,
+        g.center[1] + Math.sin(angle) * radius
+      );
+      const screen = world.matrixTransform(g.ctm);
+      return new g.win.PointerEvent(type, {
+        bubbles:true,
+        cancelable:true,
+        pointerId,
+        pointerType:"touch",
+        isPrimary:true,
+        button:0,
+        buttons:type === "pointerup" ? 0 : 1,
+        clientX:screen.x,
+        clientY:screen.y
+      });
+    }
+
+    function snapshot(g) {
+      return {
+        innerWidth:g.win.innerWidth,
+        instantMs:Number(g.instrument.dataset.selectedInstantMs),
+        scrubMode:g.instrument.dataset.scrubMode ?? "",
+        compareMode:g.instrument.dataset.compareMode ?? "",
+        detachedRings:g.instrument.dataset.detachedRings ?? "",
+        manualOffset:Number(g.track.dataset.manualOffset),
+        linked:g.track.dataset.linked ?? "",
+        comparePressed:g.compareButton.getAttribute("aria-pressed") ?? "",
+        resetHidden:g.resetButton.hidden,
+        statusHidden:g.status.hidden,
+        statusText:g.status.textContent ?? ""
+      };
+    }
+
+    function writeSnapshot(prefix, value) {
+      for (const [field, raw] of Object.entries(value)) {
+        probe.dataset[`${prefix}${field[0].toUpperCase()}${field.slice(1)}`] = String(raw);
+      }
+    }
+
+    try {
+      const loaded = new Promise(resolve => frame.addEventListener("load", resolve, { once:true }));
+      frame.src = appUrl();
+      await loaded;
+      await waitFor(() => {
+        const g = geometry();
+        const current = g ? snapshot(g) : null;
+        return current && current.innerWidth === 390 && current.instantMs === START_MS && current.scrubMode === "linked-time";
+      }, "production linked-time baseline");
+      await settle();
+
+      const g = geometry();
+      if (!g) throw new Error("production geometry unavailable");
+      const before = snapshot(g);
+
+      g.compareButton.click();
+      await settle();
+      const enabled = snapshot(g);
+
+      const radius = (g.radii[DAY_RING_INTERVAL] + g.radii[DAY_RING_INTERVAL + 1]) / 2;
+      g.svg.dispatchEvent(pointerAt(g, radius, START_ANGLE, "pointerdown", 61));
+      await settle();
+      g.svg.dispatchEvent(pointerAt(g, radius, END_ANGLE, "pointermove", 61));
+      await settle();
+      g.svg.dispatchEvent(pointerAt(g, radius, END_ANGLE, "pointerup", 61));
+      await settle();
+      const detached = snapshot(g);
+
+      g.compareButton.click();
+      await settle();
+      const restored = snapshot(g);
+
+      probe.dataset.dragDegrees = String(END_ANGLE - START_ANGLE);
+      writeSnapshot("before", before);
+      writeSnapshot("enabled", enabled);
+      writeSnapshot("detached", detached);
+      writeSnapshot("restored", restored);
+      probe.dataset.ready = "true";
+    } catch (error) {
+      probe.dataset.error = error?.stack ?? String(error);
+      probe.dataset.ready = "error";
+    }
+  </script>
+</body>
+</html>
