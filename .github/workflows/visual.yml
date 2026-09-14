@@ -90,6 +90,10 @@ jobs:
         run: node scripts/check-temporal-motion-hierarchy.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify temporal boundary continuity
+        run: node scripts/check-temporal-boundary-continuity.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify exact shared boundary gates
         run: node scripts/check-boundary-gates.mjs
         env:
