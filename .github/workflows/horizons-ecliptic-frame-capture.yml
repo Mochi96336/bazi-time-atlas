@@ -18,12 +18,16 @@ jobs:
           node-version: 22
       - name: Capture Horizons frame pairs
         run: node scripts/research-capture-horizons-ecliptic-frame.mjs
+      - name: Capture dense year-4006 frame window
+        run: node scripts/research-capture-horizons-ecliptic-frame-window.mjs
       - name: Upload research evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: horizons-ecliptic-frame-capture
-          path: tmp/horizons-ecliptic-frame-capture/
+          path: |
+            tmp/horizons-ecliptic-frame-capture/
+            tmp/horizons-ecliptic-frame-window/
           if-no-files-found: warn
           retention-days: 7
           compression-level: 6
