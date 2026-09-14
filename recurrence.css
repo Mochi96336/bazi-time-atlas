@@ -100,5 +100,20 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   .recurrence-shell { padding:14px 10px 36px; }.recurrence-intro { display:block; margin-top:28px; }.scope-note { max-width:600px; margin-top:12px; text-align:left; }.recurrence-instrument { min-height:610px; border-radius:22px; }.recurrence-toolbar { inset:11px 10px auto; display:block; }.candidate-buttons { margin-top:8px; }.recurrence-legend { top:144px; left:12px; }.recurrence-legend div { grid-template-columns:7px 58px auto; gap:6px; }.recurrence-legend span { font-size:8px; }#recurrence-wheel { width:132%; left:-16%; }.delta-dock { grid-template-columns:1fr; }.global-period { text-align:left; }.closure-grid { grid-template-columns:repeat(2,1fr); }.milestone-head,.milestone-row { grid-template-columns:78px repeat(3,48px) 1fr; gap:5px; }.milestone-head { font-size:7px; }.milestone-row { font-size:9px; }.milestone-row strong { font-size:11px; }.recurrence-notes { grid-template-columns:1fr; gap:18px; }
 }
 @media (max-width:480px) {
-  .brand { font-size:10px; }.site-nav a { padding:6px 7px; font-size:9px; }h1 { font-size:42px; }.recurrence-instrument { min-height:570px; }.base-date input { width:58px; }.base-date label:first-child input { width:76px; }.candidate-buttons button { min-height:30px; padding:0 8px; font-size:9px; }.recurrence-legend { top:156px; }.recurrence-readout > div:nth-child(2) { font-size:19px; }.closure-grid { grid-template-columns:1fr 1fr; }.milestone-head,.milestone-row { grid-template-columns:64px 42px 42px 42px 1fr; }
+  .brand { font-size:10px; }
+  .site-nav a { padding:6px 7px; font-size:9px; }
+  .recurrence-intro { margin:12px 0 10px; }
+  .recurrence-intro .eyebrow { font-size:7px; letter-spacing:.13em; }
+  h1 { margin:4px 0 0; font-size:clamp(28px,8.2vw,34px); line-height:1; }
+  .recurrence-intro .lede,
+  .scope-note { display:none; }
+  .recurrence-instrument { min-height:610px; }
+  .base-date input { width:58px; }
+  .base-date label:first-child input { width:76px; }
+  .candidate-buttons button { min-height:30px; padding:0 8px; font-size:9px; }
+  .recurrence-legend { top:156px; }
+  .recurrence-readout { bottom:14px; }
+  .recurrence-readout > div:nth-child(2) { font-size:19px; }
+  .closure-grid { grid-template-columns:1fr 1fr; }
+  .milestone-head,.milestone-row { grid-template-columns:64px 42px 42px 42px 1fr; }
 }
