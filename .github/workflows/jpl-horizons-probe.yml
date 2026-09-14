@@ -1,0 +1,41 @@
+name: JPL Horizons 4006 probe
+
+on:
+  push:
+    branches:
+      - agent/jpl-horizons-4006-evidence
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Horizons quantity 31 on TT
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --get \
+            'https://ssd.jpl.nasa.gov/api/horizons.api' \
+            --data-urlencode 'format=text' \
+            --data-urlencode "COMMAND='10'" \
+            --data-urlencode "OBJ_DATA='YES'" \
+            --data-urlencode "MAKE_EPHEM='YES'" \
+            --data-urlencode "EPHEM_TYPE='OBSERVER'" \
+            --data-urlencode "CENTER='500@399'" \
+            --data-urlencode "START_TIME='4006-03-19 00:00'" \
+            --data-urlencode "STOP_TIME='4006-03-22 00:00'" \
+            --data-urlencode "STEP_SIZE='6 h'" \
+            --data-urlencode "QUANTITIES='31'" \
+            --data-urlencode "TIME_TYPE='TT'" \
+            --data-urlencode "TIME_DIGITS='SECONDS'" \
+            --data-urlencode "CAL_FORMAT='BOTH'" \
+            --data-urlencode "ANG_FORMAT='DEG'" \
+            --data-urlencode "CSV_FORMAT='YES'" \
+            --data-urlencode "EXTRA_PREC='YES'" \
+            > horizons-4006-probe.txt
+          echo '--- ephemeris / model header ---'
+          grep -Ei 'DE4[0-9][0-9]|ephemeris|Target body name|Center body name|Time scale|TT' horizons-4006-probe.txt | head -80 || true
+          echo '--- table ---'
+          sed -n '/\$\$SOE/,/\$\$EOE/p' horizons-4006-probe.txt
