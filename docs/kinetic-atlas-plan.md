@@ -1,4 +1,8 @@
-# Kinetic Atlas redesign plan
+# Kinetic Atlas redesign plan — historical design record
+
+> **Status: historical / non-normative.** This file captures the redesign direction that led to the kinetic atlas. Implementation has since passed several assumptions and delivery phases recorded below. For current behavior and hard regression contracts, use [`current-status.md`](current-status.md).
+>
+> In particular, the current primary ring stack is **Hour → Day → Solar annual band → Month → Year** from inner to outer; Hour is already a primary ring; Zodiac is a derived sub-band owned by Solar; the recurrence lab is implemented as the secondary **Research** destination; and an absolute-state seasonal crossing solver core now exists while production DE441 integration remains fail-closed. The older stack/order and “future phase” wording below is retained only as design history.
 
 ## Product reset
 
