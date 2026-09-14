@@ -2,20 +2,29 @@ import {
   solarTermEventsBetween,
   solarTermNamedEventsBetween
 } from "../astronomy/solar-term-boundaries.js";
+import { discretePhaseWindowForRing } from "../wheel/discrete-phase.js";
 import { normalizeDegrees, shortestAngleDelta } from "../wheel/polar-geometry.js";
 
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
 const HOUR_PILLAR_MS = 2 * HOUR_MS;
+const TOOTH_DEGREES = 6;
 const BOUNDARY_ENTRY_EPSILON_MS = 1_000;
+const BOUNDARY_SAMPLE_EPSILON_MS = 1;
 const MONTH_SEARCH_DAYS = 400;
 const YEAR_SEARCH_DAYS = 800;
 const SOLAR_RATE_PROBE_MS = 6 * HOUR_MS;
 const MIN_SOLAR_RATE_DEG_PER_DAY = 0.5;
 const MAX_SOLAR_RATE_DEG_PER_DAY = 1.5;
+const MAX_TEMPORAL_BOUNDARY_CROSSINGS = 128;
+const ANGLE_EPSILON = 1e-12;
 
 function assertDirection(direction) {
   if (direction !== -1 && direction !== 1) throw new RangeError("direction must be -1 or 1");
+}
+
+function isDiscreteRing(ringId) {
+  return ringId === "hour" || ringId === "day" || ringId === "month" || ringId === "year";
 }
 
 function boundaryStartsAround(instantMs, ringId) {
@@ -48,7 +57,9 @@ function stepIntervalByStarts(instantMs, starts, direction) {
   return target + BOUNDARY_ENTRY_EPSILON_MS;
 }
 
-export function consumeDiscreteDrag(remainderDegrees, deltaDegrees, stepDegrees = 6) {
+// Kept as a compatibility helper for proof tests and old research probes. Runtime
+// linked drag no longer consumes detented six-degree steps.
+export function consumeDiscreteDrag(remainderDegrees, deltaDegrees, stepDegrees = TOOTH_DEGREES) {
   if (![remainderDegrees, deltaDegrees, stepDegrees].every(Number.isFinite) || stepDegrees <= 0) {
     throw new RangeError("drag degrees must be finite and stepDegrees must be positive");
   }
@@ -60,6 +71,8 @@ export function consumeDiscreteDrag(remainderDegrees, deltaDegrees, stepDegrees 
   });
 }
 
+// Kept for explicit boundary stepping tests. Runtime linked drag uses
+// solveLinkedTemporalDrag() so sub-tooth motion changes the Selected Instant.
 export function stepLinkedDiscreteInstant(ringId, instantMs, timeDirection) {
   assertDirection(timeDirection);
   if (!Number.isFinite(instantMs)) throw new RangeError("instantMs must be finite");
@@ -70,6 +83,73 @@ export function stepLinkedDiscreteInstant(ringId, instantMs, timeDirection) {
     return stepIntervalByStarts(instantMs, boundaryStartsAround(instantMs, ringId), timeDirection);
   }
   throw new RangeError(`ring ${ringId} is not a discrete linked scrub ring`);
+}
+
+/**
+ * Invert a linked ring gesture through the same real phase intervals that drive
+ * the rendered temporal track. One tooth is always six degrees, but its elapsed
+ * time is the actual active interval: 2h, Zi-initial day, Jie→Jie, or LiChun→LiChun.
+ *
+ * Positive ring rotation means the user moved the wheel clockwise, so master
+ * time moves backward. Crossing a boundary consumes the remaining fraction of
+ * the current tooth and then continues through the adjacent real interval; no
+ * six-degree detent or fixed 30d/365d approximation is involved.
+ */
+export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees }) {
+  if (!isDiscreteRing(ringId)) throw new RangeError(`ring ${ringId} is not a temporal linked scrub ring`);
+  if (!Number.isFinite(instantMs) || !Number.isFinite(dragDeltaDegrees)) {
+    throw new RangeError("instantMs and dragDeltaDegrees must be finite");
+  }
+  if (Math.abs(dragDeltaDegrees) < ANGLE_EPSILON) {
+    return Object.freeze({ instantMs, crossedBoundaries:0 });
+  }
+
+  const timeDirection = dragDeltaDegrees > 0 ? -1 : 1;
+  let remainingDegrees = Math.abs(dragDeltaDegrees);
+  let cursorMs = instantMs;
+  let window = discretePhaseWindowForRing(ringId, cursorMs);
+  let progress = window?.progress;
+  let crossedBoundaries = 0;
+
+  if (!window || !Number.isFinite(progress)) throw new RangeError(`no phase window for ${ringId}`);
+
+  for (let crossing = 0; crossing <= MAX_TEMPORAL_BOUNDARY_CROSSINGS; crossing += 1) {
+    const durationMs = window.endMs - window.startMs;
+    if (!Number.isFinite(durationMs) || durationMs <= 0) throw new RangeError(`invalid phase duration for ${ringId}`);
+
+    const availableFraction = timeDirection > 0 ? 1 - progress : progress;
+    const availableDegrees = Math.max(0, availableFraction * TOOTH_DEGREES);
+
+    if (remainingDegrees <= availableDegrees + ANGLE_EPSILON) {
+      const nextProgress = Math.max(0, Math.min(1,
+        progress + timeDirection * remainingDegrees / TOOTH_DEGREES
+      ));
+      return Object.freeze({
+        instantMs: window.startMs + nextProgress * durationMs,
+        crossedBoundaries
+      });
+    }
+
+    remainingDegrees -= availableDegrees;
+    crossedBoundaries += 1;
+
+    if (timeDirection > 0) {
+      cursorMs = window.endMs;
+      window = discretePhaseWindowForRing(ringId, cursorMs);
+      progress = 0;
+    } else {
+      cursorMs = window.startMs;
+      // Phase windows are half-open [start,end). Sampling one millisecond before
+      // the boundary identifies the adjacent earlier interval, while progress=1
+      // keeps the mathematical cursor exactly on the shared boundary.
+      window = discretePhaseWindowForRing(ringId, cursorMs - BOUNDARY_SAMPLE_EPSILON_MS);
+      progress = 1;
+    }
+
+    if (!window) throw new RangeError(`adjacent phase window unavailable for ${ringId}`);
+  }
+
+  throw new RangeError(`linked ${ringId} drag crossed too many temporal boundaries`);
 }
 
 function localSolarRate(longitudeAtMs, instantMs, probeMs = SOLAR_RATE_PROBE_MS) {
@@ -97,7 +177,7 @@ export function solveLinkedLongitudeDrag({
   if (typeof longitudeAtMs !== "function") throw new TypeError("longitudeAtMs must be a function");
   if (!Number.isInteger(maxIterations) || maxIterations < 1) throw new RangeError("maxIterations must be a positive integer");
   if (!Number.isFinite(toleranceDegrees) || toleranceDegrees <= 0) throw new RangeError("toleranceDegrees must be positive");
-  if (Math.abs(dragDeltaDegrees) < 1e-12) return instantMs;
+  if (Math.abs(dragDeltaDegrees) < ANGLE_EPSILON) return instantMs;
 
   const initialLongitude = longitudeAtMs(instantMs);
   if (!Number.isFinite(initialLongitude)) throw new RangeError("longitudeAtMs must return finite degrees");
@@ -127,23 +207,19 @@ export function applyLinkedRingDrag({
     return Object.freeze({
       instantMs: solveLinkedLongitudeDrag({ instantMs, dragDeltaDegrees: deltaDegrees, longitudeAtMs }),
       remainderDegrees: 0,
-      appliedSteps: 0
+      appliedSteps: 0,
+      crossedBoundaries: 0
     });
   }
 
-  if (ringId === "hour" || ringId === "year" || ringId === "month" || ringId === "day") {
-    const consumed = consumeDiscreteDrag(remainderDegrees, deltaDegrees, 6);
-    let nextMs = instantMs;
-    if (consumed.steps !== 0) {
-      const timeDirection = consumed.steps > 0 ? -1 : 1;
-      for (let index = 0; index < Math.abs(consumed.steps); index += 1) {
-        nextMs = stepLinkedDiscreteInstant(ringId, nextMs, timeDirection);
-      }
-    }
+  if (isDiscreteRing(ringId)) {
+    if (!Number.isFinite(remainderDegrees)) throw new RangeError("remainderDegrees must be finite");
+    const solved = solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees:deltaDegrees });
     return Object.freeze({
-      instantMs: nextMs,
-      remainderDegrees: consumed.remainderDegrees,
-      appliedSteps: consumed.steps
+      instantMs: solved.instantMs,
+      remainderDegrees: 0,
+      appliedSteps: 0,
+      crossedBoundaries: solved.crossedBoundaries
     });
   }
 
@@ -153,5 +229,6 @@ export function applyLinkedRingDrag({
 export const LINKED_SCRUB_CONSTANTS = Object.freeze({
   dayMs: DAY_MS,
   hourPillarMs: HOUR_PILLAR_MS,
+  toothDegrees: TOOTH_DEGREES,
   boundaryEntryEpsilonMs: BOUNDARY_ENTRY_EPSILON_MS
 });
