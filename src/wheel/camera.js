@@ -19,13 +19,13 @@ export const CAMERA_ZOOM = Object.freeze({
 // The world geometry stays identical at every breakpoint. Only the camera
 // changes. A phone is much taller relative to its width than the desktop SVG;
 // using the desktop headroom with a merely horizontal crop leaves the fan
-// floating in the middle of the instrument. Give mobile enough world-space
-// headroom to keep the cursor note below the controls while letting the narrow
-// 400×760 viewBox fill the portrait instrument instead of letterboxing it.
+// floating in the middle of the instrument. Keep enough mobile world-space
+// headroom for the cursor note and instrument metadata while bringing the
+// outer Year shell closer to the top of the portrait composition.
 export const CAMERA_TOP_MARGIN_BY_MODE = Object.freeze({
   desktop: CAMERA_TOP_MARGIN,
   compact: CAMERA_TOP_MARGIN,
-  mobile: 178
+  mobile: 150
 });
 
 export function instrumentViewBox({ center, outerRadius, viewport = DEFAULT_VIEWPORT, topMargin = CAMERA_TOP_MARGIN }) {

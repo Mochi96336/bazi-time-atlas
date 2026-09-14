@@ -194,10 +194,10 @@ test("responsive camera preserves desktop/compact framing and fills portrait mob
   assert.equal(mobile.zoom, CAMERA_ZOOM.mobile);
   assert.equal(mobile.zoom, 3);
   assert.equal(mobile.topMargin, CAMERA_TOP_MARGIN_BY_MODE.mobile);
-  assert.equal(mobile.topMargin, 178);
+  assert.equal(mobile.topMargin, 150);
   assert.equal(mobile.viewBox.x, 400);
   assert.equal(mobile.viewBox.width, 400);
-  assert.equal(mobile.viewBox.y, 0);
+  assert.equal(mobile.viewBox.y, 28);
   assert.equal(mobile.viewBox.height, 760);
 
   // Explicit headroom remains an escape hatch for proof/debug callers; only

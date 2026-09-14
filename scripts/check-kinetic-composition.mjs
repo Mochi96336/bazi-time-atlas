@@ -121,11 +121,11 @@ if (mobileCameraMode !== "mobile" || Math.abs(mobileCameraZoom - 3) > 1e-4) {
 if (![mobileCameraX, mobileCameraY, mobileCameraWidth, mobileCameraHeight, wheelWidthRatio].every(Number.isFinite)) {
   throw new Error(`mobile: non-finite camera/layout diagnostics: ${mobile.url}`);
 }
-if (Math.abs(mobileCameraX - 400) > 0.02 || Math.abs(mobileCameraY) > 0.02 || Math.abs(mobileCameraWidth - 400) > 0.02 || Math.abs(mobileCameraHeight - 760) > 0.02) {
+if (Math.abs(mobileCameraX - 400) > 0.02 || Math.abs(mobileCameraY - 28) > 0.02 || Math.abs(mobileCameraWidth - 400) > 0.02 || Math.abs(mobileCameraHeight - 760) > 0.02) {
   throw new Error(`mobile: wrong oversized portrait crop (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
 }
-if (mobileCameraWidth > 420 || mobileCameraY > 1) {
-  throw new Error(`mobile: giant fan camera regressed toward the old floating crop (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
+if (mobileCameraWidth > 420 || mobileCameraY < 20 || mobileCameraY > 36) {
+  throw new Error(`mobile: giant fan camera lost the tightened portrait framing (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
 }
 if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelTransform !== "matrix(1, 0, 0, 1, 0, 0)")) {
   throw new Error(`mobile: CSS still owns wheel zoom (widthRatio=${wheelWidthRatio}, transform=${wheelTransform}): ${mobile.url}`);
