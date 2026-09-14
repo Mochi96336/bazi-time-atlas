@@ -39,9 +39,50 @@
   background: var(--accent);
 }
 
+/* Research is intentionally a secondary destination rather than a fourth
+   product view. The extra role selector keeps this hierarchy stronger than
+   page-local nav rules that load after this shared sheet. */
+.site-nav a.research-link[data-nav-role="research"] {
+  margin-left: 6px;
+  padding-left: 12px;
+  color: #69716c;
+  font-size: 10px;
+  font-weight: 580;
+  opacity: .72;
+}
+
+.site-nav a.research-link[data-nav-role="research"]::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 1px;
+  height: 12px;
+  background: currentColor;
+  opacity: .28;
+  transform: translateY(-50%);
+}
+
+.site-nav a.research-link[data-nav-role="research"]:hover {
+  color: var(--ink);
+  opacity: .9;
+}
+
+.site-nav a.research-link[data-nav-role="research"].active,
+.site-nav a.research-link[data-nav-role="research"][aria-current="page"] {
+  color: var(--ink);
+  font-weight: 680;
+  opacity: .88;
+}
+
 @media (max-width: 600px) {
   .topbar-actions { gap: 10px; }
   .site-nav { gap: 9px; }
   .site-nav a { font-size: 10px; }
+  .site-nav a.research-link[data-nav-role="research"] {
+    margin-left: 2px;
+    padding-left: 8px;
+    font-size: 8px;
+  }
   .topbar-actions .topbar-note { display: none; }
 }
