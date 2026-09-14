@@ -56,8 +56,9 @@
   letter-spacing: .02em;
 }
 
-/* Radial mass should increase perceptually with temporal scale. This is an
-   optical hierarchy only; the SVG annuli and hit targets are unchanged. */
+/* The wheel model now carries the physical thickness hierarchy. This sheet
+   only reinforces that same scale reading with ink; geometry and hit targets
+   remain owned by wheel-core rather than CSS. */
 #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 15%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 18%, transparent); }
 #month-track .month-sector { fill: color-mix(in srgb, var(--month) 27%, transparent); }
