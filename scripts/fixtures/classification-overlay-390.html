@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px classification overlay harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px classification comparison probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    function hidden(win, node) {
+      return !node || win.getComputedStyle(node).display === "none";
+    }
+
+    function settle(callback) {
+      requestAnimationFrame(() => requestAnimationFrame(callback));
+    }
+
+    frame.addEventListener("load", () => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const button = doc?.querySelector("#classification-overlay-button");
+      const legend = doc?.querySelector("#classification-overlay-legend");
+      if (!win || !doc || !instrument || !button || !legend) return;
+
+      const disableTransitions = doc.createElement("style");
+      disableTransitions.textContent = "#kinetic-wheel *{transition:none!important}";
+      doc.head.append(disableTransitions);
+
+      const waitForApp = () => {
+        if (
+          !instrument.dataset.selectedInstantMs ||
+          instrument.dataset.classificationCycleSectors !== "240" ||
+          instrument.dataset.classificationZodiacSectors !== "12"
+        ) {
+          setTimeout(waitForApp, 40);
+          return;
+        }
+
+        const cycleNodes = [...doc.querySelectorAll(".cycle-sector[data-cycle-index]")];
+        const zodiacNodes = [...doc.querySelectorAll("#zodiac-track .zodiac-sector[data-zodiac-index]")];
+        const jiaZi = doc.querySelector('#day-track .cycle-sector[data-cycle-index="0"]');
+        const aries = doc.querySelector('#zodiac-track .zodiac-sector[data-zodiac-index="0"]');
+        const gemini = doc.querySelector('#zodiac-track .zodiac-sector[data-zodiac-index="2"]');
+        if (!jiaZi || !aries || !gemini) return;
+
+        const selectedBefore = instrument.dataset.selectedInstantMs;
+        probe.dataset.innerWidth = String(win.innerWidth);
+        probe.dataset.initialOverlay = instrument.dataset.classificationOverlay ?? "";
+        probe.dataset.initialPressed = button.getAttribute("aria-pressed") ?? "";
+        probe.dataset.initialLegendHidden = String(hidden(win, legend));
+        probe.dataset.cycleAnnotated = String(cycleNodes.filter(node => node.dataset.stemElement && node.dataset.branchElement).length);
+        probe.dataset.zodiacAnnotated = String(zodiacNodes.filter(node => node.dataset.zodiacElement && node.dataset.zodiacModality).length);
+        probe.dataset.jiaZiStem = jiaZi.dataset.stemElement ?? "";
+        probe.dataset.jiaZiBranch = jiaZi.dataset.branchElement ?? "";
+        probe.dataset.ariesElement = aries.dataset.zodiacElement ?? "";
+        probe.dataset.ariesModality = aries.dataset.zodiacModality ?? "";
+        probe.dataset.geminiElement = gemini.dataset.zodiacElement ?? "";
+        probe.dataset.geminiModality = gemini.dataset.zodiacModality ?? "";
+        probe.dataset.jiaZiFillBefore = win.getComputedStyle(jiaZi).fill;
+        probe.dataset.jiaZiStrokeBefore = win.getComputedStyle(jiaZi).stroke;
+        probe.dataset.ariesFillBefore = win.getComputedStyle(aries).fill;
+
+        button.click();
+        settle(() => {
+          probe.dataset.onOverlay = instrument.dataset.classificationOverlay ?? "";
+          probe.dataset.onPressed = button.getAttribute("aria-pressed") ?? "";
+          probe.dataset.onLegendHidden = String(hidden(win, legend));
+          probe.dataset.selectedOn = instrument.dataset.selectedInstantMs ?? "";
+          probe.dataset.jiaZiFillOn = win.getComputedStyle(jiaZi).fill;
+          probe.dataset.jiaZiStrokeOn = win.getComputedStyle(jiaZi).stroke;
+          probe.dataset.ariesFillOn = win.getComputedStyle(aries).fill;
+          probe.dataset.geminiDashOn = win.getComputedStyle(gemini).strokeDasharray;
+          probe.dataset.baziCurrent = doc.querySelector("#classification-bazi-current")?.textContent?.trim() ?? "";
+          probe.dataset.zodiacCurrent = doc.querySelector("#classification-zodiac-current")?.textContent?.trim() ?? "";
+          probe.dataset.warning = doc.querySelector(".classification-warning")?.textContent?.trim() ?? "";
+
+          button.click();
+          settle(() => {
+            probe.dataset.offOverlay = instrument.dataset.classificationOverlay ?? "";
+            probe.dataset.offPressed = button.getAttribute("aria-pressed") ?? "";
+            probe.dataset.offLegendHidden = String(hidden(win, legend));
+            probe.dataset.selectedOff = instrument.dataset.selectedInstantMs ?? "";
+            probe.dataset.selectedBefore = selectedBefore;
+            probe.dataset.ready = "true";
+          });
+        });
+      };
+      waitForApp();
+    });
+  </script>
+</body>
+</html>
