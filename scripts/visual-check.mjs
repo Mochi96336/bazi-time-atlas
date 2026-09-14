@@ -10,6 +10,7 @@ const pages = [
   { key: "annual-classification", path: "?classification=1&instant=2027-03-15T13%3A20%3A09.000Z" },
   { key: "annual-birth", path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1" },
   { key: "recurrence", path: "recurrence.html" },
+  { key: "recurrence-gregorian", path: "recurrence.html?date=2026-09-13&delta=400" },
   { key: "recurrence-local", path: "recurrence.html?date=2026-09-13&delta=1980" },
   { key: "recurrence-global", path: "recurrence.html?date=2026-09-13&delta=24000" },
   { key: "recurrence-near-best", path: "recurrence.html?date=2026-09-13&delta=792000" },
