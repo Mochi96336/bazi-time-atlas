@@ -6,11 +6,15 @@ const OUTPUT_DIR = process.env.OUTPUT_DIR || "tmp/horizons-ecliptic-frame-window
 const API_URL = "https://ssd.jpl.nasa.gov/api/horizons.api";
 const REQUEST_DELAY_MS = 1500;
 
+// Cover the complete Tyme-style catalogue year for year=4006. Its 270°
+// winter-solstice crossing belongs to December 4005, so a calendar-year-only
+// window would be scientifically incomplete even though the other 23 crossings
+// lie in 4006.
 const datasets = [
-  { targetId:"10", target:"sun", grid:"daily-knot", start:"4006-01-01 00:00", stop:"4007-01-01 00:00" },
-  { targetId:"301", target:"moon", grid:"daily-knot", start:"4006-01-01 00:00", stop:"4007-01-01 00:00" },
-  { targetId:"10", target:"sun", grid:"halfday-truth", start:"4006-01-01 12:00", stop:"4006-12-31 12:00" },
-  { targetId:"301", target:"moon", grid:"halfday-truth", start:"4006-01-01 12:00", stop:"4006-12-31 12:00" }
+  { targetId:"10", target:"sun", grid:"daily-knot", start:"4005-12-01 00:00", stop:"4007-01-01 00:00" },
+  { targetId:"301", target:"moon", grid:"daily-knot", start:"4005-12-01 00:00", stop:"4007-01-01 00:00" },
+  { targetId:"10", target:"sun", grid:"halfday-truth", start:"4005-12-01 12:00", stop:"4006-12-31 12:00" },
+  { targetId:"301", target:"moon", grid:"halfday-truth", start:"4005-12-01 12:00", stop:"4006-12-31 12:00" }
 ];
 
 function sha256(text) {
@@ -85,14 +89,14 @@ const truthRows = records.filter(item => item.grid === "halfday-truth").map(item
 if (new Set(knotRows).size !== 1 || new Set(truthRows).size !== 1) {
   throw new Error(`Sun/Moon row-count mismatch: knot=${knotRows.join(",")}, truth=${truthRows.join(",")}`);
 }
-if (knotRows[0] < 365 || truthRows[0] < 364) {
-  throw new Error(`Unexpectedly short 4006 grids: knot=${knotRows[0]}, truth=${truthRows[0]}`);
+if (knotRows[0] < 397 || truthRows[0] < 396) {
+  throw new Error(`Unexpectedly short catalogue-year grids: knot=${knotRows[0]}, truth=${truthRows[0]}`);
 }
 
 const manifest = {
   capturedAt:new Date().toISOString(),
   authority:"NASA/JPL Horizons API",
-  purpose:"research-only dense year-4006 recovery of the target-independent Earth ecliptic-of-date rotation and independent half-day interpolation truth",
+  purpose:"research-only dense recovery of the complete Tyme-style year-4006 Earth ecliptic-of-date frame window, including the previous-December winter solstice, with independent half-day interpolation truth",
   contract:{
     observer:"Earth geocenter (500@399)",
     timeScale:"TT",
@@ -102,8 +106,10 @@ const manifest = {
     quantity45:"inertial ICRF apparent RA/DEC",
     sharedCorrections:"light-time + solar gravitational deflection + stellar aberration",
     frameFitDirections:["sun","moon"],
-    knotGrid:"4006 daily 00:00 TT",
-    withheldGrid:"4006 daily 12:00 TT"
+    catalogueYear:4006,
+    catalogueYearSemantics:"270° winter solstice is in December 4005; 285°..255° follow through calendar year 4006",
+    knotGrid:"4005-12-01 through 4007-01-01, daily 00:00 TT",
+    withheldGrid:"4005-12-01 through 4006-12-31, daily 12:00 TT"
   },
   records
 };
