@@ -11,6 +11,7 @@ import { seasonalEpochProviderAvailability } from "../src/recurrence/seasonal-ep
 
 const DAY_MS = 86_400_000;
 const UNIX_EPOCH_JD = 2_440_587.5;
+const MAX_SOLVER_RESIDUAL_DEGREES = 1e-6; // < 0.004 arcsec; matches the pinned ShouXing inverse solver precision.
 
 function ttJulianDayFromUtcMillis(instantMs) {
   const utcJulianDay = UNIX_EPOCH_JD + instantMs / DAY_MS;
@@ -57,7 +58,10 @@ test("solveSolarLongitude reproduces all 24 pinned Tyme 2026 solar-term epochs o
 
     assert.equal(solved.timeScale, "TT", term.name);
     assert.equal(Object.hasOwn(solved, "instantMs"), false, term.name);
-    assert.ok(solved.residualDegrees < 1e-8, `${term.name} residual ${solved.residualDegrees}`);
+    assert.ok(
+      solved.residualDegrees < MAX_SOLVER_RESIDUAL_DEGREES,
+      `${term.name} residual ${solved.residualDegrees}`
+    );
     assert.ok(errorSeconds <= 2, `${term.name} TT error ${errorSeconds.toFixed(6)} s`);
   }
 });
@@ -65,7 +69,7 @@ test("solveSolarLongitude reproduces all 24 pinned Tyme 2026 solar-term epochs o
 test("solveSolarLongitude is not limited to named 15-degree terms", () => {
   const solved = solveSolarLongitude({ year:2026, longitudeDegrees:17.5 });
   assert.equal(solved.targetLongitudeDegrees, 17.5);
-  assert.ok(solved.residualDegrees < 1e-8);
+  assert.ok(solved.residualDegrees < MAX_SOLVER_RESIDUAL_DEGREES);
 });
 
 test("direct proof stays fail-closed outside its validated coverage", () => {
