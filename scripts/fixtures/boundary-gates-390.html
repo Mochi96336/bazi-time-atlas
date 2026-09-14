@@ -12,17 +12,54 @@
 </head>
 <body>
   <iframe id="stage" title="390px exact boundary gate probe"></iframe>
-  <output id="probe" data-ready="false"></output>
+  <output id="probe" data-ready="false" data-phase="boot"></output>
   <script>
     const RINGS = ["hour", "year", "month", "day"];
+    const POLL_INTERVAL_MS = 20;
+    const MAX_POLLS = 300;
+    const ORDINARY_MS = Date.parse("2027-03-15T12:00:00.000Z");
+    const LICHUN_SAMPLE_MS = Date.parse("2027-02-01T04:00:00.000Z");
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
+    let pollsRemaining = MAX_POLLS;
     let exercised = false;
-    let observer = null;
     frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
 
-    function afterSettled(callback) {
-      queueMicrotask(() => queueMicrotask(() => requestAnimationFrame(callback)));
+    function context() {
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!childWindow || !doc) return null;
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const input = doc.querySelector("#instant-input");
+      const reference = doc.querySelector("#reference-frame-select");
+      if (!instrument || !input || !reference) return null;
+      return { childWindow, doc, instrument, input, reference };
+    }
+
+    function fail(label) {
+      probe.dataset.phase = label;
+      probe.dataset.error = `timeout:${label}`;
+      probe.dataset.ready = "timeout";
+    }
+
+    function waitUntil(label, predicate, callback) {
+      probe.dataset.phase = label;
+      let passed = false;
+      try {
+        passed = Boolean(predicate());
+      } catch {
+        passed = false;
+      }
+      if (passed) {
+        queueMicrotask(callback);
+        return;
+      }
+      pollsRemaining -= 1;
+      if (pollsRemaining <= 0) {
+        fail(label);
+        return;
+      }
+      setTimeout(() => waitUntil(label, predicate, callback), POLL_INTERVAL_MS);
     }
 
     function boundarySnapshot(childWindow, doc) {
@@ -62,65 +99,57 @@
       }
     }
 
-    function snapshot() {
-      if (exercised) return;
-      const childWindow = frame.contentWindow;
-      const doc = frame.contentDocument;
-      if (!childWindow || !doc) return;
-      const instrument = doc.querySelector("#kinetic-instrument");
-      const input = doc.querySelector("#instant-input");
-      const reference = doc.querySelector("#reference-frame-select");
-      if (!instrument || !input || !reference) return;
-      if (instrument.dataset.discretePhaseInit !== "ready") return;
-      if (instrument.dataset.exactSharedBoundaryCount !== "1") return;
-
+    function initialReady() {
+      const current = context();
+      if (!current) return false;
+      const { childWindow, doc, instrument } = current;
+      if (instrument.dataset.discretePhaseInit !== "ready") return false;
+      if (instrument.dataset.exactSharedBoundaryCount !== "1") return false;
       const initial = boundarySnapshot(childWindow, doc);
-      if (RINGS.some(id => !Number.isFinite(initial[id].endMs))) return;
-      exercised = true;
-      observer?.disconnect();
-      observer = null;
-      probe.dataset.innerWidth = String(childWindow.innerWidth);
-      write("initial", instrument, initial);
+      return RINGS.every(id => Number.isFinite(initial[id].endMs));
+    }
 
-      reference.value = "day";
-      reference.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
-      afterSettled(() => {
-        probe.dataset.referenceFrame = instrument.dataset.referenceFrame ?? "";
-        write("reference", instrument, boundarySnapshot(childWindow, doc));
+    function runHarness() {
+      if (exercised) return;
+      waitUntil("initial-ready", initialReady, () => {
+        const current = context();
+        if (!current) return fail("initial-context");
+        exercised = true;
+        const { childWindow, doc, instrument, input, reference } = current;
+        probe.dataset.innerWidth = String(childWindow.innerWidth);
+        write("initial", instrument, boundarySnapshot(childWindow, doc));
 
-        input.value = "2027-03-15T20:00";
-        input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
-        afterSettled(() => {
-          write("ordinary", instrument, boundarySnapshot(childWindow, doc));
+        reference.value = "day";
+        reference.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+        waitUntil("reference-day", () => instrument.dataset.referenceFrame === "day", () => {
+          probe.dataset.referenceFrame = instrument.dataset.referenceFrame ?? "";
+          write("reference", instrument, boundarySnapshot(childWindow, doc));
 
-          input.value = "2027-02-01T12:00";
+          input.value = "2027-03-15T20:00";
           input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
-          afterSettled(() => {
-            write("lichun", instrument, boundarySnapshot(childWindow, doc));
-            probe.dataset.ready = "true";
+          waitUntil("ordinary-state", () => (
+            Number(instrument.dataset.selectedInstantMs) === ORDINARY_MS
+            && instrument.dataset.exactSharedBoundaryCount === "0"
+          ), () => {
+            write("ordinary", instrument, boundarySnapshot(childWindow, doc));
+
+            input.value = "2027-02-01T12:00";
+            input.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
+            waitUntil("lichun-state", () => (
+              Number(instrument.dataset.selectedInstantMs) === LICHUN_SAMPLE_MS
+              && instrument.dataset.exactSharedBoundaryCount === "1"
+              && /^year\+month@/.test(instrument.dataset.exactSharedBoundaryGroups ?? "")
+            ), () => {
+              write("lichun", instrument, boundarySnapshot(childWindow, doc));
+              probe.dataset.phase = "complete";
+              probe.dataset.ready = "true";
+            });
           });
         });
       });
     }
 
-    frame.addEventListener("load", () => {
-      const instrument = frame.contentDocument?.querySelector("#kinetic-instrument");
-      if (instrument) {
-        observer = new MutationObserver(snapshot);
-        observer.observe(instrument, {
-          attributes:true,
-          attributeFilter:[
-            "data-discrete-phase-init",
-            "data-exact-shared-boundary-count",
-            "data-exact-shared-boundary-groups"
-          ]
-        });
-      }
-      snapshot();
-      queueMicrotask(snapshot);
-      setTimeout(snapshot, 200);
-      setTimeout(snapshot, 800);
-    });
+    frame.addEventListener("load", runHarness);
   </script>
 </body>
 </html>
