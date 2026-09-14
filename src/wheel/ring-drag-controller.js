@@ -1,5 +1,6 @@
 import { RINGS, WHEEL_CENTER } from "./ring-model.js";
 import { angleAt, shortestAngleDelta } from "./polar-geometry.js";
+import { resolveDragActivation } from "./drag-activation.js";
 import {
   resetManualOffset,
   setManualOffset,
@@ -95,7 +96,9 @@ export function createRingDragController({
       pointerId: event.pointerId,
       ringId: ring.id,
       mode: compareMode ? "free" : "linked",
-      lastAngle: angleAt(WHEEL_CENTER, world)
+      lastAngle: angleAt(WHEEL_CENTER, world),
+      dragActivated: false,
+      pendingDelta: 0
     };
     svg.dataset.activeRing = ring.id;
     updatePointerStyle();
@@ -117,12 +120,18 @@ export function createRingDragController({
     active.lastAngle = nextAngle;
     if (Math.abs(delta) < DETENT_EPSILON) return;
 
+    const activation = resolveDragActivation(active, delta);
+    active.dragActivated = activation.dragActivated;
+    active.pendingDelta = activation.pendingDelta;
+    const deltaToApply = activation.deltaToApply;
+    if (Math.abs(deltaToApply) < DETENT_EPSILON) return;
+
     const state = ringStates[active.ringId];
     if (active.mode === "free") {
-      setManualOffset(state, state.manualOffset + delta);
-      onPoseChange?.(active.ringId, state, delta, { phase:"drag" });
+      setManualOffset(state, state.manualOffset + deltaToApply);
+      onPoseChange?.(active.ringId, state, deltaToApply, { phase:"drag" });
     } else {
-      onLinkedDragDelta?.(active.ringId, delta, state);
+      onLinkedDragDelta?.(active.ringId, deltaToApply, state);
     }
   }
 
