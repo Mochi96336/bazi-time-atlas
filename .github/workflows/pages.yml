@@ -1,9 +1,9 @@
 name: Deploy GitHub Pages
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Visual PNG self-check"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -15,26 +15,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install locked dependencies
-        run: npm ci --no-audit --no-fund
-      - run: npm test
-      - run: npm run check:syntax
-
   deploy:
-    needs: test
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -47,6 +40,6 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - name: Deploy to GitHub Pages
+      - name: Deploy verified revision to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
