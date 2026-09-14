@@ -1,12 +1,12 @@
 # BaZi Time Atlas — implementation checkpoint
 
-Updated for the radial-scale hierarchy work in PR #56.
+Updated after the UI consolidation, scale-emphasis and classification-overlay work through PR #59, plus the seasonal-epoch provider contract work now in progress.
 
 ## Product state
 
 The landing page is a kinetic time instrument rather than a dashboard. One Selected Instant drives every time layer, while each layer keeps its own motion law and boundary semantics.
 
-Radial position now has an explicit meaning: **short / fast cycles live inside; long / slow cycles live outside.** The primary stack runs inner → outer as:
+Radial position has an explicit meaning: **short / fast cycles live inside; long / slow cycles live outside.** The primary stack runs inner → outer as:
 
 1. Hour pillar — 60-state wheel, about five days for a full 60-state cycle, with two-hour double-hour boundaries under the atlas UTC+08:00 reference clock.
 2. Day pillar — 60-state wheel, sixty days for a full cycle, using the Zi-initial 23:00 day-boundary convention.
@@ -32,7 +32,9 @@ Implemented on the main instrument:
 - co-rotating reference frames in radial order: World / Hour / Day / Solar / Month / Year;
 - true intra-state progress for Hour / Day / Month / Year without tweening Ganzhi identities;
 - terminal boundary gates for the active discrete teeth;
-- exact shared-boundary highlighting only when resolved next-boundary timestamps are identical to the millisecond.
+- exact shared-boundary highlighting only when resolved next-boundary timestamps are identical to the millisecond;
+- scale-dependent reading emphasis: 48 hours foregrounds Hour/Day, one year foregrounds Solar/Month, and 60 years foregrounds Year without hiding other true layers;
+- an optional classification overlay that keeps BaZi Five-Phase classification and tropical-zodiac element/modality classification visually and semantically separate.
 
 Two important shared-boundary examples are represented directly:
 
@@ -74,31 +76,35 @@ The deep-time lab intentionally separates three claims:
 2. approximate astronomical similarity,
 3. unresolved / model-bounded absolute epoch reconstruction.
 
+## Seasonal-epoch provider boundary
+
+Absolute seasonal epochs can arrive through more than one legitimate source architecture, so the repo now treats source role as part of provenance rather than reducing everything to “has a year range”. The provider contract distinguishes:
+
+- **shape parameters** — long-term orbital/insolation geometry that can compare seasonal shape but does not supply an absolute epoch;
+- **absolute-state basis** — Earth/Sun state vectors on a continuous dynamical-time axis, such as DE441; these still require an app-owned apparent/geocentric solar-longitude-of-date transform and crossing root solve;
+- **direct seasonal-event provider** — a source that directly solves the target solar-longitude crossing on a continuous dynamical-time axis. It can supply an absolute seasonal epoch without pretending to be an absolute-state ephemeris.
+
+State adapters and direct-event providers therefore have separate integration registries. A direct-event provider must never be labeled as DE441 merely because it was calibrated or compared against DE441.
+
+No direct-event provider is promoted into the production registry yet. Current observable verdicts therefore stay conservative: the +1,980-year candidate has DE441 state coverage but no integrated seasonal-epoch solver, while the +24,000-year candidate remains outside the registered absolute-state coverage.
+
 ## Current hard limit
 
 The project still does **not** have an arbitrary-millennia birth-calculation engine. In particular, a deep-time Day / Hour proof requires an absolute seasonal epoch and Earth-rotation / civil-time projection chain, not only long-term orbital-shape parameters.
 
-The current source audit distinguishes:
-
-- long-term orbital/insolation geometry coverage;
-- absolute Earth/Sun state ephemeris coverage;
-- app integration and solar-longitude / seasonal-epoch root solving;
-- Earth-rotation and clock-basis requirements for Day / Hour.
-
-A candidate can therefore be an exact discrete recurrence and still remain insufficient to prove all four pillars at a distant epoch.
+Even after an absolute seasonal epoch exists, Day / Hour still require separate proof stages including TT↔UT / ΔT, civil-zone policy, day-boundary convention and the selected clock basis. An event timestamp must therefore not be promoted directly into “all four pillars resolved”.
 
 ## Current design frontier
 
-Priority order after the radial hierarchy:
-
-1. **Scale-dependent emphasis without changing truth.** The 48-hour preset should foreground Hour / Day; the one-year preset should foreground the annual Solar band / Month boundaries; the 60-year preset should foreground Year. Other layers remain present as context rather than being given fake motion laws.
-2. **Absolute seasonal-epoch pipeline inside defensible source coverage.** Integrate an explicit state ephemeris / solver path for epochs where the source actually covers the target, then propagate that epoch through the Day / Hour proof chain.
-3. **Deep-time provenance and uncertainty.** Keep source/version/validity ranges visible and refuse unsupported absolute timestamps outside coverage.
-4. **Optional Western sky only after the above remains stable.** Planets/aspects require an explicit ephemeris source/version and must remain distinct from BaZi classifications. Chinese Five Phases and Western four elements/modality must not be presented as equivalent systems.
+1. **Validate a direct seasonal-event provider inside its own declared range.** Before production integration, compare modern exact solar-term events against the existing Tyme path and record source/version/time-scale/coverage metadata.
+2. **Integrate only the validated provider role.** A direct-event source should enter `directEventProviderIds`; a state ephemeris should enter `absoluteStateAdapterIds` and still require the app crossing solver.
+3. **Propagate absolute epoch into the Day / Hour proof chain separately.** Add Earth-rotation / ΔT and civil-time conventions without hiding their uncertainty.
+4. **Refuse unsupported deep epochs.** A provider bounded to a finite range cannot be stretched to the +24,000-year or deeper recurrence merely because the discrete recurrence arithmetic closes there.
+5. **Optional Western sky only after the above remains stable.** Planets/aspects require explicit ephemeris provenance and remain distinct from BaZi classifications.
 
 ## Regression boundary
 
-Every main-instrument PR should continue to preserve:
+Every main-instrument or deep-time PR should continue to preserve:
 
 - exact boundary tests;
 - canonical radial order `Hour → Day → Solar annual band → Month → Year`;
@@ -109,7 +115,9 @@ Every main-instrument PR should continue to preserve:
 - reference-frame invariants;
 - discrete intra-state progress;
 - exact shared-boundary truth;
+- scale-emphasis and classification-overlay invariants;
 - recurrence / astronomical residual / determinacy / proof-chain gates;
-- desktop and mobile PNG inspection.
+- source-role provenance for deep-time claims;
+- desktop and mobile PNG inspection where presentation changes.
 
-The current direction is therefore: keep radial position semantically meaningful, use scale presets to change reading emphasis rather than underlying truth, and extend only source-backed parts of the deep-time proof chain.
+The current direction is therefore: keep radial position semantically meaningful, keep classification systems distinct, and extend only source-backed portions of the absolute-time proof chain without converting model coverage into unsupported certainty.
