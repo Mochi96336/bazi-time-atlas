@@ -1,0 +1,28 @@
+name: Research Horizons ecliptic frame capture
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Capture Horizons frame pairs
+        run: node scripts/research-capture-horizons-ecliptic-frame.mjs
+      - name: Upload research evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: horizons-ecliptic-frame-capture
+          path: tmp/horizons-ecliptic-frame-capture/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
