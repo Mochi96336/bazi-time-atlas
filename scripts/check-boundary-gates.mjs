@@ -63,8 +63,11 @@ function requireFinite(values, label, url) {
 
 const interactive = dump("scripts/fixtures/boundary-gates-390.html", 500, 844, 8000);
 const probe = tagById(interactive.dom, "probe");
-if (!probe || attr(probe, "data-ready") !== "true") {
-  throw new Error(`boundary-gate fixture did not settle: ${interactive.url}`);
+const ready = attr(probe, "data-ready");
+if (!probe || ready !== "true") {
+  const phase = attr(probe, "data-phase") ?? "missing";
+  const error = attr(probe, "data-error") ?? "none";
+  throw new Error(`boundary-gate fixture did not settle (ready=${ready ?? "missing"}, phase=${phase}, error=${error}): ${interactive.url}`);
 }
 if (Number(attr(probe, "data-inner-width")) !== 390) {
   throw new Error(`boundary-gate fixture is not a true 390px viewport: ${interactive.url}`);
