@@ -102,8 +102,6 @@ export function createRingDragController({
     };
     svg.dataset.activeRing = ring.id;
     updatePointerStyle();
-    if (active.mode === "free") onDragStart?.(ring.id, state);
-    else onLinkedDragStart?.(ring.id, state);
   }
 
   function move(event) {
@@ -120,13 +118,19 @@ export function createRingDragController({
     active.lastAngle = nextAngle;
     if (Math.abs(delta) < DETENT_EPSILON) return;
 
+    const wasActivated = active.dragActivated;
     const activation = resolveDragActivation(active, delta);
     active.dragActivated = activation.dragActivated;
     active.pendingDelta = activation.pendingDelta;
     const deltaToApply = activation.deltaToApply;
+    const state = ringStates[active.ringId];
+
+    if (!wasActivated && activation.dragActivated) {
+      if (active.mode === "free") onDragStart?.(active.ringId, state);
+      else onLinkedDragStart?.(active.ringId, state);
+    }
     if (Math.abs(deltaToApply) < DETENT_EPSILON) return;
 
-    const state = ringStates[active.ringId];
     if (active.mode === "free") {
       setManualOffset(state, state.manualOffset + deltaToApply);
       onPoseChange?.(active.ringId, state, deltaToApply, { phase:"drag" });
@@ -137,11 +141,16 @@ export function createRingDragController({
 
   function finish(event) {
     if (!active || event.pointerId !== active.pointerId) return;
-    const { ringId, mode } = active;
+    const { ringId, mode, dragActivated } = active;
     const state = ringStates[ringId];
     active = null;
     delete svg.dataset.activeRing;
     try { svg.releasePointerCapture(event.pointerId); } catch {}
+
+    if (!dragActivated) {
+      updatePointerStyle();
+      return;
+    }
 
     if (mode === "free") {
       const unsnappedOffset = state.manualOffset;
