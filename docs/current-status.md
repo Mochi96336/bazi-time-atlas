@@ -1,6 +1,6 @@
 # BaZi Time Atlas — current implementation checkpoint
 
-Updated through the repository-health, kinetic ownership, navigation, wheel hierarchy, deep-time solver-core and deterministic browser-harness work merged through PR #103.
+Updated through the repository-health, kinetic ownership, navigation, wheel hierarchy, deep-time solver-core, deterministic browser-harness and DE441 Sun-center apparent-direction proof work on current main, including PR #100 and PR #103.
 
 This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is retained as historical design rationale and must not override the behavior described here or locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
 
@@ -143,7 +143,7 @@ The pinned ShouXing research path demonstrates that a direct-event pipeline can 
 
 ### Absolute-state solver core
 
-The repository now contains an app-owned seasonal-crossing **solver core** over injected absolute states. Its contract keeps these layers explicit:
+The repository contains an app-owned seasonal-crossing **solver core** over injected absolute states. Its contract keeps these layers explicit:
 
 - source states: barycentric Earth/Sun state basis in ICRF on TDB;
 - TT → ephemeris-time conversion;
@@ -152,9 +152,11 @@ The repository now contains an app-owned seasonal-crossing **solver core** over 
 - transformation into Earth mean ecliptic-of-date;
 - wrapped/bracket-expanding TT root solve for the requested longitude crossing.
 
-The solver deliberately fails closed before claiming Horizons quantity-31-style semantics unless the apparent-direction model declares the required completeness, including gravitational light deflection and stellar aberration.
+The pinned DE441 research path has now validated several of those layers independently. For the geocentric **Sun-center** seasonal-longitude use case, the proof adapter composes the existing TT→TDB and DE441 state-window basis with one-iteration reception light time and NAIF-style stellar aberration. Across pinned 2026 and 4006 evidence windows, the resulting apparent ICRF direction agrees with the corresponding Horizons observer/vector layers to the recorded evidence precision. The ecliptic-of-date frame proof is also validated.
 
-This solver core does **not** mean DE441 is production-integrated. The production pipeline still lacks the real DE441 state adapter/data path plus the validated long-term apparent-direction and mean-ecliptic-of-date transformation chain needed to promote target-era seasonal epochs. Production registries therefore remain conservative.
+That result has a deliberately narrow interpretation: the Horizons evidence does not show an additional gravitational-deflection residual for this Sun-center target at the tested precision, but that is **not** a general rule for arbitrary targets or observables.
+
+This progress still does **not** make DE441 production-integrated and does not yet authorize a production seasonal event pipeline. The longitude-crossing root solve has not been composed and validated end to end with the proven state/apparent/frame layers, and the production DE441 data path remains unintegrated. Production registries therefore remain conservative and fail closed.
 
 ## Day / Hour deep-time boundary
 
@@ -211,8 +213,8 @@ Every main-instrument or deep-time PR should continue to preserve:
 
 ## Current frontier
 
-1. **Attach a real absolute-state adapter only behind its declared source/time/frame contract.** The solver core exists; the production DE441 data integration does not.
-2. **Complete and validate the apparent-direction + mean-ecliptic-of-date chain.** Do not claim Horizons-equivalent seasonal longitude before all required corrections/transforms are explicit and tested.
+1. **Attach a real production absolute-state adapter only behind its declared source/time/frame contract.** The proof adapters exist; the production DE441 data integration does not.
+2. **Compose the validated Sun-center apparent-ICRF and ecliptic-of-date proof layers with the longitude-crossing root solve, then validate that end-to-end target observable before production promotion.**
 3. **Validate target eras independently.** A working modern pipeline does not authorize a distant-era coverage extension.
 4. **Propagate any resolved absolute epoch into Day / Hour through a separate Earth-rotation/civil-time proof chain.**
 5. **Keep Research secondary to the product instrument.** New evidence surfaces should not turn the landing page back into a dashboard.
