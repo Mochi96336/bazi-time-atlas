@@ -1,6 +1,11 @@
 import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
+const TOOTH_DEGREES = 6;
+const CURSOR_ANGLE = -90;
+const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const SEXAGENARY = Array.from({ length:60 }, (_, index) => `${STEMS[index % 10]}${BRANCHES[index % 12]}`);
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -50,6 +55,19 @@ function num(tag, name) {
 
 function requireFinite(values, label, url) {
   if (!values.every(Number.isFinite)) throw new Error(`${label}: non-finite diagnostics: ${url}`);
+}
+
+function cycleIndexDelta(nextIndex, previousIndex, size = 60) {
+  let delta = (nextIndex - previousIndex) % size;
+  if (delta > size / 2) delta -= size;
+  if (delta < -size / 2) delta += size;
+  return delta;
+}
+
+function expectedTrackDelta(previousIndex, previousProgress, nextIndex, nextProgress) {
+  const coordinateDelta = cycleIndexDelta(nextIndex, previousIndex) * TOOTH_DEGREES
+    + (nextProgress - previousProgress) * TOOTH_DEGREES;
+  return -coordinateDelta;
 }
 
 const interactive = dump("scripts/fixtures/discrete-phase-390.html", 500, 844, 7000);
@@ -110,8 +128,13 @@ for (const id of ids) {
   const strokeWidth = Number.parseFloat(text("initial", id, "stroke-width") ?? "");
   if (!Number.isFinite(strokeWidth) || strokeWidth < 3) throw new Error(`discrete-phase: ${id} progress arc is not visibly styled: ${interactive.url}`);
   if (!text("initial", id, "stroke") || text("initial", id, "stroke") === "none") throw new Error(`discrete-phase: ${id} progress arc has no stroke: ${interactive.url}`);
-  if (Math.abs(stepModel[id] - initialModel[id]) > 1e-6 || stepActive[id] !== initialActive[id]) {
-    throw new Error(`discrete-phase: +10min tweened/snapped ${id} identity instead of phase only: ${interactive.url}`);
+  if (stepActive[id] !== initialActive[id]) {
+    throw new Error(`discrete-phase: +10min changed ${id} identity inside the same interval: ${interactive.url}`);
+  }
+  const expectedDelta = expectedTrackDelta(initialActive[id], initialProgress[id], stepActive[id], stepProgress[id]);
+  const actualDelta = stepModel[id] - initialModel[id];
+  if (Math.abs(actualDelta - expectedDelta) > 0.001) {
+    throw new Error(`discrete-phase: +10min ${id} track did not follow continuous phase (${initialModel[id]}->${stepModel[id]}, expected delta ${expectedDelta}): ${interactive.url}`);
   }
 }
 
@@ -133,7 +156,15 @@ const beforeHourModel = read("before", "hour", "model");
 const beforeDayModel = read("before", "day", "model");
 const afterHourModel = read("after", "hour", "model");
 const afterDayModel = read("after", "day", "model");
-requireFinite([beforeHour, beforeDay, afterHour, afterDay, beforeHourModel, beforeDayModel, afterHourModel, afterDayModel], "discrete-phase boundary", interactive.url);
+const beforeHourActive = read("before", "hour", "active-index");
+const beforeDayActive = read("before", "day", "active-index");
+const afterHourActive = read("after", "hour", "active-index");
+const afterDayActive = read("after", "day", "active-index");
+requireFinite([
+  beforeHour, beforeDay, afterHour, afterDay,
+  beforeHourModel, beforeDayModel, afterHourModel, afterDayModel,
+  beforeHourActive, beforeDayActive, afterHourActive, afterDayActive
+], "discrete-phase boundary", interactive.url);
 if (Math.abs(beforeHour - 119 / 120) > 2e-5 || Math.abs(beforeDay - 1439 / 1440) > 2e-5) {
   throw new Error(`discrete-phase: 22:59 phases are not approaching the shared 23:00 boundary (hour=${beforeHour}, day=${beforeDay}): ${interactive.url}`);
 }
@@ -141,10 +172,16 @@ if (Math.abs(afterHour) > 1e-9 || Math.abs(afterDay) > 1e-9) {
   throw new Error(`discrete-phase: 23:00 did not reset hour/day progress exactly (hour=${afterHour}, day=${afterDay}): ${interactive.url}`);
 }
 if (attr(probe, "data-before-hour-pillar") === attr(probe, "data-after-hour-pillar") || attr(probe, "data-before-day-pillar") === attr(probe, "data-after-day-pillar")) {
-  throw new Error(`discrete-phase: pillar identities did not snap at 23:00: ${interactive.url}`);
+  throw new Error(`discrete-phase: pillar identities did not change at 23:00: ${interactive.url}`);
 }
-if (Math.abs(Math.abs(afterHourModel - beforeHourModel) - 6) > 0.01 || Math.abs(Math.abs(afterDayModel - beforeDayModel) - 6) > 0.01) {
-  throw new Error(`discrete-phase: 23:00 identity snap is not one six-degree tooth (hour=${beforeHourModel}->${afterHourModel}, day=${beforeDayModel}->${afterDayModel}): ${interactive.url}`);
+const expectedHourBoundaryDelta = expectedTrackDelta(beforeHourActive, beforeHour, afterHourActive, afterHour);
+const expectedDayBoundaryDelta = expectedTrackDelta(beforeDayActive, beforeDay, afterDayActive, afterDay);
+if (Math.abs((afterHourModel - beforeHourModel) - expectedHourBoundaryDelta) > 0.001 ||
+    Math.abs((afterDayModel - beforeDayModel) - expectedDayBoundaryDelta) > 0.001) {
+  throw new Error(`discrete-phase: 23:00 geometry jumped instead of crossing continuously (hour=${beforeHourModel}->${afterHourModel}, expected ${expectedHourBoundaryDelta}; day=${beforeDayModel}->${afterDayModel}, expected ${expectedDayBoundaryDelta}): ${interactive.url}`);
+}
+if (Math.abs(afterHourModel - beforeHourModel) > 0.1 || Math.abs(afterDayModel - beforeDayModel) > 0.1) {
+  throw new Error(`discrete-phase: 23:00 produced a visible tooth jump (hour=${beforeHourModel}->${afterHourModel}, day=${beforeDayModel}->${afterDayModel}): ${interactive.url}`);
 }
 if (text("after", "hour", "path-visible") !== "false" || text("after", "day", "path-visible") !== "false") {
   throw new Error(`discrete-phase: reset phase should begin with bead only, not a nonzero arc: ${interactive.url}`);
@@ -166,5 +203,12 @@ if ((attr(legacyInstrument, "data-discrete-phase-rings") ?? "").includes("month"
 if (attr(legacyMonth, "data-phase-progress") !== null || attr(legacyMonthBead, "data-phase-visible") !== "false") {
   throw new Error(`discrete-phase legacy guard: projected month phase overlay was not suppressed: ${legacy.url}`);
 }
+const projectedMonthPillar = attr(legacyInstrument, "data-month-pillar") ?? "";
+const projectedMonthIndex = SEXAGENARY.indexOf(projectedMonthPillar);
+const projectedMonthRotation = Number(attr(legacyMonth, "data-model-rotation"));
+const expectedProjectedRotation = CURSOR_ANGLE - (projectedMonthIndex * TOOTH_DEGREES + TOOTH_DEGREES / 2);
+if (projectedMonthIndex < 0 || !Number.isFinite(projectedMonthRotation) || Math.abs(projectedMonthRotation - expectedProjectedRotation) > 0.001) {
+  throw new Error(`discrete-phase legacy guard: projected month was not centred (${projectedMonthPillar}, model=${projectedMonthRotation}, expected=${expectedProjectedRotation}): ${legacy.url}`);
+}
 
-console.log(`[discrete-phase] PASS 390px true-boundary phase; hour ${initialProgress.hour.toFixed(4)}→${stepProgress.hour.toFixed(4)}, day ${initialProgress.day.toFixed(4)}→${stepProgress.day.toFixed(4)}, exact 23:00 reset + legacy month suppression: ${interactive.url}`);
+console.log(`[discrete-phase] PASS 390px true-boundary phase + continuous tracks; hour ${initialProgress.hour.toFixed(4)}→${stepProgress.hour.toFixed(4)}, day ${initialProgress.day.toFixed(4)}→${stepProgress.day.toFixed(4)}, continuous 23:00 crossing + centred legacy month: ${interactive.url}`);

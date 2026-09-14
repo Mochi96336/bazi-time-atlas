@@ -8,6 +8,8 @@ import {
   SEXAGENARY_RING_IDS,
   assertWheelModel
 } from "./wheel/ring-model.js";
+import { discretePhaseWindows } from "./wheel/discrete-phase.js";
+import { temporalCycleRotation } from "./wheel/temporal-track.js";
 import { normalizeDegrees, shortestAngleDelta } from "./wheel/polar-geometry.js";
 import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
 import {
@@ -58,8 +60,7 @@ const ringStates = Object.fromEntries(RINGS.map(ring => [ring.id, createRingStat
 // Zodiac remains a rendered layer for independent Free Compare pose only; it is
 // no longer a primary radial hit target or independent time coordinate.
 ringStates.zodiac = createRingState("zodiac");
-const cycleRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, { lastIndex: null }]));
-const linkedDragRemainders = Object.fromEntries(RINGS.map(ring => [ring.id, 0]));
+const cycleRuntime = Object.fromEntries(SEXAGENARY_RING_IDS.map(id => [id, { initialized: false }]));
 let lastSolarLongitude = null;
 let longitudeModelRotation = null;
 let currentDisplay = null;
@@ -114,14 +115,21 @@ function renderAllRingPoses() {
   renderRingPose("zodiac");
 }
 
-function alignCycleRing(id, index) {
+function alignCycleRing(id, index, phase) {
   const runtime = cycleRuntime[id];
   const pose = ringStates[id];
   if (index < 0) return;
-  let nextRotation;
-  if (runtime.lastIndex === null) nextRotation = CURSOR_ANGLE - (index * 6 + 3);
-  else nextRotation = pose.modelRotation - shortestCycleDelta(index, runtime.lastIndex) * 6;
-  runtime.lastIndex = index;
+  // A legacy annual deep link can name a projected month without representing a
+  // physical Selected Instant for that month. Keep that explicitly nonphysical
+  // identity centred as before; every real-time phase uses its true progress.
+  const progress = phase?.progress ?? 0.5;
+  const nextRotation = temporalCycleRotation({
+    index,
+    progress,
+    cursorAngle: CURSOR_ANGLE,
+    previousRotation: runtime.initialized ? pose.modelRotation : null
+  });
+  runtime.initialized = true;
   setModelRotation(pose, nextRotation);
 }
 
@@ -234,10 +242,14 @@ function resolveDisplayState() {
   const result = resolveBirthPillars(fields, { utcOffsetHours: UTC_OFFSET_HOURS, dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY });
   const actualLongitude = apparentSolarLongitude(fields, UTC_OFFSET_HOURS);
   const longitude = state.legacyProjection?.longitude ?? actualLongitude;
+  const phases = { ...discretePhaseWindows(state.selectedMs) };
   const yearName = result.pillars.year.name;
   let monthName = result.pillars.month.name;
   let monthBranch = result.pillars.month.branch;
-  if (state.legacyProjection?.monthBranch) monthBranch = state.legacyProjection.monthBranch;
+  if (state.legacyProjection?.monthBranch) {
+    monthBranch = state.legacyProjection.monthBranch;
+    phases.month = null;
+  }
   if (state.legacyProjection?.monthPillar) monthName = state.legacyProjection.monthPillar;
   let monthIndex = ganzhiIndex(monthName);
   if (monthIndex < 0 || !monthName.endsWith(monthBranch)) {
@@ -248,6 +260,7 @@ function resolveDisplayState() {
     fields,
     longitude,
     actualLongitude,
+    phases,
     pillars: result.pillars,
     yearName,
     monthName,
@@ -307,10 +320,10 @@ function updateReadout(display) {
 
 function updateWheel() {
   currentDisplay = resolveDisplayState();
-  alignCycleRing("hour", currentDisplay.hourIndex);
-  alignCycleRing("day", currentDisplay.dayIndex);
-  alignCycleRing("month", currentDisplay.monthIndex);
-  alignCycleRing("year", currentDisplay.yearIndex);
+  alignCycleRing("hour", currentDisplay.hourIndex, currentDisplay.phases.hour);
+  alignCycleRing("day", currentDisplay.dayIndex, currentDisplay.phases.day);
+  alignCycleRing("month", currentDisplay.monthIndex, currentDisplay.phases.month);
+  alignCycleRing("year", currentDisplay.yearIndex, currentDisplay.phases.year);
   alignLongitudeTracks(currentDisplay.longitude);
   renderAllRingPoses();
   updateReadout(currentDisplay);
@@ -422,12 +435,10 @@ function applyLinkedDragToTime(id, deltaDegrees) {
     ringId: id,
     instantMs: beforeMs,
     deltaDegrees,
-    remainderDegrees: linkedDragRemainders[id],
     longitudeAtMs: longitudeAtInstant
   });
-  linkedDragRemainders[id] = result.remainderDegrees;
-  instrument.dataset.linkedScrubRemainder = result.remainderDegrees.toFixed(4);
-  instrument.dataset.linkedScrubSteps = String(result.appliedSteps);
+  instrument.dataset.linkedScrubMode = "continuous";
+  instrument.dataset.linkedScrubBoundaries = String(result.crossedBoundaries ?? 0);
   if (result.instantMs === beforeMs) return;
 
   state.selectedMs = result.instantMs;
@@ -464,10 +475,10 @@ function installRingDrag() {
         clearLegacyProjection();
         updateWheel();
       }
-      linkedDragRemainders[id] = 0;
       instrument.dataset.dragRing = id;
       instrument.dataset.dragMode = "linked";
       instrument.dataset.linkedScrubStartMs = String(Math.round(state.selectedMs));
+      instrument.dataset.linkedScrubMode = "continuous";
     },
     onLinkedDragDelta(id, deltaDegrees) {
       applyLinkedDragToTime(id, deltaDegrees);
@@ -475,11 +486,9 @@ function installRingDrag() {
     onLinkedDragEnd(id) {
       instrument.dataset.lastLinkedScrubRing = id;
       instrument.dataset.linkedScrubEndMs = String(Math.round(state.selectedMs));
-      linkedDragRemainders[id] = 0;
       delete instrument.dataset.dragRing;
       delete instrument.dataset.dragMode;
-      delete instrument.dataset.linkedScrubRemainder;
-      delete instrument.dataset.linkedScrubSteps;
+      delete instrument.dataset.linkedScrubBoundaries;
     },
     onModeChange() {
       updateCompareUi();
