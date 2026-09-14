@@ -7,10 +7,16 @@ const API_URL = "https://ssd.jpl.nasa.gov/api/horizons.api";
 const REQUEST_DELAY_MS = 1500;
 
 const captures = [
-  { body:"earth", command:"399", catalogueYear:2026, start:"2025-12-01", stop:"2026-12-31" },
-  { body:"sun", command:"10", catalogueYear:2026, start:"2025-12-01", stop:"2026-12-31" },
-  { body:"earth", command:"399", catalogueYear:4006, start:"4005-12-01", stop:"4006-12-31" },
-  { body:"sun", command:"10", catalogueYear:4006, start:"4005-12-01", stop:"4006-12-31" }
+  { body:"earth", command:"399", catalogueYear:2026, samplePhase:"daily-grid", start:"2025-12-01", stop:"2026-12-31" },
+  { body:"sun", command:"10", catalogueYear:2026, samplePhase:"daily-grid", start:"2025-12-01", stop:"2026-12-31" },
+  { body:"earth", command:"399", catalogueYear:4006, samplePhase:"daily-grid", start:"4005-12-01", stop:"4006-12-31" },
+  { body:"sun", command:"10", catalogueYear:4006, samplePhase:"daily-grid", start:"4005-12-01", stop:"4006-12-31" },
+  // These half-day-shifted rows are withheld from interpolation input and are
+  // used only to measure the error of one-day cubic Hermite state segments.
+  { body:"earth", command:"399", catalogueYear:2026, samplePhase:"withheld-midpoint", start:"2025-12-01 12:00", stop:"2026-12-30 12:00" },
+  { body:"sun", command:"10", catalogueYear:2026, samplePhase:"withheld-midpoint", start:"2025-12-01 12:00", stop:"2026-12-30 12:00" },
+  { body:"earth", command:"399", catalogueYear:4006, samplePhase:"withheld-midpoint", start:"4005-12-01 12:00", stop:"4006-12-30 12:00" },
+  { body:"sun", command:"10", catalogueYear:4006, samplePhase:"withheld-midpoint", start:"4005-12-01 12:00", stop:"4006-12-30 12:00" }
 ];
 
 function sha256(text) {
@@ -59,17 +65,17 @@ async function captureOne(spec) {
   });
   const text = await response.text();
   if (!response.ok) {
-    throw new Error(`${spec.body}-${spec.catalogueYear}: Horizons HTTP ${response.status}: ${text.slice(0, 500)}`);
+    throw new Error(`${spec.body}-${spec.catalogueYear}-${spec.samplePhase}: Horizons HTTP ${response.status}: ${text.slice(0, 500)}`);
   }
   if (!text.includes("$$SOE") || !text.includes("$$EOE")) {
-    throw new Error(`${spec.body}-${spec.catalogueYear}: Horizons response has no ephemeris block`);
+    throw new Error(`${spec.body}-${spec.catalogueYear}-${spec.samplePhase}: Horizons response has no ephemeris block`);
   }
   const rowCount = countEphemerisRows(text);
   if (rowCount < 350) {
-    throw new Error(`${spec.body}-${spec.catalogueYear}: expected a daily catalogue-year capture, got ${rowCount} rows`);
+    throw new Error(`${spec.body}-${spec.catalogueYear}-${spec.samplePhase}: expected a catalogue-year capture, got ${rowCount} rows`);
   }
 
-  const filename = `${spec.body}-${spec.catalogueYear}-icrf-tdb-au-d.txt`;
+  const filename = `${spec.body}-${spec.catalogueYear}-${spec.samplePhase}-icrf-tdb-au-d.txt`;
   await writeFile(path.join(OUTPUT_DIR, filename), text);
   return {
     ...spec,
@@ -88,7 +94,7 @@ await mkdir(OUTPUT_DIR, { recursive:true });
 const records = [];
 for (const [index, spec] of captures.entries()) {
   if (index) await new Promise(resolve => setTimeout(resolve, REQUEST_DELAY_MS));
-  console.log(`Capturing ${spec.body} ${spec.catalogueYear}...`);
+  console.log(`Capturing ${spec.body} ${spec.catalogueYear} ${spec.samplePhase}...`);
   records.push(await captureOne(spec));
 }
 
@@ -104,7 +110,8 @@ const manifest = {
     units:"AU-D",
     corrections:"NONE (geometric)",
     table:"2 (position + velocity)",
-    cadence:"1 day"
+    cadence:"1 day",
+    validation:"half-day shifted withheld truth for Hermite interpolation"
   },
   records
 };
