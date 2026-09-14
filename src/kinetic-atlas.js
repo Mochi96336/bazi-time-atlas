@@ -25,9 +25,9 @@ import {
 } from "./wheel/atlas-display-model.js";
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
+import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
 import {
   DAY_MS,
-  advanceKineticPlayback,
   sliderStateForScale
 } from "./interaction/kinetic-playback.js";
 
@@ -66,6 +66,7 @@ let longitudeModelRotation = null;
 let currentDisplay = null;
 let dragController = null;
 let compareController = null;
+let playbackController = null;
 
 function cycleIndexForRing(id, display) {
   if (id === "hour") return display.hourIndex;
@@ -226,12 +227,20 @@ function setSliderForScale() {
 }
 
 function stopPlayback() {
-  state.playing = false;
-  state.lastAnimationTs = null;
-  if (state.animationFrame) cancelAnimationFrame(state.animationFrame);
-  state.animationFrame = null;
-  playButton.textContent = "播放";
-  playButton.setAttribute("aria-pressed", "false");
+  playbackController?.stop();
+}
+
+function installPlayback() {
+  playbackController = createKineticPlaybackController({
+    state,
+    slider,
+    playButton,
+    updateWheel,
+    prepareStart() {
+      if (dragController?.compareMode) compareController?.setMode(false);
+      clearLegacyProjection();
+    }
+  });
 }
 
 function applyLinkedDragToTime(id, deltaDegrees) {
@@ -312,38 +321,6 @@ function installRingDrag() {
   compareController?.update();
 }
 
-function animationTick(timestamp) {
-  if (!state.playing) return;
-  const playback = advanceKineticPlayback({
-    scale: state.scale,
-    selectedMs: state.selectedMs,
-    anchorMs: state.anchorMs,
-    previousTimestamp: state.lastAnimationTs,
-    timestamp
-  });
-  if (state.lastAnimationTs !== null) {
-    state.selectedMs = playback.selectedMs;
-    slider.value = String(playback.offsetDays);
-    updateWheel();
-    if (playback.reachedEnd) {
-      stopPlayback();
-      return;
-    }
-  }
-  state.lastAnimationTs = timestamp;
-  state.animationFrame = requestAnimationFrame(animationTick);
-}
-
-function startPlayback() {
-  if (dragController?.compareMode) compareController?.setMode(false);
-  clearLegacyProjection();
-  state.playing = true;
-  state.lastAnimationTs = null;
-  playButton.textContent = "暫停";
-  playButton.setAttribute("aria-pressed", "true");
-  state.animationFrame = requestAnimationFrame(animationTick);
-}
-
 function bindControls() {
   scaleButtons.forEach(button => {
     button.addEventListener("click", () => {
@@ -361,7 +338,7 @@ function bindControls() {
     state.selectedMs = state.anchorMs + Number(slider.value) * DAY_MS;
     updateWheel();
   });
-  playButton.addEventListener("click", () => state.playing ? stopPlayback() : startPlayback());
+  playButton.addEventListener("click", () => playbackController?.toggle());
   nowButton.addEventListener("click", () => {
     stopPlayback();
     clearLegacyProjection();
@@ -387,6 +364,7 @@ function initialize() {
   renderer.renderStatic();
   applyInitialSearchState();
   setSliderForScale();
+  installPlayback();
   bindControls();
   updateWheel();
   installRingDrag();
