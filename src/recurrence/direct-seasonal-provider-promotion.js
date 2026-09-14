@@ -9,19 +9,18 @@ export const DIRECT_SEASONAL_VALIDATION_KINDS = Object.freeze({
 });
 
 export const DIRECT_SEASONAL_PROMOTION_POLICY = Object.freeze({
-  requiredReferenceSemantics:"apparent-geocentric-solar-longitude-of-date",
+  requiredReferenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
   minimumSamplesAtTargetYear:24,
   maxEpochErrorSeconds:2
 });
 
 /**
- * Independent authority contract intended for future pinned validation vectors.
+ * Independent authority contract intended for pinned validation vectors.
  *
- * Horizons quantity #31 is the quantity JPL explicitly recommends for Earth
- * seasons: apparent observer-centered ecliptic-of-date longitude of the Sun as
- * seen from the geocenter. The actual validation vectors are intentionally not
- * invented here; a future evidence record must pin the returned ephemeris
- * metadata and 24 target-year crossings before promotion can pass.
+ * Horizons explicitly recommends quantity #31 for Earth seasons: geocentric
+ * apparent ecliptic longitude of the Sun, using the mean ecliptic plane of
+ * date. The actual evidence must still pin the returned ephemeris metadata
+ * and target-year crossings; this contract alone never counts as evidence.
  */
 export const JPL_HORIZONS_SEASONAL_REFERENCE = Object.freeze({
   id:"jpl-horizons-earth-season-reference",
@@ -31,7 +30,7 @@ export const JPL_HORIZONS_SEASONAL_REFERENCE = Object.freeze({
   target:"Sun",
   observerCenter:"Earth geocenter",
   quantity:"31 · observer-centered Earth ecliptic longitude/latitude",
-  referenceSemantics:"apparent-geocentric-solar-longitude-of-date",
+  referenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
   timeScale:"TT",
   status:"reference-contract-only",
   note:"Use pinned Horizons output and record the actual planetary ephemeris named by the response header. This contract alone is not validation evidence."
@@ -43,7 +42,7 @@ export const SHOUXING_PIPELINE_PROOF_EVIDENCE = Object.freeze([
     providerId:"tyme4ts-1.5.2-shouxing-direct",
     kind:DIRECT_SEASONAL_VALIDATION_KINDS.SAME_MODEL,
     referenceFamily:"shouxing",
-    referenceSemantics:"apparent-geocentric-solar-longitude-of-date",
+    referenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
     timeScale:"TT",
     sampledYears:Object.freeze([2026]),
     samplesByYear:Object.freeze({ 2026:24 }),
@@ -68,7 +67,7 @@ function evidenceCoversTarget(evidence, targetYear) {
     && samplesAtYear(evidence, targetYear) > 0;
 }
 
-function isIndependentTargetEvidence({ evidence, provider, targetYear, policy }) {
+function isIndependentTargetEvidenceCandidate({ evidence, provider, targetYear, policy }) {
   return evidence?.providerId === provider.id
     && evidence?.kind === DIRECT_SEASONAL_VALIDATION_KINDS.INDEPENDENT_EPHEMERIS
     && evidence?.referenceFamily
@@ -76,8 +75,11 @@ function isIndependentTargetEvidence({ evidence, provider, targetYear, policy })
     && evidence.referenceSemantics === policy.requiredReferenceSemantics
     && evidence.timeScale === provider.timeScale
     && evidenceCoversTarget(evidence, targetYear)
-    && samplesAtYear(evidence, targetYear) >= policy.minimumSamplesAtTargetYear
-    && Number.isFinite(evidence.maxEpochErrorSeconds)
+    && samplesAtYear(evidence, targetYear) >= policy.minimumSamplesAtTargetYear;
+}
+
+function passesEpochErrorBudget(evidence, policy) {
+  return Number.isFinite(evidence?.maxEpochErrorSeconds)
     && evidence.maxEpochErrorSeconds <= policy.maxEpochErrorSeconds;
 }
 
@@ -113,8 +115,14 @@ export function assessDirectSeasonalProviderPromotion({
     item.kind === DIRECT_SEASONAL_VALIDATION_KINDS.SAME_MODEL
     || item.referenceFamily === provider.modelFamily
   );
-  const independentTargetEvidence = targetEvidence.filter(item =>
-    isIndependentTargetEvidence({ evidence:item, provider, targetYear, policy })
+  const independentTargetEvidenceCandidates = targetEvidence.filter(item =>
+    isIndependentTargetEvidenceCandidate({ evidence:item, provider, targetYear, policy })
+  );
+  const independentTargetEvidence = independentTargetEvidenceCandidates.filter(item =>
+    passesEpochErrorBudget(item, policy)
+  );
+  const rejectedIndependentTargetEvidence = independentTargetEvidenceCandidates.filter(item =>
+    !passesEpochErrorBudget(item, policy)
   );
   const sameModelEvidenceYears = Object.freeze([
     ...new Set(providerEvidence
@@ -129,6 +137,9 @@ export function assessDirectSeasonalProviderPromotion({
   if (coverageExtensionEligible) {
     status = "independent-validation-pass";
     blocker = null;
+  } else if (rejectedIndependentTargetEvidence.length) {
+    status = "independent-validation-failed";
+    blocker = "epoch-error-budget";
   } else if (sameModelTargetEvidence.length) {
     status = "same-model-evidence-only";
     blocker = "independent-target-year-validation";
@@ -148,7 +159,13 @@ export function assessDirectSeasonalProviderPromotion({
     policy,
     sameModelEvidenceYears,
     targetEvidenceIds:Object.freeze(targetEvidence.map(item => item.id)),
+    independentTargetEvidenceCandidateIds:Object.freeze(
+      independentTargetEvidenceCandidates.map(item => item.id)
+    ),
     independentTargetEvidenceIds:Object.freeze(independentTargetEvidence.map(item => item.id)),
+    rejectedIndependentTargetEvidenceIds:Object.freeze(
+      rejectedIndependentTargetEvidence.map(item => item.id)
+    ),
     coverageExtensionEligible,
     productionPromotionEligible:coverageExtensionEligible && targetAlreadyDeclared,
     requiresCoverageMetadataUpdate:coverageExtensionEligible && !targetAlreadyDeclared
