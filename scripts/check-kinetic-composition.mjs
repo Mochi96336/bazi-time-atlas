@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const DAY_MS = 86_400_000;
 const HOUR_PILLAR_MS = 7_200_000;
+const LINKED_GESTURE_DEGREES = 6.5;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -159,11 +160,12 @@ if (hourRing !== "hour" || hourScrubMode !== "linked-time") {
 if (![hourInstantBefore, hourInstantAfter, hourModelBefore, hourModelAfter, hourSolarBefore, hourSolarAfter, hourOffsetBefore, hourOffsetAfter].every(Number.isFinite)) {
   throw new Error(`hour-drag: non-finite diagnostics: ${hour.url}`);
 }
-if (Math.abs((hourInstantAfter - hourInstantBefore) + HOUR_PILLAR_MS) > 1) {
-  throw new Error(`hour-drag: +6.5° hour drag should move master time two hours backward (${hourInstantBefore} -> ${hourInstantAfter}): ${hour.url}`);
+const expectedHourDeltaMs = HOUR_PILLAR_MS * LINKED_GESTURE_DEGREES / 6;
+if (Math.abs((hourInstantAfter - hourInstantBefore) + expectedHourDeltaMs) > 1) {
+  throw new Error(`hour-drag: +${LINKED_GESTURE_DEGREES}° hour drag should move master time proportionally backward (${hourInstantBefore} -> ${hourInstantAfter}): ${hour.url}`);
 }
-if (Math.abs((hourModelAfter - hourModelBefore) - 6) > 0.01) {
-  throw new Error(`hour-drag: hour model should advance visually +6° (${hourModelBefore} -> ${hourModelAfter}): ${hour.url}`);
+if (Math.abs((hourModelAfter - hourModelBefore) - LINKED_GESTURE_DEGREES) > 0.01) {
+  throw new Error(`hour-drag: hour model should follow the full gesture continuously (${hourModelBefore} -> ${hourModelAfter}): ${hour.url}`);
 }
 if (Math.abs(hourOffsetBefore) > 1e-6 || Math.abs(hourOffsetAfter) > 1e-6 || hourLinkedState !== "true") {
   throw new Error(`hour-drag: linked scrub must keep zero manual offset (before=${hourOffsetBefore}, after=${hourOffsetAfter}, linked=${hourLinkedState}): ${hour.url}`);
@@ -172,9 +174,9 @@ if (!hourPillarBefore || !hourPillarAfter || hourPillarBefore === hourPillarAfte
   throw new Error(`hour-drag: resolved hour pillar did not change (${hourPillarBefore} -> ${hourPillarAfter}): ${hour.url}`);
 }
 if (Math.abs(hourSolarAfter - hourSolarBefore) < 0.02) {
-  throw new Error(`hour-drag: coupled solar layer did not move over two hours (${hourSolarBefore} -> ${hourSolarAfter}): ${hour.url}`);
+  throw new Error(`hour-drag: coupled solar layer did not move with continuous master time (${hourSolarBefore} -> ${hourSolarAfter}): ${hour.url}`);
 }
-console.log(`[kinetic-composition] PASS linked hour-ring scrub: ${hour.url}`);
+console.log(`[kinetic-composition] PASS continuous linked hour-ring scrub: ${hour.url}`);
 
 const linked = dump("scripts/fixtures/mobile-390.html?exerciseLinkedDrag=1", 500, 844);
 const linkedProbe = tagById(linked.dom, "probe");
@@ -198,11 +200,12 @@ if (linkedRing !== "day" || linkedScrubMode !== "linked-time") {
 if (![linkedInstantBefore, linkedInstantAfter, linkedDayModelBefore, linkedDayModelAfter, linkedSolarModelBefore, linkedSolarModelAfter, linkedDayOffsetBefore, linkedDayOffsetAfter].every(Number.isFinite)) {
   throw new Error(`linked-drag: non-finite diagnostics: ${linked.url}`);
 }
-if (Math.abs((linkedInstantAfter - linkedInstantBefore) + DAY_MS) > 1) {
-  throw new Error(`linked-drag: +6.5° day drag should move master time one day backward (${linkedInstantBefore} -> ${linkedInstantAfter}): ${linked.url}`);
+const expectedDayDeltaMs = DAY_MS * LINKED_GESTURE_DEGREES / 6;
+if (Math.abs((linkedInstantAfter - linkedInstantBefore) + expectedDayDeltaMs) > 1) {
+  throw new Error(`linked-drag: +${LINKED_GESTURE_DEGREES}° day drag should map proportionally through the real day interval (${linkedInstantBefore} -> ${linkedInstantAfter}): ${linked.url}`);
 }
-if (Math.abs((linkedDayModelAfter - linkedDayModelBefore) - 6) > 0.01) {
-  throw new Error(`linked-drag: day model should advance visually +6° (${linkedDayModelBefore} -> ${linkedDayModelAfter}): ${linked.url}`);
+if (Math.abs((linkedDayModelAfter - linkedDayModelBefore) - LINKED_GESTURE_DEGREES) > 0.01) {
+  throw new Error(`linked-drag: day model should follow the full gesture continuously (${linkedDayModelBefore} -> ${linkedDayModelAfter}): ${linked.url}`);
 }
 if (Math.abs(linkedDayOffsetBefore) > 1e-6 || Math.abs(linkedDayOffsetAfter) > 1e-6 || linkedDayState !== "true") {
   throw new Error(`linked-drag: normal scrub must stay linked with zero manual offset: ${linked.url}`);
@@ -210,7 +213,7 @@ if (Math.abs(linkedDayOffsetBefore) > 1e-6 || Math.abs(linkedDayOffsetAfter) > 1
 if (Math.abs(linkedSolarModelAfter - linkedSolarModelBefore) < 0.5) {
   throw new Error(`linked-drag: coupled solar layer did not move with master time: ${linked.url}`);
 }
-console.log(`[kinetic-composition] PASS linked day-ring scrub: ${linked.url}`);
+console.log(`[kinetic-composition] PASS continuous linked day-ring scrub: ${linked.url}`);
 
 const drag = dump("scripts/fixtures/mobile-390.html?exerciseDrag=1", 500, 844);
 const dragProbe = tagById(drag.dom, "probe");
