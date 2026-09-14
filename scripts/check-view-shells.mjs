@@ -63,9 +63,20 @@ if (!probe || attr(probe, "data-ready") !== "true") {
   throw new Error(`cross-view shell fixture did not settle: ${url}`);
 }
 
-const expectedNav = "時間圖譜|回歸|出生|六十甲子";
-for (const id of ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarymobile", "sexagenarydesktop"]) {
+const expectedNav = "時間圖譜|出生|六十甲子|研究";
+const navIds = ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarymobile", "sexagenarydesktop"];
+for (const id of navIds) {
   requireEqual(attr(probe, `data-${id}-nav`), expectedNav, `${id} navigation drifted`, url);
+  requireEqual(attr(probe, `data-${id}-research-count`), "1", `${id} must expose one research destination`, url);
+  requireEqual(attr(probe, `data-${id}-research-last`), "true", `${id} research destination must remain last`, url);
+  requireEqual(attr(probe, `data-${id}-research-class`), "true", `${id} research destination lost its secondary role class`, url);
+  requireEqual(attr(probe, `data-${id}-research-href`), "./recurrence.html", `${id} research destination changed target`, url);
+
+  const researchSize = Number.parseFloat(attr(probe, `data-${id}-research-font-size`) ?? "");
+  const primarySize = Number.parseFloat(attr(probe, `data-${id}-primary-font-size`) ?? "");
+  if (!Number.isFinite(researchSize) || !Number.isFinite(primarySize) || !(researchSize < primarySize)) {
+    throw new Error(`${id} research destination must be visually subordinate (${researchSize} !< ${primarySize}): ${url}`);
+  }
 }
 requireEqual(attr(probe, "data-all-nav-match"), "true", "cross-view navigation contract failed", url);
 
@@ -118,4 +129,4 @@ requireEqual(attr(probe, "data-sex-neighbors-visible"), "true", "Sexagenary mobi
 requireEqual(attr(probe, "data-sex-index-visible"), "true", "Sexagenary mobile full-cycle disclosure disappeared", url);
 requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "Sexagenary desktop inspector should remain visible", url);
 
-console.log(`[view-shells] PASS shared nav + instrument-first Recurrence + compact dark Birth/Sexagenary 390px hierarchy: ${url}`);
+console.log(`[view-shells] PASS primary nav + demoted Research + instrument-first Recurrence + compact dark Birth/Sexagenary 390px hierarchy: ${url}`);
