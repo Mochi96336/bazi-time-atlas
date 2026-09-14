@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px temporal motion hierarchy harness</title>
+  <style>
+    html, body { margin:0; width:500px; height:844px; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px temporal motion hierarchy probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const RINGS = ["hour", "day", "solar", "month", "year"];
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    let exercised = false;
+    let observer = null;
+
+    frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
+
+    function afterSettled(callback) {
+      queueMicrotask(() => queueMicrotask(callback));
+    }
+
+    function trackSnapshot(doc) {
+      return Object.fromEntries(RINGS.map(id => {
+        const track = doc.querySelector(`#${id}-track`);
+        return [id, Number(track?.dataset.modelRotation)];
+      }));
+    }
+
+    function writeSnapshot(prefix, values) {
+      for (const [id, value] of Object.entries(values)) {
+        const cap = id[0].toUpperCase() + id.slice(1);
+        probe.dataset[`${prefix}${cap}Model`] = String(value);
+      }
+    }
+
+    function tryExercise() {
+      if (exercised) return;
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!childWindow || !doc) return;
+
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const slider = doc.querySelector("#time-slider");
+      const dayScale = doc.querySelector('[data-scale="day"]');
+      if (!instrument || !slider || !dayScale) return;
+
+      const initial = trackSnapshot(doc);
+      if (RINGS.some(id => !Number.isFinite(initial[id]))) return;
+      const initialInstant = Number(instrument.dataset.selectedInstantMs);
+      const initialLongitude = Number(instrument.dataset.solarLongitude);
+      if (!Number.isFinite(initialInstant) || !Number.isFinite(initialLongitude)) return;
+
+      exercised = true;
+      observer?.disconnect();
+      observer = null;
+
+      probe.dataset.innerWidth = String(childWindow.innerWidth);
+      probe.dataset.initialInstant = String(initialInstant);
+      probe.dataset.initialLongitude = String(initialLongitude);
+      writeSnapshot("initial", initial);
+
+      dayScale.click();
+      afterSettled(() => {
+        slider.value = String(1 / 144); // exactly +10 minutes from the fixed anchor
+        slider.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
+        afterSettled(() => {
+          const stepped = trackSnapshot(doc);
+          const stepInstant = Number(instrument.dataset.selectedInstantMs);
+          const stepLongitude = Number(instrument.dataset.solarLongitude);
+          if (RINGS.some(id => !Number.isFinite(stepped[id])) ||
+              !Number.isFinite(stepInstant) || !Number.isFinite(stepLongitude)) return;
+
+          writeSnapshot("step", stepped);
+          probe.dataset.stepInstant = String(stepInstant);
+          probe.dataset.stepLongitude = String(stepLongitude);
+          probe.dataset.ready = "true";
+        });
+      });
+    }
+
+    frame.addEventListener("load", () => {
+      const instrument = frame.contentDocument?.querySelector("#kinetic-instrument");
+      if (instrument) {
+        observer = new MutationObserver(tryExercise);
+        observer.observe(instrument, {
+          attributes:true,
+          attributeFilter:["data-selected-instant-ms", "data-solar-longitude"]
+        });
+      }
+      tryExercise();
+      queueMicrotask(tryExercise);
+      setTimeout(tryExercise, 150);
+      setTimeout(tryExercise, 700);
+      setTimeout(tryExercise, 1500);
+      setTimeout(tryExercise, 3000);
+    });
+  </script>
+</body>
+</html>
