@@ -1,0 +1,69 @@
+export const DE441_STATE_INTERPOLATION_EVIDENCE = Object.freeze({
+  authority:"NASA/JPL Horizons API",
+  sourceEphemeris:"DE441",
+  researchWorkflowRunId:34836797011,
+  researchArtifactId:10344981076,
+  artifactDigest:"sha256:d1c5c5c504bee2d68053aaf47541b5b6f61cd0c740b9946492b7d641dc5c0dca",
+  vectorContract:Object.freeze({
+    center:"Solar System Barycenter (0)",
+    referenceFrame:"ICRF",
+    timeScale:"TDB",
+    units:"AU-D",
+    corrections:"NONE",
+    cadenceDays:1,
+    interpolation:"cubic Hermite from endpoint position and velocity"
+  }),
+  rawFileSha256:Object.freeze({
+    earth2026Daily:"c637b4a5e94a0a61462beb487f6b9138a8e1230ea84ec3adda8ceecfb79b1518",
+    sun2026Daily:"715bc5fadaf1e26417c8ef750e1b586389f1774d93b8cd0c52850aa267f52411",
+    earth4006Daily:"e034acd70da07a3cdebf9e1dbab2512e7437ad8777a682d288ea046fd3be105b",
+    sun4006Daily:"ec9d1e85f1fd0cb1cf984534254deaa7f43bd1365db980da76ab8571e2a278e4",
+    earth2026Withheld:"6dd0fea5b4f3c3fb4b5463ce96ac801336a1fb2d3e2ccadd443c6313bf34ba9e",
+    sun2026Withheld:"4b85076ef8108a5ac10f1a2606c760b4d83d7e8cc6678c731e16319e5d91bff7",
+    earth4006Withheld:"062220d3851231a8d2e7ef28df5d721fc4a5f375b81a9e2baf0881458b56c9ac",
+    sun4006Withheld:"9dab0818fc14cbfc219b1ef828cd6146364f33633a06008adab905b371d3e986"
+  }),
+  exhaustive:Object.freeze({
+    2026:Object.freeze({
+      earth:Object.freeze({
+        sampleCount:395,
+        maxPositionErrorMeters:90.69728465571293,
+        meanPositionErrorMeters:45.785308317187344,
+        maxVelocityErrorMetersPerSecond:5.3924714472315906e-05,
+        meanVelocityErrorMetersPerSecond:2.2453762150684313e-05
+      }),
+      sun:Object.freeze({
+        sampleCount:395,
+        maxPositionErrorMeters:0.0038336185616426335,
+        meanPositionErrorMeters:0.0012094070508812157,
+        maxVelocityErrorMetersPerSecond:1.5340406965937067e-09,
+        meanVelocityErrorMetersPerSecond:4.130124627949895e-10
+      })
+    }),
+    4006:Object.freeze({
+      earth:Object.freeze({
+        sampleCount:395,
+        maxPositionErrorMeters:99.09916839080434,
+        meanPositionErrorMeters:46.74740891975126,
+        maxVelocityErrorMetersPerSecond:5.59030654679236e-05,
+        meanVelocityErrorMetersPerSecond:2.1825528236617325e-05
+      }),
+      sun:Object.freeze({
+        sampleCount:395,
+        maxPositionErrorMeters:0.0037428343656954717,
+        meanPositionErrorMeters:0.0013030940087976391,
+        maxVelocityErrorMetersPerSecond:1.5345857076944072e-09,
+        meanVelocityErrorMetersPerSecond:4.68942707377044e-10
+      })
+    })
+  }),
+  promotionBoundary:Object.freeze({
+    stateInterpolationValidated:true,
+    productionStateAdapterIntegrated:false,
+    ttToTdbValidated:false,
+    apparentDirectionModelValidated:false,
+    meanEclipticOfDateTransformValidated:false,
+    seasonalCrossingEndToEndValidated:false
+  }),
+  note:"All 395 withheld half-day epochs per body/year were compared against one-day cubic Hermite interpolation. This validates the state interpolation layer only; it does not promote DE441 into the production seasonal pipeline."
+});
