@@ -55,18 +55,21 @@ function roughCrossingJulianDay(year, longitudeDegrees) {
     .getDay();
   let tropicalYearFraction = normalizeDegrees(longitudeDegrees) / 360;
 
-  // 285°..345° occur in January..March before that civil year's equinox.
-  // 270° (winter solstice) remains in December of the requested civil year.
-  if (normalizeDegrees(longitudeDegrees) > 270) tropicalYearFraction -= 1;
+  // Match the pinned Tyme SolarTerm year catalogue: its cycle starts at the
+  // previous December's 270° winter solstice, then 285°..345° fall in
+  // January..March of `year`. This is a catalogue-year selector only; the
+  // returned physical epoch remains TT and carries no civil-time semantics.
+  if (normalizeDegrees(longitudeDegrees) >= 270) tropicalYearFraction -= 1;
   return marchEquinoxGuess + tropicalYearFraction * TROPICAL_YEAR_DAYS;
 }
 
 /**
  * Solve one apparent geocentric solar-longitude crossing directly on TT.
  *
- * `year` is the reference civil year used only to choose the correct annual
- * crossing. The returned epoch stays on TT; no UTC, timezone, day-boundary or
- * BaZi Day/Hour claim is made here.
+ * `year` follows the pinned Tyme SolarTerm catalogue convention used elsewhere
+ * in the app: 270° is the previous December's winter solstice, while
+ * 285°..345° are January..March of `year`. The returned epoch stays on TT; no
+ * UTC, timezone, day-boundary or BaZi Day/Hour claim is made here.
  */
 export function solveSolarLongitude({ year, longitudeDegrees }) {
   validateRequest(year, longitudeDegrees);
@@ -88,6 +91,7 @@ export function solveSolarLongitude({ year, longitudeDegrees }) {
     providerId:TYME_SHOUXING_DIRECT_PROVIDER.id,
     providerRole:TYME_SHOUXING_DIRECT_PROVIDER.role,
     timeScale:"TT",
+    yearBasis:"tyme-solar-term-catalogue",
     year,
     targetLongitudeDegrees,
     targetUnwrappedRadians,
