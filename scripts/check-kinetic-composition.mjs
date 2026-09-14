@@ -115,14 +115,17 @@ if (fit !== "true") throw new Error(`mobile: page still scrolls (${scrollHeight}
 if (hidden !== "true") throw new Error(`mobile: secondary dashboard sections were not collapsed: ${mobile.url}`);
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`mobile: instrument occupies too little of first viewport (${share}): ${mobile.url}`);
 if (attr(probe, "data-fan-clip") !== "active" || attr(probe, "data-master-geometry") !== "shared-fan") throw new Error(`mobile: shared fan geometry inactive inside 390px fixture: ${mobile.url}`);
-if (mobileCameraMode !== "mobile" || Math.abs(mobileCameraZoom - 2.3) > 1e-4) {
-  throw new Error(`mobile: camera is not wheel-core mobile mode (${mobileCameraMode}, zoom=${mobileCameraZoom}): ${mobile.url}`);
+if (mobileCameraMode !== "mobile" || Math.abs(mobileCameraZoom - 3) > 1e-4) {
+  throw new Error(`mobile: camera is not portrait-filling wheel-core mode (${mobileCameraMode}, zoom=${mobileCameraZoom}): ${mobile.url}`);
 }
 if (![mobileCameraX, mobileCameraY, mobileCameraWidth, mobileCameraHeight, wheelWidthRatio].every(Number.isFinite)) {
   throw new Error(`mobile: non-finite camera/layout diagnostics: ${mobile.url}`);
 }
-if (Math.abs(mobileCameraX - 339.13) > 0.02 || Math.abs(mobileCameraY - 58) > 0.02 || Math.abs(mobileCameraWidth - 521.739) > 0.02 || Math.abs(mobileCameraHeight - 760) > 0.02) {
-  throw new Error(`mobile: wrong viewBox crop (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
+if (Math.abs(mobileCameraX - 400) > 0.02 || Math.abs(mobileCameraY) > 0.02 || Math.abs(mobileCameraWidth - 400) > 0.02 || Math.abs(mobileCameraHeight - 760) > 0.02) {
+  throw new Error(`mobile: wrong oversized portrait crop (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
+}
+if (mobileCameraWidth > 420 || mobileCameraY > 1) {
+  throw new Error(`mobile: giant fan camera regressed toward the old floating crop (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
 }
 if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelTransform !== "matrix(1, 0, 0, 1, 0, 0)")) {
   throw new Error(`mobile: CSS still owns wheel zoom (widthRatio=${wheelWidthRatio}, transform=${wheelTransform}): ${mobile.url}`);
@@ -134,7 +137,7 @@ if (requireAttr(probe, "data-zodiac-derived-from", "mobile", mobile.url) !== "so
 if (requireAttr(probe, "data-zodiac-pointer-events", "mobile", mobile.url) !== "none") {
   throw new Error(`mobile: derived Zodiac overlay became an independent pointer target: ${mobile.url}`);
 }
-console.log(`[kinetic-composition] PASS true 390px five-ring composition + derived Zodiac overlay; instrument share=${share}, ringHits=${ringHitMask}: ${mobile.url}`);
+console.log(`[kinetic-composition] PASS true 390px oversized five-ring composition + derived Zodiac overlay; instrument share=${share}, ringHits=${ringHitMask}: ${mobile.url}`);
 
 const hour = dump("scripts/fixtures/mobile-390.html?exerciseHourDrag=1", 500, 844);
 const hourProbe = tagById(hour.dom, "probe");

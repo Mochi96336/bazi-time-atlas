@@ -22,6 +22,7 @@ import {
   shortestAngleDelta
 } from "../src/wheel/polar-geometry.js";
 import {
+  CAMERA_TOP_MARGIN_BY_MODE,
   CAMERA_ZOOM,
   DEFAULT_VIEWPORT,
   cameraModeForWidth,
@@ -159,7 +160,7 @@ test("camera is a separate view over the unchanged world envelope", () => {
   assert.equal(CURSOR_ANGLE, -90);
 });
 
-test("responsive camera keeps the same crops after the internal radial hierarchy changes", () => {
+test("responsive camera preserves desktop/compact framing and fills portrait mobile", () => {
   assert.equal(cameraModeForWidth(1440), "desktop");
   assert.equal(cameraModeForWidth(820), "compact");
   assert.equal(cameraModeForWidth(481), "compact");
@@ -169,11 +170,13 @@ test("responsive camera keeps the same crops after the internal radial hierarchy
   const desktop = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 1440 });
   assert.equal(desktop.mode, "desktop");
   assert.equal(desktop.zoom, 1);
+  assert.equal(desktop.topMargin, CAMERA_TOP_MARGIN_BY_MODE.desktop);
   assert.deepEqual(desktop.viewBox, { x: 0, y: 58, width: 1200, height: 760 });
 
   const compact = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 700 });
   assert.equal(compact.mode, "compact");
   assert.equal(compact.zoom, CAMERA_ZOOM.compact);
+  assert.equal(compact.topMargin, CAMERA_TOP_MARGIN_BY_MODE.compact);
   assert.ok(Math.abs(compact.viewBox.x - 145.4545454545) < 1e-9);
   assert.ok(Math.abs(compact.viewBox.width - 909.0909090909) < 1e-9);
   assert.equal(compact.viewBox.y, 58);
@@ -182,10 +185,24 @@ test("responsive camera keeps the same crops after the internal radial hierarchy
   const mobile = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 390 });
   assert.equal(mobile.mode, "mobile");
   assert.equal(mobile.zoom, CAMERA_ZOOM.mobile);
-  assert.ok(Math.abs(mobile.viewBox.x - 339.1304347826) < 1e-9);
-  assert.ok(Math.abs(mobile.viewBox.width - 521.7391304348) < 1e-9);
-  assert.equal(mobile.viewBox.y, 58);
+  assert.equal(mobile.zoom, 3);
+  assert.equal(mobile.topMargin, CAMERA_TOP_MARGIN_BY_MODE.mobile);
+  assert.equal(mobile.topMargin, 178);
+  assert.equal(mobile.viewBox.x, 400);
+  assert.equal(mobile.viewBox.width, 400);
+  assert.equal(mobile.viewBox.y, 0);
   assert.equal(mobile.viewBox.height, 760);
+
+  // Explicit headroom remains an escape hatch for proof/debug callers; only
+  // the responsive default changes by breakpoint.
+  const mobileWithDesktopHeadroom = responsiveInstrumentCamera({
+    center: WHEEL_CENTER,
+    outerRadius: RADII.outer,
+    viewportWidth: 390,
+    topMargin:CAMERA_TOP_MARGIN_BY_MODE.desktop
+  });
+  assert.equal(mobileWithDesktopHeadroom.viewBox.y, 58);
+  assert.equal(mobileWithDesktopHeadroom.viewBox.width, 400);
 
   const doubled = horizontallyZoomedViewBox({ x: 10, y: 20, width: 1000, height: 500 }, 2);
   assert.deepEqual(doubled, { x: 260, y: 20, width: 500, height: 500 });
