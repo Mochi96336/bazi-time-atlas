@@ -89,6 +89,10 @@ The app-owned absolute-state solver core must keep the following layers visible 
 
 If the implementation has not demonstrated all corrections required for a claimed target observable, it must fail closed rather than relabel a partial model as Horizons-equivalent truth.
 
+The current DE441 proof path has demonstrated a **geocentric Sun-center apparent ICRF direction** for pinned 2026 and 4006 proof windows using one-iteration light time plus NAIF-style stellar aberration, and that result agrees with the corresponding Horizons observer/vector layers to the recorded evidence precision. The accompanying ecliptic-of-date frame proof is also validated. The observed absence of an additional gravitational-deflection residual is specific to this Sun-center seasonal-longitude use case and must **not** be generalized to arbitrary targets.
+
+Those proofs still do not make a production seasonal-event pipeline. The longitude-crossing root solve has not yet been composed and validated end to end with the proven state/apparent/frame layers, and the production DE441 data path remains unintegrated. Promotion therefore remains fail-closed.
+
 ## 8. A seasonal epoch does not resolve all four pillars
 
 Even a trustworthy absolute solar-term epoch does not automatically authorize arbitrary-millennia Day/Hour reconstruction.
