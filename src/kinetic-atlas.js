@@ -1,16 +1,12 @@
-import { baziMonths, solarTerms, zodiacSigns } from "./data.js";
-import { apparentSolarLongitude } from "./astronomy/solar-longitude.js";
-import { DAY_BOUNDARY, resolveBirthPillars } from "./calendar/tyme-adapter.js";
-import { monthPillarForYearStem } from "./calendar/five-tigers.js";
+import { solarTerms, zodiacSigns } from "./data.js";
 import {
   CURSOR_ANGLE,
   RINGS,
   SEXAGENARY_RING_IDS,
   assertWheelModel
 } from "./wheel/ring-model.js";
-import { discretePhaseWindows } from "./wheel/discrete-phase.js";
 import { temporalCycleRotation } from "./wheel/temporal-track.js";
-import { normalizeDegrees, shortestAngleDelta } from "./wheel/polar-geometry.js";
+import { shortestAngleDelta } from "./wheel/polar-geometry.js";
 import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
 import {
   createRingState,
@@ -19,15 +15,20 @@ import {
   setModelRotation
 } from "./wheel/ring-state.js";
 import { createRingDragController } from "./wheel/ring-drag-controller.js";
+import {
+  ATLAS_SEXAGENARY_NAMES,
+  atlasInputValueFromFields,
+  formatAtlasCivil,
+  instantFromAtlasLocalInput,
+  parseAtlasSearch,
+  resolveAtlasDisplayState,
+  solarLongitudeAtInstant
+} from "./wheel/atlas-display-model.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 
 const DAY_MS = 86_400_000;
-const UTC_OFFSET_HOURS = 8;
 const OFFSET_EPSILON = 0.001;
 
-const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
-const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-const SEXAGENARY = Array.from({ length: 60 }, (_, index) => `${STEMS[index % 10]}${BRANCHES[index % 12]}`);
 const RING_LABELS = Object.freeze({ hour: "時", year: "年", month: "月", day: "日", solar: "節氣", zodiac: "黃道" });
 
 const SCALE_CONFIG = Object.freeze({
@@ -44,7 +45,12 @@ const playButton = document.querySelector("#play-button");
 const nowButton = document.querySelector("#now-button");
 const scaleButtons = [...document.querySelectorAll("[data-scale]")];
 
-const renderer = createKineticRenderer({ svg, sexagenary: SEXAGENARY, solarTerms, zodiacSigns });
+const renderer = createKineticRenderer({
+  svg,
+  sexagenary: ATLAS_SEXAGENARY_NAMES,
+  solarTerms,
+  zodiacSigns
+});
 
 const state = {
   anchorMs: Date.now(),
@@ -68,17 +74,6 @@ let dragController = null;
 let compareButton = null;
 let resetRingsButton = null;
 let compareStatus = null;
-
-function ganzhiIndex(name) {
-  return SEXAGENARY.indexOf(name);
-}
-
-function shortestCycleDelta(nextIndex, previousIndex, size = 60) {
-  let delta = (nextIndex - previousIndex) % size;
-  if (delta > size / 2) delta -= size;
-  if (delta < -size / 2) delta += size;
-  return delta;
-}
 
 function cycleIndexForRing(id, display) {
   if (id === "hour") return display.hourIndex;
@@ -144,89 +139,15 @@ function alignLongitudeTracks(longitude) {
   setModelRotation(ringStates.zodiac, longitudeModelRotation);
 }
 
-function fieldsFromInstant(ms) {
-  const shifted = new Date(ms + UTC_OFFSET_HOURS * 3_600_000);
-  return {
-    year: shifted.getUTCFullYear(), month: shifted.getUTCMonth() + 1, day: shifted.getUTCDate(),
-    hour: shifted.getUTCHours(), minute: shifted.getUTCMinutes(), second: shifted.getUTCSeconds()
-  };
-}
-
-function longitudeAtInstant(ms) {
-  return apparentSolarLongitude(fieldsFromInstant(ms), UTC_OFFSET_HOURS);
-}
-
-function instantFromLocalInput(value) {
-  const match = /^(\d{4,6})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
-  if (!match) return null;
-  const [, y, m, d, h, min] = match;
-  return Date.UTC(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), 0) - UTC_OFFSET_HOURS * 3_600_000;
-}
-
-function inputValueFromFields(fields) {
-  const pad = value => String(value).padStart(2, "0");
-  return `${String(fields.year).padStart(4, "0")}-${pad(fields.month)}-${pad(fields.day)}T${pad(fields.hour)}:${pad(fields.minute)}`;
-}
-
-function formatCivil(fields) {
-  const pad = value => String(value).padStart(2, "0");
-  return `${fields.year}-${pad(fields.month)}-${pad(fields.day)} · ${pad(fields.hour)}:${pad(fields.minute)}:${pad(fields.second)}`;
-}
-
-function rangeContains(start, end, angle) {
-  const normalized = normalizeDegrees(angle);
-  if (end > start) return normalized >= start && normalized < end;
-  return normalized >= start || normalized < end;
-}
-
-function baziMonthAt(longitude) {
-  return baziMonths.find(month => rangeContains(month.start, month.end, longitude));
-}
-
-function zodiacAt(longitude) {
-  return zodiacSigns.find(sign => rangeContains(sign.start, sign.end, longitude));
-}
-
-function termAt(longitude) {
-  return solarTerms[Math.floor(normalizeDegrees(longitude) / 15) % 24];
-}
-
-function midpoint(start, end) {
-  return normalizeDegrees(start + normalizeDegrees(end - start) / 2);
-}
-
-function nearestCycleIndexForBranch(branch, preferredIndex) {
-  const candidates = SEXAGENARY.map((name, index) => ({ name, index })).filter(item => item.name.endsWith(branch));
-  return candidates.reduce((best, candidate) => {
-    const distance = Math.abs(shortestCycleDelta(candidate.index, preferredIndex));
-    return !best || distance < best.distance ? { index: candidate.index, distance } : best;
-  }, null)?.index ?? preferredIndex;
-}
-
-function parseLegacyProjection() {
-  const params = new URLSearchParams(location.search);
-  if (params.has("instant")) {
-    const instant = Date.parse(params.get("instant"));
-    if (Number.isFinite(instant)) {
-      state.anchorMs = instant;
-      state.selectedMs = instant;
-      return;
-    }
+function applyInitialSearchState() {
+  const parsed = parseAtlasSearch(location.search);
+  if (Number.isFinite(parsed.instantMs)) {
+    state.anchorMs = parsed.instantMs;
+    state.selectedMs = parsed.instantMs;
+    return;
   }
-  const rawLongitude = params.has("lambda") ? Number(params.get("lambda")) : Number.NaN;
-  const requestedMonth = params.get("month");
-  const yearStem = params.get("yearStem");
-  let longitude = Number.isFinite(rawLongitude) ? normalizeDegrees(rawLongitude) : null;
-  let monthBranch = baziMonths.some(month => month.branch === requestedMonth) ? requestedMonth : null;
-  if (longitude === null && monthBranch) {
-    const month = baziMonths.find(item => item.branch === monthBranch);
-    longitude = midpoint(month.start, month.end);
-  }
-  if (longitude !== null && !monthBranch) monthBranch = baziMonthAt(longitude)?.branch ?? null;
-  if (longitude === null && !monthBranch) return;
-  let monthPillar = null;
-  if (yearStem && STEMS.includes(yearStem) && monthBranch) monthPillar = monthPillarForYearStem(yearStem, monthBranch);
-  state.legacyProjection = { longitude, monthBranch, yearStem, monthPillar };
+  if (!parsed.legacyProjection) return;
+  state.legacyProjection = parsed.legacyProjection;
   document.body.classList.add("legacy-projection");
 }
 
@@ -237,43 +158,6 @@ function clearLegacyProjection() {
   history.replaceState({}, "", location.pathname);
 }
 
-function resolveDisplayState() {
-  const fields = fieldsFromInstant(state.selectedMs);
-  const result = resolveBirthPillars(fields, { utcOffsetHours: UTC_OFFSET_HOURS, dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY });
-  const actualLongitude = apparentSolarLongitude(fields, UTC_OFFSET_HOURS);
-  const longitude = state.legacyProjection?.longitude ?? actualLongitude;
-  const phases = { ...discretePhaseWindows(state.selectedMs) };
-  const yearName = result.pillars.year.name;
-  let monthName = result.pillars.month.name;
-  let monthBranch = result.pillars.month.branch;
-  if (state.legacyProjection?.monthBranch) {
-    monthBranch = state.legacyProjection.monthBranch;
-    phases.month = null;
-  }
-  if (state.legacyProjection?.monthPillar) monthName = state.legacyProjection.monthPillar;
-  let monthIndex = ganzhiIndex(monthName);
-  if (monthIndex < 0 || !monthName.endsWith(monthBranch)) {
-    monthIndex = nearestCycleIndexForBranch(monthBranch, ganzhiIndex(result.pillars.month.name));
-    monthName = SEXAGENARY[monthIndex];
-  }
-  return {
-    fields,
-    longitude,
-    actualLongitude,
-    phases,
-    pillars: result.pillars,
-    yearName,
-    monthName,
-    monthBranch,
-    monthIndex,
-    hourIndex: ganzhiIndex(result.pillars.hour.name),
-    yearIndex: ganzhiIndex(yearName),
-    dayIndex: ganzhiIndex(result.pillars.day.name),
-    activeTerm: termAt(longitude),
-    activeZodiac: zodiacAt(longitude)
-  };
-}
-
 function setText(id, value) {
   const node = document.querySelector(`#${id}`);
   if (node) node.textContent = value;
@@ -281,7 +165,7 @@ function setText(id, value) {
 
 function updateReadout(display) {
   const { fields, longitude, pillars, yearName, monthName, activeTerm, activeZodiac } = display;
-  setText("instant-readout", `${formatCivil(fields)} · UTC+08:00`);
+  setText("instant-readout", `${formatAtlasCivil(fields)} · UTC+08:00`);
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
   setText("hour-active", pillars.hour.name);
@@ -315,11 +199,14 @@ function updateReadout(display) {
     delete instrument.dataset.focusMonth;
     delete instrument.dataset.yearStem;
   }
-  if (document.activeElement !== instantInput) instantInput.value = inputValueFromFields(fields);
+  if (document.activeElement !== instantInput) instantInput.value = atlasInputValueFromFields(fields);
 }
 
 function updateWheel() {
-  currentDisplay = resolveDisplayState();
+  currentDisplay = resolveAtlasDisplayState({
+    selectedMs: state.selectedMs,
+    legacyProjection: state.legacyProjection
+  });
   alignCycleRing("hour", currentDisplay.hourIndex, currentDisplay.phases.hour);
   alignCycleRing("day", currentDisplay.dayIndex, currentDisplay.phases.day);
   alignCycleRing("month", currentDisplay.monthIndex, currentDisplay.phases.month);
@@ -435,7 +322,7 @@ function applyLinkedDragToTime(id, deltaDegrees) {
     ringId: id,
     instantMs: beforeMs,
     deltaDegrees,
-    longitudeAtMs: longitudeAtInstant
+    longitudeAtMs: solarLongitudeAtInstant
   });
   instrument.dataset.linkedScrubMode = "continuous";
   instrument.dataset.linkedScrubBoundaries = String(result.crossedBoundaries ?? 0);
@@ -556,7 +443,7 @@ function bindControls() {
     updateWheel();
   });
   instantInput.addEventListener("change", () => {
-    const instant = instantFromLocalInput(instantInput.value);
+    const instant = instantFromAtlasLocalInput(instantInput.value);
     if (instant === null || !Number.isFinite(instant)) return;
     stopPlayback();
     clearLegacyProjection();
@@ -570,7 +457,7 @@ function bindControls() {
 function initialize() {
   assertWheelModel();
   renderer.renderStatic();
-  parseLegacyProjection();
+  applyInitialSearchState();
   setSliderForScale();
   bindControls();
   updateWheel();
