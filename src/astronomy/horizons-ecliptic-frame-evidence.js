@@ -1,3 +1,24 @@
+const YEAR_4006_CATALOGUE_WINDOW = Object.freeze({
+  catalogueYear:4006,
+  catalogueYearSemantics:"270° winter solstice is in December 4005; 285°..255° follow through calendar year 4006",
+  knotGrid:"4005-12-01 through 4007-01-01, daily 00:00 TT",
+  knotStartTtJulianDay:3184190.5,
+  knotEndTtJulianDay:3184586.5,
+  knotRows:397,
+  withheldGrid:"4005-12-01 through 4006-12-31, daily 12:00 TT",
+  withheldRows:396,
+  interpolation:"quaternion-slerp between adjacent daily rotation knots",
+  maxAngularResidualArcsec:0.009068677322278694,
+  meanAngularResidualArcsec:0.0033849475656558556,
+  p99AngularResidualArcsec:0.0069550695316661151,
+  maxEquivalentMeanAnnualSolarCrossingSeconds:0.2208175770852786,
+  roughWinterSolsticeSeedTtJulianDay:3184208.6894499999,
+  roughLastCatalogueTermSeedTtJulianDay:3184558.7132250001,
+  maxRootBracketDays:16,
+  previousDecemberCoverageValidated:true,
+  exhaustiveHalfDaySweepValidated:true
+});
+
 export const HORIZONS_ECLIPTIC_FRAME_EVIDENCE = Object.freeze({
   authority:"NASA/JPL Horizons API",
   researchPullRequest:94,
@@ -23,26 +44,10 @@ export const HORIZONS_ECLIPTIC_FRAME_EVIDENCE = Object.freeze({
     maxAbsDeterminantMinusOne:2.220446049250313e-16,
     targetIndependentRotationValidated:true
   }),
-  year4006CatalogueWindow:Object.freeze({
-    catalogueYear:4006,
-    catalogueYearSemantics:"270° winter solstice is in December 4005; 285°..255° follow through calendar year 4006",
-    knotGrid:"4005-12-01 through 4007-01-01, daily 00:00 TT",
-    knotStartTtJulianDay:3184190.5,
-    knotEndTtJulianDay:3184586.5,
-    knotRows:397,
-    withheldGrid:"4005-12-01 through 4006-12-31, daily 12:00 TT",
-    withheldRows:396,
-    interpolation:"quaternion-slerp between adjacent daily rotation knots",
-    maxAngularResidualArcsec:0.009068677322278694,
-    meanAngularResidualArcsec:0.0033849475656558556,
-    p99AngularResidualArcsec:0.0069550695316661151,
-    maxEquivalentMeanAnnualSolarCrossingSeconds:0.2208175770852786,
-    roughWinterSolsticeSeedTtJulianDay:3184208.6894499999,
-    roughLastCatalogueTermSeedTtJulianDay:3184558.7132250001,
-    maxRootBracketDays:16,
-    previousDecemberCoverageValidated:true,
-    exhaustiveHalfDaySweepValidated:true
-  }),
+  year4006CatalogueWindow:YEAR_4006_CATALOGUE_WINDOW,
+  // Compatibility alias retained for the #97 proof contract. It now points at
+  // the stronger catalogue-year window instead of the superseded Jan-Dec grid.
+  year4006DenseWindow:YEAR_4006_CATALOGUE_WINDOW,
   supersededCalendarYearOnlyCapture:Object.freeze({
     researchRunId:34869125400,
     artifactId:10357559155,
@@ -66,6 +71,7 @@ export const HORIZONS_ECLIPTIC_FRAME_EVIDENCE = Object.freeze({
     targetIndependentFrameValidated:true,
     year4006FrameInterpolationValidated:true,
     year4006CatalogueCoverageValidated:true,
+    apparentDirectionCorrectionFromGeometricDe441StateValidated:false,
     productionSeasonalPipelineIntegrated:false
   }),
   note:"The clean proof retains compact daily quaternion knots plus bounded numeric evidence and selected withheld half-day cases. It does not copy Swiss Ephemeris/Owen source code or coefficient tables and remains proof-only until end-to-end seasonal crossing composition is validated."
