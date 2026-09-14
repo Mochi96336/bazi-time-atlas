@@ -154,7 +154,14 @@
 }
 
 @media (max-width: 480px) {
-  .ring-legend { gap: 5px 9px; }
+  /* Keep frame selection and layer readouts in one compact instrument band.
+     The controls remain individually usable; only the debug-dashboard-like
+     dedicated reference row is removed. */
+  .ring-legend {
+    align-items: center;
+    gap: 3px 4px;
+  }
+  .reference-frame-control { flex: 0 0 auto; }
   .ring-legend-row { grid-template-columns: none; gap: 4px; }
   .ring-legend-row span { font-size: 7.5px; }
   .ring-legend-row span::after { display: none; }
