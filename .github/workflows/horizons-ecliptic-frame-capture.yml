@@ -19,10 +19,11 @@ jobs:
       - name: Capture Horizons frame pairs
         run: node scripts/research-capture-horizons-ecliptic-frame.mjs
       - name: Upload research evidence
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: horizons-ecliptic-frame-capture
           path: tmp/horizons-ecliptic-frame-capture/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
           compression-level: 6
