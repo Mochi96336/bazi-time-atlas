@@ -25,17 +25,15 @@ import {
   solarLongitudeAtInstant
 } from "./wheel/atlas-display-model.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
+import {
+  DAY_MS,
+  advanceKineticPlayback,
+  sliderStateForScale
+} from "./interaction/kinetic-playback.js";
 
-const DAY_MS = 86_400_000;
 const OFFSET_EPSILON = 0.001;
 
 const RING_LABELS = Object.freeze({ hour: "時", year: "年", month: "月", day: "日", solar: "節氣", zodiac: "黃道" });
-
-const SCALE_CONFIG = Object.freeze({
-  day: { label: "日內 / 48 小時", spanDays: 1, sliderStep: 1 / 144, playDaysPerSecond: .25, edgeLabel: "1 日" },
-  year: { label: "一年", spanDays: 183, sliderStep: .25, playDaysPerSecond: 6, edgeLabel: "約半年" },
-  cycle: { label: "六十年", spanDays: 365.2422 * 30, sliderStep: 1, playDaysPerSecond: 365.2422, edgeLabel: "約 30 年" }
-});
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -218,14 +216,18 @@ function updateWheel() {
 }
 
 function setSliderForScale() {
-  const config = SCALE_CONFIG[state.scale];
-  slider.min = String(-config.spanDays);
-  slider.max = String(config.spanDays);
-  slider.step = String(config.sliderStep);
-  slider.value = String((state.selectedMs - state.anchorMs) / DAY_MS);
-  setText("slider-left", `−${config.edgeLabel}`);
-  setText("slider-right", `+${config.edgeLabel}`);
-  setText("scale-readout", config.label);
+  const sliderState = sliderStateForScale({
+    scale: state.scale,
+    selectedMs: state.selectedMs,
+    anchorMs: state.anchorMs
+  });
+  slider.min = String(sliderState.min);
+  slider.max = String(sliderState.max);
+  slider.step = String(sliderState.step);
+  slider.value = String(sliderState.value);
+  setText("slider-left", sliderState.leftLabel);
+  setText("slider-right", sliderState.rightLabel);
+  setText("scale-readout", sliderState.label);
   scaleButtons.forEach(button => button.classList.toggle("active", button.dataset.scale === state.scale));
 }
 
@@ -387,20 +389,21 @@ function installRingDrag() {
 
 function animationTick(timestamp) {
   if (!state.playing) return;
+  const playback = advanceKineticPlayback({
+    scale: state.scale,
+    selectedMs: state.selectedMs,
+    anchorMs: state.anchorMs,
+    previousTimestamp: state.lastAnimationTs,
+    timestamp
+  });
   if (state.lastAnimationTs !== null) {
-    const elapsedSeconds = Math.min((timestamp - state.lastAnimationTs) / 1000, .1);
-    const config = SCALE_CONFIG[state.scale];
-    state.selectedMs += elapsedSeconds * config.playDaysPerSecond * DAY_MS;
-    const offsetDays = (state.selectedMs - state.anchorMs) / DAY_MS;
-    if (offsetDays >= config.spanDays) {
-      state.selectedMs = state.anchorMs + config.spanDays * DAY_MS;
-      slider.value = String(config.spanDays);
-      updateWheel();
+    state.selectedMs = playback.selectedMs;
+    slider.value = String(playback.offsetDays);
+    updateWheel();
+    if (playback.reachedEnd) {
       stopPlayback();
       return;
     }
-    slider.value = String(offsetDays);
-    updateWheel();
   }
   state.lastAnimationTs = timestamp;
   state.animationFrame = requestAnimationFrame(animationTick);
