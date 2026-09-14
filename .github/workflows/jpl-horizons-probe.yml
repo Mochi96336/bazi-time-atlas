@@ -16,16 +16,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Prepare pinned Tyme vendor
         run: npm run vendor:prepare
-      - name: Install independent ERFA nutation implementation
-        run: python -m pip install --disable-pip-version-check --no-cache-dir pyerfa==2.0.1.5
-      - name: Compare raw 24 ShouXing crossings with JPL Horizons DE441
-        run: node scripts/probe-jpl-horizons-4006.mjs
-      - name: Diagnose mean-ecliptic versus IAU80 true-ecliptic semantics
-        run: python scripts/probe-jpl-horizons-4006-erfa.py
+      - name: Expose ShouXing 4006 longitude components
+        run: node scripts/diagnose-shouxing-4006-components.mjs
