@@ -114,6 +114,26 @@
   font-weight: 680;
 }
 
+/* Selected Instant is the shared datum for every ring, not a sixth visual
+   track. Keep the cap and line easy to find, but let the temporal shells carry
+   the resting visual weight instead of a bright measurement probe. */
+#cursor-layer .cursor-halo {
+  stroke: rgba(244,230,183,.08);
+  stroke-width: 5;
+}
+#cursor-layer .cursor-line {
+  stroke-width: 1.35;
+  opacity: .86;
+  filter: drop-shadow(0 0 3px rgba(244,230,183,.12));
+}
+#cursor-layer .cursor-cap { opacity: .82; }
+#cursor-layer .cursor-note {
+  fill: rgba(243,231,194,.76);
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: .10em;
+}
+
 /* The whole annual band is still one drag/reference target. Interaction wins
    over the quieter resting treatment. */
 #kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
