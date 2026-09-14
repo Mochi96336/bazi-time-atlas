@@ -2,6 +2,10 @@ import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const TOOTH_DEGREES = 6;
+const CURSOR_ANGLE = -90;
+const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const SEXAGENARY = Array.from({ length:60 }, (_, index) => `${STEMS[index % 10]}${BRANCHES[index % 12]}`);
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -199,5 +203,12 @@ if ((attr(legacyInstrument, "data-discrete-phase-rings") ?? "").includes("month"
 if (attr(legacyMonth, "data-phase-progress") !== null || attr(legacyMonthBead, "data-phase-visible") !== "false") {
   throw new Error(`discrete-phase legacy guard: projected month phase overlay was not suppressed: ${legacy.url}`);
 }
+const projectedMonthPillar = attr(legacyInstrument, "data-month-pillar") ?? "";
+const projectedMonthIndex = SEXAGENARY.indexOf(projectedMonthPillar);
+const projectedMonthRotation = Number(attr(legacyMonth, "data-model-rotation"));
+const expectedProjectedRotation = CURSOR_ANGLE - (projectedMonthIndex * TOOTH_DEGREES + TOOTH_DEGREES / 2);
+if (projectedMonthIndex < 0 || !Number.isFinite(projectedMonthRotation) || Math.abs(projectedMonthRotation - expectedProjectedRotation) > 0.001) {
+  throw new Error(`discrete-phase legacy guard: projected month was not centred (${projectedMonthPillar}, model=${projectedMonthRotation}, expected=${expectedProjectedRotation}): ${legacy.url}`);
+}
 
-console.log(`[discrete-phase] PASS 390px true-boundary phase + continuous tracks; hour ${initialProgress.hour.toFixed(4)}→${stepProgress.hour.toFixed(4)}, day ${initialProgress.day.toFixed(4)}→${stepProgress.day.toFixed(4)}, continuous 23:00 crossing + legacy month suppression: ${interactive.url}`);
+console.log(`[discrete-phase] PASS 390px true-boundary phase + continuous tracks; hour ${initialProgress.hour.toFixed(4)}→${stepProgress.hour.toFixed(4)}, day ${initialProgress.day.toFixed(4)}→${stepProgress.day.toFixed(4)}, continuous 23:00 crossing + centred legacy month: ${interactive.url}`);
