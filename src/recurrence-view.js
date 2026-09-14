@@ -6,6 +6,11 @@ import {
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
+import {
+  phaseAngleOnFan,
+  phaseFanCells,
+  signedShortestPhase
+} from "./recurrence/phase-fan-geometry.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -27,19 +32,22 @@ const candidateButtons = document.querySelector("#candidate-buttons");
 const milestoneRows = document.querySelector("#milestone-rows");
 const cursorGroup = document.querySelector("#recurrence-cursor");
 
+// Radial scale follows the same product grammar as the main atlas: shorter
+// recurrence cycles live inside, longer cycles live outside. Astronomy remains
+// the outer comparison layer rather than another discrete gear.
 const ringSpecs = Object.freeze({
-  gregorian: { group: document.querySelector("#gregorian-ring"), inner: 270, outer: 360, sectors: 40, sectorYears: 10, modulus: 400, className: "gregorian-sector" },
-  year: { group: document.querySelector("#year-ring"), inner: 360, outer: 450, sectors: 60, sectorYears: 1, modulus: 60, className: "year-sector" },
-  day: { group: document.querySelector("#day-ring"), inner: 450, outer: 560, sectors: 60, sectorYears: 1, modulus: 60, className: "day-sector" }
+  day: { group: document.querySelector("#day-ring"), inner:270, outer:360, sectors:60, phasePerSector:1, modulus:60, className:"day-sector" },
+  year: { group: document.querySelector("#year-ring"), inner:360, outer:450, sectors:60, phasePerSector:1, modulus:60, className:"year-sector" },
+  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector" }
 });
 
-let currentBase = { year: 2026, month: 9, day: 13 };
+let currentBase = { year:2026, month:9, day:13 };
 let currentDelta = 0;
 let candidateStates = [];
 
 function polar(radius, angleDegrees) {
   const angle = angleDegrees * Math.PI / 180;
-  return { x: CX + Math.cos(angle) * radius, y: CY + Math.sin(angle) * radius };
+  return { x:CX + Math.cos(angle) * radius, y:CY + Math.sin(angle) * radius };
 }
 
 function annularSectorPath(inner, outer, startDegrees, endDegrees) {
@@ -71,49 +79,60 @@ function setText(id, value) {
   if (node) node.textContent = value;
 }
 
+function formatSigned(value) {
+  if (value === 0) return "0";
+  return `${value > 0 ? "+" : "−"}${Math.abs(value)}`;
+}
+
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
   for (const [key, spec] of Object.entries(ringSpecs)) {
     svgEl("path", {
-      d: annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
-      class: `phase-band phase-band-${key}`
+      d:annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
+      class:`phase-band phase-band-${key}`
     }, group);
   }
   [270, 360, 450, 560].forEach(radius => {
-    svgEl("path", { d: arcPath(radius, FAN_START, FAN_END), class: "recurrence-guide" }, group);
+    svgEl("path", { d:arcPath(radius, FAN_START, FAN_END), class:"recurrence-guide" }, group);
   });
 }
 
 function renderRing(key) {
   const spec = ringSpecs[key];
-  const sectorAngle = 360 / spec.sectors;
-  spec.group.classList.add("recurrence-track");
+  const cells = phaseFanCells({ modulus:spec.modulus, sectors:spec.sectors, fanStart:FAN_START, fanEnd:FAN_END });
+  spec.group.classList.add("recurrence-track", "phase-gauge-track");
+  spec.group.dataset.phaseGeometry = "signed-shortest-fan";
+  spec.group.dataset.phaseModulus = String(spec.modulus);
+  spec.group.dataset.radialScale = key;
 
-  for (let index = 0; index < spec.sectors; index += 1) {
+  for (const cell of cells) {
     svgEl("path", {
-      d: annularSectorPath(spec.inner, spec.outer, index * sectorAngle + .12, (index + 1) * sectorAngle - .12),
-      class: `phase-sector ${spec.className}`
+      d:annularSectorPath(spec.inner, spec.outer, cell.startAngle + .06, cell.endAngle - .06),
+      class:`phase-sector ${spec.className}`,
+      "data-phase-cell":cell.index,
+      "data-signed-start":cell.signedStart
     }, spec.group);
 
-    const tickAngle = index * sectorAngle;
-    const p1 = polar(spec.outer - (index % 5 === 0 ? 10 : 6), tickAngle);
+    const tickAngle = cell.startAngle;
+    const major = cell.index % 10 === 0 || cell.index === spec.sectors / 2;
+    const p1 = polar(spec.outer - (major ? 10 : 5), tickAngle);
     const p2 = polar(spec.outer, tickAngle);
     svgEl("line", {
-      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
-      class: `phase-tick${index % 5 === 0 ? " major" : ""}`
+      x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y,
+      class:`phase-tick${major ? " major" : ""}`
     }, spec.group);
 
-    if (index % 10 === 0) {
+    if (cell.index % 10 === 0 || cell.index === spec.sectors / 2) {
       const radius = (spec.inner + spec.outer) / 2;
-      const angle = index * sectorAngle + sectorAngle / 2;
+      const angle = cell.startAngle + (cell.endAngle - cell.startAngle) / 2;
       const p = polar(radius, angle);
       const label = svgEl("text", {
-        x: p.x,
-        y: p.y,
-        class: "phase-label",
-        transform: `rotate(${angle + 90} ${p.x} ${p.y})`
+        x:p.x,
+        y:p.y,
+        class:"phase-label",
+        transform:`rotate(${angle + 90} ${p.x} ${p.y})`
       }, spec.group);
-      label.textContent = key === "gregorian" ? String(index * spec.sectorYears) : String(index);
+      label.textContent = formatSigned(cell.signedStart);
     }
   }
 }
@@ -121,75 +140,69 @@ function renderRing(key) {
 function renderCursor() {
   const inner = polar(258, CURSOR_ANGLE);
   const outer = polar(575, CURSOR_ANGLE);
-  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-halo" }, cursorGroup);
-  svgEl("line", { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, class: "cursor-line" }, cursorGroup);
+  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
+  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
   const labelPoint = polar(595, CURSOR_ANGLE);
-  const label = svgEl("text", { x: labelPoint.x, y: labelPoint.y, class: "cursor-label" }, cursorGroup);
-  label.textContent = "SAME REFERENCE";
-}
-
-function rotateRing(key, phase, modulus) {
-  const anglePerUnit = 360 / modulus;
-  const rotation = CURSOR_ANGLE - phase * anglePerUnit;
-  ringSpecs[key].group.setAttribute("transform", `rotate(${rotation.toFixed(4)} ${CX} ${CY})`);
-}
-
-function visibleEquivalentAngle(rawAngle) {
-  for (const offset of [-720, -360, 0, 360, 720]) {
-    const candidate = rawAngle + offset;
-    if (candidate >= FAN_START && candidate <= FAN_END) return candidate;
-  }
-  return null;
+  const label = svgEl("text", { x:labelPoint.x, y:labelPoint.y, class:"cursor-label" }, cursorGroup);
+  label.textContent = "SAME REFERENCE · 0";
 }
 
 function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
   const phases = {
-    gregorian: state.phases.gregorian,
-    year: state.phases.year,
-    day: state.phases.day
+    day:state.phases.day,
+    year:state.phases.year,
+    gregorian:state.phases.gregorian
   };
 
   for (const [key, spec] of Object.entries(ringSpecs)) {
     const phase = phases[key];
     if (phase === null) continue;
-    const rawAngle = CURSOR_ANGLE - phase * (360 / spec.modulus);
-    const angle = visibleEquivalentAngle(rawAngle);
-    if (angle === null) continue;
+    const signed = signedShortestPhase(phase, spec.modulus);
+    const angle = phaseAngleOnFan({
+      phase,
+      modulus:spec.modulus,
+      fanStart:FAN_START,
+      fanEnd:FAN_END,
+      referenceAngle:CURSOR_ANGLE
+    });
     const p1 = polar(spec.inner + 5, angle);
     const p2 = polar(spec.outer - 5, angle);
     svgEl("line", {
-      x1: p1.x,
-      y1: p1.y,
-      x2: p2.x,
-      y2: p2.y,
-      class: `return-marker return-marker-${key}${phase === 0 ? " is-closed" : ""}`,
-      "data-return-marker": key,
-      "data-return-angle": angle.toFixed(3)
+      x1:p1.x,
+      y1:p1.y,
+      x2:p2.x,
+      y2:p2.y,
+      class:`return-marker return-marker-${key}${phase === 0 ? " is-closed" : ""}`,
+      "data-return-marker":key,
+      "data-return-angle":angle.toFixed(3),
+      "data-phase-raw":phase,
+      "data-phase-signed":signed,
+      "data-phase-modulus":spec.modulus
     }, cursorGroup);
     const labelPoint = polar(spec.outer + 9, angle);
     const label = svgEl("text", {
-      x: labelPoint.x,
-      y: labelPoint.y,
-      class: `return-marker-label return-marker-label-${key}`,
-      "data-return-marker": `${key}-label`
+      x:labelPoint.x,
+      y:labelPoint.y,
+      class:`return-marker-label return-marker-label-${key}`,
+      "data-return-marker":`${key}-label`
     }, cursorGroup);
-    label.textContent = "0";
+    label.textContent = formatSigned(signed);
   }
 }
 
 function readBaseDate() {
   return {
-    year: Number(yearInput.value),
-    month: Number(monthInput.value),
-    day: Number(dayInput.value)
+    year:Number(yearInput.value),
+    month:Number(monthInput.value),
+    day:Number(dayInput.value)
   };
 }
 
 function parseDateParam(value) {
   const match = /^(\d{1,7})-(\d{2})-(\d{2})$/.exec(value ?? "");
   if (!match) return null;
-  const date = { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+  const date = { year:Number(match[1]), month:Number(match[2]), day:Number(match[3]) };
   return validateGregorianDate(date) ? date : null;
 }
 
@@ -306,6 +319,12 @@ function setClosureArticle(key, closed, phase) {
   setText(`${key}-status`, phase === null ? "無對應日期" : closed ? "閉合 · 0" : `偏移 ${phase}`);
 }
 
+function phaseReadout(phase, modulus) {
+  if (phase === null) return "—";
+  const signed = signedShortestPhase(phase, modulus);
+  return `${phase} / ${modulus}${signed === 0 ? "" : ` · shortest ${formatSigned(signed)}`}`;
+}
+
 function renderState() {
   let state;
   try {
@@ -315,14 +334,11 @@ function renderState() {
     return;
   }
 
-  rotateRing("gregorian", state.phases.gregorian, 400);
-  rotateRing("year", state.phases.year, 60);
-  rotateRing("day", state.phases.day ?? 0, 60);
   renderReturnMarkers(state);
 
-  setText("gregorian-phase-readout", `${state.phases.gregorian} / 400`);
-  setText("year-phase-readout", `${state.phases.year} / 60`);
-  setText("day-phase-readout", state.phases.day === null ? "—" : `${state.phases.day} / 60`);
+  setText("gregorian-phase-readout", phaseReadout(state.phases.gregorian, 400));
+  setText("year-phase-readout", phaseReadout(state.phases.year, 60));
+  setText("day-phase-readout", phaseReadout(state.phases.day, 60));
   setText("delta-readout", `${currentDelta.toLocaleString("en-US")} 年`);
   setText("target-date-readout", state.targetValid ? formatDate(state.targetDate) : `${state.targetDate.year}-${String(state.targetDate.month).padStart(2,"0")}-${String(state.targetDate.day).padStart(2,"0")}（不存在）`);
 
@@ -384,10 +400,12 @@ function bindControls() {
 
 function initialize() {
   renderGuides();
-  renderRing("gregorian");
-  renderRing("year");
   renderRing("day");
+  renderRing("year");
+  renderRing("gregorian");
   renderCursor();
+  instrument.dataset.phaseGeometry = "signed-shortest-fan";
+  instrument.dataset.phaseRadialOrder = "day,year,gregorian,astronomy";
   const initialDelta = applyQueryPreset();
   bindControls();
   instrument.dataset.baseDateValid = "true";
