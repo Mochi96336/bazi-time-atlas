@@ -5,6 +5,15 @@
   pointer-events: none;
 }
 
+/* The whole sexagenary track now moves continuously from the same real phase
+   progress, so the old #51 intra-tooth arc/bead would draw that progress twice.
+   Keep the legacy slots and their computed diagnostics intact while removing
+   the second visual trajectory. Exact next-boundary gates remain visible. */
+.state-phase-progress,
+.state-phase-bead {
+  display: none !important;
+}
+
 .state-phase-progress {
   fill: none;
   stroke-width: 3.2;
@@ -50,9 +59,6 @@
 .state-phase-bead.phase-month { fill: var(--month); }
 .state-phase-bead.phase-day { fill: var(--day); }
 
-/* The arc lives inside the currently active six-degree tooth. It represents
-   elapsed time inside that real state interval; the Ganzhi wheel itself still
-   snaps only at its actual boundary and is never tweened between identities. */
 #hour-track[data-phase-boundary-kind="calendar-discrete"] .state-phase-progress,
 #day-track[data-phase-boundary-kind="calendar-discrete"] .state-phase-progress {
   stroke-dasharray: 1.8 1.8;
