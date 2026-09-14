@@ -7,6 +7,7 @@ const outputDir = path.resolve("tmp/visual-check");
 
 const pages = [
   { key: "annual", path: "" },
+  { key: "annual-classification", path: "?classification=1&instant=2027-03-15T13%3A20%3A09.000Z" },
   { key: "annual-birth", path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1" },
   { key: "recurrence", path: "recurrence.html" },
   { key: "recurrence-local", path: "recurrence.html?date=2026-09-13&delta=1980" },
