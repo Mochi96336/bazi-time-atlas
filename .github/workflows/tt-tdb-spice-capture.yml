@@ -1,0 +1,30 @@
+name: Research TT-TDB SPICE capture
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned SpiceyPy
+        run: python -m pip install --disable-pip-version-check --no-cache-dir spiceypy==8.2.0
+      - name: Capture CSPICE TT to TDB truth
+        run: python scripts/research-capture-tt-tdb-spice.py
+      - name: Upload research evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: tt-tdb-spice-capture
+          path: tmp/tt-tdb-spice-capture/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
