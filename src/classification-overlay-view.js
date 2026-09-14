@@ -108,7 +108,9 @@ function initialize() {
   instrument.dataset.classificationCycleSectors = String(cycleCount);
   instrument.dataset.classificationZodiacSectors = String(zodiacCount);
   installKeys();
-  applyOverlay(false);
+
+  const requested = new URLSearchParams(location.search).get("classification");
+  applyOverlay(requested === "1" || requested === "on");
 
   button.addEventListener("click", () => {
     applyOverlay(button.getAttribute("aria-pressed") !== "true");
