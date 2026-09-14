@@ -9,6 +9,10 @@ import {
   assessDirectSeasonalProviderPromotion
 } from "../src/recurrence/direct-seasonal-provider-promotion.js";
 import {
+  JPL_DE441_SHOUXING_2026_CROSSCHECK,
+  JPL_DE441_SHOUXING_4006_CROSSCHECK
+} from "../src/recurrence/direct-seasonal-provider-validation-evidence.js";
+import {
   SEASONAL_EPOCH_PIPELINE,
   SEASONAL_EPOCH_SOURCES,
   seasonalEpochSourceAudit
@@ -39,12 +43,12 @@ test("direct provider declares its model family without widening validated cover
   });
 });
 
-test("JPL reference contract matches the Earth-season observable without pretending vectors are already pinned", () => {
+test("JPL reference contract pins the exact Earth-season observable", () => {
   assert.equal(JPL_HORIZONS_SEASONAL_REFERENCE.authority, "NASA/JPL Horizons");
   assert.equal(JPL_HORIZONS_SEASONAL_REFERENCE.target, "Sun");
   assert.equal(JPL_HORIZONS_SEASONAL_REFERENCE.observerCenter, "Earth geocenter");
   assert.equal(JPL_HORIZONS_SEASONAL_REFERENCE.referenceSemantics,
-    "apparent-geocentric-solar-longitude-of-date");
+    "geocentric-apparent-solar-longitude-mean-ecliptic-of-date");
   assert.equal(JPL_HORIZONS_SEASONAL_REFERENCE.timeScale, "TT");
   assert.equal(JPL_HORIZONS_SEASONAL_REFERENCE.status, "reference-contract-only");
 });
@@ -61,7 +65,9 @@ test("the 2026 same-model proof cannot justify a 4006 coverage extension", () =>
   assert.equal(result.blocker, "independent-target-year-validation");
   assert.deepEqual(result.sameModelEvidenceYears, [2026]);
   assert.deepEqual(result.targetEvidenceIds, []);
+  assert.deepEqual(result.independentTargetEvidenceCandidateIds, []);
   assert.deepEqual(result.independentTargetEvidenceIds, []);
+  assert.deepEqual(result.rejectedIndependentTargetEvidenceIds, []);
   assert.equal(result.coverageExtensionEligible, false);
   assert.equal(result.productionPromotionEligible, false);
 });
@@ -82,6 +88,7 @@ test("even 24 same-model 4006 crossings remain insufficient for promotion", () =
 
   assert.equal(result.status, "same-model-evidence-only");
   assert.deepEqual(result.targetEvidenceIds, ["shouxing-4006-self-check"]);
+  assert.deepEqual(result.independentTargetEvidenceCandidateIds, []);
   assert.deepEqual(result.independentTargetEvidenceIds, []);
   assert.equal(result.coverageExtensionEligible, false);
 });
@@ -95,13 +102,52 @@ test("24 independent target-year crossings within the error budget make coverage
 
   assert.equal(result.status, "independent-validation-pass");
   assert.equal(result.blocker, null);
+  assert.deepEqual(result.independentTargetEvidenceCandidateIds, ["jpl-horizons-4006-24-term"]);
   assert.deepEqual(result.independentTargetEvidenceIds, ["jpl-horizons-4006-24-term"]);
+  assert.deepEqual(result.rejectedIndependentTargetEvidenceIds, []);
   assert.equal(result.coverageExtensionEligible, true);
   assert.equal(result.productionPromotionEligible, false);
   assert.equal(result.requiresCoverageMetadataUpdate, true);
 });
 
-test("promotion still rejects the wrong observable, too few crossings or excessive epoch error", () => {
+test("pinned 2026 DE441 control stays near the modern ShouXing solution", () => {
+  const evidence = JPL_DE441_SHOUXING_2026_CROSSCHECK;
+  assert.equal(evidence.sourceEphemeris, "DE441");
+  assert.equal(evidence.terms.length, 24);
+  assert.equal(evidence.samplesByYear[2026], 24);
+  assert.ok(evidence.meanAbsEpochErrorSeconds < 1.1);
+  assert.ok(evidence.maxEpochErrorSeconds < 2.5);
+  assert.equal(Math.max(...evidence.terms.map(term => Math.abs(term.epochErrorSeconds))),
+    evidence.maxEpochErrorSeconds);
+});
+
+test("pinned 4006 DE441 evidence explicitly rejects a ShouXing coverage extension", () => {
+  const evidence = JPL_DE441_SHOUXING_4006_CROSSCHECK;
+  assert.equal(evidence.sourceEphemeris, "DE441");
+  assert.equal(evidence.terms.length, 24);
+  assert.equal(evidence.samplesByYear[4006], 24);
+  assert.ok(evidence.meanAbsEpochErrorSeconds > 250);
+  assert.equal(evidence.maxEpochErrorSeconds, 270.174636);
+  assert.ok(evidence.meanAbsEpochErrorSeconds
+    > JPL_DE441_SHOUXING_2026_CROSSCHECK.meanAbsEpochErrorSeconds * 250);
+
+  const result = assessDirectSeasonalProviderPromotion({
+    provider:TYME_SHOUXING_DIRECT_PROVIDER,
+    targetYear:4006,
+    evidence:[evidence]
+  });
+
+  assert.equal(result.status, "independent-validation-failed");
+  assert.equal(result.blocker, "epoch-error-budget");
+  assert.deepEqual(result.independentTargetEvidenceCandidateIds, [evidence.id]);
+  assert.deepEqual(result.independentTargetEvidenceIds, []);
+  assert.deepEqual(result.rejectedIndependentTargetEvidenceIds, [evidence.id]);
+  assert.equal(result.coverageExtensionEligible, false);
+  assert.equal(result.productionPromotionEligible, false);
+  assert.equal(result.requiresCoverageMetadataUpdate, false);
+});
+
+test("wrong observable and too few crossings are not independent target-year candidates", () => {
   const cases = [
     jplEvidence({
       id:"wrong-semantics",
@@ -110,10 +156,6 @@ test("promotion still rejects the wrong observable, too few crossings or excessi
     jplEvidence({
       id:"too-few-samples",
       samplesByYear:{ 4006:DIRECT_SEASONAL_PROMOTION_POLICY.minimumSamplesAtTargetYear - 1 }
-    }),
-    jplEvidence({
-      id:"too-large-error",
-      maxEpochErrorSeconds:DIRECT_SEASONAL_PROMOTION_POLICY.maxEpochErrorSeconds + 0.001
     })
   ];
 
@@ -123,12 +165,31 @@ test("promotion still rejects the wrong observable, too few crossings or excessi
       targetYear:4006,
       evidence:[evidence]
     });
+    assert.equal(result.status, "independent-validation-missing", evidence.id);
     assert.equal(result.coverageExtensionEligible, false, evidence.id);
     assert.equal(result.blocker, "independent-target-year-validation", evidence.id);
   }
 });
 
-test("a passing validation does not silently mutate production source or pipeline registries", () => {
+test("independent evidence over the epoch budget is present but fails promotion", () => {
+  const evidence = jplEvidence({
+    id:"too-large-error",
+    maxEpochErrorSeconds:DIRECT_SEASONAL_PROMOTION_POLICY.maxEpochErrorSeconds + 0.001
+  });
+  const result = assessDirectSeasonalProviderPromotion({
+    provider:TYME_SHOUXING_DIRECT_PROVIDER,
+    targetYear:4006,
+    evidence:[evidence]
+  });
+
+  assert.equal(result.status, "independent-validation-failed");
+  assert.equal(result.blocker, "epoch-error-budget");
+  assert.deepEqual(result.independentTargetEvidenceCandidateIds, [evidence.id]);
+  assert.deepEqual(result.rejectedIndependentTargetEvidenceIds, [evidence.id]);
+  assert.equal(result.coverageExtensionEligible, false);
+});
+
+test("failed independent validation does not silently mutate production source or pipeline registries", () => {
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
   assert.equal(SEASONAL_EPOCH_SOURCES.some(item => item.id === TYME_SHOUXING_DIRECT_PROVIDER.id), false);
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, []);
