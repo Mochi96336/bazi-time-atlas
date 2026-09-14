@@ -11,7 +11,6 @@ import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
 import {
   createRingState,
   effectiveRotation,
-  resetManualOffset,
   setModelRotation
 } from "./wheel/ring-state.js";
 import { createRingDragController } from "./wheel/ring-drag-controller.js";
@@ -24,16 +23,13 @@ import {
   resolveAtlasDisplayState,
   solarLongitudeAtInstant
 } from "./wheel/atlas-display-model.js";
+import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 import {
   DAY_MS,
   advanceKineticPlayback,
   sliderStateForScale
 } from "./interaction/kinetic-playback.js";
-
-const OFFSET_EPSILON = 0.001;
-
-const RING_LABELS = Object.freeze({ hour: "時", year: "年", month: "月", day: "日", solar: "節氣", zodiac: "黃道" });
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -69,9 +65,7 @@ let lastSolarLongitude = null;
 let longitudeModelRotation = null;
 let currentDisplay = null;
 let dragController = null;
-let compareButton = null;
-let resetRingsButton = null;
-let compareStatus = null;
+let compareController = null;
 
 function cycleIndexForRing(id, display) {
   if (id === "hour") return display.hourIndex;
@@ -212,7 +206,7 @@ function updateWheel() {
   alignLongitudeTracks(currentDisplay.longitude);
   renderAllRingPoses();
   updateReadout(currentDisplay);
-  updateCompareUi();
+  compareController?.update();
 }
 
 function setSliderForScale() {
@@ -238,84 +232,6 @@ function stopPlayback() {
   state.animationFrame = null;
   playButton.textContent = "播放";
   playButton.setAttribute("aria-pressed", "false");
-}
-
-function resetAllRingOffsets() {
-  RINGS.forEach(ring => resetManualOffset(ringStates[ring.id]));
-  resetManualOffset(ringStates.zodiac);
-  renderAllRingPoses();
-  updateCompareUi();
-}
-
-function detachedRings() {
-  return RINGS.filter(ring => Math.abs(ringStates[ring.id].manualOffset) > OFFSET_EPSILON);
-}
-
-function offsetLabel(value) {
-  const sign = value >= 0 ? "+" : "−";
-  return `${sign}${Math.abs(value).toFixed(1)}°`;
-}
-
-function updateCompareUi() {
-  if (!compareButton || !compareStatus) return;
-  const compareMode = Boolean(dragController?.compareMode);
-  const detached = detachedRings();
-  compareButton.setAttribute("aria-pressed", String(compareMode));
-  compareButton.textContent = compareMode ? "比較中" : "比較";
-  if (resetRingsButton) resetRingsButton.hidden = detached.length === 0;
-  instrument.dataset.compareMode = String(compareMode);
-  instrument.dataset.scrubMode = compareMode ? "free-compare" : "linked-time";
-  instrument.dataset.detachedRings = detached.map(ring => ring.id).join(",");
-  if (!compareMode) {
-    compareStatus.hidden = true;
-    compareStatus.textContent = "";
-    return;
-  }
-  compareStatus.hidden = false;
-  compareStatus.textContent = detached.length
-    ? `FREE · ${detached.map(ring => `${RING_LABELS[ring.id]} ${offsetLabel(ringStates[ring.id].manualOffset)}`).join(" · ")}`
-    : "FREE COMPARE · 拖動任一圓環";
-}
-
-function setCompareMode(enabled) {
-  if (!dragController) return;
-  if (!enabled) resetAllRingOffsets();
-  else stopPlayback();
-  dragController.setCompareMode(enabled);
-  updateCompareUi();
-}
-
-function installCompareControls() {
-  const controlGroup = nowButton?.parentElement;
-  if (!controlGroup) return;
-  compareButton = document.createElement("button");
-  compareButton.id = "compare-rings-button";
-  compareButton.type = "button";
-  compareButton.className = "control-button";
-  compareButton.textContent = "比較";
-  compareButton.setAttribute("aria-pressed", "false");
-  compareButton.title = "自由比較：每一層可獨立拖動，不改變真實時間";
-  controlGroup.prepend(compareButton);
-
-  resetRingsButton = document.createElement("button");
-  resetRingsButton.id = "reset-rings-button";
-  resetRingsButton.type = "button";
-  resetRingsButton.className = "control-button";
-  resetRingsButton.textContent = "歸位";
-  resetRingsButton.hidden = true;
-  controlGroup.insertBefore(resetRingsButton, nowButton);
-
-  compareStatus = document.createElement("div");
-  compareStatus.id = "ring-compare-status";
-  compareStatus.hidden = true;
-  Object.assign(compareStatus.style, {
-    position: "absolute", zIndex: "5", right: "12px", top: "58px", pointerEvents: "none",
-    color: "#d4bd8d", fontSize: "9px", fontWeight: "700", letterSpacing: ".05em"
-  });
-  instrument.appendChild(compareStatus);
-
-  compareButton.addEventListener("click", () => setCompareMode(!dragController.compareMode));
-  resetRingsButton.addEventListener("click", resetAllRingOffsets);
 }
 
 function applyLinkedDragToTime(id, deltaDegrees) {
@@ -350,13 +266,13 @@ function installRingDrag() {
     onPoseChange(id) {
       renderRingPose(id);
       instrument.dataset.lastDraggedRing = id;
-      updateCompareUi();
+      compareController?.update();
     },
     onDragEnd(id) {
       instrument.dataset.lastDraggedRing = id;
       delete instrument.dataset.dragRing;
       delete instrument.dataset.dragMode;
-      updateCompareUi();
+      compareController?.update();
     },
     onLinkedDragStart(id) {
       stopPlayback();
@@ -380,11 +296,20 @@ function installRingDrag() {
       delete instrument.dataset.linkedScrubBoundaries;
     },
     onModeChange() {
-      updateCompareUi();
+      compareController?.update();
     }
   });
-  installCompareControls();
-  updateCompareUi();
+  compareController = createFreeCompareController({
+    instrument,
+    controlGroup:nowButton?.parentElement,
+    insertBefore:nowButton,
+    rings:RINGS,
+    ringStates,
+    dragController,
+    renderAllRingPoses,
+    stopPlayback
+  });
+  compareController?.update();
 }
 
 function animationTick(timestamp) {
@@ -410,7 +335,7 @@ function animationTick(timestamp) {
 }
 
 function startPlayback() {
-  if (dragController?.compareMode) setCompareMode(false);
+  if (dragController?.compareMode) compareController?.setMode(false);
   clearLegacyProjection();
   state.playing = true;
   state.lastAnimationTs = null;
