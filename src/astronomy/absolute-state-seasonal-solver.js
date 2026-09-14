@@ -1,4 +1,3 @@
-const TWO_PI = Math.PI * 2;
 const DEG_TO_RAD = Math.PI / 180;
 const RAD_TO_DEG = 180 / Math.PI;
 const SECONDS_PER_DAY = 86400;
@@ -8,6 +7,10 @@ const SOLAR_SCHWARZSCHILD_RADIUS_AU = 1.97412574336e-8;
 
 export const ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS =
   "geocentric-apparent-solar-longitude-mean-ecliptic-of-date";
+export const MEAN_ECLIPTIC_OF_DATE_FRAME_SEMANTICS =
+  "iau76-80-mean-ecliptic-of-date";
+export const INCOMPLETE_APPARENT_SEMANTICS =
+  "geocentric-light-time-and-optional-stellar-aberration-solar-longitude-mean-ecliptic-of-date";
 
 function assertFinite(name, value) {
   if (!Number.isFinite(value)) throw new RangeError(`${name} must be finite`);
@@ -17,10 +20,6 @@ function assertVector(name, value) {
   if (!Array.isArray(value) || value.length !== 3 || value.some(item => !Number.isFinite(item))) {
     throw new TypeError(`${name} must be a finite 3-vector`);
   }
-}
-
-function add(a, b) {
-  return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 }
 
 function subtract(a, b) {
@@ -60,8 +59,9 @@ export function signedAngularResidualDegrees(actualDegrees, targetDegrees) {
  *
  * This is a small JavaScript adaptation of the ERFA/SOFA `eraAb` algorithm.
  * ERFA is BSD-licensed and derived with permission from IAU SOFA. The tiny
- * solar-potential term is retained so the contract is suitable for a future
- * DE441 adapter rather than only for a geometric proof.
+ * solar-potential term retained by `eraAb` is part of that aberration model;
+ * it is not a substitute for the separate gravitational light-deflection
+ * correction required by the Horizons quantity-31 apparent observable.
  */
 export function aberrateNaturalDirection({
   naturalDirection,
@@ -117,13 +117,31 @@ export function validateAbsoluteStateAdapter(adapter) {
 export function validateMeanEclipticOfDateTransform(transform) {
   if (!transform || typeof transform !== "object") throw new TypeError("mean-ecliptic-of-date transform is required");
   if (!transform.id || typeof transform.id !== "string") throw new TypeError("frame transform.id is required");
-  if (transform.referenceSemantics !== ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS) {
-    throw new TypeError("frame transform must target the Earth-season mean-ecliptic-of-date observable");
+  if (transform.frameSemantics !== MEAN_ECLIPTIC_OF_DATE_FRAME_SEMANTICS) {
+    throw new TypeError("frame transform must target the IAU76/80 mean-ecliptic-of-date frame");
   }
   if (typeof transform.icrfDirectionToMeanEclipticOfDate !== "function") {
     throw new TypeError("frame transform must define icrfDirectionToMeanEclipticOfDate");
   }
   return transform;
+}
+
+export function validateApparentDirectionModel(model) {
+  if (!model || typeof model !== "object") throw new TypeError("apparent-direction model is required");
+  if (!model.id || typeof model.id !== "string") throw new TypeError("apparent-direction model.id is required");
+  if (model.referenceSemantics !== ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS) {
+    throw new TypeError("apparent-direction model must target Horizons quantity-31 semantics");
+  }
+  if (model.includesGravitationalDeflection !== true) {
+    throw new TypeError("apparent-direction model must include gravitational light deflection");
+  }
+  if (model.includesStellarAberration !== true) {
+    throw new TypeError("apparent-direction model must include stellar aberration");
+  }
+  if (typeof model.naturalToApparentIcrf !== "function") {
+    throw new TypeError("apparent-direction model must define naturalToApparentIcrf");
+  }
+  return model;
 }
 
 function statesAt(adapter, ephemerisJulianDay) {
@@ -135,17 +153,22 @@ function statesAt(adapter, ephemerisJulianDay) {
 }
 
 /**
- * Construct the apparent geocentric Sun direction at one TT epoch from an
- * absolute Earth/Sun state basis.
+ * Construct geocentric solar longitude at one TT epoch from an absolute
+ * Earth/Sun state basis.
  *
- * Source states stay in ICRF/TDB. The app owns the light-time iteration,
- * stellar-aberration step and the call into a separately declared
- * mean-ecliptic-of-date transform. No UTC/civil-time semantics enter here.
+ * Horizons quantity #31 is explicitly an apparent observable: light-time,
+ * gravitational deflection and stellar aberration in the Earth mean
+ * ecliptic-of-date frame. Therefore the default path fails closed unless a
+ * declared apparent-direction model supplies both deflection and aberration.
+ * Synthetic/geometric tests may opt into `allowIncompleteApparentModel`; such
+ * results are marked incomplete and never claim quantity-31 semantics.
  */
 export function apparentGeocentricSolarLongitudeOfDate({
   ttJulianDay,
   stateAdapter,
   frameTransform,
+  apparentDirectionModel = null,
+  allowIncompleteApparentModel = false,
   lightTime = true,
   stellarAberration = true,
   lightTimeIterations = 3
@@ -153,6 +176,14 @@ export function apparentGeocentricSolarLongitudeOfDate({
   assertFinite("ttJulianDay", ttJulianDay);
   validateAbsoluteStateAdapter(stateAdapter);
   validateMeanEclipticOfDateTransform(frameTransform);
+  const completeApparentModel = apparentDirectionModel
+    ? validateApparentDirectionModel(apparentDirectionModel)
+    : null;
+  if (!completeApparentModel && !allowIncompleteApparentModel) {
+    throw new TypeError(
+      "Horizons quantity-31 semantics require an apparent-direction model with gravitational deflection and stellar aberration"
+    );
+  }
   if (!Number.isInteger(lightTimeIterations) || lightTimeIterations < 1 || lightTimeIterations > 8) {
     throw new RangeError("lightTimeIterations must be an integer in 1..8");
   }
@@ -181,13 +212,29 @@ export function apparentGeocentricSolarLongitudeOfDate({
     subtract(sun.positionAu, earth.positionAu),
     "geocentric solar direction"
   );
-  const apparentDirectionIcrf = stellarAberration
-    ? aberrateNaturalDirection({
-      naturalDirection:naturalDirectionIcrf,
-      observerBarycentricVelocityAuPerDay:earth.velocityAuPerDay,
+  let apparentDirectionIcrf;
+  if (completeApparentModel) {
+    apparentDirectionIcrf = completeApparentModel.naturalToApparentIcrf({
+      ttJulianDay,
+      observationEphemerisJulianDay,
+      emissionEphemerisJulianDay,
+      naturalDirectionIcrf:Object.freeze([...naturalDirectionIcrf]),
+      earth,
+      sun,
       sunObserverDistanceAu
-    })
-    : naturalDirectionIcrf;
+    });
+    assertVector("apparent ICRF direction", apparentDirectionIcrf);
+    apparentDirectionIcrf = unit(apparentDirectionIcrf, "apparent ICRF direction");
+  } else {
+    apparentDirectionIcrf = stellarAberration
+      ? aberrateNaturalDirection({
+        naturalDirection:naturalDirectionIcrf,
+        observerBarycentricVelocityAuPerDay:earth.velocityAuPerDay,
+        sunObserverDistanceAu
+      })
+      : naturalDirectionIcrf;
+  }
+
   const eclipticDirection = frameTransform.icrfDirectionToMeanEclipticOfDate({
     ttJulianDay,
     directionIcrf:apparentDirectionIcrf
@@ -198,12 +245,20 @@ export function apparentGeocentricSolarLongitudeOfDate({
     eclipticDirection[2],
     Math.hypot(eclipticDirection[0], eclipticDirection[1])
   ) * RAD_TO_DEG;
+  const apparentModelComplete = Boolean(completeApparentModel);
 
   return Object.freeze({
     stateAdapterId:stateAdapter.id,
     providerId:stateAdapter.providerId,
     frameTransformId:frameTransform.id,
-    referenceSemantics:ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS,
+    apparentDirectionModelId:completeApparentModel?.id ?? null,
+    referenceSemantics:apparentModelComplete
+      ? ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS
+      : null,
+    partialSemantics:apparentModelComplete ? null : INCOMPLETE_APPARENT_SEMANTICS,
+    apparentModelComplete,
+    gravitationalDeflectionApplied:apparentModelComplete,
+    stellarAberrationApplied:apparentModelComplete || Boolean(stellarAberration),
     timeScale:"TT",
     ttJulianDay,
     observationEphemerisJulianDay,
@@ -261,6 +316,8 @@ function residualAt({ ttJulianDay, longitudeDegrees, stateAdapter, frameTransfor
  * Root-solve one Earth-season longitude crossing on TT from an absolute state
  * adapter. The bracket is centered on a rough calendar seed and expands only
  * as needed; bisection then works on the wrapped signed angular residual.
+ * Quantity-31 completeness follows the same fail-closed correction contract
+ * as `apparentGeocentricSolarLongitudeOfDate`.
  */
 export function solveSeasonalCrossingFromAbsoluteState({
   year,
@@ -358,7 +415,10 @@ export function solveSeasonalCrossingFromAbsoluteState({
     providerId:stateAdapter.providerId,
     stateAdapterId:stateAdapter.id,
     frameTransformId:frameTransform.id,
-    referenceSemantics:ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS,
+    apparentDirectionModelId:solved.apparentDirectionModelId,
+    referenceSemantics:solved.referenceSemantics,
+    partialSemantics:solved.partialSemantics,
+    apparentModelComplete:solved.apparentModelComplete,
     timeScale:"TT",
     yearBasis:"atlas-solar-term-catalogue",
     year,
