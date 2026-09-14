@@ -53,7 +53,9 @@
         const jiaZi = doc.querySelector('#day-track .cycle-sector[data-cycle-index="0"]');
         const aries = doc.querySelector('#zodiac-track .zodiac-sector[data-zodiac-index="0"]');
         const gemini = doc.querySelector('#zodiac-track .zodiac-sector[data-zodiac-index="2"]');
-        if (!jiaZi || !aries || !gemini) return;
+        const baziCurrent = doc.querySelector("#classification-bazi-current");
+        const zodiacCurrent = doc.querySelector("#classification-zodiac-current");
+        if (!jiaZi || !aries || !gemini || !baziCurrent || !zodiacCurrent) return;
 
         const selectedBefore = instrument.dataset.selectedInstantMs;
         probe.dataset.innerWidth = String(win.innerWidth);
@@ -74,16 +76,20 @@
 
         button.click();
         settle(() => {
+          const legendRect = legend.getBoundingClientRect();
           probe.dataset.onOverlay = instrument.dataset.classificationOverlay ?? "";
           probe.dataset.onPressed = button.getAttribute("aria-pressed") ?? "";
           probe.dataset.onLegendHidden = String(hidden(win, legend));
+          probe.dataset.onLegendHeight = String(Math.round(legendRect.height));
+          probe.dataset.onBaziCurrentHidden = String(hidden(win, baziCurrent));
+          probe.dataset.onZodiacCurrentHidden = String(hidden(win, zodiacCurrent));
           probe.dataset.selectedOn = instrument.dataset.selectedInstantMs ?? "";
           probe.dataset.jiaZiFillOn = win.getComputedStyle(jiaZi).fill;
           probe.dataset.jiaZiStrokeOn = win.getComputedStyle(jiaZi).stroke;
           probe.dataset.ariesFillOn = win.getComputedStyle(aries).fill;
           probe.dataset.geminiDashOn = win.getComputedStyle(gemini).strokeDasharray;
-          probe.dataset.baziCurrent = doc.querySelector("#classification-bazi-current")?.textContent?.trim() ?? "";
-          probe.dataset.zodiacCurrent = doc.querySelector("#classification-zodiac-current")?.textContent?.trim() ?? "";
+          probe.dataset.baziCurrent = baziCurrent.textContent?.trim() ?? "";
+          probe.dataset.zodiacCurrent = zodiacCurrent.textContent?.trim() ?? "";
           probe.dataset.warning = doc.querySelector(".classification-warning")?.textContent?.trim() ?? "";
 
           button.click();
