@@ -118,10 +118,14 @@ function renderAllRingPoses() {
 function alignCycleRing(id, index, phase) {
   const runtime = cycleRuntime[id];
   const pose = ringStates[id];
-  if (index < 0 || !phase) return;
+  if (index < 0) return;
+  // A legacy annual deep link can name a projected month without representing a
+  // physical Selected Instant for that month. Keep that explicitly nonphysical
+  // identity centred as before; every real-time phase uses its true progress.
+  const progress = phase?.progress ?? 0.5;
   const nextRotation = temporalCycleRotation({
     index,
-    progress: phase.progress,
+    progress,
     cursorAngle: CURSOR_ANGLE,
     previousRotation: runtime.initialized ? pose.modelRotation : null
   });
