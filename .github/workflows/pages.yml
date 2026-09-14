@@ -22,9 +22,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install pinned calendar engine
-        run: npm install --no-audit --no-fund
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
       - run: npm test
+      - run: npm run check:syntax
 
   deploy:
     needs: test
@@ -39,7 +40,7 @@ jobs:
           node-version: 22
       - name: Stage pinned browser calendar engine
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run vendor:prepare
           rm -rf node_modules
       - uses: actions/configure-pages@v5

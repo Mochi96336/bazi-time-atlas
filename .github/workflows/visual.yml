@@ -17,80 +17,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install pinned calendar engine
-        run: npm install --no-audit --no-fund
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
       - name: Check data and geometry invariants
         run: npm test
-      - name: Check app syntax
-        run: |
-          node --check src/kinetic-atlas.js
-          node --check src/kinetic-boundaries.js
-          node --check src/kinetic-fan-guard.js
-          node --check src/ring-visibility-controls.js
-          node --check src/reference-frame-controls.js
-          node --check src/scale-emphasis-view.js
-          node --check src/classification-model.js
-          node --check src/classification-overlay-view.js
-          node --check src/discrete-phase-view.js
-          node --check src/wheel/reference-frame.js
-          node --check src/wheel/discrete-phase.js
-          node --check src/recurrence-view.js
-          node --check src/astronomical-residuals-view.js
-          node --check src/four-pillar-determinacy-view.js
-          node --check src/day-hour-proof-chain-view.js
-          node --check src/near-recurrence-view.js
-          node --check src/recurrence/gregorian-cycle.js
-          node --check src/recurrence/berger-orbit.js
-          node --check src/recurrence/near-recurrence.js
-          node --check src/recurrence/month-boundary-risk.js
-          node --check src/recurrence/four-pillar-determinacy.js
-          node --check src/recurrence/day-hour-proof-chain.js
-          node --check src/recurrence/seasonal-epoch-source-audit.js
-          node --check src/legacy-annual-compat.js
-          node --check src/app.js
-          node --check src/annual-deep-link.js
-          node --check src/hidden-stems-view.js
-          node --check src/birth.js
-          node --check src/birth-punishments-view.js
-          node --check src/birth-relation-model-overview.js
-          node --check src/birth-mean-solar-view.js
-          node --check src/sexagenary-data.js
-          node --check src/sexagenary.js
-          node --check src/sexagenary-deep-link.js
-          node --check src/calendar/tyme-adapter.js
-          node --check src/calendar/five-tigers.js
-          node --check src/calendar/sexagenary-year.js
-          node --check src/calendar/hidden-stems.js
-          node --check src/calendar/ten-gods.js
-          node --check src/calendar/pillar-relations.js
-          node --check src/calendar/branch-groups.js
-          node --check src/calendar/branch-punishments.js
-          node --check src/calendar/relation-models.js
-          node --check src/calendar/time-basis-sensitivity.js
-          node --check src/astronomy/solar-longitude.js
-          node --check src/astronomy/solar-term-boundaries.js
-          node --check src/astronomy/mean-solar-time.js
-          node --check src/astronomy/equation-of-time.js
-          node --check src/astronomy/apparent-solar-time.js
-          node --check scripts/prepare-vendor.mjs
-          node --check scripts/check-deep-links.mjs
-          node --check scripts/check-mean-solar-preview.mjs
-          node --check scripts/check-view-shells.mjs
-          node --check scripts/check-kinetic-boundaries.mjs
-          node --check scripts/check-kinetic-composition.mjs
-          node --check scripts/check-scale-emphasis.mjs
-          node --check scripts/check-classification-overlay.mjs
-          node --check scripts/check-ring-visibility.mjs
-          node --check scripts/check-reference-frame.mjs
-          node --check scripts/check-discrete-phase.mjs
-          node --check scripts/check-boundary-gates.mjs
-          node --check scripts/check-recurrence-lab.mjs
-          node --check scripts/check-astronomical-residuals.mjs
-          node --check scripts/check-four-pillar-determinacy.mjs
-          node --check scripts/check-day-hour-proof-chain.mjs
-          node --check scripts/check-seasonal-epoch-source-audit.mjs
-          node --check scripts/check-near-recurrence.mjs
-          node --check scripts/visual-check-determinacy.mjs
+      - name: Check JavaScript syntax
+        run: npm run check:syntax
       - name: Install lightweight CJK font for screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium

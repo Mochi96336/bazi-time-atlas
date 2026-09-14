@@ -6,6 +6,8 @@
   "scripts": {
     "vendor:prepare": "node scripts/prepare-vendor.mjs",
     "test": "npm run vendor:prepare && node --test",
+    "check:syntax": "node scripts/check-js-syntax.mjs",
+    "check": "npm run test && npm run check:syntax",
     "visual:check": "node scripts/visual-check.mjs"
   },
   "dependencies": {
