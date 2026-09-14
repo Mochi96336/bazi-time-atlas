@@ -60,6 +60,12 @@ requireEqual(attr(probe, "data-gemini-modality"), "變動", "Gemini modality", u
 requireEqual(attr(probe, "data-on-overlay"), "on", "classification overlay enabled state", url);
 requireEqual(attr(probe, "data-on-pressed"), "true", "classification overlay enabled button state", url);
 requireEqual(attr(probe, "data-on-legend-hidden"), "false", "classification overlay legend enabled visibility", url);
+const legendHeight = Number(attr(probe, "data-on-legend-height"));
+if (!Number.isFinite(legendHeight) || legendHeight > 90) {
+  throw new Error(`classification overlay mobile legend is too tall (${legendHeight}px): ${url}`);
+}
+requireEqual(attr(probe, "data-on-bazi-current-hidden"), "true", "mobile BaZi current summary should not float over the wheel", url);
+requireEqual(attr(probe, "data-on-zodiac-current-hidden"), "true", "mobile zodiac current summary should not float over the wheel", url);
 if (attr(probe, "data-jia-zi-fill-before") === attr(probe, "data-jia-zi-fill-on")) {
   throw new Error(`classification overlay did not recolor heavenly-stem fill: ${url}`);
 }
@@ -94,4 +100,4 @@ requireEqual(attr(probe, "data-off-overlay"), "off", "classification overlay dis
 requireEqual(attr(probe, "data-off-pressed"), "false", "classification overlay disabled button state", url);
 requireEqual(attr(probe, "data-off-legend-hidden"), "true", "classification overlay legend disabled visibility", url);
 
-console.log(`[classification-overlay] PASS 390px separate BaZi five-element and zodiac element/modality grammars without mutating Selected Instant: ${url}`);
+console.log(`[classification-overlay] PASS compact 390px separate BaZi five-element and zodiac element/modality grammars without mutating Selected Instant: ${url}`);
