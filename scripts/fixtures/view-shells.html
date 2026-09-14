@@ -68,6 +68,19 @@
         probe.dataset[`${id.replaceAll("-", "")}Width`] = String(win.innerWidth);
       }
 
+      const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
+      const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
+      const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
+      const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
+      const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
+      probe.dataset.recurrenceLedeHidden = String(hidden(recurrenceWin, recurrenceLede));
+      probe.dataset.recurrenceScopeHidden = String(hidden(recurrenceWin, recurrenceScope));
+      probe.dataset.recurrenceInstrumentTop = String(Math.round(recurrenceRect?.top ?? -1));
+      probe.dataset.recurrenceInstrumentHeight = String(Math.round(recurrenceRect?.height ?? -1));
+      probe.dataset.recurrenceInstrumentInFirstViewport = String(Boolean(
+        recurrenceRect && recurrenceRect.top < recurrenceWin.innerHeight * .25 && recurrenceRect.bottom <= recurrenceWin.innerHeight + 2
+      ));
+
       const [birthWin, birthDoc] = docs["birth-mobile"];
       const birthBody = birthDoc.body;
       const controls = birthDoc.querySelector("#birth-form");
