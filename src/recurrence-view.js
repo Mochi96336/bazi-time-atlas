@@ -20,6 +20,7 @@ const FAN_START = -170;
 const FAN_END = -10;
 const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_DAY_PERIOD;
+const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -280,9 +281,11 @@ function stateMeaning(state, localYears) {
   return "沒有完整閉合";
 }
 
-function phaseCell(closed, phase) {
-  const text = phase === null ? "—" : closed ? "✓ 0" : `+${phase}`;
-  return `<span class="${closed ? "phase-ok" : "phase-no"}">${text}</span>`;
+function phaseCell(closed, phase, modulus) {
+  if (phase === null) return `<span class="phase-no">—</span>`;
+  const signed = signedShortestPhase(phase, modulus);
+  const text = closed ? "✓ 0" : formatSigned(signed);
+  return `<span class="${closed ? "phase-ok" : "phase-no"}" data-phase-raw="${phase}" data-phase-signed="${signed}" data-phase-modulus="${modulus}">${text}</span>`;
 }
 
 function rebuildCandidates() {
@@ -303,7 +306,7 @@ function rebuildCandidates() {
     const row = document.createElement("div");
     row.className = "milestone-row";
     row.dataset.deltaYears = String(state.deltaYears);
-    row.innerHTML = `<strong>${state.deltaYears.toLocaleString("en-US")}</strong>${phaseCell(state.closed.gregorian, state.phases.gregorian)}${phaseCell(state.closed.year, state.phases.year)}${phaseCell(state.closed.day, state.phases.day)}<span>${stateMeaning(state, localYears)}</span>`;
+    row.innerHTML = `<strong>${state.deltaYears.toLocaleString("en-US")}</strong>${phaseCell(state.closed.gregorian, state.phases.gregorian, 400)}${phaseCell(state.closed.year, state.phases.year, 60)}${phaseCell(state.closed.day, state.phases.day, 60)}<span>${stateMeaning(state, localYears)}</span>`;
     row.addEventListener("click", () => setDelta(state.deltaYears, { source:"milestone" }));
     milestoneRows.appendChild(row);
   });
@@ -314,15 +317,26 @@ function rebuildCandidates() {
 
 function setClosureArticle(key, closed, phase) {
   const article = document.querySelector(`[data-closure="${key}"]`);
+  const modulus = PHASE_MODULUS[key];
+  const signed = phase === null ? null : signedShortestPhase(phase, modulus);
   article.classList.toggle("is-closed", closed);
   article.classList.toggle("is-open", !closed);
-  setText(`${key}-status`, phase === null ? "無對應日期" : closed ? "閉合 · 0" : `偏移 ${phase}`);
+  if (phase === null) {
+    delete article.dataset.phaseRaw;
+    delete article.dataset.phaseSigned;
+    delete article.dataset.phaseModulus;
+  } else {
+    article.dataset.phaseRaw = String(phase);
+    article.dataset.phaseSigned = String(signed);
+    article.dataset.phaseModulus = String(modulus);
+  }
+  setText(`${key}-status`, phase === null ? "無對應日期" : closed ? "閉合 · 0" : `偏移 ${formatSigned(signed)}`);
 }
 
 function phaseReadout(phase, modulus) {
   if (phase === null) return "—";
   const signed = signedShortestPhase(phase, modulus);
-  return `${phase} / ${modulus}${signed === 0 ? "" : ` · shortest ${formatSigned(signed)}`}`;
+  return `${phase} / ${modulus}${signed === 0 ? "" : ` · 最短 ${formatSigned(signed)}`}`;
 }
 
 function renderState() {
@@ -351,9 +365,13 @@ function renderState() {
 
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.deltaYears = String(currentDelta);
+  instrument.dataset.phaseDisplay = "signed-shortest";
   instrument.dataset.gregorianPhase = String(state.phases.gregorian);
   instrument.dataset.yearPhase = String(state.phases.year);
   instrument.dataset.dayPhase = state.phases.day === null ? "invalid" : String(state.phases.day);
+  instrument.dataset.gregorianPhaseSigned = String(signedShortestPhase(state.phases.gregorian, 400));
+  instrument.dataset.yearPhaseSigned = String(signedShortestPhase(state.phases.year, 60));
+  instrument.dataset.dayPhaseSigned = state.phases.day === null ? "invalid" : String(signedShortestPhase(state.phases.day, 60));
   instrument.dataset.gregorianClosed = String(state.closed.gregorian);
   instrument.dataset.yearClosed = String(state.closed.year);
   instrument.dataset.dayClosed = String(state.closed.day);
