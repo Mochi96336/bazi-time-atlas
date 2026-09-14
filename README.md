@@ -1,121 +1,140 @@
 # BaZi Time Atlas
 
-A data-driven visual atlas for understanding BaZi as a set of overlapping time, calendar, and symbolic structures rather than as one opaque fortune-telling table.
+BaZi Time Atlas is a data-driven temporal instrument for comparing several time, calendar, astronomical, and symbolic coordinate systems against one **Selected Instant**. It deliberately separates deterministic calendar/astronomy structure from interpretation and keeps unsupported deep-time claims fail-closed.
 
-The project deliberately separates **astronomical/calendar geometry**, **deterministic structural rules**, and later **interpretation**. Geometry and rule-based relationships are implemented first; subjective layers stay explicit and optional.
+The current landing page is not an annual horoscope dashboard. It is a large kinetic fan/wheel whose layers move according to their own real temporal laws.
 
-## Current views
+## Current product
 
-### Annual Atlas
+### Time Atlas
 
-One shared solar-longitude coordinate system:
+The main instrument uses one shared SVG-world center and one Selected Instant. Its five primary time rings are ordered from faster/smaller scale on the inside to slower/larger scale on the outside:
 
-- solar longitude λ = 0°–360°
-- 24 solar terms at 15° intervals
-- 12 BaZi month branches bounded by the 12 **jie** terms
-- traditional seasons beginning at Li Chun / Li Xia / Li Qiu / Li Dong
-- Earthly Branch primary Five-Phase classification
-- 12 tropical zodiac signs at 30° intervals
-- Western element and modality metadata kept separate from Chinese Five Phases
-- exact Birth projection back onto the annual wheel
-- Five Tigers month-stem derivation and collapsible hidden stems
+1. **Hour** — 60-state pillar wheel; double-hour boundaries.
+2. **Day** — 60-state pillar wheel; current atlas uses the Zi-initial 23:00 day-boundary convention.
+3. **Solar annual band** — continuous apparent solar longitude; 24 solar terms plus the tropical-zodiac classification sub-band.
+4. **Month** — 60-state pillar wheel; changes only at exact **jie** boundaries.
+5. **Year** — 60-state pillar wheel; changes at exact Li Chun.
 
-The interface shows geometric overlap without claiming symbolic equivalence. For example, Mao month (345°–15°) overlaps the last 15° of Pisces and first 15° of Aries; it is **not** labelled as equivalent to either sign.
+Tropical Zodiac is not an independent sixth clock. It is derived from the same annual solar-longitude coordinate owned by Solar and has no separate primary drag target.
 
-### Birth view
+The instrument currently supports:
 
-A single birth instant is resolved through four separate rules instead of a fake year→month→day→hour dependency chain:
+- continuous linked-time dragging using the actual semantics of each primary ring;
+- Free Compare offsets that do not mutate the canonical Selected Instant;
+- true intra-state phase for Hour / Day / Month / Year without tweening Ganzhi identities;
+- exact next-boundary gates and exact shared-boundary highlighting;
+- co-rotating reference frames;
+- scale-dependent visual emphasis;
+- primary-layer visibility isolation;
+- separate BaZi Five-Phase and Western zodiac element/modality classification overlays;
+- true 390 px mobile composition plus desktop framing;
+- reproducible deep links for selected instants and legacy annual projections.
 
-- year pillar changes at the exact Li Chun instant
-- month pillar changes at the exact 12 **jie** boundaries
-- day pillar follows the continuous sexagenary day sequence
-- hour branch follows the local clock while hour stem derives from the effective day stem
-- 23:00 Zi-initial vs 00:00 civil-midnight day boundaries are explicit conventions
-- UTC offset locates the real instant for solar-term boundaries and exact solar longitude
-- optional east-positive/west-negative birth longitude exposes a compact three-layer comparison: civil clock → **local mean solar time** → **local apparent solar time**
-- local mean solar time applies longitude correction; local apparent solar time then adds the independently validated Equation of Time (`apparent − mean`)
-- a **time-basis sensitivity** comparison evaluates Day/Hour outcomes under civil, mean-solar, and apparent-solar clock hypotheses using the same selected day-boundary and Five-Rats rules
-- sensitivity keeps Year/Month anchored to the original physical instant; only the Day/Hour clock basis is varied, so a corrected clock label cannot drag solar-term boundaries with it
-- ordinary cases collapse to one “unchanged” status line; only an actual Day/Hour boundary crossing expands the three basis results
-- the solar-time and sensitivity layers are what-if previews, not a school selector: Four Pillars continue to use the civil-clock basis until a separate, sourced convention selector is explicitly designed and reviewed
-- visible stems and hidden stems can be classified relative to the Day Master through the Ten Gods
-- Ten Gods remain structural labels only: no strength, weighting, auspiciousness, personality, or event prediction
-- the four visible pillars are scanned pairwise for Heavenly-Stem Five Combinations and Earthly-Branch Six Harmonies / Six Clashes / Six Harms
-- complete visible three-branch sets are scanned separately for 三合 and 三會; two-member "half" patterns are intentionally excluded from V1
-- branch punishments are a third model: directed 寅→巳→申→寅 / 丑→戌→未→丑 chains, 子卯 mutual punishment, and repeated 辰午酉亥 self-punishment
-- pair, complete-three-member, and punishment structures use different visual grammar so their arity/direction is not flattened into one relation type
-- Birth inputs can be deep-linked with `date=YYYY-MM-DD`, `time=HH:MM`, `utc=<offset>`, and optional `lon=<east-positive longitude>` for reproducible examples
+### Birth
+
+The Birth view resolves the four pillars through separate rule boundaries rather than a fake year→month→day→hour dependency chain. It also exposes civil, local mean solar, and local apparent solar clock comparisons for Day/Hour sensitivity while keeping Year/Month anchored to the physical instant.
+
+The deterministic structure layer includes Five Tigers, hidden stems, Day Master → Ten Gods, visible stem/branch pair relations, complete 三合 / 三會, and directed / mutual / self 刑. Interpretive strength, auspiciousness, personality, and event prediction are not silently folded into those structural rules.
 
 ### Sexagenary reference
 
-The 60 Jiazi are generated from synchronized 10-stem and 12-branch phases. The 60-cycle is its own reference system and is **not** drawn as 60 slices of the solar year.
+The 60 Jiazi are generated from synchronized 10-stem and 12-branch phases. The sexagenary cycle is its own reference system and is not treated as 60 equal slices of the solar year.
 
-## Principles
+### Research
 
-- Geometry is generated from data, not manually positioned.
-- BaZi month boundaries use the 12 **jie** solar terms.
-- Tropical zodiac signs are a separate 30° system and are not modern astronomical constellation boundaries.
-- Chinese Five Phases and Western four elements remain distinct systems.
-- Ambiguous conventions are exposed instead of silently chosen.
-- A civil timestamp, local mean solar time, and local apparent solar time are separate layers; the atlas does not call longitude-only correction “true solar time.”
-- Equation of Time uses the astronomical sign convention `apparent solar time − mean solar time`; its engine is reference-tested independently before it is allowed to drive any Birth convention.
-- Time-basis sensitivity is explicitly counterfactual: it answers whether a clock correction would cross a selected Day/Hour boundary, without changing the canonical chart or pretending all BaZi schools use the same corrected-time rule.
-- Hidden stems are branch internals, not another permanent annual ring.
-- Ten Gods are derived from Five-Phase direction + yin-yang parity relative to the Day Master.
-- Pairwise stem/branch relations are symmetric registry facts first; transformation and interpretive conditions remain separate.
-- 六害 uses the six explicit pairs in 《三命通會》〈論六害〉: 子未、丑午、寅巳、卯辰、申亥、酉戌. The atlas records pair membership only and does not turn the word "害" into a real-world prediction.
-- Complete 三合 / 三會 require all three canonical visible branches in V1; no automatic half-combination, transit completion, strength, or transformation inference.
-- 刑 is intentionally **not** a symmetric pair registry. The atlas preserves directed cycles, the reciprocal 子卯 relation, and duplicate-support self-punishment separately. Classical moralizing subtype names are omitted because the same classical discussion records alternate naming assignments.
-- 六破 is deliberately **not** in the deterministic core yet. The modern common table is widespread, but its adoption and weighting are school-dependent and the classical Zi Ping source boundary is weaker; if added later it must carry an explicit convention/source label.
-- Interpretive claims must not be smuggled into deterministic calendar or relationship layers.
+The recurrence/deep-time lab remains available as the secondary **Research** destination. It separates:
+
+- exact discrete recurrence;
+- approximate astronomical similarity;
+- unresolved or model-bounded absolute-epoch reconstruction.
+
+It contains Gregorian/sexagenary recurrence work, astronomical residuals, near-recurrence ranking, four-pillar determinacy, Day/Hour proof-chain analysis, and seasonal-epoch source audits. Research results are not promoted into product certainty unless the required source and time-scale contracts are satisfied.
+
+## Semantic contracts
+
+The repository treats these as hard boundaries:
+
+- one Selected Instant is authoritative for the kinetic atlas;
+- Year changes at exact Li Chun;
+- Month changes at exact **jie**;
+- Day follows the configured day-boundary convention;
+- Hour follows its double-hour boundary rule;
+- continuous solar phase never fabricates intermediate discrete Ganzhi identities;
+- shared-boundary highlighting requires identical resolved timestamps, not visual collinearity;
+- Zodiac is a classification over Solar longitude, not an independent time coordinate;
+- Chinese Five Phases and Western four-element/modality classifications remain distinct systems;
+- deep-time model coverage must not be stretched past the declared source or transformation coverage.
+
+See [`docs/current-status.md`](docs/current-status.md) for the current normative implementation checkpoint.
+
+## Architecture
+
+The codebase intentionally keeps domain semantics away from page/bootstrap code:
+
+- `src/calendar/` — BaZi/calendar rules and Tyme integration;
+- `src/astronomy/` — solar longitude, Equation of Time, long-term/seasonal source contracts and solver components;
+- `src/recurrence/` — discrete recurrence, residual, determinacy and proof-chain models;
+- `src/wheel/` — wheel geometry, renderer, temporal tracks, ring state, drag contracts and the atlas display model;
+- `src/interaction/` — interaction laws such as linked ring scrubbing;
+- `src/wheel/atlas-display-model.js` — pure Selected Instant → display/domain state for the main atlas;
+- `src/kinetic-atlas.js` — page controller for DOM, renderer coordination, playback, compare controls and interaction wiring.
+
+The static GitHub Pages deployment intentionally has no framework build layer. `tyme4ts` is installed from the lockfile and staged into the browser vendor path before tests/deployment.
 
 ## Development
 
-No build step is required.
+Use Node 22 and install the exact locked dependency graph:
 
 ```bash
-python -m http.server 8000
-# open http://localhost:8000
+npm ci
 ```
 
-Run all rule/data invariants with:
+Run the repository quality boundary:
 
 ```bash
-npm test
+npm run check
 ```
 
-Astronomy/calendar tests include the 24 solar-term longitude nodes, local-mean-solar rollover cases, the published NREL SPA Equation-of-Time worked example, an independent USNO approximate-coordinate differential check across the year, physical-instant invariance across UTC representations, local-apparent-solar composition/sign/rollover tests, and Day/Hour time-basis sensitivity cases for both 23:00 Zi-initial and 00:00 civil-midnight boundaries.
+`npm run check` runs the Node test suite and the automatic JavaScript syntax scan. `npm test` is available when only the rule/data tests are needed.
 
-### Lightweight PNG visual self-check
-
-The `Visual PNG self-check` workflow calls the system Chromium/Chrome directly in headless mode, with no Playwright or Puppeteer dependency.
-
-The baseline set covers desktop/mobile first viewports for:
-
-- Annual Atlas
-- Annual Atlas with an exact Birth projection
-- Birth view
-- Sexagenary reference
-
-Extra bounded review frames expose below-fold details such as expanded hidden stems, Ten-God structure, visible-pillar pair relations, reproducible complete 三合 / 三會 examples, the real-chart 寅巳 example that simultaneously demonstrates 六害 and a directed punishment edge, and one 390px time-basis-sensitive case where solar correction crosses the 23:00 Day/Hour boundary. Browser DOM probes separately verify real-chart 子卯互刑 and 辰自刑 cases without adding more PNG weight. A dedicated solar-time browser probe locks the local-mean layer, Equation of Time, local-apparent clock, additive correction identity, normal unchanged sensitivity state, and a real boundary-crossing sensitivity state.
-
-Local use:
+Serve the static site locally with, for example:
 
 ```bash
 python -m http.server 4173
-# in another terminal; requires chromium/chrome on PATH
+```
+
+The lightweight screenshot capture can then be run with system Chromium/Chrome on `PATH`:
+
+```bash
 npm run visual:check
 ```
 
-## Roadmap
+`npm run visual:check` is only the PNG capture command. The GitHub **Visual PNG self-check** workflow also runs the browser contract suite for deep links, kinetic geometry, mobile composition, temporal motion/boundaries, recurrence, astronomy, determinacy and source-audit behavior.
 
-1. **Time skeleton — complete:** annual geometry, Birth derivation, 60 Jiazi reference.
-2. **Time-basis refinement — mature preview layer:** explicit UTC offset, exact solar longitude, local mean solar time, validated Equation of Time, local apparent solar time, and Day/Hour sensitivity comparison are stable. The remaining work is a sourced convention model that can represent multiple school choices before any non-civil basis is allowed to become the canonical chart input.
-3. **Deterministic BaZi structure — active:** Five Tigers, hidden stems, Day Master → Ten Gods, and the visible derivation map from Five-Phase direction + polarity.
-4. **Stem / branch interactions — mature deterministic core:** visible-stem 五合; visible-branch 六合 / 六沖 / 六害; complete visible 三合 / 三會; directed / mutual / self 刑. 六破 remains deferred behind an explicit school/convention boundary instead of being flattened into the core table.
-5. **Seasonal support / strength:** only with explicit convention and weighting boundaries; no universal percentage model.
-6. **Interpretive layer:** optional, clearly separated from the calculation engine, and labelled by source/tradition rather than presented as objective fact.
+## CI and deployment
 
-## Deployment
+Repository CI uses two main validation layers:
 
-`.github/workflows/pages.yml` tests the rule/data invariants and deploys the repository root to GitHub Pages on pushes to `main`.
+- **Quality Gate** — locked install plus `npm run check`;
+- **Visual PNG self-check** — locked install, rule/data tests, syntax scan, browser contracts, PNG evidence and artifact upload.
+
+GitHub Pages does **not** deploy directly from an arbitrary push. The Pages workflow is triggered by completion of `Visual PNG self-check` and deploys only when that workflow succeeded for a `push` to `main`. It checks out the exact `workflow_run.head_sha`, stages the pinned browser dependency, and deploys that verified revision.
+
+Core GitHub-maintained checkout/setup/artifact actions are on their Node-24 action majors while the project runtime remains Node 22.
+
+## Deep-time boundary
+
+The repository now contains an app-owned seasonal-crossing solver core over injected absolute Earth/Sun states, but that is not the same thing as having a production DE441 pipeline. Production deep-time seasonal epochs remain fail-closed until a real state adapter plus the required apparent-direction and mean-ecliptic-of-date transformation chain are integrated and validated for the target era.
+
+Pinned independent evidence also prevents the direct ShouXing path from being silently widened to year 4006: the research pipeline works, but the target-year error exceeds the promotion budget.
+
+An absolute seasonal epoch alone is still insufficient to prove deep-time Day/Hour pillars; Earth rotation / TT↔UT / ΔT, civil-zone policy, day-boundary convention and clock-basis rules remain separate proof stages.
+
+## Documentation roles
+
+- [`docs/current-status.md`](docs/current-status.md) — current normative implementation and regression boundary.
+- [`docs/camera-ownership.md`](docs/camera-ownership.md) — current camera/world ownership contract.
+- [`docs/kinetic-atlas-plan.md`](docs/kinetic-atlas-plan.md) — historical redesign plan retained for design rationale; superseded details are not normative.
+
+When documentation and implementation disagree, update the normative checkpoint together with the code rather than treating an old roadmap as current behavior.
