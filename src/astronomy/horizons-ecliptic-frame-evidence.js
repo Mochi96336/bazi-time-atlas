@@ -1,10 +1,31 @@
+const YEAR_4006_CATALOGUE_WINDOW = Object.freeze({
+  catalogueYear:4006,
+  catalogueYearSemantics:"270° winter solstice is in December 4005; 285°..255° follow through calendar year 4006",
+  knotGrid:"4005-12-01 through 4007-01-01, daily 00:00 TT",
+  knotStartTtJulianDay:3184190.5,
+  knotEndTtJulianDay:3184586.5,
+  knotRows:397,
+  withheldGrid:"4005-12-01 through 4006-12-31, daily 12:00 TT",
+  withheldRows:396,
+  interpolation:"quaternion-slerp between adjacent daily rotation knots",
+  maxAngularResidualArcsec:0.009068677322278694,
+  meanAngularResidualArcsec:0.0033849475656558556,
+  p99AngularResidualArcsec:0.0069550695316661151,
+  maxEquivalentMeanAnnualSolarCrossingSeconds:0.2208175770852786,
+  roughWinterSolsticeSeedTtJulianDay:3184208.6894499999,
+  roughLastCatalogueTermSeedTtJulianDay:3184558.7132250001,
+  maxRootBracketDays:16,
+  previousDecemberCoverageValidated:true,
+  exhaustiveHalfDaySweepValidated:true
+});
+
 export const HORIZONS_ECLIPTIC_FRAME_EVIDENCE = Object.freeze({
   authority:"NASA/JPL Horizons API",
   researchPullRequest:94,
   crossTargetResearchRunId:34855340964,
-  denseWindowResearchRunId:34869125400,
-  denseWindowArtifactId:10357559155,
-  denseWindowArtifactDigest:"sha256:fa36844c596a5a78a2b37f6a28a5ded8c2293b4803dba9791b00eef7162224f5",
+  denseWindowResearchRunId:34881697237,
+  denseWindowArtifactId:10363212590,
+  denseWindowArtifactDigest:"sha256:7445693e518a54c261eb1cd499f78522558eee2cb57a250c51a82e40b5b44549",
   contract:Object.freeze({
     observer:"Earth geocenter (500@399)",
     timeScale:"TT",
@@ -23,23 +44,21 @@ export const HORIZONS_ECLIPTIC_FRAME_EVIDENCE = Object.freeze({
     maxAbsDeterminantMinusOne:2.220446049250313e-16,
     targetIndependentRotationValidated:true
   }),
-  year4006DenseWindow:Object.freeze({
-    knotGrid:"daily 00:00 TT",
-    knotRows:366,
-    withheldGrid:"daily 12:00 TT",
-    withheldRows:365,
-    interpolation:"quaternion-slerp between adjacent daily rotation knots",
-    maxAngularResidualArcsec:0.009068677319643812,
-    meanAngularResidualArcsec:0.0033771492706470355,
-    p99AngularResidualArcsec:0.00696041,
-    maxEquivalentMeanAnnualSolarCrossingSeconds:0.22081757702112062,
-    exhaustiveHalfDaySweepValidated:true
+  year4006CatalogueWindow:YEAR_4006_CATALOGUE_WINDOW,
+  // Compatibility alias retained for the #97 proof contract. It now points at
+  // the stronger catalogue-year window instead of the superseded Jan-Dec grid.
+  year4006DenseWindow:YEAR_4006_CATALOGUE_WINDOW,
+  supersededCalendarYearOnlyCapture:Object.freeze({
+    researchRunId:34869125400,
+    artifactId:10357559155,
+    artifactDigest:"sha256:fa36844c596a5a78a2b37f6a28a5ded8c2293b4803dba9791b00eef7162224f5",
+    limitation:"Started at 4006-01-01 and therefore did not cover the Tyme-style year=4006 previous-December 270° winter-solstice crossing."
   }),
   sourceFileDigests:Object.freeze({
-    sunDailyKnots:"sha256:689a5c4df7508b8d1d2852f9d79ed2f34a8487b2eafa8e7299565f5b90b0b4c0",
-    moonDailyKnots:"sha256:eeb2a4ed72bc48bc69ebd7896ec3e0ed5c208a89f5e1a5048e2a808b11f5d99c",
-    sunHalfDayTruth:"sha256:b7eb1a5f64dbfa591d14d42fc9093e88f77c52eda3dbf75c64834b561d315ab8",
-    moonHalfDayTruth:"sha256:2adfc95fa13f93fffcd7af57a8d84b49918d42c30bbd4609e203a82f33f20cb7"
+    sunDailyKnots:"sha256:517253716c18cbdec36923f1232a8b30cf84007c88d5688661540eecd67bf2b1",
+    moonDailyKnots:"sha256:c5f19859b867ad7c227700afa2c43947b6164f13303eba3469ba5961d467224d",
+    sunHalfDayTruth:"sha256:c847d8da7d81b133e6588c5f5e70052c4b431515454bc1bcef951509230281bd",
+    moonHalfDayTruth:"sha256:1279ef6fbfafc76234d417d24dad3a923e65dc07c0525869d08dcbe7c2145871"
   }),
   horizonsObserverTableLimits:Object.freeze({
     mars:"after AD 2600 unavailable",
@@ -51,8 +70,9 @@ export const HORIZONS_ECLIPTIC_FRAME_EVIDENCE = Object.freeze({
   promotionBoundary:Object.freeze({
     targetIndependentFrameValidated:true,
     year4006FrameInterpolationValidated:true,
+    year4006CatalogueCoverageValidated:true,
     apparentDirectionCorrectionFromGeometricDe441StateValidated:false,
     productionSeasonalPipelineIntegrated:false
   }),
-  note:"The clean proof retains only bounded numeric evidence and selected worst-region windows. It does not copy Swiss Ephemeris/Owen source code or coefficient tables, and it does not claim that an ICRF geometric DE441 state is already an apparent direction."
+  note:"The clean proof retains compact daily quaternion knots plus bounded numeric evidence and selected withheld half-day cases. It does not copy Swiss Ephemeris/Owen source code or coefficient tables and remains proof-only until end-to-end seasonal crossing composition is validated."
 });
