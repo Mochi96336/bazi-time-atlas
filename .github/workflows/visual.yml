@@ -94,6 +94,10 @@ jobs:
         run: node scripts/check-temporal-boundary-continuity.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify linked boundary drag
+        run: node scripts/check-linked-boundary-drag.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify exact shared boundary gates
         run: node scripts/check-boundary-gates.mjs
         env:
