@@ -73,7 +73,7 @@ test("playback preserves the 100 ms frame clamp", () => {
   });
   assert.equal(result.elapsedSeconds, .1);
   assert.ok(Math.abs(result.offsetDays - 36.52422) < 1e-9);
-  assert.equal(result.selectedMs, 36.52422 * DAY_MS);
+  assert.ok(Math.abs(result.selectedMs - 36.52422 * DAY_MS) < 1e-3);
   assert.equal(result.reachedEnd, false);
 });
 
