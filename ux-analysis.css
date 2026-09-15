@@ -24,6 +24,12 @@
   user-select: none;
   -webkit-user-select: none;
 }
+/* The author-level inline-flex rule above must never override HTML's hidden
+   state. Analysis entry and exit are mutually exclusive controls. */
+.analysis-toggle[hidden],
+.analysis-close[hidden] {
+  display: none !important;
+}
 .analysis-toggle { right: 16px; }
 .analysis-close {
   left: 16px;
