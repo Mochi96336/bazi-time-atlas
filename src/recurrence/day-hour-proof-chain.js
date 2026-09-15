@@ -1,4 +1,13 @@
-const CLOCK_BASES = Object.freeze(["civil", "mean-solar", "apparent-solar"]);
+import {
+  DAY_HOUR_TIME_BASIS,
+  DAY_HOUR_TIME_BASIS_VALUES,
+  isDayHourTimeBasis
+} from "../calendar/day-hour-time-basis.js";
+import {
+  TARGET_INSTANT_BASIS,
+  targetInstantBinding
+} from "./target-instant-binding.js";
+
 const HARD_BLOCKER_STATUSES = new Set([
   "uncertain-estimate",
   "missing-deep-time-model",
@@ -22,11 +31,25 @@ function freezeResult(value) {
   });
 }
 
+function targetInstantDetail(binding, identity) {
+  if (identity) return "Δ=0 比較不需要建立另一個跨時代 target instant。";
+  if (!binding.bound) {
+    return "回歸頁目前只指定年月日，沒有 hour/minute/second 或等價的物理時間座標。日柱在 23:00 子初換日規則下也可能隨日內相位改變，時柱更無法由 date-only 狀態唯一決定。";
+  }
+  if (binding.basis === TARGET_INSTANT_BASIS.TT_JULIAN_DAY) {
+    return "目標時刻已明確綁定為 TT Julian day；這是均勻動力時間座標，落到地球自轉／地方鐘面前仍需要 TT→UT1。";
+  }
+  if (binding.basis === TARGET_INSTANT_BASIS.UT1_JULIAN_DAY) {
+    return "目標時刻已明確綁定為 UT1 Julian day；Earth-rotation coordinate 已存在，但尚未因此得到民用時區或地方鐘面 convention。";
+  }
+  return `目標時刻已綁定為 UT1 加固定地方 offset (${binding.localOffsetHoursFromUt1 >= 0 ? "+" : ""}${binding.localOffsetHoursFromUt1} h)；這是明示的 proleptic convention，不是未來 UTC／政治時區預測。`;
+}
+
 export function dayHourResolutionProof({
   identity = false,
   relativeTermGeometry,
   absoluteSeasonalEpoch,
-  targetInstantBound = false,
+  targetInstant = null,
   earthRotationBridge,
   earthRotationEstimateAvailable = false,
   civilZoneBound,
@@ -42,7 +65,6 @@ export function dayHourResolutionProof({
     identity,
     relativeTermGeometry,
     absoluteSeasonalEpoch,
-    targetInstantBound,
     earthRotationBridge,
     earthRotationEstimateAvailable,
     civilZoneBound,
@@ -54,18 +76,24 @@ export function dayHourResolutionProof({
     fiveRatsRule
   })) assertBoolean(value, name);
 
-  if (clockBasis !== null && !CLOCK_BASES.includes(clockBasis)) {
-    throw new RangeError(`clockBasis must be null or one of: ${CLOCK_BASES.join(", ")}`);
+  if (clockBasis !== null && !isDayHourTimeBasis(clockBasis)) {
+    throw new RangeError(`clockBasis must be null or one of: ${DAY_HOUR_TIME_BASIS_VALUES.join(", ")}`);
   }
 
+  const target = targetInstantBinding(targetInstant);
+  const targetInstantBound = target.bound;
+  const earthRotationBridgeRequired = targetInstantBound && target.requiresEarthRotationBridge;
+  const earthRotationRequirementSatisfied = targetInstantBound
+    && (!earthRotationBridgeRequired || earthRotationBridge);
   const earthRotationEstimateCapability = earthRotationEstimateAvailable;
-  const earthRotationEstimateForTarget = targetInstantBound && earthRotationEstimateCapability;
+  const earthRotationEstimateForTarget = earthRotationBridgeRequired
+    && earthRotationEstimateCapability;
 
   const dayRequirements = Object.freeze({
     relativeTermGeometry,
     absoluteSeasonalEpoch,
     targetInstantBound,
-    earthRotationBridge,
+    earthRotationBridge:earthRotationRequirementSatisfied,
     civilZoneBound,
     dayBoundaryBound,
     sexagenaryDayArithmetic
@@ -75,8 +103,9 @@ export function dayHourResolutionProof({
     .map(([name]) => name);
   const dayResolved = identity || dayBlockers.length === 0;
 
-  const needsLongitude = clockBasis === "mean-solar" || clockBasis === "apparent-solar";
-  const needsEquationOfTime = clockBasis === "apparent-solar";
+  const needsLongitude = clockBasis === DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR
+    || clockBasis === DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR;
+  const needsEquationOfTime = clockBasis === DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR;
   const hourRequirements = Object.freeze({
     resolvedDayPillar:dayResolved,
     clockBasisBound:clockBasis !== null,
@@ -95,30 +124,33 @@ export function dayHourResolutionProof({
     : targetInstantBound
       ? "satisfied"
       : "unbound-convention";
-  const targetInstantDetail = identity
-    ? "Δ=0 比較不需要建立另一個跨時代 target instant。"
-    : targetInstantBound
-      ? "已指定可投影的目標時刻／日內相位，而不只是曆日。"
-      : "回歸頁目前只指定年月日，沒有 hour/minute/second 或等價的 TT instant。日柱在 23:00 子初換日規則下也可能隨日內相位改變，時柱更無法由 date-only 狀態唯一決定。";
 
-  const earthRotationStatus = !absoluteSeasonalEpoch || (!identity && !targetInstantBound)
-    ? "blocked"
-    : earthRotationBridge
-      ? "satisfied"
-      : earthRotationEstimateForTarget
-        ? "uncertain-estimate"
-        : "missing-deep-time-model";
-  const earthRotationDetail = !absoluteSeasonalEpoch
-    ? "必須先取得絕對 seasonal epoch，才能評估 TT↔UT1。"
-    : !identity && !targetInstantBound
-      ? earthRotationEstimateCapability
-        ? "此年份已有深時間 ΔT / TT→UT1 模型能力，但 recurrence 尚未定義一個目標 TT instant，因此不能產生此比較狀態的 UT1 estimate。"
-        : "recurrence 尚未定義目標 TT instant；Earth-rotation projection 必須等目標時刻先綁定。"
-      : earthRotationBridge
-        ? "可把均勻時間的天文事件確定地投影到地球自轉時間。"
-        : earthRotationEstimateForTarget
-          ? "已有此目標時刻的 TT→UT1 深時間 ΔT 點估計與統計不確定性；但它不是 deterministic UT1，更不能直接當成未來 UTC／民用時間，因此尚不足以唯一判定日柱或時柱。"
-          : "要落到地球自轉時間，還需要深時間 Earth-rotation / ΔT 模型；不能由軌道形狀本身推出。";
+  const earthRotationStatus = identity
+    ? "not-required"
+    : !absoluteSeasonalEpoch || !targetInstantBound
+      ? "blocked"
+      : !earthRotationBridgeRequired
+        ? "not-required"
+        : earthRotationBridge
+          ? "satisfied"
+          : earthRotationEstimateForTarget
+            ? "uncertain-estimate"
+            : "missing-deep-time-model";
+  const earthRotationDetail = identity
+    ? "Δ=0 identity comparison 不需要跨 epoch 的 Earth-rotation projection。"
+    : !absoluteSeasonalEpoch
+      ? "必須先取得絕對 seasonal epoch，才能完成目前 recurrence proof chain。"
+      : !targetInstantBound
+        ? earthRotationEstimateCapability
+          ? "此年份已有深時間 ΔT / TT→UT1 模型能力，但 recurrence 尚未定義 target instant reference basis，因此不能產生此比較狀態的 UT1 estimate。"
+          : "recurrence 尚未定義 target instant reference basis；Earth-rotation projection 必須等目標時刻先綁定。"
+        : !earthRotationBridgeRequired
+          ? `target instant 已直接位於 ${target.inputTimeScale} Earth-rotation coordinate；不應再重複要求 TT→UT1 bridge。`
+          : earthRotationBridge
+            ? "TT target 已被確定地投影到地球自轉時間。"
+            : earthRotationEstimateForTarget
+              ? "已有此 TT target 的 TT→UT1 深時間 ΔT 點估計與統計不確定性；但它不是 deterministic UT1，更不能直接當成未來 UTC／民用時間，因此尚不足以唯一判定日柱或時柱。"
+              : "TT target 要落到地球自轉時間，仍需要深時間 Earth-rotation / ΔT 模型；不能由軌道形狀本身推出。";
 
   const stages = Object.freeze([
     stage(
@@ -137,9 +169,9 @@ export function dayHourResolutionProof({
     ),
     stage(
       "target-instant",
-      "目標時刻／日內相位",
+      "目標時刻／reference basis",
       targetInstantStatus,
-      targetInstantDetail,
+      targetInstantDetail(target, identity),
       "input"
     ),
     stage(
@@ -153,7 +185,7 @@ export function dayHourResolutionProof({
       "civil-zone",
       "民用時區規則",
       civilZoneBound ? "satisfied" : "unbound-convention",
-      civilZoneBound ? "已選定事件要投影到哪一套民用時鐘。" : "回歸頁尚未綁定 UTC offset / timezone policy。",
+      civilZoneBound ? "已選定事件要投影到哪一套民用時鐘。" : "回歸頁尚未綁定 UTC offset / timezone policy；fixed-zone-from-UT1 也不等於未來政治時區。",
       "civil"
     ),
     stage(
@@ -172,23 +204,23 @@ export function dayHourResolutionProof({
     ),
     stage(
       "clock-basis",
-      "時柱時計 basis",
+      "Day / Hour local clock basis",
       clockBasis ? "satisfied" : "unbound-convention",
-      clockBasis ? `已選 ${clockBasis} clock。` : "尚未選 civil / mean-solar / apparent-solar clock；不同 basis 可能跨時支甚至日界。",
+      clockBasis ? `已選 ${clockBasis} local clock。` : "尚未選 civil / local-mean-solar / local-apparent-solar clock；這是 pillar membership 的地方鐘面 basis，不是 target instant 的物理時間尺度。",
       "civil"
     ),
     stage(
       "longitude",
       "經度",
       !clockBasis ? "conditional" : needsLongitude ? (longitudeBound ? "satisfied" : "unbound-convention") : "not-required",
-      !clockBasis ? "只有選 mean/apparent solar clock 時才需要。" : needsLongitude ? (longitudeBound ? "太陽時經度已綁定。" : "選太陽時計時後必須指定經度。") : "civil clock 不需要經度修正。",
+      !clockBasis ? "只有選 local mean/apparent solar clock 時才需要。" : needsLongitude ? (longitudeBound ? "太陽時經度已綁定。" : "選太陽時計時後必須指定經度。") : "civil clock 不需要經度修正。",
       "civil"
     ),
     stage(
       "equation-of-time",
       "Equation of Time",
       !clockBasis ? "conditional" : needsEquationOfTime ? (equationOfTimeModel ? "satisfied" : "missing-deep-time-model") : "not-required",
-      !clockBasis ? "只有 apparent-solar clock 需要。" : needsEquationOfTime ? (equationOfTimeModel ? "視太陽時修正模型可用。" : "視太陽時需要該 epoch 可用的 EoT 模型。") : "此時計 basis 不需要 EoT。",
+      !clockBasis ? "只有 local apparent solar clock 需要。" : needsEquationOfTime ? (equationOfTimeModel ? "視太陽時修正模型可用。" : "視太陽時需要該 epoch 可用的 EoT 模型。") : "此 local clock basis 不需要 EoT。",
       "astronomy"
     ),
     stage(
@@ -204,7 +236,10 @@ export function dayHourResolutionProof({
 
   return Object.freeze({
     identity,
+    targetInstant:Object.freeze({ ...target }),
     targetInstantBound,
+    targetInstantBasis:target.basis,
+    earthRotationBridgeRequired,
     clockBasis,
     needsLongitude,
     needsEquationOfTime,
@@ -232,19 +267,18 @@ export function currentRecurrenceDayHourProof({
   identity,
   astronomyWithinRange,
   absoluteSeasonalEpoch = false,
-  targetInstantBound = false,
+  targetInstant = null,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
   assertBoolean(astronomyWithinRange, "astronomyWithinRange");
   assertBoolean(absoluteSeasonalEpoch, "absoluteSeasonalEpoch");
-  assertBoolean(targetInstantBound, "targetInstantBound");
   assertBoolean(earthRotationEstimateAvailable, "earthRotationEstimateAvailable");
   return dayHourResolutionProof({
     identity,
     relativeTermGeometry:astronomyWithinRange,
     absoluteSeasonalEpoch,
-    targetInstantBound,
+    targetInstant,
     earthRotationBridge:false,
     earthRotationEstimateAvailable,
     civilZoneBound:false,
