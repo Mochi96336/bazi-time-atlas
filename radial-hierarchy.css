@@ -125,6 +125,10 @@
   letter-spacing: .10em;
 }
 
+/* The cursor note already names the shared datum. Keep the live timestamp and
+   metadata at the bottom, but do not repeat the same Selected Instant label. */
+.instrument-readout .readout-kicker { display: none; }
+
 /* The whole annual band is still one drag/reference target. Interaction wins
    over the quieter resting treatment. */
 #kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
