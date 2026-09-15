@@ -5,12 +5,9 @@ import {
   LunarSect2EightCharProvider,
   SolarTime
 } from "../../vendor/tyme4ts-1.5.2.mjs";
+import { DAY_BOUNDARY, isDayBoundary } from "./day-boundary.js";
 
-export const DAY_BOUNDARY = Object.freeze({
-  ZI_INITIAL_NEXT_DAY: "zi-initial-next-day",
-  CIVIL_MIDNIGHT: "civil-midnight"
-});
-
+export { DAY_BOUNDARY } from "./day-boundary.js";
 export const SOLAR_TERM_REFERENCE_UTC_OFFSET = 8;
 
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
@@ -38,7 +35,7 @@ function validateUtcOffset(value) {
 }
 
 function validateDayBoundary(dayBoundary) {
-  if (!Object.values(DAY_BOUNDARY).includes(dayBoundary)) {
+  if (!isDayBoundary(dayBoundary)) {
     throw new RangeError(`unsupported dayBoundary: ${dayBoundary}`);
   }
 }

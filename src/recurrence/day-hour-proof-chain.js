@@ -4,6 +4,10 @@ import {
   isDayHourTimeBasis
 } from "../calendar/day-hour-time-basis.js";
 import {
+  DAY_BOUNDARY,
+  DAY_BOUNDARY_VALUES
+} from "../calendar/day-boundary.js";
+import {
   localZoneConventionBinding,
   LOCAL_ZONE_CONVENTION_KIND
 } from "./local-zone-convention.js";
@@ -21,6 +25,14 @@ const HARD_BLOCKER_STATUSES = new Set([
 
 function assertBoolean(value, name) {
   if (typeof value !== "boolean") throw new TypeError(`${name} must be boolean`);
+}
+
+function normalizeDayBoundary(value) {
+  if (value === null || value === undefined) return null;
+  if (!DAY_BOUNDARY_VALUES.includes(value)) {
+    throw new RangeError(`dayBoundary must be null or one of: ${DAY_BOUNDARY_VALUES.join(", ")}`);
+  }
+  return value;
 }
 
 function stage(id, label, status, detail, kind) {
@@ -60,6 +72,16 @@ function localZoneDetail(binding) {
   return `已綁定 resolved civil-timezone policy：${binding.timeZoneId}。`;
 }
 
+function dayBoundaryDetail(dayBoundary) {
+  if (dayBoundary === null) {
+    return "Birth 引擎已有 canonical 日界規則，但 recurrence 必須明示選定 convention，不能用 boolean 宣稱『已綁定』。";
+  }
+  if (dayBoundary === DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY) {
+    return "已明示採用 canonical zi-initial-next-day：子初 23:00 起算下一個干支日。";
+  }
+  return "已明示採用 canonical civil-midnight：00:00 民用午夜才切換干支日。";
+}
+
 export function dayHourResolutionProof({
   identity = false,
   relativeTermGeometry,
@@ -68,7 +90,7 @@ export function dayHourResolutionProof({
   earthRotationBridge,
   earthRotationEstimateAvailable = false,
   localZoneConvention = null,
-  dayBoundaryBound,
+  dayBoundary = null,
   sexagenaryDayArithmetic,
   clockBasis = null,
   longitudeBound = false,
@@ -82,7 +104,6 @@ export function dayHourResolutionProof({
     absoluteSeasonalEpoch,
     earthRotationBridge,
     earthRotationEstimateAvailable,
-    dayBoundaryBound,
     sexagenaryDayArithmetic,
     longitudeBound,
     equationOfTimeModel,
@@ -94,10 +115,12 @@ export function dayHourResolutionProof({
     throw new RangeError(`clockBasis must be null or one of: ${DAY_HOUR_TIME_BASIS_VALUES.join(", ")}`);
   }
 
+  const normalizedDayBoundary = normalizeDayBoundary(dayBoundary);
   const target = targetInstantBinding(targetInstant);
   const localZone = localZoneConventionBinding(localZoneConvention, target);
   const targetInstantBound = target.bound;
   const localZoneBound = localZone.bound;
+  const dayBoundaryBound = normalizedDayBoundary !== null;
   const earthRotationBridgeRequired = targetInstantBound && target.requiresEarthRotationBridge;
   const earthRotationRequirementSatisfied = targetInstantBound
     && (!earthRotationBridgeRequired || earthRotationBridge);
@@ -215,7 +238,7 @@ export function dayHourResolutionProof({
       "day-boundary",
       "日界規則",
       dayBoundaryBound ? "satisfied" : "unbound-convention",
-      dayBoundaryBound ? "已選定 23:00 子初換日或民用午夜等日界。" : "Birth 引擎有日界能力，但回歸比較尚未選定這個 convention。",
+      dayBoundaryDetail(normalizedDayBoundary),
       "bazi"
     ),
     stage(
@@ -264,6 +287,8 @@ export function dayHourResolutionProof({
     targetInstantBasis:target.basis,
     localZoneConvention:Object.freeze({ ...localZone }),
     localZoneBound,
+    dayBoundary:normalizedDayBoundary,
+    dayBoundaryBound,
     earthRotationBridgeRequired,
     clockBasis,
     needsLongitude,
@@ -294,6 +319,7 @@ export function currentRecurrenceDayHourProof({
   absoluteSeasonalEpoch = false,
   targetInstant = null,
   localZoneConvention = null,
+  dayBoundary = null,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
@@ -308,7 +334,7 @@ export function currentRecurrenceDayHourProof({
     earthRotationBridge:false,
     earthRotationEstimateAvailable,
     localZoneConvention,
-    dayBoundaryBound:false,
+    dayBoundary,
     sexagenaryDayArithmetic:true,
     clockBasis:null,
     longitudeBound:false,
