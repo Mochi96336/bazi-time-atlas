@@ -33,6 +33,29 @@ test("resolved absolute seasonal epoch advances the first hard blocker to Earth 
   assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "missing-deep-time-model");
 });
 
+test("uncertain TT to UT1 estimate is visible but remains the first hard Day Hour blocker", () => {
+  const proof = currentRecurrenceDayHourProof({
+    identity:false,
+    astronomyWithinRange:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationPointEstimateAvailable:true,
+    earthRotationUncertaintyQuantified:true
+  });
+  const stage = proof.stages.find(item => item.id === "earth-rotation-bridge");
+  assert.equal(proof.firstHardBlocker, "earth-rotation-bridge");
+  assert.equal(stage.status, "uncertain-estimate");
+  assert.match(stage.detail, /1σ/);
+  assert.match(stage.detail, /deterministic UT1/);
+  assert.deepEqual(proof.earthRotation, {
+    deterministicBridge:false,
+    pointEstimateAvailable:true,
+    uncertaintyQuantified:true
+  });
+  assert.equal(proof.day.resolved, false);
+  assert.equal(proof.hour.resolved, false);
+  assert.ok(proof.day.blockers.includes("earthRotationBridge"));
+});
+
 test("identity bypasses cross-era projection without pretending the missing deep-time models exist", () => {
   const proof = currentRecurrenceDayHourProof({ identity:true, astronomyWithinRange:true });
   assert.equal(proof.day.status, "identical-by-definition");
@@ -60,6 +83,7 @@ test("Day becomes resolvable only after the absolute epoch is projected through 
   assert.equal(proof.day.blockers.length, 0);
   assert.equal(proof.hour.resolved, false);
   assert.deepEqual(proof.hour.blockers, ["clockBasisBound"]);
+  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "satisfied");
 });
 
 test("civil-clock Hour needs no longitude or Equation of Time once Day is resolved", () => {
@@ -135,6 +159,19 @@ test("apparent-solar Hour requires both longitude and an epoch-valid Equation of
     fiveRatsRule:true
   });
   assert.equal(resolved.hour.resolved, true);
+});
+
+test("uncertainty cannot be declared without an Earth-rotation point estimate", () => {
+  assert.throws(() => dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationBridge:false,
+    earthRotationPointEstimateAvailable:false,
+    earthRotationUncertaintyQuantified:true,
+    civilZoneBound:false,
+    dayBoundaryBound:false,
+    sexagenaryDayArithmetic:true
+  }), /requires earthRotationPointEstimateAvailable/);
 });
 
 test("invalid clock basis fails closed", () => {
