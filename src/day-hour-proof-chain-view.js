@@ -256,7 +256,7 @@ function readableBlocker(name) {
     absoluteSeasonalEpoch:"絕對 seasonal anchors",
     targetInstantBound:"target instant reference basis",
     earthRotationBridge:"TT↔UT1 / ΔT",
-    civilZoneBound:"民用時區",
+    localZoneBound:"地方鐘面／zone convention",
     dayBoundaryBound:"日界規則",
     sexagenaryDayArithmetic:"干支日序算術",
     resolvedDayPillar:"已解析日柱",
