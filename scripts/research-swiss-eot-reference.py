@@ -87,6 +87,7 @@ def main() -> None:
             "equationOfTimeFunction": "swe_time_equ(tjd_ut)",
             "deltaTFunction": "swe_deltat_ex(tjd_ut, FLG_SWIEPH)",
             "signConvention": "local-apparent-time-minus-local-mean-time",
+            "inputTimeScale": "UT",
             "sampleTimeScale": "UT",
             "equationInputTimeScale": "UT",
             "ephemerisPath": ephe_path,
