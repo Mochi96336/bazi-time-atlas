@@ -1,15 +1,12 @@
 import { localApparentSolarTime } from "../astronomy/apparent-solar-time.js";
+import { DAY_HOUR_TIME_BASIS } from "./day-hour-time-basis.js";
 import {
   DAY_BOUNDARY,
   resolveBirthPillars,
   resolveDayHourPillars
 } from "./tyme-adapter.js";
 
-export const DAY_HOUR_TIME_BASIS = Object.freeze({
-  CIVIL: "civil",
-  LOCAL_MEAN_SOLAR: "local-mean-solar",
-  LOCAL_APPARENT_SOLAR: "local-apparent-solar"
-});
+export { DAY_HOUR_TIME_BASIS } from "./day-hour-time-basis.js";
 
 function samePillar(a, b) {
   return a.name === b.name;
