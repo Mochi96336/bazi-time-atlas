@@ -26,9 +26,11 @@ function boundarySummary() {
 function updateSummary() {
   if (!panel || !summary || !utcOffsetInput) return;
   const text = `${formatUtcOffset(utcOffsetInput.value)} · ${boundarySummary()}`;
+  const longitudeInput = document.querySelector("#birth-longitude");
   summary.textContent = text;
   panel.dataset.advancedOpen = String(panel.open);
   panel.dataset.advancedSummary = text;
+  panel.dataset.advancedLongitude = longitudeInput?.value ?? "";
 }
 
 if (panel && form) {
@@ -37,4 +39,5 @@ if (panel && form) {
   form.addEventListener("input", updateSummary);
   form.addEventListener("change", updateSummary);
   updateSummary();
+  queueMicrotask(updateSummary);
 }
