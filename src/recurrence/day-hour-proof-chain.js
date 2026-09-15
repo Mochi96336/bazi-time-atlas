@@ -26,6 +26,7 @@ export function dayHourResolutionProof({
   identity = false,
   relativeTermGeometry,
   absoluteSeasonalEpoch,
+  targetInstantBound = false,
   earthRotationBridge,
   earthRotationEstimateAvailable = false,
   civilZoneBound,
@@ -41,6 +42,7 @@ export function dayHourResolutionProof({
     identity,
     relativeTermGeometry,
     absoluteSeasonalEpoch,
+    targetInstantBound,
     earthRotationBridge,
     earthRotationEstimateAvailable,
     civilZoneBound,
@@ -56,9 +58,13 @@ export function dayHourResolutionProof({
     throw new RangeError(`clockBasis must be null or one of: ${CLOCK_BASES.join(", ")}`);
   }
 
+  const earthRotationEstimateCapability = earthRotationEstimateAvailable;
+  const earthRotationEstimateForTarget = targetInstantBound && earthRotationEstimateCapability;
+
   const dayRequirements = Object.freeze({
     relativeTermGeometry,
     absoluteSeasonalEpoch,
+    targetInstantBound,
     earthRotationBridge,
     civilZoneBound,
     dayBoundaryBound,
@@ -84,20 +90,35 @@ export function dayHourResolutionProof({
     .map(([name]) => name);
   const hourResolved = identity || hourBlockers.length === 0;
 
-  const earthRotationStatus = earthRotationBridge
-    ? "satisfied"
-    : !absoluteSeasonalEpoch
-      ? "blocked"
-      : earthRotationEstimateAvailable
+  const targetInstantStatus = identity
+    ? "not-required"
+    : targetInstantBound
+      ? "satisfied"
+      : "unbound-convention";
+  const targetInstantDetail = identity
+    ? "Δ=0 比較不需要建立另一個跨時代 target instant。"
+    : targetInstantBound
+      ? "已指定可投影的目標時刻／日內相位，而不只是曆日。"
+      : "回歸頁目前只指定年月日，沒有 hour/minute/second 或等價的 TT instant。日柱在 23:00 子初換日規則下也可能隨日內相位改變，時柱更無法由 date-only 狀態唯一決定。";
+
+  const earthRotationStatus = !absoluteSeasonalEpoch || (!identity && !targetInstantBound)
+    ? "blocked"
+    : earthRotationBridge
+      ? "satisfied"
+      : earthRotationEstimateForTarget
         ? "uncertain-estimate"
         : "missing-deep-time-model";
-  const earthRotationDetail = earthRotationBridge
-    ? "可把均勻時間的天文事件確定地投影到地球自轉時間。"
-    : !absoluteSeasonalEpoch
-      ? "必須先取得絕對 seasonal epoch，才能評估 TT↔UT1。"
-      : earthRotationEstimateAvailable
-        ? "已有 TT→UT1 的深時間 ΔT 點估計與統計不確定性；但它不是 deterministic UT1，更不能直接當成未來 UTC／民用時間，因此尚不足以唯一判定日柱或時柱。"
-        : "要落到地球自轉時間，還需要深時間 Earth-rotation / ΔT 模型；不能由軌道形狀本身推出。";
+  const earthRotationDetail = !absoluteSeasonalEpoch
+    ? "必須先取得絕對 seasonal epoch，才能評估 TT↔UT1。"
+    : !identity && !targetInstantBound
+      ? earthRotationEstimateCapability
+        ? "此年份已有深時間 ΔT / TT→UT1 模型能力，但 recurrence 尚未定義一個目標 TT instant，因此不能產生此比較狀態的 UT1 estimate。"
+        : "recurrence 尚未定義目標 TT instant；Earth-rotation projection 必須等目標時刻先綁定。"
+      : earthRotationBridge
+        ? "可把均勻時間的天文事件確定地投影到地球自轉時間。"
+        : earthRotationEstimateForTarget
+          ? "已有此目標時刻的 TT→UT1 深時間 ΔT 點估計與統計不確定性；但它不是 deterministic UT1，更不能直接當成未來 UTC／民用時間，因此尚不足以唯一判定日柱或時柱。"
+          : "要落到地球自轉時間，還需要深時間 Earth-rotation / ΔT 模型；不能由軌道形狀本身推出。";
 
   const stages = Object.freeze([
     stage(
@@ -113,6 +134,13 @@ export function dayHourResolutionProof({
       absoluteSeasonalEpoch ? "satisfied" : "missing-deep-time-model",
       absoluteSeasonalEpoch ? "季節節點已放回連續的均勻時間軸。" : "目前只有春分歸零後的相對形狀；缺少目標年份春分／節氣的絕對 TT/TDB 類 epoch。",
       "physics"
+    ),
+    stage(
+      "target-instant",
+      "目標時刻／日內相位",
+      targetInstantStatus,
+      targetInstantDetail,
+      "input"
     ),
     stage(
       "earth-rotation-bridge",
@@ -176,23 +204,25 @@ export function dayHourResolutionProof({
 
   return Object.freeze({
     identity,
+    targetInstantBound,
     clockBasis,
     needsLongitude,
     needsEquationOfTime,
-    earthRotationEstimateAvailable,
+    earthRotationEstimateCapability,
+    earthRotationEstimateAvailable:earthRotationEstimateForTarget,
     firstHardBlocker,
     stages,
     day:freezeResult({
       resolved:dayResolved,
       status:identity ? "identical-by-definition" : dayResolved ? "resolved" : "blocked",
       blockers:identity ? [] : dayBlockers,
-      stages:["relative-term-geometry", "absolute-seasonal-epoch", "earth-rotation-bridge", "civil-zone", "day-boundary", "sexagenary-day-arithmetic"]
+      stages:["relative-term-geometry", "absolute-seasonal-epoch", "target-instant", "earth-rotation-bridge", "civil-zone", "day-boundary", "sexagenary-day-arithmetic"]
     }),
     hour:freezeResult({
       resolved:hourResolved,
       status:identity ? "identical-by-definition" : hourResolved ? "resolved" : "blocked",
       blockers:identity ? [] : hourBlockers,
-      stages:["resolved-day-pillar", "clock-basis", "longitude", "equation-of-time", "hour-rules"]
+      stages:["resolved-day-pillar", "target-instant", "clock-basis", "longitude", "equation-of-time", "hour-rules"]
     })
   });
 }
@@ -202,16 +232,19 @@ export function currentRecurrenceDayHourProof({
   identity,
   astronomyWithinRange,
   absoluteSeasonalEpoch = false,
+  targetInstantBound = false,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
   assertBoolean(astronomyWithinRange, "astronomyWithinRange");
   assertBoolean(absoluteSeasonalEpoch, "absoluteSeasonalEpoch");
+  assertBoolean(targetInstantBound, "targetInstantBound");
   assertBoolean(earthRotationEstimateAvailable, "earthRotationEstimateAvailable");
   return dayHourResolutionProof({
     identity,
     relativeTermGeometry:astronomyWithinRange,
     absoluteSeasonalEpoch,
+    targetInstantBound,
     earthRotationBridge:false,
     earthRotationEstimateAvailable,
     civilZoneBound:false,
