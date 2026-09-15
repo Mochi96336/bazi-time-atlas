@@ -54,6 +54,10 @@ jobs:
         run: node scripts/check-mean-solar-preview.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify Birth basic and advanced hierarchy
+        run: node scripts/check-birth-advanced.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify cross-view shell consistency
         run: node scripts/check-view-shells.mjs
         env:
