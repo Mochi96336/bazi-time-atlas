@@ -24,8 +24,18 @@ def main() -> None:
         year = int(sample["year"])
         month = int(sample["month"])
         day = int(sample["day"])
-        hour = float(sample["hour"])
-        jd_ut = swe.julday(year, month, day, hour, swe.GREG_CAL)
+        hour = int(sample["hour"])
+        minute = int(sample.get("minute", 0))
+        second = float(sample.get("second", 0))
+        if not 0 <= hour <= 23:
+            raise RuntimeError(f"hour out of range: {hour}")
+        if not 0 <= minute <= 59:
+            raise RuntimeError(f"minute out of range: {minute}")
+        if not 0 <= second < 60:
+            raise RuntimeError(f"second out of range: {second}")
+
+        decimal_hour = hour + minute / 60.0 + second / 3600.0
+        jd_ut = swe.julday(year, month, day, decimal_hour, swe.GREG_CAL)
         equation_days = float(swe.time_equ(jd_ut))
         delta_t_days = float(swe.deltat(jd_ut))
 
@@ -34,7 +44,8 @@ def main() -> None:
         ephemeris_flags.add(ephemeris_flag)
         if ephemeris_flag != swe.FLG_SWIEPH:
             raise RuntimeError(
-                f"Swiss Ephemeris did not use SWIEPH data at {year:04d}-{month:02d}-{day:02d} {hour:g}h; "
+                f"Swiss Ephemeris did not use SWIEPH data at "
+                f"{year:04d}-{month:02d}-{day:02d} {hour:02d}:{minute:02d}; "
                 f"retflags={retflags}, ephemeris_flag={ephemeris_flag}"
             )
 
@@ -44,6 +55,8 @@ def main() -> None:
                 "month": month,
                 "day": day,
                 "hour": hour,
+                "minute": minute,
+                "second": second,
                 "julianDayUt": jd_ut,
                 "equationOfTimeMinutes": equation_days * 1440.0,
                 "deltaTSeconds": delta_t_days * 86400.0,
