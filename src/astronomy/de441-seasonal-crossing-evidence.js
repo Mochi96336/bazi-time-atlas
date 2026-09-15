@@ -48,6 +48,18 @@ export const DE441_SEASONAL_CROSSING_4006_EVIDENCE = Object.freeze({
     promotionBudgetSeconds:2,
     withinPromotionBudget:true
   }),
+  productionShapedSolverParity:Object.freeze({
+    solver:"solveSeasonalCrossingFromAbsoluteState",
+    apparentModelId:"horizons-sun-center-apparent-direction-proof",
+    frameSemantics:"earth-mean-ecliptic-of-date",
+    lightTimeIterations:3,
+    independentTruthCrossings:24,
+    promotionBudgetSeconds:2,
+    maxEpochErrorRegressionGateSeconds:0.25,
+    meanAbsEpochErrorRegressionGateSeconds:0.1,
+    compactFixtureReused:true,
+    productionRegistryStillFailClosed:true
+  }),
   promotionBoundary:Object.freeze({
     ttToTdbValidated:true,
     de441StateInterpolationValidated:true,
@@ -57,8 +69,9 @@ export const DE441_SEASONAL_CROSSING_4006_EVIDENCE = Object.freeze({
     eclipticOfDateFrameValidated:true,
     crossingRootSolveValidated:true,
     catalogueYear4006EndToEndValidated:true,
+    productionShapedSolverParityValidated:true,
     productionSeasonalPipelineIntegrated:false,
     productionYear4006Unlocked:false
   }),
-  note:"This is an offline proof over 24 independent Horizons quantity-31 crossing epochs. The root seed is the existing ShouXing candidate, not JPL truth. Passing this proof validates the scientific chain but does not by itself register a production provider or unlock year 4006."
+  note:"This is an offline proof over 24 independent Horizons quantity-31 crossing epochs. The root seed is the existing ShouXing candidate, not JPL truth. The independent SPICE-style harness remains as a cross-check; production-shaped solver parity reuses the same compact state/frame evidence and remains fail-closed until runtime provider integration is explicitly enabled."
 });
