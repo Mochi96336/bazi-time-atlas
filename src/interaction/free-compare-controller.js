@@ -102,8 +102,15 @@ export function createFreeCompareController({
   }
 
   function setMode(enabled) {
-    if (!enabled) resetAllOffsets();
-    else stopPlayback();
+    if (!enabled) {
+      resetAllOffsets();
+    } else {
+      instrument.dispatchEvent(new CustomEvent("atlas-analysis-request", {
+        bubbles:true,
+        detail:{ reason:"free-compare" }
+      }));
+      stopPlayback();
+    }
     dragController.setCompareMode(enabled);
     update();
   }
