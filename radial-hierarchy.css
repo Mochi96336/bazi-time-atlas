@@ -167,6 +167,15 @@
     font-size: 9px;
     font-weight: 620;
   }
+
+  /* Free Compare status is injected with desktop inline coordinates. On phone,
+     reserve the narrow band below the two-line layer legend and above the
+     classification overlay/cursor note instead of letting it sit on metadata. */
+  #ring-compare-status {
+    top: 82px !important;
+    right: 9px !important;
+  }
+
   #hour-track .cycle-label,
   #day-track .cycle-label { font-size: 8px; }
   #month-track .cycle-label { font-size: 9px; }
