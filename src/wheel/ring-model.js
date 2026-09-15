@@ -2,17 +2,18 @@ export const WHEEL_CENTER = Object.freeze({ x: 600, y: 1360 });
 export const CURSOR_ANGLE = -90;
 export const FAN = Object.freeze({ start: -170, end: -10 });
 
-// Radial position and thickness both carry temporal meaning: fast / short cycles
-// live inside and stay narrow, while slow / long cycles move outward and become
-// progressively wider. Solar longitude owns one annual coordinate band; zodiac
-// is only a derived classification overlay inside that same band.
+// Radial position carries temporal scale: fast / short cycles live inside and
+// slow / long cycles move outward. Thickness is presentation-owned and instead
+// balances information capacity and visual area. Solar longitude owns one
+// annual coordinate band; zodiac is only a derived classification overlay
+// inside that same band.
 export const RADII = Object.freeze({
-  inner: 686,
-  hourOuter: 744,
-  dayOuter: 812,
-  solarTermOuter: 868,
-  solarOuter: 908,
-  monthOuter: 1028,
+  inner: 500,
+  hourOuter: 620,
+  dayOuter: 750,
+  solarTermOuter: 840,
+  solarOuter: 900,
+  monthOuter: 1040,
   yearOuter: 1182,
   outer: 1182
 });
@@ -128,13 +129,6 @@ export function assertWheelModel() {
     if (!(ring.innerRadius < ring.outerRadius)) throw new Error(`${ring.id} ring radii must increase`);
     if (index > 0 && ring.innerRadius !== RINGS[index - 1].outerRadius) {
       throw new Error(`${ring.id} must touch ${RINGS[index - 1].id} without a radial gap`);
-    }
-    if (index > 0) {
-      const thickness = ring.outerRadius - ring.innerRadius;
-      const previous = RINGS[index - 1].outerRadius - RINGS[index - 1].innerRadius;
-      if (!(thickness > previous)) {
-        throw new Error(`${ring.id} must be radially wider than ${RINGS[index - 1].id}`);
-      }
     }
   });
 

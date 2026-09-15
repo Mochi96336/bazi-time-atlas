@@ -21,10 +21,15 @@ const instrument = document.querySelector("#kinetic-instrument");
 
 function applyResponsiveCamera() {
   if (!svg || !instrument) return null;
+  const bounds = svg.getBoundingClientRect();
+  const viewportAspect = bounds.width > 0 && bounds.height > 0
+    ? bounds.width / bounds.height
+    : 1200 / 760;
   const camera = responsiveInstrumentCamera({
     center: WHEEL_CENTER,
     outerRadius: RADII.outer,
-    viewportWidth: window.innerWidth
+    viewportWidth: window.innerWidth,
+    viewportAspect
   });
   svg.setAttribute("viewBox", viewBoxString(camera.viewBox));
   instrument.dataset.geometryCameraMode = camera.mode;
@@ -33,6 +38,11 @@ function applyResponsiveCamera() {
   instrument.dataset.geometryCameraY = camera.viewBox.y.toFixed(3);
   instrument.dataset.geometryCameraWidth = camera.viewBox.width.toFixed(3);
   instrument.dataset.geometryCameraHeight = camera.viewBox.height.toFixed(3);
+  instrument.dataset.geometryCameraAspect = camera.viewportAspect.toFixed(4);
+  instrument.dataset.geometryCameraOriginGap = camera.originGap.toFixed(3);
+  instrument.dataset.geometryCameraOriginGapRatio = camera.originGapRatio.toFixed(4);
+  instrument.dataset.geometryCameraInnerBlank = (RADII.inner - camera.originGap).toFixed(3);
+  instrument.dataset.geometryCameraInnerBlankRatio = ((RADII.inner - camera.originGap) / RADII.outer).toFixed(4);
   return camera;
 }
 
@@ -106,6 +116,8 @@ function installMasterFanClip() {
   instrument.dataset.geometryInnerRadius = RADII.inner.toFixed(3);
   instrument.dataset.geometryOuterRadius = RADII.outer.toFixed(3);
   instrument.dataset.geometryRadiusRatio = (RADII.inner / RADII.outer).toFixed(4);
+  instrument.dataset.geometryRadialDepth = (RADII.outer - RADII.inner).toFixed(3);
+  instrument.dataset.geometryRadialDepthRatio = ((RADII.outer - RADII.inner) / RADII.outer).toFixed(4);
   return true;
 }
 

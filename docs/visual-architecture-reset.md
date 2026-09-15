@@ -61,6 +61,22 @@ The following values are presentation parameters and must not be treated as sema
 
 Thickness is free to represent information capacity and visual balance. In particular, the outer Year ring is not required to be thicker than Month, and Month is not required to be thicker than Solar. This removes the previous redundant encoding that amplified outer-ring visual area simply because the cycle was slower.
 
+### Camera / inner-radius composition invariant
+
+The first camera-only experiment established a useful geometric constraint. Along the Selected-Instant centerline, let:
+
+- `G` be the distance from the viewport bottom to the mathematical wheel origin;
+- `B` be the visible empty inner-disk distance from the viewport bottom to the inner ring;
+- `Rin` be the wheel's inner radius.
+
+Then, while the inner ring remains above the lower frame:
+
+`G + B = Rin`
+
+With the old `Rin = 686`, moving the origin closer necessarily created almost the same amount of new dead interior. Camera framing alone therefore cannot simultaneously improve radial curvature and eliminate the empty lower field. The reset treats **radial depth and camera framing as one composition layer**: reduce the oversized inner void, balance primary ring thickness, then frame that deeper ring stack. Camera review must monitor both origin proximity and exposed inner blank; minimizing either metric alone is not the goal.
+
+The horizontal camera dimension should follow the actual rendered SVG aspect ratio. Camera code owns radial framing, not page layout.
+
 ## Rendering hierarchy
 
 The reset should converge on four mark roles rather than one opacity value for a whole SVG group:
@@ -80,47 +96,43 @@ Scale focus (`48h`, `1y`, `60y`) may reduce surface/structure/context weight, bu
 - retain semantic topology, hit testing, phase and alignment gates;
 - record the old PNGs as pre-reset evidence rather than immutable visual targets.
 
-### B. Camera composition
+### B. Radial composition
 
-Change framing only. Do not simultaneously recolor or resize rings. The acceptance question is whether the common radial origin becomes perceptually obvious instead of the fan reading as nearly parallel horizontal bands.
+Change inner radius, primary ring thickness and camera framing together while keeping the outer envelope, fan aperture and all time semantics fixed. The acceptance question is whether the five layers occupy enough radial depth to read as one concentric mechanism **without** creating a large dead inner-disk field.
 
-### C. Radial geometry
-
-Change radii/thickness only. Preserve radial order and all hit/drag semantics. Evaluate geometry in grayscale before using color to compensate for area imbalance.
-
-### D. Fan aperture
+### C. Fan aperture
 
 Evaluate the fan angle as the instrument's frame after camera and ring geometry are stable.
 
-### E. Rendering density
+### D. Rendering density
 
 Reduce resting minor-sector/tick noise while retaining precise active and interactive detail.
 
-### F. Mark-level emphasis
+### E. Mark-level emphasis
 
 Replace whole-track fading with role-specific emphasis.
 
-### G. Color grammar
+### F. Color grammar
 
 Use color semantically: Ganzhi structure, annual solar coordinate, Selected Instant datum, and optional classification overlays should be distinguishable by role rather than by assigning every ring an unrelated muted hue.
 
-### H. Integrated labels
+### G. Integrated labels
 
 Move layer identity into the instrument so a detached legend is no longer required to understand radial order.
 
-### I. Selected Instant consolidation
+### H. Selected Instant consolidation
 
 Make the radial datum/read-head the primary current-state reading and remove duplicate state presentations where they no longer add information.
 
-### J. HUD hierarchy
+### I. HUD hierarchy
 
 Keep direct time controls primary. Move analysis lenses such as classification/reference/compare into secondary disclosure.
 
-### K. Mobile composition
+### J. Mobile composition
 
 Use the same semantic/world model but give portrait mobile its own camera/composition contract rather than treating it as desktop plus horizontal crop.
 
-### L. Debt cleanup
+### K. Debt cleanup
 
 Only after the new architecture stabilizes, remove obsolete visual overrides and old assumptions.
 

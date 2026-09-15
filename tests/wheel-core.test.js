@@ -40,7 +40,7 @@ import { ringAtWorldPoint } from "../src/wheel/ring-drag-controller.js";
 const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 const boundaryCss = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 
-test("five primary rings encode increasing temporal scale without freezing presentation thickness", () => {
+test("five primary rings encode temporal scale through radius with balanced presentation thickness", () => {
   assert.equal(assertWheelModel(), true);
   assert.deepEqual(RINGS.map(ring => ring.id), ["hour", "day", "solar", "month", "year"]);
   assert.equal(RINGS.length, 5);
@@ -62,12 +62,19 @@ test("five primary rings encode increasing temporal scale without freezing prese
   assert.equal(RINGS[0].innerRadius, RADII.inner);
   assert.equal(RINGS.at(-1).outerRadius, RADII.outer);
 
-  // Radial position carries temporal scale. Thickness is intentionally a visual
-  // composition parameter and may change independently of cycle duration.
+  // Radius is the temporal-scale channel. Thickness is presentation-owned, but
+  // the reset deliberately prevents one outer shell from becoming a giant wall.
   const thicknesses = RINGS.map(ring => ring.outerRadius - ring.innerRadius);
   thicknesses.forEach((thickness, index) => {
     assert.ok(thickness > 0, `${RINGS[index].id} needs positive visual thickness`);
   });
+  const minThickness = Math.min(...thicknesses);
+  const maxThickness = Math.max(...thicknesses);
+  assert.ok(maxThickness / minThickness <= 1.30, `primary ring thicknesses should stay visually balanced: ${thicknesses}`);
+
+  const radialDepth = RADII.outer - RADII.inner;
+  assert.ok(radialDepth / RADII.outer >= 0.55, "primary rings should occupy a majority of radial depth");
+  assert.ok(RADII.inner / RADII.outer <= 0.45, "inner void should not consume most of the giant disk");
 
   assert.equal(ringModel("hour").cycleScale, "~5 days");
   assert.equal(ringModel("day").cycleScale, "60 days");
@@ -159,36 +166,49 @@ test("paths are derived from canonical geometry rather than CSS transforms", () 
   assert.match(fan, new RegExp(`^M ${WHEEL_CENTER.x.toFixed(3)} ${WHEEL_CENTER.y.toFixed(3)}`));
 });
 
-function assertValidCamera(camera, expectedMode) {
+function assertValidCamera(camera, expectedMode, expectedAspect) {
   assert.equal(camera.mode, expectedMode);
   assert.ok(Number.isFinite(camera.zoom) && camera.zoom > 0);
   assert.ok(Number.isFinite(camera.topMargin));
+  assert.ok(Number.isFinite(camera.originGap));
+  assert.ok(Number.isFinite(camera.originGapRatio));
   for (const key of ["x", "y", "width", "height"]) {
     assert.ok(Number.isFinite(camera.viewBox[key]), `${expectedMode} viewBox.${key} should be finite`);
   }
   assert.ok(camera.viewBox.width > 0, `${expectedMode} camera width should be positive`);
   assert.ok(camera.viewBox.height > 0, `${expectedMode} camera height should be positive`);
+  assert.ok(Math.abs(camera.viewBox.width / camera.viewBox.height - expectedAspect) < 1e-10);
   assert.match(viewBoxString(camera.viewBox), /^-?\d+\.\d{3} -?\d+\.\d{3} \d+\.\d{3} \d+\.\d{3}$/);
 }
 
-test("responsive camera chooses a valid composition by breakpoint without freezing aesthetic framing", () => {
+test("responsive camera follows rendered aspect while preserving useful radial depth", () => {
   assert.equal(cameraModeForWidth(1440), "desktop");
   assert.equal(cameraModeForWidth(820), "compact");
   assert.equal(cameraModeForWidth(481), "compact");
   assert.equal(cameraModeForWidth(480), "mobile");
   assert.equal(cameraModeForWidth(390), "mobile");
 
-  const desktop = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 1440 });
-  const compact = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 700 });
-  const mobile = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 390 });
+  const desktopAspect = 2;
+  const compactAspect = 1.25;
+  const mobileAspect = 390 / 720;
+  const desktop = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 1440, viewportAspect:desktopAspect });
+  const compact = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 700, viewportAspect:compactAspect });
+  const mobile = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 390, viewportAspect:mobileAspect });
 
-  assertValidCamera(desktop, "desktop");
-  assertValidCamera(compact, "compact");
-  assertValidCamera(mobile, "mobile");
+  assertValidCamera(desktop, "desktop", desktopAspect);
+  assertValidCamera(compact, "compact", compactAspect);
+  assertValidCamera(mobile, "mobile", mobileAspect);
 
-  // Responsive framing is intentionally presentation-owned. The semantic
-  // contract is a valid camera over the same world geometry, not a frozen
-  // x/y/width/height tuple from the pre-reset composition.
+  for (const camera of [desktop, compact, mobile]) {
+    const blankBelowInnerRing = RADII.inner - camera.originGap;
+    assert.ok(camera.originGap > 0, `${camera.mode} should keep the mathematical origin below the frame`);
+    assert.ok(camera.originGapRatio <= 0.40, `${camera.mode} origin should remain perceptually nearby`);
+    assert.ok(blankBelowInnerRing >= 0, `${camera.mode} should not crop through the inner ring at the datum`);
+    assert.ok(blankBelowInnerRing / RADII.outer <= 0.12, `${camera.mode} should not expose a large dead inner-disk area`);
+  }
+
+  // Responsive framing remains presentation-owned. The semantic contract is a
+  // valid view over one world geometry and a stable Selected-Instant datum.
   assert.equal(CURSOR_ANGLE, -90);
 });
 
