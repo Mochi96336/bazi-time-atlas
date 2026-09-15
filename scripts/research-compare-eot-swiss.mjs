@@ -8,9 +8,11 @@ const OUTPUT_DIR = process.env.OUTPUT_DIR || "tmp/eot-swiss-4006";
 const SWISSEPH_EPHE_PATH = process.env.SWISSEPH_EPHE_PATH;
 const YEARS = Object.freeze([2026, 4006]);
 const HOURS_PER_DAY = 24;
-const EXPECTED_PLANETARY_FILES = Object.freeze([
-  Object.freeze({ year:2026, filename:"sepl_18.se1", coverage:"1800-2399 CE" }),
-  Object.freeze({ year:4006, filename:"sepl_36.se1", coverage:"3600-4199 CE" })
+const EXPECTED_EPHEMERIS_FILES = Object.freeze([
+  Object.freeze({ year:2026, bodyClass:"planetary", filename:"sepl_18.se1", coverage:"1800-2399 CE" }),
+  Object.freeze({ year:2026, bodyClass:"lunar", filename:"semo_18.se1", coverage:"1800-2399 CE" }),
+  Object.freeze({ year:4006, bodyClass:"planetary", filename:"sepl_36.se1", coverage:"3600-4199 CE" }),
+  Object.freeze({ year:4006, bodyClass:"lunar", filename:"semo_36.se1", coverage:"3600-4199 CE" })
 ]);
 
 if (!SWISSEPH_EPHE_PATH) throw new Error("SWISSEPH_EPHE_PATH is required");
@@ -156,7 +158,7 @@ const byYear = Object.fromEntries(YEARS.map(year => {
 }));
 
 const ephemerisFiles = [];
-for (const expected of EXPECTED_PLANETARY_FILES) {
+for (const expected of EXPECTED_EPHEMERIS_FILES) {
   const filePath = path.join(SWISSEPH_EPHE_PATH, expected.filename);
   const [buffer, info] = await Promise.all([readFile(filePath), stat(filePath)]);
   ephemerisFiles.push(Object.freeze({
