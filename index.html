@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./scale-emphasis.css">
   <link rel="stylesheet" href="./classification-overlay.css">
   <link rel="stylesheet" href="./ux-analysis.css">
+  <link rel="stylesheet" href="./mobile-time.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -102,6 +103,18 @@
       </div>
     </section>
 
+    <section id="mobile-time-dock" class="mobile-time-dock" aria-label="手機精確時間控制">
+      <div class="mobile-time-heading">
+        <strong>精確時間</strong>
+        <small id="mobile-time-status" data-state="idle">UTC+08:00 · 秒級</small>
+      </div>
+      <label class="mobile-time-field">
+        <span>選定時間，UTC+08:00，秒級</span>
+        <input id="mobile-instant-input" type="datetime-local" step="1" aria-label="選定時間，UTC+8，秒級">
+      </label>
+      <button id="mobile-time-apply" type="button">套用</button>
+    </section>
+
     <section class="timeline-dock" aria-label="時間游標">
       <label class="instant-field">選定時間
         <input id="instant-input" type="datetime-local" step="60" aria-label="選定時間，UTC+8">
@@ -165,5 +178,6 @@
   <script type="module" src="./src/kinetic-boundaries.js"></script>
   <script type="module" src="./src/legacy-annual-compat.js"></script>
   <script type="module" src="./src/analysis-mode.js"></script>
+  <script type="module" src="./src/mobile-time-control.js"></script>
 </body>
 </html>
