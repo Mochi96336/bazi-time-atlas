@@ -3,13 +3,17 @@ import { DAY_BOUNDARY } from "../calendar/day-boundary.js";
 import { dayHourLocalClockStability } from "../calendar/day-hour-clock-stability.js";
 
 /**
- * Propagate the corrected year-4006 Swiss EoT production residual into the
- * calendar-owned Day/Hour boundary primitive.
+ * Propagate only the corrected year-4006 Swiss EoT production residual into
+ * the calendar-owned Day/Hour boundary primitive.
  *
- * The dense 5-minute sweep is empirical evidence, not a continuous theorem.
- * Therefore even a candidate that clears the observed residual envelope is
- * reported only as empirically stable; deterministic recurrence authority
- * remains false until a separately-reviewed continuous upper bound exists.
+ * This is deliberately one uncertainty contribution, not a complete target-
+ * instant uncertainty budget. Deep-time TT↔UT1 / Delta-T, target-instant
+ * projection, longitude and other clock/model uncertainties remain separate.
+ *
+ * The dense 5-minute sweep is also empirical evidence, not a continuous
+ * theorem. Therefore even a candidate that clears the observed EoT residual
+ * envelope is only stable against this observed EoT contribution; it is not
+ * deterministic Day/Hour membership and grants no recurrence authority.
  */
 export function year4006SwissObservedDayHourStability(
   localClock,
@@ -22,7 +26,7 @@ export function year4006SwissObservedDayHourStability(
     dayBoundary,
     uncertaintySeconds:observedErrorEnvelopeSeconds
   });
-  const stableAgainstObservedEnvelope = boundary.stable;
+  const eotContributionStableAgainstObservedEnvelope = boundary.stable;
 
   return Object.freeze({
     ...boundary,
@@ -30,19 +34,23 @@ export function year4006SwissObservedDayHourStability(
     targetYear:4006,
     evidenceId:evidence.id,
     evidenceKind:"empirical-grid-observed-production-max",
+    uncertaintyContribution:"equation-of-time-only",
     cadenceMinutes:dense.cadenceMinutes,
     samples:dense.samples,
     observedErrorEnvelopeSeconds,
     continuousUpperBound:false,
-    stableAgainstObservedEnvelope,
+    eotContributionStableAgainstObservedEnvelope,
+    coversOnlyEquationOfTimeError:true,
+    otherClockUncertaintyIncluded:false,
+    sufficientForFullMembership:false,
     deterministicMembership:false,
     recurrenceAuthorityGranted:false,
-    status:stableAgainstObservedEnvelope
-      ? "stable-against-observed-envelope-only"
-      : "boundary-ambiguous-under-observed-envelope",
-    reason:stableAgainstObservedEnvelope
-      ? "Day/Hour membership clears the largest production EoT residual observed on the corrected 5-minute Swiss grid, but that empirical grid is not a continuous upper-bound proof."
-      : "The corrected Swiss observed production residual envelope reaches a selected Day or Hour boundary, so membership is ambiguous even under the empirical grid envelope."
+    status:eotContributionStableAgainstObservedEnvelope
+      ? "eot-contribution-stable-against-observed-envelope-only"
+      : "eot-contribution-reaches-boundary-under-observed-envelope",
+    reason:eotContributionStableAgainstObservedEnvelope
+      ? "The candidate clears the largest production EoT residual observed on the corrected 5-minute Swiss grid. This covers only the EoT contribution; the grid is not a continuous upper bound and other target-instant uncertainty remains separate."
+      : "The corrected Swiss observed EoT production residual reaches a selected Day or Hour boundary, so this candidate is not stable even against the empirical EoT contribution alone."
   });
 }
 
@@ -51,7 +59,11 @@ export const YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT = Object.freeze({
   sourceEvidenceId:EQUATION_OF_TIME_4006_SWISS_EVIDENCE.id,
   targetYear:4006,
   evidenceKind:"empirical-grid-observed-production-max",
+  uncertaintyContribution:"equation-of-time-only",
   continuousUpperBound:false,
+  coversOnlyEquationOfTimeError:true,
+  includesOtherClockUncertainty:false,
+  sufficientForFullMembership:false,
   grantsRecurrenceAuthority:false,
   delegatesBoundarySemanticsTo:"day-hour-local-clock-boundary-stability-v1"
 });
