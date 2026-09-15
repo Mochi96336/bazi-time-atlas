@@ -2,7 +2,7 @@
 
 @media (max-width: 480px) {
   .kinetic-shell {
-    grid-template-rows: auto auto minmax(620px, calc(100dvh - 112px)) auto;
+    grid-template-rows: auto auto auto auto;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
@@ -10,6 +10,11 @@
     -webkit-overflow-scrolling: touch;
   }
   .kinetic-shell::-webkit-scrollbar { display: none; }
+
+  .instrument-shell {
+    height: calc(100dvh - 112px);
+    min-height: 620px;
+  }
 
   .mobile-time-dock {
     display: grid;
