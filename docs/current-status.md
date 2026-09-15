@@ -1,8 +1,8 @@
 # BaZi Time Atlas — current implementation checkpoint
 
-Updated through the repository-health, kinetic ownership, navigation, wheel hierarchy, deep-time solver-core, deterministic browser-harness and DE441 Sun-center apparent-direction proof work on current main, including PR #100 and PR #103.
+Updated through the current production wheel, deterministic visual-evidence, typed Day/Hour proof-chain and bounded DE441 seasonal-event runtime work on main, including PRs #145–#150.
 
-This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is retained as historical design rationale and must not override the behavior described here or locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
+This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is historical design rationale and must not override behavior locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
 
 ## Product state
 
@@ -12,21 +12,21 @@ Radial position and radial thickness both carry temporal meaning: short / fast c
 
 1. **Hour pillar** — 60-state wheel with double-hour boundaries under the atlas UTC+08:00 reference clock.
 2. **Day pillar** — 60-state wheel using the current Zi-initial 23:00 day-boundary convention.
-3. **Solar annual band** — one continuous apparent-solar-longitude cycle per year. The band contains the 24 solar-term structure and the derived tropical-zodiac classification sub-band.
+3. **Solar annual band** — one continuous apparent-solar-longitude cycle per year. It contains the 24 solar-term structure and the derived tropical-zodiac classification sub-band.
 4. **Month pillar** — 60-state wheel changing only at exact **jie** boundaries.
 5. **Year pillar** — 60-state wheel changing at exact Li Chun.
 
-Tropical Zodiac is therefore **not** a sixth independent time ring. It is a derived classification overlay inside the Solar annual coordinate and has no independent primary drag target, time law, visibility ownership or reference frame.
+Tropical Zodiac is **not** a sixth independent time ring. It is a derived classification overlay inside the Solar annual coordinate and has no independent primary drag target, time law, visibility ownership or reference frame.
 
 The visual thesis remains: **one instant, multiple coordinate systems, no fake universal mechanical period.**
 
 ## Navigation contract
 
-Primary product navigation is intentionally focused:
+Primary product navigation remains intentionally focused:
 
 `時間圖譜 → 出生 → 六十甲子 → 研究`
 
-The recurrence/deep-time lab remains fully available at its existing URL, but it is the visually secondary final **Research** destination rather than a peer primary product surface. Cross-view browser checks lock the order, labels, href and secondary treatment across desktop and mobile fixtures.
+The recurrence/deep-time lab remains available at its existing URL, but it is the visually secondary final **Research** destination rather than a peer primary product surface. Cross-view browser checks lock the order, labels, href and secondary treatment across desktop and mobile fixtures.
 
 ## Main-instrument capabilities
 
@@ -44,8 +44,16 @@ Implemented on the current instrument:
 - terminal boundary gates for active discrete teeth;
 - continuous temporal motion across state boundaries rather than centre-snapping each active tooth;
 - exact shared-boundary highlighting only when resolved next-boundary timestamps are identical;
-- scale-dependent reading emphasis without hiding other true layers;
-- an optional classification overlay that keeps BaZi Five-Phase and tropical-zodiac element/modality systems visually and semantically separate.
+- scale-dependent reading emphasis without hiding true layers;
+- optional classification overlay keeping BaZi Five-Phase and tropical-zodiac element/modality systems visually and semantically separate.
+
+Scale presets change reading priority, not geometry:
+
+- **48 小時** — Hour / Day remain full contrast. Solar stays legible context while the much larger Month / Year shells progressively recede by opacity plus saturation/luminance. Hovered or actively dragged rings immediately recover full contrast.
+- **一年** — Solar / Zodiac / Month become the primary comparison, with Year and fast clocks retained as secondary context.
+- **60 年** — Year becomes the primary reading while Month, Solar, Day and Hour remain visible as phase context.
+
+The Visual PNG self-check now captures all three scale states at desktop `1440×900` and true mobile `390×844`. It also captures the originally reported Selected Instant regression at `2026-09-14 07:43:42 UTC+08`, so presentation fixes are reviewable against a deterministic real case rather than only the current clock.
 
 Two important shared-boundary examples are represented directly:
 
@@ -56,34 +64,27 @@ Visual collinearity alone is never treated as temporal concurrence.
 
 ## Architecture ownership
 
-The main page has been split so domain/display and interaction semantics do not accumulate indefinitely inside the browser bootstrap.
+The main page is split so domain/display and interaction semantics do not accumulate indefinitely inside the browser bootstrap.
 
-`src/wheel/atlas-display-model.js` owns the pure Selected Instant → display/domain mapping used by the kinetic atlas, including:
+`src/wheel/atlas-display-model.js` owns the pure Selected Instant → display/domain mapping used by the kinetic atlas, including pinned UTC+08 instant/civil-field conversion, apparent solar longitude lookup, current pillar/discrete-phase resolution and legacy projection interpretation.
 
-- pinned UTC+08 instant ↔ civil-field conversion;
-- datetime input parsing/formatting;
-- apparent solar longitude lookup;
-- current pillar and discrete-phase resolution;
-- BaZi month, solar-term, zodiac and sexagenary display selection;
-- legacy `instant` / `lambda` / `month` / `yearStem` projection interpretation.
+`src/kinetic-atlas.js` remains the page/root orchestrator. It owns canonical page state, DOM readout mutation, renderer coordination and component wiring while delegating interaction lifecycles.
 
-`src/kinetic-atlas.js` remains the page/root orchestrator. It owns canonical page state, DOM readout mutation, renderer coordination and component wiring, while delegating interaction lifecycles instead of implementing them inline.
-
-Current interaction ownership is explicit:
+Interaction ownership remains explicit:
 
 - `src/wheel/ring-drag-controller.js` — pointer capture, activation threshold and free/linked drag lifecycle dispatch;
 - `src/interaction/linked-ring-scrub.js` — linked angular drag → canonical Selected Instant conversion;
-- `src/interaction/free-compare-controller.js` — Free Compare UI/mode and manual-offset reset/view state;
+- `src/interaction/free-compare-controller.js` — Free Compare mode and manual-offset reset/view state;
 - `src/interaction/kinetic-playback.js` — pure scale, slider and playback advance mathematics;
-- `src/interaction/kinetic-playback-controller.js` — RAF plus playback start/stop/toggle and play-button lifecycle.
+- `src/interaction/kinetic-playback-controller.js` — RAF plus playback start/stop/toggle lifecycle.
 
 Other ownership boundaries remain:
 
 - `src/calendar/` — calendar/BaZi rules and Tyme adapter;
-- `src/astronomy/` — solar, Equation-of-Time, long-term and seasonal source/solver components;
-- `src/recurrence/` — recurrence, residual, determinacy and proof-chain models;
+- `src/astronomy/` — solar, Equation-of-Time, long-term, state/observable proof and seasonal solver components;
+- `src/recurrence/` — recurrence, residual, determinacy, source-audit, registration and proof-chain models;
 - `src/wheel/` — geometry, renderer, ring state, temporal tracks and drag contracts;
-- `src/interaction/` — interaction laws/controllers that act on the page state without becoming domain authorities.
+- `src/interaction/` — interaction laws/controllers acting on page state without becoming domain authorities.
 
 The normative cross-cutting version of these boundaries is recorded in `docs/architecture-contracts.md`.
 
@@ -102,91 +103,131 @@ The practical atlas keeps calendar rules and presentation separate:
 
 ## Recurrence / deep-time state
 
-The repository contains working research models for:
+The repository contains working models/evidence for:
 
 - Gregorian 400-year structure;
 - 60-year / 60-day congruence analysis;
 - local Year+Day recurrence around 1,980 years for the chosen civil-date phase;
 - 24,000-year global Gregorian + Year + Day exact-discrete closure;
-- long-term orbital / solar-term-shape residual comparison using an explicitly bounded model;
+- long-term orbital / solar-term-shape residual comparison using explicitly bounded models;
 - near-recurrence ranking rather than false exact-period claims;
 - month-boundary disagreement-window attribution;
 - four-pillar determinacy analysis;
 - Day / Hour proof-chain analysis;
-- absolute seasonal-epoch source-capability audit.
+- absolute seasonal-epoch source capability, promotion and runtime-registration audits.
 
 The deep-time lab intentionally separates three different claims:
 
 1. **exact discrete recurrence**;
 2. **approximate astronomical similarity**;
-3. **resolved or unresolved absolute epoch reconstruction with explicit source/model coverage**.
+3. **resolved or unresolved absolute epoch reconstruction with explicit source/model/runtime coverage**.
 
 A discrete closure or similar orbital shape is never promoted into an exact historical/future civil timestamp by implication.
 
 ## Seasonal-epoch source boundary
 
-Source role is part of provenance. The provider contracts distinguish:
+Source role is part of provenance. Provider contracts distinguish:
 
 - **shape parameters** — long-term orbital/insolation geometry that can compare seasonal shape but does not supply an absolute event epoch;
-- **absolute-state basis** — Earth/Sun state vectors on a continuous dynamical-time axis, such as DE441, which still require the app's seasonal-crossing transformation/solve chain;
-- **direct seasonal-event provider** — a source that directly supplies target solar-longitude crossing epochs on a declared continuous dynamical-time basis.
+- **absolute-state basis** — Earth/Sun states on a continuous dynamical-time axis, such as DE441, which require an app-owned observable transformation and crossing solve;
+- **direct seasonal-event provider** — a bounded data/runtime source that directly supplies target solar-longitude crossing epochs on a declared continuous dynamical-time basis.
 
-State adapters and direct-event providers remain separate integration registries. A direct-event provider must never be relabelled as DE441 merely because DE441 was used for validation.
+State adapters and direct-event providers remain separate integration paths. Passing proof evidence never automatically widens production runtime coverage.
 
-### Direct-event validation result
+### ShouXing validation boundary
 
-The pinned ShouXing research path demonstrates that a direct-event pipeline can work without making it production-authoritative outside its validated coverage.
+The pinned ShouXing path remains useful as a research/direct-event comparison without becoming authoritative outside validated coverage.
 
 - The modern 2026 control agrees closely with the independent target observable.
-- Independent DE441/Horizons evidence for year 4006 is present, but its approximately 4.5-minute target-year error exceeds the promotion budget by a wide margin.
-- Therefore ShouXing coverage remains bounded; the 4006 evidence is a **validation failure**, not permission to widen the provider range.
+- Against independent DE441/Horizons year-4006 truth, the ShouXing maximum target-year error is about 4.5 minutes (mean absolute error about 4.35 minutes) and exceeds the production promotion budget by a wide margin.
+- Therefore that evidence is a **validation failure for widening ShouXing coverage**, not permission to extend it.
 
-### Absolute-state solver core
+### DE441 end-to-end reconstruction proof
 
-The repository contains an app-owned seasonal-crossing **solver core** over injected absolute states. Its contract keeps these layers explicit:
+The repository now contains an app-owned absolute-state seasonal-crossing solver with explicit layers:
 
-- source states: barycentric Earth/Sun state basis in ICRF on TDB;
-- TT → ephemeris-time conversion;
-- light-time handling;
-- apparent-direction correction;
+- DE441 geometric Earth/Sun barycentric ICRF states on TDB;
+- NAIF/SPICE-compatible TT → TDB conversion;
+- reception light-time iteration;
+- validated Sun-center apparent-direction correction, including stellar aberration and the evidence-bounded Sun-center deflection semantics required by the target observable;
 - transformation into Earth mean ecliptic-of-date;
-- wrapped/bracket-expanding TT root solve for the requested longitude crossing.
+- apparent geocentric solar longitude;
+- bounded TT crossing root solve.
 
-The pinned DE441 research path has now validated several of those layers independently. For the geocentric **Sun-center** seasonal-longitude use case, the proof adapter composes the existing TT→TDB and DE441 state-window basis with one-iteration reception light time and NAIF-style stellar aberration. Across pinned 2026 and 4006 evidence windows, the resulting apparent ICRF direction agrees with the corresponding Horizons observer/vector layers to the recorded evidence precision. The ecliptic-of-date frame proof is also validated.
+For catalogue year **4006**, the complete chain has been validated against independent NASA/JPL Horizons quantity #31 truth for all 24 canonical 15° crossings:
 
-That result has a deliberately narrow interpretation: the Horizons evidence does not show an additional gravitational-deflection residual for this Sun-center target at the tested precision, but that is **not** a general rule for arbitrary targets or observables.
+- solved crossings: **24 / 24**;
+- maximum epoch error: **0.161 s**;
+- mean absolute epoch error: **0.057 s**;
+- maximum truth-longitude residual: **0.007 arcsec**;
+- production promotion budget: **2 s**;
+- production-shaped solver parity: passed.
 
-This progress still does **not** make DE441 production-integrated and does not yet authorize a production seasonal event pipeline. The longitude-crossing root solve has not been composed and validated end to end with the proven state/apparent/frame layers, and the production DE441 data path remains unintegrated. Production registries therefore remain conservative and fail closed.
+This evidence qualifies year 4006 for bounded runtime integration. It does **not** imply that every year in the full DE441 ephemeris range has been independently validated.
+
+### Production year-4006 seasonal-event runtime
+
+Production integration deliberately does **not** expose the proof-only DE441 state windows as a general runtime state adapter. Instead, the validated year-4006 result is published as a bounded authoritative direct-event data product:
+
+- provider id: `jpl-de441-seasonal-events-v1`;
+- source authority: NASA/JPL Horizons quantity #31 / DE441;
+- time scale: TT;
+- published coverage: catalogue year **4006 only**;
+- payload: exactly **24** apparent geocentric solar-longitude crossing epochs at 15° steps;
+- integration mode: `direct-event-runtime-registry`.
+
+Runtime startup re-assesses the data product before registration. The gate verifies source provenance/integrity, manifest coverage, exact runtime payload identity, 24 canonical crossings and the independently reconstructed DE441/Horizons parity inside the two-second budget. A failed assessment throws instead of silently publishing the provider.
+
+This is why `SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds` remains empty and the generic state-solver flags remain false while year 4006 can still be resolved through the registered direct-event provider. Those states are not contradictory: the proof-only state adapter is still fail-closed, while the separately reviewed 4006 event slice is production-integrated.
+
+The provider coverage is intentionally **not** widened to DE441's full source ephemeris range (`-13200…17191`) by inference. Every additional published year/range requires its own declared payload and validation boundary.
 
 ## Day / Hour deep-time boundary
 
-The project still does **not** have an arbitrary-millennia birth-calculation engine.
+The project still does **not** have an arbitrary-millennia birth-calculation engine. Resolving a seasonal epoch does not automatically resolve Day or Hour.
 
-Even after an absolute seasonal epoch is available, Day / Hour require separate proof stages including:
+The proof chain now uses a typed **local-zone convention** rather than a legacy boolean claim. Supported semantic cases include:
 
-- TT↔UT / ΔT and Earth rotation;
-- civil-zone policy;
+- `civil-timezone` — requires an explicitly resolved civil timezone policy and a non-empty zone id;
+- `proleptic-fixed-offset-from-ut1` — a research convention defining a local clock directly from UT1, without claiming future UTC, DST or political timezone history.
+
+A `fixed-zone-from-ut1` target instant may derive the matching proleptic local-zone convention. That can satisfy the local-clock projection stage while still keeping `futureUtcPolicyResolved=false` and `civilTimezonePolicyResolved=false`.
+
+The Day proof also uses the canonical typed day-boundary contract shared with the Birth engine: `zi-initial-next-day` or `civil-midnight`. The legacy `dayBoundaryBound:true` boolean is not authority and cannot unlock the proof by itself.
+
+The recurrence research controls expose those two canonical day-boundary choices independently from the fixed-zone target toggle. No value is selected by default. An absent `dayBoundary` remains explicitly unbound, and an invalid value fails closed instead of inheriting the Birth-page default.
+
+For the year-4006 fixed-zone research target with `UT1 +8 h`:
+
+- without `dayBoundary`, the first hard blocker remains **day-boundary** and Day / Hour stay unresolved;
+- with either canonical day-boundary convention, the Day pillar resolves and the first hard blocker advances to **clock-basis**;
+- Hour remains unresolved because civil / local-mean-solar / local-apparent-solar clock basis is still intentionally unbound.
+
+Remaining downstream proof stages still include, as applicable:
+
+- deterministic TT↔UT1 / Earth-rotation treatment for the chosen target basis;
+- local-zone convention;
 - day-boundary convention;
-- selected civil / mean-solar / apparent-solar clock basis;
-- downstream pillar reconstruction.
+- sexagenary day arithmetic and resolved Day pillar;
+- selected civil / local-mean-solar / local-apparent-solar clock basis;
+- longitude when the selected solar-time basis requires it;
+- Hour pillar reconstruction.
 
 An event timestamp must therefore never be promoted directly into “all four pillars resolved”.
 
 ## Repository health and release boundary
 
-The repository now has a reproducible baseline rather than an implicit local-machine workflow:
+The repository has a reproducible baseline rather than an implicit local-machine workflow:
 
 - `package-lock.json` pins the dependency graph;
 - CI and deployment install with `npm ci`;
-- `npm run check` runs the test suite plus an automatic recursive JavaScript syntax scan, so new JS/MJS files are not silently omitted from syntax validation;
-- the project runtime remains Node 22;
-- GitHub-maintained checkout/setup/artifact actions use their current pinned majors in the workflows;
+- `npm run check` runs the test suite plus recursive JavaScript syntax validation;
+- runtime remains Node 22;
 - **Quality Gate** provides the fast locked-install + repository-check boundary;
-- **Visual PNG self-check** provides the browser-contract + PNG-evidence boundary;
-- GitHub Pages deploys only after a successful Visual workflow caused by a push to `main`, and checks out that workflow's exact `head_sha` before deployment;
-- Pages concurrency is scoped to the eligible deploy job, so skipped PR-triggered `workflow_run` shells cannot cancel a legitimate production deployment while successive eligible main deploys retain latest-wins behavior.
-
-The exact shared-boundary browser fixture no longer relies on opportunistic load timing plus a few fixed-delay snapshots. It advances through bounded, condition-driven states and records the stalled phase/error if it cannot settle, while preserving the existing outer fail-closed time budget.
+- **Visual PNG self-check** provides browser-contract + deterministic PNG evidence;
+- scale-window captures cover 48h / one-year / 60-year at desktop and true 390 px mobile;
+- the originally reported Selected Instant has dedicated deterministic regression PNGs;
+- GitHub Pages deploys only after a successful Visual workflow caused by a push to `main`, checking out that workflow's exact `head_sha`.
 
 One repository-setting gap remains outside source control: `main` should be protected by a GitHub branch/ruleset requiring PR flow and the required Quality/Visual checks while blocking force-push/delete. A solo repository does not need an artificial multi-reviewer requirement.
 
@@ -196,7 +237,7 @@ Every main-instrument or deep-time PR should continue to preserve:
 
 - exact calendar/boundary tests;
 - canonical radial order `Hour → Day → Solar annual band → Month → Year`;
-- increasing primary radial scale from faster inner cycles to slower outer cycles;
+- increasing radial scale from faster inner cycles to slower outer cycles;
 - Zodiac ownership by the Solar annual band rather than an independent clock;
 - canonical fan/world geometry and true-390 px composition;
 - linked drag and Free Compare semantics;
@@ -208,17 +249,18 @@ Every main-instrument or deep-time PR should continue to preserve:
 - scale-emphasis and classification-overlay invariants;
 - recurrence / astronomical residual / determinacy / proof-chain gates;
 - source-role provenance and fail-closed deep-time semantics;
+- explicit runtime coverage distinct from broad source-ephemeris coverage;
 - cross-view navigation hierarchy;
 - desktop/mobile PNG inspection when presentation changes.
 
 ## Current frontier
 
-1. **Attach a real production absolute-state adapter only behind its declared source/time/frame contract.** The proof adapters exist; the production DE441 data integration does not.
-2. **Compose the validated Sun-center apparent-ICRF and ecliptic-of-date proof layers with the longitude-crossing root solve, then validate that end-to-end target observable before production promotion.**
-3. **Validate target eras independently.** A working modern pipeline does not authorize a distant-era coverage extension.
-4. **Propagate any resolved absolute epoch into Day / Hour through a separate Earth-rotation/civil-time proof chain.**
+1. **Validate and publish additional seasonal-event runtime coverage only where independent target-era evidence exists.** The 4006 direct-event slice is production-integrated; the rest of DE441's theoretical source coverage must not be inherited automatically.
+2. **Add a production absolute-state adapter only if a real runtime use case requires on-demand states/crossings.** Proof-only pinned windows must not be rebranded as general runtime coverage; any adapter needs explicit bundled data, source/time/frame semantics and runtime coverage.
+3. **Continue the year-4006 Day / Hour proof from the `clock-basis` blocker.** Explicit day-boundary selection is now wired and can resolve Day; the next production-safe step is to bind civil / local-mean-solar / local-apparent-solar clock basis without conflating it with target-instant time scale or future political timezone policy.
+4. **Validate target eras independently.** Passing 2026 or 4006 does not authorize another century or millennium by interpolation of confidence.
 5. **Keep Research secondary to the product instrument.** New evidence surfaces should not turn the landing page back into a dashboard.
-6. **Protect `main` at the repository-settings layer.** Source-controlled CI is now strong enough to serve as required checks once the ruleset is enabled.
+6. **Protect `main` at the repository-settings layer.** Source-controlled CI is strong enough to serve as required checks once a ruleset is enabled.
 7. **Optional Western sky only after the above remains stable.** Planets/aspects require explicit ephemeris provenance and remain distinct from BaZi classifications.
 
-The current direction is therefore: keep radial position and motion semantically meaningful, keep classification systems distinct, keep controller/domain ownership narrow, and extend only source-backed portions of the absolute-time proof chain without converting model coverage into unsupported certainty.
+The current direction is therefore: keep radial position and motion semantically meaningful, keep classification systems distinct, keep controller/domain ownership narrow, publish only source-backed absolute-time results inside explicit runtime coverage, and never convert broad model/source coverage into unsupported certainty.
