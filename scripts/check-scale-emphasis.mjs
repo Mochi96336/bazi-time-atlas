@@ -29,6 +29,12 @@ function requireEqual(actual, expected, label, url) {
   if (actual !== expected) throw new Error(`${label}: expected ${expected}, got ${actual}: ${url}`);
 }
 
+function requireDescending(values, label, url) {
+  if (!values.every(Number.isFinite) || values.some((value, index) => index > 0 && values[index - 1] <= value)) {
+    throw new Error(`${label}: expected strictly descending opacity, got ${values.join(",")}: ${url}`);
+  }
+}
+
 const url = new URL("scripts/fixtures/scale-emphasis-390.html", baseURL).href;
 const result = spawnSync(findBrowser(), [
   "--headless=new",
@@ -61,8 +67,13 @@ near(num(probe, "data-year-solar-opacity"), 1, "one-year Solar opacity", url);
 near(num(probe, "data-year-zodiac-opacity"), 1, "one-year Zodiac opacity", url);
 near(num(probe, "data-year-month-opacity"), 1, "one-year Month opacity", url);
 near(num(probe, "data-year-year-opacity"), .62, "one-year Year context opacity", url);
-near(num(probe, "data-year-day-opacity"), .40, "one-year Day ambient opacity", url);
-near(num(probe, "data-year-hour-opacity"), .30, "one-year Hour ambient opacity", url);
+near(num(probe, "data-year-day-opacity"), .54, "one-year Day ambient opacity", url);
+near(num(probe, "data-year-hour-opacity"), .46, "one-year Hour ambient opacity", url);
+requireDescending([
+  num(probe, "data-year-year-opacity"),
+  num(probe, "data-year-day-opacity"),
+  num(probe, "data-year-hour-opacity")
+], "one-year context hierarchy Year > Day > Hour", url);
 
 requireEqual(attr(probe, "data-day-window"), "day", "48-hour emphasis mode", url);
 requireEqual(attr(probe, "data-day-focus"), "hour,day", "48-hour focus rings", url);
@@ -85,8 +96,15 @@ near(num(probe, "data-cycle-year-opacity"), 1, "60-year Year opacity", url);
 near(num(probe, "data-cycle-month-opacity"), .70, "60-year Month context opacity", url);
 near(num(probe, "data-cycle-solar-opacity"), .52, "60-year Solar context opacity", url);
 near(num(probe, "data-cycle-zodiac-opacity"), .52, "60-year Zodiac follows Solar opacity", url);
-near(num(probe, "data-cycle-day-opacity"), .34, "60-year Day ambient opacity", url);
-near(num(probe, "data-cycle-hour-opacity"), .24, "60-year Hour ambient opacity", url);
+near(num(probe, "data-cycle-day-opacity"), .48, "60-year Day ambient opacity", url);
+near(num(probe, "data-cycle-hour-opacity"), .40, "60-year Hour ambient opacity", url);
+requireDescending([
+  num(probe, "data-cycle-year-opacity"),
+  num(probe, "data-cycle-month-opacity"),
+  num(probe, "data-cycle-solar-opacity"),
+  num(probe, "data-cycle-day-opacity"),
+  num(probe, "data-cycle-hour-opacity")
+], "60-year hierarchy Year > Month > Solar > Day > Hour", url);
 
 requireEqual(attr(probe, "data-all-primary-displayed"), "true", "scale emphasis must not hide primary layers", url);
 requireEqual(attr(probe, "data-zodiac-displayed"), "true", "scale emphasis must not hide Zodiac overlay", url);
