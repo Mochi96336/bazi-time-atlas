@@ -50,7 +50,10 @@ function attr(tag, name) {
 }
 
 function tagById(dom, tagName, id) {
-  return new RegExp(`<${tagName}\\b[^>]*id="${id}"[^>]*>`).exec(dom)?.[0] ?? "";
+  const start = dom.indexOf(`<${tagName}`);
+  if (start < 0) return "";
+  const candidates = dom.match(new RegExp(`<${tagName}[^>]*>`, "g")) ?? [];
+  return candidates.find(tag => attr(tag, "id") === id) ?? "";
 }
 
 function elementTextById(dom, id) {
@@ -59,7 +62,11 @@ function elementTextById(dom, id) {
 }
 
 function groupMarkup(dom, id) {
-  return new RegExp(`<g\\b[^>]*id="${id}"[^>]*>[\\s\\S]*?<\\/g>`).exec(dom)?.[0] ?? "";
+  const openTag = tagById(dom, "g", id);
+  if (!openTag) return "";
+  const start = dom.indexOf(openTag);
+  const end = dom.indexOf("</g>", start);
+  return end >= 0 ? dom.slice(start, end + 4) : "";
 }
 
 function hasClass(tag, name) {
@@ -67,7 +74,7 @@ function hasClass(tag, name) {
 }
 
 function firstTagWithClasses(markup, tagName, classNames) {
-  const tags = markup.match(new RegExp(`<${tagName}\\b[^>]*>`, "g")) ?? [];
+  const tags = markup.match(new RegExp(`<${tagName}[^>]*>`, "g")) ?? [];
   return tags.find(tag => classNames.every(name => hasClass(tag, name))) ?? "";
 }
 
