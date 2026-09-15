@@ -30,6 +30,9 @@ const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
 
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
+  const cycleStaticLabels = new Map();
+  const activeCycleLabels = new Map();
+  const lastActiveCycleIndex = new Map();
   const termSectorNodes = [];
   const zodiacSectorNodes = [];
   const motionTraceNodes = new Map();
@@ -67,6 +70,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const model = ringModel(id);
     const group = groupFor(id);
     const sectors = [];
+    const staticLabels = new Map();
     group.classList.add("ring-track", `${id}-track`);
 
     sexagenary.forEach((label, index) => {
@@ -99,11 +103,21 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
           x: point.x,
           y: point.y,
           class: "cycle-label",
+          "data-cycle-index": index,
+          "data-cycle-label": label,
           transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
         }, group);
         text.textContent = label;
+        staticLabels.set(index, text);
       }
     });
+
+    const activeLabel = el("text", {
+      class: "active-cycle-label",
+      "data-active-cycle-ring": id,
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, group);
 
     el("path", {
       class: `state-phase-progress phase-${id}`,
@@ -132,6 +146,44 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     }, group);
 
     cycleSectors.set(id, sectors);
+    cycleStaticLabels.set(id, staticLabels);
+    activeCycleLabels.set(id, activeLabel);
+  }
+
+  function updateActiveCycleLabel(id, activeIndex) {
+    const node = activeCycleLabels.get(id);
+    if (!node) return;
+
+    const previousIndex = lastActiveCycleIndex.get(id);
+    if (previousIndex === activeIndex) return;
+
+    const staticLabels = cycleStaticLabels.get(id);
+    if (Number.isInteger(previousIndex)) {
+      staticLabels?.get(previousIndex)?.classList.remove("is-active-shadowed");
+    }
+
+    if (!Number.isInteger(activeIndex) || activeIndex < 0 || activeIndex >= sexagenary.length) {
+      node.setAttribute("visibility", "hidden");
+      node.removeAttribute("data-cycle-index");
+      node.removeAttribute("data-cycle-label");
+      node.textContent = "";
+      lastActiveCycleIndex.delete(id);
+      return;
+    }
+
+    const model = ringModel(id);
+    const angle = activeIndex * 6 + 3;
+    const point = polar((model.innerRadius + model.outerRadius) / 2, angle);
+    const label = sexagenary[activeIndex];
+    node.setAttribute("x", String(point.x));
+    node.setAttribute("y", String(point.y));
+    node.setAttribute("transform", `rotate(${angle + 90} ${point.x} ${point.y})`);
+    node.setAttribute("data-cycle-index", String(activeIndex));
+    node.setAttribute("data-cycle-label", label);
+    node.setAttribute("visibility", "visible");
+    node.textContent = label;
+    staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
+    lastActiveCycleIndex.set(id, activeIndex);
   }
 
   function renderSolarRing() {
@@ -352,6 +404,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   function setCyclePose(id, rotationDegrees, activeIndex) {
     worldRotations.set(id, rotationDegrees);
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
+    updateActiveCycleLabel(id, activeIndex);
     scheduleReferenceFrameFlush();
   }
 
