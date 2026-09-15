@@ -20,22 +20,25 @@
 #kinetic-instrument[data-scale-window="day"] #month-track { opacity: .38; }
 #kinetic-instrument[data-scale-window="day"] #year-track { opacity: .30; }
 
-/* One year: continuous Solar plus jie-driven Month are the useful comparison. */
+/* One year: continuous Solar plus jie-driven Month are the useful comparison.
+   Fast clocks remain secondary, but their floor mirrors the legend so the
+   Selected Instant read-head never disappears into the contextual fade. */
 #kinetic-instrument[data-scale-window="year"] #solar-track,
 #kinetic-instrument[data-scale-window="year"] #zodiac-track,
 #kinetic-instrument[data-scale-window="year"] #month-track { opacity: 1; }
 #kinetic-instrument[data-scale-window="year"] #year-track { opacity: .62; }
-#kinetic-instrument[data-scale-window="year"] #day-track { opacity: .40; }
-#kinetic-instrument[data-scale-window="year"] #hour-track { opacity: .30; }
+#kinetic-instrument[data-scale-window="year"] #day-track { opacity: .54; }
+#kinetic-instrument[data-scale-window="year"] #hour-track { opacity: .46; }
 
 /* Sixty years: the outer Year shell becomes the primary reading. Month and the
-   annual band remain secondary phase context; fast clocks recede. */
+   annual band remain secondary phase context; fast clocks recede without
+   falling below the matching legend context floor. */
 #kinetic-instrument[data-scale-window="cycle"] #year-track { opacity: 1; }
 #kinetic-instrument[data-scale-window="cycle"] #month-track { opacity: .70; }
 #kinetic-instrument[data-scale-window="cycle"] #solar-track,
 #kinetic-instrument[data-scale-window="cycle"] #zodiac-track { opacity: .52; }
-#kinetic-instrument[data-scale-window="cycle"] #day-track { opacity: .34; }
-#kinetic-instrument[data-scale-window="cycle"] #hour-track { opacity: .24; }
+#kinetic-instrument[data-scale-window="cycle"] #day-track { opacity: .48; }
+#kinetic-instrument[data-scale-window="cycle"] #hour-track { opacity: .40; }
 
 /* The legend mirrors reading priority, but an explicitly hidden layer keeps the
    visibility-control styling instead of being revived by emphasis. */
