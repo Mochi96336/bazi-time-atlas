@@ -16,16 +16,6 @@ function freezeResult(value) {
   });
 }
 
-/**
- * Build an executable proof contract for projecting a normalized solar-term
- * comparison back onto Day and Hour pillars.
- *
- * The recurrence lab currently owns relative Jie geometry and sexagenary day
- * arithmetic, but its Berger shape comparison deliberately removes the common
- * vernal-equinox translation. Recovering Day/Hour therefore needs a new bridge
- * from an absolute dynamical-time seasonal epoch to Earth rotation and then to
- * a chosen local clock. The conditions below are capabilities, not guesses.
- */
 export function dayHourResolutionProof({
   identity = false,
   relativeTermGeometry,
@@ -187,13 +177,18 @@ export function dayHourResolutionProof({
 }
 
 /** Current capabilities intentionally represented by the recurrence page. */
-export function currentRecurrenceDayHourProof({ identity, astronomyWithinRange }) {
+export function currentRecurrenceDayHourProof({
+  identity,
+  astronomyWithinRange,
+  absoluteSeasonalEpoch = false
+}) {
   assertBoolean(identity, "identity");
   assertBoolean(astronomyWithinRange, "astronomyWithinRange");
+  assertBoolean(absoluteSeasonalEpoch, "absoluteSeasonalEpoch");
   return dayHourResolutionProof({
     identity,
     relativeTermGeometry:astronomyWithinRange,
-    absoluteSeasonalEpoch:false,
+    absoluteSeasonalEpoch,
     earthRotationBridge:false,
     civilZoneBound:false,
     dayBoundaryBound:false,

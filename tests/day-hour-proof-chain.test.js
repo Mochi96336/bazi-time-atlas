@@ -5,7 +5,7 @@ import {
   dayHourResolutionProof
 } from "../src/recurrence/day-hour-proof-chain.js";
 
-test("current deep-time recurrence stops first at the missing absolute seasonal epoch", () => {
+test("current deep-time recurrence defaults to missing absolute seasonal epoch", () => {
   const proof = currentRecurrenceDayHourProof({ identity:false, astronomyWithinRange:true });
   assert.equal(proof.firstHardBlocker, "absolute-seasonal-epoch");
   assert.equal(proof.day.resolved, false);
@@ -16,6 +16,21 @@ test("current deep-time recurrence stops first at the missing absolute seasonal 
   assert.ok(proof.day.blockers.includes("dayBoundaryBound"));
   assert.equal(proof.stages.find(stage => stage.id === "relative-term-geometry").status, "satisfied");
   assert.equal(proof.stages.find(stage => stage.id === "sexagenary-day-arithmetic").status, "satisfied");
+});
+
+test("resolved absolute seasonal epoch advances the first hard blocker to Earth rotation", () => {
+  const proof = currentRecurrenceDayHourProof({
+    identity:false,
+    astronomyWithinRange:true,
+    absoluteSeasonalEpoch:true
+  });
+  assert.equal(proof.firstHardBlocker, "earth-rotation-bridge");
+  assert.equal(proof.day.resolved, false);
+  assert.equal(proof.hour.resolved, false);
+  assert.equal(proof.day.blockers.includes("absoluteSeasonalEpoch"), false);
+  assert.ok(proof.day.blockers.includes("earthRotationBridge"));
+  assert.equal(proof.stages.find(stage => stage.id === "absolute-seasonal-epoch").status, "satisfied");
+  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "missing-deep-time-model");
 });
 
 test("identity bypasses cross-era projection without pretending the missing deep-time models exist", () => {

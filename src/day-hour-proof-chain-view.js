@@ -19,7 +19,11 @@ const STATUS_LABELS = Object.freeze({
 const AUDIT_STATUS_LABELS = Object.freeze({
   "identity-bypass":"同一狀態 · 不需跨 epoch",
   resolved:"已有可用 seasonal-epoch pipeline",
+  "qualified-direct-event-provider-not-integrated":"direct seasonal event 有 · 尚未整合",
   "qualified-ephemeris-basis-not-integrated":"absolute state coverage 有 · solver 尚未整合",
+  "state-adapter-runtime-coverage-undeclared":"state adapter 已註冊 · runtime coverage 未宣告",
+  "state-adapter-runtime-coverage-gap":"state adapter runtime coverage gap",
+  "deep-time-seasonal-epoch-solver-incomplete":"absolute state 有 · seasonal solver 未完成",
   "absolute-state-coverage-gap":"absolute-state ephemeris coverage gap"
 });
 
@@ -73,7 +77,7 @@ function ensureEpochAuditPanel() {
       <div>
         <div class="eyebrow">Absolute seasonal epoch · source audit</div>
         <h2>覆蓋到那一年，不代表能直接給出那一年的節氣時刻。</h2>
-        <p>這裡分開檢查年份 coverage、absolute Earth/Sun state、連續動力時間與 repo 整合狀態。數值 ephemeris 也只是 seasonal-epoch solver 的基礎：仍要做地心／視太陽黃經-of-date 轉換與交點 root solve。</p>
+        <p>這裡分開檢查年份 coverage、absolute Earth/Sun state、direct seasonal event、連續動力時間與 repo 整合狀態。只有真正可呼叫的 runtime provider 才會把 absolute seasonal epoch 標成可用。</p>
       </div>
       <div class="epoch-audit-summary">
         <span>Target / verdict</span>
@@ -136,48 +140,56 @@ function renderEpochSource(item) {
   article.dataset.ephemerisBasisCapable = String(item.ephemerisBasisCapable);
   article.dataset.directSeasonalEpoch = String(item.directSeasonalEpoch);
   article.dataset.implementedAsBasis = String(item.implementedAsBasis);
+  article.dataset.implementedDirectProvider = String(item.implementedDirectProvider);
   article.dataset.qualifiedCoverage = String(item.qualifiedCoverage);
   article.dataset.reason = item.reason;
 
   const coverage = `${formatYear(item.coverage.minYear)} → ${formatYear(item.coverage.maxYear)}`;
+  const inApp = item.implementedAsBasis || item.implementedDirectProvider;
   const verdict = item.usableNow
     ? "pipeline 可用"
-    : item.qualifiedCoverage
-      ? "absolute state ✓ · solver 尚未整合"
-      : item.coversTarget
-        ? "coverage ✓ · 無 absolute state"
-        : "超出 coverage";
+    : item.qualifiedCoverage && item.directSeasonalEpoch
+      ? "direct event ✓ · 尚未整合"
+      : item.qualifiedCoverage
+        ? "absolute state ✓ · solver 尚未整合"
+        : item.coversTarget
+          ? "coverage ✓ · 無 absolute epoch"
+          : "超出 coverage";
 
   article.innerHTML = `
     <header><div><span>${item.authority}</span><strong>${item.label}</strong></div><b>${verdict}</b></header>
     <div class="epoch-audit-facts">
       <span><em>Coverage</em><strong>${coverage}</strong></span>
       <span><em>Absolute state</em><strong>${item.ephemerisBasisCapable ? "yes" : "no"}</strong></span>
-      <span><em>In app</em><strong>${item.implementedAsBasis ? "yes" : "no"}</strong></span>
+      <span><em>Direct event</em><strong>${item.directSeasonalEpoch ? "yes" : "no"}</strong></span>
+      <span><em>In app</em><strong>${inApp ? "yes" : "no"}</strong></span>
     </div>
     <p>${item.note}</p>
   `;
   return article;
 }
 
-function renderEpochAudit(baseYear, targetYear) {
+function renderEpochAudit(baseYear, targetYear, audit) {
   const panel = ensureEpochAuditPanel();
   if (!panel || !instrument) return;
-  const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
   panel.querySelector("#epoch-audit-sources")?.replaceChildren(...audit.evaluations.map(renderEpochSource));
   setText("epoch-audit-target", `${targetYear} · ${AUDIT_STATUS_LABELS[audit.status] ?? audit.status}`);
   setText("epoch-audit-verdict", audit.identity
     ? "Δ=0 不需要跨 epoch source。"
-    : audit.status === "qualified-ephemeris-basis-not-integrated"
-      ? "DE441 涵蓋目標年的 absolute Earth/Sun state；仍須整合 source adapter、黃經-of-date transform 與 crossing root solve。"
-      : audit.status === "absolute-state-coverage-gap"
-        ? `現有 registry 沒有同時涵蓋 ${targetYear} 且提供 absolute state-vector ephemeris basis 的 source。`
-        : "absolute seasonal epoch pipeline 已可用。"
+    : audit.status === "resolved"
+      ? `已由 ${audit.usableSourceIds.join(" · ")} 提供可呼叫的 absolute seasonal epoch。`
+      : audit.status === "qualified-ephemeris-basis-not-integrated"
+        ? "DE441 涵蓋目標年的 absolute Earth/Sun state；仍須整合 source adapter、黃經-of-date transform 與 crossing root solve。"
+        : audit.status === "absolute-state-coverage-gap"
+          ? `現有 registry 沒有同時涵蓋 ${targetYear} 且提供 absolute state 或 direct seasonal event 的 source。`
+          : "absolute seasonal epoch pipeline 尚未滿足完整 runtime contract。"
   );
   const gap = audit.nearestEphemerisBoundary;
-  setText("epoch-audit-footnote", gap && !audit.identity
-    ? `最近的 absolute-state ephemeris 邊界：${gap.sourceId} → ${formatYear(gap.boundaryYear)}；距目標 ${gap.gapYears.toLocaleString("en-US")} 年。長期 shape/parameter coverage 不會被當成 absolute state 或 timestamp coverage。`
-    : "source coverage、absolute-state capability 與 seasonal-epoch solver 分開記錄。"
+  setText("epoch-audit-footnote", audit.status === "resolved"
+    ? `Production runtime coverage 只認 provider 自己宣告的年份；目前 usable：${audit.usableSourceIds.join(" · ")}。`
+    : gap && !audit.identity
+      ? `最近的 absolute seasonal-epoch source 邊界：${gap.sourceId} → ${formatYear(gap.boundaryYear)}；距目標 ${gap.gapYears.toLocaleString("en-US")} 年。長期 shape/parameter coverage 不會被當成 absolute state 或 timestamp coverage。`
+      : "source coverage、absolute-state capability、direct-event runtime 與 seasonal-epoch solver 分開記錄。"
   );
 
   panel.dataset.ready = "true";
@@ -197,6 +209,7 @@ function renderEpochAudit(baseYear, targetYear) {
   instrument.dataset.seasonalEpochDe441Covered = String(de441?.coversTarget ?? false);
   instrument.dataset.seasonalEpochDe441BasisCapable = String(de441?.ephemerisBasisCapable ?? false);
   instrument.dataset.seasonalEpochQualifiedSourceCount = String(audit.qualifiedSourceIds.length);
+  instrument.dataset.seasonalEpochUsableSourceCount = String(audit.usableSourceIds.length);
   instrument.dataset.seasonalEpochSolverRequired = String(audit.seasonalEpochSolverRequired);
   instrument.dataset.seasonalEpochNearestEphemerisGapYears = gap ? String(gap.gapYears) : "none";
 }
@@ -220,9 +233,12 @@ function refresh() {
   }
 
   const identity = deltaYears === 0;
+  const targetYear = baseYear + deltaYears;
+  const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
   const proof = currentRecurrenceDayHourProof({
     identity,
-    astronomyWithinRange:astronomyValidity === "within-range"
+    astronomyWithinRange:astronomyValidity === "within-range",
+    absoluteSeasonalEpoch:audit.absoluteSeasonalEpochAvailable
   });
   const stages = panel.querySelector("#proof-chain-stages");
   stages?.replaceChildren(...proof.stages.map(renderStage));
@@ -238,7 +254,9 @@ function refresh() {
       ? "同一狀態不需要跨時代的絕對時間投影。"
       : proof.firstHardBlocker === "absolute-seasonal-epoch"
         ? "先把春分／節氣放回絕對均勻時間軸，之後才有資格談民用日界。"
-        : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
+        : proof.firstHardBlocker === "earth-rotation-bridge"
+          ? "節氣已有絕對 TT；下一個硬缺口是 TT↔UT / ΔT 的深時間地球自轉橋。"
+          : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
   );
   setText("proof-chain-day-status", proof.day.resolved ? "resolved" : "blocked");
   setText(
@@ -264,7 +282,7 @@ function refresh() {
   instrument.dataset.dayHourProofHourResolved = String(proof.hour.resolved);
   instrument.dataset.dayHourProofStageCount = String(proof.stages.length);
 
-  renderEpochAudit(baseYear, baseYear + deltaYears);
+  renderEpochAudit(baseYear, targetYear, audit);
 }
 
 let queued = false;

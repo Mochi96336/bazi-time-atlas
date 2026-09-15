@@ -5,9 +5,11 @@ import {
 } from "../src/astronomy/absolute-state-seasonal-solver.js";
 import { HORIZONS_SUN_APPARENT_CORRECTION_EVIDENCE } from "../src/astronomy/horizons-sun-apparent-correction-evidence.js";
 import { HORIZONS_SUN_APPARENT_DIRECTION_PROOF_MODEL } from "../src/astronomy/horizons-sun-apparent-direction-proof.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import { SEASONAL_EPOCH_PIPELINE, seasonalEpochSourceAudit } from "../src/recurrence/seasonal-epoch-source-audit.js";
 
 const ARCSEC_PER_RADIAN = 206264.80624709636;
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function unit(vector) {
   const magnitude = Math.hypot(...vector);
@@ -85,11 +87,14 @@ test("repository aberration reproduces Horizons LT+S direction at modern and yea
   }
 });
 
-test("apparent-direction proof alone does not promote the production year-4006 seasonal pipeline", () => {
+test("apparent-direction proof remains proof-only while the bounded direct runtime resolves year 4006", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(result.absoluteSeasonalEpochAvailable, false);
+  assert.equal(result.status, "resolved");
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(result.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });
