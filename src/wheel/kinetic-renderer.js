@@ -150,15 +150,13 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     activeCycleLabels.set(id, activeLabel);
   }
 
-  function updateActiveCycleLabel(id, activeIndex) {
+  function updateActiveCycleLabel(id, activeIndex, modelRotationDegrees) {
     const node = activeCycleLabels.get(id);
     if (!node) return;
 
     const previousIndex = lastActiveCycleIndex.get(id);
-    if (previousIndex === activeIndex) return;
-
     const staticLabels = cycleStaticLabels.get(id);
-    if (Number.isInteger(previousIndex)) {
+    if (Number.isInteger(previousIndex) && previousIndex !== activeIndex) {
       staticLabels?.get(previousIndex)?.classList.remove("is-active-shadowed");
     }
 
@@ -166,20 +164,30 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       node.setAttribute("visibility", "hidden");
       node.removeAttribute("data-cycle-index");
       node.removeAttribute("data-cycle-label");
+      node.removeAttribute("data-cycle-coordinate");
       node.textContent = "";
       lastActiveCycleIndex.delete(id);
       return;
     }
 
+    // The active label is a read-head, not a sector caption. Use the same model
+    // coordinate that the temporal track aligned to Selected Instant instead of
+    // pinning text to the sector midpoint. This keeps the label exactly on the
+    // datum while time advances continuously within one Ganzhi sector. Manual
+    // Free Compare offset remains render-only, so the read-head travels with the
+    // detached ring rather than pretending the ring is still linked.
+    const coordinate = Number.isFinite(modelRotationDegrees)
+      ? ((CURSOR_ANGLE - modelRotationDegrees) % 360 + 360) % 360
+      : activeIndex * 6 + 3;
     const model = ringModel(id);
-    const angle = activeIndex * 6 + 3;
-    const point = polar((model.innerRadius + model.outerRadius) / 2, angle);
+    const point = polar((model.innerRadius + model.outerRadius) / 2, coordinate);
     const label = sexagenary[activeIndex];
     node.setAttribute("x", String(point.x));
     node.setAttribute("y", String(point.y));
-    node.setAttribute("transform", `rotate(${angle + 90} ${point.x} ${point.y})`);
+    node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
     node.setAttribute("data-cycle-index", String(activeIndex));
     node.setAttribute("data-cycle-label", label);
+    node.setAttribute("data-cycle-coordinate", coordinate.toFixed(6));
     node.setAttribute("visibility", "visible");
     node.textContent = label;
     staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
@@ -401,10 +409,10 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     renderCursor();
   }
 
-  function setCyclePose(id, rotationDegrees, activeIndex) {
+  function setCyclePose(id, rotationDegrees, activeIndex, modelRotationDegrees = rotationDegrees) {
     worldRotations.set(id, rotationDegrees);
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
-    updateActiveCycleLabel(id, activeIndex);
+    updateActiveCycleLabel(id, activeIndex, modelRotationDegrees);
     scheduleReferenceFrameFlush();
   }
 
