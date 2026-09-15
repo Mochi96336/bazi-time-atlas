@@ -1,0 +1,97 @@
+.target-instant-controls {
+  margin: 12px 0 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(238,242,237,.11);
+  border-radius: 14px;
+  background: rgba(255,255,255,.018);
+}
+.target-instant-control-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.target-instant-control-head > div { min-width: 0; }
+.target-instant-control-head span {
+  display: block;
+  color: #748078;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.target-instant-control-head strong {
+  display: block;
+  margin-top: 2px;
+  color: #d8ded9;
+  font-size: 12px;
+}
+.target-instant-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+  color: #9ca69f;
+  font-size: 10px;
+  cursor: pointer;
+}
+.target-instant-toggle input { accent-color: #cbd8cf; }
+.target-instant-fields {
+  display: grid;
+  grid-template-columns: minmax(150px, .8fr) minmax(150px, .7fr) minmax(220px, 1.5fr);
+  gap: 9px;
+  align-items: end;
+  margin-top: 10px;
+}
+.target-instant-fields label {
+  display: grid;
+  gap: 4px;
+  color: #707b73;
+  font-size: 8px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.target-instant-fields input {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid rgba(238,242,237,.12);
+  border-radius: 9px;
+  color: #eef2ed;
+  background: #111512;
+}
+.target-instant-fields input:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+}
+#target-instant-status {
+  display: block;
+  min-height: 34px;
+  padding: 7px 9px;
+  border-left: 2px solid rgba(203,216,207,.38);
+  color: #aab3ad;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.target-instant-controls[data-valid="false"] #target-instant-status {
+  border-left-color: #a07c73;
+  color: #c99b90;
+}
+.target-instant-controls > p {
+  margin: 9px 0 0;
+  color: #737e76;
+  font-size: 9px;
+  line-height: 1.55;
+}
+.target-instant-controls[data-enabled="false"] .target-instant-fields {
+  opacity: .72;
+}
+@media (max-width: 760px) {
+  .target-instant-control-head { align-items: flex-start; flex-direction: column; }
+  .target-instant-fields { grid-template-columns: 1fr 1fr; }
+  #target-instant-status { grid-column: 1 / -1; }
+}
+@media (max-width: 480px) {
+  .target-instant-controls { padding: 10px; }
+  .target-instant-fields { grid-template-columns: 1fr; }
+  #target-instant-status { grid-column: auto; }
+}

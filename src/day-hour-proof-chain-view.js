@@ -1,11 +1,18 @@
 import { deepTimeEarthRotationEstimateSupportsYear } from "./astronomy/deep-time-earth-rotation.js";
 import { currentRecurrenceDayHourProof } from "./recurrence/day-hour-proof-chain.js";
+import { fixedZoneTargetClock } from "./recurrence/fixed-zone-target-clock.js";
+import { recurrenceState } from "./recurrence/gregorian-cycle.js";
 import { seasonalEpochSourceAudit } from "./recurrence/seasonal-epoch-source-audit.js";
 
 const instrument = document.querySelector("#recurrence-instrument");
 const determinacyPanel = document.querySelector("#four-pillar-determinacy");
 let proofPanel = null;
 let epochAuditPanel = null;
+let targetClockControls = null;
+
+const TARGET_CLOCK_MODE = "fixed-zone";
+const DEFAULT_TARGET_TIME = "12:00:00";
+const DEFAULT_UT1_OFFSET_HOURS = 8;
 
 const STATUS_LABELS = Object.freeze({
   satisfied:"已有",
@@ -32,6 +39,149 @@ const AUDIT_STATUS_LABELS = Object.freeze({
 function setText(id, value) {
   const node = document.querySelector(`#${id}`);
   if (node) node.textContent = value;
+}
+
+function ensureTargetClockStyles() {
+  if (document.querySelector("link[data-target-clock-styles]")) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./recurrence-target-clock.css";
+  link.dataset.targetClockStyles = "1";
+  document.head.appendChild(link);
+}
+
+function normalizedTargetTime(value) {
+  const match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value ?? "");
+  if (!match) throw new RangeError("target time must be HH:MM or HH:MM:SS");
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const second = Number(match[3] ?? 0);
+  if (hour > 23 || minute > 59 || second > 59) throw new RangeError("target time is outside the civil clock range");
+  return Object.freeze({
+    hour,
+    minute,
+    second,
+    text:`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}`
+  });
+}
+
+function parseBaseDate() {
+  const match = /^(\d+)-(\d{2})-(\d{2})$/.exec(instrument?.dataset?.baseDate ?? "");
+  return match ? { year:Number(match[1]), month:Number(match[2]), day:Number(match[3]) } : null;
+}
+
+function targetClockPreset() {
+  const params = new URLSearchParams(location.search);
+  const enabled = params.get("targetClock") === TARGET_CLOCK_MODE;
+  const rawTime = params.get("targetTime") ?? DEFAULT_TARGET_TIME;
+  const rawOffset = params.get("ut1Offset") ?? String(DEFAULT_UT1_OFFSET_HOURS);
+  return Object.freeze({ enabled, rawTime, rawOffset });
+}
+
+function syncTargetClockQuery() {
+  if (!targetClockControls) return;
+  const url = new URL(location.href);
+  const enabled = targetClockControls.enabled.checked;
+  if (enabled) {
+    url.searchParams.set("targetClock", TARGET_CLOCK_MODE);
+    url.searchParams.set("targetTime", targetClockControls.time.value || DEFAULT_TARGET_TIME);
+    url.searchParams.set("ut1Offset", targetClockControls.offset.value || String(DEFAULT_UT1_OFFSET_HOURS));
+  } else {
+    url.searchParams.delete("targetClock");
+    url.searchParams.delete("targetTime");
+    url.searchParams.delete("ut1Offset");
+  }
+  history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+function setTargetClockEnabledState() {
+  if (!targetClockControls) return;
+  const enabled = targetClockControls.enabled.checked;
+  targetClockControls.root.dataset.enabled = String(enabled);
+  targetClockControls.time.disabled = !enabled;
+  targetClockControls.offset.disabled = !enabled;
+}
+
+function ensureTargetClockControls(panel) {
+  if (targetClockControls?.root?.isConnected) return targetClockControls;
+  ensureTargetClockStyles();
+  const preset = targetClockPreset();
+  const root = document.createElement("div");
+  root.id = "target-instant-controls";
+  root.className = "target-instant-controls";
+  root.innerHTML = `
+    <div class="target-instant-control-head">
+      <div>
+        <span>Target instant · research convention</span>
+        <strong>日內時刻預設不綁定</strong>
+      </div>
+      <label class="target-instant-toggle"><input id="target-instant-enabled" type="checkbox"> <span>fixed-zone-from-UT1</span></label>
+    </div>
+    <div class="target-instant-fields">
+      <label>Target local clock<input id="target-instant-time" type="time" step="1" value="${DEFAULT_TARGET_TIME}"></label>
+      <label>Fixed offset from UT1<input id="target-instant-offset" type="number" min="-14" max="14" step="0.25" value="${DEFAULT_UT1_OFFSET_HOURS}"></label>
+      <output id="target-instant-status" aria-live="polite">date-only · 未建立日內 target instant</output>
+    </div>
+    <p>這是 proleptic Gregorian + 固定 UT1 offset 的研究座標，不是西元遠未來 UTC、DST 或政治時區預測。啟用只解開 target-instant 這一層；日界與 Day/Hour local clock basis 仍需另外選定。</p>
+  `;
+  panel.querySelector(".proof-chain-head")?.insertAdjacentElement("afterend", root);
+
+  const enabled = root.querySelector("#target-instant-enabled");
+  const time = root.querySelector("#target-instant-time");
+  const offset = root.querySelector("#target-instant-offset");
+  const status = root.querySelector("#target-instant-status");
+  enabled.checked = preset.enabled;
+  time.value = preset.rawTime;
+  offset.value = preset.rawOffset;
+  targetClockControls = { root, enabled, time, offset, status };
+  setTargetClockEnabledState();
+
+  enabled.addEventListener("change", () => {
+    setTargetClockEnabledState();
+    syncTargetClockQuery();
+    scheduleRefresh();
+  });
+  for (const input of [time, offset]) {
+    input.addEventListener("change", () => {
+      syncTargetClockQuery();
+      scheduleRefresh();
+    });
+  }
+  return targetClockControls;
+}
+
+function targetInstantForCurrentState(deltaYears) {
+  const controls = targetClockControls;
+  if (!controls?.enabled.checked) {
+    if (controls) {
+      controls.root.dataset.valid = "true";
+      controls.root.dataset.basis = "date-only";
+      controls.status.textContent = "date-only · 未建立日內 target instant";
+    }
+    return null;
+  }
+
+  try {
+    const baseDate = parseBaseDate();
+    if (!baseDate) throw new RangeError("base date unavailable");
+    const state = recurrenceState(baseDate, deltaYears);
+    if (!state.targetValid) throw new RangeError("target Gregorian date does not exist");
+    const time = normalizedTargetTime(controls.time.value);
+    const offset = Number(controls.offset.value);
+    const projection = fixedZoneTargetClock({ ...state.targetDate, ...time }, offset);
+    controls.root.dataset.valid = "true";
+    controls.root.dataset.basis = projection.targetInstant.basis;
+    controls.root.dataset.ut1JulianDay = String(projection.ut1JulianDay);
+    controls.root.dataset.localOffsetHoursFromUt1 = String(offset);
+    controls.status.textContent = `${state.targetDate.year}-${String(state.targetDate.month).padStart(2, "0")}-${String(state.targetDate.day).padStart(2, "0")} ${time.text} · UT1 JD ${projection.ut1JulianDay.toFixed(6)} · offset ${offset >= 0 ? "+" : ""}${offset} h`;
+    return projection.targetInstant;
+  } catch (error) {
+    controls.root.dataset.valid = "false";
+    controls.root.dataset.basis = "date-only";
+    delete controls.root.dataset.ut1JulianDay;
+    controls.status.textContent = `無效 · ${error.message}`;
+    return null;
+  }
 }
 
 function ensurePanel() {
@@ -63,6 +213,7 @@ function ensurePanel() {
   `;
   determinacyPanel.insertAdjacentElement("afterend", panel);
   proofPanel = panel;
+  ensureTargetClockControls(panel);
   return panel;
 }
 
@@ -103,6 +254,7 @@ function readableBlocker(name) {
   const labels = {
     relativeTermGeometry:"相對節氣幾何",
     absoluteSeasonalEpoch:"絕對季節 epoch",
+    targetInstantBound:"目標時刻",
     earthRotationBridge:"TT↔UT1 / ΔT",
     civilZoneBound:"民用時區",
     dayBoundaryBound:"日界規則",
@@ -217,9 +369,7 @@ function renderEpochAudit(baseYear, targetYear, audit) {
 }
 
 function parseBaseYear() {
-  const value = instrument?.dataset?.baseDate ?? "";
-  const match = /^(\d+)-/.exec(value);
-  return match ? Number(match[1]) : null;
+  return parseBaseDate()?.year ?? null;
 }
 
 function refresh() {
@@ -237,12 +387,14 @@ function refresh() {
   const identity = deltaYears === 0;
   const targetYear = baseYear + deltaYears;
   const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
+  const targetInstant = targetInstantForCurrentState(deltaYears);
   const earthRotationEstimateAvailable = audit.absoluteSeasonalEpochAvailable
     && deepTimeEarthRotationEstimateSupportsYear(targetYear);
   const proof = currentRecurrenceDayHourProof({
     identity,
     astronomyWithinRange:astronomyValidity === "within-range",
     absoluteSeasonalEpoch:audit.absoluteSeasonalEpochAvailable,
+    targetInstant,
     earthRotationEstimateAvailable
   });
   const stages = panel.querySelector("#proof-chain-stages");
@@ -258,12 +410,16 @@ function refresh() {
     identity
       ? "同一狀態不需要跨時代的絕對時間投影。"
       : proof.firstHardBlocker === "absolute-seasonal-epoch"
-        ? "先把春分／節氣放回絕對均勻時間軸，之後才有資格談民用日界。"
-        : proof.firstHardBlocker === "earth-rotation-bridge" && firstBlockerStage?.status === "uncertain-estimate"
-          ? "TT→UT1 已有 ΔT 外推與統計 uncertainty，但不是 deterministic Earth rotation；目前不能據此唯一決定日柱／時柱。"
-          : proof.firstHardBlocker === "earth-rotation-bridge"
-            ? "節氣已有絕對 TT；下一個硬缺口是 TT↔UT1 / ΔT 的深時間地球自轉橋。"
-            : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
+        ? "先把春分／節氣放回絕對均勻時間軸，之後才有資格談地方日界。"
+        : proof.firstHardBlocker === "target-instant"
+          ? "回歸頁目前仍是 date-only；啟用上方 fixed-zone-from-UT1 research convention 才會建立日內 target instant。"
+          : proof.firstHardBlocker === "earth-rotation-bridge" && firstBlockerStage?.status === "uncertain-estimate"
+            ? "TT→UT1 已有 ΔT 外推與統計 uncertainty，但不是 deterministic Earth rotation；目前不能據此唯一決定日柱／時柱。"
+            : proof.firstHardBlocker === "earth-rotation-bridge"
+              ? "節氣已有絕對 TT；下一個硬缺口是 TT↔UT1 / ΔT 的深時間地球自轉橋。"
+              : proof.firstHardBlocker === "civil-zone"
+                ? "target instant 已有明示 fixed-zone-from-UT1 座標；下一層仍需另外選定 Day/Hour 要採用的 civil/local-zone convention，不能把 research fixed offset 冒充未來政治時區。"
+                : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
   );
   setText("proof-chain-day-status", proof.day.resolved ? "resolved" : "blocked");
   setText(
@@ -280,12 +436,20 @@ function refresh() {
   panel.dataset.deltaYears = String(deltaYears);
   panel.dataset.identity = String(identity);
   panel.dataset.firstHardBlocker = proof.firstHardBlocker ?? "none";
+  panel.dataset.targetInstantBasis = proof.targetInstantBasis;
+  panel.dataset.targetInstantBound = String(proof.targetInstantBound);
+  panel.dataset.targetClockEnabled = String(targetClockControls?.enabled.checked ?? false);
+  panel.dataset.targetClockValid = targetClockControls?.root.dataset.valid ?? "true";
+  panel.dataset.earthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
   panel.dataset.earthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   panel.dataset.dayResolved = String(proof.day.resolved);
   panel.dataset.hourResolved = String(proof.hour.resolved);
   panel.dataset.stageCount = String(proof.stages.length);
 
   instrument.dataset.dayHourProofFirstHardBlocker = proof.firstHardBlocker ?? "none";
+  instrument.dataset.dayHourProofTargetInstantBasis = proof.targetInstantBasis;
+  instrument.dataset.dayHourProofTargetInstantBound = String(proof.targetInstantBound);
+  instrument.dataset.dayHourProofEarthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
   instrument.dataset.dayHourProofEarthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   instrument.dataset.dayHourProofDayResolved = String(proof.day.resolved);
   instrument.dataset.dayHourProofHourResolved = String(proof.hour.resolved);
