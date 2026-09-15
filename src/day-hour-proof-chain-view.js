@@ -1,4 +1,5 @@
 import { deepTimeEarthRotationEstimateSupportsYear } from "./astronomy/deep-time-earth-rotation.js";
+import { DAY_BOUNDARY, DAY_BOUNDARY_VALUES } from "./calendar/day-boundary.js";
 import { currentRecurrenceDayHourProof } from "./recurrence/day-hour-proof-chain.js";
 import { fixedZoneTargetClock } from "./recurrence/fixed-zone-target-clock.js";
 import { recurrenceState } from "./recurrence/gregorian-cycle.js";
@@ -75,7 +76,9 @@ function targetClockPreset() {
   const enabled = params.get("targetClock") === TARGET_CLOCK_MODE;
   const rawTime = params.get("targetTime") ?? DEFAULT_TARGET_TIME;
   const rawOffset = params.get("ut1Offset") ?? String(DEFAULT_UT1_OFFSET_HOURS);
-  return Object.freeze({ enabled, rawTime, rawOffset });
+  const rawDayBoundary = params.get("dayBoundary") ?? "";
+  const dayBoundaryValid = rawDayBoundary === "" || DAY_BOUNDARY_VALUES.includes(rawDayBoundary);
+  return Object.freeze({ enabled, rawTime, rawOffset, rawDayBoundary, dayBoundaryValid });
 }
 
 function syncTargetClockQuery() {
@@ -90,6 +93,12 @@ function syncTargetClockQuery() {
     url.searchParams.delete("targetClock");
     url.searchParams.delete("targetTime");
     url.searchParams.delete("ut1Offset");
+  }
+  const dayBoundary = targetClockControls.dayBoundary.value;
+  if (DAY_BOUNDARY_VALUES.includes(dayBoundary)) {
+    url.searchParams.set("dayBoundary", dayBoundary);
+  } else {
+    url.searchParams.delete("dayBoundary");
   }
   history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
 }
@@ -112,28 +121,37 @@ function ensureTargetClockControls(panel) {
   root.innerHTML = `
     <div class="target-instant-control-head">
       <div>
-        <span>Target instant · research convention</span>
-        <strong>日內時刻預設不綁定</strong>
+        <span>Target / Day boundary · research conventions</span>
+        <strong>日內時刻與日界預設都不綁定</strong>
       </div>
       <label class="target-instant-toggle"><input id="target-instant-enabled" type="checkbox"> <span>fixed-zone-from-UT1</span></label>
     </div>
     <div class="target-instant-fields">
       <label>Target local clock<input id="target-instant-time" type="time" step="1" value="${DEFAULT_TARGET_TIME}"></label>
       <label>Fixed offset from UT1<input id="target-instant-offset" type="number" min="-14" max="14" step="0.25" value="${DEFAULT_UT1_OFFSET_HOURS}"></label>
+      <label>Day boundary<select id="day-boundary-convention">
+        <option value="">Not selected</option>
+        <option value="${DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY}">子初 23:00 → 次日</option>
+        <option value="${DAY_BOUNDARY.CIVIL_MIDNIGHT}">民用午夜 00:00</option>
+      </select></label>
       <output id="target-instant-status" aria-live="polite">date-only · 未建立日內 target instant</output>
     </div>
-    <p>這是 proleptic Gregorian + 固定 UT1 offset 的研究座標，不是西元遠未來 UTC、DST 或政治時區預測。啟用只解開 target-instant 這一層；日界與 Day/Hour local clock basis 仍需另外選定。</p>
+    <p>fixed-zone-from-UT1 是 proleptic Gregorian + 固定 UT1 offset 的研究座標，不是西元遠未來 UTC、DST 或政治時區預測。Day boundary 也必須獨立明示採用既有 Birth canonical rule；兩者都不會自動選定 Day / Hour local clock basis。</p>
   `;
   panel.querySelector(".proof-chain-head")?.insertAdjacentElement("afterend", root);
 
   const enabled = root.querySelector("#target-instant-enabled");
   const time = root.querySelector("#target-instant-time");
   const offset = root.querySelector("#target-instant-offset");
+  const dayBoundary = root.querySelector("#day-boundary-convention");
   const status = root.querySelector("#target-instant-status");
   enabled.checked = preset.enabled;
   time.value = preset.rawTime;
   offset.value = preset.rawOffset;
-  targetClockControls = { root, enabled, time, offset, status };
+  dayBoundary.value = preset.dayBoundaryValid ? preset.rawDayBoundary : "";
+  root.dataset.dayBoundaryValid = String(preset.dayBoundaryValid);
+  root.dataset.dayBoundary = dayBoundary.value || "unbound";
+  targetClockControls = { root, enabled, time, offset, dayBoundary, status };
   setTargetClockEnabledState();
 
   enabled.addEventListener("change", () => {
@@ -147,7 +165,18 @@ function ensureTargetClockControls(panel) {
       scheduleRefresh();
     });
   }
+  dayBoundary.addEventListener("change", () => {
+    root.dataset.dayBoundaryValid = "true";
+    root.dataset.dayBoundary = dayBoundary.value || "unbound";
+    syncTargetClockQuery();
+    scheduleRefresh();
+  });
   return targetClockControls;
+}
+
+function selectedDayBoundary() {
+  const value = targetClockControls?.dayBoundary.value ?? "";
+  return DAY_BOUNDARY_VALUES.includes(value) ? value : null;
 }
 
 function targetInstantForCurrentState(deltaYears) {
@@ -388,6 +417,7 @@ function refresh() {
   const targetYear = baseYear + deltaYears;
   const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
   const targetInstant = targetInstantForCurrentState(deltaYears);
+  const dayBoundary = selectedDayBoundary();
   const earthRotationEstimateAvailable = audit.absoluteSeasonalEpochAvailable
     && deepTimeEarthRotationEstimateSupportsYear(targetYear);
   const proof = currentRecurrenceDayHourProof({
@@ -395,6 +425,7 @@ function refresh() {
     astronomyWithinRange:astronomyValidity === "within-range",
     absoluteSeasonalEpoch:audit.absoluteSeasonalEpochAvailable,
     targetInstant,
+    dayBoundary,
     earthRotationEstimateAvailable
   });
   const stages = panel.querySelector("#proof-chain-stages");
@@ -419,7 +450,11 @@ function refresh() {
               ? "target instant reference basis 已成立；下一個硬缺口是 TT↔UT1 / ΔT 的深時間地球自轉橋。"
               : proof.firstHardBlocker === "civil-zone"
                 ? "target instant 已有明示 fixed-zone-from-UT1 座標；下一層仍需另外選定 Day/Hour 要採用的 civil/local-zone convention，不能把 research fixed offset 冒充未來政治時區。"
-                : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
+                : proof.firstHardBlocker === "day-boundary"
+                  ? "地方鐘面已成立；下一層要明示日界 convention：子初 23:00 起次日或民用午夜 00:00。Birth 的預設不會被 recurrence 暗中繼承。"
+                  : proof.firstHardBlocker === "clock-basis"
+                    ? "日柱在明示的地方鐘面與日界 convention 下已可解析；時柱仍需明示 civil / local mean solar / local apparent solar clock basis。"
+                    : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
   );
   setText("proof-chain-day-status", proof.day.resolved ? "resolved" : "blocked");
   setText(
@@ -440,15 +475,24 @@ function refresh() {
   panel.dataset.targetInstantBound = String(proof.targetInstantBound);
   panel.dataset.targetClockEnabled = String(targetClockControls?.enabled.checked ?? false);
   panel.dataset.targetClockValid = targetClockControls?.root.dataset.valid ?? "true";
+  panel.dataset.dayBoundary = proof.dayBoundary ?? "unbound";
+  panel.dataset.dayBoundaryBound = String(proof.dayBoundaryBound);
+  panel.dataset.dayBoundaryControlValid = targetClockControls?.root.dataset.dayBoundaryValid ?? "true";
   panel.dataset.earthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
   panel.dataset.earthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   panel.dataset.dayResolved = String(proof.day.resolved);
   panel.dataset.hourResolved = String(proof.hour.resolved);
   panel.dataset.stageCount = String(proof.stages.length);
 
+  if (targetClockControls) {
+    targetClockControls.root.dataset.dayBoundary = proof.dayBoundary ?? "unbound";
+  }
+
   instrument.dataset.dayHourProofFirstHardBlocker = proof.firstHardBlocker ?? "none";
   instrument.dataset.dayHourProofTargetInstantBasis = proof.targetInstantBasis;
   instrument.dataset.dayHourProofTargetInstantBound = String(proof.targetInstantBound);
+  instrument.dataset.dayHourProofDayBoundary = proof.dayBoundary ?? "unbound";
+  instrument.dataset.dayHourProofDayBoundaryBound = String(proof.dayBoundaryBound);
   instrument.dataset.dayHourProofEarthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
   instrument.dataset.dayHourProofEarthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   instrument.dataset.dayHourProofDayResolved = String(proof.day.resolved);
