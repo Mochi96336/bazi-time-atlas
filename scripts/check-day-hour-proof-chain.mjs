@@ -72,6 +72,9 @@ const localExact = {
   "data-ready":"true",
   "data-identity":"false",
   "data-first-hard-blocker":"target-instant",
+  "data-target-instant-basis":"date-only",
+  "data-target-instant-bound":"false",
+  "data-target-clock-enabled":"false",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
@@ -97,7 +100,49 @@ if (!local.dom.includes("目標時刻／reference basis") || !local.dom.includes
 if (!local.dom.includes("此年份已有深時間 ΔT / TT→UT1 模型能力") || !local.dom.includes("尚未定義 target instant reference basis")) {
   throw new Error(`4006 proof: Earth-rotation capability must remain upstream-blocked: ${local.url}`);
 }
+if (!local.dom.includes("proleptic Gregorian + 固定 UT1 offset") || !local.dom.includes("不是西元遠未來 UTC")) {
+  throw new Error(`4006 proof: explicit fixed-zone research warning missing: ${local.url}`);
+}
 console.log(`[day-hour-proof] PASS 4006 date-only recurrence blocks typed target instant before Earth rotation: ${local.url}`);
+
+const bound = dumpDom("recurrence.html?date=2026-09-13&delta=1980&targetClock=fixed-zone&targetTime=12%3A34%3A56&ut1Offset=8");
+const boundInstrument = tagById(bound.dom, "recurrence-instrument");
+const boundPanel = tagById(bound.dom, "day-hour-proof-chain");
+const boundControls = tagById(bound.dom, "target-instant-controls");
+const boundExact = {
+  "data-ready":"true",
+  "data-identity":"false",
+  "data-first-hard-blocker":"civil-zone",
+  "data-target-instant-basis":"fixed-zone-from-ut1",
+  "data-target-instant-bound":"true",
+  "data-target-clock-enabled":"true",
+  "data-target-clock-valid":"true",
+  "data-earth-rotation-bridge-required":"false",
+  "data-earth-rotation-estimate-available":"false",
+  "data-day-resolved":"false",
+  "data-hour-resolved":"false"
+};
+for (const [name, expected] of Object.entries(boundExact)) {
+  const actual = attr(boundPanel, name);
+  if (actual !== expected) throw new Error(`4006 fixed-zone proof: expected ${name}=${expected}, got ${actual}: ${bound.url}`);
+}
+if (attr(boundControls, "data-enabled") !== "true" || attr(boundControls, "data-valid") !== "true" || attr(boundControls, "data-basis") !== "fixed-zone-from-ut1") {
+  throw new Error(`4006 fixed-zone proof: target controls did not settle to a valid fixed-zone target: ${bound.url}`);
+}
+if (attr(boundInstrument, "data-day-hour-proof-target-instant-basis") !== "fixed-zone-from-ut1" || attr(boundInstrument, "data-day-hour-proof-target-instant-bound") !== "true") {
+  throw new Error(`4006 fixed-zone proof: instrument target binding mismatch: ${bound.url}`);
+}
+expectStage(bound.dom, "absolute-seasonal-epoch", "satisfied", "4006 fixed-zone proof", bound.url);
+expectStage(bound.dom, "target-instant", "satisfied", "4006 fixed-zone proof", bound.url);
+expectStage(bound.dom, "earth-rotation-bridge", "not-required", "4006 fixed-zone proof", bound.url);
+expectStage(bound.dom, "civil-zone", "unbound-convention", "4006 fixed-zone proof", bound.url);
+if (!bound.dom.includes("4006-09-13 12:34:56") || !bound.dom.includes("UT1 JD") || !bound.dom.includes("offset +8 h")) {
+  throw new Error(`4006 fixed-zone proof: target projection readout missing: ${bound.url}`);
+}
+if (!bound.dom.includes("research fixed offset 冒充未來政治時區")) {
+  throw new Error(`4006 fixed-zone proof: next-blocker explanation must preserve civil-policy boundary: ${bound.url}`);
+}
+console.log(`[day-hour-proof] PASS 4006 fixed-zone target advances only to civil-zone blocker: ${bound.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
