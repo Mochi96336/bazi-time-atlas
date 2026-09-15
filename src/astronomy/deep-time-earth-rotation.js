@@ -43,6 +43,10 @@ export function prolepticGregorianDecimalYearAtJulianDay(julianDay) {
   return year + dayOfYearZeroBased / daysInGregorianYear(year);
 }
 
+export function deepTimeEarthRotationEstimateSupportsYear(year) {
+  return Number.isInteger(year) && year > LONG_TERM_PARABOLA_START_YEAR;
+}
+
 export function longTermDeltaTPointEstimateSeconds(decimalYear) {
   assertFinite(decimalYear, "decimalYear");
   if (decimalYear <= LONG_TERM_PARABOLA_START_YEAR) {

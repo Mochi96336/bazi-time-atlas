@@ -4,6 +4,7 @@ import { seasonalEventsForCatalogueYear } from "../src/astronomy/de441-seasonal-
 import { DEEP_TIME_EARTH_ROTATION_EVIDENCE } from "../src/astronomy/deep-time-earth-rotation-evidence.js";
 import {
   DEEP_TIME_EARTH_ROTATION_MODEL,
+  deepTimeEarthRotationEstimateSupportsYear,
   estimateDeepTimeUt1FromTtJulianDay,
   futureDeltaTOneSigmaSeconds,
   longTermDeltaTPointEstimateSeconds,
@@ -28,6 +29,15 @@ test("evidence separates a long-term Delta T estimate from deterministic Earth r
   assert.equal(evidence.promotionBoundary.deterministicCivilTimeValidated, false);
   assert.equal(evidence.promotionBoundary.dayPillarUniquenessValidated, false);
   assert.equal(evidence.promotionBoundary.hourPillarUniquenessValidated, false);
+});
+
+test("coverage helper exposes only the long-term extrapolation domain", () => {
+  assert.equal(deepTimeEarthRotationEstimateSupportsYear(2150), false);
+  assert.equal(deepTimeEarthRotationEstimateSupportsYear(2151), true);
+  assert.equal(deepTimeEarthRotationEstimateSupportsYear(4006), true);
+  assert.equal(deepTimeEarthRotationEstimateSupportsYear(26026), true);
+  assert.equal(deepTimeEarthRotationEstimateSupportsYear(4006.5), false);
+  assert.equal(deepTimeEarthRotationEstimateSupportsYear(Number.NaN), false);
 });
 
 test("NASA long-term parabola reproduces the published year-4000 point estimate", () => {

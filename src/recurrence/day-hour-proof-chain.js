@@ -1,4 +1,10 @@
 const CLOCK_BASES = Object.freeze(["civil", "mean-solar", "apparent-solar"]);
+const HARD_BLOCKER_STATUSES = new Set([
+  "uncertain-estimate",
+  "missing-deep-time-model",
+  "missing-model",
+  "unbound-convention"
+]);
 
 function assertBoolean(value, name) {
   if (typeof value !== "boolean") throw new TypeError(`${name} must be boolean`);
@@ -21,6 +27,7 @@ export function dayHourResolutionProof({
   relativeTermGeometry,
   absoluteSeasonalEpoch,
   earthRotationBridge,
+  earthRotationEstimateAvailable = false,
   civilZoneBound,
   dayBoundaryBound,
   sexagenaryDayArithmetic,
@@ -35,6 +42,7 @@ export function dayHourResolutionProof({
     relativeTermGeometry,
     absoluteSeasonalEpoch,
     earthRotationBridge,
+    earthRotationEstimateAvailable,
     civilZoneBound,
     dayBoundaryBound,
     sexagenaryDayArithmetic,
@@ -76,6 +84,21 @@ export function dayHourResolutionProof({
     .map(([name]) => name);
   const hourResolved = identity || hourBlockers.length === 0;
 
+  const earthRotationStatus = earthRotationBridge
+    ? "satisfied"
+    : !absoluteSeasonalEpoch
+      ? "blocked"
+      : earthRotationEstimateAvailable
+        ? "uncertain-estimate"
+        : "missing-deep-time-model";
+  const earthRotationDetail = earthRotationBridge
+    ? "可把均勻時間的天文事件確定地投影到地球自轉時間。"
+    : !absoluteSeasonalEpoch
+      ? "必須先取得絕對 seasonal epoch，才能評估 TT↔UT1。"
+      : earthRotationEstimateAvailable
+        ? "已有 TT→UT1 的深時間 ΔT 點估計與統計不確定性；但它不是 deterministic UT1，更不能直接當成未來 UTC／民用時間，因此尚不足以唯一判定日柱或時柱。"
+        : "要落到地球自轉時間，還需要深時間 Earth-rotation / ΔT 模型；不能由軌道形狀本身推出。";
+
   const stages = Object.freeze([
     stage(
       "relative-term-geometry",
@@ -93,9 +116,9 @@ export function dayHourResolutionProof({
     ),
     stage(
       "earth-rotation-bridge",
-      "地球自轉橋 · TT↔UT / ΔT",
-      earthRotationBridge ? "satisfied" : absoluteSeasonalEpoch ? "missing-deep-time-model" : "blocked",
-      earthRotationBridge ? "可把均勻時間的天文事件投影到地球自轉時間。" : "要落到民用日期，還需要深時間 Earth-rotation / ΔT 橋接；不能由軌道形狀本身推出。",
+      "地球自轉橋 · TT↔UT1 / ΔT",
+      earthRotationStatus,
+      earthRotationDetail,
       "physics"
     ),
     stage(
@@ -149,16 +172,14 @@ export function dayHourResolutionProof({
     )
   ]);
 
-  const firstHardBlocker = stages.find(item => item.status === "missing-deep-time-model")?.id
-    ?? stages.find(item => item.status === "missing-model")?.id
-    ?? stages.find(item => item.status === "unbound-convention")?.id
-    ?? null;
+  const firstHardBlocker = stages.find(item => HARD_BLOCKER_STATUSES.has(item.status))?.id ?? null;
 
   return Object.freeze({
     identity,
     clockBasis,
     needsLongitude,
     needsEquationOfTime,
+    earthRotationEstimateAvailable,
     firstHardBlocker,
     stages,
     day:freezeResult({
@@ -180,16 +201,19 @@ export function dayHourResolutionProof({
 export function currentRecurrenceDayHourProof({
   identity,
   astronomyWithinRange,
-  absoluteSeasonalEpoch = false
+  absoluteSeasonalEpoch = false,
+  earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
   assertBoolean(astronomyWithinRange, "astronomyWithinRange");
   assertBoolean(absoluteSeasonalEpoch, "absoluteSeasonalEpoch");
+  assertBoolean(earthRotationEstimateAvailable, "earthRotationEstimateAvailable");
   return dayHourResolutionProof({
     identity,
     relativeTermGeometry:astronomyWithinRange,
     absoluteSeasonalEpoch,
     earthRotationBridge:false,
+    earthRotationEstimateAvailable,
     civilZoneBound:false,
     dayBoundaryBound:false,
     sexagenaryDayArithmetic:true,
