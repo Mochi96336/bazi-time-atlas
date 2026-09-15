@@ -21,6 +21,8 @@ export function dayHourResolutionProof({
   relativeTermGeometry,
   absoluteSeasonalEpoch,
   earthRotationBridge,
+  earthRotationPointEstimateAvailable = false,
+  earthRotationUncertaintyQuantified = false,
   civilZoneBound,
   dayBoundaryBound,
   sexagenaryDayArithmetic,
@@ -35,6 +37,8 @@ export function dayHourResolutionProof({
     relativeTermGeometry,
     absoluteSeasonalEpoch,
     earthRotationBridge,
+    earthRotationPointEstimateAvailable,
+    earthRotationUncertaintyQuantified,
     civilZoneBound,
     dayBoundaryBound,
     sexagenaryDayArithmetic,
@@ -44,6 +48,9 @@ export function dayHourResolutionProof({
     fiveRatsRule
   })) assertBoolean(value, name);
 
+  if (earthRotationUncertaintyQuantified && !earthRotationPointEstimateAvailable) {
+    throw new TypeError("earthRotationUncertaintyQuantified requires earthRotationPointEstimateAvailable");
+  }
   if (clockBasis !== null && !CLOCK_BASES.includes(clockBasis)) {
     throw new RangeError(`clockBasis must be null or one of: ${CLOCK_BASES.join(", ")}`);
   }
@@ -76,6 +83,21 @@ export function dayHourResolutionProof({
     .map(([name]) => name);
   const hourResolved = identity || hourBlockers.length === 0;
 
+  const earthRotationStatus = earthRotationBridge
+    ? "satisfied"
+    : !absoluteSeasonalEpoch
+      ? "blocked"
+      : earthRotationPointEstimateAvailable && earthRotationUncertaintyQuantified
+        ? "uncertain-estimate"
+        : "missing-deep-time-model";
+  const earthRotationDetail = earthRotationBridge
+    ? "可把均勻時間的天文事件投影到地球自轉時間。"
+    : !absoluteSeasonalEpoch
+      ? "先取得絕對 TT/TDB 類 seasonal epoch，才能評估 Earth rotation / ΔT。"
+      : earthRotationStatus === "uncertain-estimate"
+        ? "已有深時間 TT→UT1 點估計與 1σ 不確定度，但 deterministic UT1 尚未驗證；這不足以證明唯一民用日期、日柱或時支。"
+        : "要落到民用日期，還需要深時間 Earth-rotation / ΔT 橋接；不能由軌道形狀本身推出。";
+
   const stages = Object.freeze([
     stage(
       "relative-term-geometry",
@@ -94,8 +116,8 @@ export function dayHourResolutionProof({
     stage(
       "earth-rotation-bridge",
       "地球自轉橋 · TT↔UT / ΔT",
-      earthRotationBridge ? "satisfied" : absoluteSeasonalEpoch ? "missing-deep-time-model" : "blocked",
-      earthRotationBridge ? "可把均勻時間的天文事件投影到地球自轉時間。" : "要落到民用日期，還需要深時間 Earth-rotation / ΔT 橋接；不能由軌道形狀本身推出。",
+      earthRotationStatus,
+      earthRotationDetail,
       "physics"
     ),
     stage(
@@ -149,7 +171,9 @@ export function dayHourResolutionProof({
     )
   ]);
 
-  const firstHardBlocker = stages.find(item => item.status === "missing-deep-time-model")?.id
+  const firstHardBlocker = stages.find(item =>
+    item.status === "missing-deep-time-model" || item.status === "uncertain-estimate"
+  )?.id
     ?? stages.find(item => item.status === "missing-model")?.id
     ?? stages.find(item => item.status === "unbound-convention")?.id
     ?? null;
@@ -161,6 +185,11 @@ export function dayHourResolutionProof({
     needsEquationOfTime,
     firstHardBlocker,
     stages,
+    earthRotation:Object.freeze({
+      deterministicBridge:earthRotationBridge,
+      pointEstimateAvailable:earthRotationPointEstimateAvailable,
+      uncertaintyQuantified:earthRotationUncertaintyQuantified
+    }),
     day:freezeResult({
       resolved:dayResolved,
       status:identity ? "identical-by-definition" : dayResolved ? "resolved" : "blocked",
@@ -180,16 +209,22 @@ export function dayHourResolutionProof({
 export function currentRecurrenceDayHourProof({
   identity,
   astronomyWithinRange,
-  absoluteSeasonalEpoch = false
+  absoluteSeasonalEpoch = false,
+  earthRotationPointEstimateAvailable = false,
+  earthRotationUncertaintyQuantified = false
 }) {
   assertBoolean(identity, "identity");
   assertBoolean(astronomyWithinRange, "astronomyWithinRange");
   assertBoolean(absoluteSeasonalEpoch, "absoluteSeasonalEpoch");
+  assertBoolean(earthRotationPointEstimateAvailable, "earthRotationPointEstimateAvailable");
+  assertBoolean(earthRotationUncertaintyQuantified, "earthRotationUncertaintyQuantified");
   return dayHourResolutionProof({
     identity,
     relativeTermGeometry:astronomyWithinRange,
     absoluteSeasonalEpoch,
     earthRotationBridge:false,
+    earthRotationPointEstimateAvailable,
+    earthRotationUncertaintyQuantified,
     civilZoneBound:false,
     dayBoundaryBound:false,
     sexagenaryDayArithmetic:true,
