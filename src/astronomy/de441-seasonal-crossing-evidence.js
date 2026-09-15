@@ -1,7 +1,12 @@
 export const DE441_SEASONAL_CROSSING_4006_EVIDENCE = Object.freeze({
   id:"de441-horizons-q31-seasonal-crossing-e2e-4006",
+  providerId:"jpl-de441",
+  validationKind:"authoritative-observable-reconstruction",
+  sourceEphemeris:"DE441",
   authority:"NASA/JPL Horizons + NASA/JPL NAIF SPICE",
   catalogueYear:4006,
+  sampledYears:Object.freeze([4006]),
+  samplesByYear:Object.freeze({ 4006:24 }),
   referenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
   timeScale:"TT",
   chain:Object.freeze([
@@ -20,6 +25,15 @@ export const DE441_SEASONAL_CROSSING_4006_EVIDENCE = Object.freeze({
     artifactId:10344981076,
     artifactDigest:"sha256:d1c5c5c504bee2d68053aaf47541b5b6f61cd0c740b9946492b7d641dc5c0dca",
     compactStateKnots:50
+  }),
+  apparentDirectionEvidence:Object.freeze({
+    researchPullRequest:109,
+    workflowRunId:34886473281,
+    artifactId:10365660120,
+    artifactDigest:"sha256:5bd8b2c448390034839d092e35ac28c3d82ec65007999423bf0fba6ada3e9bc8",
+    sunCenterQ45VsLtPlusSMaxArcsec:2.1724745127587677e-6,
+    repositoryAberrationVsLtPlusSMaxArcsec:4.164146993414492e-7,
+    gravitationalDeflectionMode:"sun-center-evidence-bounded-identity"
   }),
   frameEvidence:Object.freeze({
     researchPullRequest:94,
@@ -66,6 +80,7 @@ export const DE441_SEASONAL_CROSSING_4006_EVIDENCE = Object.freeze({
     lightTimeValidated:true,
     stellarAberrationValidated:true,
     sunCenterApparentIcrfValidated:true,
+    sunCenterApparentCorrectionModelValidated:true,
     eclipticOfDateFrameValidated:true,
     crossingRootSolveValidated:true,
     catalogueYear4006EndToEndValidated:true,
@@ -73,5 +88,5 @@ export const DE441_SEASONAL_CROSSING_4006_EVIDENCE = Object.freeze({
     productionSeasonalPipelineIntegrated:false,
     productionYear4006Unlocked:false
   }),
-  note:"This is an offline proof over 24 independent Horizons quantity-31 crossing epochs. The root seed is the existing ShouXing candidate, not JPL truth. The independent SPICE-style harness remains as a cross-check; production-shaped solver parity reuses the same compact state/frame evidence and remains fail-closed until runtime provider integration is explicitly enabled."
+  note:"Pinned 24-crossing year-4006 reconstruction evidence. The independent SPICE-style harness and the production-shaped three-iteration solver parity are separate checks over the same bounded DE441/Horizons basis. Passing this evidence may qualify year 4006 for a separate runtime-integration review, but it does not register an adapter, widen runtime coverage, or unlock production year 4006."
 });
