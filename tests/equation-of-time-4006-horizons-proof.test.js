@@ -1,3 +1,4 @@
+// Proof-only differential: this file must not widen runtime or recurrence authority.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { JulianDay } from "../vendor/tyme4ts-1.5.2.mjs";
