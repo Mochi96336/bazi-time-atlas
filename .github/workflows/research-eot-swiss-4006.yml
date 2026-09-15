@@ -25,10 +25,10 @@ jobs:
         run: |
           mkdir -p tmp/sweph
           curl -fsSL --retry 3 --retry-delay 2 \
-            https://www.astro.com/ftp/swisseph/ephe/sepl_18.se1 \
+            https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/sepl_18.se1 \
             -o tmp/sweph/sepl_18.se1
           curl -fsSL --retry 3 --retry-delay 2 \
-            https://www.astro.com/ftp/swisseph/ephe/sepl_36.se1 \
+            https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/sepl_36.se1 \
             -o tmp/sweph/sepl_36.se1
           sha256sum tmp/sweph/sepl_18.se1 tmp/sweph/sepl_36.se1
       - name: Compare hourly production EoT against Swiss reference
