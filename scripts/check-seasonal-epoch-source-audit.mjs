@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
+const DE441_EVENT_PROVIDER_ID = "jpl-de441-seasonal-events-v1";
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -60,22 +61,41 @@ const local = dumpDom("recurrence.html?date=2026-09-13&delta=1980");
 const localPanel = tagById(local.dom, "seasonal-epoch-source-audit");
 const localInstrument = tagById(local.dom, "recurrence-instrument");
 expectAttr(localPanel, "data-target-year", "4006", "4006 audit", local.url);
-expectAttr(localPanel, "data-audit-status", "qualified-ephemeris-basis-not-integrated", "4006 audit", local.url);
-expectAttr(localPanel, "data-qualified-source-count", "1", "4006 audit", local.url);
-expectAttr(localPanel, "data-usable-source-count", "0", "4006 audit", local.url);
-expectAttr(localPanel, "data-seasonal-epoch-solver-required", "true", "4006 audit", local.url);
+expectAttr(localPanel, "data-audit-status", "resolved", "4006 audit", local.url);
+expectAttr(localPanel, "data-blocker", "none", "4006 audit", local.url);
+expectAttr(localPanel, "data-qualified-source-count", "2", "4006 audit", local.url);
+expectAttr(localPanel, "data-usable-source-count", "1", "4006 audit", local.url);
+expectAttr(localPanel, "data-seasonal-epoch-solver-required", "false", "4006 audit", local.url);
 expectAttr(localInstrument, "data-seasonal-epoch-de441-covered", "true", "4006 audit", local.url);
 expectAttr(localInstrument, "data-seasonal-epoch-de441-basis-capable", "true", "4006 audit", local.url);
-expectAttr(localInstrument, "data-seasonal-epoch-qualified-source-count", "1", "4006 audit", local.url);
+expectAttr(localInstrument, "data-seasonal-epoch-qualified-source-count", "2", "4006 audit", local.url);
+expectAttr(localInstrument, "data-seasonal-epoch-usable-source-count", "1", "4006 audit", local.url);
 
 const localDe441 = sourceTag(local.dom, "jpl-de441");
 expectAttr(localDe441, "data-covers-target", "true", "4006 DE441", local.url);
 expectAttr(localDe441, "data-ephemeris-basis-capable", "true", "4006 DE441", local.url);
-expectAttr(localDe441, "data-qualified-coverage", "true", "4006 DE441", local.url);
-if (!local.dom.includes("absolute state ✓ · solver 尚未整合") || !local.dom.includes("crossing root solve")) {
-  throw new Error(`4006 audit: state-vs-solver distinction missing: ${local.url}`);
+expectAttr(localDe441, "data-implemented-as-basis", "false", "4006 DE441", local.url);
+
+const localDirect = sourceTag(local.dom, DE441_EVENT_PROVIDER_ID);
+expectAttr(localDirect, "data-covers-target", "true", "4006 direct provider", local.url);
+expectAttr(localDirect, "data-direct-seasonal-epoch", "true", "4006 direct provider", local.url);
+expectAttr(localDirect, "data-implemented-direct-provider", "true", "4006 direct provider", local.url);
+expectAttr(localDirect, "data-qualified-coverage", "true", "4006 direct provider", local.url);
+expectAttr(localDirect, "data-reason", "usable", "4006 direct provider", local.url);
+if (!local.dom.includes("pipeline 可用") || !local.dom.includes(DE441_EVENT_PROVIDER_ID)) {
+  throw new Error(`4006 audit: bounded direct-event runtime not rendered as usable: ${local.url}`);
 }
-console.log(`[seasonal-epoch-audit] PASS 4006 has DE441 state coverage but no integrated seasonal-epoch solver: ${local.url}`);
+console.log(`[seasonal-epoch-audit] PASS 4006 resolves through bounded JPL direct-event runtime: ${local.url}`);
+
+const adjacent = dumpDom("recurrence.html?date=2026-09-13&delta=1979");
+const adjacentPanel = tagById(adjacent.dom, "seasonal-epoch-source-audit");
+const adjacentDirect = sourceTag(adjacent.dom, DE441_EVENT_PROVIDER_ID);
+expectAttr(adjacentPanel, "data-target-year", "4005", "4005 audit", adjacent.url);
+expectAttr(adjacentPanel, "data-audit-status", "qualified-ephemeris-basis-not-integrated", "4005 audit", adjacent.url);
+expectAttr(adjacentPanel, "data-usable-source-count", "0", "4005 audit", adjacent.url);
+expectAttr(adjacentDirect, "data-covers-target", "false", "4005 direct provider", adjacent.url);
+expectAttr(adjacentDirect, "data-reason", "outside-source-coverage", "4005 direct provider", adjacent.url);
+console.log(`[seasonal-epoch-audit] PASS 4005 remains outside bounded direct-event coverage: ${adjacent.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const panel = tagById(global.dom, "seasonal-epoch-source-audit");
@@ -89,21 +109,21 @@ expectAttr(panel, "data-nearest-ephemeris-boundary-year", "17191", "26026 audit"
 expectAttr(panel, "data-nearest-ephemeris-gap-years", "8835", "26026 audit", global.url);
 expectAttr(instrument, "data-seasonal-epoch-de441-covered", "false", "26026 audit", global.url);
 expectAttr(instrument, "data-seasonal-epoch-qualified-source-count", "0", "26026 audit", global.url);
+expectAttr(instrument, "data-seasonal-epoch-usable-source-count", "0", "26026 audit", global.url);
 expectAttr(instrument, "data-seasonal-epoch-nearest-ephemeris-gap-years", "8835", "26026 audit", global.url);
 
 const berger = sourceTag(global.dom, "berger-1978-shape");
 const de441 = sourceTag(global.dom, "jpl-de441");
+const direct = sourceTag(global.dom, DE441_EVENT_PROVIDER_ID);
 const la2004 = sourceTag(global.dom, "la2004-insolation-parameters");
 expectAttr(berger, "data-covers-target", "true", "26026 Berger", global.url);
 expectAttr(berger, "data-ephemeris-basis-capable", "false", "26026 Berger", global.url);
 expectAttr(de441, "data-covers-target", "false", "26026 DE441", global.url);
 expectAttr(de441, "data-ephemeris-basis-capable", "true", "26026 DE441", global.url);
+expectAttr(direct, "data-covers-target", "false", "26026 direct provider", global.url);
 expectAttr(la2004, "data-covers-target", "true", "26026 La2004", global.url);
 expectAttr(la2004, "data-ephemeris-basis-capable", "false", "26026 La2004", global.url);
 if (!global.dom.includes("absolute-state ephemeris coverage gap") || !global.dom.includes("距目標 8,835 年")) {
   throw new Error(`26026 audit: explicit coverage-gap explanation missing: ${global.url}`);
 }
-if (!global.dom.includes("coverage ✓ · 無 absolute state") || !global.dom.includes("超出 coverage")) {
-  throw new Error(`26026 audit: source-level distinction missing: ${global.url}`);
-}
-console.log(`[seasonal-epoch-audit] PASS 26026 separates shape coverage from absolute-state ephemeris coverage: ${global.url}`);
+console.log(`[seasonal-epoch-audit] PASS 26026 remains outside every absolute seasonal-epoch source: ${global.url}`);

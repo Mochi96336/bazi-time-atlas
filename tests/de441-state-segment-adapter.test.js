@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createDe441StateSegmentProofAdapter } from "../src/astronomy/de441-state-segment-adapter.js";
 import { DE441_STATE_INTERPOLATION_EVIDENCE } from "../src/astronomy/de441-state-interpolation-evidence.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import {
   DE441_SEGMENT_PROOF_CASES,
   DE441_SEGMENT_PROOF_PROVENANCE
@@ -13,6 +14,7 @@ import {
 
 const AU_METERS = 149_597_870_700;
 const SECONDS_PER_DAY = 86400;
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function vectorError(a, b, scale = 1) {
   return Math.hypot(
@@ -23,7 +25,6 @@ function vectorError(a, b, scale = 1) {
 }
 
 function identityTestTtToTdb(ttJulianDay) {
-  // Test-only: isolates interpolation on the already-TDB state axis.
   return ttJulianDay;
 }
 
@@ -147,13 +148,15 @@ test("proof adapter fails closed outside its pinned state windows", () => {
   );
 });
 
-test("state interpolation proof does not promote the production seasonal pipeline", () => {
+test("state interpolation proof remains proof-only while the bounded direct-event runtime resolves 4006", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
 
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(result.absoluteSeasonalEpochAvailable, false);
-  assert.deepEqual(result.usableSourceIds, []);
+  assert.equal(result.status, "resolved");
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(result.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });

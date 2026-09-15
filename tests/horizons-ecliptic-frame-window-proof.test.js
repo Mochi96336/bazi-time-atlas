@@ -9,11 +9,14 @@ import {
   sphericalDegreesToUnitVector
 } from "../src/astronomy/horizons-ecliptic-frame-window-proof.js";
 import { HORIZONS_ECLIPTIC_FRAME_EVIDENCE } from "../src/astronomy/horizons-ecliptic-frame-evidence.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import {
   HORIZONS_2026_CROSS_TARGET_CASES,
   HORIZONS_4006_FRAME_INTERPOLATION_CASES
 } from "./fixtures/horizons-ecliptic-frame-proof.js";
 import { SEASONAL_EPOCH_PIPELINE, seasonalEpochSourceAudit } from "../src/recurrence/seasonal-epoch-source-audit.js";
+
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function directionPairMatrix(sample) {
   return rotationFromDirectionPairs({
@@ -111,12 +114,14 @@ test("proof adapter interpolates frame windows without claiming production integ
   assert.throws(() => adapter.matrixAtTtJulianDay(3184300.0), /no proof frame window covers/);
 });
 
-test("frame proof alone keeps the year-4006 seasonal epoch fail-closed", () => {
+test("frame proof remains proof-only while the bounded direct-event runtime resolves year 4006", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(result.absoluteSeasonalEpochAvailable, false);
-  assert.deepEqual(result.usableSourceIds, []);
+  assert.equal(result.status, "resolved");
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(result.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });

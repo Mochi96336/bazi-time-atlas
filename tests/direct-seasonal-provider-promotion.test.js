@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { TYME_SHOUXING_DIRECT_PROVIDER } from "../src/astronomy/direct-seasonal-event-provider.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import {
   DIRECT_SEASONAL_PROMOTION_POLICY,
   DIRECT_SEASONAL_VALIDATION_KINDS,
@@ -17,6 +18,8 @@ import {
   SEASONAL_EPOCH_SOURCES,
   seasonalEpochSourceAudit
 } from "../src/recurrence/seasonal-epoch-source-audit.js";
+
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function jplEvidence(overrides = {}) {
   return {
@@ -189,12 +192,14 @@ test("independent evidence over the epoch budget is present but fails promotion"
   assert.equal(result.coverageExtensionEligible, false);
 });
 
-test("failed independent validation does not silently mutate production source or pipeline registries", () => {
+test("failed ShouXing validation does not register ShouXing or disturb the bounded JPL production runtime", () => {
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
   assert.equal(SEASONAL_EPOCH_SOURCES.some(item => item.id === TYME_SHOUXING_DIRECT_PROVIDER.id), false);
-  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, []);
-  assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
+  assert.equal(SEASONAL_EPOCH_SOURCES.filter(item => item.id === DE441_EVENT_PROVIDER_ID).length, 1);
+  assert.equal(result.status, "resolved");
   assert.deepEqual(result.qualifiedStateBasisSourceIds, ["jpl-de441"]);
-  assert.deepEqual(result.qualifiedDirectEventSourceIds, []);
-  assert.equal(result.absoluteSeasonalEpochAvailable, false);
+  assert.deepEqual(result.qualifiedDirectEventSourceIds, [DE441_EVENT_PROVIDER_ID]);
+  assert.deepEqual(result.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
 });

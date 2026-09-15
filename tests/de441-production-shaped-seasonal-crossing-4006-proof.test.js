@@ -10,10 +10,12 @@ import { ttJulianDayToTdbJulianDay } from "../src/astronomy/naif-tt-tdb-time-bri
 import { createHorizonsEclipticFrameWindowProofTransform } from "../src/astronomy/horizons-ecliptic-frame-transform-proof.js";
 import { HORIZONS_SUN_APPARENT_DIRECTION_PROOF_MODEL } from "../src/astronomy/horizons-sun-apparent-direction-proof.js";
 import { DE441_SEASONAL_CROSSING_4006_EVIDENCE } from "../src/astronomy/de441-seasonal-crossing-evidence.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import { DE441_SEASONAL_CROSSING_4006_FIXTURE } from "./fixtures/de441-seasonal-crossing-4006-proof.js";
 import { SEASONAL_EPOCH_PIPELINE, seasonalEpochSourceAudit } from "../src/recurrence/seasonal-epoch-source-audit.js";
 
 const SECONDS_PER_DAY = 86400;
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function quaternionToMatrix(quaternion) {
   const magnitude = Math.hypot(...quaternion);
@@ -99,12 +101,14 @@ test("production-shaped absolute-state solver recovers all 24 year-4006 Horizons
   assert.ok(meanAbsEpochErrorSeconds < 0.1, `production-shaped mean error ${meanAbsEpochErrorSeconds} s`);
 });
 
-test("production-shaped proof still leaves the runtime seasonal provider registry fail-closed", () => {
+test("production-shaped state proof remains separate from the bounded direct-event runtime", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
-  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
   const audit = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(audit.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(audit.absoluteSeasonalEpochAvailable, false);
+  assert.equal(audit.status, "resolved");
+  assert.equal(audit.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(audit.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });

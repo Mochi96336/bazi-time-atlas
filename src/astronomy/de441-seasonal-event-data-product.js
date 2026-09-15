@@ -29,7 +29,7 @@ export const DE441_SEASONAL_EVENT_DATA_PROVIDER = defineSeasonalEpochProvider({
   },
   implementation:"bundled-pinned-seasonal-event-slice",
   timeScale:"TT",
-  note:"Runtime-shaped direct-event data product. The published v1 slice currently contains only catalogue year 4006, derived from pinned Horizons quantity-31 / DE441 crossing truth. It intentionally does not expose state vectors and is not yet registered in the production seasonal pipeline."
+  note:"Production direct-event data product. The published v1 slice contains only catalogue year 4006, derived from pinned Horizons quantity-31 / DE441 crossing truth. It intentionally does not expose state vectors and cannot answer outside its declared 4006 coverage."
 });
 
 const SOURCE_CROSSCHECK = JPL_DE441_SHOUXING_4006_CROSSCHECK;
@@ -45,14 +45,6 @@ function freezeAuthoritativeSourceTerm(term) {
   });
 }
 
-/**
- * Clean source-provenance view for the bundled event product.
- *
- * The original capture record is a ShouXing-vs-JPL crosscheck and therefore
- * carries the ShouXing provider id. Runtime data-product provenance must not
- * inherit that provider identity: the payload itself is the pinned NASA/JPL
- * Horizons quantity-31 DE441 truth side of the comparison.
- */
 export const DE441_SEASONAL_EVENT_SOURCE_EVIDENCE = Object.freeze({
   id:"jpl-horizons-de441-4006-seasonal-events-source-v1",
   validationKind:"authoritative-source-pinning",
@@ -173,7 +165,8 @@ export const DE441_SEASONAL_EVENT_DATA_PRODUCT_MANIFEST = Object.freeze({
     rawFloat64EpochBytes:projectedEpochBytes,
     note:"Projection counts TT epoch Float64 values only; indexes, integrity metadata and compression/container overhead are separate."
   }),
-  productionIntegrated:false
+  productionIntegrated:true,
+  productionIntegrationMode:"direct-event-runtime-registry"
 });
 
 export function seasonalEventsForCatalogueYear(year) {

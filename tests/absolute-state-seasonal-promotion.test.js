@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { TYME_SHOUXING_DIRECT_PROVIDER } from "../src/astronomy/direct-seasonal-event-provider.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import { DE441_SEASONAL_CROSSING_4006_EVIDENCE } from "../src/astronomy/de441-seasonal-crossing-evidence.js";
 import {
   ABSOLUTE_STATE_SEASONAL_PROMOTION_POLICY,
@@ -13,6 +14,7 @@ import {
 } from "../src/recurrence/seasonal-epoch-source-audit.js";
 
 const DE441_PROVIDER = SEASONAL_EPOCH_SOURCES.find(item => item.id === "jpl-de441");
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function assess(evidence = [DE441_SEASONAL_CROSSING_4006_EVIDENCE], targetYear = 4006) {
   return assessAbsoluteStateSeasonalPromotion({
@@ -30,7 +32,7 @@ function evidenceVariant(overrides = {}) {
   });
 }
 
-test("year-4006 DE441 reconstruction passes the science gate but not production integration", () => {
+test("year-4006 DE441 reconstruction passes the science gate but not absolute-state production integration", () => {
   const result = assess();
   assert.equal(result.status, "authoritative-reconstruction-pass");
   assert.equal(result.blocker, null);
@@ -108,19 +110,20 @@ test("absolute-state promotion assessment refuses a direct-event provider role",
   );
 });
 
-test("passing science evidence still leaves the production registry and 4006 audit fail-closed", () => {
+test("passing state-basis science evidence remains separate from the bounded production direct-event runtime", () => {
   const promotion = assess();
   assert.equal(promotion.integrationEligible, true);
 
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
-  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
 
   const audit = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(audit.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(audit.absoluteSeasonalEpochAvailable, false);
-  assert.deepEqual(audit.usableSourceIds, []);
+  assert.equal(audit.status, "resolved");
+  assert.equal(audit.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(audit.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });
 
 test("promotion policy explicitly names all proof layers required before integration review", () => {

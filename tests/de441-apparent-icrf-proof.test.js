@@ -7,6 +7,7 @@ import {
   DE441_APPARENT_ICRF_MODEL
 } from "../src/astronomy/de441-apparent-icrf-proof.js";
 import { DE441_APPARENT_ICRF_EVIDENCE } from "../src/astronomy/de441-apparent-icrf-evidence.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import {
   DE441_APPARENT_ICRF_PROOF_CASES,
   DE441_APPARENT_ICRF_PROOF_PROVENANCE
@@ -15,6 +16,7 @@ import { SEASONAL_EPOCH_PIPELINE, seasonalEpochSourceAudit } from "../src/recurr
 
 const AU_METERS = 149_597_870_700;
 const ARCSEC_PER_RADIAN = 206264.80624709636;
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function norm(vector) {
   return Math.hypot(vector[0], vector[1], vector[2]);
@@ -132,13 +134,15 @@ test("NAIF stellar aberration reconstructs Horizons LT+S and observer quantity #
   assert.ok(maxObserverErrorArcsec < 0.00002);
 });
 
-test("apparent-direction proof remains fail-closed before end-to-end crossing composition", () => {
+test("apparent-direction proof remains proof-only while the bounded direct-event runtime resolves 4006", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
 
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(result.absoluteSeasonalEpochAvailable, false);
-  assert.deepEqual(result.usableSourceIds, []);
+  assert.equal(result.status, "resolved");
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(result.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });

@@ -46,7 +46,6 @@ test("authoritative year-4006 DE441 seasonal-event product passes the registrati
   assert.deepEqual(result.reconstructionIntegrityFailures, []);
   assert.equal(result.registrationEligible, true);
   assert.equal(result.productionRegistrationEligible, true);
-  assert.equal(result.requiresProductionRegistryMutation, true);
 });
 
 test("registration policy pins the quantity-31 semantics, TT, 24 crossings and two-second reconstruction budget", () => {
@@ -131,18 +130,18 @@ test("registration gate cannot widen the published data-product coverage", () =>
   assert.equal(result.registrationEligible, false);
 });
 
-test("passing registration evidence still leaves the production seasonal registry fail-closed", () => {
+test("production registry now reflects the already-passed bounded registration gate", () => {
   const result = assess();
   assert.equal(result.registrationEligible, true);
 
   const providerId = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
-  assert.equal(SEASONAL_EPOCH_SOURCES.some(source => source.id === providerId), false);
-  assert.equal(SEASONAL_EPOCH_PIPELINE.directEventProviderIds.includes(providerId), false);
+  assert.equal(SEASONAL_EPOCH_SOURCES.filter(source => source.id === providerId).length, 1);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [providerId]);
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
 
   const audit = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(audit.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(audit.absoluteSeasonalEpochAvailable, false);
-  assert.deepEqual(audit.usableSourceIds, []);
+  assert.equal(audit.status, "resolved");
+  assert.equal(audit.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(audit.usableSourceIds, [providerId]);
 });
