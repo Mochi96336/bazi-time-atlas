@@ -19,17 +19,29 @@
     const RINGS = ["hour", "day", "solar", "month", "year"];
     frame.src = new URL("../../?instant=2027-03-15T13%3A20%3A09.000Z", location.href).href;
 
+    function style(win, doc, id) {
+      return win.getComputedStyle(doc.querySelector(`#${id}-track`));
+    }
+
     function opacity(win, doc, id) {
-      return Number(win.getComputedStyle(doc.querySelector(`#${id}-track`)).opacity);
+      return Number(style(win, doc, id).opacity);
+    }
+
+    function filter(win, doc, id) {
+      return style(win, doc, id).filter;
     }
 
     function displays(win, doc) {
-      return Object.fromEntries(RINGS.map(id => [id, win.getComputedStyle(doc.querySelector(`#${id}-track`)).display]));
+      return Object.fromEntries(RINGS.map(id => [id, style(win, doc, id).display]));
     }
 
-    function snapshotOpacities(win, doc, prefix) {
-      for (const id of RINGS) probe.dataset[`${prefix}${id[0].toUpperCase()}${id.slice(1)}Opacity`] = String(opacity(win, doc, id));
+    function snapshotPresentation(win, doc, prefix) {
+      for (const id of RINGS) {
+        probe.dataset[`${prefix}${id[0].toUpperCase()}${id.slice(1)}Opacity`] = String(opacity(win, doc, id));
+        probe.dataset[`${prefix}${id[0].toUpperCase()}${id.slice(1)}Filter`] = filter(win, doc, id);
+      }
       probe.dataset[`${prefix}ZodiacOpacity`] = String(opacity(win, doc, "zodiac"));
+      probe.dataset[`${prefix}ZodiacFilter`] = filter(win, doc, "zodiac");
     }
 
     function settle(callback) {
@@ -40,7 +52,8 @@
       const win = frame.contentWindow;
       const doc = frame.contentDocument;
       const instrument = doc?.querySelector("#kinetic-instrument");
-      if (!win || !doc || !instrument) return;
+      const svg = doc?.querySelector("#kinetic-wheel");
+      if (!win || !doc || !instrument || !svg) return;
 
       const disableTransitions = doc.createElement("style");
       disableTransitions.textContent = "#hour-track,#day-track,#solar-track,#zodiac-track,#month-track,#year-track,.ring-legend-row{transition:none!important}";
@@ -59,7 +72,7 @@
         probe.dataset.initialContext = instrument.dataset.scaleContextRings ?? "";
         probe.dataset.initialAmbient = instrument.dataset.scaleAmbientRings ?? "";
         probe.dataset.initialReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
-        snapshotOpacities(win, doc, "year");
+        snapshotPresentation(win, doc, "year");
 
         doc.querySelector('[data-scale="day"]')?.click();
         settle(() => {
@@ -69,26 +82,33 @@
           probe.dataset.dayAmbient = instrument.dataset.scaleAmbientRings ?? "";
           probe.dataset.dayReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
           probe.dataset.daySelectedInstant = instrument.dataset.selectedInstantMs ?? "";
-          snapshotOpacities(win, doc, "day");
+          snapshotPresentation(win, doc, "day");
 
-          doc.querySelector('[data-scale="cycle"]')?.click();
+          svg.dataset.hoverRing = "year";
           settle(() => {
-            probe.dataset.cycleWindow = instrument.dataset.scaleWindow ?? "";
-            probe.dataset.cycleFocus = instrument.dataset.scaleFocusRings ?? "";
-            probe.dataset.cycleContext = instrument.dataset.scaleContextRings ?? "";
-            probe.dataset.cycleAmbient = instrument.dataset.scaleAmbientRings ?? "";
-            probe.dataset.cycleReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
-            probe.dataset.cycleSelectedInstant = instrument.dataset.selectedInstantMs ?? "";
-            snapshotOpacities(win, doc, "cycle");
+            probe.dataset.dayHoverYearOpacity = String(opacity(win, doc, "year"));
+            probe.dataset.dayHoverYearFilter = filter(win, doc, "year");
+            delete svg.dataset.hoverRing;
 
-            const displayState = displays(win, doc);
-            probe.dataset.allPrimaryDisplayed = String(Object.values(displayState).every(value => value !== "none"));
-            probe.dataset.zodiacDisplayed = String(win.getComputedStyle(doc.querySelector("#zodiac-track")).display !== "none");
-            probe.dataset.selectedInstantBefore = selectedBefore;
-            probe.dataset.activeScaleButtons = String(doc.querySelectorAll('.scale-button.active').length);
-            probe.dataset.currentScaleButton = doc.querySelector('.scale-button.active')?.dataset.scale ?? "";
-            probe.dataset.currentAriaScale = doc.querySelector('.scale-button[aria-current="true"]')?.dataset.scale ?? "";
-            probe.dataset.ready = "true";
+            doc.querySelector('[data-scale="cycle"]')?.click();
+            settle(() => {
+              probe.dataset.cycleWindow = instrument.dataset.scaleWindow ?? "";
+              probe.dataset.cycleFocus = instrument.dataset.scaleFocusRings ?? "";
+              probe.dataset.cycleContext = instrument.dataset.scaleContextRings ?? "";
+              probe.dataset.cycleAmbient = instrument.dataset.scaleAmbientRings ?? "";
+              probe.dataset.cycleReadout = doc.querySelector("#scale-readout")?.textContent?.trim() ?? "";
+              probe.dataset.cycleSelectedInstant = instrument.dataset.selectedInstantMs ?? "";
+              snapshotPresentation(win, doc, "cycle");
+
+              const displayState = displays(win, doc);
+              probe.dataset.allPrimaryDisplayed = String(Object.values(displayState).every(value => value !== "none"));
+              probe.dataset.zodiacDisplayed = String(style(win, doc, "zodiac").display !== "none");
+              probe.dataset.selectedInstantBefore = selectedBefore;
+              probe.dataset.activeScaleButtons = String(doc.querySelectorAll('.scale-button.active').length);
+              probe.dataset.currentScaleButton = doc.querySelector('.scale-button.active')?.dataset.scale ?? "";
+              probe.dataset.currentAriaScale = doc.querySelector('.scale-button[aria-current="true"]')?.dataset.scale ?? "";
+              probe.dataset.ready = "true";
+            });
           });
         });
       };
