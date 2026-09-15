@@ -32,7 +32,51 @@ export const DE441_SEASONAL_EVENT_DATA_PROVIDER = defineSeasonalEpochProvider({
   note:"Runtime-shaped direct-event data product. The published v1 slice currently contains only catalogue year 4006, derived from pinned Horizons quantity-31 / DE441 crossing truth. It intentionally does not expose state vectors and is not yet registered in the production seasonal pipeline."
 });
 
-const SOURCE_EVIDENCE = JPL_DE441_SHOUXING_4006_CROSSCHECK;
+const SOURCE_CROSSCHECK = JPL_DE441_SHOUXING_4006_CROSSCHECK;
+
+function freezeAuthoritativeSourceTerm(term) {
+  if (!Number.isFinite(term.jplDe441TtJulianDay)) {
+    throw new TypeError(`missing DE441 TT epoch for ${term.name}`);
+  }
+  return Object.freeze({
+    name:term.name,
+    longitudeDegrees:term.longitudeDegrees,
+    ttJulianDay:term.jplDe441TtJulianDay
+  });
+}
+
+/**
+ * Clean source-provenance view for the bundled event product.
+ *
+ * The original capture record is a ShouXing-vs-JPL crosscheck and therefore
+ * carries the ShouXing provider id. Runtime data-product provenance must not
+ * inherit that provider identity: the payload itself is the pinned NASA/JPL
+ * Horizons quantity-31 DE441 truth side of the comparison.
+ */
+export const DE441_SEASONAL_EVENT_SOURCE_EVIDENCE = Object.freeze({
+  id:"jpl-horizons-de441-4006-seasonal-events-source-v1",
+  validationKind:"authoritative-source-pinning",
+  authority:SOURCE_CROSSCHECK.authority,
+  sourceUrl:"https://ssd.jpl.nasa.gov/horizons/",
+  referenceFamily:"jpl-planetary-ephemeris",
+  sourceEphemeris:SOURCE_CROSSCHECK.sourceEphemeris,
+  target:SOURCE_CROSSCHECK.target,
+  observerCenter:SOURCE_CROSSCHECK.observerCenter,
+  quantity:SOURCE_CROSSCHECK.quantity,
+  referenceSemantics:SOURCE_CROSSCHECK.referenceSemantics,
+  timeScale:SOURCE_CROSSCHECK.timeScale,
+  catalogueYear:SOURCE_CROSSCHECK.catalogueYear,
+  sampledYears:SOURCE_CROSSCHECK.sampledYears,
+  samplesByYear:SOURCE_CROSSCHECK.samplesByYear,
+  crossings:SOURCE_CROSSCHECK.terms.length,
+  researchWorkflowRunId:SOURCE_CROSSCHECK.researchWorkflowRunId,
+  sourceCaptureSha256:SOURCE_CROSSCHECK.sourceCaptureSha256,
+  sourceCrosscheckId:SOURCE_CROSSCHECK.id,
+  terms:Object.freeze(SOURCE_CROSSCHECK.terms.map(freezeAuthoritativeSourceTerm)),
+  note:"Authoritative source-pinning record for the JPL side of the original ShouXing crosscheck. It names no runtime provider and makes no model-independence claim; it only preserves the exact Horizons/DE441 seasonal-event payload provenance."
+});
+
+const SOURCE_EVIDENCE = DE441_SEASONAL_EVENT_SOURCE_EVIDENCE;
 
 function normalizeDegrees(value) {
   return ((value % 360) + 360) % 360;
@@ -62,21 +106,21 @@ function canonicalSeasonalLongitude(longitudeDegrees) {
 }
 
 function freezeEvent(term) {
-  if (!Number.isFinite(term.jplDe441TtJulianDay)) {
+  if (!Number.isFinite(term.ttJulianDay)) {
     throw new TypeError(`missing DE441 TT epoch for ${term.name}`);
   }
   return Object.freeze({
     providerId:DE441_SEASONAL_EVENT_DATA_PROVIDER.id,
     providerRole:DE441_SEASONAL_EVENT_DATA_PROVIDER.role,
     sourceEvidenceId:SOURCE_EVIDENCE.id,
-    sourceEphemeris:"DE441",
+    sourceEphemeris:SOURCE_EVIDENCE.sourceEphemeris,
     referenceSemantics:SOURCE_EVIDENCE.referenceSemantics,
     timeScale:"TT",
     yearBasis:"atlas-solar-term-catalogue",
     catalogueYear:4006,
     name:term.name,
     longitudeDegrees:canonicalSeasonalLongitude(term.longitudeDegrees),
-    ttJulianDay:term.jplDe441TtJulianDay
+    ttJulianDay:term.ttJulianDay
   });
 }
 
@@ -105,6 +149,8 @@ export const DE441_SEASONAL_EVENT_DATA_PRODUCT_MANIFEST = Object.freeze({
   providerId:DE441_SEASONAL_EVENT_DATA_PROVIDER.id,
   providerRole:DE441_SEASONAL_EVENT_DATA_PROVIDER.role,
   payload:"24 apparent geocentric solar-longitude crossing epochs per catalogue year",
+  validationKind:SOURCE_EVIDENCE.validationKind,
+  sourceEvidenceId:SOURCE_EVIDENCE.id,
   referenceSemantics:SOURCE_EVIDENCE.referenceSemantics,
   timeScale:"TT",
   yearBasis:"atlas-solar-term-catalogue",
@@ -116,6 +162,7 @@ export const DE441_SEASONAL_EVENT_DATA_PRODUCT_MANIFEST = Object.freeze({
     maxYear:4006,
     events:EVENTS_4006.length,
     sourceEvidenceId:SOURCE_EVIDENCE.id,
+    sourceCrosscheckId:SOURCE_EVIDENCE.sourceCrosscheckId,
     sourceCaptureSha256:SOURCE_EVIDENCE.sourceCaptureSha256
   }),
   fullDe441Projection:Object.freeze({
