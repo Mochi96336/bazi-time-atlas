@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px Free Compare read-head harness</title>
+  <style>
+    html, body { margin:0; width:390px; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; opacity:0; pointer-events:none; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Free Compare read-head production harness"></iframe>
+  <output id="probe" data-ready="false"></output>
+
+  <script type="module">
+    const START_MS = Date.parse("2024-06-15T04:00:00.000Z");
+    const START_ANGLE = -90;
+    const READHEADS = [
+      ["hour", "hour", '[data-active-cycle-ring="hour"]', "data-cycle-coordinate"],
+      ["day", "day", '[data-active-cycle-ring="day"]', "data-cycle-coordinate"],
+      ["term", "solar", '[data-active-annual-kind="term"]', "data-annual-coordinate"],
+      ["zodiac", "zodiac", '[data-active-annual-kind="zodiac"]', "data-annual-coordinate"],
+      ["month", "month", '[data-active-cycle-ring="month"]', "data-cycle-coordinate"],
+      ["year", "year", '[data-active-cycle-ring="year"]', "data-cycle-coordinate"]
+    ];
+    const probe = document.querySelector("#probe");
+    const frame = document.querySelector("#stage");
+
+    function appUrl() {
+      const url = new URL("../../", location.href);
+      url.searchParams.set("instant", new Date(START_MS).toISOString());
+      return url.href;
+    }
+
+    function settle() {
+      return new Promise(resolve => queueMicrotask(() => queueMicrotask(resolve)));
+    }
+
+    async function waitFor(predicate, label, timeoutMs = 5000) {
+      const started = performance.now();
+      while (performance.now() - started < timeoutMs) {
+        if (predicate()) return;
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+      throw new Error(`timeout waiting for ${label}`);
+    }
+
+    function signedAngleDelta(actual, expected) {
+      let delta = ((actual - expected) % 360 + 360) % 360;
+      if (delta > 180) delta -= 360;
+      return delta;
+    }
+
+    function geometry() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const svg = doc?.querySelector("#kinetic-wheel");
+      const compareButton = doc?.querySelector("#compare-rings-button");
+      const ctm = svg?.getScreenCTM();
+      const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
+      const tracks = Object.fromEntries(
+        ["hour", "day", "solar", "zodiac", "month", "year"].map(id => [id, doc?.querySelector(`#${id}-track`)])
+      );
+      if (!win || !doc || !instrument || !svg || !compareButton || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value)) || Object.values(tracks).some(track => !track)) return null;
+      const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
+        .map(path => {
+          const point = path.getPointAtLength(0);
+          return Math.hypot(point.x - center[0], point.y - center[1]);
+        })
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (radii.length !== 7) return null;
+      return { win, doc, instrument, svg, compareButton, ctm, center, tracks, radii };
+    }
+
+    function pointerAt(g, radius, angleDegrees, type, pointerId) {
+      const angle = angleDegrees * Math.PI / 180;
+      const world = new g.win.DOMPoint(
+        g.center[0] + Math.cos(angle) * radius,
+        g.center[1] + Math.sin(angle) * radius
+      );
+      const screen = world.matrixTransform(g.ctm);
+      return new g.win.PointerEvent(type, {
+        bubbles:true,
+        cancelable:true,
+        pointerId,
+        pointerType:"touch",
+        isPrimary:true,
+        button:0,
+        buttons:type === "pointerup" ? 0 : 1,
+        clientX:screen.x,
+        clientY:screen.y
+      });
+    }
+
+    async function dragRing(g, { innerGuide, outerGuide, degrees, pointerId }) {
+      const radius = (g.radii[innerGuide] + g.radii[outerGuide]) / 2;
+      const endAngle = START_ANGLE + degrees;
+      g.svg.dispatchEvent(pointerAt(g, radius, START_ANGLE, "pointerdown", pointerId));
+      await settle();
+      g.svg.dispatchEvent(pointerAt(g, radius, endAngle, "pointermove", pointerId));
+      await settle();
+      g.svg.dispatchEvent(pointerAt(g, radius, endAngle, "pointerup", pointerId));
+      await settle();
+    }
+
+    function readheadOffsets(g) {
+      const cursor = Number(g.svg.dataset.referenceCursorAngle);
+      return Object.fromEntries(READHEADS.map(([name, trackId, selector, coordinateAttr]) => {
+        const track = g.tracks[trackId];
+        const label = track?.querySelector(selector);
+        const coordinate = Number(label?.getAttribute(coordinateAttr));
+        const renderedRotation = Number(track?.dataset.renderedRotation);
+        const offset = signedAngleDelta(coordinate + renderedRotation, cursor);
+        return [name, offset];
+      }));
+    }
+
+    function snapshot(g) {
+      const offsets = readheadOffsets(g);
+      return {
+        innerWidth:g.win.innerWidth,
+        instantMs:Number(g.instrument.dataset.selectedInstantMs),
+        compareMode:g.instrument.dataset.compareMode ?? "",
+        detachedRings:g.instrument.dataset.detachedRings ?? "",
+        offsets:Object.entries(offsets).map(([name, value]) => `${name}:${Number(value).toFixed(4)}`).join(","),
+        finite:Object.values(offsets).every(Number.isFinite)
+      };
+    }
+
+    function writeSnapshot(prefix, value) {
+      for (const [field, raw] of Object.entries(value)) {
+        probe.dataset[`${prefix}${field[0].toUpperCase()}${field.slice(1)}`] = String(raw);
+      }
+    }
+
+    try {
+      const loaded = new Promise(resolve => frame.addEventListener("load", resolve, { once:true }));
+      frame.src = appUrl();
+      await loaded;
+      await waitFor(() => {
+        const g = geometry();
+        const current = g ? snapshot(g) : null;
+        return current && current.innerWidth === 390 && current.instantMs === START_MS && current.finite;
+      }, "production read-head baseline");
+      await settle();
+
+      const g = geometry();
+      if (!g) throw new Error("production geometry unavailable");
+      const before = snapshot(g);
+
+      g.compareButton.click();
+      await settle();
+      const enabled = snapshot(g);
+
+      await dragRing(g, { innerGuide:1, outerGuide:2, degrees:6, pointerId:71 });
+      const detached = snapshot(g);
+
+      await dragRing(g, { innerGuide:0, outerGuide:1, degrees:6, pointerId:72 });
+      await dragRing(g, { innerGuide:2, outerGuide:4, degrees:15, pointerId:73 });
+      await dragRing(g, { innerGuide:4, outerGuide:5, degrees:6, pointerId:74 });
+      await dragRing(g, { innerGuide:5, outerGuide:6, degrees:6, pointerId:75 });
+      const allDetached = snapshot(g);
+
+      g.compareButton.click();
+      await settle();
+      const restored = snapshot(g);
+
+      writeSnapshot("before", before);
+      writeSnapshot("enabled", enabled);
+      writeSnapshot("detached", detached);
+      writeSnapshot("allDetached", allDetached);
+      writeSnapshot("restored", restored);
+      probe.dataset.ready = "true";
+    } catch (error) {
+      probe.dataset.error = error?.stack ?? String(error);
+      probe.dataset.ready = "error";
+    }
+  </script>
+</body>
+</html>
