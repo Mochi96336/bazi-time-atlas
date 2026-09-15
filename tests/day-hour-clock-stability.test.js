@@ -1,3 +1,4 @@
+// Calendar-boundary primitive only: this test must not grant astronomy or recurrence authority.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DAY_BOUNDARY } from "../src/calendar/day-boundary.js";
