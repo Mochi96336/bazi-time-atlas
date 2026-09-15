@@ -17,8 +17,7 @@
   <script type="module">
     const START_MS = Date.parse("2024-06-15T04:00:00.000Z");
     const START_ANGLE = -90;
-    const END_ANGLE = -84;
-    const DAY_RING_INTERVAL = 1;
+    const DAY_END_ANGLE = -84;
     const probe = document.querySelector("#probe");
     const frame = document.querySelector("#stage");
 
@@ -46,14 +45,18 @@
       const doc = frame.contentDocument;
       const instrument = doc?.querySelector("#kinetic-instrument");
       const svg = doc?.querySelector("#kinetic-wheel");
-      const track = doc?.querySelector("#day-track");
       const compareButton = doc?.querySelector("#compare-rings-button");
       const resetButton = doc?.querySelector("#reset-rings-button");
       const status = doc?.querySelector("#ring-compare-status");
       const legend = doc?.querySelector(".ring-legend");
+      const classificationButton = doc?.querySelector("#classification-overlay-button");
+      const classificationLegend = doc?.querySelector("#classification-overlay-legend");
       const ctm = svg?.getScreenCTM();
       const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
-      if (!win || !doc || !instrument || !svg || !track || !compareButton || !resetButton || !status || !legend || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value))) return null;
+      const tracks = Object.fromEntries(
+        ["hour", "day", "solar", "month", "year"].map(id => [id, doc?.querySelector(`#${id}-track`)])
+      );
+      if (!win || !doc || !instrument || !svg || !compareButton || !resetButton || !status || !legend || !classificationButton || !classificationLegend || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value)) || Object.values(tracks).some(track => !track)) return null;
       const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
         .map(path => {
           const point = path.getPointAtLength(0);
@@ -62,7 +65,7 @@
         .filter(Number.isFinite)
         .sort((a, b) => a - b);
       if (radii.length !== 7) return null;
-      return { win, doc, instrument, svg, track, compareButton, resetButton, status, legend, ctm, center, radii };
+      return { win, doc, instrument, svg, tracks, compareButton, resetButton, status, legend, classificationButton, classificationLegend, ctm, center, radii };
     }
 
     function pointerAt(g, radius, angleDegrees, type, pointerId) {
@@ -85,6 +88,17 @@
       });
     }
 
+    async function dragRing(g, { innerGuide, outerGuide, degrees, pointerId }) {
+      const radius = (g.radii[innerGuide] + g.radii[outerGuide]) / 2;
+      const endAngle = START_ANGLE + degrees;
+      g.svg.dispatchEvent(pointerAt(g, radius, START_ANGLE, "pointerdown", pointerId));
+      await settle();
+      g.svg.dispatchEvent(pointerAt(g, radius, endAngle, "pointermove", pointerId));
+      await settle();
+      g.svg.dispatchEvent(pointerAt(g, radius, endAngle, "pointerup", pointerId));
+      await settle();
+    }
+
     function rectsOverlap(a, b) {
       return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
     }
@@ -92,22 +106,29 @@
     function snapshot(g) {
       const statusRect = g.status.getBoundingClientRect();
       const legendRect = g.legend.getBoundingClientRect();
+      const classificationRect = g.classificationLegend.getBoundingClientRect();
       return {
         innerWidth:g.win.innerWidth,
         instantMs:Number(g.instrument.dataset.selectedInstantMs),
         scrubMode:g.instrument.dataset.scrubMode ?? "",
         compareMode:g.instrument.dataset.compareMode ?? "",
         detachedRings:g.instrument.dataset.detachedRings ?? "",
-        manualOffset:Number(g.track.dataset.manualOffset),
-        linked:g.track.dataset.linked ?? "",
+        manualOffset:Number(g.tracks.day.dataset.manualOffset),
+        manualOffsets:["hour", "day", "solar", "month", "year"].map(id => `${id}:${Number(g.tracks[id].dataset.manualOffset).toFixed(1)}`).join(","),
+        linked:g.tracks.day.dataset.linked ?? "",
         comparePressed:g.compareButton.getAttribute("aria-pressed") ?? "",
         resetHidden:g.resetButton.hidden,
         statusHidden:g.status.hidden,
         statusText:g.status.textContent ?? "",
         statusTop:statusRect.top,
         statusBottom:statusRect.bottom,
+        statusWidth:statusRect.width,
+        statusHeight:statusRect.height,
         legendBottom:legendRect.bottom,
-        statusLegendOverlap:!g.status.hidden && rectsOverlap(statusRect, legendRect)
+        statusLegendOverlap:!g.status.hidden && rectsOverlap(statusRect, legendRect),
+        classificationHidden:g.classificationLegend.hidden,
+        classificationTop:classificationRect.top,
+        statusClassificationOverlap:!g.status.hidden && !g.classificationLegend.hidden && rectsOverlap(statusRect, classificationRect)
       };
     }
 
@@ -136,23 +157,32 @@
       await settle();
       const enabled = snapshot(g);
 
-      const radius = (g.radii[DAY_RING_INTERVAL] + g.radii[DAY_RING_INTERVAL + 1]) / 2;
-      g.svg.dispatchEvent(pointerAt(g, radius, START_ANGLE, "pointerdown", 61));
-      await settle();
-      g.svg.dispatchEvent(pointerAt(g, radius, END_ANGLE, "pointermove", 61));
-      await settle();
-      g.svg.dispatchEvent(pointerAt(g, radius, END_ANGLE, "pointerup", 61));
-      await settle();
+      await dragRing(g, { innerGuide:1, outerGuide:2, degrees:DAY_END_ANGLE - START_ANGLE, pointerId:61 });
       const detached = snapshot(g);
+
+      /* Exercise the longest legitimate status: every primary ring detached.
+         Solar spans guide radii 2..4 because guide 3 only subdivides its shared
+         annual band for the derived Zodiac overlay. */
+      await dragRing(g, { innerGuide:0, outerGuide:1, degrees:6, pointerId:62 });
+      await dragRing(g, { innerGuide:2, outerGuide:4, degrees:15, pointerId:63 });
+      await dragRing(g, { innerGuide:4, outerGuide:5, degrees:6, pointerId:64 });
+      await dragRing(g, { innerGuide:5, outerGuide:6, degrees:6, pointerId:65 });
+      const allDetached = snapshot(g);
+
+      g.classificationButton.click();
+      await settle();
+      const combined = snapshot(g);
 
       g.compareButton.click();
       await settle();
       const restored = snapshot(g);
 
-      probe.dataset.dragDegrees = String(END_ANGLE - START_ANGLE);
+      probe.dataset.dragDegrees = String(DAY_END_ANGLE - START_ANGLE);
       writeSnapshot("before", before);
       writeSnapshot("enabled", enabled);
       writeSnapshot("detached", detached);
+      writeSnapshot("allDetached", allDetached);
+      writeSnapshot("combined", combined);
       writeSnapshot("restored", restored);
       probe.dataset.ready = "true";
     } catch (error) {
