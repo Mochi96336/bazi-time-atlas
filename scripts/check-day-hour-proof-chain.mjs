@@ -61,7 +61,8 @@ if (!zero.dom.includes("Δ=0 · identity bypass") || !zero.dom.includes("同一�
   throw new Error(`zero identity: identity-bypass explanation missing: ${zero.url}`);
 }
 expectStage(zero.dom, "absolute-seasonal-epoch", "satisfied", "zero identity", zero.url);
-console.log(`[day-hour-proof] PASS identity bypass with current absolute-epoch availability: ${zero.url}`);
+expectStage(zero.dom, "target-instant", "not-required", "zero identity", zero.url);
+console.log(`[day-hour-proof] PASS identity bypass does not invent a cross-era target instant: ${zero.url}`);
 
 const local = dumpDom("recurrence.html?date=2026-09-13&delta=1980");
 const localInstrument = tagById(local.dom, "recurrence-instrument");
@@ -69,29 +70,33 @@ const localPanel = tagById(local.dom, "day-hour-proof-chain");
 const localExact = {
   "data-ready":"true",
   "data-identity":"false",
-  "data-first-hard-blocker":"earth-rotation-bridge",
-  "data-earth-rotation-estimate-available":"true",
+  "data-first-hard-blocker":"target-instant",
+  "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
-  "data-stage-count":"10"
+  "data-stage-count":"11"
 };
 for (const [name, expected] of Object.entries(localExact)) {
   const actual = attr(localPanel, name);
   if (actual !== expected) throw new Error(`4006 proof: expected ${name}=${expected}, got ${actual}: ${local.url}`);
 }
-if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "earth-rotation-bridge") {
+if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "target-instant") {
   throw new Error(`4006 proof: instrument first blocker mismatch: ${local.url}`);
 }
-if (attr(localInstrument, "data-day-hour-proof-earth-rotation-estimate-available") !== "true") {
-  throw new Error(`4006 proof: Earth-rotation estimate capability missing from instrument: ${local.url}`);
+if (attr(localInstrument, "data-day-hour-proof-earth-rotation-estimate-available") !== "false") {
+  throw new Error(`4006 proof: date-only recurrence must not claim a target-specific UT1 estimate: ${local.url}`);
 }
 expectStage(local.dom, "relative-term-geometry", "satisfied", "4006 proof", local.url);
 expectStage(local.dom, "absolute-seasonal-epoch", "satisfied", "4006 proof", local.url);
-expectStage(local.dom, "earth-rotation-bridge", "uncertain-estimate", "4006 proof", local.url);
-if (!local.dom.includes("有估計 · 不確定") || !local.dom.includes("deterministic Earth rotation")) {
-  throw new Error(`4006 proof: uncertainty-aware Earth-rotation explanation missing: ${local.url}`);
+expectStage(local.dom, "target-instant", "unbound-convention", "4006 proof", local.url);
+expectStage(local.dom, "earth-rotation-bridge", "blocked", "4006 proof", local.url);
+if (!local.dom.includes("回歸頁目前只指定年月日") || !local.dom.includes("沒有 hour/minute/second")) {
+  throw new Error(`4006 proof: date-only target-instant explanation missing: ${local.url}`);
 }
-console.log(`[day-hour-proof] PASS 4006 TT→UT1 estimate exists but remains uncertainty-blocked: ${local.url}`);
+if (!local.dom.includes("此年份已有深時間 ΔT / TT→UT1 模型能力") || !local.dom.includes("尚未定義一個目標 TT instant")) {
+  throw new Error(`4006 proof: Earth-rotation capability must remain upstream-blocked: ${local.url}`);
+}
+console.log(`[day-hour-proof] PASS 4006 date-only recurrence blocks target instant before Earth rotation: ${local.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
@@ -103,7 +108,7 @@ const exact = {
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
-  "data-stage-count":"10"
+  "data-stage-count":"11"
 };
 for (const [name, expected] of Object.entries(exact)) {
   const actual = attr(panel, name);
@@ -119,6 +124,7 @@ if (attr(instrument, "data-day-hour-proof-day-resolved") !== "false" || attr(ins
 const expectedStages = {
   "relative-term-geometry":"satisfied",
   "absolute-seasonal-epoch":"missing-deep-time-model",
+  "target-instant":"unbound-convention",
   "earth-rotation-bridge":"blocked",
   "civil-zone":"unbound-convention",
   "day-boundary":"unbound-convention",
