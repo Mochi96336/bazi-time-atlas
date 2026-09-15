@@ -102,6 +102,10 @@ jobs:
         run: node scripts/check-free-compare-drag.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify Free Compare readhead ownership
+        run: node scripts/check-free-compare-readheads.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify exact shared boundary gates
         run: node scripts/check-boundary-gates.mjs
         env:
