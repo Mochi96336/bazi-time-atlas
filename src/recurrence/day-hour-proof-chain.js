@@ -7,6 +7,7 @@ import {
   DAY_BOUNDARY,
   DAY_BOUNDARY_VALUES
 } from "../calendar/day-boundary.js";
+import { equationOfTimeModelBinding } from "./equation-of-time-model-binding.js";
 import { geographicLongitudeBinding } from "./geographic-longitude-binding.js";
 import {
   localZoneConventionBinding,
@@ -93,6 +94,19 @@ function longitudeDetail(binding, clockBasis, needsLongitude) {
   return `太陽時經度已綁定：${hemisphere}${Math.abs(binding.longitudeDegrees)}°（east-positive）。`;
 }
 
+function equationOfTimeDetail(binding, clockBasis, needsEquationOfTime) {
+  if (!clockBasis) return "只有 local apparent solar clock 需要。";
+  if (!needsEquationOfTime) return "此 local clock basis 不需要 EoT。";
+  if (!binding.bound) {
+    return "視太陽時需要明示一個 registry-owned EoT model；不能用 boolean 或有限數值輸出冒充深時間驗證。";
+  }
+  if (!binding.validatedForTarget) {
+    const target = binding.targetYear === null ? "目前 target" : String(binding.targetYear);
+    return `已找到 ${binding.modelId}，但其 ${binding.validationScope ?? "registered"} evidence 沒有授權 ${target} 的 recurrence EoT；model presence 不等於 target-era validation。`;
+  }
+  return `EoT model ${binding.modelId} 已由 ${binding.evidenceId} 驗證涵蓋 target year ${binding.targetYear}。`;
+}
+
 export function dayHourResolutionProof({
   identity = false,
   relativeTermGeometry,
@@ -105,7 +119,8 @@ export function dayHourResolutionProof({
   sexagenaryDayArithmetic,
   clockBasis = null,
   longitudeDegrees = null,
-  equationOfTimeModel = false,
+  equationOfTimeModelId = null,
+  targetYear = null,
   hourBranchRule = true,
   fiveRatsRule = true
 }) {
@@ -116,7 +131,6 @@ export function dayHourResolutionProof({
     earthRotationBridge,
     earthRotationEstimateAvailable,
     sexagenaryDayArithmetic,
-    equationOfTimeModel,
     hourBranchRule,
     fiveRatsRule
   })) assertBoolean(value, name);
@@ -127,6 +141,7 @@ export function dayHourResolutionProof({
 
   const normalizedDayBoundary = normalizeDayBoundary(dayBoundary);
   const longitude = geographicLongitudeBinding(longitudeDegrees);
+  const equationOfTimeModel = equationOfTimeModelBinding(equationOfTimeModelId, targetYear);
   const target = targetInstantBinding(targetInstant);
   const localZone = localZoneConventionBinding(localZoneConvention, target);
   const targetInstantBound = target.bound;
@@ -157,11 +172,12 @@ export function dayHourResolutionProof({
   const needsLongitude = clockBasis === DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR
     || clockBasis === DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR;
   const needsEquationOfTime = clockBasis === DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR;
+  const equationOfTimeRequirementSatisfied = !needsEquationOfTime || equationOfTimeModel.validatedForTarget;
   const hourRequirements = Object.freeze({
     resolvedDayPillar:dayResolved,
     clockBasisBound:clockBasis !== null,
     longitudeBound:!needsLongitude || longitudeBound,
-    equationOfTimeModel:!needsEquationOfTime || equationOfTimeModel,
+    equationOfTimeModel:equationOfTimeRequirementSatisfied,
     hourBranchRule,
     fiveRatsRule
   });
@@ -277,8 +293,8 @@ export function dayHourResolutionProof({
     stage(
       "equation-of-time",
       "Equation of Time",
-      !clockBasis ? "conditional" : needsEquationOfTime ? (equationOfTimeModel ? "satisfied" : "missing-deep-time-model") : "not-required",
-      !clockBasis ? "只有 local apparent solar clock 需要。" : needsEquationOfTime ? (equationOfTimeModel ? "視太陽時修正模型可用。" : "視太陽時需要該 epoch 可用的 EoT 模型。") : "此 local clock basis 不需要 EoT。",
+      !clockBasis ? "conditional" : needsEquationOfTime ? (equationOfTimeModel.validatedForTarget ? "satisfied" : "missing-deep-time-model") : "not-required",
+      equationOfTimeDetail(equationOfTimeModel, clockBasis, needsEquationOfTime),
       "astronomy"
     ),
     stage(
@@ -306,6 +322,8 @@ export function dayHourResolutionProof({
     longitude:Object.freeze({ ...longitude }),
     longitudeDegrees:longitude.longitudeDegrees,
     longitudeBound,
+    equationOfTimeModel:Object.freeze({ ...equationOfTimeModel }),
+    equationOfTimeModelValidated:equationOfTimeModel.validatedForTarget,
     needsLongitude,
     needsEquationOfTime,
     earthRotationEstimateCapability,
@@ -337,6 +355,8 @@ export function currentRecurrenceDayHourProof({
   dayBoundary = null,
   clockBasis = null,
   longitudeDegrees = null,
+  equationOfTimeModelId = null,
+  targetYear = null,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
@@ -355,7 +375,8 @@ export function currentRecurrenceDayHourProof({
     sexagenaryDayArithmetic:true,
     clockBasis,
     longitudeDegrees,
-    equationOfTimeModel:false,
+    equationOfTimeModelId,
+    targetYear,
     hourBranchRule:true,
     fiveRatsRule:true
   });
