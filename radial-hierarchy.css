@@ -50,10 +50,12 @@
 /* Sparse labels describe the scale; one dynamic label on each Ganzhi ring
    describes the sector currently crossing the Selected Instant datum. When
    that sector is already one of the five-step samples, retire the sampled copy
-   so the read-head never becomes doubled text. */
+   so the read-head never becomes doubled text. The read-head anchor stays on
+   the datum, but its glyphs start at that anchor instead of being bisected by
+   the cursor stroke. */
 .cycle-label.is-active-shadowed { visibility: hidden; }
 .active-cycle-label {
-  text-anchor: middle;
+  text-anchor: start;
   dominant-baseline: middle;
   pointer-events: none;
   paint-order: stroke fill;
