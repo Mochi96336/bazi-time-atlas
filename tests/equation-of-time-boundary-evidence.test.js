@@ -18,19 +18,23 @@ test("adapter propagates the exact corrected Swiss observed production envelope"
   assert.equal(result.samples, 105120);
   assert.equal(result.evidenceId, "swiss-ephemeris-eot-4006-dense-v2");
   assert.equal(result.evidenceKind, "empirical-grid-observed-production-max");
+  assert.equal(result.uncertaintyContribution, "equation-of-time-only");
 });
 
-test("ordinary candidate may clear the observed envelope without becoming deterministic", () => {
+test("ordinary candidate may clear the observed EoT contribution without becoming full membership proof", () => {
   const result = year4006SwissObservedDayHourStability({ hour:12, minute:0, second:0 });
   assert.equal(result.hourBranchMarginSeconds, 3600);
-  assert.equal(result.stableAgainstObservedEnvelope, true);
-  assert.equal(result.status, "stable-against-observed-envelope-only");
+  assert.equal(result.eotContributionStableAgainstObservedEnvelope, true);
+  assert.equal(result.status, "eot-contribution-stable-against-observed-envelope-only");
   assert.equal(result.continuousUpperBound, false);
+  assert.equal(result.coversOnlyEquationOfTimeError, true);
+  assert.equal(result.otherClockUncertaintyIncluded, false);
+  assert.equal(result.sufficientForFullMembership, false);
   assert.equal(result.deterministicMembership, false);
   assert.equal(result.recurrenceAuthorityGranted, false);
 });
 
-test("near an ordinary Hour boundary the observed envelope keeps membership ambiguous", () => {
+test("near an ordinary Hour boundary the observed EoT contribution keeps membership ambiguous", () => {
   const result = year4006SwissObservedDayHourStability(
     { hour:0, minute:59, second:59 },
     { dayBoundary:DAY_BOUNDARY.CIVIL_MIDNIGHT }
@@ -39,8 +43,8 @@ test("near an ordinary Hour boundary the observed envelope keeps membership ambi
   assert.equal(result.hourBranchStable, false);
   assert.equal(result.dayBoundaryStable, true);
   assert.deepEqual(result.ambiguousKinds, ["hour-branch"]);
-  assert.equal(result.stableAgainstObservedEnvelope, false);
-  assert.equal(result.status, "boundary-ambiguous-under-observed-envelope");
+  assert.equal(result.eotContributionStableAgainstObservedEnvelope, false);
+  assert.equal(result.status, "eot-contribution-reaches-boundary-under-observed-envelope");
 });
 
 test("civil midnight can remain the governing ambiguity even with a stable Hour branch", () => {
@@ -52,7 +56,7 @@ test("civil midnight can remain the governing ambiguity even with a stable Hour 
   assert.equal(result.dayBoundaryMarginSeconds, 1);
   assert.equal(result.dayBoundaryStable, false);
   assert.deepEqual(result.ambiguousKinds, ["day-boundary"]);
-  assert.equal(result.stableAgainstObservedEnvelope, false);
+  assert.equal(result.eotContributionStableAgainstObservedEnvelope, false);
 });
 
 test("Zi-initial boundary propagates ambiguity to both Day and Hour together", () => {
@@ -63,12 +67,16 @@ test("Zi-initial boundary propagates ambiguity to both Day and Hour together", (
   assert.equal(result.hourBranchMarginSeconds, 1);
   assert.equal(result.dayBoundaryMarginSeconds, 1);
   assert.deepEqual(result.ambiguousKinds, ["hour-branch", "day-boundary"]);
-  assert.equal(result.stableAgainstObservedEnvelope, false);
+  assert.equal(result.eotContributionStableAgainstObservedEnvelope, false);
 });
 
-test("contract keeps empirical evidence distinct from continuous authority", () => {
+test("contract keeps EoT evidence distinct from continuous and total-clock authority", () => {
   assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.targetYear, 4006);
+  assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.uncertaintyContribution, "equation-of-time-only");
   assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.continuousUpperBound, false);
+  assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.coversOnlyEquationOfTimeError, true);
+  assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.includesOtherClockUncertainty, false);
+  assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.sufficientForFullMembership, false);
   assert.equal(YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.grantsRecurrenceAuthority, false);
   assert.equal(
     YEAR_4006_SWISS_BOUNDARY_EVIDENCE_CONTRACT.delegatesBoundarySemanticsTo,
