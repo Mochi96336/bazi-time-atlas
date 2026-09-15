@@ -36,8 +36,15 @@ def main() -> None:
 
         decimal_hour = hour + minute / 60.0 + second / 3600.0
         jd_ut = swe.julday(year, month, day, decimal_hour, swe.GREG_CAL)
-        equation_days = float(swe.time_equ(jd_ut))
-        delta_t_days = float(swe.deltat(jd_ut))
+
+        # Swiss Ephemeris documents swe_time_equ() as taking ET/TT, while
+        # deltat_ex() takes UT. Keep the scale conversion explicit so the
+        # reference and aligned production path evaluate the same ephemeris
+        # instant. FLG_SWIEPH also binds Delta-T to the selected ephemeris
+        # context instead of relying on the legacy automatic guess.
+        delta_t_days = float(swe.deltat_ex(jd_ut, swe.FLG_SWIEPH))
+        jd_et = jd_ut + delta_t_days
+        equation_days = float(swe.time_equ(jd_et))
 
         _, retflags = swe.calc_ut(jd_ut, swe.SUN, swe.FLG_SWIEPH)
         ephemeris_flag = int(retflags & ephe_mask)
@@ -58,6 +65,7 @@ def main() -> None:
                 "minute": minute,
                 "second": second,
                 "julianDayUt": jd_ut,
+                "julianDayEt": jd_et,
                 "equationOfTimeMinutes": equation_days * 1440.0,
                 "deltaTSeconds": delta_t_days * 86400.0,
                 "ephemerisFlag": ephemeris_flag,
@@ -69,8 +77,10 @@ def main() -> None:
             "library": "Swiss Ephemeris",
             "version": swe.version,
             "equationOfTimeFunction": "swe_time_equ",
+            "deltaTFunction": "swe_deltat_ex(FLG_SWIEPH)",
             "signConvention": "local-apparent-time-minus-local-mean-time",
-            "inputTimeScale": "UT",
+            "sampleTimeScale": "UT",
+            "equationInputTimeScale": "ET/TT",
             "ephemerisPath": ephe_path,
             "ephemerisFlags": sorted(ephemeris_flags),
             "rows": rows,
