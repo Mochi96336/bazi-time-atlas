@@ -320,6 +320,7 @@ export function currentRecurrenceDayHourProof({
   targetInstant = null,
   localZoneConvention = null,
   dayBoundary = null,
+  clockBasis = null,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
@@ -336,7 +337,7 @@ export function currentRecurrenceDayHourProof({
     localZoneConvention,
     dayBoundary,
     sexagenaryDayArithmetic:true,
-    clockBasis:null,
+    clockBasis,
     longitudeBound:false,
     equationOfTimeModel:false,
     hourBranchRule:true,
