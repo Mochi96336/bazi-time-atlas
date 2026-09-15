@@ -25,6 +25,25 @@
     const rotation = (doc, id, kind = "rendered") => num(doc.querySelector(`#${id}-track`)?.dataset[`${kind}Rotation`]);
     const maxRotationDiff = (doc, before, kind = "rendered") => Math.max(...PRIMARY_RINGS.map(id => Math.abs(rotation(doc, id, kind) - before[id])));
     const rotationSnapshot = doc => Object.fromEntries(PRIMARY_RINGS.map(id => [id, rotation(doc, id)]));
+    const shortestAngleError = (actual, expected) => {
+      let delta = ((actual - expected) % 360 + 360) % 360;
+      if (delta > 180) delta -= 360;
+      return Math.abs(delta);
+    };
+    const cycleReadheadCoordinate = (doc, id) => num(doc.querySelector(`#${id}-track .active-cycle-label`)?.dataset.cycleCoordinate);
+    const annualReadheadCoordinate = (doc, kind) => num(doc.querySelector(`[data-active-annual-kind="${kind}"]`)?.dataset.annualCoordinate);
+    const readheadAlignmentErrors = doc => {
+      const cursor = num(doc.querySelector("#kinetic-wheel")?.dataset.referenceCursorAngle);
+      return [
+        [cycleReadheadCoordinate(doc, "hour"), rotation(doc, "hour")],
+        [cycleReadheadCoordinate(doc, "day"), rotation(doc, "day")],
+        [annualReadheadCoordinate(doc, "term"), rotation(doc, "solar")],
+        [annualReadheadCoordinate(doc, "zodiac"), rotation(doc, "zodiac")],
+        [cycleReadheadCoordinate(doc, "month"), rotation(doc, "month")],
+        [cycleReadheadCoordinate(doc, "year"), rotation(doc, "year")]
+      ].map(([coordinate, renderedRotation]) => shortestAngleError(coordinate + renderedRotation, cursor));
+    };
+    const maxReadheadAlignmentError = doc => Math.max(...readheadAlignmentErrors(doc));
 
     function afterFlush(callback) {
       queueMicrotask(() => queueMicrotask(callback));
@@ -48,6 +67,7 @@
       const zodiacTrack = doc.querySelector("#zodiac-track");
       if (!instrument || !svg || !select || !slider || !solarRow || !dayTrace || !solarTrace || !fanLayer || !motionLayer || !cursorLayer || !zodiacTrack) return;
       if (PRIMARY_RINGS.some(id => !Number.isFinite(rotation(doc, id))) || !Number.isFinite(rotation(doc, "zodiac"))) return;
+      if (!Number.isFinite(maxReadheadAlignmentError(doc))) return;
       if (instrument.dataset.fanClip !== "active") return;
 
       exercised = true;
@@ -56,6 +76,7 @@
       probe.dataset.initialReference = instrument.dataset.referenceFrame ?? "";
       probe.dataset.initialOffset = svg.dataset.referenceFrameOffsetDegrees ?? "";
       probe.dataset.initialCursor = svg.dataset.referenceCursorAngle ?? "";
+      probe.dataset.initialReadheadMaxError = String(maxReadheadAlignmentError(doc));
       probe.dataset.motionFanClipped = motionLayer.dataset.fanClipped ?? "";
       probe.dataset.cursorFanClipped = cursorLayer.dataset.fanClipped ?? "";
       probe.dataset.motionClipOwner = motionLayer.dataset.fanClipOwner ?? "";
@@ -92,6 +113,7 @@
           probe.dataset.dayFrameOffset = String(dayOffset);
           probe.dataset.dayCursor = String(dayCursor);
           probe.dataset.dayCursorEquationError = String(dayCursor - (-90 - dayOffset));
+          probe.dataset.dayReadheadMaxError = String(maxReadheadAlignmentError(doc));
           probe.dataset.solarRelativeDelta = String(solarRenderedAfter - solarRenderedBefore);
           probe.dataset.zodiacSolarDeltaError = String(zodiacRenderedAfter - solarRenderedAfter);
           probe.dataset.dayTraceVisible = String(dayTrace.classList.contains("is-visible"));
@@ -104,6 +126,7 @@
           select.dispatchEvent(new childWindow.Event("change", { bubbles:true }));
           afterFlush(() => {
             probe.dataset.solarReference = instrument.dataset.referenceFrame ?? "";
+            probe.dataset.solarReferenceReadheadMaxError = String(maxReadheadAlignmentError(doc));
             probe.dataset.switchJump = String(maxRotationDiff(doc, beforeSwitch));
             probe.dataset.switchOffsetDelta = String(num(svg.dataset.referenceFrameOffsetDegrees) - offsetBeforeSwitch);
             probe.dataset.switchTraceCount = String(doc.querySelectorAll(".motion-trace.is-visible").length);
@@ -125,6 +148,7 @@
               probe.dataset.hiddenSolarRenderedDelta = String(solarRenderedAfterHiddenStep - solarRenderedBeforeHiddenStep);
               probe.dataset.hiddenZodiacRenderedDelta = String(zodiacRenderedAfterHiddenStep - zodiacRenderedBeforeHiddenStep);
               probe.dataset.hiddenDayRenderedDelta = String(dayRenderedAfterHiddenStep - dayRenderedBeforeHiddenStep);
+              probe.dataset.hiddenReadheadMaxError = String(maxReadheadAlignmentError(doc));
               probe.dataset.hiddenSolarTraceVisible = String(solarTrace.classList.contains("is-visible"));
               probe.dataset.hiddenReferenceOffset = svg.dataset.referenceFrameOffsetDegrees ?? "";
 
@@ -144,6 +168,7 @@
                 probe.dataset.worldCursor = svg.dataset.referenceCursorAngle ?? "";
                 probe.dataset.worldMaxRotationError = String(Math.max(...worldErrors));
                 probe.dataset.worldZodiacSolarError = String(zodiacSolarWorldError);
+                probe.dataset.worldReadheadMaxError = String(maxReadheadAlignmentError(doc));
                 probe.dataset.worldTraceCount = String(doc.querySelectorAll(".motion-trace.is-visible").length);
                 probe.dataset.initialDayRendered = String(dayRenderedBefore);
                 probe.dataset.ready = "true";
