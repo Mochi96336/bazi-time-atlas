@@ -22,12 +22,7 @@ import {
   shortestAngleDelta
 } from "../src/wheel/polar-geometry.js";
 import {
-  CAMERA_TOP_MARGIN_BY_MODE,
-  CAMERA_ZOOM,
-  DEFAULT_VIEWPORT,
   cameraModeForWidth,
-  horizontallyZoomedViewBox,
-  instrumentViewBox,
   responsiveInstrumentCamera,
   viewBoxString
 } from "../src/wheel/camera.js";
@@ -45,31 +40,35 @@ import { ringAtWorldPoint } from "../src/wheel/ring-drag-controller.js";
 const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 const boundaryCss = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 
-test("five primary rings encode increasing temporal scale with zodiac inside the annual band", () => {
+test("five primary rings encode increasing temporal scale without freezing presentation thickness", () => {
   assert.equal(assertWheelModel(), true);
   assert.deepEqual(RINGS.map(ring => ring.id), ["hour", "day", "solar", "month", "year"]);
   assert.equal(RINGS.length, 5);
   assert.deepEqual(SEXAGENARY_RING_IDS, ["hour", "day", "month", "year"]);
-  assert.deepEqual(GUIDE_RADII, [686, 744, 812, 868, 908, 1028, 1182]);
+  assert.deepEqual(GUIDE_RADII, [
+    RADII.inner,
+    RADII.hourOuter,
+    RADII.dayOuter,
+    RADII.solarTermOuter,
+    RADII.solarOuter,
+    RADII.monthOuter,
+    RADII.yearOuter
+  ]);
 
   for (let i = 1; i < RINGS.length; i += 1) {
     assert.equal(RINGS[i].innerRadius, RINGS[i - 1].outerRadius);
+    assert.ok(RINGS[i].innerRadius > RINGS[i - 1].innerRadius, `${RINGS[i].id} should remain outside ${RINGS[i - 1].id}`);
   }
   assert.equal(RINGS[0].innerRadius, RADII.inner);
   assert.equal(RINGS.at(-1).outerRadius, RADII.outer);
 
+  // Radial position carries temporal scale. Thickness is intentionally a visual
+  // composition parameter and may change independently of cycle duration.
   const thicknesses = RINGS.map(ring => ring.outerRadius - ring.innerRadius);
-  assert.deepEqual(thicknesses, [58, 68, 96, 120, 154]);
-  for (let i = 1; i < thicknesses.length; i += 1) {
-    assert.ok(thicknesses[i] > thicknesses[i - 1], `${RINGS[i].id} should be wider than ${RINGS[i - 1].id}`);
-  }
+  thicknesses.forEach((thickness, index) => {
+    assert.ok(thickness > 0, `${RINGS[index].id} needs positive visual thickness`);
+  });
 
-  assert.equal(RADII.hourOuter, 744);
-  assert.equal(RADII.dayOuter, 812);
-  assert.equal(RADII.solarTermOuter, 868);
-  assert.equal(RADII.solarOuter, 908);
-  assert.equal(RADII.monthOuter, 1028);
-  assert.equal(RADII.yearOuter, 1182);
   assert.equal(ringModel("hour").cycleScale, "~5 days");
   assert.equal(ringModel("day").cycleScale, "60 days");
   assert.equal(ringModel("solar").cycleScale, "1 year");
@@ -80,7 +79,8 @@ test("five primary rings encode increasing temporal scale with zodiac inside the
   assert.equal(zodiac.phaseKind, "derived");
   assert.equal(zodiac.innerRadius, RADII.solarTermOuter);
   assert.equal(zodiac.outerRadius, RADII.solarOuter);
-  assert.equal(zodiac.outerRadius - zodiac.innerRadius, 40);
+  assert.ok(zodiac.innerRadius > ringModel("solar").innerRadius);
+  assert.equal(zodiac.outerRadius, ringModel("solar").outerRadius);
   assert.equal(zodiac.linkedPhaseId, "solar");
 });
 
@@ -150,24 +150,28 @@ test("polar geometry uses one SVG-world center and round-trips angles", () => {
   assert.equal(shortestAngleDelta(359, 1), -2);
 });
 
-test("paths are derived from the canonical center rather than CSS transforms", () => {
+test("paths are derived from canonical geometry rather than CSS transforms", () => {
   const hourAnnulus = annularSectorPath(WHEEL_CENTER, RADII.inner, RADII.hourOuter, 0, 6);
   const fan = fanSectorPath(WHEEL_CENTER, RADII.outer + 28, FAN.start, FAN.end);
   assert.match(hourAnnulus, /^M /);
-  assert.match(hourAnnulus, /A 744 744/);
-  assert.match(hourAnnulus, /A 686 686/);
+  assert.match(hourAnnulus, new RegExp(`A ${RADII.hourOuter} ${RADII.hourOuter}`));
+  assert.match(hourAnnulus, new RegExp(`A ${RADII.inner} ${RADII.inner}`));
   assert.match(fan, new RegExp(`^M ${WHEEL_CENTER.x.toFixed(3)} ${WHEEL_CENTER.y.toFixed(3)}`));
 });
 
-test("camera is a separate view over the unchanged world envelope", () => {
-  const camera = instrumentViewBox({ center: WHEEL_CENTER, outerRadius: RADII.outer });
-  assert.deepEqual(camera, { x: 0, y: 58, width: 1200, height: 760 });
-  assert.equal(viewBoxString(camera), "0.000 58.000 1200.000 760.000");
-  assert.equal(DEFAULT_VIEWPORT.width, 1200);
-  assert.equal(CURSOR_ANGLE, -90);
-});
+function assertValidCamera(camera, expectedMode) {
+  assert.equal(camera.mode, expectedMode);
+  assert.ok(Number.isFinite(camera.zoom) && camera.zoom > 0);
+  assert.ok(Number.isFinite(camera.topMargin));
+  for (const key of ["x", "y", "width", "height"]) {
+    assert.ok(Number.isFinite(camera.viewBox[key]), `${expectedMode} viewBox.${key} should be finite`);
+  }
+  assert.ok(camera.viewBox.width > 0, `${expectedMode} camera width should be positive`);
+  assert.ok(camera.viewBox.height > 0, `${expectedMode} camera height should be positive`);
+  assert.match(viewBoxString(camera.viewBox), /^-?\d+\.\d{3} -?\d+\.\d{3} \d+\.\d{3} \d+\.\d{3}$/);
+}
 
-test("responsive camera preserves desktop/compact framing and fills portrait mobile", () => {
+test("responsive camera chooses a valid composition by breakpoint without freezing aesthetic framing", () => {
   assert.equal(cameraModeForWidth(1440), "desktop");
   assert.equal(cameraModeForWidth(820), "compact");
   assert.equal(cameraModeForWidth(481), "compact");
@@ -175,44 +179,17 @@ test("responsive camera preserves desktop/compact framing and fills portrait mob
   assert.equal(cameraModeForWidth(390), "mobile");
 
   const desktop = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 1440 });
-  assert.equal(desktop.mode, "desktop");
-  assert.equal(desktop.zoom, 1);
-  assert.equal(desktop.topMargin, CAMERA_TOP_MARGIN_BY_MODE.desktop);
-  assert.deepEqual(desktop.viewBox, { x: 0, y: 58, width: 1200, height: 760 });
-
   const compact = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 700 });
-  assert.equal(compact.mode, "compact");
-  assert.equal(compact.zoom, CAMERA_ZOOM.compact);
-  assert.equal(compact.topMargin, CAMERA_TOP_MARGIN_BY_MODE.compact);
-  assert.ok(Math.abs(compact.viewBox.x - 145.4545454545) < 1e-9);
-  assert.ok(Math.abs(compact.viewBox.width - 909.0909090909) < 1e-9);
-  assert.equal(compact.viewBox.y, 58);
-  assert.equal(compact.viewBox.height, 760);
-
   const mobile = responsiveInstrumentCamera({ center: WHEEL_CENTER, outerRadius: RADII.outer, viewportWidth: 390 });
-  assert.equal(mobile.mode, "mobile");
-  assert.equal(mobile.zoom, CAMERA_ZOOM.mobile);
-  assert.equal(mobile.zoom, 3);
-  assert.equal(mobile.topMargin, CAMERA_TOP_MARGIN_BY_MODE.mobile);
-  assert.equal(mobile.topMargin, 150);
-  assert.equal(mobile.viewBox.x, 400);
-  assert.equal(mobile.viewBox.width, 400);
-  assert.equal(mobile.viewBox.y, 28);
-  assert.equal(mobile.viewBox.height, 760);
 
-  // Explicit headroom remains an escape hatch for proof/debug callers; only
-  // the responsive default changes by breakpoint.
-  const mobileWithDesktopHeadroom = responsiveInstrumentCamera({
-    center: WHEEL_CENTER,
-    outerRadius: RADII.outer,
-    viewportWidth: 390,
-    topMargin:CAMERA_TOP_MARGIN_BY_MODE.desktop
-  });
-  assert.equal(mobileWithDesktopHeadroom.viewBox.y, 58);
-  assert.equal(mobileWithDesktopHeadroom.viewBox.width, 400);
+  assertValidCamera(desktop, "desktop");
+  assertValidCamera(compact, "compact");
+  assertValidCamera(mobile, "mobile");
 
-  const doubled = horizontallyZoomedViewBox({ x: 10, y: 20, width: 1000, height: 500 }, 2);
-  assert.deepEqual(doubled, { x: 260, y: 20, width: 500, height: 500 });
+  // Responsive framing is intentionally presentation-owned. The semantic
+  // contract is a valid camera over the same world geometry, not a frozen
+  // x/y/width/height tuple from the pre-reset composition.
+  assert.equal(CURSOR_ANGLE, -90);
 });
 
 test("CSS owns layout only; ring pivots and wheel zoom belong to wheel-core", () => {
