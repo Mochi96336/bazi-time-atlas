@@ -11,14 +11,29 @@
   transition: opacity 180ms ease, filter 180ms ease;
 }
 
-/* 48 hours: fast inner clocks are the subject; annual and slower shells remain
-   visible as context so relative movement still reads as one instrument. */
+/* 48 hours: Hour / Day are physically the narrowest rings, so opacity alone is
+   not enough to overcome the much larger painted area of the slow outer shells.
+   Keep canonical radii untouched and progressively remove ink from Solar,
+   Month and Year instead. They remain present as phase context and recover full
+   contrast immediately when the user hovers or drags them. */
 #kinetic-instrument[data-scale-window="day"] #hour-track,
-#kinetic-instrument[data-scale-window="day"] #day-track { opacity: 1; }
+#kinetic-instrument[data-scale-window="day"] #day-track {
+  opacity: 1;
+  filter: none;
+}
 #kinetic-instrument[data-scale-window="day"] #solar-track,
-#kinetic-instrument[data-scale-window="day"] #zodiac-track { opacity: .56; }
-#kinetic-instrument[data-scale-window="day"] #month-track { opacity: .38; }
-#kinetic-instrument[data-scale-window="day"] #year-track { opacity: .30; }
+#kinetic-instrument[data-scale-window="day"] #zodiac-track {
+  opacity: .40;
+  filter: saturate(.72) brightness(.78);
+}
+#kinetic-instrument[data-scale-window="day"] #month-track {
+  opacity: .22;
+  filter: saturate(.56) brightness(.62);
+}
+#kinetic-instrument[data-scale-window="day"] #year-track {
+  opacity: .14;
+  filter: saturate(.48) brightness(.55);
+}
 
 /* One year: continuous Solar plus jie-driven Month are the useful comparison.
    Fast clocks remain secondary, but their floor mirrors the legend so the
@@ -48,9 +63,9 @@
 #kinetic-instrument[data-scale-window="year"] .ring-month:not([aria-pressed="false"]),
 #kinetic-instrument[data-scale-window="cycle"] .ring-year:not([aria-pressed="false"]) { opacity: 1; }
 
-#kinetic-instrument[data-scale-window="day"] .ring-solar:not([aria-pressed="false"]) { opacity: .70; }
-#kinetic-instrument[data-scale-window="day"] .ring-month:not([aria-pressed="false"]) { opacity: .52; }
-#kinetic-instrument[data-scale-window="day"] .ring-year:not([aria-pressed="false"]) { opacity: .44; }
+#kinetic-instrument[data-scale-window="day"] .ring-solar:not([aria-pressed="false"]) { opacity: .62; }
+#kinetic-instrument[data-scale-window="day"] .ring-month:not([aria-pressed="false"]) { opacity: .38; }
+#kinetic-instrument[data-scale-window="day"] .ring-year:not([aria-pressed="false"]) { opacity: .28; }
 #kinetic-instrument[data-scale-window="year"] .ring-year:not([aria-pressed="false"]) { opacity: .72; }
 #kinetic-instrument[data-scale-window="year"] .ring-day:not([aria-pressed="false"]) { opacity: .54; }
 #kinetic-instrument[data-scale-window="year"] .ring-hour:not([aria-pressed="false"]) { opacity: .46; }
@@ -59,8 +74,8 @@
 #kinetic-instrument[data-scale-window="cycle"] .ring-day:not([aria-pressed="false"]) { opacity: .48; }
 #kinetic-instrument[data-scale-window="cycle"] .ring-hour:not([aria-pressed="false"]) { opacity: .40; }
 
-/* Interaction always wins over ambient dimming. A ring under the pointer must
-   return to full contrast without changing the selected time window. */
+/* Interaction always wins over ambient recession. A ring under the pointer or
+   actively dragged returns to full contrast without changing the time window. */
 #kinetic-wheel[data-hover-ring="hour"] #hour-track,
 #kinetic-wheel[data-active-ring="hour"] #hour-track,
 #kinetic-wheel[data-hover-ring="day"] #day-track,
@@ -72,7 +87,10 @@
 #kinetic-wheel[data-hover-ring="month"] #month-track,
 #kinetic-wheel[data-active-ring="month"] #month-track,
 #kinetic-wheel[data-hover-ring="year"] #year-track,
-#kinetic-wheel[data-active-ring="year"] #year-track { opacity: 1; }
+#kinetic-wheel[data-active-ring="year"] #year-track {
+  opacity: 1;
+  filter: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
   #hour-track,
