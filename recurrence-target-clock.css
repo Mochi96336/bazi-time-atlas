@@ -37,7 +37,7 @@
 .target-instant-toggle input { accent-color: #cbd8cf; }
 .target-instant-fields {
   display: grid;
-  grid-template-columns: minmax(130px, .75fr) minmax(130px, .7fr) minmax(170px, .9fr) minmax(180px, 1fr) minmax(220px, 1.4fr);
+  grid-template-columns: minmax(120px,.7fr) minmax(120px,.65fr) minmax(160px,.9fr) minmax(170px,1fr) minmax(130px,.75fr) minmax(220px,1.35fr);
   gap: 9px;
   align-items: end;
   margin-top: 10px;
@@ -81,7 +81,8 @@
   color: #c99b90;
 }
 .target-instant-controls[data-day-boundary-valid="false"] #day-boundary-convention,
-.target-instant-controls[data-clock-basis-valid="false"] #clock-basis-convention {
+.target-instant-controls[data-clock-basis-valid="false"] #clock-basis-convention,
+.target-instant-controls[data-longitude-valid="false"] #longitude-convention {
   border-color: rgba(160,124,115,.7);
 }
 .target-instant-controls > p {
@@ -90,12 +91,13 @@
   font-size: 9px;
   line-height: 1.55;
 }
-@media (max-width: 1100px) {
-  .target-instant-fields { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1280px) {
+  .target-instant-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   #target-instant-status { grid-column: 1 / -1; }
 }
 @media (max-width: 760px) {
   .target-instant-control-head { align-items: flex-start; flex-direction: column; }
+  .target-instant-fields { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 480px) {
   .target-instant-controls { padding: 10px; }
