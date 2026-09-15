@@ -126,6 +126,10 @@ jobs:
         run: node scripts/check-day-hour-proof-chain.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify recurrence longitude UI
+        run: node scripts/check-recurrence-longitude-ui.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify seasonal epoch source audit
         run: node scripts/check-seasonal-epoch-source-audit.mjs
         env:

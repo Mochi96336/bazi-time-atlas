@@ -3,6 +3,7 @@ import { DAY_BOUNDARY, DAY_BOUNDARY_VALUES } from "./calendar/day-boundary.js";
 import { DAY_HOUR_TIME_BASIS, DAY_HOUR_TIME_BASIS_VALUES } from "./calendar/day-hour-time-basis.js";
 import { currentRecurrenceDayHourProof } from "./recurrence/day-hour-proof-chain.js";
 import { fixedZoneTargetClock } from "./recurrence/fixed-zone-target-clock.js";
+import { geographicLongitudeBinding } from "./recurrence/geographic-longitude-binding.js";
 import { recurrenceState } from "./recurrence/gregorian-cycle.js";
 import { seasonalEpochSourceAudit } from "./recurrence/seasonal-epoch-source-audit.js";
 
@@ -67,6 +68,19 @@ function normalizedTargetTime(value) {
   });
 }
 
+function parsedLongitude(raw, { emptyValid = true } = {}) {
+  const text = String(raw ?? "");
+  if (text.trim() === "") {
+    return Object.freeze({ valid:emptyValid, longitudeDegrees:null });
+  }
+  try {
+    const binding = geographicLongitudeBinding(Number(text));
+    return Object.freeze({ valid:true, longitudeDegrees:binding.longitudeDegrees });
+  } catch {
+    return Object.freeze({ valid:false, longitudeDegrees:null });
+  }
+}
+
 function parseBaseDate() {
   const match = /^(\d+)-(\d{2})-(\d{2})$/.exec(instrument?.dataset?.baseDate ?? "");
   return match ? { year:Number(match[1]), month:Number(match[2]), day:Number(match[3]) } : null;
@@ -79,17 +93,36 @@ function targetClockPreset() {
   const rawOffset = params.get("ut1Offset") ?? String(DEFAULT_UT1_OFFSET_HOURS);
   const rawDayBoundary = params.get("dayBoundary") ?? "";
   const rawClockBasis = params.get("clockBasis") ?? "";
+  const rawLongitude = params.get("lon") ?? "";
   const dayBoundaryValid = rawDayBoundary === "" || DAY_BOUNDARY_VALUES.includes(rawDayBoundary);
   const clockBasisValid = rawClockBasis === "" || DAY_HOUR_TIME_BASIS_VALUES.includes(rawClockBasis);
+  const longitude = parsedLongitude(rawLongitude, { emptyValid:!params.has("lon") });
   return Object.freeze({
     enabled,
     rawTime,
     rawOffset,
     rawDayBoundary,
     rawClockBasis,
+    rawLongitude,
     dayBoundaryValid,
-    clockBasisValid
+    clockBasisValid,
+    longitudeValid:longitude.valid,
+    longitudeDegrees:longitude.longitudeDegrees
   });
+}
+
+function currentLongitudeSelection() {
+  return parsedLongitude(targetClockControls?.longitude.value ?? "");
+}
+
+function setLongitudeControlState() {
+  if (!targetClockControls) return Object.freeze({ valid:true, longitudeDegrees:null });
+  const selection = currentLongitudeSelection();
+  targetClockControls.root.dataset.longitudeValid = String(selection.valid);
+  targetClockControls.root.dataset.longitudeDegrees = selection.valid && selection.longitudeDegrees !== null
+    ? String(selection.longitudeDegrees)
+    : "unbound";
+  return selection;
 }
 
 function syncTargetClockQuery() {
@@ -117,6 +150,12 @@ function syncTargetClockQuery() {
   } else {
     url.searchParams.delete("clockBasis");
   }
+  const longitude = setLongitudeControlState();
+  if (longitude.valid && longitude.longitudeDegrees !== null) {
+    url.searchParams.set("lon", String(longitude.longitudeDegrees));
+  } else {
+    url.searchParams.delete("lon");
+  }
   history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
@@ -138,8 +177,8 @@ function ensureTargetClockControls(panel) {
   root.innerHTML = `
     <div class="target-instant-control-head">
       <div>
-        <span>Target / Day boundary / Clock basis · research conventions</span>
-        <strong>日內時刻、日界與 local clock basis 預設都不綁定</strong>
+        <span>Target / Day boundary / Clock basis / Longitude · research conventions</span>
+        <strong>日內時刻、日界、local clock basis 與經度預設都不綁定</strong>
       </div>
       <label class="target-instant-toggle"><input id="target-instant-enabled" type="checkbox"> <span>fixed-zone-from-UT1</span></label>
     </div>
@@ -157,9 +196,10 @@ function ensureTargetClockControls(panel) {
         <option value="${DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR}">Local mean solar</option>
         <option value="${DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR}">Local apparent solar</option>
       </select></label>
+      <label>Longitude · E+ / W−<input id="longitude-convention" type="number" min="-180" max="180" step="0.0001" placeholder="Not selected" inputmode="decimal"></label>
       <output id="target-instant-status" aria-live="polite">date-only · 未建立日內 target instant</output>
     </div>
-    <p>fixed-zone-from-UT1 是 proleptic Gregorian + 固定 UT1 offset 的研究座標，不是西元遠未來 UTC、DST 或政治時區預測。Day boundary 與 local clock basis 都必須獨立明示；選 civil 不代表未來政治時區已解決，選太陽時則會把 proof 推進到經度／Equation of Time 的下一層。</p>
+    <p>fixed-zone-from-UT1 是 proleptic Gregorian + 固定 UT1 offset 的研究座標，不是西元遠未來 UTC、DST 或政治時區預測。Day boundary、local clock basis 與 <code>lon</code> 都必須獨立明示；經度採東正西負，絕不從 fixed offset / timezone 推定。local apparent solar 在經度之後仍需 Equation of Time。</p>
   `;
   panel.querySelector(".proof-chain-head")?.insertAdjacentElement("afterend", root);
 
@@ -168,17 +208,23 @@ function ensureTargetClockControls(panel) {
   const offset = root.querySelector("#target-instant-offset");
   const dayBoundary = root.querySelector("#day-boundary-convention");
   const clockBasis = root.querySelector("#clock-basis-convention");
+  const longitude = root.querySelector("#longitude-convention");
   const status = root.querySelector("#target-instant-status");
   enabled.checked = preset.enabled;
   time.value = preset.rawTime;
   offset.value = preset.rawOffset;
   dayBoundary.value = preset.dayBoundaryValid ? preset.rawDayBoundary : "";
   clockBasis.value = preset.clockBasisValid ? preset.rawClockBasis : "";
+  longitude.value = preset.longitudeValid && preset.longitudeDegrees !== null ? String(preset.longitudeDegrees) : "";
   root.dataset.dayBoundaryValid = String(preset.dayBoundaryValid);
   root.dataset.dayBoundary = dayBoundary.value || "unbound";
   root.dataset.clockBasisValid = String(preset.clockBasisValid);
   root.dataset.clockBasis = clockBasis.value || "unbound";
-  targetClockControls = { root, enabled, time, offset, dayBoundary, clockBasis, status };
+  root.dataset.longitudeValid = String(preset.longitudeValid);
+  root.dataset.longitudeDegrees = preset.longitudeValid && preset.longitudeDegrees !== null
+    ? String(preset.longitudeDegrees)
+    : "unbound";
+  targetClockControls = { root, enabled, time, offset, dayBoundary, clockBasis, longitude, status };
   setTargetClockEnabledState();
 
   enabled.addEventListener("change", () => {
@@ -204,6 +250,11 @@ function ensureTargetClockControls(panel) {
     syncTargetClockQuery();
     scheduleRefresh();
   });
+  longitude.addEventListener("change", () => {
+    setLongitudeControlState();
+    syncTargetClockQuery();
+    scheduleRefresh();
+  });
   return targetClockControls;
 }
 
@@ -215,6 +266,11 @@ function selectedDayBoundary() {
 function selectedClockBasis() {
   const value = targetClockControls?.clockBasis.value ?? "";
   return DAY_HOUR_TIME_BASIS_VALUES.includes(value) ? value : null;
+}
+
+function selectedLongitude() {
+  const selection = currentLongitudeSelection();
+  return selection.valid ? selection.longitudeDegrees : null;
 }
 
 function targetInstantForCurrentState(deltaYears) {
@@ -457,6 +513,7 @@ function refresh() {
   const targetInstant = targetInstantForCurrentState(deltaYears);
   const dayBoundary = selectedDayBoundary();
   const clockBasis = selectedClockBasis();
+  const longitudeDegrees = selectedLongitude();
   const earthRotationEstimateAvailable = audit.absoluteSeasonalEpochAvailable
     && deepTimeEarthRotationEstimateSupportsYear(targetYear);
   const proof = currentRecurrenceDayHourProof({
@@ -466,6 +523,7 @@ function refresh() {
     targetInstant,
     dayBoundary,
     clockBasis,
+    longitudeDegrees,
     earthRotationEstimateAvailable
   });
   const stages = panel.querySelector("#proof-chain-stages");
@@ -495,7 +553,7 @@ function refresh() {
                   : proof.firstHardBlocker === "clock-basis"
                     ? "日柱在明示的地方鐘面與日界 convention 下已可解析；時柱仍需明示 civil / local mean solar / local apparent solar clock basis。"
                     : proof.firstHardBlocker === "longitude"
-                      ? "已明示採用太陽時計時；下一個硬條件是觀測地經度。local mean solar 到此只缺經度，local apparent solar 還會再需要 Equation of Time。"
+                      ? "已明示採用太陽時計時；下一個硬條件是觀測地經度 lon（東正／西負）。fixed-zone offset 不會被推定成地理經度；local apparent solar 在經度之後仍需 Equation of Time。"
                       : proof.firstHardBlocker === "equation-of-time"
                         ? "經度已綁定；local apparent solar clock 還需要該 epoch 可用的 Equation of Time 模型。"
                         : proof.hour.resolved
@@ -527,6 +585,9 @@ function refresh() {
   panel.dataset.clockBasis = proof.clockBasis ?? "unbound";
   panel.dataset.clockBasisBound = String(proof.clockBasis !== null);
   panel.dataset.clockBasisControlValid = targetClockControls?.root.dataset.clockBasisValid ?? "true";
+  panel.dataset.longitudeDegrees = proof.longitudeBound ? String(proof.longitudeDegrees) : "unbound";
+  panel.dataset.longitudeBound = String(proof.longitudeBound);
+  panel.dataset.longitudeControlValid = targetClockControls?.root.dataset.longitudeValid ?? "true";
   panel.dataset.needsLongitude = String(proof.needsLongitude);
   panel.dataset.needsEquationOfTime = String(proof.needsEquationOfTime);
   panel.dataset.earthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
@@ -538,6 +599,7 @@ function refresh() {
   if (targetClockControls) {
     targetClockControls.root.dataset.dayBoundary = proof.dayBoundary ?? "unbound";
     targetClockControls.root.dataset.clockBasis = proof.clockBasis ?? "unbound";
+    targetClockControls.root.dataset.longitudeDegrees = proof.longitudeBound ? String(proof.longitudeDegrees) : "unbound";
   }
 
   instrument.dataset.dayHourProofFirstHardBlocker = proof.firstHardBlocker ?? "none";
@@ -547,6 +609,8 @@ function refresh() {
   instrument.dataset.dayHourProofDayBoundaryBound = String(proof.dayBoundaryBound);
   instrument.dataset.dayHourProofClockBasis = proof.clockBasis ?? "unbound";
   instrument.dataset.dayHourProofClockBasisBound = String(proof.clockBasis !== null);
+  instrument.dataset.dayHourProofLongitudeDegrees = proof.longitudeBound ? String(proof.longitudeDegrees) : "unbound";
+  instrument.dataset.dayHourProofLongitudeBound = String(proof.longitudeBound);
   instrument.dataset.dayHourProofNeedsLongitude = String(proof.needsLongitude);
   instrument.dataset.dayHourProofNeedsEquationOfTime = String(proof.needsEquationOfTime);
   instrument.dataset.dayHourProofEarthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
