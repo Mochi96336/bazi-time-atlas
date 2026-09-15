@@ -6,6 +6,7 @@ import {
   currentRecurrenceDayHourProof,
   dayHourResolutionProof
 } from "../src/recurrence/day-hour-proof-chain.js";
+import { EQUATION_OF_TIME_MODEL_ID } from "../src/recurrence/equation-of-time-model-binding.js";
 import { LOCAL_ZONE_CONVENTION_KIND } from "../src/recurrence/local-zone-convention.js";
 import { TARGET_INSTANT_BASIS } from "../src/recurrence/target-instant-binding.js";
 
@@ -223,22 +224,42 @@ test("local mean solar Hour adds typed longitude but not Equation of Time", () =
   assert.deepEqual(resolved.hour.blockers, []);
 });
 
-test("local apparent solar Hour requires typed longitude and an epoch-valid Equation of Time model", () => {
-  const blocked = proof({
+test("local apparent solar Hour requires registry-validated target-year EoT authority", () => {
+  const unbound = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeDegrees:121.5,
-    equationOfTimeModel:false
+    targetYear:4006
   });
-  assert.equal(blocked.hour.resolved, false);
-  assert.deepEqual(blocked.hour.blockers, ["equationOfTimeModel"]);
-  assert.equal(blocked.longitudeBound, true);
+  assert.equal(unbound.hour.resolved, false);
+  assert.deepEqual(unbound.hour.blockers, ["equationOfTimeModel"]);
+  assert.equal(unbound.equationOfTimeModel.bound, false);
+  assert.equal(unbound.equationOfTimeModelValidated, false);
 
-  const resolved = proof({
+  const legacy = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeDegrees:121.5,
+    targetYear:4006,
     equationOfTimeModel:true
   });
-  assert.equal(resolved.hour.resolved, true);
+  assert.equal(legacy.hour.resolved, false);
+  assert.equal(legacy.equationOfTimeModel.bound, false);
+  assert.equal(legacy.firstHardBlocker, "equation-of-time");
+
+  for (const targetYear of [2024, 4006]) {
+    const registered = proof({
+      clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
+      longitudeDegrees:121.5,
+      targetYear,
+      equationOfTimeModelId:EQUATION_OF_TIME_MODEL_ID.ATLAS_TYME_NREL_SPA_V1
+    });
+    assert.equal(registered.equationOfTimeModel.bound, true);
+    assert.equal(registered.equationOfTimeModel.recurrenceAuthority, false);
+    assert.equal(registered.equationOfTimeModelValidated, false);
+    assert.equal(registered.firstHardBlocker, "equation-of-time");
+    assert.equal(registered.hour.resolved, false);
+    assert.deepEqual(registered.hour.blockers, ["equationOfTimeModel"]);
+    assert.equal(registered.stages.find(stage => stage.id === "equation-of-time").status, "missing-deep-time-model");
+  }
 });
 
 test("legacy longitudeBound boolean cannot masquerade as a geographic coordinate", () => {
