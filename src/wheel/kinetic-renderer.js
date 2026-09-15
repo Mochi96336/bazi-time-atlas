@@ -36,6 +36,12 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   const lastActiveCycleIndex = new Map();
   const termSectorNodes = [];
   const zodiacSectorNodes = [];
+  const annualStaticLabels = new Map([
+    ["term", []],
+    ["zodiac", []]
+  ]);
+  const activeAnnualLabels = new Map();
+  const lastActiveAnnualIndex = new Map();
   const motionTraceNodes = new Map();
   const worldRotations = new Map();
   const lastRenderedRotation = new Map();
@@ -195,6 +201,44 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     lastActiveCycleIndex.set(id, activeIndex);
   }
 
+  function updateActiveAnnualLabel(kind, activeIndex, coordinate) {
+    const node = activeAnnualLabels.get(kind);
+    const staticLabels = annualStaticLabels.get(kind) ?? [];
+    if (!node) return;
+
+    const previousIndex = lastActiveAnnualIndex.get(kind);
+    if (Number.isInteger(previousIndex) && previousIndex !== activeIndex) {
+      staticLabels[previousIndex]?.removeAttribute("visibility");
+    }
+
+    const source = kind === "term" ? solarTerms : zodiacSigns;
+    if (!Number.isInteger(activeIndex) || activeIndex < 0 || activeIndex >= source.length || !Number.isFinite(coordinate)) {
+      node.setAttribute("visibility", "hidden");
+      node.removeAttribute("data-annual-index");
+      node.removeAttribute("data-annual-label");
+      node.removeAttribute("data-annual-coordinate");
+      node.textContent = "";
+      lastActiveAnnualIndex.delete(kind);
+      return;
+    }
+
+    const model = kind === "term" ? ringModel("solar") : ringModel("zodiac");
+    const innerRadius = kind === "term" ? model.innerRadius : model.innerRadius;
+    const outerRadius = kind === "term" ? RADII.solarTermOuter : model.outerRadius;
+    const point = polar((innerRadius + outerRadius) / 2, coordinate);
+    const label = source[activeIndex]?.name ?? "";
+    node.setAttribute("x", String(point.x));
+    node.setAttribute("y", String(point.y));
+    node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
+    node.setAttribute("data-annual-index", String(activeIndex));
+    node.setAttribute("data-annual-label", label);
+    node.setAttribute("data-annual-coordinate", coordinate.toFixed(6));
+    node.setAttribute("visibility", "visible");
+    node.textContent = label;
+    staticLabels[activeIndex]?.setAttribute("visibility", "hidden");
+    lastActiveAnnualIndex.set(kind, activeIndex);
+  }
+
   function renderSolarRing() {
     const model = ringModel("solar");
     solarTrack.classList.add("ring-track", "solar-track", "annual-coordinate-band");
@@ -231,7 +275,15 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         transform: `rotate(${term.longitude + 97.5} ${labelPoint.x} ${labelPoint.y})`
       }, solarTrack);
       label.textContent = term.name;
+      annualStaticLabels.get("term").push(label);
     });
+
+    activeAnnualLabels.set("term", el("text", {
+      class: "term-label active-cycle-label active-annual-label",
+      "data-active-annual-kind": "term",
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, solarTrack));
   }
 
   function renderZodiacRing() {
@@ -261,7 +313,15 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         transform: `rotate(${angle + 90} ${point.x} ${point.y})`
       }, zodiacTrack);
       label.textContent = sign.name;
+      annualStaticLabels.get("zodiac").push(label);
     });
+
+    activeAnnualLabels.set("zodiac", el("text", {
+      class: "zodiac-label active-cycle-label active-annual-label",
+      "data-active-annual-kind": "zodiac",
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, zodiacTrack));
   }
 
   function renderMotionTraces() {
@@ -433,8 +493,12 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   function setSolarRingPose(rotationDegrees, solarLongitude) {
     worldRotations.set("solar", rotationDegrees);
     const normalized = ((solarLongitude % 360) + 360) % 360;
-    setActiveSector(termSectorNodes, Math.floor(normalized / 15) % 24);
-    setActiveSector(zodiacSectorNodes, Math.floor(normalized / 30) % 12);
+    const termIndex = Math.floor(normalized / 15) % 24;
+    const zodiacIndex = Math.floor(normalized / 30) % 12;
+    setActiveSector(termSectorNodes, termIndex);
+    setActiveSector(zodiacSectorNodes, zodiacIndex);
+    updateActiveAnnualLabel("term", termIndex, normalized);
+    updateActiveAnnualLabel("zodiac", zodiacIndex, normalized);
     scheduleReferenceFrameFlush();
   }
 

@@ -187,6 +187,10 @@ const solarMarkup = groupMarkup(screenshot.dom, "solar-track");
 const zodiacMarkup = groupMarkup(screenshot.dom, "zodiac-track");
 const activeTerm = firstTagWithClasses(solarMarkup, "path", ["term-sector", "is-active"]);
 const activeZodiac = firstTagWithClasses(zodiacMarkup, "path", ["zodiac-sector", "is-active"]);
+const termReadhead = textRecordWithClass(solarMarkup, "active-annual-label");
+const zodiacReadhead = textRecordWithClass(zodiacMarkup, "active-annual-label");
+const termReadheadCoordinate = Number(attr(termReadhead.tag, "data-annual-coordinate"));
+const zodiacReadheadCoordinate = Number(attr(zodiacReadhead.tag, "data-annual-coordinate"));
 const solarRotation = Number(attr(solarGroupTag, "data-rendered-rotation"));
 const zodiacRotation = Number(attr(zodiacGroupTag, "data-rendered-rotation"));
 const expectedTermIndex = Math.floor((((longitude % 360) + 360) % 360) / 15) % 24;
@@ -199,12 +203,30 @@ if (attr(instrumentTag, "data-term") !== "白露" ||
     Number(attr(activeZodiac, "data-zodiac-index")) !== expectedZodiacIndex) {
   throw new Error(`screenshot-alignment: annual classifications disagree with solar longitude ${longitude}: ${screenshot.url}`);
 }
-if (!Number.isFinite(longitude) || !Number.isFinite(solarRotation) || !Number.isFinite(zodiacRotation) ||
-    shortestAngleError(longitude + solarRotation, cursorAngle) > 0.002 ||
-    shortestAngleError(longitude + zodiacRotation, cursorAngle) > 0.002) {
+if (termReadhead.text !== "白露" ||
+    zodiacReadhead.text !== "處女" ||
+    Number(attr(termReadhead.tag, "data-annual-index")) !== expectedTermIndex ||
+    Number(attr(zodiacReadhead.tag, "data-annual-index")) !== expectedZodiacIndex ||
+    attr(termReadhead.tag, "data-annual-label") !== "白露" ||
+    attr(zodiacReadhead.tag, "data-annual-label") !== "處女") {
   throw new Error(
-    `screenshot-alignment: solar/zodiac coordinate missed Selected Instant ` +
-    `(longitude=${longitude}, solarRotation=${solarRotation}, zodiacRotation=${zodiacRotation}, cursor=${cursorAngle}): ${screenshot.url}`
+    `screenshot-alignment: annual read-head identity disagrees ` +
+    `(term=${termReadhead.text}/${attr(termReadhead.tag, "data-annual-label")}, ` +
+    `zodiac=${zodiacReadhead.text}/${attr(zodiacReadhead.tag, "data-annual-label")}): ${screenshot.url}`
+  );
+}
+if (!Number.isFinite(longitude) || !Number.isFinite(solarRotation) || !Number.isFinite(zodiacRotation) ||
+    !Number.isFinite(termReadheadCoordinate) || !Number.isFinite(zodiacReadheadCoordinate) ||
+    shortestAngleError(longitude + solarRotation, cursorAngle) > 0.002 ||
+    shortestAngleError(longitude + zodiacRotation, cursorAngle) > 0.002 ||
+    shortestAngleError(termReadheadCoordinate + solarRotation, cursorAngle) > 0.002 ||
+    shortestAngleError(zodiacReadheadCoordinate + zodiacRotation, cursorAngle) > 0.002 ||
+    shortestAngleError(termReadheadCoordinate, longitude) > 0.002 ||
+    shortestAngleError(zodiacReadheadCoordinate, longitude) > 0.002) {
+  throw new Error(
+    `screenshot-alignment: solar/zodiac read-head coordinate missed Selected Instant ` +
+    `(longitude=${longitude}, term=${termReadheadCoordinate}, zodiac=${zodiacReadheadCoordinate}, ` +
+    `solarRotation=${solarRotation}, zodiacRotation=${zodiacRotation}, cursor=${cursorAngle}): ${screenshot.url}`
   );
 }
 console.log(
