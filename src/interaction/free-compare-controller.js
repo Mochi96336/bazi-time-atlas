@@ -75,17 +75,6 @@ export function createFreeCompareController({
   const compareStatus = documentRef.createElement("div");
   compareStatus.id = "ring-compare-status";
   compareStatus.hidden = true;
-  Object.assign(compareStatus.style, {
-    position: "absolute",
-    zIndex: "5",
-    right: "12px",
-    top: "58px",
-    pointerEvents: "none",
-    color: "#d4bd8d",
-    fontSize: "9px",
-    fontWeight: "700",
-    letterSpacing: ".05em"
-  });
   instrument.appendChild(compareStatus);
 
   function update() {
