@@ -70,6 +70,7 @@ const localExact = {
   "data-ready":"true",
   "data-identity":"false",
   "data-first-hard-blocker":"earth-rotation-bridge",
+  "data-earth-rotation-estimate-available":"true",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
   "data-stage-count":"10"
@@ -81,13 +82,16 @@ for (const [name, expected] of Object.entries(localExact)) {
 if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "earth-rotation-bridge") {
   throw new Error(`4006 proof: instrument first blocker mismatch: ${local.url}`);
 }
+if (attr(localInstrument, "data-day-hour-proof-earth-rotation-estimate-available") !== "true") {
+  throw new Error(`4006 proof: Earth-rotation estimate capability missing from instrument: ${local.url}`);
+}
 expectStage(local.dom, "relative-term-geometry", "satisfied", "4006 proof", local.url);
 expectStage(local.dom, "absolute-seasonal-epoch", "satisfied", "4006 proof", local.url);
-expectStage(local.dom, "earth-rotation-bridge", "missing-deep-time-model", "4006 proof", local.url);
-if (!local.dom.includes("節氣已有絕對 TT") || !local.dom.includes("TT↔UT / ΔT")) {
-  throw new Error(`4006 proof: Earth-rotation blocker explanation missing: ${local.url}`);
+expectStage(local.dom, "earth-rotation-bridge", "uncertain-estimate", "4006 proof", local.url);
+if (!local.dom.includes("有估計 · 不確定") || !local.dom.includes("deterministic Earth rotation")) {
+  throw new Error(`4006 proof: uncertainty-aware Earth-rotation explanation missing: ${local.url}`);
 }
-console.log(`[day-hour-proof] PASS 4006 absolute epoch resolved; first hard blocker=earth-rotation-bridge: ${local.url}`);
+console.log(`[day-hour-proof] PASS 4006 TT→UT1 estimate exists but remains uncertainty-blocked: ${local.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
@@ -96,6 +100,7 @@ const exact = {
   "data-ready":"true",
   "data-identity":"false",
   "data-first-hard-blocker":"absolute-seasonal-epoch",
+  "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
   "data-stage-count":"10"

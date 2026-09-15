@@ -1,3 +1,4 @@
+import { deepTimeEarthRotationEstimateSupportsYear } from "./astronomy/deep-time-earth-rotation.js";
 import { currentRecurrenceDayHourProof } from "./recurrence/day-hour-proof-chain.js";
 import { seasonalEpochSourceAudit } from "./recurrence/seasonal-epoch-source-audit.js";
 
@@ -8,6 +9,7 @@ let epochAuditPanel = null;
 
 const STATUS_LABELS = Object.freeze({
   satisfied:"已有",
+  "uncertain-estimate":"有估計 · 不確定",
   "missing-deep-time-model":"缺深時間模型",
   "missing-model":"缺模型",
   blocked:"前置阻塞",
@@ -45,7 +47,7 @@ function ensurePanel() {
       <div>
         <div class="eyebrow">Day / Hour resolution proof chain</div>
         <h2>要把日柱、時柱解鎖，真正缺的是哪一層？</h2>
-        <p>這裡不增加任何遠未來假設，只把目前模型的輸出接成一條可滿足的依賴鏈。綠色代表 repo 已有；「缺深時間模型」是物理／時間尺度缺口；「尚未綁定」則是既有八字計算能力尚未在回歸頁選定 convention。</p>
+        <p>這裡不增加任何遠未來假設，只把目前模型的輸出接成一條可滿足的依賴鏈。綠色代表 repo 已有；「有估計 · 不確定」代表已有可執行外推但尚不足以唯一決定時間；「尚未綁定」則是既有八字計算能力尚未在回歸頁選定 convention。</p>
       </div>
       <div class="proof-chain-blocker">
         <span>First hard blocker</span>
@@ -101,7 +103,7 @@ function readableBlocker(name) {
   const labels = {
     relativeTermGeometry:"相對節氣幾何",
     absoluteSeasonalEpoch:"絕對季節 epoch",
-    earthRotationBridge:"TT↔UT / ΔT",
+    earthRotationBridge:"TT↔UT1 / ΔT",
     civilZoneBound:"民用時區",
     dayBoundaryBound:"日界規則",
     sexagenaryDayArithmetic:"干支日序算術",
@@ -235,10 +237,13 @@ function refresh() {
   const identity = deltaYears === 0;
   const targetYear = baseYear + deltaYears;
   const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
+  const earthRotationEstimateAvailable = audit.absoluteSeasonalEpochAvailable
+    && deepTimeEarthRotationEstimateSupportsYear(targetYear);
   const proof = currentRecurrenceDayHourProof({
     identity,
     astronomyWithinRange:astronomyValidity === "within-range",
-    absoluteSeasonalEpoch:audit.absoluteSeasonalEpochAvailable
+    absoluteSeasonalEpoch:audit.absoluteSeasonalEpochAvailable,
+    earthRotationEstimateAvailable
   });
   const stages = panel.querySelector("#proof-chain-stages");
   stages?.replaceChildren(...proof.stages.map(renderStage));
@@ -254,9 +259,11 @@ function refresh() {
       ? "同一狀態不需要跨時代的絕對時間投影。"
       : proof.firstHardBlocker === "absolute-seasonal-epoch"
         ? "先把春分／節氣放回絕對均勻時間軸，之後才有資格談民用日界。"
-        : proof.firstHardBlocker === "earth-rotation-bridge"
-          ? "節氣已有絕對 TT；下一個硬缺口是 TT↔UT / ΔT 的深時間地球自轉橋。"
-          : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
+        : proof.firstHardBlocker === "earth-rotation-bridge" && firstBlockerStage?.status === "uncertain-estimate"
+          ? "TT→UT1 已有 ΔT 外推與統計 uncertainty，但不是 deterministic Earth rotation；目前不能據此唯一決定日柱／時柱。"
+          : proof.firstHardBlocker === "earth-rotation-bridge"
+            ? "節氣已有絕對 TT；下一個硬缺口是 TT↔UT1 / ΔT 的深時間地球自轉橋。"
+            : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
   );
   setText("proof-chain-day-status", proof.day.resolved ? "resolved" : "blocked");
   setText(
@@ -273,11 +280,13 @@ function refresh() {
   panel.dataset.deltaYears = String(deltaYears);
   panel.dataset.identity = String(identity);
   panel.dataset.firstHardBlocker = proof.firstHardBlocker ?? "none";
+  panel.dataset.earthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   panel.dataset.dayResolved = String(proof.day.resolved);
   panel.dataset.hourResolved = String(proof.hour.resolved);
   panel.dataset.stageCount = String(proof.stages.length);
 
   instrument.dataset.dayHourProofFirstHardBlocker = proof.firstHardBlocker ?? "none";
+  instrument.dataset.dayHourProofEarthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   instrument.dataset.dayHourProofDayResolved = String(proof.day.resolved);
   instrument.dataset.dayHourProofHourResolved = String(proof.hour.resolved);
   instrument.dataset.dayHourProofStageCount = String(proof.stages.length);
