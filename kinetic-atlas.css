@@ -92,6 +92,30 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 .scale-button.active { color: #111512; background: var(--accent); border-color: var(--accent); }
 .control-button.primary { color: #1a201b; background: var(--cursor); border-color: var(--cursor); min-width: 62px; }
 
+/* Analysis modes are secondary lenses over the same Selected Instant. Keep
+   their resting controls quieter than direct time actions; active states still
+   surface through aria/class state, while Play remains the sole primary CTA. */
+#compare-rings-button[aria-pressed="false"],
+#classification-overlay-button[aria-pressed="false"] {
+  padding-inline: 8px;
+  color: #78827b;
+  border-color: transparent;
+  background: transparent;
+  backdrop-filter: none;
+}
+#compare-rings-button[aria-pressed="false"]:hover,
+#classification-overlay-button[aria-pressed="false"]:hover {
+  color: var(--ink);
+  border-color: rgba(238,242,237,.16);
+  background: rgba(255,255,255,.025);
+}
+#compare-rings-button[aria-pressed="true"] {
+  color: #111512;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+#now-button { margin-left: 5px; }
+
 .ring-legend {
   position: absolute;
   z-index: 3;
@@ -228,6 +252,9 @@ body.legacy-projection .legacy-note { display: block; }
   .lede { font-size: 13px; }
   .instrument-shell { min-height: 570px; }
   .control-button, .scale-button { min-height: 32px; padding: 0 10px; font-size: 10px; }
+  #compare-rings-button[aria-pressed="false"],
+  #classification-overlay-button[aria-pressed="false"] { padding-inline: 6px; }
+  #now-button { margin-left: 2px; }
   .ring-legend { top: 92px; }
   .instrument-readout { bottom: 14px; }
   #instant-readout { font-size: 17px; }
