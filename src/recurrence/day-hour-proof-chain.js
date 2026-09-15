@@ -4,6 +4,10 @@ import {
   isDayHourTimeBasis
 } from "../calendar/day-hour-time-basis.js";
 import {
+  localZoneConventionBinding,
+  LOCAL_ZONE_CONVENTION_KIND
+} from "./local-zone-convention.js";
+import {
   TARGET_INSTANT_BASIS,
   targetInstantBinding
 } from "./target-instant-binding.js";
@@ -40,9 +44,20 @@ function targetInstantDetail(binding, identity) {
     return "目標時刻已明確綁定為 TT Julian day；這是均勻動力時間座標，落到地球自轉／地方鐘面前仍需要 TT→UT1。";
   }
   if (binding.basis === TARGET_INSTANT_BASIS.UT1_JULIAN_DAY) {
-    return "目標時刻已明確綁定為 UT1 Julian day；Earth-rotation coordinate 已存在，但尚未因此得到民用時區或地方鐘面 convention。";
+    return "目標時刻已明確綁定為 UT1 Julian day；Earth-rotation coordinate 已存在，但尚未因此得到地方鐘面 convention。";
   }
   return `目標時刻已綁定為 UT1 加固定地方 offset (${binding.localOffsetHoursFromUt1 >= 0 ? "+" : ""}${binding.localOffsetHoursFromUt1} h)；這是明示的 proleptic convention，不是未來 UTC／政治時區預測。`;
+}
+
+function localZoneDetail(binding) {
+  if (!binding.bound) {
+    return "尚未綁定把 Earth-rotation coordinate 映到哪一套地方鐘面；可以是明示的 civil-timezone policy，也可以是研究用 proleptic fixed offset。";
+  }
+  if (binding.kind === LOCAL_ZONE_CONVENTION_KIND.PROLEPTIC_FIXED_OFFSET_FROM_UT1) {
+    const sign = binding.localOffsetHoursFromUt1 >= 0 ? "+" : "";
+    return `已採用 UT1 ${sign}${binding.localOffsetHoursFromUt1} h 的 proleptic fixed local zone。它足以定義研究用地方鐘面，但 futureUtcPolicyResolved=false、civilTimezonePolicyResolved=false，不是未來 UTC／DST／政治時區預測。`;
+  }
+  return `已綁定 resolved civil-timezone policy：${binding.timeZoneId}。`;
 }
 
 export function dayHourResolutionProof({
@@ -52,7 +67,7 @@ export function dayHourResolutionProof({
   targetInstant = null,
   earthRotationBridge,
   earthRotationEstimateAvailable = false,
-  civilZoneBound,
+  localZoneConvention = null,
   dayBoundaryBound,
   sexagenaryDayArithmetic,
   clockBasis = null,
@@ -67,7 +82,6 @@ export function dayHourResolutionProof({
     absoluteSeasonalEpoch,
     earthRotationBridge,
     earthRotationEstimateAvailable,
-    civilZoneBound,
     dayBoundaryBound,
     sexagenaryDayArithmetic,
     longitudeBound,
@@ -81,7 +95,9 @@ export function dayHourResolutionProof({
   }
 
   const target = targetInstantBinding(targetInstant);
+  const localZone = localZoneConventionBinding(localZoneConvention, target);
   const targetInstantBound = target.bound;
+  const localZoneBound = localZone.bound;
   const earthRotationBridgeRequired = targetInstantBound && target.requiresEarthRotationBridge;
   const earthRotationRequirementSatisfied = targetInstantBound
     && (!earthRotationBridgeRequired || earthRotationBridge);
@@ -94,7 +110,7 @@ export function dayHourResolutionProof({
     absoluteSeasonalEpoch,
     targetInstantBound,
     earthRotationBridge:earthRotationRequirementSatisfied,
-    civilZoneBound,
+    localZoneBound,
     dayBoundaryBound,
     sexagenaryDayArithmetic
   });
@@ -152,6 +168,13 @@ export function dayHourResolutionProof({
               ? "已有此 TT target 的 TT→UT1 深時間 ΔT 點估計與統計不確定性；但它不是 deterministic UT1，更不能直接當成未來 UTC／民用時間，因此尚不足以唯一判定日柱或時柱。"
               : "TT target 要落到地球自轉時間，仍需要深時間 Earth-rotation / ΔT 模型；不能由軌道形狀本身推出。";
 
+  const clockBasisDetail = !clockBasis
+    ? "尚未選 civil / local-mean-solar / local-apparent-solar clock；這是 pillar membership 的地方鐘面 basis，不是 target instant 的物理時間尺度。"
+    : clockBasis === DAY_HOUR_TIME_BASIS.CIVIL
+      && localZone.kind === LOCAL_ZONE_CONVENTION_KIND.PROLEPTIC_FIXED_OFFSET_FROM_UT1
+        ? "已選 civil/zone-clock reading；此處使用的是研究用 proleptic fixed local zone，不代表未來政治時區已解決。"
+        : `已選 ${clockBasis} local clock。`;
+
   const stages = Object.freeze([
     stage(
       "relative-term-geometry",
@@ -183,9 +206,9 @@ export function dayHourResolutionProof({
     ),
     stage(
       "civil-zone",
-      "民用時區規則",
-      civilZoneBound ? "satisfied" : "unbound-convention",
-      civilZoneBound ? "已選定事件要投影到哪一套民用時鐘。" : "回歸頁尚未綁定 UTC offset / timezone policy；fixed-zone-from-UT1 也不等於未來政治時區。",
+      "地方鐘面／zone convention",
+      localZoneBound ? "satisfied" : "unbound-convention",
+      localZoneDetail(localZone),
       "civil"
     ),
     stage(
@@ -206,14 +229,14 @@ export function dayHourResolutionProof({
       "clock-basis",
       "Day / Hour local clock basis",
       clockBasis ? "satisfied" : "unbound-convention",
-      clockBasis ? `已選 ${clockBasis} local clock。` : "尚未選 civil / local-mean-solar / local-apparent-solar clock；這是 pillar membership 的地方鐘面 basis，不是 target instant 的物理時間尺度。",
+      clockBasisDetail,
       "civil"
     ),
     stage(
       "longitude",
       "經度",
       !clockBasis ? "conditional" : needsLongitude ? (longitudeBound ? "satisfied" : "unbound-convention") : "not-required",
-      !clockBasis ? "只有選 local mean/apparent solar clock 時才需要。" : needsLongitude ? (longitudeBound ? "太陽時經度已綁定。" : "選太陽時計時後必須指定經度。") : "civil clock 不需要經度修正。",
+      !clockBasis ? "只有選 local mean/apparent solar clock 時才需要。" : needsLongitude ? (longitudeBound ? "太陽時經度已綁定。" : "選太陽時計時後必須指定經度。") : "civil/zone clock 不需要經度修正。",
       "civil"
     ),
     stage(
@@ -239,6 +262,8 @@ export function dayHourResolutionProof({
     targetInstant:Object.freeze({ ...target }),
     targetInstantBound,
     targetInstantBasis:target.basis,
+    localZoneConvention:Object.freeze({ ...localZone }),
+    localZoneBound,
     earthRotationBridgeRequired,
     clockBasis,
     needsLongitude,
@@ -268,6 +293,7 @@ export function currentRecurrenceDayHourProof({
   astronomyWithinRange,
   absoluteSeasonalEpoch = false,
   targetInstant = null,
+  localZoneConvention = null,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
@@ -281,7 +307,7 @@ export function currentRecurrenceDayHourProof({
     targetInstant,
     earthRotationBridge:false,
     earthRotationEstimateAvailable,
-    civilZoneBound:false,
+    localZoneConvention,
     dayBoundaryBound:false,
     sexagenaryDayArithmetic:true,
     clockBasis:null,
