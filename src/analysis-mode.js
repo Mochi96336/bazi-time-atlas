@@ -41,6 +41,8 @@ function setAnalysisOpen(open, { reset = false } = {}) {
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false, { reset:true }));
 
+instrument?.addEventListener("atlas-analysis-request", () => setAnalysisOpen(true));
+
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && instrument?.dataset.analysisOpen === "true") {
     setAnalysisOpen(false, { reset:true });
@@ -49,4 +51,4 @@ document.addEventListener("keydown", event => {
 });
 
 const params = new URLSearchParams(location.search);
-setAnalysisOpen(params.get("analysis") === "1");
+setAnalysisOpen(params.get("analysis") === "1" || params.get("classification") === "1");
