@@ -8,7 +8,7 @@ const SOLAR_SCHWARZSCHILD_RADIUS_AU = 1.97412574336e-8;
 export const ABSOLUTE_STATE_SEASONAL_REFERENCE_SEMANTICS =
   "geocentric-apparent-solar-longitude-mean-ecliptic-of-date";
 export const MEAN_ECLIPTIC_OF_DATE_FRAME_SEMANTICS =
-  "iau76-80-mean-ecliptic-of-date";
+  "earth-mean-ecliptic-of-date";
 export const INCOMPLETE_APPARENT_SEMANTICS =
   "geocentric-light-time-and-optional-stellar-aberration-solar-longitude-mean-ecliptic-of-date";
 
@@ -118,7 +118,7 @@ export function validateMeanEclipticOfDateTransform(transform) {
   if (!transform || typeof transform !== "object") throw new TypeError("mean-ecliptic-of-date transform is required");
   if (!transform.id || typeof transform.id !== "string") throw new TypeError("frame transform.id is required");
   if (transform.frameSemantics !== MEAN_ECLIPTIC_OF_DATE_FRAME_SEMANTICS) {
-    throw new TypeError("frame transform must target the IAU76/80 mean-ecliptic-of-date frame");
+    throw new TypeError("frame transform must target Earth mean-ecliptic-of-date semantics");
   }
   if (typeof transform.icrfDirectionToMeanEclipticOfDate !== "function") {
     throw new TypeError("frame transform must define icrfDirectionToMeanEclipticOfDate");
