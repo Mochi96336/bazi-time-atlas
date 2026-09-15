@@ -10,12 +10,16 @@ import {
  *
  * - absolute-state adapters expose an Earth/Sun state basis and therefore still
  *   need the app-owned apparent longitude-of-date transform + crossing solver.
+ *   Registration by provider id is not enough: every registered state adapter
+ *   must also declare the bounded runtime year coverage actually shipped by the
+ *   app. Runtime coverage must never inherit the broader source ephemeris range.
  * - direct-event providers already solve the seasonal longitude crossing and
  *   only need an explicit integration entry here; they must never masquerade
  *   as a DE441/state-vector adapter.
  */
 export const SEASONAL_EPOCH_PIPELINE = Object.freeze({
   absoluteStateAdapterIds:Object.freeze([]),
+  absoluteStateAdapterRuntimeCoverageById:Object.freeze({}),
   directEventProviderIds:Object.freeze([]),
   apparentGeocentricSolarLongitudeOfDate:false,
   crossingRootSolve:false
@@ -92,8 +96,8 @@ function assertYear(value, name) {
   if (!Number.isInteger(value)) throw new RangeError(`${name} must be an integer year`);
 }
 
-function evaluateSource(source, targetYear) {
-  const availability = seasonalEpochProviderAvailability(source, targetYear, SEASONAL_EPOCH_PIPELINE);
+function evaluateSource(source, targetYear, pipeline) {
+  const availability = seasonalEpochProviderAvailability(source, targetYear, pipeline);
   return Object.freeze({
     ...availability,
     label:source.label,
@@ -121,18 +125,34 @@ function nearestAbsoluteEpochCoverageBoundary(evaluations, targetYear) {
   return best;
 }
 
-export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
+export function seasonalEpochSourceAudit({ baseYear, targetYear, pipeline = SEASONAL_EPOCH_PIPELINE }) {
   assertYear(baseYear, "baseYear");
   assertYear(targetYear, "targetYear");
   const identity = baseYear === targetYear;
-  const evaluations = Object.freeze(SEASONAL_EPOCH_SOURCES.map(item => evaluateSource(item, targetYear)));
+  const evaluations = Object.freeze(SEASONAL_EPOCH_SOURCES.map(item => evaluateSource(item, targetYear, pipeline)));
   const qualified = evaluations.filter(item => item.qualifiedCoverage);
   const qualifiedDirect = qualified.filter(item => item.directSeasonalEpoch);
   const qualifiedState = qualified.filter(item => item.ephemerisBasisCapable);
+  const stateNotIntegrated = qualifiedState.filter(item => !item.stateAdapterIntegrated);
+  const stateRuntimeUndeclared = qualifiedState.filter(item =>
+    item.stateAdapterIntegrated && !item.stateAdapterRuntimeCoverageDeclared
+  );
+  const stateRuntimeGap = qualifiedState.filter(item =>
+    item.stateAdapterIntegrated
+    && item.stateAdapterRuntimeCoverageDeclared
+    && !item.stateAdapterCoversTarget
+  );
+  const stateSolverIncomplete = qualifiedState.filter(item =>
+    item.stateAdapterIntegrated
+    && item.stateAdapterCoversTarget
+    && !item.deepTimeSolverReady
+  );
   const usable = evaluations.filter(item => item.usableNow);
   const nearestEphemerisBoundary = nearestAbsoluteEpochCoverageBoundary(evaluations, targetYear);
-  const deepTimeSolverReady = SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate
-    && SEASONAL_EPOCH_PIPELINE.crossingRootSolve;
+  const deepTimeSolverReady = Boolean(
+    pipeline.apparentGeocentricSolarLongitudeOfDate
+    && pipeline.crossingRootSolve
+  );
 
   let status;
   let blocker;
@@ -145,7 +165,16 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
   } else if (qualifiedDirect.length) {
     status = "qualified-direct-event-provider-not-integrated";
     blocker = "direct-event-provider-integration";
-  } else if (qualifiedState.length) {
+  } else if (stateRuntimeUndeclared.length) {
+    status = "state-adapter-runtime-coverage-undeclared";
+    blocker = "runtime-adapter-coverage-contract";
+  } else if (stateRuntimeGap.length) {
+    status = "state-adapter-runtime-coverage-gap";
+    blocker = "runtime-adapter-coverage";
+  } else if (stateSolverIncomplete.length) {
+    status = "deep-time-seasonal-epoch-solver-incomplete";
+    blocker = "seasonal-epoch-solver";
+  } else if (stateNotIntegrated.length) {
     status = "qualified-ephemeris-basis-not-integrated";
     blocker = "implementation-and-seasonal-epoch-solver";
   } else {
@@ -154,6 +183,11 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
     status = "absolute-state-coverage-gap";
     blocker = "ephemeris-source-coverage";
   }
+
+  const seasonalEpochSolverRequired = !identity
+    && !usable.length
+    && qualifiedDirect.length === 0
+    && (qualifiedState.length === 0 || qualifiedState.some(item => !item.deepTimeSolverReady));
 
   return Object.freeze({
     baseYear,
@@ -168,10 +202,10 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear }) {
     qualifiedDirectEventSourceIds:Object.freeze(qualifiedDirect.map(item => item.id)),
     usableSourceIds:Object.freeze(usable.map(item => item.id)),
     nearestEphemerisBoundary,
-    appPipeline:SEASONAL_EPOCH_PIPELINE,
+    appPipeline:pipeline,
     deepTimeSolverReady,
     absoluteSeasonalEpochAvailable:identity || usable.length > 0,
     seasonalEpochProviderIntegrationRequired:!identity && !usable.length && qualifiedDirect.length > 0,
-    seasonalEpochSolverRequired:!identity && !usable.length && qualifiedDirect.length === 0
+    seasonalEpochSolverRequired
   });
 }
