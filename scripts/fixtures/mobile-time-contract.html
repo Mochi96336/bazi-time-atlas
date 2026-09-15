@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px precise-time probe</title>
+  <style>
+    html, body { margin:0; width:390px; height:844px; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Mobile precise-time production harness"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    frame.src = new URL("../../?instant=2026-09-15T20%3A14%3A37.000Z", location.href).href;
+
+    function snapshot() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const shell = doc?.querySelector(".kinetic-shell");
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const dock = doc?.querySelector("#mobile-time-dock");
+      const input = doc?.querySelector("#mobile-instant-input");
+      const apply = doc?.querySelector("#mobile-time-apply");
+      if (!win || !doc || !shell || !instrument || !dock || !input || !apply) return;
+      const dockStyle = win.getComputedStyle(dock);
+      const shellStyle = win.getComputedStyle(shell);
+      const instrumentRect = instrument.getBoundingClientRect();
+      const dockRect = dock.getBoundingClientRect();
+      probe.dataset.ready = "true";
+      probe.dataset.innerWidth = String(win.innerWidth);
+      probe.dataset.dockDisplay = dockStyle.display;
+      probe.dataset.inputStep = input.getAttribute("step") ?? "";
+      probe.dataset.inputValue = input.value;
+      probe.dataset.shellOverflowY = shellStyle.overflowY;
+      probe.dataset.shellScrollable = String(shell.scrollHeight > shell.clientHeight + 2);
+      probe.dataset.instrumentShare = String(instrumentRect.height / win.innerHeight);
+      probe.dataset.dockAfterInstrument = String(dockRect.top >= instrumentRect.bottom - 1);
+      probe.dataset.applyVisible = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
+    }
+
+    frame.addEventListener("load", () => {
+      snapshot();
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 100);
+      setTimeout(snapshot, 700);
+    });
+  </script>
+</body>
+</html>
