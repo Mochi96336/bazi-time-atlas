@@ -50,9 +50,10 @@
       const compareButton = doc?.querySelector("#compare-rings-button");
       const resetButton = doc?.querySelector("#reset-rings-button");
       const status = doc?.querySelector("#ring-compare-status");
+      const legend = doc?.querySelector(".ring-legend");
       const ctm = svg?.getScreenCTM();
       const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
-      if (!win || !doc || !instrument || !svg || !track || !compareButton || !resetButton || !status || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value))) return null;
+      if (!win || !doc || !instrument || !svg || !track || !compareButton || !resetButton || !status || !legend || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value))) return null;
       const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
         .map(path => {
           const point = path.getPointAtLength(0);
@@ -61,7 +62,7 @@
         .filter(Number.isFinite)
         .sort((a, b) => a - b);
       if (radii.length !== 7) return null;
-      return { win, doc, instrument, svg, track, compareButton, resetButton, status, ctm, center, radii };
+      return { win, doc, instrument, svg, track, compareButton, resetButton, status, legend, ctm, center, radii };
     }
 
     function pointerAt(g, radius, angleDegrees, type, pointerId) {
@@ -84,7 +85,13 @@
       });
     }
 
+    function rectsOverlap(a, b) {
+      return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    }
+
     function snapshot(g) {
+      const statusRect = g.status.getBoundingClientRect();
+      const legendRect = g.legend.getBoundingClientRect();
       return {
         innerWidth:g.win.innerWidth,
         instantMs:Number(g.instrument.dataset.selectedInstantMs),
@@ -96,7 +103,11 @@
         comparePressed:g.compareButton.getAttribute("aria-pressed") ?? "",
         resetHidden:g.resetButton.hidden,
         statusHidden:g.status.hidden,
-        statusText:g.status.textContent ?? ""
+        statusText:g.status.textContent ?? "",
+        statusTop:statusRect.top,
+        statusBottom:statusRect.bottom,
+        legendBottom:legendRect.bottom,
+        statusLegendOverlap:!g.status.hidden && rectsOverlap(statusRect, legendRect)
       };
     }
 

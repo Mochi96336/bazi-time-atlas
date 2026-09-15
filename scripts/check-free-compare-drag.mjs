@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const EXPECTED_INSTANT_MS = Date.parse("2024-06-15T04:00:00.000Z");
 const EXPECTED_OFFSET_DEGREES = 6;
+const MIN_STATUS_LEGEND_GAP_PX = 4;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -56,7 +57,11 @@ function snapshot(prefix) {
     comparePressed:attr(`data-${prefix}-compare-pressed`) ?? "",
     resetHidden:attr(`data-${prefix}-reset-hidden`) ?? "",
     statusHidden:attr(`data-${prefix}-status-hidden`) ?? "",
-    statusText:attr(`data-${prefix}-status-text`) ?? ""
+    statusText:attr(`data-${prefix}-status-text`) ?? "",
+    statusTop:num(`data-${prefix}-status-top`),
+    statusBottom:num(`data-${prefix}-status-bottom`),
+    legendBottom:num(`data-${prefix}-legend-bottom`),
+    statusLegendOverlap:attr(`data-${prefix}-status-legend-overlap`) ?? ""
   };
 }
 
@@ -80,6 +85,21 @@ if (!(enabled.scrubMode === "free-compare" && enabled.compareMode === "true" && 
   throw new Error(`Compare button did not enter Free Compare cleanly: ${JSON.stringify(enabled)}: ${url}`);
 }
 
+for (const [phase, value] of Object.entries({ enabled, detached })) {
+  if (!(value.statusHidden === "false" && value.statusLegendOverlap === "false")) {
+    throw new Error(`${phase} Free Compare status overlaps the mobile layer legend: ${JSON.stringify(value)}: ${url}`);
+  }
+  if (!(Number.isFinite(value.statusTop) && Number.isFinite(value.statusBottom) && Number.isFinite(value.legendBottom))) {
+    throw new Error(`${phase} Free Compare status clearance geometry is not finite: ${JSON.stringify(value)}: ${url}`);
+  }
+  if (value.statusTop < value.legendBottom + MIN_STATUS_LEGEND_GAP_PX) {
+    throw new Error(
+      `${phase} Free Compare status needs >=${MIN_STATUS_LEGEND_GAP_PX}px below legend; ` +
+      `got ${value.statusTop - value.legendBottom}px: ${JSON.stringify(value)}: ${url}`
+    );
+  }
+}
+
 if (Math.abs(detached.manualOffset - EXPECTED_OFFSET_DEGREES) > 1e-9) {
   throw new Error(`Free Compare day ring did not detent to +6°: ${JSON.stringify(detached)}: ${url}`);
 }
@@ -99,5 +119,6 @@ if (!(restored.manualOffset === 0 && restored.linked === "true" && restored.deta
 
 console.log(
   `[free-compare-drag] PASS true 390px pointer gesture; Selected Instant ${EXPECTED_INSTANT_MS} stayed fixed; ` +
-  `Day manual offset 0°→${detached.manualOffset.toFixed(1)}°→0°; linked-time restored: ${url}`
+  `Day manual offset 0°→${detached.manualOffset.toFixed(1)}°→0°; status cleared legend by ` +
+  `${(detached.statusTop - detached.legendBottom).toFixed(1)}px; linked-time restored: ${url}`
 );
