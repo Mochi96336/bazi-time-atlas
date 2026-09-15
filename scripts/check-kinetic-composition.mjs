@@ -72,22 +72,32 @@ const cameraX = Number(requireAttr(instrument, "data-geometry-camera-x", "deskto
 const cameraY = Number(requireAttr(instrument, "data-geometry-camera-y", "desktop", desktop.url));
 const cameraWidth = Number(requireAttr(instrument, "data-geometry-camera-width", "desktop", desktop.url));
 const cameraHeight = Number(requireAttr(instrument, "data-geometry-camera-height", "desktop", desktop.url));
-if (center.length !== 2 || !center.every(Number.isFinite) || center[1] <= 1000) {
-  throw new Error(`desktop: disk center is not far enough below the viewport (${center.join(",")}): ${desktop.url}`);
+const cameraOriginGap = Number(requireAttr(instrument, "data-geometry-camera-origin-gap", "desktop", desktop.url));
+const cameraOriginGapRatio = Number(requireAttr(instrument, "data-geometry-camera-origin-gap-ratio", "desktop", desktop.url));
+if (center.length !== 2 || !center.every(Number.isFinite)) {
+  throw new Error(`desktop: invalid canonical disk center (${center.join(",")}): ${desktop.url}`);
 }
-if (![innerRadius, outerRadius, radiusRatio, cameraZoom, cameraX, cameraY, cameraWidth, cameraHeight].every(Number.isFinite)) {
+if (![innerRadius, outerRadius, radiusRatio, cameraZoom, cameraX, cameraY, cameraWidth, cameraHeight, cameraOriginGap, cameraOriginGapRatio].every(Number.isFinite)) {
   throw new Error(`desktop: missing giant-disk/camera diagnostics: ${desktop.url}`);
 }
-if (cameraMode !== "desktop" || Math.abs(cameraZoom - 1) > 1e-6 || Math.abs(cameraX) > 1e-6 || Math.abs(cameraWidth - 1200) > 1e-6 || Math.abs(cameraHeight - 760) > 1e-6) {
-  throw new Error(`desktop: unexpected responsive camera (${cameraMode}, zoom=${cameraZoom}, box=${cameraX},${cameraY},${cameraWidth},${cameraHeight}): ${desktop.url}`);
+if (!(innerRadius > 0 && outerRadius > innerRadius) || Math.abs(radiusRatio - innerRadius / outerRadius) > 0.001) {
+  throw new Error(`desktop: invalid radial envelope (inner=${innerRadius}, outer=${outerRadius}, ratio=${radiusRatio}): ${desktop.url}`);
 }
-if (outerRadius < 1100 || radiusRatio < 0.55) throw new Error(`desktop: disk curvature is too tight (inner=${innerRadius}, outer=${outerRadius}, ratio=${radiusRatio}): ${desktop.url}`);
+if (cameraMode !== "desktop" || cameraZoom <= 0 || cameraWidth <= 0 || cameraHeight <= 0) {
+  throw new Error(`desktop: invalid responsive camera (${cameraMode}, zoom=${cameraZoom}, box=${cameraX},${cameraY},${cameraWidth},${cameraHeight}): ${desktop.url}`);
+}
+const recomputedDesktopOriginGap = center[1] - (cameraY + cameraHeight);
+if (Math.abs(recomputedDesktopOriginGap - cameraOriginGap) > 0.02 || Math.abs(cameraOriginGap / outerRadius - cameraOriginGapRatio) > 0.001) {
+  throw new Error(`desktop: origin-gap diagnostics disagree (gap=${cameraOriginGap}, ratio=${cameraOriginGapRatio}): ${desktop.url}`);
+}
+if (cameraOriginGap < 0 || cameraOriginGapRatio > 0.35) {
+  throw new Error(`desktop: common radial origin is still too remote from the frame (gap=${cameraOriginGap}, ratio=${cameraOriginGapRatio}): ${desktop.url}`);
+}
 const outerTopInView = center[1] - outerRadius - cameraY;
-const innerTopInView = center[1] - innerRadius - cameraY;
-if (outerTopInView < 70 || outerTopInView > 180 || innerTopInView <= outerTopInView || innerTopInView > 700) {
-  throw new Error(`desktop: radial scale stack is not fully framed (outerTop=${outerTopInView}, innerTop=${innerTopInView}, cameraY=${cameraY}): ${desktop.url}`);
+if (outerTopInView < 0 || outerTopInView > cameraHeight * 0.15) {
+  throw new Error(`desktop: outer Year crown is not framed near the top (outerTop=${outerTopInView}, cameraHeight=${cameraHeight}): ${desktop.url}`);
 }
-console.log(`[kinetic-composition] PASS desktop five-primary-ring radial hierarchy + annual overlay; center=${center.join(",")}, radii=${innerRadius}/${outerRadius}: ${desktop.url}`);
+console.log(`[kinetic-composition] PASS desktop radial-origin composition; originGapRatio=${cameraOriginGapRatio}, radii=${innerRadius}/${outerRadius}: ${desktop.url}`);
 
 const mobile = dump("scripts/fixtures/mobile-390.html", 500, 844);
 const probe = tagById(mobile.dom, "probe");
@@ -122,17 +132,20 @@ if (fit !== "true") throw new Error(`mobile: page still scrolls (${scrollHeight}
 if (hidden !== "true") throw new Error(`mobile: secondary dashboard sections were not collapsed: ${mobile.url}`);
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`mobile: instrument occupies too little of first viewport (${share}): ${mobile.url}`);
 if (attr(probe, "data-fan-clip") !== "active" || attr(probe, "data-master-geometry") !== "shared-fan") throw new Error(`mobile: shared fan geometry inactive inside 390px fixture: ${mobile.url}`);
-if (mobileCameraMode !== "mobile" || Math.abs(mobileCameraZoom - 3) > 1e-4) {
-  throw new Error(`mobile: camera is not portrait-filling wheel-core mode (${mobileCameraMode}, zoom=${mobileCameraZoom}): ${mobile.url}`);
+if (mobileCameraMode !== "mobile" || !Number.isFinite(mobileCameraZoom) || mobileCameraZoom <= 0) {
+  throw new Error(`mobile: invalid portrait wheel-core camera (${mobileCameraMode}, zoom=${mobileCameraZoom}): ${mobile.url}`);
 }
-if (![mobileCameraX, mobileCameraY, mobileCameraWidth, mobileCameraHeight, wheelWidthRatio].every(Number.isFinite)) {
+if (![mobileCameraX, mobileCameraY, mobileCameraWidth, mobileCameraHeight, wheelWidthRatio].every(Number.isFinite) || mobileCameraWidth <= 0 || mobileCameraHeight <= 0) {
   throw new Error(`mobile: non-finite camera/layout diagnostics: ${mobile.url}`);
 }
-if (Math.abs(mobileCameraX - 400) > 0.02 || Math.abs(mobileCameraY - 28) > 0.02 || Math.abs(mobileCameraWidth - 400) > 0.02 || Math.abs(mobileCameraHeight - 760) > 0.02) {
-  throw new Error(`mobile: wrong oversized portrait crop (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
+const mobileOriginGap = center[1] - (mobileCameraY + mobileCameraHeight);
+const mobileOriginGapRatio = mobileOriginGap / outerRadius;
+const mobileOuterTopInView = center[1] - outerRadius - mobileCameraY;
+if (mobileOriginGap < 0 || mobileOriginGapRatio > 0.30) {
+  throw new Error(`mobile: radial origin is still too remote from portrait frame (gap=${mobileOriginGap}, ratio=${mobileOriginGapRatio}): ${mobile.url}`);
 }
-if (mobileCameraWidth > 420 || mobileCameraY < 20 || mobileCameraY > 36) {
-  throw new Error(`mobile: giant fan camera lost the tightened portrait framing (${mobileCameraX},${mobileCameraY},${mobileCameraWidth},${mobileCameraHeight}): ${mobile.url}`);
+if (mobileOuterTopInView < 0 || mobileOuterTopInView > mobileCameraHeight * 0.12) {
+  throw new Error(`mobile: outer Year crown is not preserved near the portrait top (outerTop=${mobileOuterTopInView}, cameraHeight=${mobileCameraHeight}): ${mobile.url}`);
 }
 if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelTransform !== "matrix(1, 0, 0, 1, 0, 0)")) {
   throw new Error(`mobile: CSS still owns wheel zoom (widthRatio=${wheelWidthRatio}, transform=${wheelTransform}): ${mobile.url}`);
@@ -155,8 +168,8 @@ if (requireAttr(probe, "data-zodiac-pointer-events", "mobile", mobile.url) !== "
   throw new Error(`mobile: derived Zodiac overlay became an independent pointer target: ${mobile.url}`);
 }
 console.log(
-  `[kinetic-composition] PASS true 390px oversized five-ring composition + derived Zodiac overlay; ` +
-  `instrument share=${share}, ringHits=${ringHitMask}, active Ganzhi=${activeCycleLabels}: ${mobile.url}`
+  `[kinetic-composition] PASS true 390px radial-origin composition + derived Zodiac overlay; ` +
+  `originGapRatio=${mobileOriginGapRatio.toFixed(4)}, instrument share=${share}, ringHits=${ringHitMask}, active Ganzhi=${activeCycleLabels}: ${mobile.url}`
 );
 
 const sampledTarget = encodeURIComponent("../../?instant=2029-03-15T13:20:09.000Z");

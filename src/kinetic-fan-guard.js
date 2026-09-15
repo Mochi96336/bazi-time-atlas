@@ -33,6 +33,8 @@ function applyResponsiveCamera() {
   instrument.dataset.geometryCameraY = camera.viewBox.y.toFixed(3);
   instrument.dataset.geometryCameraWidth = camera.viewBox.width.toFixed(3);
   instrument.dataset.geometryCameraHeight = camera.viewBox.height.toFixed(3);
+  instrument.dataset.geometryCameraOriginGap = camera.originGap.toFixed(3);
+  instrument.dataset.geometryCameraOriginGapRatio = camera.originGapRatio.toFixed(4);
   return camera;
 }
 
@@ -147,4 +149,4 @@ function boot(attempt = 0) {
 }
 
 boot();
-window.addEventListener("resize", refreshCompositionDiagnostics, { passive: true });
+window.addEventListener("resize", refreshCompositionDiagnostics, { passive:true });

@@ -163,15 +163,21 @@ function assertValidCamera(camera, expectedMode) {
   assert.equal(camera.mode, expectedMode);
   assert.ok(Number.isFinite(camera.zoom) && camera.zoom > 0);
   assert.ok(Number.isFinite(camera.topMargin));
+  assert.ok(Number.isFinite(camera.originGap) && camera.originGap >= 0);
+  assert.ok(Number.isFinite(camera.originGapRatio));
+  assert.ok(camera.originGapRatio >= 0 && camera.originGapRatio <= .35, `${expectedMode} should keep the common origin perceptually near the frame`);
+  assert.ok(Math.abs(camera.originGap / RADII.outer - camera.originGapRatio) < 1e-12);
   for (const key of ["x", "y", "width", "height"]) {
     assert.ok(Number.isFinite(camera.viewBox[key]), `${expectedMode} viewBox.${key} should be finite`);
   }
   assert.ok(camera.viewBox.width > 0, `${expectedMode} camera width should be positive`);
   assert.ok(camera.viewBox.height > 0, `${expectedMode} camera height should be positive`);
+  const outerTopInView = WHEEL_CENTER.y - RADII.outer - camera.viewBox.y;
+  assert.ok(outerTopInView >= 0 && outerTopInView <= camera.viewBox.height * .15, `${expectedMode} should retain the Year crown near the top of frame`);
   assert.match(viewBoxString(camera.viewBox), /^-?\d+\.\d{3} -?\d+\.\d{3} \d+\.\d{3} \d+\.\d{3}$/);
 }
 
-test("responsive camera chooses a valid composition by breakpoint without freezing aesthetic framing", () => {
+test("responsive camera frames one radial mechanism instead of a horizontal-only crop", () => {
   assert.equal(cameraModeForWidth(1440), "desktop");
   assert.equal(cameraModeForWidth(820), "compact");
   assert.equal(cameraModeForWidth(481), "compact");
@@ -186,9 +192,9 @@ test("responsive camera chooses a valid composition by breakpoint without freezi
   assertValidCamera(compact, "compact");
   assertValidCamera(mobile, "mobile");
 
-  // Responsive framing is intentionally presentation-owned. The semantic
-  // contract is a valid camera over the same world geometry, not a frozen
-  // x/y/width/height tuple from the pre-reset composition.
+  // Portrait framing can reveal more radial convergence without changing the
+  // world model; exact x/y/width/height remain presentation-owned.
+  assert.ok(mobile.originGapRatio < desktop.originGapRatio);
   assert.equal(CURSOR_ANGLE, -90);
 });
 
