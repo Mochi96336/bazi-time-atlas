@@ -6,10 +6,12 @@ import {
   currentRecurrenceDayHourProof,
   dayHourResolutionProof
 } from "../src/recurrence/day-hour-proof-chain.js";
+import { EQUATION_OF_TIME_MODEL_ID } from "../src/recurrence/equation-of-time-model-binding.js";
 import { LOCAL_ZONE_CONVENTION_KIND } from "../src/recurrence/local-zone-convention.js";
 import { TARGET_INSTANT_BASIS } from "../src/recurrence/target-instant-binding.js";
 
 const SAMPLE_JD = 3_184_634.5;
+const EOT_MODEL_ID = EQUATION_OF_TIME_MODEL_ID.ATLAS_TYME_NREL_SPA_V1;
 const TEST_CIVIL_ZONE = Object.freeze({
   kind:LOCAL_ZONE_CONVENTION_KIND.CIVIL_TIMEZONE,
   policyResolved:true,
@@ -32,7 +34,8 @@ function proof(overrides = {}) {
     sexagenaryDayArithmetic:true,
     clockBasis:null,
     longitudeDegrees:null,
-    equationOfTimeModel:false,
+    targetYear:null,
+    equationOfTimeModelId:null,
     hourBranchRule:true,
     fiveRatsRule:true,
     ...overrides
@@ -49,6 +52,8 @@ test("current deep-time recurrence defaults to missing absolute seasonal epoch a
   assert.equal(result.dayBoundaryBound, false);
   assert.equal(result.longitudeDegrees, null);
   assert.equal(result.longitudeBound, false);
+  assert.equal(result.equationOfTimeModel.bound, false);
+  assert.equal(result.equationOfTimeModelValidatedForTarget, false);
   assert.equal(result.day.resolved, false);
   assert.equal(result.hour.resolved, false);
   assert.ok(result.day.blockers.includes("absoluteSeasonalEpoch"));
@@ -203,9 +208,7 @@ test("civil-clock Hour needs no longitude or Equation of Time once Day is resolv
 });
 
 test("local mean solar Hour adds typed longitude but not Equation of Time", () => {
-  const blocked = proof({
-    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR
-  });
+  const blocked = proof({ clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR });
   assert.equal(blocked.hour.resolved, false);
   assert.deepEqual(blocked.hour.blockers, ["longitudeBound"]);
   assert.equal(blocked.longitudeDegrees, null);
@@ -223,22 +226,72 @@ test("local mean solar Hour adds typed longitude but not Equation of Time", () =
   assert.deepEqual(resolved.hour.blockers, []);
 });
 
-test("local apparent solar Hour requires typed longitude and an epoch-valid Equation of Time model", () => {
-  const blocked = proof({
+test("local apparent solar Hour requires registry-owned recurrence EoT authority", () => {
+  const unbound = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeDegrees:121.5,
-    equationOfTimeModel:false
+    targetYear:2024
   });
-  assert.equal(blocked.hour.resolved, false);
-  assert.deepEqual(blocked.hour.blockers, ["equationOfTimeModel"]);
-  assert.equal(blocked.longitudeBound, true);
+  assert.equal(unbound.hour.resolved, false);
+  assert.deepEqual(unbound.hour.blockers, ["equationOfTimeModel"]);
+  assert.equal(unbound.equationOfTimeModel.bound, false);
+  assert.equal(unbound.equationOfTimeModelValidatedForTarget, false);
 
-  const resolved = proof({
+  const modernModel = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeDegrees:121.5,
+    targetYear:2024,
+    equationOfTimeModelId:EOT_MODEL_ID
+  });
+  assert.equal(modernModel.equationOfTimeModel.bound, true);
+  assert.equal(modernModel.equationOfTimeModel.validationScope, "modern-reference-only");
+  assert.equal(modernModel.equationOfTimeModel.recurrenceAuthority, false);
+  assert.equal(modernModel.equationOfTimeModel.coversTarget, false);
+  assert.equal(modernModel.equationOfTimeModelValidatedForTarget, false);
+  assert.equal(modernModel.stages.find(stage => stage.id === "equation-of-time").status, "missing-deep-time-model");
+  assert.equal(modernModel.hour.resolved, false);
+});
+
+test("modern EoT references do not silently extrapolate to year 4006", () => {
+  const result = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
+    longitudeDegrees:121.5,
+    targetYear:4006,
+    equationOfTimeModelId:EOT_MODEL_ID
+  });
+  assert.equal(result.equationOfTimeModel.bound, true);
+  assert.deepEqual(result.equationOfTimeModel.referenceYears, [2003, 2005, 2024]);
+  assert.equal(result.equationOfTimeModel.recurrenceAuthority, false);
+  assert.equal(result.equationOfTimeModel.coversTarget, false);
+  assert.equal(result.equationOfTimeModelValidatedForTarget, false);
+  assert.equal(result.firstHardBlocker, "equation-of-time");
+  assert.deepEqual(result.hour.blockers, ["equationOfTimeModel"]);
+  const stage = result.stages.find(item => item.id === "equation-of-time");
+  assert.equal(stage.status, "missing-deep-time-model");
+  assert.match(stage.detail, /modern-reference-only/);
+  assert.match(stage.detail, /2003 \/ 2005 \/ 2024/);
+});
+
+test("legacy EoT booleans cannot masquerade as recurrence authority", () => {
+  const result = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
+    longitudeDegrees:121.5,
+    targetYear:2024,
     equationOfTimeModel:true
   });
-  assert.equal(resolved.hour.resolved, true);
+  assert.equal(result.equationOfTimeModel.bound, false);
+  assert.equal(result.equationOfTimeModelValidatedForTarget, false);
+  assert.equal(result.firstHardBlocker, "equation-of-time");
+  assert.equal(result.hour.resolved, false);
+  assert.throws(
+    () => proof({
+      clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
+      longitudeDegrees:121.5,
+      targetYear:2024,
+      equationOfTimeModelId:true
+    }),
+    /canonical non-empty string/
+  );
 });
 
 test("legacy longitudeBound boolean cannot masquerade as a geographic coordinate", () => {
@@ -283,7 +336,8 @@ test("legacy civilZoneBound boolean cannot satisfy the typed local-zone requirem
     sexagenaryDayArithmetic:true,
     clockBasis:DAY_HOUR_TIME_BASIS.CIVIL,
     longitudeDegrees:null,
-    equationOfTimeModel:false,
+    targetYear:null,
+    equationOfTimeModelId:null,
     hourBranchRule:true,
     fiveRatsRule:true
   });
