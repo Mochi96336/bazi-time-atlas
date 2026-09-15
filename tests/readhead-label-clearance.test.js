@@ -13,5 +13,6 @@ test("active read-head glyphs start at the exact datum anchor instead of straddl
 });
 
 test("annual read-heads keep using the shared clearance rule", () => {
-  assert.match(renderer, /class:\s*`active-annual-label active-cycle-label active-annual-\$\{kind\}`/);
+  assert.match(renderer, /class:\s*"term-label active-cycle-label active-annual-label"/);
+  assert.match(renderer, /class:\s*"zodiac-label active-cycle-label active-annual-label"/);
 });
