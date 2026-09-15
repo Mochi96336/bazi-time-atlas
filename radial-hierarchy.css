@@ -3,25 +3,16 @@
    semantics remain owned by the wheel model and renderer. */
 
 /* Read the legend the same way the eye reads the fan: outer / slow first,
-   then walk inward toward the fast clocks. */
+   then walk inward toward the fast clocks. Keep the legend about layer
+   identity/current state; cycle scale is already encoded by radius and the
+   time-window controls. */
 .ring-year { order: 1; }
 .ring-month { order: 2; }
 .ring-solar { order: 3; }
 .ring-day { order: 4; }
 .ring-hour { order: 5; }
 
-.ring-legend-row { grid-template-columns: 8px 92px minmax(72px, auto); }
-.ring-legend-row span::after {
-  color: #505b54;
-  font-size: 7px;
-  font-weight: 680;
-  letter-spacing: .02em;
-}
-.ring-hour span::after { content: " · ~5日"; }
-.ring-day span::after { content: " · 60日"; }
-.ring-solar span::after { content: " · 1年"; }
-.ring-month span::after { content: " · ~5年"; }
-.ring-year span::after { content: " · 60年"; }
+.ring-legend-row { grid-template-columns: 8px 54px minmax(64px, auto); }
 .ring-year strong { color: #e4ddc4; font-weight: 800; }
 .ring-month strong { color: #d4dfd7; font-weight: 760; }
 .ring-solar strong { color: #c7b89f; font-weight: 700; }
@@ -147,25 +138,31 @@
 }
 
 @media (max-width: 820px) {
-  .ring-legend-row { grid-template-columns: 7px 74px minmax(58px, auto); gap: 6px; }
-  .ring-legend-row span::after { font-size: 6.5px; }
+  .ring-legend-row { grid-template-columns: 7px 48px minmax(58px, auto); gap: 6px; }
   #year-track .cycle-label { font-size: 10.5px; }
   #month-track .cycle-label { font-size: 9.5px; }
 }
 
 @media (max-width: 480px) {
-  /* Keep frame selection and layer readouts in one compact instrument band.
-     The controls remain individually usable; only the debug-dashboard-like
-     dedicated reference row is removed. */
+  /* Keep frame selection semantically separate from the layer visibility/state
+     controls. The narrow legend already needs two lines, so this clarifies the
+     band without increasing its effective height. */
   .ring-legend {
     align-items: center;
     gap: 3px 4px;
   }
-  .reference-frame-control { flex: 0 0 auto; }
+  .reference-frame-control { flex: 0 0 100%; }
   .ring-legend-row { grid-template-columns: none; gap: 4px; }
-  .ring-legend-row span { font-size: 7.5px; }
-  .ring-legend-row span::after { display: none; }
-  .ring-legend-row strong { font-size: 9px; }
+  .ring-legend-row span {
+    color: #919b94;
+    font-size: 7.5px;
+    font-weight: 700;
+  }
+  .ring-legend-row strong {
+    color: #737e77;
+    font-size: 9px;
+    font-weight: 620;
+  }
   #hour-track .cycle-label,
   #day-track .cycle-label { font-size: 8px; }
   #month-track .cycle-label { font-size: 9px; }
