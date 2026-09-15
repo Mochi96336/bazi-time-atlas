@@ -59,7 +59,7 @@ const longitudeInput = tagById(longitude.dom, "birth-longitude");
 if (attr(longitudePanel, "data-advanced-open") !== "true" || !longitudePanel.includes(" open")) {
   throw new Error(`longitude research context must surface Advanced: ${longitude.url}`);
 }
-if (attr(longitudeInput, "value") !== "121.5") {
-  throw new Error(`longitude input was not preserved inside Advanced: ${longitude.url}`);
+if (!longitudeInput || attr(longitudePanel, "data-advanced-longitude") !== "121.5") {
+  throw new Error(`longitude input was not preserved as live Advanced state: ${longitude.url}`);
 }
 console.log(`[birth-advanced] PASS longitude research context surfaces Advanced with bound coordinate: ${longitude.url}`);
