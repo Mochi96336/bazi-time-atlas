@@ -175,6 +175,15 @@
   stroke-width: 1.65;
 }
 
+/* Wide desktop has room for the full headline on one line. Reclaim that forced
+   line break instead of shrinking the instrument: narrower layouts still wrap
+   naturally, while phone composition explicitly restores the authored break. */
+@media (min-width: 1100px) {
+  .atlas-intro-copy,
+  .atlas-intro h1 { max-width: 1050px; }
+  .atlas-intro h1 br { display: none; }
+}
+
 @media (max-width: 820px) {
   .boundary-meta { justify-content: flex-start; text-align: left; }
   .boundary-marker i { display: none; }
