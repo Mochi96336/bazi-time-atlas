@@ -96,6 +96,23 @@ if (!meanSolar.dom.includes("E121.5°") || !meanSolar.dom.includes("east-positiv
 }
 console.log(`[recurrence-longitude] PASS lon=121.5 resolves local mean solar Hour: ${meanSolar.url}`);
 
+const zeroLongitude = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=0`);
+const zeroPanel = tagById(zeroLongitude.dom, "day-hour-proof-chain");
+const zeroControls = tagById(zeroLongitude.dom, "target-instant-controls");
+if (
+  attr(zeroPanel, "data-first-hard-blocker") !== "none"
+  || attr(zeroPanel, "data-longitude-degrees") !== "0"
+  || attr(zeroPanel, "data-longitude-bound") !== "true"
+  || attr(zeroPanel, "data-longitude-control-valid") !== "true"
+  || attr(zeroPanel, "data-hour-resolved") !== "true"
+  || attr(zeroControls, "data-longitude") !== "0"
+  || attr(zeroControls, "data-longitude-valid") !== "true"
+) {
+  throw new Error(`lon=0 must remain a valid bound Greenwich coordinate rather than becoming unbound: ${zeroLongitude.url}`);
+}
+expectStage(zeroLongitude.dom, "longitude", "satisfied", "zero longitude mean solar", zeroLongitude.url);
+console.log(`[recurrence-longitude] PASS lon=0 remains a valid bound longitude: ${zeroLongitude.url}`);
+
 const apparent = dumpDom(`${fixedZonePath}&clockBasis=local-apparent-solar&lon=-74.006`);
 const apparentPanel = tagById(apparent.dom, "day-hour-proof-chain");
 const apparentControls = tagById(apparent.dom, "target-instant-controls");
@@ -118,18 +135,35 @@ if (!apparentBlockers.includes("Equation of Time") || apparentBlockers.includes(
 }
 console.log(`[recurrence-longitude] PASS west longitude advances apparent solar to Equation of Time: ${apparent.url}`);
 
-const invalid = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=181`);
-const invalidPanel = tagById(invalid.dom, "day-hour-proof-chain");
-const invalidControls = tagById(invalid.dom, "target-instant-controls");
-if (
-  attr(invalidPanel, "data-first-hard-blocker") !== "longitude"
-  || attr(invalidPanel, "data-longitude-degrees") !== "unbound"
-  || attr(invalidPanel, "data-longitude-bound") !== "false"
-  || attr(invalidPanel, "data-longitude-control-valid") !== "false"
-  || attr(invalidControls, "data-longitude") !== "unbound"
-  || attr(invalidControls, "data-longitude-valid") !== "false"
-) {
-  throw new Error(`invalid lon query must fail closed to unbound longitude: ${invalid.url}`);
+for (const rawLongitude of ["181", "-181", "abc"]) {
+  const invalid = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=${encodeURIComponent(rawLongitude)}`);
+  const invalidPanel = tagById(invalid.dom, "day-hour-proof-chain");
+  const invalidControls = tagById(invalid.dom, "target-instant-controls");
+  if (
+    attr(invalidPanel, "data-first-hard-blocker") !== "longitude"
+    || attr(invalidPanel, "data-longitude-degrees") !== "unbound"
+    || attr(invalidPanel, "data-longitude-bound") !== "false"
+    || attr(invalidPanel, "data-longitude-control-valid") !== "false"
+    || attr(invalidControls, "data-longitude") !== "unbound"
+    || attr(invalidControls, "data-longitude-valid") !== "false"
+  ) {
+    throw new Error(`invalid lon=${rawLongitude} query must fail closed to unbound longitude: ${invalid.url}`);
+  }
+  expectStage(invalid.dom, "longitude", "unbound-convention", `invalid longitude ${rawLongitude}`, invalid.url);
 }
-expectStage(invalid.dom, "longitude", "unbound-convention", "invalid longitude", invalid.url);
-console.log(`[recurrence-longitude] PASS invalid longitude query fails closed: ${invalid.url}`);
+console.log("[recurrence-longitude] PASS positive/negative overflow and non-numeric longitudes fail closed");
+
+const cleared = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=`);
+const clearedPanel = tagById(cleared.dom, "day-hour-proof-chain");
+const clearedControls = tagById(cleared.dom, "target-instant-controls");
+if (
+  attr(clearedPanel, "data-first-hard-blocker") !== "longitude"
+  || attr(clearedPanel, "data-longitude-degrees") !== "unbound"
+  || attr(clearedPanel, "data-longitude-bound") !== "false"
+  || attr(clearedPanel, "data-longitude-control-valid") !== "true"
+  || attr(clearedControls, "data-longitude") !== "unbound"
+  || attr(clearedControls, "data-longitude-valid") !== "true"
+) {
+  throw new Error(`empty lon= must behave as an explicitly cleared, valid unbound control: ${cleared.url}`);
+}
+console.log(`[recurrence-longitude] PASS empty lon= clears the optional coordinate without inventing an error: ${cleared.url}`);
