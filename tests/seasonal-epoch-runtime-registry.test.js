@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import {
+  DE441_SEASONAL_EVENT_RUNTIME_REGISTRATION,
   DIRECT_SEASONAL_EVENT_RUNTIME_BY_ID,
   PRODUCTION_DIRECT_SEASONAL_EVENT_PROVIDER_IDS,
   PRODUCTION_DIRECT_SEASONAL_EVENT_PROVIDERS,
@@ -20,6 +21,15 @@ test("production registry exposes exactly the bounded DE441 year-4006 direct pro
   assert.equal(runtime.provider, DE441_SEASONAL_EVENT_DATA_PROVIDER);
   assert.equal(typeof runtime.eventsForCatalogueYear, "function");
   assert.equal(typeof runtime.eventForLongitude, "function");
+});
+
+test("production registry entry is authorized by the authoritative registration gate", () => {
+  const runtime = productionDirectSeasonalEventRuntime(PROVIDER_ID);
+  assert.equal(DE441_SEASONAL_EVENT_RUNTIME_REGISTRATION.status, "authoritative-data-product-pass");
+  assert.equal(DE441_SEASONAL_EVENT_RUNTIME_REGISTRATION.providerId, PROVIDER_ID);
+  assert.equal(DE441_SEASONAL_EVENT_RUNTIME_REGISTRATION.targetYear, 4006);
+  assert.equal(DE441_SEASONAL_EVENT_RUNTIME_REGISTRATION.productionRegistrationEligible, true);
+  assert.equal(runtime.registration, DE441_SEASONAL_EVENT_RUNTIME_REGISTRATION);
 });
 
 test("production runtime resolves all 24 year-4006 events through a callable registry", () => {
