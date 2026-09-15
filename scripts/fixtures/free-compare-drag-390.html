@@ -44,6 +44,7 @@
       const win = frame.contentWindow;
       const doc = frame.contentDocument;
       const instrument = doc?.querySelector("#kinetic-instrument");
+      const toolbar = doc?.querySelector(".instrument-toolbar");
       const svg = doc?.querySelector("#kinetic-wheel");
       const compareButton = doc?.querySelector("#compare-rings-button");
       const resetButton = doc?.querySelector("#reset-rings-button");
@@ -51,12 +52,14 @@
       const legend = doc?.querySelector(".ring-legend");
       const classificationButton = doc?.querySelector("#classification-overlay-button");
       const classificationLegend = doc?.querySelector("#classification-overlay-legend");
+      const scaleGroup = toolbar?.querySelector('.toolbar-group[aria-label="時間尺度"]') ?? toolbar?.querySelector(".toolbar-group");
+      const actionGroup = compareButton?.parentElement;
       const ctm = svg?.getScreenCTM();
       const center = instrument?.dataset.geometryCenter?.split(",").map(Number);
       const tracks = Object.fromEntries(
         ["hour", "day", "solar", "month", "year"].map(id => [id, doc?.querySelector(`#${id}-track`)])
       );
-      if (!win || !doc || !instrument || !svg || !compareButton || !resetButton || !status || !legend || !classificationButton || !classificationLegend || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value)) || Object.values(tracks).some(track => !track)) return null;
+      if (!win || !doc || !instrument || !toolbar || !svg || !compareButton || !resetButton || !status || !legend || !classificationButton || !classificationLegend || !scaleGroup || !actionGroup || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value)) || Object.values(tracks).some(track => !track)) return null;
       const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
         .map(path => {
           const point = path.getPointAtLength(0);
@@ -65,7 +68,7 @@
         .filter(Number.isFinite)
         .sort((a, b) => a - b);
       if (radii.length !== 7) return null;
-      return { win, doc, instrument, svg, tracks, compareButton, resetButton, status, legend, classificationButton, classificationLegend, ctm, center, radii };
+      return { win, doc, instrument, toolbar, svg, tracks, compareButton, resetButton, status, legend, classificationButton, classificationLegend, scaleGroup, actionGroup, ctm, center, radii };
     }
 
     function pointerAt(g, radius, angleDegrees, type, pointerId) {
@@ -107,6 +110,17 @@
       const statusRect = g.status.getBoundingClientRect();
       const legendRect = g.legend.getBoundingClientRect();
       const classificationRect = g.classificationLegend.getBoundingClientRect();
+      const toolbarRect = g.toolbar.getBoundingClientRect();
+      const scaleGroupRect = g.scaleGroup.getBoundingClientRect();
+      const actionGroupRect = g.actionGroup.getBoundingClientRect();
+      const resetRect = g.resetButton.getBoundingClientRect();
+      const visibleActionRects = [...g.actionGroup.querySelectorAll("button")]
+        .filter(button => !button.hidden)
+        .map(button => button.getBoundingClientRect());
+      const actionTops = visibleActionRects.map(rect => rect.top);
+      const actionTopSpread = actionTops.length ? Math.max(...actionTops) - Math.min(...actionTops) : Number.NaN;
+      const actionBottoms = visibleActionRects.map(rect => rect.bottom);
+      const actionBottomSpread = actionBottoms.length ? Math.max(...actionBottoms) - Math.min(...actionBottoms) : Number.NaN;
       return {
         innerWidth:g.win.innerWidth,
         instantMs:Number(g.instrument.dataset.selectedInstantMs),
@@ -118,17 +132,37 @@
         linked:g.tracks.day.dataset.linked ?? "",
         comparePressed:g.compareButton.getAttribute("aria-pressed") ?? "",
         resetHidden:g.resetButton.hidden,
+        resetWidth:resetRect.width,
+        resetHeight:resetRect.height,
         statusHidden:g.status.hidden,
         statusText:g.status.textContent ?? "",
         statusTop:statusRect.top,
         statusBottom:statusRect.bottom,
         statusWidth:statusRect.width,
         statusHeight:statusRect.height,
+        legendTop:legendRect.top,
         legendBottom:legendRect.bottom,
         statusLegendOverlap:!g.status.hidden && rectsOverlap(statusRect, legendRect),
         classificationHidden:g.classificationLegend.hidden,
         classificationTop:classificationRect.top,
-        statusClassificationOverlap:!g.status.hidden && !g.classificationLegend.hidden && rectsOverlap(statusRect, classificationRect)
+        statusClassificationOverlap:!g.status.hidden && !g.classificationLegend.hidden && rectsOverlap(statusRect, classificationRect),
+        toolbarLeft:toolbarRect.left,
+        toolbarRight:toolbarRect.right,
+        toolbarTop:toolbarRect.top,
+        toolbarBottom:toolbarRect.bottom,
+        scaleGroupLeft:scaleGroupRect.left,
+        scaleGroupRight:scaleGroupRect.right,
+        actionGroupLeft:actionGroupRect.left,
+        actionGroupRight:actionGroupRect.right,
+        actionGroupTop:actionGroupRect.top,
+        actionGroupBottom:actionGroupRect.bottom,
+        actionGroupHeight:actionGroupRect.height,
+        actionButtonCount:visibleActionRects.length,
+        actionTopSpread,
+        actionBottomSpread,
+        scaleActionOverlap:rectsOverlap(scaleGroupRect, actionGroupRect),
+        actionToolbarOverflow:actionGroupRect.left < toolbarRect.left || actionGroupRect.right > toolbarRect.right,
+        toolbarLegendOverlap:rectsOverlap(toolbarRect, legendRect)
       };
     }
 
