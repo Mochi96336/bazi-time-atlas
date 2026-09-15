@@ -45,6 +45,58 @@ function instrumentHas(dom, name, value) {
   return tag.includes(`${name}="${value}"`);
 }
 
+function attr(tag, name) {
+  return new RegExp(`${name}="([^"]*)"`).exec(tag)?.[1] ?? null;
+}
+
+function tagById(dom, tagName, id) {
+  const start = dom.indexOf(`<${tagName}`);
+  if (start < 0) return "";
+  const candidates = dom.match(new RegExp(`<${tagName}[^>]*>`, "g")) ?? [];
+  return candidates.find(tag => attr(tag, "id") === id) ?? "";
+}
+
+function elementTextById(dom, id) {
+  const match = new RegExp(`<[^>]+id="${id}"[^>]*>([^<]*)<`).exec(dom);
+  return match?.[1]?.trim() ?? "";
+}
+
+function groupMarkup(dom, id) {
+  const openTag = tagById(dom, "g", id);
+  if (!openTag) return "";
+  const start = dom.indexOf(openTag);
+  const end = dom.indexOf("</g>", start);
+  return end >= 0 ? dom.slice(start, end + 4) : "";
+}
+
+function hasClass(tag, name) {
+  return (attr(tag, "class") ?? "").split(/\s+/).includes(name);
+}
+
+function firstTagWithClasses(markup, tagName, classNames) {
+  const tags = markup.match(new RegExp(`<${tagName}[^>]*>`, "g")) ?? [];
+  return tags.find(tag => classNames.every(name => hasClass(tag, name))) ?? "";
+}
+
+function textRecordWithClass(markup, className) {
+  const matches = [...markup.matchAll(/<text\b([^>]*)>([\s\S]*?)<\/text>/g)];
+  for (const match of matches) {
+    const tag = `<text${match[1]}>`;
+    if (!hasClass(tag, className)) continue;
+    return {
+      tag,
+      text: match[2].replace(/<[^>]+>/g, "").trim()
+    };
+  }
+  return { tag:"", text:"" };
+}
+
+function shortestAngleError(actual, expected) {
+  let delta = ((actual - expected) % 360 + 360) % 360;
+  if (delta > 180) delta -= 360;
+  return Math.abs(delta);
+}
+
 const liChun = solarTermInstantMs(2024, "立春");
 const liBefore = dumpDom(liChun - 1_000);
 const liAfter = dumpDom(liChun + 1_000);
@@ -73,3 +125,89 @@ if (!instrumentHas(jingAfter.dom, "data-month-pillar", "丁卯") ||
   throw new Error(`Jing Zhe +1s did not flip the month pillar at the exact boundary: ${jingAfter.url}`);
 }
 console.log(`[kinetic-boundary] PASS Jing Zhe exact month flip: ${new Date(jingZhe).toISOString()}`);
+
+// Regression for the exact state that exposed the misleading wheel: the legend,
+// active sector, dynamic read-head and shared Selected Instant datum must all
+// describe one state. The read-head coordinate is allowed to move continuously
+// inside the active 6-degree Ganzhi sector; it must not be forced to its centre.
+const screenshotInstant = Date.parse("2026-09-13T23:43:42.000Z");
+const screenshot = dumpDom(screenshotInstant);
+const instrumentTag = tagById(screenshot.dom, "section", "kinetic-instrument");
+const wheelTag = tagById(screenshot.dom, "svg", "kinetic-wheel");
+const cursorAngle = Number(attr(wheelTag, "data-reference-cursor-angle"));
+if (!Number.isFinite(cursorAngle) || attr(wheelTag, "data-reference-frame") !== "world") {
+  throw new Error(`screenshot-alignment: canonical world cursor diagnostics are missing: ${screenshot.url}`);
+}
+
+const expectedCycles = [
+  ["hour", "data-hour-pillar", "hour-active", "壬辰"],
+  ["day", "data-day-pillar", "day-active", "辛卯"],
+  ["month", "data-month-pillar", "month-active", "丁酉"],
+  ["year", "data-year-pillar", "year-active", "丙午"]
+];
+
+for (const [id, instrumentAttr, readoutId, expectedLabel] of expectedCycles) {
+  const groupTag = tagById(screenshot.dom, "g", `${id}-track`);
+  const markup = groupMarkup(screenshot.dom, `${id}-track`);
+  const activeSector = firstTagWithClasses(markup, "path", ["cycle-sector", "is-active"]);
+  const readhead = textRecordWithClass(markup, "active-cycle-label");
+  const activeIndex = Number(attr(activeSector, "data-cycle-index"));
+  const coordinate = Number(attr(readhead.tag, "data-cycle-coordinate"));
+  const renderedRotation = Number(attr(groupTag, "data-rendered-rotation"));
+  const sectorLabel = attr(activeSector, "data-cycle-label");
+  const readheadLabel = attr(readhead.tag, "data-cycle-label");
+  const withinSector = ((coordinate - activeIndex * 6) % 360 + 360) % 360;
+  const alignmentError = shortestAngleError(coordinate + renderedRotation, cursorAngle);
+
+  if (attr(instrumentTag, instrumentAttr) !== expectedLabel ||
+      elementTextById(screenshot.dom, readoutId) !== expectedLabel ||
+      sectorLabel !== expectedLabel ||
+      readheadLabel !== expectedLabel ||
+      readhead.text !== expectedLabel) {
+    throw new Error(
+      `screenshot-alignment: ${id} identity disagrees ` +
+      `(instrument=${attr(instrumentTag, instrumentAttr)}, legend=${elementTextById(screenshot.dom, readoutId)}, ` +
+      `sector=${sectorLabel}, readhead=${readheadLabel}/${readhead.text}, expected=${expectedLabel}): ${screenshot.url}`
+    );
+  }
+  if (!Number.isInteger(activeIndex) || !Number.isFinite(coordinate) || !Number.isFinite(renderedRotation) ||
+      withinSector < -0.001 || withinSector > 6.001 || alignmentError > 0.002) {
+    throw new Error(
+      `screenshot-alignment: ${id} read-head is not on the Selected Instant datum ` +
+      `(index=${activeIndex}, coordinate=${coordinate}, rotation=${renderedRotation}, ` +
+      `cursor=${cursorAngle}, within=${withinSector}, error=${alignmentError}): ${screenshot.url}`
+    );
+  }
+}
+
+const longitude = Number(attr(instrumentTag, "data-solar-longitude"));
+const solarGroupTag = tagById(screenshot.dom, "g", "solar-track");
+const zodiacGroupTag = tagById(screenshot.dom, "g", "zodiac-track");
+const solarMarkup = groupMarkup(screenshot.dom, "solar-track");
+const zodiacMarkup = groupMarkup(screenshot.dom, "zodiac-track");
+const activeTerm = firstTagWithClasses(solarMarkup, "path", ["term-sector", "is-active"]);
+const activeZodiac = firstTagWithClasses(zodiacMarkup, "path", ["zodiac-sector", "is-active"]);
+const solarRotation = Number(attr(solarGroupTag, "data-rendered-rotation"));
+const zodiacRotation = Number(attr(zodiacGroupTag, "data-rendered-rotation"));
+const expectedTermIndex = Math.floor((((longitude % 360) + 360) % 360) / 15) % 24;
+const expectedZodiacIndex = Math.floor((((longitude % 360) + 360) % 360) / 30) % 12;
+
+if (attr(instrumentTag, "data-term") !== "白露" ||
+    attr(instrumentTag, "data-zodiac") !== "處女" ||
+    !elementTextById(screenshot.dom, "solar-active").includes("白露 · 處女") ||
+    Number(attr(activeTerm, "data-term-index")) !== expectedTermIndex ||
+    Number(attr(activeZodiac, "data-zodiac-index")) !== expectedZodiacIndex) {
+  throw new Error(`screenshot-alignment: annual classifications disagree with solar longitude ${longitude}: ${screenshot.url}`);
+}
+if (!Number.isFinite(longitude) || !Number.isFinite(solarRotation) || !Number.isFinite(zodiacRotation) ||
+    shortestAngleError(longitude + solarRotation, cursorAngle) > 0.002 ||
+    shortestAngleError(longitude + zodiacRotation, cursorAngle) > 0.002) {
+  throw new Error(
+    `screenshot-alignment: solar/zodiac coordinate missed Selected Instant ` +
+    `(longitude=${longitude}, solarRotation=${solarRotation}, zodiacRotation=${zodiacRotation}, cursor=${cursorAngle}): ${screenshot.url}`
+  );
+}
+console.log(
+  `[kinetic-boundary] PASS screenshot datum alignment: ` +
+  `丙午 / 丁酉 / 辛卯 / 壬辰 / 白露 / 處女 @ ${new Date(screenshotInstant).toISOString()}`
+);

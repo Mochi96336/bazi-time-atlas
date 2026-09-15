@@ -110,6 +110,13 @@ const wheelTransform = requireAttr(probe, "data-wheel-transform", "mobile", mobi
 const ringHitMask = requireAttr(probe, "data-ring-hit-mask", "mobile", mobile.url);
 const ringHitClasses = requireAttr(probe, "data-ring-hit-classes", "mobile", mobile.url);
 const ringHitDebug = requireAttr(probe, "data-ring-hit-debug", "mobile", mobile.url);
+const activeCycleLabelMatchMask = requireAttr(probe, "data-active-cycle-label-match-mask", "mobile", mobile.url);
+const activeCycleLabelVisibleMask = requireAttr(probe, "data-active-cycle-label-visible-mask", "mobile", mobile.url);
+const activeCycleLabelUniqueMask = requireAttr(probe, "data-active-cycle-label-unique-mask", "mobile", mobile.url);
+const activeCycleDuplicateVisibleMask = requireAttr(probe, "data-active-cycle-duplicate-visible-mask", "mobile", mobile.url);
+const activeCycleIndices = requireAttr(probe, "data-active-cycle-indices", "mobile", mobile.url);
+const activeCycleLabels = requireAttr(probe, "data-active-cycle-labels", "mobile", mobile.url);
+const activeCycleLabelDebug = requireAttr(probe, "data-active-cycle-label-debug", "mobile", mobile.url);
 if (actualWidth !== 390 || mediaMatched !== "true") throw new Error(`mobile: fixture is not a true 390px CSS viewport (innerWidth=${actualWidth}, match=${mediaMatched}): ${mobile.url}`);
 if (fit !== "true") throw new Error(`mobile: page still scrolls (${scrollHeight} > ${viewportHeight}): ${mobile.url}`);
 if (hidden !== "true") throw new Error(`mobile: secondary dashboard sections were not collapsed: ${mobile.url}`);
@@ -131,13 +138,48 @@ if (Math.abs(wheelWidthRatio - 1) > 0.01 || (wheelTransform !== "none" && wheelT
   throw new Error(`mobile: CSS still owns wheel zoom (widthRatio=${wheelWidthRatio}, transform=${wheelTransform}): ${mobile.url}`);
 }
 if (ringHitMask !== "11111") throw new Error(`mobile: not all five primary time rings are visibly hit-testable (mask=${ringHitMask}; hits=${ringHitClasses}; debug=${ringHitDebug}): ${mobile.url}`);
+if (activeCycleLabelMatchMask !== "1111" || activeCycleLabelVisibleMask !== "1111" || activeCycleLabelUniqueMask !== "1111") {
+  throw new Error(
+    `mobile: active Ganzhi read-heads do not uniquely match their active sectors ` +
+    `(match=${activeCycleLabelMatchMask}, visible=${activeCycleLabelVisibleMask}, unique=${activeCycleLabelUniqueMask}, ` +
+    `indices=${activeCycleIndices}, labels=${activeCycleLabels}, debug=${activeCycleLabelDebug}): ${mobile.url}`
+  );
+}
+if (activeCycleDuplicateVisibleMask !== "0000") {
+  throw new Error(`mobile: active Ganzhi read-head doubled an existing sampled label (duplicates=${activeCycleDuplicateVisibleMask}, debug=${activeCycleLabelDebug}): ${mobile.url}`);
+}
 if (requireAttr(probe, "data-zodiac-derived-from", "mobile", mobile.url) !== "solar" || requireAttr(probe, "data-zodiac-transform-matches-solar", "mobile", mobile.url) !== "true") {
   throw new Error(`mobile: Zodiac escaped the shared annual Solar transform: ${mobile.url}`);
 }
 if (requireAttr(probe, "data-zodiac-pointer-events", "mobile", mobile.url) !== "none") {
   throw new Error(`mobile: derived Zodiac overlay became an independent pointer target: ${mobile.url}`);
 }
-console.log(`[kinetic-composition] PASS true 390px oversized five-ring composition + derived Zodiac overlay; instrument share=${share}, ringHits=${ringHitMask}: ${mobile.url}`);
+console.log(
+  `[kinetic-composition] PASS true 390px oversized five-ring composition + derived Zodiac overlay; ` +
+  `instrument share=${share}, ringHits=${ringHitMask}, active Ganzhi=${activeCycleLabels}: ${mobile.url}`
+);
+
+const sampledTarget = encodeURIComponent("../../?instant=2029-03-15T13:20:09.000Z");
+const sampledMobile = dump(`scripts/fixtures/mobile-390.html?target=${sampledTarget}`, 500, 844);
+const sampledProbe = tagById(sampledMobile.dom, "probe");
+const sampledMatchMask = requireAttr(sampledProbe, "data-active-cycle-label-match-mask", "sampled-active-label", sampledMobile.url);
+const sampledVisibleMask = requireAttr(sampledProbe, "data-active-cycle-label-visible-mask", "sampled-active-label", sampledMobile.url);
+const sampledUniqueMask = requireAttr(sampledProbe, "data-active-cycle-label-unique-mask", "sampled-active-label", sampledMobile.url);
+const sampledStaticMask = requireAttr(sampledProbe, "data-active-cycle-sampled-mask", "sampled-active-label", sampledMobile.url);
+const sampledDuplicateMask = requireAttr(sampledProbe, "data-active-cycle-duplicate-visible-mask", "sampled-active-label", sampledMobile.url);
+const sampledIndices = requireAttr(sampledProbe, "data-active-cycle-indices", "sampled-active-label", sampledMobile.url);
+const sampledLabels = requireAttr(sampledProbe, "data-active-cycle-labels", "sampled-active-label", sampledMobile.url);
+const sampledDebug = requireAttr(sampledProbe, "data-active-cycle-label-debug", "sampled-active-label", sampledMobile.url);
+if (sampledMatchMask !== "1111" || sampledVisibleMask !== "1111" || sampledUniqueMask !== "1111") {
+  throw new Error(`sampled-active-label: read-head contract failed (match=${sampledMatchMask}, visible=${sampledVisibleMask}, unique=${sampledUniqueMask}, debug=${sampledDebug}): ${sampledMobile.url}`);
+}
+if (sampledStaticMask[3] !== "1" || sampledDuplicateMask[3] !== "0") {
+  throw new Error(
+    `sampled-active-label: 2029 Year index should collide with a five-step sample but render only the read-head ` +
+    `(sampled=${sampledStaticMask}, duplicates=${sampledDuplicateMask}, indices=${sampledIndices}, labels=${sampledLabels}, debug=${sampledDebug}): ${sampledMobile.url}`
+  );
+}
+console.log(`[kinetic-composition] PASS sampled Year active label dedupe at 390px; indices=${sampledIndices}, labels=${sampledLabels}: ${sampledMobile.url}`);
 
 const hour = dump("scripts/fixtures/mobile-390.html?exerciseHourDrag=1", 500, 844);
 const hourProbe = tagById(hour.dom, "probe");
@@ -179,6 +221,9 @@ if (!hourPillarBefore || !hourPillarAfter || hourPillarBefore === hourPillarAfte
 if (Math.abs(hourSolarAfter - hourSolarBefore) < 0.02) {
   throw new Error(`hour-drag: coupled solar layer did not move with continuous master time (${hourSolarBefore} -> ${hourSolarAfter}): ${hour.url}`);
 }
+if (requireAttr(hourProbe, "data-active-cycle-label-match-mask", "hour-drag", hour.url) !== "1111") {
+  throw new Error(`hour-drag: active Ganzhi read-heads did not follow the changed pillar state: ${hour.url}`);
+}
 console.log(`[kinetic-composition] PASS continuous linked hour-ring scrub: ${hour.url}`);
 
 const linked = dump("scripts/fixtures/mobile-390.html?exerciseLinkedDrag=1", 500, 844);
@@ -215,6 +260,9 @@ if (Math.abs(linkedDayOffsetBefore) > 1e-6 || Math.abs(linkedDayOffsetAfter) > 1
 }
 if (Math.abs(linkedSolarModelAfter - linkedSolarModelBefore) < 0.5) {
   throw new Error(`linked-drag: coupled solar layer did not move with master time: ${linked.url}`);
+}
+if (requireAttr(linkedProbe, "data-active-cycle-label-match-mask", "linked-drag", linked.url) !== "1111") {
+  throw new Error(`linked-drag: active Ganzhi read-heads did not follow the changed day state: ${linked.url}`);
 }
 console.log(`[kinetic-composition] PASS continuous linked day-ring scrub: ${linked.url}`);
 

@@ -30,6 +30,10 @@ const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
 
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
+  const cycleStaticLabels = new Map();
+  const activeCycleLabels = new Map();
+  const activeCycleIndices = new Map();
+  const lastActiveCycleIndex = new Map();
   const termSectorNodes = [];
   const zodiacSectorNodes = [];
   const motionTraceNodes = new Map();
@@ -67,6 +71,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const model = ringModel(id);
     const group = groupFor(id);
     const sectors = [];
+    const staticLabels = new Map();
     group.classList.add("ring-track", `${id}-track`);
 
     sexagenary.forEach((label, index) => {
@@ -99,11 +104,21 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
           x: point.x,
           y: point.y,
           class: "cycle-label",
+          "data-cycle-index": index,
+          "data-cycle-label": label,
           transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
         }, group);
         text.textContent = label;
+        staticLabels.set(index, text);
       }
     });
+
+    const activeLabel = el("text", {
+      class: "active-cycle-label",
+      "data-active-cycle-ring": id,
+      "aria-hidden": "true",
+      visibility: "hidden"
+    }, group);
 
     el("path", {
       class: `state-phase-progress phase-${id}`,
@@ -132,6 +147,52 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     }, group);
 
     cycleSectors.set(id, sectors);
+    cycleStaticLabels.set(id, staticLabels);
+    activeCycleLabels.set(id, activeLabel);
+  }
+
+  function updateActiveCycleLabel(id, activeIndex, modelRotationDegrees) {
+    const node = activeCycleLabels.get(id);
+    if (!node) return;
+
+    const previousIndex = lastActiveCycleIndex.get(id);
+    const staticLabels = cycleStaticLabels.get(id);
+    if (Number.isInteger(previousIndex) && previousIndex !== activeIndex) {
+      staticLabels?.get(previousIndex)?.classList.remove("is-active-shadowed");
+    }
+
+    if (!Number.isInteger(activeIndex) || activeIndex < 0 || activeIndex >= sexagenary.length) {
+      node.setAttribute("visibility", "hidden");
+      node.removeAttribute("data-cycle-index");
+      node.removeAttribute("data-cycle-label");
+      node.removeAttribute("data-cycle-coordinate");
+      node.textContent = "";
+      lastActiveCycleIndex.delete(id);
+      return;
+    }
+
+    // The active label is a read-head, not a sector caption. The controller's
+    // model rotation already encodes the exact within-state Selected Instant
+    // coordinate. Read that pose after the synchronous diagnostics update so a
+    // label keeps moving inside one Ganzhi sector instead of sticking to its
+    // midpoint. Free Compare changes only the effective/rendered pose, so this
+    // local read-head then travels with a detached ring as intended.
+    const coordinate = Number.isFinite(modelRotationDegrees)
+      ? ((CURSOR_ANGLE - modelRotationDegrees) % 360 + 360) % 360
+      : activeIndex * 6 + 3;
+    const model = ringModel(id);
+    const point = polar((model.innerRadius + model.outerRadius) / 2, coordinate);
+    const label = sexagenary[activeIndex];
+    node.setAttribute("x", String(point.x));
+    node.setAttribute("y", String(point.y));
+    node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
+    node.setAttribute("data-cycle-index", String(activeIndex));
+    node.setAttribute("data-cycle-label", label);
+    node.setAttribute("data-cycle-coordinate", coordinate.toFixed(6));
+    node.setAttribute("visibility", "visible");
+    node.textContent = label;
+    staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
+    lastActiveCycleIndex.set(id, activeIndex);
   }
 
   function renderSolarRing() {
@@ -312,6 +373,19 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       zodiacTrack.dataset.derivedFrom = "solar";
     }
 
+    // setTrackDiagnostics() runs synchronously after each renderer pose update,
+    // before this microtask flush. Its model rotation is therefore the canonical
+    // Selected Instant coordinate even when Free Compare adds a manual offset to
+    // the effective world rotation.
+    SEXAGENARY_RING_IDS.forEach(id => {
+      const group = groupFor(id);
+      updateActiveCycleLabel(
+        id,
+        activeCycleIndices.get(id),
+        Number(group?.dataset.modelRotation)
+      );
+    });
+
     RINGS.forEach(ring => {
       const renderedRotation = renderedRotations.get(ring.id);
       if (Number.isFinite(renderedRotation)) updateMotionTrace(ring.id, renderedRotation, cursorAngle);
@@ -351,6 +425,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
   function setCyclePose(id, rotationDegrees, activeIndex) {
     worldRotations.set(id, rotationDegrees);
+    activeCycleIndices.set(id, activeIndex);
     setActiveSector(cycleSectors.get(id) ?? [], activeIndex);
     scheduleReferenceFrameFlush();
   }

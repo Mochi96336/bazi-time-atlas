@@ -47,6 +47,42 @@
   letter-spacing: .02em;
 }
 
+/* Sparse labels describe the scale; one dynamic label on each Ganzhi ring
+   describes the sector currently crossing the Selected Instant datum. When
+   that sector is already one of the five-step samples, retire the sampled copy
+   so the read-head never becomes doubled text. */
+.cycle-label.is-active-shadowed { visibility: hidden; }
+.active-cycle-label {
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(8,12,9,.82);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+  letter-spacing: .02em;
+}
+#hour-track .active-cycle-label {
+  fill: #c5d7cd;
+  font-size: 9px;
+  font-weight: 760;
+}
+#day-track .active-cycle-label {
+  fill: #d7e2dc;
+  font-size: 9.5px;
+  font-weight: 780;
+}
+#month-track .active-cycle-label {
+  fill: #edf2ed;
+  font-size: 10.5px;
+  font-weight: 820;
+}
+#year-track .active-cycle-label {
+  fill: #fff2c9;
+  font-size: 11.5px;
+  font-weight: 860;
+}
+
 /* The wheel model now carries the physical thickness hierarchy. This sheet
    only reinforces that same scale reading with ink; geometry and hit targets
    remain owned by wheel-core rather than CSS. */
@@ -193,4 +229,9 @@
   #day-track .cycle-label { font-size: 8px; }
   #month-track .cycle-label { font-size: 9px; }
   #year-track .cycle-label { font-size: 10px; }
+
+  #hour-track .active-cycle-label { font-size: 8.5px; }
+  #day-track .active-cycle-label { font-size: 9px; }
+  #month-track .active-cycle-label { font-size: 10px; }
+  #year-track .active-cycle-label { font-size: 11px; }
 }

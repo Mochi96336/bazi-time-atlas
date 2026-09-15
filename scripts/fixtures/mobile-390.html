@@ -87,6 +87,60 @@
       };
     }
 
+    function activeCycleLabelDiagnostic(childWindow, doc) {
+      const ids = ["hour", "day", "month", "year"];
+      const rows = ids.map(id => {
+        const track = doc.querySelector(`#${id}-track`);
+        const activeSector = track?.querySelector(".cycle-sector.is-active") ?? null;
+        const activeLabels = [...(track?.querySelectorAll(".active-cycle-label") ?? [])];
+        const activeLabel = activeLabels[0] ?? null;
+        const activeIndex = activeSector?.dataset.cycleIndex ?? "";
+        const sectorLabel = activeSector?.dataset.cycleLabel ?? "";
+        const labelIndex = activeLabel?.dataset.cycleIndex ?? "";
+        const labelText = activeLabel?.dataset.cycleLabel ?? activeLabel?.textContent ?? "";
+        const labelStyle = activeLabel ? childWindow.getComputedStyle(activeLabel) : null;
+        const sampled = activeIndex
+          ? track?.querySelector(`.cycle-label[data-cycle-index="${activeIndex}"]`) ?? null
+          : null;
+        const sampledStyle = sampled ? childWindow.getComputedStyle(sampled) : null;
+        const visible = Boolean(
+          activeLabel &&
+          labelStyle &&
+          labelStyle.display !== "none" &&
+          labelStyle.visibility !== "hidden" &&
+          Number(labelStyle.opacity || 1) > 0
+        );
+        const sampledVisible = Boolean(
+          sampled &&
+          sampledStyle &&
+          sampledStyle.display !== "none" &&
+          sampledStyle.visibility !== "hidden" &&
+          Number(sampledStyle.opacity || 1) > 0
+        );
+        return {
+          id,
+          activeIndex,
+          sectorLabel,
+          labelIndex,
+          labelText,
+          count:activeLabels.length,
+          visible,
+          sampled:Boolean(sampled),
+          sampledVisible
+        };
+      });
+      return {
+        matchMask:rows.map(row => row.activeIndex && row.activeIndex === row.labelIndex && row.sectorLabel === row.labelText ? "1" : "0").join(""),
+        visibleMask:rows.map(row => row.visible ? "1" : "0").join(""),
+        uniqueMask:rows.map(row => row.count === 1 ? "1" : "0").join(""),
+        sampledMask:rows.map(row => row.sampled ? "1" : "0").join(""),
+        duplicateVisibleMask:rows.map(row => row.sampledVisible ? "1" : "0").join(""),
+        indices:rows.map(row => row.activeIndex).join(","),
+        labels:rows.map(row => `${row.id}:${row.labelText}`).join(" | "),
+        debug:JSON.stringify(rows)
+      };
+    }
+
     function pointerAt(childWindow, geometry, radius, angleDegrees, type, pointerId = 71) {
       const angle = angleDegrees * Math.PI / 180;
       const world = new childWindow.DOMPoint(
@@ -215,6 +269,7 @@
       const secondary = [".timeline-dock", ".state-strip", ".atlas-notes", ".sources-panel"]
         .map(selector => doc.querySelector(selector)).filter(Boolean);
       const ringHits = ringHitDiagnostic(childWindow, doc, instrument);
+      const activeCycleLabels = activeCycleLabelDiagnostic(childWindow, doc);
       probe.dataset.ready = "true";
       probe.dataset.innerWidth = String(childWindow.innerWidth);
       probe.dataset.innerHeight = String(childWindow.innerHeight);
@@ -239,6 +294,14 @@
       probe.dataset.ringHitMask = ringHits.mask;
       probe.dataset.ringHitClasses = ringHits.classes;
       probe.dataset.ringHitDebug = ringHits.debug;
+      probe.dataset.activeCycleLabelMatchMask = activeCycleLabels.matchMask;
+      probe.dataset.activeCycleLabelVisibleMask = activeCycleLabels.visibleMask;
+      probe.dataset.activeCycleLabelUniqueMask = activeCycleLabels.uniqueMask;
+      probe.dataset.activeCycleSampledMask = activeCycleLabels.sampledMask;
+      probe.dataset.activeCycleDuplicateVisibleMask = activeCycleLabels.duplicateVisibleMask;
+      probe.dataset.activeCycleIndices = activeCycleLabels.indices;
+      probe.dataset.activeCycleLabels = activeCycleLabels.labels;
+      probe.dataset.activeCycleLabelDebug = activeCycleLabels.debug;
       probe.dataset.zodiacDerivedFrom = zodiacTrack?.dataset.derivedFrom ?? "";
       probe.dataset.zodiacPointerEvents = zodiacTrack ? childWindow.getComputedStyle(zodiacTrack).pointerEvents : "";
       probe.dataset.zodiacTransformMatchesSolar = String(
