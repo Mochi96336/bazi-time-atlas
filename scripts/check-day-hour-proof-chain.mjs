@@ -62,6 +62,7 @@ if (!zero.dom.includes("Δ=0 · identity bypass") || !zero.dom.includes("同一�
 }
 expectStage(zero.dom, "absolute-seasonal-epoch", "satisfied", "zero identity", zero.url);
 expectStage(zero.dom, "target-instant", "not-required", "zero identity", zero.url);
+expectStage(zero.dom, "earth-rotation-bridge", "not-required", "zero identity", zero.url);
 console.log(`[day-hour-proof] PASS identity bypass does not invent a cross-era target instant: ${zero.url}`);
 
 const local = dumpDom("recurrence.html?date=2026-09-13&delta=1980");
@@ -90,13 +91,13 @@ expectStage(local.dom, "relative-term-geometry", "satisfied", "4006 proof", loca
 expectStage(local.dom, "absolute-seasonal-epoch", "satisfied", "4006 proof", local.url);
 expectStage(local.dom, "target-instant", "unbound-convention", "4006 proof", local.url);
 expectStage(local.dom, "earth-rotation-bridge", "blocked", "4006 proof", local.url);
-if (!local.dom.includes("回歸頁目前只指定年月日") || !local.dom.includes("沒有 hour/minute/second")) {
-  throw new Error(`4006 proof: date-only target-instant explanation missing: ${local.url}`);
+if (!local.dom.includes("目標時刻／reference basis") || !local.dom.includes("回歸頁目前只指定年月日") || !local.dom.includes("沒有 hour/minute/second") || !local.dom.includes("date-only")) {
+  throw new Error(`4006 proof: typed date-only target-instant explanation missing: ${local.url}`);
 }
-if (!local.dom.includes("此年份已有深時間 ΔT / TT→UT1 模型能力") || !local.dom.includes("尚未定義一個目標 TT instant")) {
+if (!local.dom.includes("此年份已有深時間 ΔT / TT→UT1 模型能力") || !local.dom.includes("尚未定義 target instant reference basis")) {
   throw new Error(`4006 proof: Earth-rotation capability must remain upstream-blocked: ${local.url}`);
 }
-console.log(`[day-hour-proof] PASS 4006 date-only recurrence blocks target instant before Earth rotation: ${local.url}`);
+console.log(`[day-hour-proof] PASS 4006 date-only recurrence blocks typed target instant before Earth rotation: ${local.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
@@ -139,7 +140,7 @@ for (const [id, status] of Object.entries(expectedStages)) expectStage(global.do
 if (!global.dom.includes("絕對季節 epoch") || !global.dom.includes("先把春分／節氣放回絕對均勻時間軸")) {
   throw new Error(`24000-year proof: first-hard-blocker explanation missing: ${global.url}`);
 }
-if (!global.dom.includes("民用時區") || !global.dom.includes("日界規則") || !global.dom.includes("時計 basis")) {
+if (!global.dom.includes("民用時區") || !global.dom.includes("日界規則") || !global.dom.includes("clock basis")) {
   throw new Error(`24000-year proof: convention blockers missing: ${global.url}`);
 }
 console.log(`[day-hour-proof] PASS 24000-year proof remains blocked at absolute-seasonal-epoch: ${global.url}`);

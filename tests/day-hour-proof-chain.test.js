@@ -1,91 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { DAY_HOUR_TIME_BASIS } from "../src/calendar/day-hour-time-basis.js";
 import {
   currentRecurrenceDayHourProof,
   dayHourResolutionProof
 } from "../src/recurrence/day-hour-proof-chain.js";
+import { TARGET_INSTANT_BASIS } from "../src/recurrence/target-instant-binding.js";
 
-test("current deep-time recurrence defaults to missing absolute seasonal epoch and target instant", () => {
-  const proof = currentRecurrenceDayHourProof({ identity:false, astronomyWithinRange:true });
-  assert.equal(proof.firstHardBlocker, "absolute-seasonal-epoch");
-  assert.equal(proof.targetInstantBound, false);
-  assert.equal(proof.day.resolved, false);
-  assert.equal(proof.hour.resolved, false);
-  assert.ok(proof.day.blockers.includes("absoluteSeasonalEpoch"));
-  assert.ok(proof.day.blockers.includes("targetInstantBound"));
-  assert.ok(proof.day.blockers.includes("earthRotationBridge"));
-  assert.ok(proof.day.blockers.includes("civilZoneBound"));
-  assert.ok(proof.day.blockers.includes("dayBoundaryBound"));
-  assert.equal(proof.stages.find(stage => stage.id === "relative-term-geometry").status, "satisfied");
-  assert.equal(proof.stages.find(stage => stage.id === "target-instant").status, "unbound-convention");
-  assert.equal(proof.stages.find(stage => stage.id === "sexagenary-day-arithmetic").status, "satisfied");
-});
+const SAMPLE_JD = 3_184_634.5;
 
-test("date-only recurrence stops at target instant even when year-4006 Earth-rotation capability exists", () => {
-  const proof = currentRecurrenceDayHourProof({
-    identity:false,
-    astronomyWithinRange:true,
-    absoluteSeasonalEpoch:true,
-    earthRotationEstimateAvailable:true
-  });
-  assert.equal(proof.firstHardBlocker, "target-instant");
-  assert.equal(proof.targetInstantBound, false);
-  assert.equal(proof.earthRotationEstimateCapability, true);
-  assert.equal(proof.earthRotationEstimateAvailable, false);
-  assert.equal(proof.day.resolved, false);
-  assert.equal(proof.hour.resolved, false);
-  assert.equal(proof.day.blockers.includes("absoluteSeasonalEpoch"), false);
-  assert.ok(proof.day.blockers.includes("targetInstantBound"));
-  assert.ok(proof.day.blockers.includes("earthRotationBridge"));
-  assert.equal(proof.stages.find(stage => stage.id === "absolute-seasonal-epoch").status, "satisfied");
-  assert.equal(proof.stages.find(stage => stage.id === "target-instant").status, "unbound-convention");
-  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "blocked");
-});
+function target(basis, extra = {}) {
+  return { basis, julianDay:SAMPLE_JD, ...extra };
+}
 
-test("once a target instant is bound, an uncertain UT1 estimate becomes the next hard blocker", () => {
-  const proof = currentRecurrenceDayHourProof({
-    identity:false,
-    astronomyWithinRange:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationEstimateAvailable:true
-  });
-  assert.equal(proof.firstHardBlocker, "earth-rotation-bridge");
-  assert.equal(proof.targetInstantBound, true);
-  assert.equal(proof.earthRotationEstimateCapability, true);
-  assert.equal(proof.earthRotationEstimateAvailable, true);
-  assert.equal(proof.stages.find(stage => stage.id === "target-instant").status, "satisfied");
-  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "uncertain-estimate");
-});
-
-test("absolute epoch and target instant without any Earth-rotation estimate still report a missing deep-time model", () => {
-  const proof = currentRecurrenceDayHourProof({
-    identity:false,
-    astronomyWithinRange:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationEstimateAvailable:false
-  });
-  assert.equal(proof.firstHardBlocker, "earth-rotation-bridge");
-  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "missing-deep-time-model");
-});
-
-test("identity bypasses cross-era projection without inventing a target instant", () => {
-  const proof = currentRecurrenceDayHourProof({ identity:true, astronomyWithinRange:true });
-  assert.equal(proof.day.status, "identical-by-definition");
-  assert.equal(proof.hour.status, "identical-by-definition");
-  assert.equal(proof.day.resolved, true);
-  assert.equal(proof.hour.resolved, true);
-  assert.equal(proof.targetInstantBound, false);
-  assert.equal(proof.stages.find(stage => stage.id === "target-instant").status, "not-required");
-  assert.equal(proof.stages.find(stage => stage.id === "absolute-seasonal-epoch").status, "missing-deep-time-model");
-});
-
-test("Day becomes resolvable only after target instant, deterministic Earth rotation and civil day rules are bound", () => {
-  const proof = dayHourResolutionProof({
+function proof(overrides = {}) {
+  return dayHourResolutionProof({
     relativeTermGeometry:true,
     absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
+    targetInstant:target(TARGET_INSTANT_BASIS.TT_JULIAN_DAY),
     earthRotationBridge:true,
     earthRotationEstimateAvailable:true,
     civilZoneBound:true,
@@ -95,131 +27,166 @@ test("Day becomes resolvable only after target instant, deterministic Earth rota
     longitudeBound:false,
     equationOfTimeModel:false,
     hourBranchRule:true,
-    fiveRatsRule:true
+    fiveRatsRule:true,
+    ...overrides
   });
-  assert.equal(proof.day.resolved, true);
-  assert.equal(proof.day.blockers.length, 0);
-  assert.equal(proof.hour.resolved, false);
-  assert.deepEqual(proof.hour.blockers, ["clockBasisBound"]);
-  assert.equal(proof.stages.find(stage => stage.id === "target-instant").status, "satisfied");
-  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "satisfied");
+}
+
+test("current deep-time recurrence defaults to missing absolute seasonal epoch and a typed date-only target", () => {
+  const result = currentRecurrenceDayHourProof({ identity:false, astronomyWithinRange:true });
+  assert.equal(result.firstHardBlocker, "absolute-seasonal-epoch");
+  assert.equal(result.targetInstantBound, false);
+  assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.DATE_ONLY);
+  assert.equal(result.day.resolved, false);
+  assert.equal(result.hour.resolved, false);
+  assert.ok(result.day.blockers.includes("absoluteSeasonalEpoch"));
+  assert.ok(result.day.blockers.includes("targetInstantBound"));
+  assert.ok(result.day.blockers.includes("earthRotationBridge"));
+  assert.equal(result.stages.find(stage => stage.id === "target-instant").status, "unbound-convention");
+});
+
+test("date-only recurrence stops before Earth rotation even when year-4006 Delta-T capability exists", () => {
+  const result = currentRecurrenceDayHourProof({
+    identity:false,
+    astronomyWithinRange:true,
+    absoluteSeasonalEpoch:true,
+    earthRotationEstimateAvailable:true
+  });
+  assert.equal(result.firstHardBlocker, "target-instant");
+  assert.equal(result.targetInstantBound, false);
+  assert.equal(result.earthRotationBridgeRequired, false);
+  assert.equal(result.earthRotationEstimateCapability, true);
+  assert.equal(result.earthRotationEstimateAvailable, false);
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "blocked");
+});
+
+test("a TT target makes the uncertain TT to UT1 estimate the next hard blocker", () => {
+  const result = currentRecurrenceDayHourProof({
+    identity:false,
+    astronomyWithinRange:true,
+    absoluteSeasonalEpoch:true,
+    targetInstant:target(TARGET_INSTANT_BASIS.TT_JULIAN_DAY),
+    earthRotationEstimateAvailable:true
+  });
+  assert.equal(result.firstHardBlocker, "earth-rotation-bridge");
+  assert.equal(result.targetInstantBound, true);
+  assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.TT_JULIAN_DAY);
+  assert.equal(result.earthRotationBridgeRequired, true);
+  assert.equal(result.earthRotationEstimateAvailable, true);
+  assert.equal(result.stages.find(stage => stage.id === "target-instant").status, "satisfied");
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "uncertain-estimate");
+});
+
+test("a UT1 target already owns an Earth-rotation coordinate and does not require TT to UT1 again", () => {
+  const result = currentRecurrenceDayHourProof({
+    identity:false,
+    astronomyWithinRange:true,
+    absoluteSeasonalEpoch:true,
+    targetInstant:target(TARGET_INSTANT_BASIS.UT1_JULIAN_DAY),
+    earthRotationEstimateAvailable:true
+  });
+  assert.equal(result.targetInstantBound, true);
+  assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.UT1_JULIAN_DAY);
+  assert.equal(result.earthRotationBridgeRequired, false);
+  assert.equal(result.earthRotationEstimateAvailable, false);
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
+  assert.equal(result.firstHardBlocker, "civil-zone");
+});
+
+test("a fixed-zone-from-UT1 target can satisfy Day without inventing future UTC policy", () => {
+  const result = proof({
+    targetInstant:target(TARGET_INSTANT_BASIS.FIXED_ZONE_FROM_UT1, { localOffsetHoursFromUt1:8 }),
+    earthRotationBridge:false,
+    clockBasis:DAY_HOUR_TIME_BASIS.CIVIL
+  });
+  assert.equal(result.targetInstant.futureUtcPolicyResolved, false);
+  assert.equal(result.targetInstant.civilTimezonePolicyResolved, false);
+  assert.equal(result.targetInstant.localClockCoordinateAvailable, true);
+  assert.equal(result.earthRotationBridgeRequired, false);
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
+  assert.equal(result.day.resolved, true);
+  assert.equal(result.hour.resolved, true);
+});
+
+test("identity bypasses cross-era projection without inventing any target instant basis", () => {
+  const result = currentRecurrenceDayHourProof({ identity:true, astronomyWithinRange:true });
+  assert.equal(result.day.status, "identical-by-definition");
+  assert.equal(result.hour.status, "identical-by-definition");
+  assert.equal(result.targetInstantBound, false);
+  assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.DATE_ONLY);
+  assert.equal(result.stages.find(stage => stage.id === "target-instant").status, "not-required");
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
+});
+
+test("Day with a TT target becomes resolvable only after deterministic Earth rotation and civil day rules", () => {
+  const result = proof();
+  assert.equal(result.day.resolved, true);
+  assert.equal(result.day.blockers.length, 0);
+  assert.equal(result.hour.resolved, false);
+  assert.deepEqual(result.hour.blockers, ["clockBasisBound"]);
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "satisfied");
 });
 
 test("even a deterministic Earth-rotation model cannot resolve a date-only recurrence", () => {
-  const proof = dayHourResolutionProof({
-    relativeTermGeometry:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:false,
-    earthRotationBridge:true,
-    earthRotationEstimateAvailable:true,
-    civilZoneBound:true,
-    dayBoundaryBound:true,
-    sexagenaryDayArithmetic:true,
-    clockBasis:"civil",
-    longitudeBound:false,
-    equationOfTimeModel:false,
-    hourBranchRule:true,
-    fiveRatsRule:true
+  const result = proof({
+    targetInstant:null,
+    clockBasis:DAY_HOUR_TIME_BASIS.CIVIL
   });
-  assert.equal(proof.firstHardBlocker, "target-instant");
-  assert.equal(proof.day.resolved, false);
-  assert.equal(proof.hour.resolved, false);
-  assert.deepEqual(proof.day.blockers, ["targetInstantBound"]);
-  assert.equal(proof.stages.find(stage => stage.id === "earth-rotation-bridge").status, "blocked");
+  assert.equal(result.firstHardBlocker, "target-instant");
+  assert.equal(result.day.resolved, false);
+  assert.equal(result.hour.resolved, false);
+  assert.deepEqual(result.day.blockers, ["targetInstantBound", "earthRotationBridge"]);
+  assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "blocked");
 });
 
 test("civil-clock Hour needs no longitude or Equation of Time once Day is resolved", () => {
-  const proof = dayHourResolutionProof({
-    relativeTermGeometry:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationBridge:true,
-    civilZoneBound:true,
-    dayBoundaryBound:true,
-    sexagenaryDayArithmetic:true,
-    clockBasis:"civil",
-    longitudeBound:false,
-    equationOfTimeModel:false,
-    hourBranchRule:true,
-    fiveRatsRule:true
-  });
-  assert.equal(proof.day.resolved, true);
-  assert.equal(proof.hour.resolved, true);
-  assert.equal(proof.needsLongitude, false);
-  assert.equal(proof.needsEquationOfTime, false);
-  assert.equal(proof.stages.find(stage => stage.id === "longitude").status, "not-required");
-  assert.equal(proof.stages.find(stage => stage.id === "equation-of-time").status, "not-required");
+  const result = proof({ clockBasis:DAY_HOUR_TIME_BASIS.CIVIL });
+  assert.equal(result.day.resolved, true);
+  assert.equal(result.hour.resolved, true);
+  assert.equal(result.needsLongitude, false);
+  assert.equal(result.needsEquationOfTime, false);
+  assert.equal(result.stages.find(stage => stage.id === "longitude").status, "not-required");
+  assert.equal(result.stages.find(stage => stage.id === "equation-of-time").status, "not-required");
 });
 
-test("mean-solar Hour adds longitude but not Equation of Time", () => {
-  const proof = dayHourResolutionProof({
-    relativeTermGeometry:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationBridge:true,
-    civilZoneBound:true,
-    dayBoundaryBound:true,
-    sexagenaryDayArithmetic:true,
-    clockBasis:"mean-solar",
-    longitudeBound:false,
-    equationOfTimeModel:false,
-    hourBranchRule:true,
-    fiveRatsRule:true
+test("local mean solar Hour adds longitude but not Equation of Time", () => {
+  const result = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR,
+    longitudeBound:false
   });
-  assert.equal(proof.hour.resolved, false);
-  assert.deepEqual(proof.hour.blockers, ["longitudeBound"]);
-  assert.equal(proof.needsLongitude, true);
-  assert.equal(proof.needsEquationOfTime, false);
+  assert.equal(result.hour.resolved, false);
+  assert.deepEqual(result.hour.blockers, ["longitudeBound"]);
+  assert.equal(result.needsLongitude, true);
+  assert.equal(result.needsEquationOfTime, false);
 });
 
-test("apparent-solar Hour requires both longitude and an epoch-valid Equation of Time model", () => {
-  const blocked = dayHourResolutionProof({
-    relativeTermGeometry:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationBridge:true,
-    civilZoneBound:true,
-    dayBoundaryBound:true,
-    sexagenaryDayArithmetic:true,
-    clockBasis:"apparent-solar",
+test("local apparent solar Hour requires longitude and an epoch-valid Equation of Time model", () => {
+  const blocked = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeBound:true,
-    equationOfTimeModel:false,
-    hourBranchRule:true,
-    fiveRatsRule:true
+    equationOfTimeModel:false
   });
   assert.equal(blocked.hour.resolved, false);
   assert.deepEqual(blocked.hour.blockers, ["equationOfTimeModel"]);
 
-  const resolved = dayHourResolutionProof({
-    relativeTermGeometry:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationBridge:true,
-    civilZoneBound:true,
-    dayBoundaryBound:true,
-    sexagenaryDayArithmetic:true,
-    clockBasis:"apparent-solar",
+  const resolved = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeBound:true,
-    equationOfTimeModel:true,
-    hourBranchRule:true,
-    fiveRatsRule:true
+    equationOfTimeModel:true
   });
   assert.equal(resolved.hour.resolved, true);
 });
 
+test("legacy short solar clock ids fail closed instead of drifting from the calendar engine", () => {
+  assert.throws(() => proof({ clockBasis:"mean-solar" }), /clockBasis/);
+  assert.throws(() => proof({ clockBasis:"apparent-solar" }), /clockBasis/);
+});
+
+test("forged target-bound booleans and clock-basis ids cannot masquerade as target instant references", () => {
+  assert.throws(() => proof({ targetInstant:{ bound:true } }), /target instant basis/);
+  assert.throws(() => proof({ targetInstant:{ basis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR, julianDay:SAMPLE_JD } }), /target instant basis/);
+});
+
 test("invalid clock basis fails closed", () => {
-  assert.throws(() => dayHourResolutionProof({
-    relativeTermGeometry:true,
-    absoluteSeasonalEpoch:true,
-    targetInstantBound:true,
-    earthRotationBridge:true,
-    civilZoneBound:true,
-    dayBoundaryBound:true,
-    sexagenaryDayArithmetic:true,
-    clockBasis:"sundial-ish",
-    longitudeBound:true,
-    equationOfTimeModel:true,
-    hourBranchRule:true,
-    fiveRatsRule:true
-  }), /clockBasis/);
+  assert.throws(() => proof({ clockBasis:"sundial-ish" }), /clockBasis/);
 });

@@ -97,7 +97,13 @@ Those proofs still do not make a production seasonal-event pipeline. The longitu
 
 Even a trustworthy absolute solar-term epoch does not automatically authorize arbitrary-millennia Day/Hour reconstruction.
 
-Day/Hour proof requires a separate chain covering at least TT↔UT / ΔT and Earth rotation, civil-zone policy, day-boundary convention, selected civil/mean-solar/apparent-solar clock basis and downstream pillar reconstruction.
+The recurrence proof must keep **target-instant reference basis** separate from **Day/Hour local clock basis**. A target may be date-only, a TT Julian-day coordinate, a UT1 Julian-day coordinate, or an explicitly proleptic fixed local offset from UT1. These are different claims. TT still requires an Earth-rotation bridge before it can locate an Earth-rotation clock phase; a target already expressed on UT1 must not be sent through TT→UT1 a second time.
+
+The downstream Day/Hour clock basis is a different choice: `civil`, `local-mean-solar`, or `local-apparent-solar`. Mean/apparent solar clocks are derived local readings used to decide pillar membership; they are not independent physical target instants and must not be accepted as target-instant reference bases.
+
+A fixed offset from UT1 is also not a prediction of future UTC, daylight-saving, or political timezone rules. Deep-time ΔT evidence may support an explicitly uncertain TT→UT1 estimate, but it cannot silently resolve future UTC/civil policy. Any target binding or local-clock projection that needs those policies must remain fail-closed until they are explicitly supplied.
+
+Day/Hour proof therefore requires a separate chain covering the target instant and its reference basis, any required TT↔UT1 / ΔT and Earth-rotation projection, civil/local-zone policy, day-boundary convention, selected Day/Hour clock basis and downstream pillar reconstruction.
 
 Therefore an astronomical event timestamp must never be promoted directly into "all four pillars resolved" without that independent proof chain.
 
