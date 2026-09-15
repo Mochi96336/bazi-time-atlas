@@ -14,10 +14,13 @@ import {
 import {
   validateMeanEclipticOfDateTransform
 } from "../src/astronomy/absolute-state-seasonal-solver.js";
+import { DE441_SEASONAL_EVENT_DATA_PROVIDER } from "../src/astronomy/de441-seasonal-event-data-product.js";
 import {
   HORIZONS_4006_PREVIOUS_WINTER_SOLSTICE_FRAME_CASE
 } from "./fixtures/horizons-ecliptic-frame-catalogue-proof.js";
 import { SEASONAL_EPOCH_PIPELINE, seasonalEpochSourceAudit } from "../src/recurrence/seasonal-epoch-source-audit.js";
+
+const DE441_EVENT_PROVIDER_ID = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
 
 function directionPairMatrix(sample) {
   return rotationFromDirectionPairs({
@@ -98,11 +101,14 @@ test("proof transform now satisfies the absolute-state solver frame contract wit
   }), /no proof frame window covers/);
 });
 
-test("complete frame catalogue proof still leaves year 4006 fail-closed", () => {
+test("complete frame catalogue proof remains proof-only while the bounded direct runtime resolves 4006", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [DE441_EVENT_PROVIDER_ID]);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(result.absoluteSeasonalEpochAvailable, false);
+  assert.equal(result.status, "resolved");
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(result.usableSourceIds, [DE441_EVENT_PROVIDER_ID]);
 });

@@ -78,7 +78,7 @@ test("data product fails closed outside published coverage or canonical seasonal
   assert.equal(seasonalEventForLongitude({ year:4006, longitudeDegrees:-90 }).longitudeDegrees, 270);
 });
 
-test("manifest pins source provenance without pretending the full DE441 product is already published", () => {
+test("manifest pins source provenance and declares only the bounded production integration", () => {
   const manifest = DE441_SEASONAL_EVENT_DATA_PRODUCT_MANIFEST;
   assert.equal(manifest.schemaVersion, 1);
   assert.equal(manifest.validationKind, "authoritative-source-pinning");
@@ -92,16 +92,21 @@ test("manifest pins source provenance without pretending the full DE441 product 
   assert.equal(manifest.fullDe441Projection.epochValues, 729408);
   assert.equal(manifest.fullDe441Projection.rawFloat64EpochBytes, 5_835_264);
   assert.ok(manifest.fullDe441Projection.rawFloat64EpochBytes < 6_000_000);
-  assert.equal(manifest.productionIntegrated, false);
+  assert.equal(manifest.productionIntegrated, true);
+  assert.equal(manifest.productionIntegrationMode, "direct-event-runtime-registry");
 });
 
-test("bundled data slice alone does not mutate source or pipeline registries", () => {
+test("production registry exposes the 4006 data slice without registering a DE441 state adapter", () => {
   const providerId = DE441_SEASONAL_EVENT_DATA_PROVIDER.id;
-  assert.equal(SEASONAL_EPOCH_SOURCES.some(source => source.id === providerId), false);
-  assert.equal(SEASONAL_EPOCH_PIPELINE.directEventProviderIds.includes(providerId), false);
+  assert.equal(SEASONAL_EPOCH_SOURCES.filter(source => source.id === providerId).length, 1);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, [providerId]);
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
+  assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
+  assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
+
   const audit = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
-  assert.equal(audit.status, "qualified-ephemeris-basis-not-integrated");
-  assert.equal(audit.absoluteSeasonalEpochAvailable, false);
+  assert.equal(audit.status, "resolved");
+  assert.equal(audit.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(audit.usableSourceIds, [providerId]);
 });

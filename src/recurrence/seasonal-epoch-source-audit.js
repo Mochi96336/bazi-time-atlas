@@ -4,32 +4,19 @@ import {
   defineSeasonalEpochProvider,
   seasonalEpochProviderAvailability
 } from "./seasonal-epoch-provider.js";
+import {
+  PRODUCTION_DIRECT_SEASONAL_EVENT_PROVIDER_IDS,
+  PRODUCTION_DIRECT_SEASONAL_EVENT_PROVIDERS
+} from "./seasonal-epoch-runtime-registry.js";
 
-/**
- * Deep-time provider integration is deliberately split by source role.
- *
- * - absolute-state adapters expose an Earth/Sun state basis and therefore still
- *   need the app-owned apparent longitude-of-date transform + crossing solver.
- *   Registration by provider id is not enough: every registered state adapter
- *   must also declare the bounded runtime year coverage actually shipped by the
- *   app. Runtime coverage must never inherit the broader source ephemeris range.
- * - direct-event providers already solve the seasonal longitude crossing and
- *   only need an explicit integration entry here; they must never masquerade
- *   as a DE441/state-vector adapter.
- */
 export const SEASONAL_EPOCH_PIPELINE = Object.freeze({
   absoluteStateAdapterIds:Object.freeze([]),
   absoluteStateAdapterRuntimeCoverageById:Object.freeze({}),
-  directEventProviderIds:Object.freeze([]),
+  directEventProviderIds:PRODUCTION_DIRECT_SEASONAL_EVENT_PROVIDER_IDS,
   apparentGeocentricSolarLongitudeOfDate:false,
   crossingRootSolve:false
 });
 
-/**
- * Registry of source capabilities. Coverage alone is not enough: every source
- * has an explicit role describing what it can actually contribute to an
- * absolute seasonal epoch proof.
- */
 export const SEASONAL_EPOCH_SOURCES = Object.freeze([
   defineSeasonalEpochProvider({
     id:"berger-1978-shape",
@@ -69,6 +56,7 @@ export const SEASONAL_EPOCH_SOURCES = Object.freeze([
     timeScale:"JED / ephemeris dynamical-time family",
     note:"高品質 absolute Earth/Sun state basis；它本身不是本 app 的節氣 timestamp API，仍須做視／地心太陽黃經-of-date 轉換與 crossing root solve。正式解只延伸到 AD 17191。"
   }),
+  ...PRODUCTION_DIRECT_SEASONAL_EVENT_PROVIDERS,
   defineSeasonalEpochProvider({
     id:"la2004-insolation-parameters",
     role:SEASONAL_EPOCH_PROVIDER_ROLES.SHAPE_PARAMETERS,
@@ -125,11 +113,17 @@ function nearestAbsoluteEpochCoverageBoundary(evaluations, targetYear) {
   return best;
 }
 
-export function seasonalEpochSourceAudit({ baseYear, targetYear, pipeline = SEASONAL_EPOCH_PIPELINE }) {
+export function seasonalEpochSourceAudit({
+  baseYear,
+  targetYear,
+  pipeline = SEASONAL_EPOCH_PIPELINE,
+  sources = SEASONAL_EPOCH_SOURCES
+}) {
   assertYear(baseYear, "baseYear");
   assertYear(targetYear, "targetYear");
+  if (!Array.isArray(sources)) throw new TypeError("sources must be an array");
   const identity = baseYear === targetYear;
-  const evaluations = Object.freeze(SEASONAL_EPOCH_SOURCES.map(item => evaluateSource(item, targetYear, pipeline)));
+  const evaluations = Object.freeze(sources.map(item => evaluateSource(item, targetYear, pipeline)));
   const qualified = evaluations.filter(item => item.qualifiedCoverage);
   const qualifiedDirect = qualified.filter(item => item.directSeasonalEpoch);
   const qualifiedState = qualified.filter(item => item.ephemerisBasisCapable);
@@ -178,8 +172,6 @@ export function seasonalEpochSourceAudit({ baseYear, targetYear, pipeline = SEAS
     status = "qualified-ephemeris-basis-not-integrated";
     blocker = "implementation-and-seasonal-epoch-solver";
   } else {
-    // Kept for compatibility with existing evidence. The gap now means there is
-    // neither an absolute-state basis nor a direct-event provider covering the target.
     status = "absolute-state-coverage-gap";
     blocker = "ephemeris-source-coverage";
   }

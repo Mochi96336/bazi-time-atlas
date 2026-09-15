@@ -60,8 +60,34 @@ if (attr(zeroInstrument, "data-day-hour-proof-day-resolved") !== "true" || attr(
 if (!zero.dom.includes("Δ=0 · identity bypass") || !zero.dom.includes("同一狀態不需要跨時代的絕對時間投影")) {
   throw new Error(`zero identity: identity-bypass explanation missing: ${zero.url}`);
 }
-expectStage(zero.dom, "absolute-seasonal-epoch", "missing-deep-time-model", "zero identity", zero.url);
-console.log(`[day-hour-proof] PASS identity bypass without pretending deep-time models exist: ${zero.url}`);
+expectStage(zero.dom, "absolute-seasonal-epoch", "satisfied", "zero identity", zero.url);
+console.log(`[day-hour-proof] PASS identity bypass with current absolute-epoch availability: ${zero.url}`);
+
+const local = dumpDom("recurrence.html?date=2026-09-13&delta=1980");
+const localInstrument = tagById(local.dom, "recurrence-instrument");
+const localPanel = tagById(local.dom, "day-hour-proof-chain");
+const localExact = {
+  "data-ready":"true",
+  "data-identity":"false",
+  "data-first-hard-blocker":"earth-rotation-bridge",
+  "data-day-resolved":"false",
+  "data-hour-resolved":"false",
+  "data-stage-count":"10"
+};
+for (const [name, expected] of Object.entries(localExact)) {
+  const actual = attr(localPanel, name);
+  if (actual !== expected) throw new Error(`4006 proof: expected ${name}=${expected}, got ${actual}: ${local.url}`);
+}
+if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "earth-rotation-bridge") {
+  throw new Error(`4006 proof: instrument first blocker mismatch: ${local.url}`);
+}
+expectStage(local.dom, "relative-term-geometry", "satisfied", "4006 proof", local.url);
+expectStage(local.dom, "absolute-seasonal-epoch", "satisfied", "4006 proof", local.url);
+expectStage(local.dom, "earth-rotation-bridge", "missing-deep-time-model", "4006 proof", local.url);
+if (!local.dom.includes("節氣已有絕對 TT") || !local.dom.includes("TT↔UT / ΔT")) {
+  throw new Error(`4006 proof: Earth-rotation blocker explanation missing: ${local.url}`);
+}
+console.log(`[day-hour-proof] PASS 4006 absolute epoch resolved; first hard blocker=earth-rotation-bridge: ${local.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
@@ -102,10 +128,7 @@ for (const [id, status] of Object.entries(expectedStages)) expectStage(global.do
 if (!global.dom.includes("絕對季節 epoch") || !global.dom.includes("先把春分／節氣放回絕對均勻時間軸")) {
   throw new Error(`24000-year proof: first-hard-blocker explanation missing: ${global.url}`);
 }
-if (!global.dom.includes("absoluteSeasonalEpoch") && !global.dom.includes("絕對季節 epoch")) {
-  throw new Error(`24000-year proof: Day blocker list missing absolute epoch: ${global.url}`);
-}
 if (!global.dom.includes("民用時區") || !global.dom.includes("日界規則") || !global.dom.includes("時計 basis")) {
   throw new Error(`24000-year proof: convention blockers missing: ${global.url}`);
 }
-console.log(`[day-hour-proof] PASS 24000-year proof chain; first hard blocker=absolute-seasonal-epoch: ${global.url}`);
+console.log(`[day-hour-proof] PASS 24000-year proof remains blocked at absolute-seasonal-epoch: ${global.url}`);
