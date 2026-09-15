@@ -129,6 +129,20 @@
    metadata at the bottom, but do not repeat the same Selected Instant label. */
 .instrument-readout .readout-kicker { display: none; }
 
+/* Free Compare owns state/content in the controller; presentation belongs to
+   CSS so responsive placement stays a layout concern rather than JS policy. */
+#ring-compare-status {
+  position: absolute;
+  z-index: 5;
+  right: 12px;
+  top: 58px;
+  pointer-events: none;
+  color: #d4bd8d;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
 /* The whole annual band is still one drag/reference target. Interaction wins
    over the quieter resting treatment. */
 #kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
@@ -168,12 +182,11 @@
     font-weight: 620;
   }
 
-  /* Free Compare status is injected with desktop inline coordinates. On phone,
-     reserve the narrow band below the two-line layer legend and above the
-     classification overlay/cursor note instead of letting it sit on metadata. */
+  /* Reserve the narrow band below the two-line layer legend and above the
+     classification overlay/cursor note for active Free Compare feedback. */
   #ring-compare-status {
-    top: 82px !important;
-    right: 9px !important;
+    top: 82px;
+    right: 9px;
   }
 
   #hour-track .cycle-label,
