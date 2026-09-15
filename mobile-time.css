@@ -1,0 +1,90 @@
+.mobile-time-dock { display: none; }
+
+@media (max-width: 480px) {
+  .kinetic-shell {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kinetic-shell::-webkit-scrollbar { display: none; }
+
+  .mobile-time-dock {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px 8px;
+    align-items: end;
+    margin-top: 9px;
+    padding: 10px;
+    border: 1px solid var(--hairline);
+    border-radius: 15px;
+    background: rgba(255,255,255,.022);
+  }
+  .mobile-time-heading {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .mobile-time-heading strong {
+    color: #dce2dd;
+    font-size: 10px;
+    font-weight: 760;
+    letter-spacing: .05em;
+  }
+  .mobile-time-heading small,
+  #mobile-time-status {
+    color: #6f7972;
+    font-size: 8px;
+  }
+  #mobile-time-status[data-state="error"] { color: var(--danger); }
+  #mobile-time-status[data-state="pending"] { color: var(--cursor); }
+
+  .mobile-time-field {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .mobile-time-field span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  #mobile-instant-input {
+    min-width: 0;
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid rgba(238,242,237,.16);
+    border-radius: 10px;
+    padding: 7px 9px;
+    color: var(--ink);
+    background: #111512;
+    color-scheme: dark;
+    font-size: 12px;
+  }
+  #mobile-instant-input[aria-invalid="true"] { border-color: var(--danger); }
+  #mobile-time-apply {
+    min-height: 38px;
+    border: 1px solid var(--cursor);
+    border-radius: 10px;
+    padding: 0 12px;
+    color: #181d19;
+    background: var(--cursor);
+    font-size: 10px;
+    font-weight: 780;
+    cursor: pointer;
+  }
+
+  /* The original desktop timeline remains intentionally absent on phones.
+     The dedicated mobile dock owns exact entry while the disk keeps the first
+     viewport. Additional explanatory panels stay collapsed. */
+  .timeline-dock,
+  .state-strip,
+  .atlas-notes,
+  .sources-panel { display: none; }
+}
