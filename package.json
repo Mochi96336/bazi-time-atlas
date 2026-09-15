@@ -8,7 +8,7 @@
     "test": "npm run vendor:prepare && node --test",
     "check:syntax": "node scripts/check-js-syntax.mjs",
     "check": "npm run test && npm run check:syntax",
-    "visual:check": "node scripts/visual-check.mjs"
+    "visual:check": "node scripts/visual-check.mjs && node scripts/visual-check-scale-windows.mjs"
   },
   "dependencies": {
     "tyme4ts": "1.5.2"
