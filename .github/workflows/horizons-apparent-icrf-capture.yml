@@ -1,0 +1,33 @@
+name: Research Horizons apparent ICRF capture
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Capture Horizons apparent ICRF layers
+        run: node scripts/research-capture-horizons-apparent-icrf.mjs
+      - name: Capture DE441 barycentric proof windows
+        run: node scripts/research-capture-de441-apparent-proof-windows.mjs
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: horizons-apparent-icrf-capture
+          path: |
+            tmp/horizons-apparent-icrf-capture/
+            tmp/de441-apparent-proof-windows/
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
