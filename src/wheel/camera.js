@@ -5,37 +5,21 @@ export const DEFAULT_VIEWPORT = Object.freeze({
   height: 760
 });
 
-export const CAMERA_TOP_MARGIN = 120;
 export const CAMERA_BREAKPOINTS = Object.freeze({
   mobileMax: 480,
   compactMax: 820
 });
-export const CAMERA_ZOOM = Object.freeze({
-  desktop: 1,
-  compact: 1.32,
-  mobile: 3
-});
 
-// The world geometry stays identical at every breakpoint. Only the camera
-// changes. A phone is much taller relative to its width than the desktop SVG;
-// using the desktop headroom with a merely horizontal crop leaves the fan
-// floating in the middle of the instrument. Keep enough mobile world-space
-// headroom for the cursor note and instrument metadata while bringing the
-// outer Year shell closer to the top of the portrait composition.
-export const CAMERA_TOP_MARGIN_BY_MODE = Object.freeze({
-  desktop: CAMERA_TOP_MARGIN,
-  compact: CAMERA_TOP_MARGIN,
-  mobile: 150
+// Vertical framing owns radial composition. Horizontal framing follows the
+// actual rendered SVG aspect ratio so the camera does not introduce a second,
+// hidden crop merely because desktop and portrait containers have different
+// shapes. With the deeper ring envelope, all breakpoints can share roughly the
+// same radial depth while reserving different top headroom for their HUD.
+export const CAMERA_FRAME_BY_MODE = Object.freeze({
+  desktop: Object.freeze({ heightRatio:.72, topMargin:80 }),
+  compact: Object.freeze({ heightRatio:.72, topMargin:90 }),
+  mobile: Object.freeze({ heightRatio:.72, topMargin:100 })
 });
-
-export function instrumentViewBox({ center, outerRadius, viewport = DEFAULT_VIEWPORT, topMargin = CAMERA_TOP_MARGIN }) {
-  return Object.freeze({
-    x: viewport.x,
-    y: center.y - outerRadius - topMargin,
-    width: viewport.width,
-    height: viewport.height
-  });
-}
 
 export function cameraModeForWidth(viewportWidth) {
   if (!Number.isFinite(viewportWidth) || viewportWidth <= 0) throw new RangeError("viewportWidth must be positive and finite");
@@ -44,14 +28,23 @@ export function cameraModeForWidth(viewportWidth) {
   return "desktop";
 }
 
-export function horizontallyZoomedViewBox(viewBox, zoom) {
-  if (!Number.isFinite(zoom) || zoom <= 0) throw new RangeError("zoom must be positive and finite");
-  const width = viewBox.width / zoom;
+export function radialInstrumentViewBox({ center, outerRadius, viewportAspect, frame }) {
+  if (!center || !Number.isFinite(center.x) || !Number.isFinite(center.y)) {
+    throw new TypeError("center must contain finite x/y coordinates");
+  }
+  if (!Number.isFinite(outerRadius) || outerRadius <= 0) throw new RangeError("outerRadius must be positive and finite");
+  if (!Number.isFinite(viewportAspect) || viewportAspect <= 0) throw new RangeError("viewportAspect must be positive and finite");
+  if (!frame || !Number.isFinite(frame.heightRatio) || frame.heightRatio <= 0 || !Number.isFinite(frame.topMargin)) {
+    throw new TypeError("frame must contain a positive heightRatio and finite topMargin");
+  }
+
+  const height = outerRadius * frame.heightRatio;
+  const width = height * viewportAspect;
   return Object.freeze({
-    x: viewBox.x + (viewBox.width - width) / 2,
-    y: viewBox.y,
+    x: center.x - width / 2,
+    y: center.y - outerRadius - frame.topMargin,
     width,
-    height: viewBox.height
+    height
   });
 }
 
@@ -59,15 +52,24 @@ export function responsiveInstrumentCamera({
   center,
   outerRadius,
   viewportWidth,
-  viewport = DEFAULT_VIEWPORT,
-  topMargin = null
+  viewportAspect = DEFAULT_VIEWPORT.width / DEFAULT_VIEWPORT.height
 }) {
   const mode = cameraModeForWidth(viewportWidth);
-  const zoom = CAMERA_ZOOM[mode];
-  const resolvedTopMargin = topMargin ?? CAMERA_TOP_MARGIN_BY_MODE[mode];
-  const baseViewBox = instrumentViewBox({ center, outerRadius, viewport, topMargin:resolvedTopMargin });
-  const viewBox = horizontallyZoomedViewBox(baseViewBox, zoom);
-  return Object.freeze({ mode, zoom, topMargin:resolvedTopMargin, viewBox });
+  const frame = CAMERA_FRAME_BY_MODE[mode];
+  const viewBox = radialInstrumentViewBox({ center, outerRadius, viewportAspect, frame });
+  const originGap = center.y - (viewBox.y + viewBox.height);
+  const originGapRatio = originGap / outerRadius;
+  const zoom = DEFAULT_VIEWPORT.height / viewBox.height;
+
+  return Object.freeze({
+    mode,
+    zoom,
+    topMargin:frame.topMargin,
+    originGap,
+    originGapRatio,
+    viewportAspect,
+    viewBox
+  });
 }
 
 export function viewBoxString(viewBox) {
