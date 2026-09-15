@@ -1,6 +1,6 @@
 # BaZi Time Atlas — current implementation checkpoint
 
-Updated through the current production wheel, deterministic visual-evidence, typed Day/Hour proof-chain and bounded DE441 seasonal-event runtime work on main, including PRs #145–#148.
+Updated through the current production wheel, deterministic visual-evidence, typed Day/Hour proof-chain and bounded DE441 seasonal-event runtime work on main, including PRs #145–#150.
 
 This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is historical design rationale and must not override behavior locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
 
@@ -193,9 +193,15 @@ The proof chain now uses a typed **local-zone convention** rather than a legacy 
 
 A `fixed-zone-from-ut1` target instant may derive the matching proleptic local-zone convention. That can satisfy the local-clock projection stage while still keeping `futureUtcPolicyResolved=false` and `civilTimezonePolicyResolved=false`.
 
-The Day proof also now accepts the canonical typed day-boundary contract used by the Birth engine: `zi-initial-next-day` or `civil-midnight`. The legacy `dayBoundaryBound:true` boolean is not authority and cannot unlock the proof by itself. Current recurrence remains unbound by default and the research page does not silently choose either convention.
+The Day proof also uses the canonical typed day-boundary contract shared with the Birth engine: `zi-initial-next-day` or `civil-midnight`. The legacy `dayBoundaryBound:true` boolean is not authority and cannot unlock the proof by itself.
 
-For the existing year-4006 research URL with an explicit fixed-zone target and `UT1 +8 h`, the proof now advances through target-instant, Earth-rotation requirement and local-zone convention, then stops at the next hard blocker: **day-boundary**. Day / Hour remain unresolved until an explicit canonical day-boundary convention is bound.
+The recurrence research controls expose those two canonical day-boundary choices independently from the fixed-zone target toggle. No value is selected by default. An absent `dayBoundary` remains explicitly unbound, and an invalid value fails closed instead of inheriting the Birth-page default.
+
+For the year-4006 fixed-zone research target with `UT1 +8 h`:
+
+- without `dayBoundary`, the first hard blocker remains **day-boundary** and Day / Hour stay unresolved;
+- with either canonical day-boundary convention, the Day pillar resolves and the first hard blocker advances to **clock-basis**;
+- Hour remains unresolved because civil / local-mean-solar / local-apparent-solar clock basis is still intentionally unbound.
 
 Remaining downstream proof stages still include, as applicable:
 
@@ -251,7 +257,7 @@ Every main-instrument or deep-time PR should continue to preserve:
 
 1. **Validate and publish additional seasonal-event runtime coverage only where independent target-era evidence exists.** The 4006 direct-event slice is production-integrated; the rest of DE441's theoretical source coverage must not be inherited automatically.
 2. **Add a production absolute-state adapter only if a real runtime use case requires on-demand states/crossings.** Proof-only pinned windows must not be rebranded as general runtime coverage; any adapter needs explicit bundled data, source/time/frame semantics and runtime coverage.
-3. **Continue the year-4006 Day / Hour proof by explicitly binding a canonical day-boundary convention.** The typed day-boundary contract now exists in core, but the recurrence research UI intentionally leaves it unbound; once one of the two canonical conventions is selected, the proof can advance to the downstream clock-basis stages instead of treating a boolean as sufficient evidence.
+3. **Continue the year-4006 Day / Hour proof from the `clock-basis` blocker.** Explicit day-boundary selection is now wired and can resolve Day; the next production-safe step is to bind civil / local-mean-solar / local-apparent-solar clock basis without conflating it with target-instant time scale or future political timezone policy.
 4. **Validate target eras independently.** Passing 2026 or 4006 does not authorize another century or millennium by interpolation of confidence.
 5. **Keep Research secondary to the product instrument.** New evidence surfaces should not turn the landing page back into a dashboard.
 6. **Protect `main` at the repository-settings layer.** Source-controlled CI is strong enough to serve as required checks once a ruleset is enabled.
