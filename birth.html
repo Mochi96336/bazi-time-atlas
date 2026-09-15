@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./birth.css">
+  <link rel="stylesheet" href="./birth-advanced.css">
   <link rel="stylesheet" href="./cross-view.css">
   <link rel="stylesheet" href="./ten-gods.css">
 </head>
@@ -34,7 +35,8 @@
 
     <section class="birth-layout">
       <form id="birth-form" class="birth-controls">
-        <div class="eyebrow">輸入</div>
+        <div class="eyebrow">出生時間</div>
+        <p class="birth-input-intro">先填出生日期與當地鐘面時間。時區、換日口徑與太陽時比較放在進階設定。</p>
 
         <div class="birth-field-group">
           <span class="field-label">出生日期</span>
@@ -45,37 +47,50 @@
           </div>
         </div>
 
-        <div class="birth-field-group">
-          <span class="field-label">出生時間與 UTC offset</span>
-          <div class="clock-zone-row">
-            <div class="segmented-input time-inputs">
-              <label><input id="birth-hour" name="birth-hour" type="number" inputmode="numeric" min="0" max="23" value="8" required aria-label="出生小時"><small>時</small></label>
-              <span class="time-colon">:</span>
-              <label><input id="birth-minute" name="birth-minute" type="number" inputmode="numeric" min="0" max="59" value="37" required aria-label="出生分鐘"><small>分</small></label>
-            </div>
-            <label class="utc-offset-input">
-              <span>UTC</span>
-              <input id="birth-utc-offset" name="birth-utc-offset" type="number" inputmode="decimal" min="-14" max="14" step="0.25" value="8" required aria-label="出生當時 UTC offset">
-            </label>
+        <div class="birth-field-group birth-basic-time">
+          <span class="field-label">出生時間</span>
+          <div class="segmented-input time-inputs">
+            <label><input id="birth-hour" name="birth-hour" type="number" inputmode="numeric" min="0" max="23" value="8" required aria-label="出生小時"><small>時</small></label>
+            <span class="time-colon">:</span>
+            <label><input id="birth-minute" name="birth-minute" type="number" inputmode="numeric" min="0" max="59" value="37" required aria-label="出生分鐘"><small>分</small></label>
           </div>
-          <span class="field-hint">24 小時制；offset 填出生當時的實際 UTC 差，例如台灣 +8、印度 +5.5。</span>
+          <span class="field-hint">24 小時制 · 出生地當地鐘面時間</span>
         </div>
 
-        <fieldset>
-          <legend>換日規則</legend>
-          <label class="boundary-option">
-            <input type="radio" name="day-boundary" value="zi-initial-next-day" checked>
-            <span><strong>23:00 子初換日</strong><small>進入子時即使用下一干支日</small></span>
-          </label>
-          <label class="boundary-option">
-            <input type="radio" name="day-boundary" value="civil-midnight">
-            <span><strong>00:00 午夜換日</strong><small>23:00–23:59 保留當日日柱，再依有效日干起時</small></span>
-          </label>
-        </fieldset>
-        <div class="time-basis-note">
-          <strong>V0.3 時間基準：出生地民用時間 + UTC offset</strong>
-          <span>offset 用來把年／月節氣界與太陽黃經對回同一真實瞬間。日／時仍依出生地鐘面時間；本版仍不做經度修正或真太陽時。</span>
-        </div>
+        <details id="birth-advanced-controls" class="birth-advanced-controls">
+          <summary>
+            <span class="birth-advanced-summary-copy"><small>CONVENTIONS</small><strong>進階設定</strong></span>
+            <em id="birth-advanced-summary">UTC+08:00 · 23:00 換日</em>
+          </summary>
+          <div class="birth-advanced-body">
+            <div class="birth-field-group" data-advanced-group="time-basis">
+              <span class="field-label">時區與出生地</span>
+              <div class="clock-zone-row">
+                <label class="utc-offset-input">
+                  <span>UTC</span>
+                  <input id="birth-utc-offset" name="birth-utc-offset" type="number" inputmode="decimal" min="-14" max="14" step="0.25" value="8" required aria-label="出生當時 UTC offset">
+                </label>
+              </div>
+              <span class="field-hint">offset 用來定位同一物理瞬間；出生地經度只供太陽時比較，不會自動改盤。</span>
+            </div>
+
+            <fieldset>
+              <legend>換日規則</legend>
+              <label class="boundary-option">
+                <input type="radio" name="day-boundary" value="zi-initial-next-day" checked>
+                <span><strong>23:00 子初換日</strong><small>進入子時即使用下一干支日</small></span>
+              </label>
+              <label class="boundary-option">
+                <input type="radio" name="day-boundary" value="civil-midnight">
+                <span><strong>00:00 午夜換日</strong><small>23:00–23:59 保留當日日柱，再依有效日干起時</small></span>
+              </label>
+            </fieldset>
+            <div class="time-basis-note">
+              <strong>目前排盤基準：出生地民用時間 + UTC offset</strong>
+              <span>offset 把年／月節氣界與太陽黃經對回同一真實瞬間。日／時依選定鐘面與換日口徑；經度與太陽時只做邊界敏感度比較。</span>
+            </div>
+          </div>
+        </details>
       </form>
 
       <section class="birth-stage" aria-live="polite">
@@ -165,5 +180,6 @@
 
   <script type="module" src="./src/birth.js"></script>
   <script type="module" src="./src/birth-punishments-view.js"></script>
+  <script type="module" src="./src/birth-advanced-mode.js"></script>
 </body>
 </html>
