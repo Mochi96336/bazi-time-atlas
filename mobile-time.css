@@ -2,6 +2,7 @@
 
 @media (max-width: 480px) {
   .kinetic-shell {
+    grid-template-rows: auto auto minmax(620px, calc(100dvh - 112px)) auto;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
