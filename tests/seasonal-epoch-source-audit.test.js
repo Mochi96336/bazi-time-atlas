@@ -6,6 +6,18 @@ import {
   seasonalEpochSourceAudit
 } from "../src/recurrence/seasonal-epoch-source-audit.js";
 
+function de441Pipeline({ registered = true, runtimeCoverage = null, solverReady = true } = {}) {
+  return Object.freeze({
+    absoluteStateAdapterIds:Object.freeze(registered ? ["jpl-de441"] : []),
+    absoluteStateAdapterRuntimeCoverageById:Object.freeze(
+      runtimeCoverage ? { "jpl-de441":Object.freeze(runtimeCoverage) } : {}
+    ),
+    directEventProviderIds:Object.freeze([]),
+    apparentGeocentricSolarLongitudeOfDate:solverReady,
+    crossingRootSolve:solverReady
+  });
+}
+
 test("source registry keeps shape parameters, state basis and direct events semantically distinct", () => {
   const byId = Object.fromEntries(SEASONAL_EPOCH_SOURCES.map(item => [item.id, item]));
   assert.equal(byId["berger-1978-shape"].role, "shape-parameters");
@@ -21,8 +33,9 @@ test("source registry keeps shape parameters, state basis and direct events sema
   assert.equal(SEASONAL_EPOCH_SOURCES.some(item => item.role === "direct-seasonal-event"), false);
 });
 
-test("deep-time app pipeline keeps state adapters and direct event providers in separate registries", () => {
+test("deep-time app pipeline keeps state registration, runtime coverage and direct event providers separate", () => {
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterIds, []);
+  assert.deepEqual(SEASONAL_EPOCH_PIPELINE.absoluteStateAdapterRuntimeCoverageById, {});
   assert.deepEqual(SEASONAL_EPOCH_PIPELINE.directEventProviderIds, []);
   assert.equal(SEASONAL_EPOCH_PIPELINE.apparentGeocentricSolarLongitudeOfDate, false);
   assert.equal(SEASONAL_EPOCH_PIPELINE.crossingRootSolve, false);
@@ -34,7 +47,7 @@ test("deep-time app pipeline keeps state adapters and direct event providers in 
   assert.equal(result.absoluteSeasonalEpochAvailable, false);
 });
 
-test("1980-year recurrence lands inside DE441 state coverage but still needs app integration and a seasonal-epoch solver", () => {
+test("1980-year recurrence lands inside DE441 source coverage but still needs bounded runtime integration and a seasonal-epoch solver", () => {
   const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006 });
   assert.equal(result.status, "qualified-ephemeris-basis-not-integrated");
   assert.equal(result.blocker, "implementation-and-seasonal-epoch-solver");
@@ -51,9 +64,85 @@ test("1980-year recurrence lands inside DE441 state coverage but still needs app
   assert.equal(de441.ephemerisBasisCapable, true);
   assert.equal(de441.directSeasonalEpoch, false);
   assert.equal(de441.implementedAsBasis, false);
+  assert.equal(de441.stateAdapterRuntimeCoverage, null);
+  assert.equal(de441.stateAdapterRuntimeCoverageDeclared, false);
+  assert.equal(de441.stateAdapterCoversTarget, false);
   assert.equal(de441.implementedDirectProvider, false);
   assert.equal(de441.deepTimeSolverReady, false);
   assert.equal(de441.reason, "qualified-ephemeris-basis-not-integrated");
+});
+
+test("audit distinguishes registered adapter with undeclared runtime coverage", () => {
+  const result = seasonalEpochSourceAudit({
+    baseYear:2026,
+    targetYear:4006,
+    pipeline:de441Pipeline({ runtimeCoverage:null, solverReady:true })
+  });
+  assert.equal(result.status, "state-adapter-runtime-coverage-undeclared");
+  assert.equal(result.blocker, "runtime-adapter-coverage-contract");
+  assert.equal(result.deepTimeSolverReady, true);
+  assert.equal(result.seasonalEpochSolverRequired, false);
+  assert.equal(result.absoluteSeasonalEpochAvailable, false);
+  assert.deepEqual(result.usableSourceIds, []);
+});
+
+test("audit resolves exactly the bounded runtime year once the solver is ready", () => {
+  const pipeline = de441Pipeline({
+    runtimeCoverage:{ mode:"absolute-year", minYear:4006, maxYear:4006 },
+    solverReady:true
+  });
+  const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear:4006, pipeline });
+  assert.equal(result.status, "resolved");
+  assert.equal(result.blocker, null);
+  assert.equal(result.deepTimeSolverReady, true);
+  assert.equal(result.seasonalEpochSolverRequired, false);
+  assert.equal(result.absoluteSeasonalEpochAvailable, true);
+  assert.deepEqual(result.usableSourceIds, ["jpl-de441"]);
+
+  const de441 = result.evaluations.find(item => item.id === "jpl-de441");
+  assert.deepEqual(de441.stateAdapterRuntimeCoverage, {
+    mode:"absolute-year",
+    minYear:4006,
+    maxYear:4006
+  });
+  assert.equal(de441.stateAdapterCoversTarget, true);
+  assert.equal(de441.reason, "usable");
+});
+
+test("audit reports runtime coverage gap instead of inheriting DE441 source coverage", () => {
+  const pipeline = de441Pipeline({
+    runtimeCoverage:{ mode:"absolute-year", minYear:4006, maxYear:4006 },
+    solverReady:true
+  });
+  for (const targetYear of [4005, 4007]) {
+    const result = seasonalEpochSourceAudit({ baseYear:2026, targetYear, pipeline });
+    assert.equal(result.status, "state-adapter-runtime-coverage-gap");
+    assert.equal(result.blocker, "runtime-adapter-coverage");
+    assert.equal(result.deepTimeSolverReady, true);
+    assert.equal(result.seasonalEpochSolverRequired, false);
+    assert.equal(result.absoluteSeasonalEpochAvailable, false);
+    assert.deepEqual(result.usableSourceIds, []);
+    const de441 = result.evaluations.find(item => item.id === "jpl-de441");
+    assert.equal(de441.coversTarget, true);
+    assert.equal(de441.stateAdapterCoversTarget, false);
+    assert.equal(de441.reason, "state-adapter-runtime-coverage-gap");
+  }
+});
+
+test("audit separates bounded runtime coverage from a missing deep-time solver", () => {
+  const result = seasonalEpochSourceAudit({
+    baseYear:2026,
+    targetYear:4006,
+    pipeline:de441Pipeline({
+      runtimeCoverage:{ mode:"absolute-year", minYear:4006, maxYear:4006 },
+      solverReady:false
+    })
+  });
+  assert.equal(result.status, "deep-time-seasonal-epoch-solver-incomplete");
+  assert.equal(result.blocker, "seasonal-epoch-solver");
+  assert.equal(result.deepTimeSolverReady, false);
+  assert.equal(result.seasonalEpochSolverRequired, true);
+  assert.equal(result.absoluteSeasonalEpochAvailable, false);
 });
 
 test("24000-year recurrence exposes an absolute-epoch provider coverage gap", () => {

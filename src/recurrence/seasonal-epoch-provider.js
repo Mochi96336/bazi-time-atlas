@@ -73,6 +73,29 @@ export function seasonalEpochCoverageBounds(provider) {
   });
 }
 
+function absoluteStateRuntimeCoverage(provider, pipeline, sourceBounds) {
+  const registry = pipeline?.absoluteStateAdapterRuntimeCoverageById;
+  if (!registry || typeof registry !== "object") return null;
+  const coverage = registry[provider.id];
+  if (coverage == null) return null;
+  if (!coverage || typeof coverage !== "object" || coverage.mode !== "absolute-year") {
+    throw new TypeError(`absolute-state runtime coverage for ${provider.id} must use absolute-year mode`);
+  }
+  assertInteger(coverage.minYear, `${provider.id} runtime coverage minYear`);
+  assertInteger(coverage.maxYear, `${provider.id} runtime coverage maxYear`);
+  if (coverage.minYear > coverage.maxYear) {
+    throw new RangeError(`absolute-state runtime coverage for ${provider.id} must have minYear <= maxYear`);
+  }
+  if (coverage.minYear < sourceBounds.minYear || coverage.maxYear > sourceBounds.maxYear) {
+    throw new RangeError(`absolute-state runtime coverage for ${provider.id} must stay inside source coverage`);
+  }
+  return Object.freeze({
+    mode:"absolute-year",
+    minYear:coverage.minYear,
+    maxYear:coverage.maxYear
+  });
+}
+
 export function seasonalEpochProviderAvailability(provider, targetYear, pipeline) {
   assertInteger(targetYear, "targetYear");
   const bounds = seasonalEpochCoverageBounds(provider);
@@ -82,6 +105,15 @@ export function seasonalEpochProviderAvailability(provider, targetYear, pipeline
   const directSeasonalEpoch = role === SEASONAL_EPOCH_PROVIDER_ROLES.DIRECT_EVENT;
   const stateAdapterIntegrated = ephemerisBasisCapable
     && pipeline.absoluteStateAdapterIds.includes(provider.id);
+  const stateAdapterRuntimeCoverage = stateAdapterIntegrated
+    ? absoluteStateRuntimeCoverage(provider, pipeline, bounds)
+    : null;
+  const stateAdapterRuntimeCoverageDeclared = stateAdapterRuntimeCoverage !== null;
+  const stateAdapterCoversTarget = Boolean(
+    stateAdapterRuntimeCoverage
+    && targetYear >= stateAdapterRuntimeCoverage.minYear
+    && targetYear <= stateAdapterRuntimeCoverage.maxYear
+  );
   const directProviderIntegrated = directSeasonalEpoch
     && pipeline.directEventProviderIds.includes(provider.id);
   const deepTimeSolverReady = Boolean(
@@ -92,7 +124,10 @@ export function seasonalEpochProviderAvailability(provider, targetYear, pipeline
   const usableNow = coversTarget && (
     directSeasonalEpoch
       ? directProviderIntegrated
-      : ephemerisBasisCapable && stateAdapterIntegrated && deepTimeSolverReady
+      : ephemerisBasisCapable
+        && stateAdapterIntegrated
+        && stateAdapterCoversTarget
+        && deepTimeSolverReady
   );
 
   let reason;
@@ -100,6 +135,8 @@ export function seasonalEpochProviderAvailability(provider, targetYear, pipeline
   else if (role === SEASONAL_EPOCH_PROVIDER_ROLES.SHAPE_PARAMETERS) reason = "parameter-source-without-absolute-epoch";
   else if (directSeasonalEpoch && !directProviderIntegrated) reason = "qualified-direct-event-provider-not-integrated";
   else if (ephemerisBasisCapable && !stateAdapterIntegrated) reason = "qualified-ephemeris-basis-not-integrated";
+  else if (ephemerisBasisCapable && !stateAdapterRuntimeCoverageDeclared) reason = "state-adapter-runtime-coverage-undeclared";
+  else if (ephemerisBasisCapable && !stateAdapterCoversTarget) reason = "state-adapter-runtime-coverage-gap";
   else if (ephemerisBasisCapable && !deepTimeSolverReady) reason = "deep-time-seasonal-epoch-solver-incomplete";
   else reason = "usable";
 
@@ -112,6 +149,9 @@ export function seasonalEpochProviderAvailability(provider, targetYear, pipeline
     ephemerisBasisCapable,
     directSeasonalEpoch,
     stateAdapterIntegrated,
+    stateAdapterRuntimeCoverage,
+    stateAdapterRuntimeCoverageDeclared,
+    stateAdapterCoversTarget,
     directProviderIntegrated,
     implementedAsBasis:stateAdapterIntegrated,
     implementedDirectProvider:directProviderIntegrated,
