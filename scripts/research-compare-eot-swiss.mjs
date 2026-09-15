@@ -7,7 +7,9 @@ import { equationOfTime } from "../src/astronomy/equation-of-time.js";
 const OUTPUT_DIR = process.env.OUTPUT_DIR || "tmp/eot-swiss-4006";
 const SWISSEPH_EPHE_PATH = process.env.SWISSEPH_EPHE_PATH;
 const YEARS = Object.freeze([2026, 4006]);
-const HOURS_PER_DAY = 24;
+const HOURLY_STEP_MINUTES = 60;
+const DENSE_YEAR = 4006;
+const DENSE_STEP_MINUTES = 5;
 const EXPECTED_EPHEMERIS_FILES = Object.freeze([
   Object.freeze({ year:2026, bodyClass:"planetary", filename:"sepl_18.se1", coverage:"1800-2399 CE" }),
   Object.freeze({ year:2026, bodyClass:"lunar", filename:"semo_18.se1", coverage:"1800-2399 CE" }),
@@ -25,13 +27,23 @@ function monthLengths(year) {
   return [31, isGregorianLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 }
 
-function samplesForYear(year) {
+function samplesForYear(year, stepMinutes) {
+  if (!Number.isInteger(stepMinutes) || stepMinutes <= 0 || 1440 % stepMinutes !== 0) {
+    throw new RangeError("stepMinutes must be a positive integer divisor of 1440");
+  }
   const samples = [];
   for (const [monthIndex, days] of monthLengths(year).entries()) {
     const month = monthIndex + 1;
     for (let day = 1; day <= days; day += 1) {
-      for (let hour = 0; hour < HOURS_PER_DAY; hour += 1) {
-        samples.push(Object.freeze({ year, month, day, hour }));
+      for (let minuteOfDay = 0; minuteOfDay < 1440; minuteOfDay += stepMinutes) {
+        samples.push(Object.freeze({
+          year,
+          month,
+          day,
+          hour:Math.floor(minuteOfDay / 60),
+          minute:minuteOfDay % 60,
+          second:0
+        }));
       }
     }
   }
@@ -55,6 +67,7 @@ function summarize(records, field) {
   const maxAbsIndex = absValues.indexOf(maxAbs);
   const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
   const rms = Math.sqrt(values.reduce((sum, value) => sum + value * value, 0) / values.length);
+  const worstRecord = records[maxAbsIndex];
   return Object.freeze({
     count:values.length,
     min:Math.min(...values),
@@ -65,10 +78,12 @@ function summarize(records, field) {
     p95Abs:absPercentile(values, 0.95),
     p99Abs:absPercentile(values, 0.99),
     worst:Object.freeze({
-      year:records[maxAbsIndex].year,
-      month:records[maxAbsIndex].month,
-      day:records[maxAbsIndex].day,
-      hour:records[maxAbsIndex].hour,
+      year:worstRecord.year,
+      month:worstRecord.month,
+      day:worstRecord.day,
+      hour:worstRecord.hour,
+      minute:worstRecord.minute,
+      second:worstRecord.second,
       value:values[maxAbsIndex]
     })
   });
@@ -81,6 +96,8 @@ function topWorst(records, field, limit = 20) {
       month:record.month,
       day:record.day,
       hour:record.hour,
+      minute:record.minute,
+      second:record.second,
       swissMinutes:record.swissMinutes,
       alignedMinutes:record.alignedMinutes,
       productionMinutes:record.productionMinutes,
@@ -93,35 +110,36 @@ function topWorst(records, field, limit = 20) {
     .map(Object.freeze);
 }
 
-const samples = YEARS.flatMap(samplesForYear);
-console.log(`Comparing ${samples.length} hourly proleptic-Gregorian UT arguments across ${YEARS.join(" and ")}...`);
-
-const python = spawnSync(
-  "python3",
-  ["scripts/research-swiss-eot-reference.py"],
-  {
-    input:JSON.stringify(samples),
-    encoding:"utf8",
-    maxBuffer:64 * 1024 * 1024,
-    env:{ ...process.env, SWISSEPH_EPHE_PATH }
+function runSwissReference(samples, label) {
+  console.log(`Capturing Swiss reference for ${label}: ${samples.length} samples...`);
+  const python = spawnSync(
+    "python3",
+    ["scripts/research-swiss-eot-reference.py"],
+    {
+      input:JSON.stringify(samples),
+      encoding:"utf8",
+      maxBuffer:128 * 1024 * 1024,
+      env:{ ...process.env, SWISSEPH_EPHE_PATH }
+    }
+  );
+  if (python.status !== 0) {
+    throw new Error(`Swiss reference helper failed for ${label} (${python.status}):\n${python.stderr}\n${python.stdout}`);
   }
-);
-if (python.status !== 0) {
-  throw new Error(`Swiss reference helper failed (${python.status}):\n${python.stderr}\n${python.stdout}`);
-}
-const reference = JSON.parse(python.stdout);
-if (reference.rows.length !== samples.length) {
-  throw new Error(`Swiss reference row mismatch: expected ${samples.length}, got ${reference.rows.length}`);
+  const reference = JSON.parse(python.stdout);
+  if (reference.rows.length !== samples.length) {
+    throw new Error(`${label}: expected ${samples.length} Swiss rows, got ${reference.rows.length}`);
+  }
+  return reference;
 }
 
-const records = reference.rows.map(row => {
+function comparisonRecord(row) {
   const input = {
     year:row.year,
     month:row.month,
     day:row.day,
     hour:row.hour,
-    minute:0,
-    second:0
+    minute:row.minute ?? 0,
+    second:row.second ?? 0
   };
   const aligned = equationOfTime(input, 0, { deltaTSeconds:row.deltaTSeconds });
   const production = equationOfTime(input, 0);
@@ -142,20 +160,46 @@ const records = reference.rows.map(row => {
     deltaTSecondsDifference:production.deltaTSeconds - row.deltaTSeconds,
     deltaTDrivenEotDifferenceSeconds
   });
-});
+}
 
-const byYear = Object.fromEntries(YEARS.map(year => {
-  const yearRecords = records.filter(record => record.year === year);
-  return [year, Object.freeze({
-    samples:yearRecords.length,
-    alignedErrorSeconds:summarize(yearRecords, "alignedErrorSeconds"),
-    productionErrorSeconds:summarize(yearRecords, "productionErrorSeconds"),
-    deltaTSecondsDifference:summarize(yearRecords, "deltaTSecondsDifference"),
-    deltaTDrivenEotDifferenceSeconds:summarize(yearRecords, "deltaTDrivenEotDifferenceSeconds"),
-    worstAligned:topWorst(yearRecords, "alignedErrorSeconds"),
-    worstProduction:topWorst(yearRecords, "productionErrorSeconds")
-  })];
-}));
+function comparisonSummary(records) {
+  return Object.freeze({
+    samples:records.length,
+    alignedErrorSeconds:summarize(records, "alignedErrorSeconds"),
+    productionErrorSeconds:summarize(records, "productionErrorSeconds"),
+    deltaTSecondsDifference:summarize(records, "deltaTSecondsDifference"),
+    deltaTDrivenEotDifferenceSeconds:summarize(records, "deltaTDrivenEotDifferenceSeconds"),
+    worstAligned:topWorst(records, "alignedErrorSeconds"),
+    worstProduction:topWorst(records, "productionErrorSeconds")
+  });
+}
+
+const hourlySamples = YEARS.flatMap(year => samplesForYear(year, HOURLY_STEP_MINUTES));
+console.log(`Comparing ${hourlySamples.length} hourly proleptic-Gregorian UT arguments across ${YEARS.join(" and ")}...`);
+const hourlyReference = runSwissReference(hourlySamples, "hourly 2026+4006");
+const hourlyRecords = hourlyReference.rows.map(comparisonRecord);
+const hourlyByYear = Object.fromEntries(YEARS.map(year => [
+  year,
+  comparisonSummary(hourlyRecords.filter(record => record.year === year))
+]));
+
+const denseSamples = samplesForYear(DENSE_YEAR, DENSE_STEP_MINUTES);
+console.log(`Running dense ${DENSE_STEP_MINUTES}-minute sweep for ${DENSE_YEAR}: ${denseSamples.length} samples...`);
+const denseReference = runSwissReference(denseSamples, `dense ${DENSE_YEAR}`);
+const denseRecords = denseReference.rows.map(comparisonRecord);
+const denseSummary = comparisonSummary(denseRecords);
+
+const referenceIdentity = Object.freeze({
+  library:hourlyReference.library,
+  version:hourlyReference.version,
+  function:hourlyReference.equationOfTimeFunction,
+  signConvention:hourlyReference.signConvention,
+  inputTimeScale:hourlyReference.inputTimeScale,
+  ephemerisFlags:Object.freeze(Array.from(new Set([
+    ...hourlyReference.ephemerisFlags,
+    ...denseReference.ephemerisFlags
+  ])).sort((a, b) => a - b))
+});
 
 const ephemerisFiles = [];
 for (const expected of EXPECTED_EPHEMERIS_FILES) {
@@ -177,36 +221,42 @@ const manifest = Object.freeze({
     signConvention:"apparent-solar-time-minus-mean-solar-time"
   }),
   reference:Object.freeze({
-    library:reference.library,
-    version:reference.version,
-    function:reference.equationOfTimeFunction,
-    signConvention:reference.signConvention,
-    inputTimeScale:reference.inputTimeScale,
+    ...referenceIdentity,
     timeInterpretation:"Swiss Ephemeris astronomical UT argument; used here as a UT1-oriented independent variable, not as a claim about year-4006 UTC, leap seconds, EOP predictions, DST, or political civil time",
-    ephemerisFlags:reference.ephemerisFlags,
     ephemerisFiles:Object.freeze(ephemerisFiles)
   }),
   sampling:Object.freeze({
     calendar:"proleptic Gregorian",
-    years:YEARS,
-    cadence:"1 hour",
     timeArgument:"astronomical UT-like argument at zero longitude",
     futureUtcPolicyClaim:false,
-    totalSamples:records.length,
-    samplesPerYear:Object.fromEntries(YEARS.map(year => [year, records.filter(record => record.year === year).length]))
+    hourly:Object.freeze({
+      years:YEARS,
+      cadenceMinutes:HOURLY_STEP_MINUTES,
+      totalSamples:hourlyRecords.length,
+      samplesPerYear:Object.fromEntries(YEARS.map(year => [year, hourlyRecords.filter(record => record.year === year).length]))
+    }),
+    dense:Object.freeze({
+      year:DENSE_YEAR,
+      cadenceMinutes:DENSE_STEP_MINUTES,
+      totalSamples:denseRecords.length,
+      retainsFullRecords:false
+    })
   }),
   comparisonModes:Object.freeze({
     aligned:"production equationOfTime() with Swiss Ephemeris delta-T injected, isolating EoT/solar-position model disagreement at matched ephemeris time",
     production:"production equationOfTime() unchanged, including the repository Tyme/ShouXing delta-T model"
   }),
-  summary:Object.freeze(byYear)
+  summary:Object.freeze({
+    hourly:Object.freeze(hourlyByYear),
+    dense4006:denseSummary
+  })
 });
 
 await mkdir(OUTPUT_DIR, { recursive:true });
 await writeFile(path.join(OUTPUT_DIR, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 await writeFile(
-  path.join(OUTPUT_DIR, "records.ndjson"),
-  `${records.map(record => JSON.stringify(record)).join("\n")}\n`
+  path.join(OUTPUT_DIR, "records-hourly.ndjson"),
+  `${hourlyRecords.map(record => JSON.stringify(record)).join("\n")}\n`
 );
 
 console.log(JSON.stringify(manifest, null, 2));
