@@ -11,6 +11,7 @@ import {
   localZoneConventionBinding,
   LOCAL_ZONE_CONVENTION_KIND
 } from "./local-zone-convention.js";
+import { longitudeBinding } from "./longitude-binding.js";
 import {
   TARGET_INSTANT_BASIS,
   targetInstantBinding
@@ -82,6 +83,14 @@ function dayBoundaryDetail(dayBoundary) {
   return "已明示採用 canonical civil-midnight：00:00 民用午夜才切換干支日。";
 }
 
+function longitudeDetail(binding) {
+  if (!binding.bound) {
+    return "選太陽時計時後必須指定實際經度；proof 不接受 boolean『已綁定』宣稱。經度採 Greenwich 東正西負的角度 convention。";
+  }
+  const sign = binding.longitudeDegreesEast >= 0 ? "+" : "";
+  return `已綁定經度 ${sign}${binding.longitudeDegreesEast}°（Greenwich 東正西負）。`;
+}
+
 export function dayHourResolutionProof({
   identity = false,
   relativeTermGeometry,
@@ -93,7 +102,7 @@ export function dayHourResolutionProof({
   dayBoundary = null,
   sexagenaryDayArithmetic,
   clockBasis = null,
-  longitudeBound = false,
+  longitude = null,
   equationOfTimeModel = false,
   hourBranchRule = true,
   fiveRatsRule = true
@@ -105,7 +114,6 @@ export function dayHourResolutionProof({
     earthRotationBridge,
     earthRotationEstimateAvailable,
     sexagenaryDayArithmetic,
-    longitudeBound,
     equationOfTimeModel,
     hourBranchRule,
     fiveRatsRule
@@ -118,9 +126,11 @@ export function dayHourResolutionProof({
   const normalizedDayBoundary = normalizeDayBoundary(dayBoundary);
   const target = targetInstantBinding(targetInstant);
   const localZone = localZoneConventionBinding(localZoneConvention, target);
+  const longitudeReference = longitudeBinding(longitude);
   const targetInstantBound = target.bound;
   const localZoneBound = localZone.bound;
   const dayBoundaryBound = normalizedDayBoundary !== null;
+  const longitudeBound = longitudeReference.bound;
   const earthRotationBridgeRequired = targetInstantBound && target.requiresEarthRotationBridge;
   const earthRotationRequirementSatisfied = targetInstantBound
     && (!earthRotationBridgeRequired || earthRotationBridge);
@@ -259,7 +269,7 @@ export function dayHourResolutionProof({
       "longitude",
       "經度",
       !clockBasis ? "conditional" : needsLongitude ? (longitudeBound ? "satisfied" : "unbound-convention") : "not-required",
-      !clockBasis ? "只有選 local mean/apparent solar clock 時才需要。" : needsLongitude ? (longitudeBound ? "太陽時經度已綁定。" : "選太陽時計時後必須指定經度。") : "civil/zone clock 不需要經度修正。",
+      !clockBasis ? "只有選 local mean/apparent solar clock 時才需要。" : needsLongitude ? longitudeDetail(longitudeReference) : "civil/zone clock 不需要經度修正。",
       "civil"
     ),
     stage(
@@ -291,6 +301,8 @@ export function dayHourResolutionProof({
     dayBoundaryBound,
     earthRotationBridgeRequired,
     clockBasis,
+    longitude:Object.freeze({ ...longitudeReference }),
+    longitudeBound,
     needsLongitude,
     needsEquationOfTime,
     earthRotationEstimateCapability,
@@ -321,6 +333,7 @@ export function currentRecurrenceDayHourProof({
   localZoneConvention = null,
   dayBoundary = null,
   clockBasis = null,
+  longitude = null,
   earthRotationEstimateAvailable = false
 }) {
   assertBoolean(identity, "identity");
@@ -338,7 +351,7 @@ export function currentRecurrenceDayHourProof({
     dayBoundary,
     sexagenaryDayArithmetic:true,
     clockBasis,
-    longitudeBound:false,
+    longitude,
     equationOfTimeModel:false,
     hourBranchRule:true,
     fiveRatsRule:true
