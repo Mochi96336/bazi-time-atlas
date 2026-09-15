@@ -94,7 +94,7 @@ function topWorst(records, field, limit = 20) {
 }
 
 const samples = YEARS.flatMap(samplesForYear);
-console.log(`Comparing ${samples.length} hourly samples across ${YEARS.join(" and ")}...`);
+console.log(`Comparing ${samples.length} hourly proleptic-Gregorian UT arguments across ${YEARS.join(" and ")}...`);
 
 const python = spawnSync(
   "python3",
@@ -182,6 +182,7 @@ const manifest = Object.freeze({
     function:reference.equationOfTimeFunction,
     signConvention:reference.signConvention,
     inputTimeScale:reference.inputTimeScale,
+    timeInterpretation:"Swiss Ephemeris astronomical UT argument; used here as a UT1-oriented independent variable, not as a claim about year-4006 UTC, leap seconds, EOP predictions, DST, or political civil time",
     ephemerisFlags:reference.ephemerisFlags,
     ephemerisFiles:Object.freeze(ephemerisFiles)
   }),
@@ -189,7 +190,8 @@ const manifest = Object.freeze({
     calendar:"proleptic Gregorian",
     years:YEARS,
     cadence:"1 hour",
-    utcOffsetHours:0,
+    timeArgument:"astronomical UT-like argument at zero longitude",
+    futureUtcPolicyClaim:false,
     totalSamples:records.length,
     samplesPerYear:Object.fromEntries(YEARS.map(year => [year, records.filter(record => record.year === year).length]))
   }),
