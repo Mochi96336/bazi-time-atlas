@@ -27,7 +27,7 @@ const STATUS_LABELS = Object.freeze({
 
 const AUDIT_STATUS_LABELS = Object.freeze({
   "identity-bypass":"同一狀態 · 不需跨 epoch",
-  resolved:"已有可用 seasonal-epoch pipeline",
+  resolved:"已有 seasonal TT anchors runtime",
   "qualified-direct-event-provider-not-integrated":"direct seasonal event 有 · 尚未整合",
   "qualified-ephemeris-basis-not-integrated":"absolute state coverage 有 · solver 尚未整合",
   "state-adapter-runtime-coverage-undeclared":"state adapter 已註冊 · runtime coverage 未宣告",
@@ -197,7 +197,7 @@ function ensurePanel() {
       <div>
         <div class="eyebrow">Day / Hour resolution proof chain</div>
         <h2>要把日柱、時柱解鎖，真正缺的是哪一層？</h2>
-        <p>這裡不增加任何遠未來假設，只把目前模型的輸出接成一條可滿足的依賴鏈。綠色代表 repo 已有；「有估計 · 不確定」代表已有可執行外推但尚不足以唯一決定時間；「尚未綁定」則是既有八字計算能力尚未在回歸頁選定 convention。</p>
+        <p>這裡把 seasonal TT anchors、target instant reference basis、Earth rotation，以及 Day / Hour 的 local clock convention 分開。4006 有節氣 anchors，不代表 recurrence 已經有可投影的 TT / UT1 target instant。</p>
       </div>
       <div class="proof-chain-blocker">
         <span>First hard blocker</span>
@@ -229,8 +229,8 @@ function ensureEpochAuditPanel() {
     <div class="epoch-audit-head">
       <div>
         <div class="eyebrow">Absolute seasonal epoch · source audit</div>
-        <h2>覆蓋到那一年，不代表能直接給出那一年的節氣時刻。</h2>
-        <p>這裡分開檢查年份 coverage、absolute Earth/Sun state、direct seasonal event、連續動力時間與 repo 整合狀態。只有真正可呼叫的 runtime provider 才會把 absolute seasonal epoch 標成可用。</p>
+        <h2>有 seasonal crossings，不代表 target instant 已綁定。</h2>
+        <p>這裡只稽核 source/provider 能否提供 absolute seasonal anchors。direct-event runtime 的 canonical crossings 與 recurrence 的 typed target-instant reference basis 是不同能力；後者必須由 target-instant contract 明示，不從 anchors 推定。</p>
       </div>
       <div class="epoch-audit-summary">
         <span>Target / verdict</span>
@@ -253,14 +253,14 @@ function statusLabel(status) {
 function readableBlocker(name) {
   const labels = {
     relativeTermGeometry:"相對節氣幾何",
-    absoluteSeasonalEpoch:"絕對季節 epoch",
-    targetInstantBound:"目標時刻",
+    absoluteSeasonalEpoch:"絕對 seasonal anchors",
+    targetInstantBound:"target instant reference basis",
     earthRotationBridge:"TT↔UT1 / ΔT",
     civilZoneBound:"民用時區",
     dayBoundaryBound:"日界規則",
     sexagenaryDayArithmetic:"干支日序算術",
     resolvedDayPillar:"已解析日柱",
-    clockBasisBound:"時計 basis",
+    clockBasisBound:"local clock basis",
     longitudeBound:"經度",
     equationOfTimeModel:"Equation of Time",
     hourBranchRule:"時支規則",
@@ -301,7 +301,7 @@ function renderEpochSource(item) {
   const coverage = `${formatYear(item.coverage.minYear)} → ${formatYear(item.coverage.maxYear)}`;
   const inApp = item.implementedAsBasis || item.implementedDirectProvider;
   const verdict = item.usableNow
-    ? "pipeline 可用"
+    ? "anchors runtime 可用"
     : item.qualifiedCoverage && item.directSeasonalEpoch
       ? "direct event ✓ · 尚未整合"
       : item.qualifiedCoverage
@@ -331,7 +331,7 @@ function renderEpochAudit(baseYear, targetYear, audit) {
   setText("epoch-audit-verdict", audit.identity
     ? "Δ=0 不需要跨 epoch source。"
     : audit.status === "resolved"
-      ? `已由 ${audit.usableSourceIds.join(" · ")} 提供可呼叫的 absolute seasonal epoch。`
+      ? `已由 ${audit.usableSourceIds.join(" · ")} 提供可呼叫的 seasonal TT anchors；這不會自動綁定 recurrence target instant。`
       : audit.status === "qualified-ephemeris-basis-not-integrated"
         ? "DE441 涵蓋目標年的 absolute Earth/Sun state；仍須整合 source adapter、黃經-of-date transform 與 crossing root solve。"
         : audit.status === "absolute-state-coverage-gap"
@@ -340,7 +340,7 @@ function renderEpochAudit(baseYear, targetYear, audit) {
   );
   const gap = audit.nearestEphemerisBoundary;
   setText("epoch-audit-footnote", audit.status === "resolved"
-    ? `Production runtime coverage 只認 provider 自己宣告的年份；目前 usable：${audit.usableSourceIds.join(" · ")}。`
+    ? `Production runtime coverage 只認 provider 自己宣告的年份；目前 usable anchors：${audit.usableSourceIds.join(" · ")}。target instant 仍須獨立使用 typed TT / UT1 / fixed-zone-from-UT1 contract。`
     : gap && !audit.identity
       ? `最近的 absolute seasonal-epoch source 邊界：${gap.sourceId} → ${formatYear(gap.boundaryYear)}；距目標 ${gap.gapYears.toLocaleString("en-US")} 年。長期 shape/parameter coverage 不會被當成 absolute state 或 timestamp coverage。`
       : "source coverage、absolute-state capability、direct-event runtime 與 seasonal-epoch solver 分開記錄。"
@@ -410,13 +410,13 @@ function refresh() {
     identity
       ? "同一狀態不需要跨時代的絕對時間投影。"
       : proof.firstHardBlocker === "absolute-seasonal-epoch"
-        ? "先把春分／節氣放回絕對均勻時間軸，之後才有資格談地方日界。"
+        ? "先把春分／節氣放回絕對均勻時間軸，取得目標年的 absolute seasonal anchors；它們只證明 seasonal events，不會替 recurrence 綁定 target instant。"
         : proof.firstHardBlocker === "target-instant"
-          ? "回歸頁目前仍是 date-only；啟用上方 fixed-zone-from-UT1 research convention 才會建立日內 target instant。"
+          ? "seasonal anchors 與 target instant 是不同能力；目前 recurrence 仍是 date-only，必須明示 TT / UT1 / fixed-zone-from-UT1 reference basis；此頁可用上方 fixed-zone-from-UT1 research convention 綁定。"
           : proof.firstHardBlocker === "earth-rotation-bridge" && firstBlockerStage?.status === "uncertain-estimate"
-            ? "TT→UT1 已有 ΔT 外推與統計 uncertainty，但不是 deterministic Earth rotation；目前不能據此唯一決定日柱／時柱。"
+            ? "TT target 已明示後，TT→UT1 雖有 ΔT 外推與統計 uncertainty，仍不是 deterministic Earth rotation。"
             : proof.firstHardBlocker === "earth-rotation-bridge"
-              ? "節氣已有絕對 TT；下一個硬缺口是 TT↔UT1 / ΔT 的深時間地球自轉橋。"
+              ? "target instant reference basis 已成立；下一個硬缺口是 TT↔UT1 / ΔT 的深時間地球自轉橋。"
               : proof.firstHardBlocker === "civil-zone"
                 ? "target instant 已有明示 fixed-zone-from-UT1 座標；下一層仍需另外選定 Day/Hour 要採用的 civil/local-zone convention，不能把 research fixed offset 冒充未來政治時區。"
                 : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
