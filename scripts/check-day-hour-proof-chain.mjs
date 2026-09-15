@@ -36,6 +36,10 @@ function attr(tag, name) {
   return tag.match(new RegExp(`${name}="([^"]*)"`))?.[1] ?? null;
 }
 
+function textById(dom, id) {
+  return dom.match(new RegExp(`<[^>]+id="${id}"[^>]*>([^<]*)</[^>]+>`))?.[1]?.trim() ?? "";
+}
+
 function stageTag(dom, id) {
   return dom.match(new RegExp(`<article[^>]*data-proof-stage="${id}"[^>]*>`))?.[0] ?? "";
 }
@@ -94,6 +98,7 @@ expectStage(local.dom, "relative-term-geometry", "satisfied", "4006 proof", loca
 expectStage(local.dom, "absolute-seasonal-epoch", "satisfied", "4006 proof", local.url);
 expectStage(local.dom, "target-instant", "unbound-convention", "4006 proof", local.url);
 expectStage(local.dom, "earth-rotation-bridge", "blocked", "4006 proof", local.url);
+expectStage(local.dom, "civil-zone", "unbound-convention", "4006 proof", local.url);
 if (!local.dom.includes("目標時刻／reference basis") || !local.dom.includes("回歸頁目前只指定年月日") || !local.dom.includes("沒有 hour/minute/second") || !local.dom.includes("date-only")) {
   throw new Error(`4006 proof: typed date-only target-instant explanation missing: ${local.url}`);
 }
@@ -102,6 +107,16 @@ if (!local.dom.includes("此年份已有深時間 ΔT / TT→UT1 模型能力") 
 }
 if (!local.dom.includes("proleptic Gregorian + 固定 UT1 offset") || !local.dom.includes("不是西元遠未來 UTC")) {
   throw new Error(`4006 proof: explicit fixed-zone research warning missing: ${local.url}`);
+}
+const localDayBlockers = textById(local.dom, "proof-chain-day-blockers");
+const localHourBlockers = textById(local.dom, "proof-chain-hour-blockers");
+if (
+  !localDayBlockers.includes("地方鐘面／zone convention")
+  || localDayBlockers.includes("localZoneBound")
+  || !localHourBlockers.includes("已解析日柱")
+  || localHourBlockers.includes("localZoneBound")
+) {
+  throw new Error(`4006 proof: typed local-zone blocker ownership/rendering mismatch: ${local.url}`);
 }
 console.log(`[day-hour-proof] PASS 4006 date-only recurrence blocks typed target instant before Earth rotation: ${local.url}`);
 
@@ -112,7 +127,7 @@ const boundControls = tagById(bound.dom, "target-instant-controls");
 const boundExact = {
   "data-ready":"true",
   "data-identity":"false",
-  "data-first-hard-blocker":"civil-zone",
+  "data-first-hard-blocker":"day-boundary",
   "data-target-instant-basis":"fixed-zone-from-ut1",
   "data-target-instant-bound":"true",
   "data-target-clock-enabled":"true",
@@ -135,14 +150,15 @@ if (attr(boundInstrument, "data-day-hour-proof-target-instant-basis") !== "fixed
 expectStage(bound.dom, "absolute-seasonal-epoch", "satisfied", "4006 fixed-zone proof", bound.url);
 expectStage(bound.dom, "target-instant", "satisfied", "4006 fixed-zone proof", bound.url);
 expectStage(bound.dom, "earth-rotation-bridge", "not-required", "4006 fixed-zone proof", bound.url);
-expectStage(bound.dom, "civil-zone", "unbound-convention", "4006 fixed-zone proof", bound.url);
+expectStage(bound.dom, "civil-zone", "satisfied", "4006 fixed-zone proof", bound.url);
+expectStage(bound.dom, "day-boundary", "unbound-convention", "4006 fixed-zone proof", bound.url);
 if (!bound.dom.includes("4006-09-13 12:34:56") || !bound.dom.includes("UT1 JD") || !bound.dom.includes("offset +8 h")) {
   throw new Error(`4006 fixed-zone proof: target projection readout missing: ${bound.url}`);
 }
-if (!bound.dom.includes("research fixed offset 冒充未來政治時區")) {
-  throw new Error(`4006 fixed-zone proof: next-blocker explanation must preserve civil-policy boundary: ${bound.url}`);
+if (!bound.dom.includes("proleptic fixed local zone") || !bound.dom.includes("civilTimezonePolicyResolved=false") || !bound.dom.includes("不是未來 UTC／DST／政治時區預測")) {
+  throw new Error(`4006 fixed-zone proof: local-zone convention must remain explicit and non-political: ${bound.url}`);
 }
-console.log(`[day-hour-proof] PASS 4006 fixed-zone target advances only to civil-zone blocker: ${bound.url}`);
+console.log(`[day-hour-proof] PASS 4006 fixed-zone target derives local-zone convention and stops at day-boundary: ${bound.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
@@ -185,7 +201,7 @@ for (const [id, status] of Object.entries(expectedStages)) expectStage(global.do
 if (!global.dom.includes("絕對季節 epoch") || !global.dom.includes("先把春分／節氣放回絕對均勻時間軸")) {
   throw new Error(`24000-year proof: first-hard-blocker explanation missing: ${global.url}`);
 }
-if (!global.dom.includes("民用時區") || !global.dom.includes("日界規則") || !global.dom.includes("clock basis")) {
+if (!global.dom.includes("zone convention") || !global.dom.includes("日界規則") || !global.dom.includes("clock basis")) {
   throw new Error(`24000-year proof: convention blockers missing: ${global.url}`);
 }
 console.log(`[day-hour-proof] PASS 24000-year proof remains blocked at absolute-seasonal-epoch: ${global.url}`);

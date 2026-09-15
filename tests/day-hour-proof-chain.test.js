@@ -5,9 +5,15 @@ import {
   currentRecurrenceDayHourProof,
   dayHourResolutionProof
 } from "../src/recurrence/day-hour-proof-chain.js";
+import { LOCAL_ZONE_CONVENTION_KIND } from "../src/recurrence/local-zone-convention.js";
 import { TARGET_INSTANT_BASIS } from "../src/recurrence/target-instant-binding.js";
 
 const SAMPLE_JD = 3_184_634.5;
+const TEST_CIVIL_ZONE = Object.freeze({
+  kind:LOCAL_ZONE_CONVENTION_KIND.CIVIL_TIMEZONE,
+  policyResolved:true,
+  timeZoneId:"test-resolved-zone"
+});
 
 function target(basis, extra = {}) {
   return { basis, julianDay:SAMPLE_JD, ...extra };
@@ -20,7 +26,7 @@ function proof(overrides = {}) {
     targetInstant:target(TARGET_INSTANT_BASIS.TT_JULIAN_DAY),
     earthRotationBridge:true,
     earthRotationEstimateAvailable:true,
-    civilZoneBound:true,
+    localZoneConvention:TEST_CIVIL_ZONE,
     dayBoundaryBound:true,
     sexagenaryDayArithmetic:true,
     clockBasis:null,
@@ -37,11 +43,13 @@ test("current deep-time recurrence defaults to missing absolute seasonal epoch a
   assert.equal(result.firstHardBlocker, "absolute-seasonal-epoch");
   assert.equal(result.targetInstantBound, false);
   assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.DATE_ONLY);
+  assert.equal(result.localZoneBound, false);
   assert.equal(result.day.resolved, false);
   assert.equal(result.hour.resolved, false);
   assert.ok(result.day.blockers.includes("absoluteSeasonalEpoch"));
   assert.ok(result.day.blockers.includes("targetInstantBound"));
   assert.ok(result.day.blockers.includes("earthRotationBridge"));
+  assert.ok(result.day.blockers.includes("localZoneBound"));
   assert.equal(result.stages.find(stage => stage.id === "target-instant").status, "unbound-convention");
 });
 
@@ -77,7 +85,7 @@ test("a TT target makes the uncertain TT to UT1 estimate the next hard blocker",
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "uncertain-estimate");
 });
 
-test("a UT1 target already owns an Earth-rotation coordinate and does not require TT to UT1 again", () => {
+test("a UT1 target still requires a separate local-zone convention", () => {
   const result = currentRecurrenceDayHourProof({
     identity:false,
     astronomyWithinRange:true,
@@ -89,21 +97,29 @@ test("a UT1 target already owns an Earth-rotation coordinate and does not requir
   assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.UT1_JULIAN_DAY);
   assert.equal(result.earthRotationBridgeRequired, false);
   assert.equal(result.earthRotationEstimateAvailable, false);
+  assert.equal(result.localZoneBound, false);
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
   assert.equal(result.firstHardBlocker, "civil-zone");
 });
 
-test("a fixed-zone-from-UT1 target can satisfy Day without inventing future UTC policy", () => {
+test("a fixed-zone-from-UT1 target derives its proleptic local-zone convention without inventing future UTC policy", () => {
   const result = proof({
     targetInstant:target(TARGET_INSTANT_BASIS.FIXED_ZONE_FROM_UT1, { localOffsetHoursFromUt1:8 }),
     earthRotationBridge:false,
+    localZoneConvention:null,
     clockBasis:DAY_HOUR_TIME_BASIS.CIVIL
   });
   assert.equal(result.targetInstant.futureUtcPolicyResolved, false);
   assert.equal(result.targetInstant.civilTimezonePolicyResolved, false);
   assert.equal(result.targetInstant.localClockCoordinateAvailable, true);
+  assert.equal(result.localZoneBound, true);
+  assert.equal(result.localZoneConvention.kind, LOCAL_ZONE_CONVENTION_KIND.PROLEPTIC_FIXED_OFFSET_FROM_UT1);
+  assert.equal(result.localZoneConvention.derivedFromTargetInstant, true);
+  assert.equal(result.localZoneConvention.futureUtcPolicyResolved, false);
+  assert.equal(result.localZoneConvention.civilTimezonePolicyResolved, false);
   assert.equal(result.earthRotationBridgeRequired, false);
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
+  assert.equal(result.stages.find(stage => stage.id === "civil-zone").status, "satisfied");
   assert.equal(result.day.resolved, true);
   assert.equal(result.hour.resolved, true);
 });
@@ -118,13 +134,14 @@ test("identity bypasses cross-era projection without inventing any target instan
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
 });
 
-test("Day with a TT target becomes resolvable only after deterministic Earth rotation and civil day rules", () => {
+test("Day with a TT target becomes resolvable only after deterministic Earth rotation, local-zone and day rules", () => {
   const result = proof();
   assert.equal(result.day.resolved, true);
   assert.equal(result.day.blockers.length, 0);
   assert.equal(result.hour.resolved, false);
   assert.deepEqual(result.hour.blockers, ["clockBasisBound"]);
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "satisfied");
+  assert.equal(result.stages.find(stage => stage.id === "civil-zone").status, "satisfied");
 });
 
 test("even a deterministic Earth-rotation model cannot resolve a date-only recurrence", () => {
@@ -185,6 +202,27 @@ test("legacy short solar clock ids fail closed instead of drifting from the cale
 test("forged target-bound booleans and clock-basis ids cannot masquerade as target instant references", () => {
   assert.throws(() => proof({ targetInstant:{ bound:true } }), /target instant basis/);
   assert.throws(() => proof({ targetInstant:{ basis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR, julianDay:SAMPLE_JD } }), /target instant basis/);
+});
+
+test("legacy civilZoneBound boolean cannot satisfy the typed local-zone requirement", () => {
+  const result = dayHourResolutionProof({
+    relativeTermGeometry:true,
+    absoluteSeasonalEpoch:true,
+    targetInstant:target(TARGET_INSTANT_BASIS.UT1_JULIAN_DAY),
+    earthRotationBridge:false,
+    earthRotationEstimateAvailable:false,
+    civilZoneBound:true,
+    dayBoundaryBound:true,
+    sexagenaryDayArithmetic:true,
+    clockBasis:DAY_HOUR_TIME_BASIS.CIVIL,
+    longitudeBound:false,
+    equationOfTimeModel:false,
+    hourBranchRule:true,
+    fiveRatsRule:true
+  });
+  assert.equal(result.localZoneBound, false);
+  assert.equal(result.firstHardBlocker, "civil-zone");
+  assert.equal(result.day.resolved, false);
 });
 
 test("invalid clock basis fails closed", () => {
