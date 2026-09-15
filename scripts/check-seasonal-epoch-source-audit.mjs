@@ -82,10 +82,14 @@ expectAttr(localDirect, "data-direct-seasonal-epoch", "true", "4006 direct provi
 expectAttr(localDirect, "data-implemented-direct-provider", "true", "4006 direct provider", local.url);
 expectAttr(localDirect, "data-qualified-coverage", "true", "4006 direct provider", local.url);
 expectAttr(localDirect, "data-reason", "usable", "4006 direct provider", local.url);
-if (!local.dom.includes("pipeline 可用") || !local.dom.includes(DE441_EVENT_PROVIDER_ID)) {
-  throw new Error(`4006 audit: bounded direct-event runtime not rendered as usable: ${local.url}`);
+if (!local.dom.includes("anchors runtime 可用") || !local.dom.includes(DE441_EVENT_PROVIDER_ID)) {
+  throw new Error(`4006 audit: bounded direct-event anchors runtime not rendered as usable: ${local.url}`);
 }
-console.log(`[seasonal-epoch-audit] PASS 4006 resolves through bounded JPL direct-event runtime: ${local.url}`);
+if (!local.dom.includes("不會自動綁定 recurrence target instant")
+  || !local.dom.includes("typed TT / UT1 / fixed-zone-from-UT1 contract")) {
+  throw new Error(`4006 audit: seasonal anchors must remain separate from typed target-instant binding: ${local.url}`);
+}
+console.log(`[seasonal-epoch-audit] PASS 4006 exposes bounded JPL seasonal anchors without binding a recurrence target instant: ${local.url}`);
 
 const adjacent = dumpDom("recurrence.html?date=2026-09-13&delta=1979");
 const adjacentPanel = tagById(adjacent.dom, "seasonal-epoch-source-audit");
