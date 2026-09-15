@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scale-window visual evidence harness</title>
+  <style>
+    html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:100%; height:100%; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Deterministic scale-window atlas"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const FIXED_INSTANT = "2024-06-15T04:00:00.000Z";
+    const ALLOWED_SCALES = new Set(["day", "year", "cycle"]);
+    const params = new URLSearchParams(location.search);
+    const scale = params.get("scale") || "year";
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+
+    if (!ALLOWED_SCALES.has(scale)) {
+      probe.dataset.error = `unsupported scale: ${scale}`;
+      throw new Error(`Unsupported scale-window visual evidence scale: ${scale}`);
+    }
+
+    const appUrl = new URL("../../", location.href);
+    appUrl.searchParams.set("instant", FIXED_INSTANT);
+    frame.src = appUrl.href;
+
+    function snapshot() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const button = doc?.querySelector(`.scale-button[data-scale="${scale}"]`);
+      if (!win || !doc || !instrument || !button) return false;
+
+      if (instrument.dataset.scaleWindow !== scale) button.click();
+      if (instrument.dataset.scaleWindow !== scale) return false;
+
+      const selectedMs = Number(instrument.dataset.selectedInstantMs);
+      if (selectedMs !== Date.parse(FIXED_INSTANT)) return false;
+
+      probe.dataset.ready = "true";
+      probe.dataset.scale = scale;
+      probe.dataset.innerWidth = String(win.innerWidth);
+      probe.dataset.innerHeight = String(win.innerHeight);
+      probe.dataset.selectedInstantMs = String(selectedMs);
+      probe.dataset.focusRings = instrument.dataset.scaleFocusRings ?? "";
+      probe.dataset.contextRings = instrument.dataset.scaleContextRings ?? "";
+      probe.dataset.ambientRings = instrument.dataset.scaleAmbientRings ?? "";
+      return true;
+    }
+
+    frame.addEventListener("load", () => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        attempts += 1;
+        if (snapshot() || attempts >= 100) clearInterval(timer);
+      }, 20);
+    }, { once:true });
+  </script>
+</body>
+</html>
