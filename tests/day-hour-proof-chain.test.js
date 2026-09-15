@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DAY_HOUR_TIME_BASIS } from "../src/calendar/day-hour-time-basis.js";
+import { DAY_BOUNDARY } from "../src/calendar/tyme-adapter.js";
 import {
   currentRecurrenceDayHourProof,
   dayHourResolutionProof
@@ -27,7 +28,7 @@ function proof(overrides = {}) {
     earthRotationBridge:true,
     earthRotationEstimateAvailable:true,
     localZoneConvention:TEST_CIVIL_ZONE,
-    dayBoundaryBound:true,
+    dayBoundary:DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY,
     sexagenaryDayArithmetic:true,
     clockBasis:null,
     longitudeBound:false,
@@ -44,12 +45,15 @@ test("current deep-time recurrence defaults to missing absolute seasonal epoch a
   assert.equal(result.targetInstantBound, false);
   assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.DATE_ONLY);
   assert.equal(result.localZoneBound, false);
+  assert.equal(result.dayBoundary, null);
+  assert.equal(result.dayBoundaryBound, false);
   assert.equal(result.day.resolved, false);
   assert.equal(result.hour.resolved, false);
   assert.ok(result.day.blockers.includes("absoluteSeasonalEpoch"));
   assert.ok(result.day.blockers.includes("targetInstantBound"));
   assert.ok(result.day.blockers.includes("earthRotationBridge"));
   assert.ok(result.day.blockers.includes("localZoneBound"));
+  assert.ok(result.day.blockers.includes("dayBoundaryBound"));
   assert.equal(result.stages.find(stage => stage.id === "target-instant").status, "unbound-convention");
 });
 
@@ -130,6 +134,7 @@ test("identity bypasses cross-era projection without inventing any target instan
   assert.equal(result.hour.status, "identical-by-definition");
   assert.equal(result.targetInstantBound, false);
   assert.equal(result.targetInstantBasis, TARGET_INSTANT_BASIS.DATE_ONLY);
+  assert.equal(result.dayBoundary, null);
   assert.equal(result.stages.find(stage => stage.id === "target-instant").status, "not-required");
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "not-required");
 });
@@ -142,6 +147,34 @@ test("Day with a TT target becomes resolvable only after deterministic Earth rot
   assert.deepEqual(result.hour.blockers, ["clockBasisBound"]);
   assert.equal(result.stages.find(stage => stage.id === "earth-rotation-bridge").status, "satisfied");
   assert.equal(result.stages.find(stage => stage.id === "civil-zone").status, "satisfied");
+  assert.equal(result.stages.find(stage => stage.id === "day-boundary").status, "satisfied");
+});
+
+test("both canonical Birth day-boundary conventions satisfy the typed proof requirement", () => {
+  for (const dayBoundary of Object.values(DAY_BOUNDARY)) {
+    const result = proof({ dayBoundary });
+    assert.equal(result.dayBoundary, dayBoundary);
+    assert.equal(result.dayBoundaryBound, true);
+    assert.equal(result.stages.find(stage => stage.id === "day-boundary").status, "satisfied");
+    assert.equal(result.day.resolved, true);
+  }
+});
+
+test("legacy dayBoundaryBound boolean cannot satisfy the typed day-boundary requirement", () => {
+  const result = proof({
+    dayBoundary:null,
+    dayBoundaryBound:true,
+    clockBasis:DAY_HOUR_TIME_BASIS.CIVIL
+  });
+  assert.equal(result.dayBoundary, null);
+  assert.equal(result.dayBoundaryBound, false);
+  assert.equal(result.firstHardBlocker, "day-boundary");
+  assert.equal(result.stages.find(stage => stage.id === "day-boundary").status, "unbound-convention");
+  assert.equal(result.day.resolved, false);
+});
+
+test("invalid day-boundary ids fail closed instead of drifting from the Birth engine", () => {
+  assert.throws(() => proof({ dayBoundary:"late-zi-ish" }), /dayBoundary/);
 });
 
 test("even a deterministic Earth-rotation model cannot resolve a date-only recurrence", () => {
@@ -212,7 +245,7 @@ test("legacy civilZoneBound boolean cannot satisfy the typed local-zone requirem
     earthRotationBridge:false,
     earthRotationEstimateAvailable:false,
     civilZoneBound:true,
-    dayBoundaryBound:true,
+    dayBoundary:DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY,
     sexagenaryDayArithmetic:true,
     clockBasis:DAY_HOUR_TIME_BASIS.CIVIL,
     longitudeBound:false,
