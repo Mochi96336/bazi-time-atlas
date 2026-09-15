@@ -25,16 +25,15 @@ jobs:
           python-version: "3.12"
       - name: Install pinned Swiss Ephemeris wrapper
         run: python -m pip install --disable-pip-version-check pyswisseph==2.10.3.2
-      - name: Download official Swiss planetary ephemerides
+      - name: Download official Swiss planetary and lunar ephemerides
         run: |
           mkdir -p tmp/sweph
-          curl -fsSL --retry 3 --retry-delay 2 \
-            https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/sepl_18.se1 \
-            -o tmp/sweph/sepl_18.se1
-          curl -fsSL --retry 3 --retry-delay 2 \
-            https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/sepl_36.se1 \
-            -o tmp/sweph/sepl_36.se1
-          sha256sum tmp/sweph/sepl_18.se1 tmp/sweph/sepl_36.se1
+          for file in sepl_18.se1 semo_18.se1 sepl_36.se1 semo_36.se1; do
+            curl -fsSL --retry 3 --retry-delay 2 \
+              "https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/${file}" \
+              -o "tmp/sweph/${file}"
+          done
+          sha256sum tmp/sweph/sepl_18.se1 tmp/sweph/semo_18.se1 tmp/sweph/sepl_36.se1 tmp/sweph/semo_36.se1
       - name: Compare hourly production EoT against Swiss reference
         env:
           SWISSEPH_EPHE_PATH: tmp/sweph
