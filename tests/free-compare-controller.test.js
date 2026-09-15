@@ -58,7 +58,7 @@ test("linked mode projects the original compare UI contract", () => {
   });
 });
 
-test("empty Free Compare mode keeps the instructional status", () => {
+test("empty Free Compare mode makes fixed-time ownership explicit", () => {
   assert.deepEqual(freeCompareViewState({
     compareMode:true,
     rings:RINGS,
@@ -71,11 +71,11 @@ test("empty Free Compare mode keeps the instructional status", () => {
     scrubMode:"free-compare",
     detachedIds:[],
     statusHidden:false,
-    statusText:"FREE COMPARE · 拖動任一圓環"
+    statusText:"時間固定 · 拖動任一圓環"
   });
 });
 
-test("Free Compare status preserves signed one-decimal offsets", () => {
+test("Free Compare status preserves fixed-time ownership and signed one-decimal offsets", () => {
   const view = freeCompareViewState({
     compareMode:true,
     rings:RINGS,
@@ -83,5 +83,5 @@ test("Free Compare status preserves signed one-decimal offsets", () => {
   });
   assert.equal(view.resetHidden, false);
   assert.deepEqual(view.detachedIds, ["day", "solar"]);
-  assert.equal(view.statusText, "FREE · 日 +1.2° · 節氣 −2.0°");
+  assert.equal(view.statusText, "時間固定 · 日 +1.2° · 節氣 −2.0°");
 });

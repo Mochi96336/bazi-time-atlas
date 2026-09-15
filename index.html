@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./radial-hierarchy.css">
   <link rel="stylesheet" href="./scale-emphasis.css">
   <link rel="stylesheet" href="./classification-overlay.css">
+  <link rel="stylesheet" href="./ux-analysis.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -34,7 +35,7 @@
       <p class="atlas-principle">固定的徑向線代表同一個選定瞬間。所有時間層都穿過它；半徑現在同時表示尺度：短週期靠內，長週期靠外。</p>
     </section>
 
-    <section id="kinetic-instrument" class="instrument-shell" aria-label="多速時間圓盤">
+    <section id="kinetic-instrument" class="instrument-shell" aria-label="多速時間圓盤" data-analysis-open="false">
       <div class="instrument-toolbar" aria-label="時間圓盤控制">
         <div class="toolbar-group" role="group" aria-label="時間尺度">
           <button class="scale-button" type="button" data-scale="day">48 小時</button>
@@ -47,6 +48,9 @@
           <button id="play-button" class="control-button primary" type="button" aria-pressed="false">播放</button>
         </div>
       </div>
+
+      <span id="analysis-toggle" class="analysis-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="kinetic-instrument" title="顯示比較、分類、圖層與參考系等分析工具">分析</span>
+      <span id="analysis-close" class="analysis-close" role="button" tabindex="0" hidden>完成分析</span>
 
       <div class="ring-legend" aria-hidden="true">
         <div class="ring-legend-row ring-hour"><i></i><span>時柱</span><strong id="hour-active">—</strong></div>
@@ -133,7 +137,7 @@
           <li><strong>48 小時</strong>：時柱／日柱前景化，觀察高速離散跳格。</li>
           <li><strong>一年</strong>：年度黃經／月柱前景化，觀察節界如何驅動月柱。</li>
           <li><strong>60 年</strong>：最外年柱成為主角，內層保留為相位脈絡而不消失。</li>
-          <li><strong>分類</strong>：可選擇性顯示干支五行與黃道四元素／模式；只並列，不建立跨系統等價。</li>
+          <li><strong>分析</strong>：需要比較、分類、圖層顯示或相對參考系時再展開；退出分析會回到標準時間視圖。</li>
           <li><a href="./docs/current-status.md">目前實作狀態</a> · <a href="./recurrence.html">深時間回歸實驗</a></li>
         </ul>
       </div>
@@ -160,5 +164,6 @@
   <script type="module" src="./src/classification-overlay-view.js"></script>
   <script type="module" src="./src/kinetic-boundaries.js"></script>
   <script type="module" src="./src/legacy-annual-compat.js"></script>
+  <script type="module" src="./src/analysis-mode.js"></script>
 </body>
 </html>

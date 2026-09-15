@@ -27,8 +27,8 @@ export function freeCompareViewState({
   const statusText = !compareMode
     ? ""
     : detached.length
-      ? `FREE · ${detached.map(ring => `${ringLabels[ring.id] ?? ring.id} ${offsetLabel(ringStates[ring.id].manualOffset)}`).join(" · ")}`
-      : "FREE COMPARE · 拖動任一圓環";
+      ? `時間固定 · ${detached.map(ring => `${ringLabels[ring.id] ?? ring.id} ${offsetLabel(ringStates[ring.id].manualOffset)}`).join(" · ")}`
+      : "時間固定 · 拖動任一圓環";
 
   return {
     compareMode:Boolean(compareMode),
@@ -61,7 +61,7 @@ export function createFreeCompareController({
   compareButton.className = "control-button";
   compareButton.textContent = "比較";
   compareButton.setAttribute("aria-pressed", "false");
-  compareButton.title = "自由比較：每一層可獨立拖動，不改變真實時間";
+  compareButton.title = "自由比較：時間固定；每一層可獨立拖動，只改視覺偏移";
   controlGroup.prepend(compareButton);
 
   const resetRingsButton = documentRef.createElement("button");
@@ -102,8 +102,15 @@ export function createFreeCompareController({
   }
 
   function setMode(enabled) {
-    if (!enabled) resetAllOffsets();
-    else stopPlayback();
+    if (!enabled) {
+      resetAllOffsets();
+    } else {
+      instrument.dispatchEvent(new CustomEvent("atlas-analysis-request", {
+        bubbles:true,
+        detail:{ reason:"free-compare" }
+      }));
+      stopPlayback();
+    }
     dragController.setCompareMode(enabled);
     update();
   }

@@ -1,0 +1,102 @@
+/* Progressive disclosure for analysis-only controls.
+   The default atlas is a time-reading instrument. Compare, classification,
+   layer visibility and relative reference frames become available only while
+   Analysis is explicitly open. Domain state and wheel semantics are unchanged. */
+
+.analysis-toggle,
+.analysis-close {
+  position: absolute;
+  z-index: 6;
+  top: 58px;
+  min-height: 25px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f9992;
+  background: rgba(15,19,16,.54);
+  font-size: 8px;
+  font-weight: 720;
+  letter-spacing: .04em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.analysis-toggle { right: 16px; }
+.analysis-close {
+  left: 16px;
+  color: #c5d3ca;
+  border-color: rgba(199,217,205,.18);
+  background: rgba(199,217,205,.055);
+}
+.analysis-toggle:hover,
+.analysis-toggle:focus-visible,
+.analysis-close:hover,
+.analysis-close:focus-visible {
+  color: var(--ink);
+  border-color: rgba(238,242,237,.24);
+  background: rgba(255,255,255,.04);
+}
+.analysis-toggle:focus-visible,
+.analysis-close:focus-visible {
+  outline: 2px solid var(--cursor);
+  outline-offset: 3px;
+}
+
+/* Keep the existing toolbar geometry stable for regression fixtures while the
+   default user-facing view hides analysis-only actions. Reference-frame UI can
+   leave layout entirely because no primary reading depends on its footprint. */
+#kinetic-instrument:not([data-analysis-open="true"]) #compare-rings-button,
+#kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button {
+  visibility: hidden;
+  pointer-events: none;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) #reset-rings-button,
+#kinetic-instrument:not([data-analysis-open="true"]) .reference-frame-control {
+  display: none !important;
+}
+
+/* The live layer list is a readout in the normal product view. It only becomes
+   a layer-visibility control after the user explicitly enters Analysis. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row[data-ring-toggle] {
+  pointer-events: none;
+  cursor: default;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+#kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+  pointer-events: auto;
+}
+
+/* Analysis is a temporary lens over the same Selected Instant, not a second
+   product state. The mild edge cue makes mode entry visible without changing
+   time geometry or any domain calculation. */
+#kinetic-instrument[data-analysis-open="true"] {
+  border-color: rgba(199,217,205,.22);
+  box-shadow: 0 34px 100px rgba(0,0,0,.28), inset 0 0 0 1px rgba(199,217,205,.035);
+}
+#kinetic-instrument[data-analysis-open="true"] .reference-frame-control::before {
+  content: "分析 · ";
+  color: #9eaaa2;
+}
+
+/* Free Compare must never look like ordinary time scrubbing. */
+#kinetic-instrument[data-compare-mode="true"] #ring-compare-status {
+  font-weight: 780;
+  letter-spacing: .035em;
+}
+
+@media (max-width: 480px) {
+  .analysis-toggle,
+  .analysis-close {
+    top: 82px;
+    min-height: 21px;
+    padding-inline: 7px;
+    font-size: 7px;
+  }
+  .analysis-toggle { right: 9px; }
+  .analysis-close { left: 9px; }
+}
