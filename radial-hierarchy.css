@@ -212,11 +212,9 @@
     font-size: 7.5px;
     font-weight: 700;
   }
-  .ring-legend-row strong {
-    color: #737e77;
-    font-size: 9px;
-    font-weight: 620;
-  }
+  /* Keep the compact mobile type size, but inherit each ring's hierarchy ink
+     and weight from the outer/slow → inner/fast legend rules above. */
+  .ring-legend-row strong { font-size: 9px; }
 
   /* Reserve the narrow band below the two-line layer legend and above the
      classification overlay/cursor note for active Free Compare feedback. */
