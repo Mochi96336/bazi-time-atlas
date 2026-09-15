@@ -83,6 +83,9 @@ const localExact = {
   "data-day-boundary":"unbound",
   "data-day-boundary-bound":"false",
   "data-day-boundary-control-valid":"true",
+  "data-clock-basis":"unbound",
+  "data-clock-basis-bound":"false",
+  "data-clock-basis-control-valid":"true",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
@@ -92,14 +95,24 @@ for (const [name, expected] of Object.entries(localExact)) {
   const actual = attr(localPanel, name);
   if (actual !== expected) throw new Error(`4006 proof: expected ${name}=${expected}, got ${actual}: ${local.url}`);
 }
-if (attr(localControls, "data-day-boundary") !== "unbound" || attr(localControls, "data-day-boundary-valid") !== "true") {
-  throw new Error(`4006 proof: default day-boundary control must remain explicitly unbound: ${local.url}`);
+if (
+  attr(localControls, "data-day-boundary") !== "unbound"
+  || attr(localControls, "data-day-boundary-valid") !== "true"
+  || attr(localControls, "data-clock-basis") !== "unbound"
+  || attr(localControls, "data-clock-basis-valid") !== "true"
+) {
+  throw new Error(`4006 proof: default convention controls must remain explicitly unbound: ${local.url}`);
 }
 if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "target-instant") {
   throw new Error(`4006 proof: instrument first blocker mismatch: ${local.url}`);
 }
-if (attr(localInstrument, "data-day-hour-proof-day-boundary") !== "unbound" || attr(localInstrument, "data-day-hour-proof-day-boundary-bound") !== "false") {
-  throw new Error(`4006 proof: instrument day-boundary default must remain unbound: ${local.url}`);
+if (
+  attr(localInstrument, "data-day-hour-proof-day-boundary") !== "unbound"
+  || attr(localInstrument, "data-day-hour-proof-day-boundary-bound") !== "false"
+  || attr(localInstrument, "data-day-hour-proof-clock-basis") !== "unbound"
+  || attr(localInstrument, "data-day-hour-proof-clock-basis-bound") !== "false"
+) {
+  throw new Error(`4006 proof: instrument convention defaults must remain unbound: ${local.url}`);
 }
 if (attr(localInstrument, "data-day-hour-proof-earth-rotation-estimate-available") !== "false") {
   throw new Error(`4006 proof: date-only recurrence must not claim a target-specific UT1 estimate: ${local.url}`);
@@ -147,6 +160,9 @@ const boundExact = {
   "data-day-boundary":"unbound",
   "data-day-boundary-bound":"false",
   "data-day-boundary-control-valid":"true",
+  "data-clock-basis":"unbound",
+  "data-clock-basis-bound":"false",
+  "data-clock-basis-control-valid":"true",
   "data-earth-rotation-bridge-required":"false",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
@@ -162,8 +178,10 @@ if (
   || attr(boundControls, "data-basis") !== "fixed-zone-from-ut1"
   || attr(boundControls, "data-day-boundary") !== "unbound"
   || attr(boundControls, "data-day-boundary-valid") !== "true"
+  || attr(boundControls, "data-clock-basis") !== "unbound"
+  || attr(boundControls, "data-clock-basis-valid") !== "true"
 ) {
-  throw new Error(`4006 fixed-zone proof: target/day-boundary controls did not settle to the expected unbound boundary state: ${bound.url}`);
+  throw new Error(`4006 fixed-zone proof: target/day-boundary/clock-basis controls did not settle to the expected unbound state: ${bound.url}`);
 }
 if (attr(boundInstrument, "data-day-hour-proof-target-instant-basis") !== "fixed-zone-from-ut1" || attr(boundInstrument, "data-day-hour-proof-target-instant-bound") !== "true") {
   throw new Error(`4006 fixed-zone proof: instrument target binding mismatch: ${bound.url}`);
@@ -196,6 +214,9 @@ const ziExact = {
   "data-day-boundary":"zi-initial-next-day",
   "data-day-boundary-bound":"true",
   "data-day-boundary-control-valid":"true",
+  "data-clock-basis":"unbound",
+  "data-clock-basis-bound":"false",
+  "data-clock-basis-control-valid":"true",
   "data-day-resolved":"true",
   "data-hour-resolved":"false"
 };
@@ -203,8 +224,12 @@ for (const [name, expected] of Object.entries(ziExact)) {
   const actual = attr(ziPanel, name);
   if (actual !== expected) throw new Error(`4006 zi-boundary proof: expected ${name}=${expected}, got ${actual}: ${ziBoundary.url}`);
 }
-if (attr(ziControls, "data-day-boundary") !== "zi-initial-next-day" || attr(ziControls, "data-day-boundary-valid") !== "true") {
-  throw new Error(`4006 zi-boundary proof: control did not bind canonical zi-initial-next-day: ${ziBoundary.url}`);
+if (
+  attr(ziControls, "data-day-boundary") !== "zi-initial-next-day"
+  || attr(ziControls, "data-day-boundary-valid") !== "true"
+  || attr(ziControls, "data-clock-basis") !== "unbound"
+) {
+  throw new Error(`4006 zi-boundary proof: control did not bind canonical zi-initial-next-day while keeping clock basis unbound: ${ziBoundary.url}`);
 }
 if (attr(ziInstrument, "data-day-hour-proof-day-boundary") !== "zi-initial-next-day" || attr(ziInstrument, "data-day-hour-proof-day-boundary-bound") !== "true") {
   throw new Error(`4006 zi-boundary proof: instrument day-boundary binding mismatch: ${ziBoundary.url}`);
@@ -226,6 +251,7 @@ if (
   attr(midnightPanel, "data-first-hard-blocker") !== "clock-basis"
   || attr(midnightPanel, "data-day-boundary") !== "civil-midnight"
   || attr(midnightPanel, "data-day-boundary-bound") !== "true"
+  || attr(midnightPanel, "data-clock-basis") !== "unbound"
   || attr(midnightPanel, "data-day-resolved") !== "true"
   || attr(midnightPanel, "data-hour-resolved") !== "false"
   || attr(midnightControls, "data-day-boundary") !== "civil-midnight"
@@ -254,6 +280,99 @@ if (
 expectStage(invalidBoundary.dom, "day-boundary", "unbound-convention", "4006 invalid-boundary proof", invalidBoundary.url);
 console.log(`[day-hour-proof] PASS invalid day-boundary query fails closed: ${invalidBoundary.url}`);
 
+const civilClock = dumpDom(`${fixedZonePath}&dayBoundary=zi-initial-next-day&clockBasis=civil`);
+const civilPanel = tagById(civilClock.dom, "day-hour-proof-chain");
+const civilControls = tagById(civilClock.dom, "target-instant-controls");
+const civilInstrument = tagById(civilClock.dom, "recurrence-instrument");
+const civilExact = {
+  "data-first-hard-blocker":"none",
+  "data-clock-basis":"civil",
+  "data-clock-basis-bound":"true",
+  "data-clock-basis-control-valid":"true",
+  "data-needs-longitude":"false",
+  "data-needs-equation-of-time":"false",
+  "data-day-resolved":"true",
+  "data-hour-resolved":"true"
+};
+for (const [name, expected] of Object.entries(civilExact)) {
+  const actual = attr(civilPanel, name);
+  if (actual !== expected) throw new Error(`4006 civil-clock proof: expected ${name}=${expected}, got ${actual}: ${civilClock.url}`);
+}
+if (
+  attr(civilControls, "data-clock-basis") !== "civil"
+  || attr(civilControls, "data-clock-basis-valid") !== "true"
+  || attr(civilInstrument, "data-day-hour-proof-clock-basis") !== "civil"
+  || attr(civilInstrument, "data-day-hour-proof-clock-basis-bound") !== "true"
+) {
+  throw new Error(`4006 civil-clock proof: typed clock basis did not propagate through controls/instrument: ${civilClock.url}`);
+}
+expectStage(civilClock.dom, "clock-basis", "satisfied", "4006 civil-clock proof", civilClock.url);
+expectStage(civilClock.dom, "longitude", "not-required", "4006 civil-clock proof", civilClock.url);
+expectStage(civilClock.dom, "equation-of-time", "not-required", "4006 civil-clock proof", civilClock.url);
+if (!civilClock.dom.includes("已選 civil/zone-clock reading") || !civilClock.dom.includes("不代表未來政治時區已解決")) {
+  throw new Error(`4006 civil-clock proof: fixed-zone civil semantics warning missing: ${civilClock.url}`);
+}
+if (textById(civilClock.dom, "proof-chain-hour-blockers") !== "無 blocker") {
+  throw new Error(`4006 civil-clock proof: Hour should resolve without longitude/EoT: ${civilClock.url}`);
+}
+console.log(`[day-hour-proof] PASS explicit civil clock basis resolves Hour without longitude or EoT: ${civilClock.url}`);
+
+const meanSolar = dumpDom(`${fixedZonePath}&dayBoundary=zi-initial-next-day&clockBasis=local-mean-solar`);
+const meanPanel = tagById(meanSolar.dom, "day-hour-proof-chain");
+if (
+  attr(meanPanel, "data-first-hard-blocker") !== "longitude"
+  || attr(meanPanel, "data-clock-basis") !== "local-mean-solar"
+  || attr(meanPanel, "data-clock-basis-bound") !== "true"
+  || attr(meanPanel, "data-needs-longitude") !== "true"
+  || attr(meanPanel, "data-needs-equation-of-time") !== "false"
+  || attr(meanPanel, "data-hour-resolved") !== "false"
+) {
+  throw new Error(`4006 mean-solar proof: explicit basis must advance to longitude only: ${meanSolar.url}`);
+}
+expectStage(meanSolar.dom, "clock-basis", "satisfied", "4006 mean-solar proof", meanSolar.url);
+expectStage(meanSolar.dom, "longitude", "unbound-convention", "4006 mean-solar proof", meanSolar.url);
+expectStage(meanSolar.dom, "equation-of-time", "not-required", "4006 mean-solar proof", meanSolar.url);
+if (!textById(meanSolar.dom, "proof-chain-hour-blockers").includes("經度") || textById(meanSolar.dom, "proof-chain-hour-blockers").includes("local clock basis")) {
+  throw new Error(`4006 mean-solar proof: Hour blocker should move from clock basis to longitude: ${meanSolar.url}`);
+}
+console.log(`[day-hour-proof] PASS explicit local-mean-solar basis advances Hour proof to longitude: ${meanSolar.url}`);
+
+const apparentSolar = dumpDom(`${fixedZonePath}&dayBoundary=zi-initial-next-day&clockBasis=local-apparent-solar`);
+const apparentPanel = tagById(apparentSolar.dom, "day-hour-proof-chain");
+if (
+  attr(apparentPanel, "data-first-hard-blocker") !== "longitude"
+  || attr(apparentPanel, "data-clock-basis") !== "local-apparent-solar"
+  || attr(apparentPanel, "data-needs-longitude") !== "true"
+  || attr(apparentPanel, "data-needs-equation-of-time") !== "true"
+  || attr(apparentPanel, "data-hour-resolved") !== "false"
+) {
+  throw new Error(`4006 apparent-solar proof: explicit basis must expose longitude + Equation of Time: ${apparentSolar.url}`);
+}
+expectStage(apparentSolar.dom, "clock-basis", "satisfied", "4006 apparent-solar proof", apparentSolar.url);
+expectStage(apparentSolar.dom, "longitude", "unbound-convention", "4006 apparent-solar proof", apparentSolar.url);
+expectStage(apparentSolar.dom, "equation-of-time", "missing-deep-time-model", "4006 apparent-solar proof", apparentSolar.url);
+const apparentBlockers = textById(apparentSolar.dom, "proof-chain-hour-blockers");
+if (!apparentBlockers.includes("經度") || !apparentBlockers.includes("Equation of Time")) {
+  throw new Error(`4006 apparent-solar proof: both downstream blockers must be visible: ${apparentSolar.url}`);
+}
+console.log(`[day-hour-proof] PASS explicit local-apparent-solar basis exposes longitude and EoT blockers: ${apparentSolar.url}`);
+
+const invalidClock = dumpDom(`${fixedZonePath}&dayBoundary=zi-initial-next-day&clockBasis=sundial-ish`);
+const invalidClockPanel = tagById(invalidClock.dom, "day-hour-proof-chain");
+const invalidClockControls = tagById(invalidClock.dom, "target-instant-controls");
+if (
+  attr(invalidClockPanel, "data-first-hard-blocker") !== "clock-basis"
+  || attr(invalidClockPanel, "data-clock-basis") !== "unbound"
+  || attr(invalidClockPanel, "data-clock-basis-bound") !== "false"
+  || attr(invalidClockPanel, "data-clock-basis-control-valid") !== "false"
+  || attr(invalidClockControls, "data-clock-basis") !== "unbound"
+  || attr(invalidClockControls, "data-clock-basis-valid") !== "false"
+) {
+  throw new Error(`4006 invalid-clock proof: invalid query must fail closed to unbound clock basis: ${invalidClock.url}`);
+}
+expectStage(invalidClock.dom, "clock-basis", "unbound-convention", "4006 invalid-clock proof", invalidClock.url);
+console.log(`[day-hour-proof] PASS invalid clock-basis query fails closed: ${invalidClock.url}`);
+
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
 const panel = tagById(global.dom, "day-hour-proof-chain");
@@ -263,6 +382,8 @@ const exact = {
   "data-first-hard-blocker":"absolute-seasonal-epoch",
   "data-day-boundary":"unbound",
   "data-day-boundary-bound":"false",
+  "data-clock-basis":"unbound",
+  "data-clock-basis-bound":"false",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
