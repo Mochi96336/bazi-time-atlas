@@ -31,7 +31,7 @@ function proof(overrides = {}) {
     dayBoundary:DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY,
     sexagenaryDayArithmetic:true,
     clockBasis:null,
-    longitudeBound:false,
+    longitudeDegrees:null,
     equationOfTimeModel:false,
     hourBranchRule:true,
     fiveRatsRule:true,
@@ -47,6 +47,8 @@ test("current deep-time recurrence defaults to missing absolute seasonal epoch a
   assert.equal(result.localZoneBound, false);
   assert.equal(result.dayBoundary, null);
   assert.equal(result.dayBoundaryBound, false);
+  assert.equal(result.longitudeDegrees, null);
+  assert.equal(result.longitudeBound, false);
   assert.equal(result.day.resolved, false);
   assert.equal(result.hour.resolved, false);
   assert.ok(result.day.blockers.includes("absoluteSeasonalEpoch"));
@@ -193,38 +195,70 @@ test("civil-clock Hour needs no longitude or Equation of Time once Day is resolv
   const result = proof({ clockBasis:DAY_HOUR_TIME_BASIS.CIVIL });
   assert.equal(result.day.resolved, true);
   assert.equal(result.hour.resolved, true);
+  assert.equal(result.longitudeBound, false);
   assert.equal(result.needsLongitude, false);
   assert.equal(result.needsEquationOfTime, false);
   assert.equal(result.stages.find(stage => stage.id === "longitude").status, "not-required");
   assert.equal(result.stages.find(stage => stage.id === "equation-of-time").status, "not-required");
 });
 
-test("local mean solar Hour adds longitude but not Equation of Time", () => {
-  const result = proof({
-    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR,
-    longitudeBound:false
+test("local mean solar Hour adds typed longitude but not Equation of Time", () => {
+  const blocked = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR
   });
-  assert.equal(result.hour.resolved, false);
-  assert.deepEqual(result.hour.blockers, ["longitudeBound"]);
-  assert.equal(result.needsLongitude, true);
-  assert.equal(result.needsEquationOfTime, false);
+  assert.equal(blocked.hour.resolved, false);
+  assert.deepEqual(blocked.hour.blockers, ["longitudeBound"]);
+  assert.equal(blocked.longitudeDegrees, null);
+  assert.equal(blocked.longitudeBound, false);
+  assert.equal(blocked.needsLongitude, true);
+  assert.equal(blocked.needsEquationOfTime, false);
+
+  const resolved = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR,
+    longitudeDegrees:121.5
+  });
+  assert.equal(resolved.longitudeDegrees, 121.5);
+  assert.equal(resolved.longitudeBound, true);
+  assert.equal(resolved.hour.resolved, true);
+  assert.deepEqual(resolved.hour.blockers, []);
 });
 
-test("local apparent solar Hour requires longitude and an epoch-valid Equation of Time model", () => {
+test("local apparent solar Hour requires typed longitude and an epoch-valid Equation of Time model", () => {
   const blocked = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
-    longitudeBound:true,
+    longitudeDegrees:121.5,
     equationOfTimeModel:false
   });
   assert.equal(blocked.hour.resolved, false);
   assert.deepEqual(blocked.hour.blockers, ["equationOfTimeModel"]);
+  assert.equal(blocked.longitudeBound, true);
 
   const resolved = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
-    longitudeBound:true,
+    longitudeDegrees:121.5,
     equationOfTimeModel:true
   });
   assert.equal(resolved.hour.resolved, true);
+});
+
+test("legacy longitudeBound boolean cannot masquerade as a geographic coordinate", () => {
+  const result = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR,
+    longitudeBound:true
+  });
+  assert.equal(result.longitudeDegrees, null);
+  assert.equal(result.longitudeBound, false);
+  assert.equal(result.firstHardBlocker, "longitude");
+  assert.deepEqual(result.hour.blockers, ["longitudeBound"]);
+});
+
+test("invalid longitude coordinates fail closed instead of being clamped", () => {
+  for (const longitudeDegrees of [Number.NaN, Number.POSITIVE_INFINITY, -181, 181]) {
+    assert.throws(
+      () => proof({ clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR, longitudeDegrees }),
+      /longitudeDegrees/
+    );
+  }
 });
 
 test("legacy short solar clock ids fail closed instead of drifting from the calendar engine", () => {
@@ -248,7 +282,7 @@ test("legacy civilZoneBound boolean cannot satisfy the typed local-zone requirem
     dayBoundary:DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY,
     sexagenaryDayArithmetic:true,
     clockBasis:DAY_HOUR_TIME_BASIS.CIVIL,
-    longitudeBound:false,
+    longitudeDegrees:null,
     equationOfTimeModel:false,
     hourBranchRule:true,
     fiveRatsRule:true
