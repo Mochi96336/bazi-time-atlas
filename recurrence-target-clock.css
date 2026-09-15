@@ -37,7 +37,7 @@
 .target-instant-toggle input { accent-color: #cbd8cf; }
 .target-instant-fields {
   display: grid;
-  grid-template-columns: minmax(150px, .8fr) minmax(150px, .7fr) minmax(220px, 1.5fr);
+  grid-template-columns: minmax(140px, .8fr) minmax(140px, .7fr) minmax(180px, .9fr) minmax(220px, 1.5fr);
   gap: 9px;
   align-items: end;
   margin-top: 10px;
@@ -50,7 +50,8 @@
   letter-spacing: .07em;
   text-transform: uppercase;
 }
-.target-instant-fields input {
+.target-instant-fields input,
+.target-instant-fields select {
   width: 100%;
   min-height: 34px;
   padding: 6px 8px;
@@ -72,9 +73,15 @@
   font-size: 10px;
   line-height: 1.5;
 }
+.target-instant-controls[data-enabled="false"] #target-instant-status {
+  opacity: .72;
+}
 .target-instant-controls[data-valid="false"] #target-instant-status {
   border-left-color: #a07c73;
   color: #c99b90;
+}
+.target-instant-controls[data-day-boundary-valid="false"] #day-boundary-convention {
+  border-color: rgba(160,124,115,.7);
 }
 .target-instant-controls > p {
   margin: 9px 0 0;
@@ -82,13 +89,12 @@
   font-size: 9px;
   line-height: 1.55;
 }
-.target-instant-controls[data-enabled="false"] .target-instant-fields {
-  opacity: .72;
+@media (max-width: 900px) {
+  .target-instant-fields { grid-template-columns: 1fr 1fr; }
+  #target-instant-status { grid-column: 1 / -1; }
 }
 @media (max-width: 760px) {
   .target-instant-control-head { align-items: flex-start; flex-direction: column; }
-  .target-instant-fields { grid-template-columns: 1fr 1fr; }
-  #target-instant-status { grid-column: 1 / -1; }
 }
 @media (max-width: 480px) {
   .target-instant-controls { padding: 10px; }

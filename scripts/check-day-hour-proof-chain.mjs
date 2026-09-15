@@ -72,6 +72,7 @@ console.log(`[day-hour-proof] PASS identity bypass does not invent a cross-era t
 const local = dumpDom("recurrence.html?date=2026-09-13&delta=1980");
 const localInstrument = tagById(local.dom, "recurrence-instrument");
 const localPanel = tagById(local.dom, "day-hour-proof-chain");
+const localControls = tagById(local.dom, "target-instant-controls");
 const localExact = {
   "data-ready":"true",
   "data-identity":"false",
@@ -79,6 +80,9 @@ const localExact = {
   "data-target-instant-basis":"date-only",
   "data-target-instant-bound":"false",
   "data-target-clock-enabled":"false",
+  "data-day-boundary":"unbound",
+  "data-day-boundary-bound":"false",
+  "data-day-boundary-control-valid":"true",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
@@ -88,8 +92,14 @@ for (const [name, expected] of Object.entries(localExact)) {
   const actual = attr(localPanel, name);
   if (actual !== expected) throw new Error(`4006 proof: expected ${name}=${expected}, got ${actual}: ${local.url}`);
 }
+if (attr(localControls, "data-day-boundary") !== "unbound" || attr(localControls, "data-day-boundary-valid") !== "true") {
+  throw new Error(`4006 proof: default day-boundary control must remain explicitly unbound: ${local.url}`);
+}
 if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "target-instant") {
   throw new Error(`4006 proof: instrument first blocker mismatch: ${local.url}`);
+}
+if (attr(localInstrument, "data-day-hour-proof-day-boundary") !== "unbound" || attr(localInstrument, "data-day-hour-proof-day-boundary-bound") !== "false") {
+  throw new Error(`4006 proof: instrument day-boundary default must remain unbound: ${local.url}`);
 }
 if (attr(localInstrument, "data-day-hour-proof-earth-rotation-estimate-available") !== "false") {
   throw new Error(`4006 proof: date-only recurrence must not claim a target-specific UT1 estimate: ${local.url}`);
@@ -99,6 +109,7 @@ expectStage(local.dom, "absolute-seasonal-epoch", "satisfied", "4006 proof", loc
 expectStage(local.dom, "target-instant", "unbound-convention", "4006 proof", local.url);
 expectStage(local.dom, "earth-rotation-bridge", "blocked", "4006 proof", local.url);
 expectStage(local.dom, "civil-zone", "unbound-convention", "4006 proof", local.url);
+expectStage(local.dom, "day-boundary", "unbound-convention", "4006 proof", local.url);
 if (!local.dom.includes("目標時刻／reference basis") || !local.dom.includes("回歸頁目前只指定年月日") || !local.dom.includes("沒有 hour/minute/second") || !local.dom.includes("date-only")) {
   throw new Error(`4006 proof: typed date-only target-instant explanation missing: ${local.url}`);
 }
@@ -120,7 +131,8 @@ if (
 }
 console.log(`[day-hour-proof] PASS 4006 date-only recurrence blocks typed target instant before Earth rotation: ${local.url}`);
 
-const bound = dumpDom("recurrence.html?date=2026-09-13&delta=1980&targetClock=fixed-zone&targetTime=12%3A34%3A56&ut1Offset=8");
+const fixedZonePath = "recurrence.html?date=2026-09-13&delta=1980&targetClock=fixed-zone&targetTime=12%3A34%3A56&ut1Offset=8";
+const bound = dumpDom(fixedZonePath);
 const boundInstrument = tagById(bound.dom, "recurrence-instrument");
 const boundPanel = tagById(bound.dom, "day-hour-proof-chain");
 const boundControls = tagById(bound.dom, "target-instant-controls");
@@ -132,6 +144,9 @@ const boundExact = {
   "data-target-instant-bound":"true",
   "data-target-clock-enabled":"true",
   "data-target-clock-valid":"true",
+  "data-day-boundary":"unbound",
+  "data-day-boundary-bound":"false",
+  "data-day-boundary-control-valid":"true",
   "data-earth-rotation-bridge-required":"false",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
@@ -141,8 +156,14 @@ for (const [name, expected] of Object.entries(boundExact)) {
   const actual = attr(boundPanel, name);
   if (actual !== expected) throw new Error(`4006 fixed-zone proof: expected ${name}=${expected}, got ${actual}: ${bound.url}`);
 }
-if (attr(boundControls, "data-enabled") !== "true" || attr(boundControls, "data-valid") !== "true" || attr(boundControls, "data-basis") !== "fixed-zone-from-ut1") {
-  throw new Error(`4006 fixed-zone proof: target controls did not settle to a valid fixed-zone target: ${bound.url}`);
+if (
+  attr(boundControls, "data-enabled") !== "true"
+  || attr(boundControls, "data-valid") !== "true"
+  || attr(boundControls, "data-basis") !== "fixed-zone-from-ut1"
+  || attr(boundControls, "data-day-boundary") !== "unbound"
+  || attr(boundControls, "data-day-boundary-valid") !== "true"
+) {
+  throw new Error(`4006 fixed-zone proof: target/day-boundary controls did not settle to the expected unbound boundary state: ${bound.url}`);
 }
 if (attr(boundInstrument, "data-day-hour-proof-target-instant-basis") !== "fixed-zone-from-ut1" || attr(boundInstrument, "data-day-hour-proof-target-instant-bound") !== "true") {
   throw new Error(`4006 fixed-zone proof: instrument target binding mismatch: ${bound.url}`);
@@ -158,7 +179,80 @@ if (!bound.dom.includes("4006-09-13 12:34:56") || !bound.dom.includes("UT1 JD") 
 if (!bound.dom.includes("proleptic fixed local zone") || !bound.dom.includes("civilTimezonePolicyResolved=false") || !bound.dom.includes("不是未來 UTC／DST／政治時區預測")) {
   throw new Error(`4006 fixed-zone proof: local-zone convention must remain explicit and non-political: ${bound.url}`);
 }
+if (!bound.dom.includes("Birth 的預設不會被 recurrence 暗中繼承")) {
+  throw new Error(`4006 fixed-zone proof: explicit day-boundary blocker explanation missing: ${bound.url}`);
+}
 console.log(`[day-hour-proof] PASS 4006 fixed-zone target derives local-zone convention and stops at day-boundary: ${bound.url}`);
+
+const ziBoundary = dumpDom(`${fixedZonePath}&dayBoundary=zi-initial-next-day`);
+const ziInstrument = tagById(ziBoundary.dom, "recurrence-instrument");
+const ziPanel = tagById(ziBoundary.dom, "day-hour-proof-chain");
+const ziControls = tagById(ziBoundary.dom, "target-instant-controls");
+const ziExact = {
+  "data-ready":"true",
+  "data-first-hard-blocker":"clock-basis",
+  "data-target-instant-basis":"fixed-zone-from-ut1",
+  "data-target-instant-bound":"true",
+  "data-day-boundary":"zi-initial-next-day",
+  "data-day-boundary-bound":"true",
+  "data-day-boundary-control-valid":"true",
+  "data-day-resolved":"true",
+  "data-hour-resolved":"false"
+};
+for (const [name, expected] of Object.entries(ziExact)) {
+  const actual = attr(ziPanel, name);
+  if (actual !== expected) throw new Error(`4006 zi-boundary proof: expected ${name}=${expected}, got ${actual}: ${ziBoundary.url}`);
+}
+if (attr(ziControls, "data-day-boundary") !== "zi-initial-next-day" || attr(ziControls, "data-day-boundary-valid") !== "true") {
+  throw new Error(`4006 zi-boundary proof: control did not bind canonical zi-initial-next-day: ${ziBoundary.url}`);
+}
+if (attr(ziInstrument, "data-day-hour-proof-day-boundary") !== "zi-initial-next-day" || attr(ziInstrument, "data-day-hour-proof-day-boundary-bound") !== "true") {
+  throw new Error(`4006 zi-boundary proof: instrument day-boundary binding mismatch: ${ziBoundary.url}`);
+}
+expectStage(ziBoundary.dom, "day-boundary", "satisfied", "4006 zi-boundary proof", ziBoundary.url);
+expectStage(ziBoundary.dom, "clock-basis", "unbound-convention", "4006 zi-boundary proof", ziBoundary.url);
+if (!ziBoundary.dom.includes("canonical zi-initial-next-day") || !ziBoundary.dom.includes("子初 23:00") || !ziBoundary.dom.includes("時柱仍需明示 civil / local mean solar / local apparent solar clock basis")) {
+  throw new Error(`4006 zi-boundary proof: canonical boundary or next-blocker explanation missing: ${ziBoundary.url}`);
+}
+if (textById(ziBoundary.dom, "proof-chain-day-blockers") !== "無 blocker" || !textById(ziBoundary.dom, "proof-chain-hour-blockers").includes("local clock basis")) {
+  throw new Error(`4006 zi-boundary proof: Day should resolve while Hour stops at clock basis: ${ziBoundary.url}`);
+}
+console.log(`[day-hour-proof] PASS canonical zi-initial day boundary advances 4006 proof to clock-basis: ${ziBoundary.url}`);
+
+const midnightBoundary = dumpDom(`${fixedZonePath}&dayBoundary=civil-midnight`);
+const midnightPanel = tagById(midnightBoundary.dom, "day-hour-proof-chain");
+const midnightControls = tagById(midnightBoundary.dom, "target-instant-controls");
+if (
+  attr(midnightPanel, "data-first-hard-blocker") !== "clock-basis"
+  || attr(midnightPanel, "data-day-boundary") !== "civil-midnight"
+  || attr(midnightPanel, "data-day-boundary-bound") !== "true"
+  || attr(midnightPanel, "data-day-resolved") !== "true"
+  || attr(midnightPanel, "data-hour-resolved") !== "false"
+  || attr(midnightControls, "data-day-boundary") !== "civil-midnight"
+) {
+  throw new Error(`4006 civil-midnight proof: canonical boundary did not advance to clock-basis: ${midnightBoundary.url}`);
+}
+expectStage(midnightBoundary.dom, "day-boundary", "satisfied", "4006 civil-midnight proof", midnightBoundary.url);
+if (!midnightBoundary.dom.includes("canonical civil-midnight") || !midnightBoundary.dom.includes("00:00 民用午夜")) {
+  throw new Error(`4006 civil-midnight proof: canonical midnight detail missing: ${midnightBoundary.url}`);
+}
+console.log(`[day-hour-proof] PASS canonical civil-midnight day boundary advances 4006 proof to clock-basis: ${midnightBoundary.url}`);
+
+const invalidBoundary = dumpDom(`${fixedZonePath}&dayBoundary=late-zi-ish`);
+const invalidPanel = tagById(invalidBoundary.dom, "day-hour-proof-chain");
+const invalidControls = tagById(invalidBoundary.dom, "target-instant-controls");
+if (
+  attr(invalidPanel, "data-first-hard-blocker") !== "day-boundary"
+  || attr(invalidPanel, "data-day-boundary") !== "unbound"
+  || attr(invalidPanel, "data-day-boundary-bound") !== "false"
+  || attr(invalidPanel, "data-day-boundary-control-valid") !== "false"
+  || attr(invalidControls, "data-day-boundary") !== "unbound"
+  || attr(invalidControls, "data-day-boundary-valid") !== "false"
+) {
+  throw new Error(`4006 invalid-boundary proof: invalid query must fail closed to unbound day-boundary: ${invalidBoundary.url}`);
+}
+expectStage(invalidBoundary.dom, "day-boundary", "unbound-convention", "4006 invalid-boundary proof", invalidBoundary.url);
+console.log(`[day-hour-proof] PASS invalid day-boundary query fails closed: ${invalidBoundary.url}`);
 
 const global = dumpDom("recurrence.html?date=2026-09-13&delta=24000");
 const instrument = tagById(global.dom, "recurrence-instrument");
@@ -167,6 +261,8 @@ const exact = {
   "data-ready":"true",
   "data-identity":"false",
   "data-first-hard-blocker":"absolute-seasonal-epoch",
+  "data-day-boundary":"unbound",
+  "data-day-boundary-bound":"false",
   "data-earth-rotation-estimate-available":"false",
   "data-day-resolved":"false",
   "data-hour-resolved":"false",
