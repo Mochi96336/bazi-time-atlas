@@ -1,0 +1,262 @@
+/* Desktop Analysis is a lens over the same radial instrument, not a second
+   dashboard around it. Keep all capabilities reachable while flattening the
+   persistent chrome that competes with the wheel. Mobile keeps its dedicated
+   structured Analysis layout. */
+@media (min-width: 821px) {
+  #kinetic-instrument[data-analysis-open="true"] {
+    box-shadow: none;
+  }
+
+  /* Keep one action row: observation-window controls on the left, secondary
+     analysis/time actions on the right. Remove pill/card styling so the row
+     reads as instrument chrome rather than another toolbar surface. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    align-items: center;
+    gap: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group {
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .control-button,
+  #kinetic-instrument[data-analysis-open="true"] .scale-button {
+    min-height: 28px;
+    border: 0;
+    border-radius: 0;
+    padding: 0 7px;
+    color: #85898a;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .control-button:hover,
+  #kinetic-instrument[data-analysis-open="true"] .scale-button:hover {
+    color: var(--ink);
+    border-color: transparent;
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .scale-button.active,
+  #kinetic-instrument[data-analysis-open="true"] #compare-rings-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #play-button[aria-pressed="true"] {
+    color: #e2e4e3;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: inset 0 -1px rgba(235,238,236,.48);
+  }
+  #kinetic-instrument[data-analysis-open="true"] #play-button.primary {
+    min-width: auto;
+  }
+
+  /* The old Analysis legend was a dense debug panel pinned over the upper-left
+     wheel. Turn it into one flat secondary rail below the primary controls.
+     Active values already live at the read-head; this rail only owns layer
+     visibility and reference-frame selection. */
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    left: clamp(14px, 2vw, 32px);
+    right: clamp(104px, 8vw, 138px);
+    top: 45px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 7px 12px;
+    flex-wrap: wrap;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    order: 0;
+    gap: 5px;
+    padding: 0;
+    color: #767b7c;
+    font-size: 7px;
+    letter-spacing: .06em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control::before {
+    content: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 22px;
+    border: 0;
+    border-bottom: 1px solid rgba(236,239,239,.16);
+    border-radius: 0;
+    padding: 0 16px 0 4px;
+    color: #aeb2b2;
+    background: transparent;
+    backdrop-filter: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+    display: inline-flex;
+    grid-template-columns: none;
+    align-items: center;
+    gap: 4px;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle]:hover,
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle]:focus-visible {
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row i {
+    width: 4px;
+    height: 4px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    color: #85898a;
+    font-size: 8px;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row strong {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-reference-active="true"] {
+    background: transparent;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-reference-active="true"] span {
+    color: color-mix(in srgb, var(--cursor) 58%, var(--muted));
+  }
+
+  /* "完成分析" belongs to the same quiet second rail. */
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 45px;
+    left: auto;
+    right: clamp(14px, 2vw, 32px);
+    min-height: 22px;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    color: #8c9091;
+    background: transparent;
+    box-shadow: none;
+    font-size: 8px;
+  }
+
+  /* The datum is already the ivory line plus exact timestamp. Do not add a
+     third persistent SELECTED INSTANT caption above the wheel in Analysis. */
+  #kinetic-instrument[data-analysis-open="true"] #cursor-layer .cursor-note {
+    display: none;
+  }
+
+  /* Analysis keeps precise scrubbing, but the horizontal timeline must remain
+     subordinate to the radial instrument instead of becoming a second chart. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
+    width: min(1180px, calc(100% - 64px));
+    margin: 8px auto 0;
+    grid-template-columns: minmax(160px, 200px) 1fr auto;
+    gap: 10px;
+    border: 0;
+    border-top: 1px solid rgba(236,239,239,.08);
+    border-radius: 0;
+    padding: 7px 0 0;
+    background: transparent;
+    opacity: .64;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock:hover,
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock:focus-within {
+    opacity: .92;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field {
+    gap: 2px;
+    color: #6f7475;
+    font-size: 7px;
+    letter-spacing: .04em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field input {
+    border: 0;
+    border-bottom: 1px solid rgba(236,239,239,.12);
+    border-radius: 0;
+    padding: 5px 3px;
+    background: transparent;
+    box-shadow: none;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-wrap {
+    gap: 2px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .boundary-rail-wrap {
+    min-height: 18px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .boundary-marker i {
+    font-size: 6px;
+    opacity: .52;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-scale,
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .boundary-mode {
+    font-size: 7px;
+    opacity: .48;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status {
+    font-size: 7px;
+    opacity: .52;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status span {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status strong {
+    font-size: 9px;
+  }
+
+  /* Five diagnostic cards repeat the read-head. Preserve their inspector entry
+     points but collapse them into one typographic summary line. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip {
+    width: min(1180px, calc(100% - 64px));
+    margin: 9px auto 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 7px 22px;
+    flex-wrap: wrap;
+    padding: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    border: 0;
+    border-top: 0;
+    padding: 0;
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell span {
+    display: inline;
+    color: #676c6d;
+    font-size: 7px;
+    letter-spacing: .05em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell strong {
+    display: inline;
+    margin: 0;
+    color: #bfc3c2;
+    font-size: 11px;
+    font-weight: 700;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell small {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell-reference:hover,
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell-reference:focus-visible,
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell-reference[aria-expanded="true"] {
+    border-top-color: transparent;
+  }
+
+  /* Long-form instruction remains reachable by scrolling, but it no longer
+     visually attaches itself to the first-screen instrument stack. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .atlas-notes {
+    margin-top: 52px;
+    opacity: .56;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .sources-panel {
+    opacity: .48;
+  }
+}
