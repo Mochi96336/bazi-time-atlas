@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
 const hierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
 const atlas = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
+const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
 
 test("wheel sectors tile their coordinates without artificial angular gutters", () => {
@@ -30,18 +31,28 @@ test("sixty-step structure uses short minor ticks and longer five-step anchors",
   }
 });
 
-test("resting surfaces are borderless while active and classification evidence retain borders", () => {
-  assert.match(hierarchy, /\.cycle-sector:not\(\.is-active\) \{ stroke: none; \}/);
+test("selected-instant interval surfaces stay borderless until interaction or classification gives the border meaning", () => {
+  assert.match(
+    hierarchy,
+    /\.cycle-sector:not\(\.is-active\),\s*\n\.cycle-sector\.is-active \{ stroke: none; \}/
+  );
   assert.match(hierarchy, /#solar-track \.term-sector \{[\s\S]*?stroke: none;/);
+  assert.match(hierarchy, /#solar-track \.term-sector\.is-active \{[\s\S]*?stroke: none;/);
   assert.match(hierarchy, /#zodiac-track \.zodiac-sector \{[\s\S]*?stroke: none;/);
-  assert.match(hierarchy, /#solar-track \.term-sector\.is-active \{[\s\S]*?stroke: rgba\(/);
-  assert.match(hierarchy, /#zodiac-track \.zodiac-sector\.is-active \{[\s\S]*?stroke: rgba\(/);
+  assert.match(hierarchy, /#zodiac-track \.zodiac-sector\.is-active \{[\s\S]*?stroke: none;/);
 
-  // The base stylesheet still owns a singular active Ganzhi outline.
+  // The early base stylesheet may still declare a legacy active outline, but the
+  // radial hierarchy must explicitly override it in the composed resting view.
   assert.match(atlas, /\.cycle-sector\.is-active \{[^}]*stroke: rgba\(/s);
 
-  // Dense categorical borders remain opt-in instead of becoming resting grid ink.
+  // Hover/drag can restore temporary manipulation feedback without changing the
+  // resting Selected-Instant grammar.
+  assert.match(boundaries, /#kinetic-wheel\[data-hover-ring="hour"\][\s\S]*?stroke:\s*rgba\(238, 242, 237, \.27\);/);
+  assert.match(boundaries, /#kinetic-wheel\[data-active-ring="hour"\][\s\S]*?stroke:\s*rgba\(244, 230, 183, \.58\);/);
+
+  // Dense categorical borders remain opt-in and own their stroke explicitly.
   assert.match(classification, /data-classification-overlay="on"\] \.cycle-sector\[data-branch-element=/);
+  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\s*\{[\s\S]*?stroke:\s*color-mix/);
   assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\[data-zodiac-modality=/);
 });
 
