@@ -21,14 +21,29 @@ test("ordinary reading keeps long-form notes out of the main path", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
 });
 
-test("ordinary reading keeps only the immediate Now action in the wheel toolbar", () => {
-  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.toolbar-group\[role="group"\]\[aria-label="時間尺度"\],[\s\S]*?#classification-overlay-button,[\s\S]*?#play-button\s*\{\s*display:\s*none;/);
-  assert.doesNotMatch(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #now-button[\s\S]*?display:\s*none;/);
+test("ordinary reading keeps quiet observation-window lenses but hides analysis transport chrome", () => {
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.toolbar-group\[role="group"\]\[aria-label="時間尺度"\][\s\S]*?display:\s*none;/
+  );
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #classification-overlay-button,[\s\S]*?#play-button\s*\{\s*display:\s*none;/
+  );
+  assert.match(css, /\.scale-button\[data-scale="day"\]::after\s*\{\s*content:\s*"日內";/s);
+  assert.match(css, /\.scale-button\[data-scale="year"\]::after\s*\{\s*content:\s*"年度";/s);
+  assert.match(css, /\.scale-button\[data-scale="cycle"\]::after\s*\{\s*content:\s*"六十年";/s);
+  assert.match(css, /\.scale-button\.active\s*\{[^}]*background:\s*transparent;/s);
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #now-button\s*\{[^}]*display:\s*none;/s
+  );
 });
 
-test("ordinary reading preserves exact datetime entry but removes the duplicate range and scale status", () => {
-  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{[\s\S]*?grid-template-columns:\s*minmax\(260px, 360px\);[\s\S]*?opacity:\s*\.62;/);
+test("ordinary reading preserves exact datetime entry but removes duplicate range and diagnostics", () => {
+  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{[\s\S]*?grid-template-columns:\s*minmax\(190px, 230px\);[\s\S]*?opacity:\s*\.52;/);
   assert.match(css, /~ \.timeline-dock \.slider-wrap,[\s\S]*?~ \.timeline-dock \.timeline-status\s*\{\s*display:\s*none;/);
+  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.readout-meta,[\s\S]*?\.boundary-meta\s*\{\s*display:\s*none;/);
   assert.match(css, /#kinetic-instrument\[data-analysis-open="true"\] ~ \.timeline-dock\s*\{\s*opacity:\s*1;/);
   assert.match(css, /\.timeline-dock:focus-within\s*\{\s*opacity:\s*1;/);
 });
