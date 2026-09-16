@@ -26,7 +26,10 @@ import {
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
-import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
+import {
+  SELECTED_INSTANT_COMMAND,
+  selectedInstantFromCommandDetail
+} from "./interaction/selected-instant-command.js";
 import {
   clearLegacyProjectionUrl,
   selectedInstantUrl
@@ -368,7 +371,8 @@ function bindControls() {
     setSelectedInstant(instant, "desktop-input");
   });
   instrument.addEventListener(SELECTED_INSTANT_COMMAND, event => {
-    const instant = Number(event.detail?.instantMs);
+    const instant = selectedInstantFromCommandDetail(event.detail);
+    if (instant === null) return;
     const source = typeof event.detail?.source === "string" ? event.detail.source : "command";
     setSelectedInstant(instant, source);
   });
