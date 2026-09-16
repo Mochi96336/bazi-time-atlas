@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body { margin:0; width:1200px; min-height:900px; background:#0b0f0c; }
+    iframe { display:block; width:1200px; height:900px; border:0; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Temporal context control production harness"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const stage = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    stage.src = new URL("../../?instant=2026-09-15T20%3A14%3A37.000Z&keep=1#analysis", location.href).href;
+
+    stage.addEventListener("load", () => {
+      const win = stage.contentWindow;
+      const doc = stage.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const trigger = doc?.querySelector("#time-context-trigger");
+      const panel = doc?.querySelector("#time-context-popover");
+      const utc = doc?.querySelector("#time-context-utc");
+      const boundary = doc?.querySelector("#time-context-boundary");
+      const apply = doc?.querySelector("#time-context-apply");
+      const timeline = doc?.querySelector(".timeline-dock");
+      const readout = doc?.querySelector("#instant-readout");
+      if (!win || !instrument || !trigger || !panel || !utc || !boundary || !apply || !timeline || !readout) return;
+
+      const selectedBefore = instrument.dataset.selectedInstantMs ?? "";
+      const timelineTopBefore = timeline.getBoundingClientRect().top;
+      win.__timeContextContinuity = "alive";
+
+      probe.dataset.triggerTextDefault = trigger.textContent.trim();
+      probe.dataset.panelHiddenDefault = String(panel.hidden);
+      probe.dataset.selectedBefore = selectedBefore;
+      probe.dataset.defaultUrlHasContext = String(new URL(win.location.href).searchParams.has("utc") || new URL(win.location.href).searchParams.has("dayBoundary"));
+
+      trigger.click();
+      probe.dataset.panelHiddenOpen = String(panel.hidden);
+      probe.dataset.timelineDeltaOpen = String(Math.abs(timeline.getBoundingClientRect().top - timelineTopBefore));
+
+      utc.value = "9";
+      boundary.value = "civil-midnight";
+      apply.click();
+
+      setTimeout(() => {
+        const customUrl = new URL(win.location.href);
+        probe.dataset.selectedCustom = instrument.dataset.selectedInstantMs ?? "";
+        probe.dataset.utcCustom = instrument.dataset.utcOffsetHours ?? "";
+        probe.dataset.boundaryCustom = instrument.dataset.dayBoundary ?? "";
+        probe.dataset.sourceCustom = instrument.dataset.lastTimeContextSource ?? "";
+        probe.dataset.triggerTextCustom = trigger.textContent.trim();
+        probe.dataset.readoutCustom = readout.textContent.trim();
+        probe.dataset.urlUtcCustom = customUrl.searchParams.get("utc") ?? "";
+        probe.dataset.urlBoundaryCustom = customUrl.searchParams.get("dayBoundary") ?? "";
+        probe.dataset.urlInstantCustom = customUrl.searchParams.get("instant") ?? "";
+        probe.dataset.urlKeepCustom = customUrl.searchParams.get("keep") ?? "";
+        probe.dataset.urlHashCustom = customUrl.hash;
+        probe.dataset.panelHiddenAfterApply = String(panel.hidden);
+        probe.dataset.documentContinuity = String(win.__timeContextContinuity === "alive");
+
+        trigger.click();
+        utc.value = "8";
+        boundary.value = "zi-initial-next-day";
+        apply.click();
+
+        setTimeout(() => {
+          const resetUrl = new URL(win.location.href);
+          probe.dataset.selectedReset = instrument.dataset.selectedInstantMs ?? "";
+          probe.dataset.triggerTextReset = trigger.textContent.trim();
+          probe.dataset.resetHasUtc = String(resetUrl.searchParams.has("utc"));
+          probe.dataset.resetHasBoundary = String(resetUrl.searchParams.has("dayBoundary"));
+          probe.dataset.resetInstant = resetUrl.searchParams.get("instant") ?? "";
+          probe.dataset.resetKeep = resetUrl.searchParams.get("keep") ?? "";
+          probe.dataset.resetHash = resetUrl.hash;
+          probe.dataset.ready = "true";
+        }, 100);
+      }, 100);
+    });
+  </script>
+</body>
+</html>
