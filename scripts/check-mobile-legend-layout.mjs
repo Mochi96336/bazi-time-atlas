@@ -3,11 +3,11 @@ import { spawnSync } from "node:child_process";
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const EPS = 1.5;
 const DIRECT_LABELS = [
-  ["year", "年 · YEAR"],
-  ["month", "月 · MONTH"],
-  ["solar", "太陽 · SOLAR"],
-  ["day", "日 · DAY"],
-  ["hour", "時 · HOUR"]
+  ["year", "年"],
+  ["month", "月"],
+  ["solar", "太陽"],
+  ["day", "日"],
+  ["hour", "時"]
 ];
 
 function findBrowser() {

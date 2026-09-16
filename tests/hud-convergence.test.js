@@ -10,7 +10,7 @@ test("normal reading view turns the layer legend into fixed ring identity labels
   assert.match(analysisCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend-row \{[\s\S]*?position:\s*absolute;/);
   assert.match(analysisCss, /\.ring-legend-row i,[\s\S]*?\.ring-legend-row strong \{\s*display:\s*none;/);
 
-  for (const label of ["年 · YEAR", "月 · MONTH", "太陽 · SOLAR", "日 · DAY", "時 · HOUR"]) {
+  for (const label of ["年", "月", "太陽", "日", "時"]) {
     assert.match(analysisCss, new RegExp(`content:\\s*"${label}"`));
   }
 });
