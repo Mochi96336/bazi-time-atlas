@@ -95,6 +95,7 @@ export function createFreeCompareController({
   }
 
   function resetAllOffsets() {
+    dragController.cancelActiveGesture?.({ detent:false, reason:"free-compare-reset" });
     dragController.cancelInertia?.({ detent:false, reason:"free-compare-reset" });
     rings.forEach(ring => resetManualOffset(ringStates[ring.id]));
     if (ringStates.zodiac) resetManualOffset(ringStates.zodiac);
