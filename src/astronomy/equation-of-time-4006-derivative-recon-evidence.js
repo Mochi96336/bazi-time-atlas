@@ -1,0 +1,98 @@
+export const EQUATION_OF_TIME_4006_DERIVATIVE_RECON_EVIDENCE = Object.freeze({
+  id:"swiss-ephemeris-eot-4006-derivative-recon-v1",
+  purpose:"empirical residual-derivative reconnaissance for sizing a future certified Equation-of-Time continuity proof",
+  targetYear:4006,
+  productionModelId:"atlas-tyme-nrel-spa-v1",
+  sourceEvidenceId:"swiss-ephemeris-eot-4006-dense-v2",
+  provenance:Object.freeze({
+    researchPullRequest:209,
+    researchHeadSha:"509e1c7f79c793aa550a9c063f60258232c83c8c",
+    workflowRunId:35095077616,
+    workflowRunNumber:1,
+    artifactId:10444839838,
+    artifactName:"eot-residual-derivative-4006",
+    artifactDigest:"sha256:edb2676fe1101313518d371771ff9589355f33f59a7bba68f8498e09089c4861"
+  }),
+  reference:Object.freeze({
+    authority:"Swiss Ephemeris / Astrodienst",
+    libraryVersion:"2.10.03",
+    upstreamCommit:"9083a12d59e98034fb2337061481ac8800c16e64",
+    function:"swe_time_equ(tjd_ut)",
+    deltaTFunction:"swe_deltat_ex(tjd_ut, FLG_SWIEPH)",
+    inputTimeScale:"astronomical UT / UT1-oriented independent variable",
+    futureUtcPolicyClaim:false,
+    ephemerisFiles:Object.freeze([
+      Object.freeze({ filename:"sepl_36.se1", sha256:"3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0" }),
+      Object.freeze({ filename:"semo_36.se1", sha256:"f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa" })
+    ])
+  }),
+  sampling:Object.freeze({
+    cadenceMinutes:5,
+    cadenceSeconds:300,
+    interiorSamples:105120,
+    terminalEndpointSampled:true,
+    totalSamples:105121,
+    intervals:105120,
+    terminalEndpoint:"4007-01-01T00:00:00",
+    endpointAugmentedGridCoverRadiusSeconds:150
+  }),
+  reproduction:Object.freeze({
+    correctedDenseObservedProductionMaxAbsSeconds:1.4929317113205443,
+    reproducedInteriorObservedProductionMaxAbsSeconds:1.4929317113205443,
+    allGridIncludingEndpointObservedProductionMaxAbsSeconds:1.4929317113205443,
+    toleranceSeconds:1e-9,
+    exactWithinTolerance:true
+  }),
+  empiricalSlopes:Object.freeze({
+    productionResidualForward:Object.freeze({
+      maxAbsSecondsPerSecond:1.9835599204104905e-7,
+      maxAbsSecondsPerDay:0.01713795771234664,
+      worstWindow:Object.freeze({
+        start:"4006-11-16T07:10:00",
+        end:"4006-11-16T07:15:00",
+        startResidualSeconds:1.1296998131290081,
+        endResidualSeconds:1.1296403063269622,
+        deltaResidualSeconds:-0.00005950680204591663
+      })
+    }),
+    productionResidualCentral:Object.freeze({
+      maxAbsSecondsPerSecond:1.9788568183189044e-7,
+      maxAbsSecondsPerDay:0.017097322910275336,
+      worstAt:"4006-11-16T10:05:00"
+    }),
+    alignedResidualForward:Object.freeze({
+      maxAbsSecondsPerSecond:1.1652745739440497e-7,
+      maxAbsSecondsPerDay:0.01006797231887659,
+      worstWindow:Object.freeze({
+        start:"4006-02-06T18:05:00",
+        end:"4006-02-06T18:10:00"
+      })
+    }),
+    alignedResidualCentral:Object.freeze({
+      maxAbsSecondsPerSecond:1.1538844998330788e-7,
+      maxAbsSecondsPerDay:0.0099695620785578,
+      worstAt:"4006-04-12T01:30:00"
+    })
+  }),
+  planning:Object.freeze({
+    continuousCapSeconds:2,
+    existingGridCoverRadiusSeconds:300,
+    maximumCertifiedLipschitzSecondsPerSecondForCap:0.0016902276289315192,
+    maximumCertifiedLipschitzSecondsPerDayForCap:146.03566713968326,
+    observedForwardSlopeToThresholdRatio:0.00011735460280367101,
+    endpointAugmentedGridCoverRadiusSeconds:150,
+    endpointAugmentedMaximumCertifiedLipschitzSecondsPerSecondForCap:0.0033804552578630383,
+    endpointAugmentedMaximumCertifiedLipschitzSecondsPerDayForCap:292.0713342793665,
+    thresholdComparisonIsCertification:false
+  }),
+  interpretation:Object.freeze({
+    empiricalOnly:true,
+    certifiedDerivativeBound:false,
+    certifiedLipschitzBound:false,
+    continuousUpperBound:false,
+    deterministicMembership:false,
+    recurrenceAuthorityGranted:false,
+    observedFiniteDifferenceIsNotCertification:true,
+    reason:"The observed five-minute residual slopes are useful for sizing a future conservative derivative certificate, but sampled finite differences do not prove the residual derivative between samples and cannot supply recurrence authority."
+  })
+});
