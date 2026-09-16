@@ -1,0 +1,48 @@
+export const EQUATION_OF_TIME_4006_SWISS_SECOND_DERIVATIVE_RECON_EVIDENCE = Object.freeze({
+  id:"swiss-eot-4006-second-derivative-recon-v1",
+  targetYear:4006,
+  provenance:Object.freeze({
+    researchPullRequest:226,
+    researchHeadSha:"1a52aa728e457858b2695a53aee476107025a5bd",
+    workflowRunId:35117230212,
+    artifactId:10455429126,
+    artifactName:"swiss-eot-second-derivative-recon-4006",
+    artifactDigest:"sha256:f2006a48106e96ee22a9c55da9f8c4559a55881f3ef8d61b83b23d2e644bc892",
+    swissUpstreamCommit:"9083a12d59e98034fb2337061481ac8800c16e64",
+    pyswissephVersion:"2.10.3.2"
+  }),
+  sampling:Object.freeze({
+    cadenceSeconds:300,
+    intervals:105120,
+    samplesIncludingTerminalEndpoint:105121,
+    swiephSamples:105121
+  }),
+  observed:Object.freeze({
+    sunRaEngineSpeedMinDegPerDay:0.8843949768135152,
+    sunRaEngineSpeedMaxDegPerDay:1.0962922924964844,
+    maxAbsEotForwardSlopeSolarSecondsPerDay:26.555449898870393,
+    maxAbsEotSecondDifferenceDegPerDaySquared:0.011037621181458235,
+    maxAbsSiderealResidualSecondDifferenceDegPerDaySquared:0.0001347330689895898,
+    maxAbsSunRaForwardSecondDifferenceDegPerDaySquared:0.010992255178280175,
+    maxAbsSunRaEngineSpeedObservedAccelerationDegPerDaySquared:0.0033834108355961234
+  }),
+  planning:Object.freeze({
+    requiredCertifiedSecondDerivativeBoundDegPerDaySquared:104.94059155911904,
+    observedSecondDifferenceToRequiredBoundRatio:0.00010517971184906186,
+    requiredBoundToObservedSecondDifferenceRatio:9507.536980468723,
+    nextProofTarget:"certified-global-Swiss-EoT-second-derivative-bound",
+    suggestedSourceLayer:"Swiss SWIEPH Chebyshev segments plus long-term sidereal corrections"
+  }),
+  interpretation:Object.freeze({
+    empiricalOnly:true,
+    observedSecondDifferencesAreCertification:false,
+    swissPublicSpeedChangesAreCertification:false,
+    certifiedSwissEotSecondDerivativeBound:false,
+    certifiedSwissEotDerivativeBound:false,
+    residualDerivativeCertified:false,
+    continuousResidualUpperBound:false,
+    deterministicMembership:false,
+    recurrenceAuthorityGranted:false,
+    reason:"The 5-minute second-difference reconnaissance shows roughly 9507x empirical headroom relative to the MVT proof threshold, but it does not bound curvature between samples. A source/interval hard bound is still required."
+  })
+});
