@@ -1,12 +1,18 @@
 import { baziMonths, solarTerms, zodiacSigns } from "../data.js";
 import { apparentSolarLongitude } from "../astronomy/solar-longitude.js";
-import { DAY_BOUNDARY, resolveBirthPillars } from "../calendar/tyme-adapter.js";
+import { resolveBirthPillars } from "../calendar/tyme-adapter.js";
 import { monthPillarForYearStem } from "../calendar/five-tigers.js";
 import { heavenlyStems, sexagenaryCycle } from "../sexagenary-data.js";
 import { discretePhaseWindows } from "./discrete-phase.js";
+import {
+  DEFAULT_ATLAS_TIME_CONTEXT,
+  normalizeAtlasTimeContext
+} from "./atlas-time-context.js";
 import { normalizeDegrees } from "./polar-geometry.js";
 
-export const ATLAS_UTC_OFFSET_HOURS = 8;
+// Compatibility export for callers/tests that still name the current default.
+// UTC+08 is now a default context value, not a display-model invariant.
+export const ATLAS_UTC_OFFSET_HOURS = DEFAULT_ATLAS_TIME_CONTEXT.utcOffsetHours;
 export const ATLAS_SEXAGENARY_NAMES = Object.freeze(sexagenaryCycle.map(item => item.name));
 
 const VALID_STEM_NAMES = new Set(heavenlyStems.map(item => item.name));
@@ -54,8 +60,9 @@ function nearestCycleIndexForBranch(branch, preferredIndex) {
   }, null)?.index ?? preferredIndex;
 }
 
-export function civilFieldsFromInstant(ms) {
-  const shifted = new Date(ms + ATLAS_UTC_OFFSET_HOURS * 3_600_000);
+export function civilFieldsFromInstant(ms, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {
+  const context = normalizeAtlasTimeContext(timeContext);
+  const shifted = new Date(ms + context.utcOffsetHours * 3_600_000);
   return {
     year: shifted.getUTCFullYear(),
     month: shifted.getUTCMonth() + 1,
@@ -66,16 +73,21 @@ export function civilFieldsFromInstant(ms) {
   };
 }
 
-export function solarLongitudeAtInstant(ms) {
-  return apparentSolarLongitude(civilFieldsFromInstant(ms), ATLAS_UTC_OFFSET_HOURS);
+export function solarLongitudeAtInstant(ms, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {
+  const context = normalizeAtlasTimeContext(timeContext);
+  return apparentSolarLongitude(
+    civilFieldsFromInstant(ms, context),
+    context.utcOffsetHours
+  );
 }
 
-export function instantFromAtlasLocalInput(value) {
+export function instantFromAtlasLocalInput(value, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {
   const match = /^(\d{4,6})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
   if (!match) return null;
+  const context = normalizeAtlasTimeContext(timeContext);
   const [, y, m, d, h, min, sec = "0"] = match;
   return Date.UTC(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(sec))
-    - ATLAS_UTC_OFFSET_HOURS * 3_600_000;
+    - context.utcOffsetHours * 3_600_000;
 }
 
 export function atlasInputValueFromFields(fields) {
@@ -119,15 +131,20 @@ export function parseAtlasSearch(search) {
   return Object.freeze({ instantMs: null, legacyProjection });
 }
 
-export function resolveAtlasDisplayState({ selectedMs, legacyProjection = null }) {
-  const fields = civilFieldsFromInstant(selectedMs);
+export function resolveAtlasDisplayState({
+  selectedMs,
+  legacyProjection = null,
+  timeContext = DEFAULT_ATLAS_TIME_CONTEXT
+}) {
+  const context = normalizeAtlasTimeContext(timeContext);
+  const fields = civilFieldsFromInstant(selectedMs, context);
   const result = resolveBirthPillars(fields, {
-    utcOffsetHours: ATLAS_UTC_OFFSET_HOURS,
-    dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+    utcOffsetHours: context.utcOffsetHours,
+    dayBoundary: context.dayBoundary
   });
-  const actualLongitude = apparentSolarLongitude(fields, ATLAS_UTC_OFFSET_HOURS);
+  const actualLongitude = apparentSolarLongitude(fields, context.utcOffsetHours);
   const longitude = legacyProjection?.longitude ?? actualLongitude;
-  const phases = { ...discretePhaseWindows(selectedMs) };
+  const phases = { ...discretePhaseWindows(selectedMs, context) };
   const yearName = result.pillars.year.name;
   let monthName = result.pillars.month.name;
   let monthBranch = result.pillars.month.branch;
@@ -146,6 +163,7 @@ export function resolveAtlasDisplayState({ selectedMs, legacyProjection = null }
 
   return {
     fields,
+    timeContext: context,
     longitude,
     actualLongitude,
     phases,
