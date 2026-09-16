@@ -47,7 +47,7 @@ test("selected-instant interval surfaces stay borderless until interaction or cl
 
   // Hover/drag can restore temporary manipulation feedback without changing the
   // resting Selected-Instant grammar.
-  assert.match(boundaries, /#kinetic-wheel\[data-hover-ring="hour"\][\s\S]*?stroke:\s*rgba\(238, 242, 237, \.27\);/);
+  assert.match(boundaries, /#kinetic-wheel\[data-hover-ring="hour"\][\s\S]*?stroke:\s*rgba\(236, 239, 239, \.27\);/);
   assert.match(boundaries, /#kinetic-wheel\[data-active-ring="hour"\][\s\S]*?stroke:\s*rgba\(244, 230, 183, \.58\);/);
 
   // Dense categorical borders remain opt-in and own their stroke explicitly.
