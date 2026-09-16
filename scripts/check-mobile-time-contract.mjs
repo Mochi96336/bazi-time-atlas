@@ -52,6 +52,12 @@ if (attr(probe, "data-mobile-source") !== "mobile-exact") {
 if (attr(probe, "data-mobile-url-instant") !== "2026-09-15T20:15:09.000Z") {
   throw new Error(`mobile exact-time apply did not persist the exact instant into the URL: ${url}`);
 }
+if (attr(probe, "data-mobile-url-keep") !== "1" || attr(probe, "data-mobile-url-hash") !== "#analysis") {
+  throw new Error(`mobile committed instant discarded unrelated URL state: ${url}`);
+}
+if (attr(probe, "data-mobile-legacy-keys") !== "false") {
+  throw new Error(`mobile committed instant retained legacy projection keys: ${url}`);
+}
 if (attr(probe, "data-mobile-document-continuity") !== "true") {
   throw new Error(`mobile exact-time apply rebuilt the document instead of updating in place: ${url}`);
 }
@@ -76,5 +82,14 @@ if (attr(probe, "data-desktop-selected-instant-ms") !== String(expectedDesktopMs
 if (attr(probe, "data-desktop-source") !== "desktop-input") {
   throw new Error(`desktop exact-time edit bypassed the selected-instant state owner: ${url}`);
 }
+if (attr(probe, "data-desktop-url-instant") !== "2026-09-15T20:14:52.000Z") {
+  throw new Error(`desktop exact-time edit did not persist the committed Selected Instant into the URL: ${url}`);
+}
+if (attr(probe, "data-desktop-url-keep") !== "1" || attr(probe, "data-desktop-url-hash") !== "#analysis") {
+  throw new Error(`desktop committed instant discarded unrelated URL state: ${url}`);
+}
+if (attr(probe, "data-desktop-legacy-keys") !== "false") {
+  throw new Error(`desktop committed instant retained legacy projection keys: ${url}`);
+}
 
-console.log(`[exact-time] PASS in-place mobile command + desktop second-level round trip; mobile share=${share.toFixed(3)}: ${url}`);
+console.log(`[exact-time] PASS symmetric committed URL persistence + in-place mobile command; mobile share=${share.toFixed(3)}: ${url}`);
