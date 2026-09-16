@@ -22,12 +22,22 @@ test("desktop atlas header has one current-view owner", () => {
   );
 });
 
-test("mobile atlas keeps current-page navigation available", () => {
-  const mobile = css.match(/@media \(max-width: 600px\) \{([\s\S]*)\}\s*$/);
-  assert.ok(mobile, "shared mobile navigation override must remain present");
+test("mobile atlas keeps one typographic current-page owner without pill chrome", () => {
+  const mobile = css.match(/@media \(max-width: 480px\) \{([\s\S]*?)\n\}/);
+  assert.ok(mobile, "compact atlas navigation override must remain present");
+  assert.match(
+    mobile[1],
+    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/,
+    "mobile current-view identity should be text, not a dashboard pill"
+  );
+  assert.match(
+    mobile[1],
+    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]::after\s*\{[\s\S]*?bottom:\s*0;[\s\S]*?opacity:\s*\.72;/,
+    "mobile current-view identity should retain one quiet active baseline"
+  );
   assert.doesNotMatch(
     mobile[1],
     /a\[aria-current="page"\][^}]*display:\s*none;/s,
-    "mobile must not inherit the desktop-only hidden current-page link"
+    "mobile must retain its current-page owner because the compact brand is hidden"
   );
 });
