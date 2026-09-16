@@ -5,11 +5,18 @@ import { DAY_BOUNDARY } from "../src/calendar/day-boundary.js";
 import {
   DEFAULT_ATLAS_TIME_CONTEXT,
   atlasTimeContextFromSearch,
+  formatAtlasUtcOffset,
   writeAtlasTimeContextSearch
 } from "../src/wheel/atlas-time-context.js";
 
 test("missing temporal context query stays on minimal production defaults", () => {
   assert.equal(atlasTimeContextFromSearch("?instant=2026-09-16T00%3A00%3A00.000Z"), DEFAULT_ATLAS_TIME_CONTEXT);
+});
+
+test("UTC offset labels preserve whole and fractional fixed offsets", () => {
+  assert.equal(formatAtlasUtcOffset(8), "UTC+08:00");
+  assert.equal(formatAtlasUtcOffset(9), "UTC+09:00");
+  assert.equal(formatAtlasUtcOffset(-3.5), "UTC−03:30");
 });
 
 test("non-default fixed offset and day boundary round-trip from query state", () => {
@@ -65,4 +72,5 @@ test("writer rejects invalid temporal context instead of serializing partial sta
     () => writeAtlasTimeContextSearch(new URLSearchParams(), { dayBoundary: "unknown" }),
     /dayBoundary/
   );
+  assert.throws(() => formatAtlasUtcOffset(99), /utcOffsetHours/);
 });

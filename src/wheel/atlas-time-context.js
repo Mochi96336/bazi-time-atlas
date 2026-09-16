@@ -13,6 +13,15 @@ function validateUtcOffsetHours(value) {
   }
 }
 
+export function formatAtlasUtcOffset(value) {
+  validateUtcOffsetHours(value);
+  const totalMinutes = Math.round(Math.abs(value) * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const sign = value < 0 ? "−" : "+";
+  return `UTC${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 export function normalizeAtlasTimeContext(value = DEFAULT_ATLAS_TIME_CONTEXT) {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new TypeError("atlas time context must be an object");

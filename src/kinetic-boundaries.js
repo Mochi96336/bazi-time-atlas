@@ -2,18 +2,21 @@ import "./ring-visibility-controls.js";
 import "./discrete-phase-view.js";
 import "./kinetic-fan-guard.js";
 import {
-  formatSolarTermEvent,
   jieBoundaryContext,
   solarTermEventsBetween,
   solarTermNamedEventsBetween
 } from "./astronomy/solar-term-boundaries.js";
+import { civilFieldsFromInstant } from "./wheel/atlas-display-model.js";
+import {
+  DEFAULT_ATLAS_TIME_CONTEXT,
+  formatAtlasUtcOffset,
+  normalizeAtlasTimeContext
+} from "./wheel/atlas-time-context.js";
 
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
-const UTC_OFFSET_HOURS = 8;
 
 const instrument = document.querySelector("#kinetic-instrument");
-const instantReadout = document.querySelector("#instant-readout");
 const slider = document.querySelector("#time-slider");
 const boundaryRail = document.querySelector("#boundary-rail");
 const previousReadout = document.querySelector("#previous-jie-readout");
@@ -24,22 +27,39 @@ let railSignature = null;
 let railEvents = [];
 let railNodes = [];
 
-function instantFromReadout() {
-  const text = instantReadout?.textContent ?? "";
-  const match = /(-?\d{1,6})-(\d{2})-(\d{2}) · (\d{2}):(\d{2}):(\d{2})/.exec(text);
-  if (!match) return null;
-  const [, year, month, day, hour, minute, second] = match;
-  const date = new Date(0);
-  date.setUTCFullYear(Number(year), Number(month) - 1, Number(day));
-  date.setUTCHours(Number(hour), Number(minute), Number(second), 0);
-  return date.getTime() - UTC_OFFSET_HOURS * HOUR_MS;
+function selectedInstantMs() {
+  const value = Number(instrument?.dataset.selectedInstantMs);
+  return Number.isFinite(value) ? value : null;
 }
 
-function formatCompact(event) {
+function currentTimeContext() {
+  if (!instrument) return DEFAULT_ATLAS_TIME_CONTEXT;
+  const rawUtc = instrument.dataset.utcOffsetHours;
+  const rawBoundary = instrument.dataset.dayBoundary;
+  if (rawUtc === undefined && rawBoundary === undefined) return DEFAULT_ATLAS_TIME_CONTEXT;
+
+  try {
+    return normalizeAtlasTimeContext({
+      utcOffsetHours: rawUtc === undefined ? DEFAULT_ATLAS_TIME_CONTEXT.utcOffsetHours : Number(rawUtc),
+      dayBoundary: rawBoundary ?? DEFAULT_ATLAS_TIME_CONTEXT.dayBoundary
+    });
+  } catch {
+    return DEFAULT_ATLAS_TIME_CONTEXT;
+  }
+}
+
+function formatCompact(event, timeContext) {
   if (!event) return "—";
-  const fields = event.referenceFields;
+  const fields = civilFieldsFromInstant(event.instantMs, timeContext);
   const pad = value => String(value).padStart(2, "0");
   return `${event.name} · ${pad(fields.month)}/${pad(fields.day)} ${pad(fields.hour)}:${pad(fields.minute)}:${pad(fields.second)}`;
+}
+
+function formatBoundaryTitle(event, timeContext) {
+  const fields = civilFieldsFromInstant(event.instantMs, timeContext);
+  const pad = value => String(value).padStart(2, "0");
+  const offset = formatAtlasUtcOffset(timeContext.utcOffsetHours);
+  return `${event.name} · ${fields.year}-${pad(fields.month)}-${pad(fields.day)} ${pad(fields.hour)}:${pad(fields.minute)}:${pad(fields.second)} · ${offset}`;
 }
 
 function activeScale() {
@@ -61,12 +81,12 @@ function railWindow(selectedMs) {
   };
 }
 
-function renderRail(selectedMs) {
+function renderRail(selectedMs, timeContext) {
   if (!boundaryRail || !slider) return;
   const window = railWindow(selectedMs);
   if (!window) return;
   const scale = activeScale();
-  const signature = `${scale}|${Math.round(window.anchorMs / 1000)}|${window.minDays}|${window.maxDays}`;
+  const signature = `${scale}|${Math.round(window.anchorMs / 1000)}|${window.minDays}|${window.maxDays}|${timeContext.utcOffsetHours}`;
   if (signature === railSignature) return;
   railSignature = signature;
 
@@ -82,7 +102,7 @@ function renderRail(selectedMs) {
     marker.style.left = `${Math.max(0, Math.min(1, position)) * 100}%`;
     marker.dataset.boundaryName = event.name;
     marker.dataset.boundaryInstant = new Date(event.instantMs).toISOString();
-    marker.title = `${formatSolarTermEvent(event)} · UTC+08:00`;
+    marker.title = formatBoundaryTitle(event, timeContext);
     if (scale === "year") {
       const label = document.createElement("i");
       label.textContent = event.name;
@@ -92,9 +112,11 @@ function renderRail(selectedMs) {
     return marker;
   });
 
-  boundaryMode.textContent = scale === "cycle"
-    ? "60 年尺度：只標立春換年"
-    : "精確「節」界 · UTC+08:00";
+  if (boundaryMode) {
+    boundaryMode.textContent = scale === "cycle"
+      ? "60 年尺度：只標立春換年"
+      : `精確「節」界 · ${formatAtlasUtcOffset(timeContext.utcOffsetHours)}`;
+  }
 }
 
 function updateNearMarker(selectedMs) {
@@ -105,10 +127,10 @@ function updateNearMarker(selectedMs) {
   });
 }
 
-function updateBoundaryContext(selectedMs) {
+function updateBoundaryContext(selectedMs, timeContext) {
   const context = jieBoundaryContext(selectedMs);
-  previousReadout.textContent = formatCompact(context.previous);
-  nextReadout.textContent = formatCompact(context.next);
+  if (previousReadout) previousReadout.textContent = formatCompact(context.previous, timeContext);
+  if (nextReadout) nextReadout.textContent = formatCompact(context.next, timeContext);
 
   if (context.previous) {
     instrument.dataset.previousJie = context.previous.name;
@@ -121,15 +143,19 @@ function updateBoundaryContext(selectedMs) {
 }
 
 function refresh() {
-  const selectedMs = instantFromReadout();
+  const selectedMs = selectedInstantMs();
   if (!Number.isFinite(selectedMs)) return;
-  renderRail(selectedMs);
+  const timeContext = currentTimeContext();
+  renderRail(selectedMs, timeContext);
   updateNearMarker(selectedMs);
-  updateBoundaryContext(selectedMs);
+  updateBoundaryContext(selectedMs, timeContext);
 }
 
-if (instantReadout && slider && boundaryRail) {
-  new MutationObserver(refresh).observe(instantReadout, { childList: true, characterData: true, subtree: true });
+if (instrument && slider && boundaryRail) {
+  new MutationObserver(refresh).observe(instrument, {
+    attributes:true,
+    attributeFilter:["data-selected-instant-ms", "data-utc-offset-hours", "data-day-boundary"]
+  });
   slider.addEventListener("input", refresh);
   document.querySelectorAll("[data-scale]").forEach(button => button.addEventListener("click", () => queueMicrotask(refresh)));
   refresh();

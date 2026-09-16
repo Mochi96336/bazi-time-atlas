@@ -23,7 +23,7 @@
     const mobileFrame = document.querySelector("#mobile-stage");
     const desktopFrame = document.querySelector("#desktop-stage");
     const probe = document.querySelector("#probe");
-    const source = "../../?instant=2026-09-15T20%3A14%3A37.000Z&lambda=271.25&month=%E5%AD%90&yearStem=%E4%B9%99&keep=1#analysis";
+    const source = "../../?instant=2026-09-15T20%3A14%3A37.000Z&lambda=271.25&month=%E5%AD%90&yearStem=%E4%B9%99&utc=9&dayBoundary=civil-midnight&keep=1#analysis";
     mobileFrame.src = new URL(source, location.href).href;
     desktopFrame.src = new URL(source, location.href).href;
     let mobileLoaded = false;
@@ -44,14 +44,16 @@
       const input = mobileDoc?.querySelector("#mobile-instant-input");
       const apply = mobileDoc?.querySelector("#mobile-time-apply");
       const status = mobileDoc?.querySelector("#mobile-time-status");
+      const mobileReadout = mobileDoc?.querySelector("#instant-readout");
 
       const desktopWin = desktopFrame.contentWindow;
       const desktopDoc = desktopFrame.contentDocument;
       const desktopInstrument = desktopDoc?.querySelector("#kinetic-instrument");
       const desktopInput = desktopDoc?.querySelector("#instant-input");
+      const desktopReadout = desktopDoc?.querySelector("#instant-readout");
 
-      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply || !status ||
-          !desktopWin || !desktopDoc || !desktopInstrument || !desktopInput) return;
+      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply || !status || !mobileReadout ||
+          !desktopWin || !desktopDoc || !desktopInstrument || !desktopInput || !desktopReadout) return;
 
       const dockStyle = mobileWin.getComputedStyle(dock);
       const shellStyle = mobileWin.getComputedStyle(shell);
@@ -64,6 +66,9 @@
         probe.dataset.dockDisplay = dockStyle.display;
         probe.dataset.inputStep = input.getAttribute("step") ?? "";
         probe.dataset.inputValue = input.value;
+        probe.dataset.mobileInitialReadout = mobileReadout.textContent.trim();
+        probe.dataset.mobileInitialUtc = instrument.dataset.utcOffsetHours ?? "";
+        probe.dataset.mobileInitialBoundary = instrument.dataset.dayBoundary ?? "";
         probe.dataset.shellOverflowY = shellStyle.overflowY;
         probe.dataset.shellScrollable = String(shell.scrollHeight > shell.clientHeight + 2);
         probe.dataset.instrumentShare = String(instrumentRect.height / mobileWin.innerHeight);
@@ -75,12 +80,15 @@
         probe.dataset.desktopInitialPrecision = desktopInput.dataset.precision ?? "";
         probe.dataset.desktopInitialValue = desktopInput.value;
         probe.dataset.desktopInitialValid = String(desktopInput.validity.valid);
+        probe.dataset.desktopInitialReadout = desktopReadout.textContent.trim();
+        probe.dataset.desktopInitialUtc = desktopInstrument.dataset.utcOffsetHours ?? "";
+        probe.dataset.desktopInitialBoundary = desktopInstrument.dataset.dayBoundary ?? "";
       }
 
       if (!mobileApplied) {
         mobileApplied = true;
         mobileWin.__exactTimeContinuity = "alive";
-        input.value = "2026-09-16T04:15:09";
+        input.value = "2026-09-16T05:15:09";
         input.dispatchEvent(new Event("input", { bubbles:true }));
         apply.click();
         setTimeout(snapshot, 150);
@@ -92,6 +100,8 @@
       probe.dataset.mobileSelectedInstantMs = instrument.dataset.selectedInstantMs ?? "";
       probe.dataset.mobileSource = instrument.dataset.lastSelectedInstantSource ?? "";
       probe.dataset.mobileUrlInstant = mobileUrl.searchParams.get("instant") ?? "";
+      probe.dataset.mobileUrlUtc = mobileUrl.searchParams.get("utc") ?? "";
+      probe.dataset.mobileUrlBoundary = mobileUrl.searchParams.get("dayBoundary") ?? "";
       probe.dataset.mobileUrlKeep = mobileUrl.searchParams.get("keep") ?? "";
       probe.dataset.mobileUrlHash = mobileUrl.hash;
       probe.dataset.mobileLegacyKeys = String(["lambda", "month", "yearStem"].some(key => mobileUrl.searchParams.has(key)));
@@ -102,7 +112,7 @@
 
       if (!desktopEdited) {
         desktopEdited = true;
-        desktopInput.value = "2026-09-16T04:14:52";
+        desktopInput.value = "2026-09-16T05:14:52";
         desktopInput.dispatchEvent(new Event("change", { bubbles:true }));
         setTimeout(snapshot, 120);
         return;
@@ -114,6 +124,8 @@
       probe.dataset.desktopSelectedInstantMs = desktopInstrument.dataset.selectedInstantMs ?? "";
       probe.dataset.desktopSource = desktopInstrument.dataset.lastSelectedInstantSource ?? "";
       probe.dataset.desktopUrlInstant = desktopUrl.searchParams.get("instant") ?? "";
+      probe.dataset.desktopUrlUtc = desktopUrl.searchParams.get("utc") ?? "";
+      probe.dataset.desktopUrlBoundary = desktopUrl.searchParams.get("dayBoundary") ?? "";
       probe.dataset.desktopUrlKeep = desktopUrl.searchParams.get("keep") ?? "";
       probe.dataset.desktopUrlHash = desktopUrl.hash;
       probe.dataset.desktopLegacyKeys = String(["lambda", "month", "yearStem"].some(key => desktopUrl.searchParams.has(key)));
