@@ -17,6 +17,42 @@ test("desktop reading view removes narrative and elevated card chrome", () => {
   assert.match(css, /\.instrument-shell\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
 });
 
+test("desktop wheel owns the viewport instead of a capped document column", () => {
+  assert.match(
+    css,
+    /\.kinetic-shell\s*\{[\s\S]*?width:\s*100%;[\s\S]*?max-width:\s*none;[\s\S]*?padding:\s*12px 0 22px;/
+  );
+  assert.doesNotMatch(css, /\.kinetic-shell\s*\{[^}]*width:\s*min\(1760px,\s*100%\)/s);
+  assert.match(
+    css,
+    /\.instrument-shell\s*\{[\s\S]*?height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);[\s\S]*?container-type:\s*size;/
+  );
+  assert.match(
+    css,
+    /\.kinetic-topbar\s*\{[^}]*padding-inline:\s*clamp\(14px,\s*2vw,\s*32px\);/s,
+    "full-bleed wheel must not push product/navigation chrome against the viewport edge"
+  );
+});
+
+test("wide desktop ring identities follow camera height instead of old width percentages", () => {
+  const wide = css.match(/@media \(min-width: 821px\) \{([\s\S]*?)\n\}/);
+  assert.ok(wide, "wide desktop identity placement override must exist");
+  for (const [ring, offset, top] of [
+    ["year", "57.08", "36.26"],
+    ["month", "49.08", "51.97"],
+    ["solar", "41.08", "67.67"],
+    ["day", "34.14", "81.28"],
+    ["hour", "32.01", "85.47"]
+  ]) {
+    assert.match(
+      wide[1],
+      new RegExp(`\\.ring-${ring}\\s*\\{[^}]*left:\\s*calc\\(50% - ${offset}cqh\\);[^}]*top:\\s*${top}%;`, "s"),
+      `${ring} identity should stay on the intended radial spoke across desktop aspect ratios`
+    );
+  }
+  assert.doesNotMatch(wide[1], /\.ring-(?:year|month|solar|day|hour)\s*\{[^}]*left:\s*\d+(?:\.\d+)?%;/s);
+});
+
 test("mobile reading view removes hero/card chrome without stealing shell scroll ownership", () => {
   const mobile = css.match(/@media \(max-width: 480px\) \{([\s\S]*?)\n\}/);
   assert.ok(mobile, "mobile instrument-first override must exist");
