@@ -43,6 +43,17 @@ test("leaving legacy projection removes only projection keys", () => {
   assert.equal(url.searchParams.has("yearStem"), false);
 });
 
+test("clearing projection keys never discards an already committed exact instant", () => {
+  const href = clearLegacyProjectionUrl(
+    "https://example.test/atlas/?instant=2026-09-15T20%3A14%3A52.000Z&lambda=271.25&keep=1#analysis"
+  );
+  const url = new URL(href);
+  assert.equal(url.searchParams.get("instant"), "2026-09-15T20:14:52.000Z");
+  assert.equal(url.searchParams.get("keep"), "1");
+  assert.equal(url.hash, "#analysis");
+  assert.equal(url.searchParams.has("lambda"), false);
+});
+
 test("invalid URL or instant inputs fail closed", () => {
   assert.equal(selectedInstantUrl("not a url", Date.now()), null);
   assert.equal(selectedInstantUrl("https://example.test/atlas/", Number.NaN), null);
