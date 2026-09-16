@@ -1,0 +1,50 @@
+/* Mobile legend composition owns HUD placement only. Wheel geometry, time state,
+   layer semantics, analysis state, and classification flow remain owned by
+   their existing modules. */
+@media (max-width: 480px) {
+  .ring-legend {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    gap: 2px 4px;
+  }
+
+  .ring-legend-row,
+  .ring-legend-row[data-ring-toggle],
+  .reference-frame-control {
+    order: initial;
+  }
+
+  .ring-legend-row,
+  .ring-legend-row[data-ring-toggle] {
+    display: flex;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    gap: 4px;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .ring-year { grid-column: 1; grid-row: 1; }
+  .ring-month { grid-column: 2; grid-row: 1; }
+  .ring-day { grid-column: 3; grid-row: 1; }
+  .ring-hour { grid-column: 4; grid-row: 1; }
+  .ring-solar { grid-column: 1 / -1; grid-row: 2; }
+
+  .reference-frame-control {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Analysis adds a third legend row. Keep its exit/status controls below that
+     row. Classification owns its separate below-instrument flow band. */
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 96px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
+    top: 96px;
+  }
+}
