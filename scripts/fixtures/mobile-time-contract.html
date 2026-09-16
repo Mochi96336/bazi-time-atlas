@@ -3,48 +3,94 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>390px precise-time probe</title>
+  <title>Exact-time production probe</title>
   <style>
-    html, body { margin:0; width:390px; height:844px; background:#0b0f0c; }
-    #stage { display:block; width:390px; height:844px; border:0; }
+    html, body { margin:0; width:1600px; min-height:1000px; background:#0b0f0c; }
+    .stages { display:flex; gap:10px; align-items:flex-start; }
+    iframe { display:block; border:0; }
+    #mobile-stage { width:390px; height:844px; }
+    #desktop-stage { width:1200px; height:900px; }
     #probe { display:none; }
   </style>
 </head>
 <body>
-  <iframe id="stage" title="Mobile precise-time production harness"></iframe>
+  <div class="stages">
+    <iframe id="mobile-stage" title="Mobile precise-time production harness"></iframe>
+    <iframe id="desktop-stage" title="Desktop precise-time production harness"></iframe>
+  </div>
   <output id="probe" data-ready="false"></output>
   <script>
-    const frame = document.querySelector("#stage");
+    const mobileFrame = document.querySelector("#mobile-stage");
+    const desktopFrame = document.querySelector("#desktop-stage");
     const probe = document.querySelector("#probe");
-    frame.src = new URL("../../?instant=2026-09-15T20%3A14%3A37.000Z", location.href).href;
+    const source = "../../?instant=2026-09-15T20%3A14%3A37.000Z";
+    mobileFrame.src = new URL(source, location.href).href;
+    desktopFrame.src = new URL(source, location.href).href;
+    let mobileLoaded = false;
+    let desktopLoaded = false;
+    let desktopEdited = false;
 
     function snapshot() {
-      const win = frame.contentWindow;
-      const doc = frame.contentDocument;
-      const shell = doc?.querySelector(".kinetic-shell");
-      const instrument = doc?.querySelector("#kinetic-instrument");
-      const dock = doc?.querySelector("#mobile-time-dock");
-      const input = doc?.querySelector("#mobile-instant-input");
-      const apply = doc?.querySelector("#mobile-time-apply");
-      if (!win || !doc || !shell || !instrument || !dock || !input || !apply) return;
-      const dockStyle = win.getComputedStyle(dock);
-      const shellStyle = win.getComputedStyle(shell);
+      if (!mobileLoaded || !desktopLoaded) return;
+
+      const mobileWin = mobileFrame.contentWindow;
+      const mobileDoc = mobileFrame.contentDocument;
+      const shell = mobileDoc?.querySelector(".kinetic-shell");
+      const instrument = mobileDoc?.querySelector("#kinetic-instrument");
+      const dock = mobileDoc?.querySelector("#mobile-time-dock");
+      const input = mobileDoc?.querySelector("#mobile-instant-input");
+      const apply = mobileDoc?.querySelector("#mobile-time-apply");
+
+      const desktopWin = desktopFrame.contentWindow;
+      const desktopDoc = desktopFrame.contentDocument;
+      const desktopInstrument = desktopDoc?.querySelector("#kinetic-instrument");
+      const desktopInput = desktopDoc?.querySelector("#instant-input");
+
+      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply ||
+          !desktopWin || !desktopDoc || !desktopInstrument || !desktopInput) return;
+
+      const dockStyle = mobileWin.getComputedStyle(dock);
+      const shellStyle = mobileWin.getComputedStyle(shell);
       const instrumentRect = instrument.getBoundingClientRect();
       const dockRect = dock.getBoundingClientRect();
-      probe.dataset.ready = "true";
-      probe.dataset.innerWidth = String(win.innerWidth);
+
+      probe.dataset.innerWidth = String(mobileWin.innerWidth);
       probe.dataset.dockDisplay = dockStyle.display;
       probe.dataset.inputStep = input.getAttribute("step") ?? "";
       probe.dataset.inputValue = input.value;
       probe.dataset.shellOverflowY = shellStyle.overflowY;
       probe.dataset.shellScrollable = String(shell.scrollHeight > shell.clientHeight + 2);
-      probe.dataset.instrumentShare = String(instrumentRect.height / win.innerHeight);
+      probe.dataset.instrumentShare = String(instrumentRect.height / mobileWin.innerHeight);
       probe.dataset.dockAfterInstrument = String(dockRect.top >= instrumentRect.bottom - 1);
       probe.dataset.applyVisible = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
+
+      if (!desktopEdited) {
+        probe.dataset.desktopInnerWidth = String(desktopWin.innerWidth);
+        probe.dataset.desktopInitialStep = desktopInput.step;
+        probe.dataset.desktopInitialPrecision = desktopInput.dataset.precision ?? "";
+        probe.dataset.desktopInitialValue = desktopInput.value;
+        probe.dataset.desktopInitialValid = String(desktopInput.validity.valid);
+        desktopEdited = true;
+        desktopInput.value = "2026-09-16T04:14:52";
+        desktopInput.dispatchEvent(new Event("change", { bubbles:true }));
+        setTimeout(snapshot, 120);
+        return;
+      }
+
+      probe.dataset.desktopRoundtripValue = desktopInput.value;
+      probe.dataset.desktopRoundtripValid = String(desktopInput.validity.valid);
+      probe.dataset.desktopSelectedInstantMs = desktopInstrument.dataset.selectedInstantMs ?? "";
+      probe.dataset.ready = "true";
     }
 
-    frame.addEventListener("load", () => {
-      snapshot();
+    mobileFrame.addEventListener("load", () => {
+      mobileLoaded = true;
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 100);
+      setTimeout(snapshot, 700);
+    });
+    desktopFrame.addEventListener("load", () => {
+      desktopLoaded = true;
       queueMicrotask(snapshot);
       setTimeout(snapshot, 100);
       setTimeout(snapshot, 700);

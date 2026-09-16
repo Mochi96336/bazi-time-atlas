@@ -71,16 +71,16 @@ export function solarLongitudeAtInstant(ms) {
 }
 
 export function instantFromAtlasLocalInput(value) {
-  const match = /^(\d{4,6})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
+  const match = /^(\d{4,6})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
   if (!match) return null;
-  const [, y, m, d, h, min] = match;
-  return Date.UTC(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), 0)
+  const [, y, m, d, h, min, sec = "0"] = match;
+  return Date.UTC(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(sec))
     - ATLAS_UTC_OFFSET_HOURS * 3_600_000;
 }
 
 export function atlasInputValueFromFields(fields) {
   const pad = value => String(value).padStart(2, "0");
-  return `${String(fields.year).padStart(4, "0")}-${pad(fields.month)}-${pad(fields.day)}T${pad(fields.hour)}:${pad(fields.minute)}`;
+  return `${String(fields.year).padStart(4, "0")}-${pad(fields.month)}-${pad(fields.day)}T${pad(fields.hour)}:${pad(fields.minute)}:${pad(fields.second)}`;
 }
 
 export function formatAtlasCivil(fields) {

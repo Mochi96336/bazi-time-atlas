@@ -13,9 +13,9 @@ import {
   solarLongitudeAtInstant
 } from "../src/wheel/atlas-display-model.js";
 
-test("atlas civil-time helpers preserve the pinned UTC+8 controller semantics", () => {
+test("atlas civil-time helpers preserve second-level UTC+8 controller semantics", () => {
   assert.equal(ATLAS_UTC_OFFSET_HOURS, 8);
-  const instantMs = Date.UTC(2026, 8, 14, 4, 34, 0);
+  const instantMs = Date.UTC(2026, 8, 14, 4, 34, 37);
   const fields = civilFieldsFromInstant(instantMs);
   assert.deepEqual(fields, {
     year: 2026,
@@ -23,11 +23,15 @@ test("atlas civil-time helpers preserve the pinned UTC+8 controller semantics", 
     day: 14,
     hour: 12,
     minute: 34,
-    second: 0
+    second: 37
   });
-  assert.equal(atlasInputValueFromFields(fields), "2026-09-14T12:34");
-  assert.equal(formatAtlasCivil(fields), "2026-09-14 · 12:34:00");
-  assert.equal(instantFromAtlasLocalInput("2026-09-14T12:34"), instantMs);
+  assert.equal(atlasInputValueFromFields(fields), "2026-09-14T12:34:37");
+  assert.equal(formatAtlasCivil(fields), "2026-09-14 · 12:34:37");
+  assert.equal(instantFromAtlasLocalInput(atlasInputValueFromFields(fields)), instantMs);
+  assert.equal(
+    instantFromAtlasLocalInput("2026-09-14T12:34"),
+    Date.UTC(2026, 8, 14, 4, 34, 0)
+  );
   assert.equal(instantFromAtlasLocalInput("not-a-date"), null);
 });
 

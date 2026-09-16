@@ -7,9 +7,16 @@ import {
 const instrument = document.querySelector("#kinetic-instrument");
 const dock = document.querySelector("#mobile-time-dock");
 const input = document.querySelector("#mobile-instant-input");
+const desktopInput = document.querySelector("#instant-input");
 const applyButton = document.querySelector("#mobile-time-apply");
 const status = document.querySelector("#mobile-time-status");
 const mobileQuery = window.matchMedia("(max-width: 480px)");
+
+if (desktopInput) {
+  desktopInput.step = "1";
+  desktopInput.setAttribute("aria-label", "選定時間，UTC+8，秒級");
+  desktopInput.dataset.precision = "second";
+}
 
 function syncFromInstrument() {
   if (!instrument || !input || document.activeElement === input) return;
