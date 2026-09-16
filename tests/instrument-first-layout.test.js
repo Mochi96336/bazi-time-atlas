@@ -68,6 +68,17 @@ test("ordinary time navigation keeps observation windows and Now in one left clu
   );
 });
 
+test("ordinary reading retires the duplicate Selected Instant caption", () => {
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #cursor-layer \.cursor-note\s*\{\s*display:\s*none;/
+  );
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument\[data-analysis-open="true"\] #cursor-layer \.cursor-note\s*\{[^}]*display:\s*none;/s
+  );
+});
+
 test("ordinary reading preserves exact datetime entry but removes duplicate range and diagnostics", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{[\s\S]*?grid-template-columns:\s*minmax\(190px, 230px\);[\s\S]*?opacity:\s*\.52;/);
   assert.match(css, /~ \.timeline-dock \.slider-wrap,[\s\S]*?~ \.timeline-dock \.timeline-status\s*\{\s*display:\s*none;/);

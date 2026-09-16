@@ -141,6 +141,13 @@
   margin-left: 1px;
 }
 
+/* The ivory line and exact timestamp already identify the shared datum in
+   ordinary reading. Keep the explicit caption for Analysis, where naming the
+   measurement reference is useful, instead of repeating it on the main view. */
+#kinetic-instrument:not([data-analysis-open="true"]) #cursor-layer .cursor-note {
+  display: none;
+}
+
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
   min-height: 28px;
   border: 0;
