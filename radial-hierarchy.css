@@ -4,11 +4,12 @@
 
 /* Color grammar belongs to the composed instrument, not to each clock as an
    independent category. The canonical semantic tokens live in kinetic-atlas.css;
-   this layer only consumes them. The four Ganzhi clocks are one cool, low-chroma
-   family whose lightness opens outward with temporal scale. Solar longitude keeps
-   the single warm brass channel; derived Zodiac stays a recessed violet; the ivory
-   cursor remains reserved for the Selected Instant. Classification mode may
-   deliberately replace this resting grammar with categorical element colors. */
+   this layer only consumes them. The four Ganzhi clocks are one achromatic
+   graphite family whose lightness opens outward with temporal scale. Solar
+   longitude keeps the single matte-brass channel; derived Zodiac stays a recessed
+   cool violet; the warm ivory cursor remains reserved for the Selected Instant.
+   Classification mode may deliberately replace this resting grammar with
+   categorical element colors. */
 
 /* Read the legend the same way the eye reads the fan: outer / slow first,
    then walk inward toward the fast clocks. Keep the legend about layer
@@ -21,11 +22,11 @@
 .ring-hour { order: 5; }
 
 .ring-legend-row { grid-template-columns: 8px 54px minmax(64px, auto); }
-.ring-year strong { color: #dce6df; font-weight: 800; }
-.ring-month strong { color: #d4dfd7; font-weight: 760; }
-.ring-solar strong { color: #c7b89f; font-weight: 700; }
+.ring-year strong { color: #dfe2e0; font-weight: 800; }
+.ring-month strong { color: #d4d7d5; font-weight: 760; }
+.ring-solar strong { color: #c4b394; font-weight: 700; }
 .ring-day strong,
-.ring-hour strong { color: #9da8a1; font-weight: 660; }
+.ring-hour strong { color: #9ca19f; font-weight: 660; }
 
 /* The giant-disk geometry has enough arc length to render every sexagenary
    identity. Slow outer shells therefore keep all 60 labels. Fast inner clocks
@@ -35,40 +36,40 @@
 #hour-track .cycle-label:nth-of-type(2n),
 #day-track .cycle-label:nth-of-type(2n) { display: none; }
 #hour-track .cycle-label {
-  fill: rgba(202,216,208,.36);
+  fill: rgba(188,194,193,.36);
   font-size: 8.5px;
   font-weight: 620;
 }
 #hour-track .cycle-label.major {
-  fill: rgba(202,216,208,.50);
+  fill: rgba(188,194,193,.50);
   font-weight: 680;
 }
 #day-track .cycle-label {
-  fill: rgba(211,222,217,.44);
+  fill: rgba(200,205,203,.44);
   font-size: 9px;
   font-weight: 640;
 }
 #day-track .cycle-label.major {
-  fill: rgba(211,222,217,.58);
+  fill: rgba(200,205,203,.58);
   font-weight: 700;
 }
 #month-track .cycle-label {
-  fill: rgba(222,234,225,.72);
+  fill: rgba(214,218,216,.72);
   font-size: 10px;
   font-weight: 720;
 }
 #month-track .cycle-label.major {
-  fill: rgba(230,239,233,.88);
+  fill: rgba(225,228,226,.88);
   font-weight: 780;
 }
 #year-track .cycle-label {
-  fill: rgba(226,236,229,.84);
+  fill: rgba(226,229,227,.84);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .02em;
 }
 #year-track .cycle-label.major {
-  fill: rgba(239,246,241,.96);
+  fill: rgba(240,242,241,.96);
   font-weight: 860;
 }
 
@@ -83,128 +84,127 @@
   dominant-baseline: middle;
   pointer-events: none;
   paint-order: stroke fill;
-  stroke: rgba(8,12,9,.82);
+  stroke: rgba(7,9,10,.84);
   stroke-width: 2.4px;
   stroke-linejoin: round;
   letter-spacing: .02em;
 }
 #hour-track .active-cycle-label {
-  fill: #c5d7cd;
+  fill: #c7cbca;
   font-size: 9px;
   font-weight: 760;
 }
 #day-track .active-cycle-label {
-  fill: #d7e2dc;
+  fill: #d7dad8;
   font-size: 9.5px;
   font-weight: 780;
 }
 #month-track .active-cycle-label {
-  fill: #edf2ed;
+  fill: #eceeed;
   font-size: 10.5px;
   font-weight: 820;
 }
 #year-track .active-cycle-label {
-  fill: #f0f6f2;
+  fill: #f2f3f2;
   font-size: 11.5px;
   font-weight: 860;
 }
 
-/* Temporal identity is carried by broad continuous surfaces, not by outlining
-   every discrete tooth. Sector DOM remains intact for hit testing and active
-   state. Resting sectors — including the one containing Selected Instant — stay
-   borderless: the radial cursor owns exact-instant precision, while the active
-   fill only supplies local interval context. Interaction and Classification
-   restore outlines later when a border carries real manipulation/category meaning. */
-#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 15%, transparent); }
-#day-track .day-sector { fill: color-mix(in srgb, var(--day) 18%, transparent); }
-#month-track .month-sector { fill: color-mix(in srgb, var(--month) 27%, transparent); }
-#year-track .year-sector { fill: color-mix(in srgb, var(--year) 36%, transparent); }
+/* M2 anodized-graphite material: the temporal rings remain continuous matte
+   surfaces. Material depth comes from restrained luminance separation and an
+   engraved tick cadence, not per-sector gradients, noise, or expensive SVG
+   filters. Resting sectors stay borderless so the wheel reads as one instrument. */
+#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 14%, transparent); }
+#day-track .day-sector { fill: color-mix(in srgb, var(--day) 17%, transparent); }
+#month-track .month-sector { fill: color-mix(in srgb, var(--month) 26%, transparent); }
+#year-track .year-sector { fill: color-mix(in srgb, var(--year) 34%, transparent); }
 
 .cycle-sector:not(.is-active),
 .cycle-sector.is-active { stroke: none; }
 
 #hour-track .cycle-sector.is-active,
 #day-track .cycle-sector.is-active {
-  fill: color-mix(in srgb, currentColor 40%, transparent);
+  fill: color-mix(in srgb, currentColor 38%, transparent);
 }
-#month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 58%, transparent); }
-#year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 66%, transparent); }
+#month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 54%, transparent); }
+#year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 62%, transparent); }
 
-/* Every six-degree boundary still exists as a short tick, but only each fifth
-   boundary is allowed to read as structural. This preserves the 60-step phase
-   scale without drawing sixty full separators through every annulus. */
-#hour-track .ring-tick { stroke: rgba(238,242,237,.055); }
-#day-track .ring-tick { stroke: rgba(238,242,237,.075); }
-#month-track .ring-tick { stroke: rgba(238,242,237,.10); }
-#year-track .ring-tick { stroke: rgba(238,242,237,.12); }
-#hour-track .ring-tick.major { stroke: rgba(238,242,237,.23); stroke-width: 1.05; }
-#day-track .ring-tick.major { stroke: rgba(238,242,237,.28); stroke-width: 1.1; }
-#month-track .ring-tick.major { stroke: rgba(238,242,237,.40); stroke-width: 1.2; }
-#year-track .ring-tick.major { stroke: rgba(231,239,234,.52); stroke-width: 1.35; }
+/* Every six-degree boundary still exists as a short engraved tick, but only each
+   fifth boundary reads as structural. Minor marks stay close to the graphite
+   surface; major marks catch a little more light, approximating a shallow etched
+   edge without introducing bevel filters or texture noise. */
+#hour-track .ring-tick { stroke: rgba(235,238,236,.045); }
+#day-track .ring-tick { stroke: rgba(235,238,236,.060); }
+#month-track .ring-tick { stroke: rgba(235,238,236,.085); }
+#year-track .ring-tick { stroke: rgba(235,238,236,.105); }
+#hour-track .ring-tick.major { stroke: rgba(235,238,236,.20); stroke-width: 1.05; }
+#day-track .ring-tick.major { stroke: rgba(235,238,236,.24); stroke-width: 1.1; }
+#month-track .ring-tick.major { stroke: rgba(235,238,236,.34); stroke-width: 1.2; }
+#year-track .ring-tick.major { stroke: rgba(235,238,236,.44); stroke-width: 1.35; }
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
-   not two more peer clocks. Resting sectors form continuous surfaces. Exact
-   term boundaries stay in the dedicated marks, with 節 (jie) carrying the
-   stronger cadence. Their active fills locate the current interval without
-   competing with the shared Selected-Instant cursor. */
+   not two more peer clocks. Matte brass stays warmer than the graphite but does
+   not become a gold CTA; Zodiac is deliberately more recessed and less violet.
+   Active fills locate the current interval without competing with the shared
+   Selected-Instant cursor. */
 #guide-layer .guide-arc.annual-subdivide {
-  stroke: color-mix(in srgb, var(--solar) 12%, transparent);
+  stroke: color-mix(in srgb, var(--solar) 10%, transparent);
   stroke-dasharray: 3 6;
 }
 #solar-track .term-sector {
-  fill: color-mix(in srgb, var(--solar) 4.5%, transparent);
+  fill: color-mix(in srgb, var(--solar) 4%, transparent);
   stroke: none;
 }
-#solar-track .term-sector.jie { fill: color-mix(in srgb, var(--solar) 7.5%, transparent); }
+#solar-track .term-sector.jie { fill: color-mix(in srgb, var(--solar) 7%, transparent); }
 #solar-track .term-sector.is-active {
-  fill: color-mix(in srgb, var(--solar) 19%, transparent);
+  fill: color-mix(in srgb, var(--solar) 17%, transparent);
   stroke: none;
 }
-#solar-track .term-mark { opacity: .30; stroke-width: .8; }
-#solar-track .term-mark.jie { opacity: .70; stroke-width: 1.15; }
+#solar-track .term-mark { opacity: .28; stroke-width: .8; }
+#solar-track .term-mark.jie { opacity: .66; stroke-width: 1.15; }
 #solar-track .term-label {
-  fill: color-mix(in srgb, var(--solar) 62%, var(--muted));
+  fill: color-mix(in srgb, var(--solar) 58%, var(--muted));
   font-size: 10px;
   font-weight: 650;
 }
 #solar-track .term-label.jie {
-  fill: color-mix(in srgb, var(--solar) 72%, var(--ink));
+  fill: color-mix(in srgb, var(--solar) 68%, var(--ink));
   font-weight: 760;
 }
 
 #zodiac-track {
   pointer-events: none;
-  opacity: .78;
+  opacity: .72;
 }
 #zodiac-track .zodiac-sector {
-  fill: color-mix(in srgb, var(--zodiac) 5.5%, transparent);
+  fill: color-mix(in srgb, var(--zodiac) 4.5%, transparent);
   stroke: none;
 }
 #zodiac-track .zodiac-sector.is-active {
-  fill: color-mix(in srgb, var(--zodiac) 15%, transparent);
+  fill: color-mix(in srgb, var(--zodiac) 12%, transparent);
   stroke: none;
 }
 #zodiac-track .zodiac-label {
-  fill: color-mix(in srgb, var(--zodiac) 72%, var(--muted));
+  fill: color-mix(in srgb, var(--zodiac) 66%, var(--muted));
   font-size: 10px;
   font-weight: 680;
 }
 
-/* Selected Instant is the shared datum for every ring, not a sixth visual
-   track. Keep the cap and line easy to find, but let the temporal shells carry
-   the resting visual weight instead of a bright measurement probe. */
+/* Selected Instant is the only luminous material cue. Keep the ivory line thin,
+   but give it enough local halo to read immediately against the darker graphite
+   family. No resting ring, Solar sector, or Zodiac sector receives glow. */
 #cursor-layer .cursor-halo {
-  stroke: rgba(244,230,183,.08);
+  stroke: color-mix(in srgb, var(--cursor) 10%, transparent);
   stroke-width: 5;
 }
 #cursor-layer .cursor-line {
-  stroke-width: 1.35;
-  opacity: .86;
-  filter: drop-shadow(0 0 3px rgba(244,230,183,.12));
+  stroke-width: 1.4;
+  opacity: .90;
+  filter: drop-shadow(0 0 3.5px color-mix(in srgb, var(--cursor) 18%, transparent));
 }
-#cursor-layer .cursor-cap { opacity: .82; }
+#cursor-layer .cursor-cap { opacity: .88; }
 #cursor-layer .cursor-note {
-  fill: rgba(243,231,194,.76);
+  fill: color-mix(in srgb, var(--cursor) 72%, var(--ink));
   font-size: 9px;
   font-weight: 720;
   letter-spacing: .10em;
@@ -222,7 +222,7 @@
   right: 12px;
   top: 58px;
   pointer-events: none;
-  color: #d4bd8d;
+  color: #c6a66f;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .05em;
@@ -237,7 +237,7 @@
 }
 #kinetic-wheel[data-active-ring="solar"] #solar-track .term-sector,
 #kinetic-wheel[data-active-ring="solar"] #zodiac-track .zodiac-sector {
-  stroke: rgba(244,230,183,.58);
+  stroke: color-mix(in srgb, var(--cursor) 54%, transparent);
   stroke-width: 1.65;
 }
 
@@ -258,7 +258,7 @@
   .reference-frame-control { flex: 0 0 100%; }
   .ring-legend-row { grid-template-columns: none; gap: 4px; }
   .ring-legend-row span {
-    color: #919b94;
+    color: #909593;
     font-size: 7.5px;
     font-weight: 700;
   }
