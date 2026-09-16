@@ -81,7 +81,9 @@
 #kinetic-instrument[data-classification-overlay="on"] .cycle-sector { stroke-width:1.45; }
 #kinetic-instrument[data-classification-overlay="on"] .cycle-sector.is-active { stroke-width:2.2; filter:brightness(1.2); }
 
-/* Zodiac: fill = Western four-element classification, border rhythm = modality. */
+/* Zodiac: fill = Western four-element classification, border rhythm = modality.
+   Resting Zodiac sectors are borderless, so comparison mode explicitly owns the
+   outline color as well as its solid/dotted/dashed modality rhythm. */
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="火"] { fill: color-mix(in srgb, var(--z-fire) 36%, transparent); }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="土"] { fill: color-mix(in srgb, var(--z-earth) 36%, transparent); }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-element="風"] { fill: color-mix(in srgb, var(--z-air) 36%, transparent); }
@@ -89,7 +91,10 @@
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="基本"] { stroke-dasharray:none; }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="固定"] { stroke-dasharray:1.5 3; }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="變動"] { stroke-dasharray:5 3; }
-#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector { stroke-width:1.7; }
+#kinetic-instrument[data-classification-overlay="on"] .zodiac-sector {
+  stroke: color-mix(in srgb, var(--zodiac) 62%, var(--ink));
+  stroke-width:1.7;
+}
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector.is-active { stroke-width:2.3; filter:brightness(1.18); }
 
 @media (max-width: 480px) {

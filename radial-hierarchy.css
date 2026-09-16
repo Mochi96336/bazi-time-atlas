@@ -111,15 +111,17 @@
 
 /* Temporal identity is carried by broad continuous surfaces, not by outlining
    every discrete tooth. Sector DOM remains intact for hit testing and active
-   state; resting borders are removed so 60-step rings stop reading as combs.
-   Classification mode is loaded later and deliberately restores categorical
-   borders only when the user asks for that comparison. */
+   state. Resting sectors — including the one containing Selected Instant — stay
+   borderless: the radial cursor owns exact-instant precision, while the active
+   fill only supplies local interval context. Interaction and Classification
+   restore outlines later when a border carries real manipulation/category meaning. */
 #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 15%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 18%, transparent); }
 #month-track .month-sector { fill: color-mix(in srgb, var(--month) 27%, transparent); }
 #year-track .year-sector { fill: color-mix(in srgb, var(--year) 36%, transparent); }
 
-.cycle-sector:not(.is-active) { stroke: none; }
+.cycle-sector:not(.is-active),
+.cycle-sector.is-active { stroke: none; }
 
 #hour-track .cycle-sector.is-active,
 #day-track .cycle-sector.is-active {
@@ -143,7 +145,8 @@
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
    not two more peer clocks. Resting sectors form continuous surfaces. Exact
    term boundaries stay in the dedicated marks, with 節 (jie) carrying the
-   stronger cadence; active state may use a border because it is singular. */
+   stronger cadence. Their active fills locate the current interval without
+   competing with the shared Selected-Instant cursor. */
 #guide-layer .guide-arc.annual-subdivide {
   stroke: color-mix(in srgb, var(--solar) 12%, transparent);
   stroke-dasharray: 3 6;
@@ -155,8 +158,7 @@
 #solar-track .term-sector.jie { fill: color-mix(in srgb, var(--solar) 7.5%, transparent); }
 #solar-track .term-sector.is-active {
   fill: color-mix(in srgb, var(--solar) 19%, transparent);
-  stroke: color-mix(in srgb, var(--cursor) 42%, transparent);
-  stroke-width: 1.15;
+  stroke: none;
 }
 #solar-track .term-mark { opacity: .30; stroke-width: .8; }
 #solar-track .term-mark.jie { opacity: .70; stroke-width: 1.15; }
@@ -180,8 +182,7 @@
 }
 #zodiac-track .zodiac-sector.is-active {
   fill: color-mix(in srgb, var(--zodiac) 15%, transparent);
-  stroke: color-mix(in srgb, var(--zodiac) 58%, var(--ink));
-  stroke-width: 1.1;
+  stroke: none;
 }
 #zodiac-track .zodiac-label {
   fill: color-mix(in srgb, var(--zodiac) 72%, var(--muted));
