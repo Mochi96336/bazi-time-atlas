@@ -366,6 +366,7 @@ export function createRingDragController({
 
   return Object.freeze({
     setCompareMode,
+    cancelActiveGesture,
     cancelInertia,
     get compareMode() { return compareMode; },
     get activeMode() { return active?.mode ?? null; },
