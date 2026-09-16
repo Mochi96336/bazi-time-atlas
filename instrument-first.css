@@ -37,11 +37,14 @@
   .analysis-toggle { top: 50px; right: 8px; }
   .analysis-close { top: 50px; left: 8px; }
 
-  /* Keep the timestamp subordinate to the radial read-head instead of allowing
-     a second HUD-sized focal object to form at the bottom of the wheel. */
+  /* Analysis keeps the diagnostic readout. Ordinary desktop reading has one
+     textual exact-time surface: the editable rail directly below the wheel. */
   .instrument-readout {
     bottom: 12px;
     width: min(660px, calc(100% - 24px));
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .instrument-readout {
+    display: none;
   }
   .readout-kicker { display: none; }
   #instant-readout {
