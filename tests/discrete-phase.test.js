@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { DAY_BOUNDARY } from "../src/calendar/day-boundary.js";
 import {
   dayPhaseWindow,
   discretePhaseWindows,
@@ -24,7 +25,18 @@ test("hour phase uses real double-hour clock progress without moving the pillar 
   assert.equal(phase.endMs - phase.startMs, 2 * HOUR_MS);
   assert.equal(phase.source, "double-hour");
   assert.equal(phase.boundaryKind, "calendar-discrete");
+  assert.equal(phase.referenceUtcOffsetHours, 8);
   assert.ok(Math.abs(phase.progress - 1209 / 7200) < 1e-12);
+});
+
+test("hour phase follows the selected fixed-offset local clock", () => {
+  const phase = hourPhaseWindow(SAMPLE, {
+    utcOffsetHours: 9,
+    dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+  });
+  assert.equal(new Date(phase.startMs).toISOString(), "2027-03-15T12:00:00.000Z");
+  assert.equal(new Date(phase.endMs).toISOString(), "2027-03-15T14:00:00.000Z");
+  assert.equal(phase.referenceUtcOffsetHours, 9);
 });
 
 test("day phase follows the Zi-initial 23:00 day-boundary convention", () => {
@@ -33,8 +45,24 @@ test("day phase follows the Zi-initial 23:00 day-boundary convention", () => {
   assert.equal(new Date(phase.endMs).toISOString(), "2027-03-15T15:00:00.000Z");
   assert.equal(phase.endMs - phase.startMs, DAY_MS);
   assert.equal(phase.source, "zi-initial");
+  assert.equal(phase.dayBoundary, DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY);
   assert.equal(phase.boundaryKind, "calendar-discrete");
   assert.ok(phase.progress > 0.93 && phase.progress < 0.94);
+});
+
+test("day phase can use civil midnight without changing the selected instant", () => {
+  const instantMs = Date.parse("2027-03-15T15:30:00.000Z"); // UTC+8 = 23:30
+  const ziInitial = dayPhaseWindow(instantMs);
+  const civilMidnight = dayPhaseWindow(instantMs, {
+    utcOffsetHours: 8,
+    dayBoundary: DAY_BOUNDARY.CIVIL_MIDNIGHT
+  });
+
+  assert.equal(new Date(ziInitial.startMs).toISOString(), "2027-03-15T15:00:00.000Z");
+  assert.equal(new Date(civilMidnight.startMs).toISOString(), "2027-03-14T16:00:00.000Z");
+  assert.equal(new Date(civilMidnight.endMs).toISOString(), "2027-03-15T16:00:00.000Z");
+  assert.equal(civilMidnight.source, "civil-midnight");
+  assert.equal(civilMidnight.dayBoundary, DAY_BOUNDARY.CIVIL_MIDNIGHT);
 });
 
 test("month phase is bounded by exact jie instants", () => {
