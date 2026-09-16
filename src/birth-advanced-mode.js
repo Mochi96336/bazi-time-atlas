@@ -1,3 +1,5 @@
+import "./birth-atlas-cross-view.js";
+
 const form = document.querySelector("#birth-form");
 const panel = document.querySelector("#birth-advanced-controls");
 const summary = document.querySelector("#birth-advanced-summary");

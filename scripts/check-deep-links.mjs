@@ -67,11 +67,20 @@ const cases = [
   },
   {
     path: "birth.html?tenGod=1&relations=1",
-    label: "Birth Annual link + Ten Gods + visible pair relations",
+    label: "Birth Atlas instant links + Ten Gods + visible pair relations",
     assert(dom) {
       const groups = dom.match(/data-ten-god-group="[^"]+"/g) ?? [];
+      const exactInstant = "2005-12-23T00%3A37%3A00.000Z";
       return /class="birth-projection-link"/.test(dom) &&
-        /href="\.\/\?month=[^"]+&amp;lambda=\d+\.\d+&amp;yearStem=%E4%B9%99"/.test(dom) &&
+        /data-atlas-cross-view="selected-instant"/.test(dom) &&
+        new RegExp(`href="[^"]*\\?instant=${exactInstant}"`).test(dom) &&
+        /data-atlas-inspect="year"/.test(dom) &&
+        /data-atlas-inspect="month"/.test(dom) &&
+        /data-atlas-inspect="day"/.test(dom) &&
+        /data-atlas-inspect="hour"/.test(dom) &&
+        new RegExp(`data-href="[^"]*\\?instant=${exactInstant}&amp;inspect=year"`).test(dom) &&
+        !/sexagenary\.html\?ganzhi=/.test(dom) &&
+        !/data-atlas-cross-view="selected-instant"[^>]*(?:lambda|month|yearStem)=/.test(dom) &&
         /年度盤精確定位/.test(dom) &&
         /年干乙/.test(dom) &&
         /UTC\+08:00/.test(dom) &&
