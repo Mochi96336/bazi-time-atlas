@@ -98,9 +98,8 @@
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector.is-active { stroke-width:2.3; filter:brightness(1.18); }
 
 @media (max-width: 480px) {
-  /* Classification is an explanation of the wheel, not a HUD over it. Keep the
-     first viewport owned by the instrument and reserve enough flow space for
-     the contract's <=90px legend plus explicit clearance to the time dock. */
+  /* Classification is evidence for the wheel, not another card. Keep the
+     existing reserved band / overlap contract, but flatten its presentation. */
   #kinetic-instrument[data-classification-overlay="on"] {
     overflow: visible;
     margin-bottom: 96px;
@@ -111,13 +110,15 @@
     left: 9px;
     right: 9px;
     width: auto;
-    padding: 6px 8px 5px;
-    border-radius: 11px;
+    padding: 5px 0 4px;
+    border: 0;
+    border-top: 1px solid rgba(238,242,237,.10);
+    border-radius: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 5px 10px;
+    gap: 4px 10px;
     align-items: start;
-    background: rgba(255,255,255,.018);
+    background: transparent;
     backdrop-filter: none;
     box-shadow: none;
   }
@@ -132,7 +133,12 @@
   .classification-row header small { font-size:5px; white-space:nowrap; }
   .classification-keys { gap:3px; margin-top:3px; flex-wrap:nowrap; }
   .classification-keys + .classification-keys { margin-top:3px; }
-  .classification-keys i { min-width:15px; height:14px; font-size:5.5px; }
+  .classification-keys i {
+    min-width:15px;
+    height:14px;
+    border-radius:2px;
+    font-size:5.5px;
+  }
   .classification-current { display:none; }
   .classification-warning {
     grid-column: 1 / -1;
