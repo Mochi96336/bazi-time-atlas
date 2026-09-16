@@ -4,6 +4,8 @@ import path from "node:path";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
+const captureTimeoutMs = 45_000;
+const captureAttempts = 2;
 
 const pages = [
   { key: "annual", path: "" },
@@ -153,6 +155,35 @@ function mobileHarnessPath(capture) {
   return `scripts/fixtures/mobile-390.html?${params.toString()}`;
 }
 
+function captureScreenshot(browser, args, captureName) {
+  let lastResult = null;
+  for (let attempt = 1; attempt <= captureAttempts; attempt += 1) {
+    const result = spawnSync(browser, args, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: captureTimeoutMs,
+      killSignal: "SIGKILL",
+    });
+    if (result.status === 0) return result;
+
+    lastResult = result;
+    const timedOut = result.error?.code === "ETIMEDOUT";
+    const reason = timedOut
+      ? `timed out after ${captureTimeoutMs} ms`
+      : `exited with status ${result.status ?? "unknown"}${result.signal ? ` / ${result.signal}` : ""}`;
+    if (attempt < captureAttempts) {
+      console.warn(`[visual] RETRY ${captureName}: attempt ${attempt}/${captureAttempts} ${reason}`);
+    }
+  }
+
+  process.stderr.write(lastResult?.stdout ?? "");
+  process.stderr.write(lastResult?.stderr ?? "");
+  const suffix = lastResult?.error?.code === "ETIMEDOUT"
+    ? ` after ${captureAttempts} attempts × ${captureTimeoutMs} ms`
+    : "";
+  throw new Error(`Screenshot capture failed for ${captureName}${suffix}`);
+}
+
 await mkdir(outputDir, { recursive: true });
 const browser = findBrowser();
 const evidence = [];
@@ -167,6 +198,7 @@ for (const capture of captures) {
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
+    "--disable-dev-shm-usage",
     "--hide-scrollbars",
     "--run-all-compositor-stages-before-draw",
     "--virtual-time-budget=2200",
@@ -176,16 +208,7 @@ for (const capture of captures) {
     url,
   ];
 
-  const result = spawnSync(browser, args, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-
-  if (result.status !== 0) {
-    process.stderr.write(result.stdout ?? "");
-    process.stderr.write(result.stderr ?? "");
-    throw new Error(`Screenshot capture failed for ${capture.name}`);
-  }
+  captureScreenshot(browser, args, capture.name);
 
   const info = await stat(outputPath);
   if (info.size < 10_000) {
