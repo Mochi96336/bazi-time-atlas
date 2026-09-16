@@ -1,22 +1,23 @@
-/* Mobile legend composition owns HUD placement only. Wheel geometry, time state,
-   layer semantics, analysis state, and classification flow remain owned by
-   their existing modules. */
+/* Mobile legend composition owns the Analysis control grid only. Normal reading
+   identity labels are positioned directly on the radial stack by ux-analysis.css.
+   Wheel geometry, time state, classification flow and layer semantics stay in
+   their existing owners. */
 @media (max-width: 480px) {
-  .ring-legend {
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
     gap: 2px 4px;
   }
 
-  .ring-legend-row,
-  .ring-legend-row[data-ring-toggle],
-  .reference-frame-control {
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row,
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle],
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
     order: initial;
   }
 
-  .ring-legend-row,
-  .ring-legend-row[data-ring-toggle] {
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row,
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
     display: flex;
     min-width: 0;
     margin: 0;
@@ -26,13 +27,13 @@
     white-space: nowrap;
   }
 
-  .ring-year { grid-column: 1; grid-row: 1; }
-  .ring-month { grid-column: 2; grid-row: 1; }
-  .ring-day { grid-column: 3; grid-row: 1; }
-  .ring-hour { grid-column: 4; grid-row: 1; }
-  .ring-solar { grid-column: 1 / -1; grid-row: 2; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-year { grid-column: 1; grid-row: 1; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-month { grid-column: 2; grid-row: 1; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-day { grid-column: 3; grid-row: 1; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-hour { grid-column: 4; grid-row: 1; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-solar { grid-column: 1 / -1; grid-row: 2; }
 
-  .reference-frame-control {
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
     grid-column: 1 / -1;
     grid-row: 3;
     width: 100%;
