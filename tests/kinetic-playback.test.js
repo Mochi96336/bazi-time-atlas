@@ -8,9 +8,9 @@ import {
   sliderStateForScale
 } from "../src/interaction/kinetic-playback.js";
 
-test("kinetic scales preserve the shipped spans, steps and playback rates", () => {
+test("kinetic observation windows preserve the shipped spans, steps and playback rates", () => {
   assert.deepEqual(KINETIC_SCALE_CONFIG.day, {
-    label: "日內 / 48 小時",
+    label: "48 小時",
     spanDays: 1,
     sliderStep: 1 / 144,
     playDaysPerSecond: .25,
@@ -24,7 +24,7 @@ test("kinetic scales preserve the shipped spans, steps and playback rates", () =
     edgeLabel: "約半年"
   });
   assert.deepEqual(KINETIC_SCALE_CONFIG.cycle, {
-    label: "六十年",
+    label: "60 年",
     spanDays: 365.2422 * 30,
     sliderStep: 1,
     playDaysPerSecond: 365.2422,
@@ -32,7 +32,7 @@ test("kinetic scales preserve the shipped spans, steps and playback rates", () =
   });
 });
 
-test("slider state is a pure projection of selected time and scale", () => {
+test("slider state is a pure projection of selected time and observation window", () => {
   assert.deepEqual(sliderStateForScale({
     scale: "year",
     anchorMs: 1_000,
@@ -77,7 +77,7 @@ test("playback preserves the 100 ms frame clamp", () => {
   assert.equal(result.reachedEnd, false);
 });
 
-test("playback clamps exactly to the positive scale edge", () => {
+test("playback clamps exactly to the positive observation-window edge", () => {
   const anchorMs = 42 * DAY_MS;
   const selectedMs = anchorMs + 182.9 * DAY_MS;
   const result = advanceKineticPlayback({
@@ -92,7 +92,7 @@ test("playback clamps exactly to the positive scale edge", () => {
   assert.equal(result.reachedEnd, true);
 });
 
-test("unknown scales fail closed", () => {
+test("unknown observation windows fail closed", () => {
   assert.throws(() => sliderStateForScale({
     scale: "unknown",
     selectedMs: 0,
