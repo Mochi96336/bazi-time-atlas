@@ -297,6 +297,9 @@ export function createRingDragController({
 
   function finish(event, { allowInertia = true } = {}) {
     if (!active || event.pointerId !== active.pointerId) return;
+    if (allowInertia) {
+      for (const sample of pointerSamples(event)) applyPointerSample(sample);
+    }
     const gesture = active;
     active = null;
     delete svg.dataset.activeRing;
