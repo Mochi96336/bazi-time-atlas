@@ -85,16 +85,25 @@ for (const id of ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarym
 }
 requireEqual(attr(probe, "data-sexagenarydesktop-width"), "1200", "sexagenary desktop fixture width drifted", url);
 
-requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile long lede returned above the instrument", url);
-requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note returned above the instrument", url);
-requireEqual(attr(probe, "data-recurrence-instrument-in-first-viewport"), "true", "Recurrence mobile instrument no longer fits the first viewport", url);
+requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile long lede returned above the task flow", url);
+requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note returned above the task flow", url);
+requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "true", "Recurrence mobile research task map disappeared", url);
+requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce task 01 before the instrument", url);
+requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
+
+const taskNavTop = Number(attr(probe, "data-recurrence-task-nav-top"));
+const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
 const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
-if (!Number.isFinite(recurrenceTop) || recurrenceTop < 80 || recurrenceTop > 210) {
-  throw new Error(`Recurrence mobile instrument must begin near the top of the first viewport (top=${recurrenceTop}): ${url}`);
+const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
+if (![taskNavTop, taskHeadTop, recurrenceTop].every(Number.isFinite) || !(taskNavTop < taskHeadTop && taskHeadTop < recurrenceTop)) {
+  throw new Error(`Recurrence mobile task flow must read task map → task 01 → instrument (${taskNavTop}, ${taskHeadTop}, ${recurrenceTop}): ${url}`);
 }
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
   throw new Error(`Recurrence mobile instrument became too shallow (${recurrenceHeight}px): ${url}`);
+}
+if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) {
+  throw new Error(`Recurrence mobile first viewport must still expose a substantial instrument area (${recurrenceVisibleHeight}px): ${url}`);
 }
 
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
@@ -129,4 +138,4 @@ requireEqual(attr(probe, "data-sex-neighbors-visible"), "true", "Sexagenary mobi
 requireEqual(attr(probe, "data-sex-index-visible"), "true", "Sexagenary mobile full-cycle disclosure disappeared", url);
 requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "Sexagenary desktop inspector should remain visible", url);
 
-console.log(`[view-shells] PASS primary nav + demoted Research + instrument-first Recurrence + compact dark Birth/Sexagenary 390px hierarchy: ${url}`);
+console.log(`[view-shells] PASS primary nav + task-first Research + substantial first-viewport instrument + compact dark Birth/Sexagenary 390px hierarchy: ${url}`);

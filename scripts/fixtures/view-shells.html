@@ -91,13 +91,26 @@
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
+      const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
+      const discreteTaskHead = recurrenceDoc.querySelector("#research-discrete > .research-task-head");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
+      const taskNavRect = researchTaskNav?.getBoundingClientRect();
+      const taskHeadRect = discreteTaskHead?.getBoundingClientRect();
+      const viewportHeight = recurrenceWin.innerHeight;
+      const visibleInstrumentHeight = recurrenceRect
+        ? Math.max(0, Math.min(recurrenceRect.bottom, viewportHeight) - Math.max(recurrenceRect.top, 0))
+        : -1;
       probe.dataset.recurrenceLedeHidden = String(hidden(recurrenceWin, recurrenceLede));
       probe.dataset.recurrenceScopeHidden = String(hidden(recurrenceWin, recurrenceScope));
+      probe.dataset.recurrenceTaskNavVisible = String(Boolean(researchTaskNav && !hidden(recurrenceWin, researchTaskNav)));
+      probe.dataset.recurrenceTaskNavTop = String(Math.round(taskNavRect?.top ?? -1));
+      probe.dataset.recurrenceTaskHeadTop = String(Math.round(taskHeadRect?.top ?? -1));
+      probe.dataset.recurrenceTaskHeadBeforeInstrument = String(Boolean(taskHeadRect && recurrenceRect && taskHeadRect.bottom <= recurrenceRect.top));
       probe.dataset.recurrenceInstrumentTop = String(Math.round(recurrenceRect?.top ?? -1));
       probe.dataset.recurrenceInstrumentHeight = String(Math.round(recurrenceRect?.height ?? -1));
-      probe.dataset.recurrenceInstrumentInFirstViewport = String(Boolean(
-        recurrenceRect && recurrenceRect.top < recurrenceWin.innerHeight * .25 && recurrenceRect.bottom <= recurrenceWin.innerHeight + 2
+      probe.dataset.recurrenceInstrumentVisibleHeight = String(Math.round(visibleInstrumentHeight));
+      probe.dataset.recurrenceInstrumentStartsInFirstViewport = String(Boolean(
+        recurrenceRect && recurrenceRect.top >= 0 && recurrenceRect.top < viewportHeight * .55
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];

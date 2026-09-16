@@ -122,6 +122,10 @@ jobs:
         run: node scripts/check-recurrence-lab.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify Research task hierarchy
+        run: node scripts/check-research-task-hierarchy.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify astronomical residual states
         run: node scripts/check-astronomical-residuals.mjs
         env:
