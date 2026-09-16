@@ -122,11 +122,11 @@
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: var(--solar, #e5bd91); }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--day, #abc2cc); }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--hour, #9eb7c1); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span::after { content: "年 · YEAR"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span::after { content: "月 · MONTH"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span::after { content: "太陽 · SOLAR"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span::after { content: "日 · DAY"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span::after { content: "時 · HOUR"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span::after { content: "年"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span::after { content: "月"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span::after { content: "太陽"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span::after { content: "日"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span::after { content: "時"; }
 
 #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
   pointer-events: auto;
