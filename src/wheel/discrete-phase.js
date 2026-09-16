@@ -2,14 +2,21 @@ import {
   jieBoundaryContext,
   solarTermNamedEventsBetween
 } from "../astronomy/solar-term-boundaries.js";
+import { DAY_BOUNDARY } from "../calendar/day-boundary.js";
+import {
+  DEFAULT_ATLAS_TIME_CONTEXT,
+  normalizeAtlasTimeContext
+} from "./atlas-time-context.js";
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
 export const DISCRETE_RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
-export const PHASE_REFERENCE_UTC_OFFSET_HOURS = 8;
+// Compatibility export for tests/callers that describe the default reference.
+export const PHASE_REFERENCE_UTC_OFFSET_HOURS = DEFAULT_ATLAS_TIME_CONTEXT.utcOffsetHours;
 
-function localFieldsAt(instantMs) {
-  const shifted = new Date(instantMs + PHASE_REFERENCE_UTC_OFFSET_HOURS * HOUR_MS);
+function localFieldsAt(instantMs, timeContext) {
+  const context = normalizeAtlasTimeContext(timeContext);
+  const shifted = new Date(instantMs + context.utcOffsetHours * HOUR_MS);
   return {
     year: shifted.getUTCFullYear(),
     month: shifted.getUTCMonth() + 1,
@@ -18,11 +25,12 @@ function localFieldsAt(instantMs) {
   };
 }
 
-function instantFromLocalFields(year, month, day, hour) {
+function instantFromLocalFields(year, month, day, hour, timeContext) {
+  const context = normalizeAtlasTimeContext(timeContext);
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
   date.setUTCHours(hour, 0, 0, 0);
-  return date.getTime() - PHASE_REFERENCE_UTC_OFFSET_HOURS * HOUR_MS;
+  return date.getTime() - context.utcOffsetHours * HOUR_MS;
 }
 
 function boundedProgress(instantMs, startMs, endMs) {
@@ -30,37 +38,70 @@ function boundedProgress(instantMs, startMs, endMs) {
   return Math.max(0, Math.min(1, (instantMs - startMs) / (endMs - startMs)));
 }
 
-function phaseWindow(id, instantMs, startMs, endMs, source, boundaryKind) {
+function phaseWindow(
+  id,
+  instantMs,
+  startMs,
+  endMs,
+  source,
+  boundaryKind,
+  referenceUtcOffsetHours = PHASE_REFERENCE_UTC_OFFSET_HOURS,
+  dayBoundary = null
+) {
   const progress = boundedProgress(instantMs, startMs, endMs);
   if (progress === null) return null;
-  return Object.freeze({
+  const phase = {
     id,
     startMs,
     endMs,
     progress,
     source,
     boundaryKind,
-    referenceUtcOffsetHours: PHASE_REFERENCE_UTC_OFFSET_HOURS
-  });
+    referenceUtcOffsetHours
+  };
+  if (dayBoundary !== null) phase.dayBoundary = dayBoundary;
+  return Object.freeze(phase);
 }
 
-export function hourPhaseWindow(instantMs) {
+export function hourPhaseWindow(instantMs, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {
   if (!Number.isFinite(instantMs)) throw new RangeError("instantMs must be finite");
-  const fields = localFieldsAt(instantMs);
+  const context = normalizeAtlasTimeContext(timeContext);
+  const fields = localFieldsAt(instantMs, context);
   // Chinese double-hours start at odd local clock hours: 子 begins at 23:00,
-  // 丑 at 01:00, ... 亥 at 21:00 under the atlas' fixed UTC+08 reference.
+  // 丑 at 01:00, ... 亥 at 21:00 in the selected fixed-offset civil clock.
   const startHour = fields.hour % 2 === 1 ? fields.hour : fields.hour - 1;
-  const startMs = instantFromLocalFields(fields.year, fields.month, fields.day, startHour);
-  return phaseWindow("hour", instantMs, startMs, startMs + 2 * HOUR_MS, "double-hour", "calendar-discrete");
+  const startMs = instantFromLocalFields(fields.year, fields.month, fields.day, startHour, context);
+  return phaseWindow(
+    "hour",
+    instantMs,
+    startMs,
+    startMs + 2 * HOUR_MS,
+    "double-hour",
+    "calendar-discrete",
+    context.utcOffsetHours
+  );
 }
 
-export function dayPhaseWindow(instantMs) {
+export function dayPhaseWindow(instantMs, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {
   if (!Number.isFinite(instantMs)) throw new RangeError("instantMs must be finite");
-  const fields = localFieldsAt(instantMs);
-  let startMs = instantFromLocalFields(fields.year, fields.month, fields.day, 23);
-  // DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY: the next sexagenary day starts at 子初 23:00.
+  const context = normalizeAtlasTimeContext(timeContext);
+  const fields = localFieldsAt(instantMs, context);
+  const startHour = context.dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT ? 0 : 23;
+  let startMs = instantFromLocalFields(fields.year, fields.month, fields.day, startHour, context);
   if (startMs > instantMs) startMs -= DAY_MS;
-  return phaseWindow("day", instantMs, startMs, startMs + DAY_MS, "zi-initial", "calendar-discrete");
+  const source = context.dayBoundary === DAY_BOUNDARY.CIVIL_MIDNIGHT
+    ? "civil-midnight"
+    : "zi-initial";
+  return phaseWindow(
+    "day",
+    instantMs,
+    startMs,
+    startMs + DAY_MS,
+    source,
+    "calendar-discrete",
+    context.utcOffsetHours,
+    context.dayBoundary
+  );
 }
 
 export function monthPhaseWindow(instantMs) {
@@ -90,20 +131,24 @@ export function yearPhaseWindow(instantMs) {
   return phaseWindow("year", instantMs, previous.instantMs, next.instantMs, "li-chun", "astronomical-discrete");
 }
 
-export function discretePhaseWindowForRing(id, instantMs) {
-  if (id === "hour") return hourPhaseWindow(instantMs);
-  if (id === "day") return dayPhaseWindow(instantMs);
+export function discretePhaseWindowForRing(
+  id,
+  instantMs,
+  timeContext = DEFAULT_ATLAS_TIME_CONTEXT
+) {
+  if (id === "hour") return hourPhaseWindow(instantMs, timeContext);
+  if (id === "day") return dayPhaseWindow(instantMs, timeContext);
   if (id === "month") return monthPhaseWindow(instantMs);
   if (id === "year") return yearPhaseWindow(instantMs);
   throw new RangeError(`unknown discrete phase ring: ${id}`);
 }
 
-export function discretePhaseWindows(instantMs) {
+export function discretePhaseWindows(instantMs, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {
   return Object.freeze({
-    hour: hourPhaseWindow(instantMs),
+    hour: hourPhaseWindow(instantMs, timeContext),
     year: yearPhaseWindow(instantMs),
     month: monthPhaseWindow(instantMs),
-    day: dayPhaseWindow(instantMs)
+    day: dayPhaseWindow(instantMs, timeContext)
   });
 }
 
