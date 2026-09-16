@@ -3,23 +3,33 @@
    interaction state and analysis tooling remain owned by their existing modules. */
 
 @media (min-width: 481px) {
+  /* Desktop is a viewport instrument, not a centered document column. Keep the
+     topbar padded, but let the wheel itself own the complete browser width. */
   .kinetic-shell {
-    width: min(1760px, 100%);
-    padding: 12px clamp(10px, 1.5vw, 24px) 22px;
+    width: 100%;
+    max-width: none;
+    padding: 12px 0 22px;
   }
 
-  .kinetic-topbar { min-height: 32px; }
+  .kinetic-topbar {
+    min-height: 32px;
+    padding-inline: clamp(14px, 2vw, 32px);
+  }
 
   /* The header already names the product. The authored hero repeats the same
      reading rule several times before the user reaches the actual instrument. */
   .atlas-intro { display: none; }
 
   /* The wheel is the page surface. Remove the large rounded dashboard card and
-     give the radial stack enough height to become the first-screen object. */
+     give the radial stack the whole first-screen height. No desktop max-height:
+     a tall monitor must make the instrument larger instead of exposing a dead
+     field below a 980px cap. Size containment also gives the fixed ring labels
+     a camera-relative cqh coordinate system. */
   .instrument-shell {
     margin-top: 6px;
-    height: clamp(620px, calc(100dvh - 60px), 980px);
+    height: max(720px, calc(100dvh - 52px));
     min-height: 0;
+    container-type: size;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -33,9 +43,9 @@
     box-shadow: inset 0 0 0 1px rgba(199, 217, 205, .08);
   }
 
-  .instrument-toolbar { inset: 8px 8px auto; }
-  .analysis-toggle { top: 50px; right: 8px; }
-  .analysis-close { top: 50px; left: 8px; }
+  .instrument-toolbar { inset: 8px clamp(14px, 2vw, 32px) auto; }
+  .analysis-toggle { top: 50px; right: clamp(14px, 2vw, 32px); }
+  .analysis-close { top: 50px; left: clamp(14px, 2vw, 32px); }
 
   /* Keep the timestamp subordinate to the radial read-head instead of allowing
      a second HUD-sized focal object to form at the bottom of the wheel. */
@@ -206,6 +216,38 @@
   margin-bottom: 0;
 }
 
+/* The earlier HUD convergence placed these labels with percentages of the old
+   capped desktop width. Once the wheel becomes full bleed those percentages no
+   longer describe a radial spoke: the same label drifts sideways as aspect ratio
+   changes. Use the instrument height as the camera scale instead. These cqh
+   offsets follow the existing -117° spoke and bias each identity toward a band
+   edge, away from the rotating Ganzhi/term captions that occupy the midpoint. */
+@media (min-width: 821px) {
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
+    font-size: 11px;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-year {
+    left: calc(50% - 57.08cqh);
+    top: 36.26%;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-month {
+    left: calc(50% - 49.08cqh);
+    top: 51.97%;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar {
+    left: calc(50% - 41.08cqh);
+    top: 67.67%;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-day {
+    left: calc(50% - 34.14cqh);
+    top: 81.28%;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour {
+    left: calc(50% - 32.01cqh);
+    top: 85.47%;
+  }
+}
+
 @media (max-width: 480px) {
   /* Mobile now follows the same instrument-first composition as desktop. Keep
      mobile-time.css ownership of shell rows/scrolling so the exact-time dock
@@ -277,6 +319,6 @@
 
 @media (min-width: 1100px) {
   .instrument-shell {
-    height: clamp(760px, calc(100dvh - 60px), 980px);
+    height: max(760px, calc(100dvh - 52px));
   }
 }
