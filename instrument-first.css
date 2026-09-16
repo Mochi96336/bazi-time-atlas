@@ -185,6 +185,22 @@
 }
 
 @media (max-width: 480px) {
+  /* Mobile now follows the same instrument-first composition as desktop. The
+     legacy hero and rounded dashboard shell were the last homepage chrome still
+     consuming the first viewport before the actual wheel. */
+  .kinetic-shell {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .atlas-intro {
+    display: none;
+  }
+  .instrument-shell {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
   #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
     min-height: 26px;
     padding-inline: 6px;
