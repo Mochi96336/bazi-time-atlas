@@ -2,7 +2,8 @@ import { sexagenaryCycle } from "./sexagenary-data.js";
 import {
   GANZHI_PILLARS,
   ganzhiInspectorModel,
-  normalizeGanzhiPillar
+  normalizeGanzhiPillar,
+  sexagenaryReferenceByName
 } from "./ganzhi-inspector-model.js";
 
 const inspector = document.querySelector("#ganzhi-inspector");
@@ -12,6 +13,7 @@ if (inspector) {
   const closeButton = inspector.querySelector("#ganzhi-inspector-close");
   const grid = inspector.querySelector("#ganzhi-inspector-grid");
   let activePillar = null;
+  let activeReference = null;
   let lastTrigger = null;
 
   function setText(id, value) {
@@ -19,16 +21,20 @@ if (inspector) {
     if (node) node.textContent = value;
   }
 
-  function syncSearch(pillar) {
+  function syncSearch() {
     const url = new URL(location.href);
-    if (pillar) url.searchParams.set("inspect", pillar);
+    if (activePillar) url.searchParams.set("inspect", activePillar);
     else url.searchParams.delete("inspect");
+    if (activeReference) url.searchParams.set("reference", activeReference);
+    else url.searchParams.delete("reference");
     history.replaceState(history.state, "", url.href);
   }
 
   function updateTriggerState() {
     triggers.forEach(trigger => {
-      const active = !inspector.hidden && trigger.dataset.ganzhiReference === activePillar;
+      const active = !inspector.hidden
+        && activeReference === null
+        && trigger.dataset.ganzhiReference === activePillar;
       trigger.setAttribute("aria-expanded", String(active));
     });
   }
@@ -44,21 +50,28 @@ if (inspector) {
 
   function renderActive() {
     const config = activePillar ? GANZHI_PILLARS[activePillar] : null;
-    if (!config) return false;
-    const name = document.querySelector(`#${config.stateId}`)?.textContent?.trim() ?? "";
-    const model = ganzhiInspectorModel(activePillar, name);
-    inspector.dataset.pillar = activePillar;
+    const name = config
+      ? document.querySelector(`#${config.stateId}`)?.textContent?.trim() ?? ""
+      : activeReference ?? "";
+    const model = config
+      ? ganzhiInspectorModel(activePillar, name)
+      : sexagenaryReferenceByName(name);
+    const mode = config ? "pillar" : activeReference ? "reference" : "";
+    if (!mode) return false;
+
+    inspector.dataset.mode = mode;
+    inspector.dataset.pillar = activePillar ?? "";
     inspector.dataset.ganzhi = model?.name ?? "";
     inspector.dataset.ready = String(Boolean(model));
-    setText("ganzhi-inspector-pillar", config.label);
+    setText("ganzhi-inspector-pillar", config?.label ?? "六十甲子 reference");
 
     if (!model) {
       setText("ganzhi-inspector-title", "—");
       setText("ganzhi-inspector-ordinal", "— / 60");
       setText("ganzhi-inspector-stem", "—");
-      setText("ganzhi-inspector-stem-meta", "等待目前柱位");
+      setText("ganzhi-inspector-stem-meta", config ? "等待目前柱位" : "無效參考");
       setText("ganzhi-inspector-branch", "—");
-      setText("ganzhi-inspector-branch-meta", "等待目前柱位");
+      setText("ganzhi-inspector-branch-meta", config ? "等待目前柱位" : "無效參考");
       setText("ganzhi-inspector-previous", "—");
       setText("ganzhi-inspector-current", "—");
       setText("ganzhi-inspector-next", "—");
@@ -89,12 +102,27 @@ if (inspector) {
     const normalized = normalizeGanzhiPillar(pillar);
     if (!normalized) return false;
     activePillar = normalized;
+    activeReference = null;
     if (trigger) lastTrigger = trigger;
     inspector.hidden = false;
     inspector.dataset.open = "true";
     renderActive();
     updateTriggerState();
-    if (syncUrl) syncSearch(normalized);
+    if (syncUrl) syncSearch();
+    return true;
+  }
+
+  function openReference(name, { syncUrl = true } = {}) {
+    const reference = sexagenaryReferenceByName(name);
+    if (!reference) return false;
+    activePillar = null;
+    activeReference = reference.name;
+    lastTrigger = null;
+    inspector.hidden = false;
+    inspector.dataset.open = "true";
+    renderActive();
+    updateTriggerState();
+    if (syncUrl) syncSearch();
     return true;
   }
 
@@ -102,10 +130,11 @@ if (inspector) {
     if (inspector.hidden) return;
     inspector.hidden = true;
     inspector.dataset.open = "false";
-    if (syncUrl) syncSearch(null);
-    updateTriggerState();
     const focusTarget = restoreFocus ? lastTrigger : null;
     activePillar = null;
+    activeReference = null;
+    if (syncUrl) syncSearch();
+    updateTriggerState();
     if (focusTarget instanceof HTMLElement) focusTarget.focus();
   }
 
@@ -123,7 +152,7 @@ if (inspector) {
   triggers.forEach(trigger => {
     trigger.addEventListener("click", () => {
       const pillar = trigger.dataset.ganzhiReference;
-      if (!inspector.hidden && activePillar === pillar) {
+      if (!inspector.hidden && activeReference === null && activePillar === pillar) {
         closeInspector({ restoreFocus: false });
         return;
       }
@@ -147,8 +176,12 @@ if (inspector) {
     if (node) observer.observe(node, { childList: true, characterData: true, subtree: true });
   });
 
-  const requestedPillar = normalizeGanzhiPillar(new URLSearchParams(location.search).get("inspect"));
+  const params = new URLSearchParams(location.search);
+  const requestedPillar = normalizeGanzhiPillar(params.get("inspect"));
+  const requestedReference = sexagenaryReferenceByName(params.get("reference"))?.name ?? null;
   if (requestedPillar) {
     requestAnimationFrame(() => openInspector(requestedPillar, { syncUrl: false }));
+  } else if (requestedReference) {
+    requestAnimationFrame(() => openReference(requestedReference, { syncUrl: false }));
   }
 }
