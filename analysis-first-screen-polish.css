@@ -1,0 +1,168 @@
+/* Second-pass desktop Analysis polish. This sheet is intentionally installed
+   after the visible-ten-gods sheet so the remaining informational panels can be
+   flattened without changing their data ownership or compact/mobile layouts. */
+@media (min-width: 821px) {
+  /* The visible-stems comparison is useful evidence, but not a second card.
+     Compress it into the same quiet top rail as the other Analysis chrome. */
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    position: absolute;
+    z-index: 6;
+    top: 72px;
+    left: clamp(18px, 2vw, 32px);
+    right: clamp(310px, 24vw, 360px);
+    margin: 0;
+    border: 0;
+    border-top: 1px solid rgba(236,239,239,.075);
+    border-radius: 0;
+    padding: 5px 0 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(180px, 30ch);
+    align-items: center;
+    gap: 8px 14px;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head > div {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head small {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
+    color: #777c7d;
+    font-size: 6.5px;
+    font-weight: 720;
+    letter-spacing: .055em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
+    color: #a5a9a8;
+    font-size: 7px;
+    font-weight: 720;
+    letter-spacing: .035em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-grid {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(58px, 1fr));
+    gap: 0;
+    border: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    gap: 2px 4px;
+    border: 0;
+    border-left: 1px solid rgba(236,239,239,.065);
+    padding: 0 8px;
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:first-child {
+    border-left: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
+    color: #666b6c;
+    font-size: 6px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
+    margin: 0;
+    color: #c1c4c3;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 730;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
+    margin: 0;
+    color: #7b8081;
+    font-size: 6.5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-note {
+    margin: 0;
+    max-width: none;
+    color: #666b6c;
+    font-size: 6px;
+    line-height: 1.25;
+    letter-spacing: .01em;
+    opacity: .72;
+  }
+
+  /* Classification is an optional lens, not a floating dashboard card. Keep the
+     actual legend rows/keys/explanation, but align them to the same evidence rail
+     and strip the old rounded panel surface. */
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
+    top: 72px;
+    right: clamp(18px, 2vw, 32px);
+    width: min(270px, calc(100% - 36px));
+    border: 0;
+    border-left: 1px solid rgba(236,239,239,.085);
+    border-radius: 0;
+    padding: 4px 0 4px 10px;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row + .classification-row {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top-color: rgba(236,239,239,.055);
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header {
+    gap: 5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header span {
+    color: #838788;
+    font-size: 6.5px;
+    font-weight: 740;
+    letter-spacing: .055em;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header small {
+    color: #64696a;
+    font-size: 5.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-keys {
+    gap: 3px;
+    margin-top: 3px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-keys i {
+    min-width: 15px;
+    width: 15px;
+    height: 15px;
+    border-radius: 2px;
+    font-size: 6px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-current {
+    margin-top: 3px;
+    color: #737879;
+    font-size: 6.5px;
+    line-height: 1.25;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-warning {
+    margin-top: 4px;
+    color: color-mix(in srgb, var(--solar) 48%, #777c7d);
+    font-size: 6px;
+    line-height: 1.25;
+    opacity: .72;
+  }
+}

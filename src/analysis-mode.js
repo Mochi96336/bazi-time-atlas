@@ -4,6 +4,24 @@ const instrument = document.querySelector("#kinetic-instrument");
 const openControl = document.querySelector("#analysis-toggle");
 const closeControl = document.querySelector("#analysis-close");
 
+function installAnalysisFirstScreenStyles() {
+  if (document.querySelector("link[data-analysis-first-screen]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./analysis-first-screen.css";
+  stylesheet.dataset.analysisFirstScreen = "1";
+  document.head.append(stylesheet);
+}
+
+function installAnalysisFirstScreenPolishStyles() {
+  if (document.querySelector("link[data-analysis-first-screen-polish]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./analysis-first-screen-polish.css";
+  stylesheet.dataset.analysisFirstScreenPolish = "1";
+  document.head.append(stylesheet);
+}
+
 function activate(control, handler) {
   if (!control) return;
   control.addEventListener("click", handler);
@@ -40,7 +58,12 @@ function setAnalysisOpen(open, { reset = false } = {}) {
   closeControl.hidden = !open;
 }
 
+installAnalysisFirstScreenStyles();
 installAtlasVisibleTenGods(instrument);
+// atlas-visible-ten-gods installs its own stylesheet dynamically. Install the
+// final desktop polish afterwards so it can flatten that panel without changing
+// the component's data/lifecycle ownership or compact/mobile CSS.
+installAnalysisFirstScreenPolishStyles();
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false, { reset:true }));
 
