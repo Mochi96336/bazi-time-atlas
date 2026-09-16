@@ -85,13 +85,17 @@
   font-weight: 860;
 }
 
-/* The wheel model now carries the physical thickness hierarchy. This sheet
-   only reinforces that same scale reading with ink; geometry and hit targets
-   remain owned by wheel-core rather than CSS. */
+/* Temporal identity is carried by broad continuous surfaces, not by outlining
+   every discrete tooth. Sector DOM remains intact for hit testing and active
+   state; resting borders are removed so 60-step rings stop reading as combs.
+   Classification mode is loaded later and deliberately restores categorical
+   borders only when the user asks for that comparison. */
 #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 15%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 18%, transparent); }
 #month-track .month-sector { fill: color-mix(in srgb, var(--month) 27%, transparent); }
 #year-track .year-sector { fill: color-mix(in srgb, var(--year) 36%, transparent); }
+
+.cycle-sector:not(.is-active) { stroke: none; }
 
 #hour-track .cycle-sector.is-active,
 #day-track .cycle-sector.is-active {
@@ -100,27 +104,38 @@
 #month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 58%, transparent); }
 #year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 66%, transparent); }
 
-#hour-track .ring-tick { stroke: rgba(238,242,237,.13); }
-#day-track .ring-tick { stroke: rgba(238,242,237,.17); }
-#month-track .ring-tick { stroke: rgba(238,242,237,.28); }
-#year-track .ring-tick { stroke: rgba(238,242,237,.32); }
-#month-track .ring-tick.major { stroke: rgba(238,242,237,.47); }
-#year-track .ring-tick.major { stroke: rgba(244,238,218,.62); stroke-width: 1.4; }
+/* Every six-degree boundary still exists as a short tick, but only each fifth
+   boundary is allowed to read as structural. This preserves the 60-step phase
+   scale without drawing sixty full separators through every annulus. */
+#hour-track .ring-tick { stroke: rgba(238,242,237,.055); }
+#day-track .ring-tick { stroke: rgba(238,242,237,.075); }
+#month-track .ring-tick { stroke: rgba(238,242,237,.10); }
+#year-track .ring-tick { stroke: rgba(238,242,237,.12); }
+#hour-track .ring-tick.major { stroke: rgba(238,242,237,.23); stroke-width: 1.05; }
+#day-track .ring-tick.major { stroke: rgba(238,242,237,.28); stroke-width: 1.1; }
+#month-track .ring-tick.major { stroke: rgba(238,242,237,.40); stroke-width: 1.2; }
+#year-track .ring-tick.major { stroke: rgba(244,238,218,.52); stroke-width: 1.35; }
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
-   not two more peer clocks. Make the shared band read like a reference scale
-   between the inner clocks and the slow outer shells. */
+   not two more peer clocks. Resting sectors form continuous surfaces. Exact
+   term boundaries stay in the dedicated marks, with 節 (jie) carrying the
+   stronger cadence; active state may use a border because it is singular. */
 #guide-layer .guide-arc.annual-subdivide {
   stroke: rgba(213,163,109,.12);
   stroke-dasharray: 3 6;
 }
 #solar-track .term-sector {
   fill: rgba(213,163,109,.045);
-  stroke: rgba(238,242,237,.065);
+  stroke: none;
 }
 #solar-track .term-sector.jie { fill: rgba(213,163,109,.075); }
-#solar-track .term-sector.is-active { fill: rgba(213,163,109,.19); }
-#solar-track .term-mark { opacity: .72; }
+#solar-track .term-sector.is-active {
+  fill: rgba(213,163,109,.19);
+  stroke: rgba(244,230,183,.42);
+  stroke-width: 1.15;
+}
+#solar-track .term-mark { opacity: .30; stroke-width: .8; }
+#solar-track .term-mark.jie { opacity: .70; stroke-width: 1.15; }
 #solar-track .term-label {
   fill: #aa9c86;
   font-size: 10px;
@@ -134,9 +149,13 @@
 }
 #zodiac-track .zodiac-sector {
   fill: rgba(153,139,180,.055);
-  stroke: rgba(214,204,231,.10);
+  stroke: none;
 }
-#zodiac-track .zodiac-sector.is-active { fill: rgba(153,139,180,.15); }
+#zodiac-track .zodiac-sector.is-active {
+  fill: rgba(153,139,180,.15);
+  stroke: rgba(214,204,231,.38);
+  stroke-width: 1.1;
+}
 #zodiac-track .zodiac-label {
   fill: #a49ab8;
   font-size: 10px;
@@ -181,11 +200,12 @@
   letter-spacing: .05em;
 }
 
-/* The whole annual band is still one drag/reference target. Interaction wins
-   over the quieter resting treatment. */
+/* Hover promotes the annual surface without bringing the comb back. During an
+   actual drag the full sector borders may appear as temporary manipulation
+   feedback; resting presentation stays sparse. */
 #kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector,
 #kinetic-wheel[data-hover-ring="solar"] #zodiac-track .zodiac-sector {
-  stroke: rgba(238,242,237,.27);
+  filter: brightness(1.16);
 }
 #kinetic-wheel[data-active-ring="solar"] #solar-track .term-sector,
 #kinetic-wheel[data-active-ring="solar"] #zodiac-track .zodiac-sector {
