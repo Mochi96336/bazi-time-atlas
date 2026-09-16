@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   FREE_COMPARE_OFFSET_EPSILON,
+  createFreeCompareController,
   detachedCompareRings,
   freeCompareViewState
 } from "../src/interaction/free-compare-controller.js";
@@ -20,6 +21,22 @@ function ringStates(offsets = {}) {
     ...RINGS.map(ring => [ring.id, { manualOffset:offsets[ring.id] ?? 0 }]),
     ["zodiac", { manualOffset:offsets.zodiac ?? 0 }]
   ]);
+}
+
+function fakeNode() {
+  const listeners = new Map();
+  return {
+    dataset:{},
+    hidden:false,
+    textContent:"",
+    setAttribute() {},
+    addEventListener(type, listener) { listeners.set(type, listener); },
+    dispatch(type) { listeners.get(type)?.(); },
+    appendChild() {},
+    prepend() {},
+    insertBefore() {},
+    dispatchEvent() {}
+  };
 }
 
 test("detached compare rings preserve primary radial order and ignore zodiac", () => {
@@ -84,4 +101,46 @@ test("Free Compare status preserves fixed-time ownership and signed one-decimal 
   assert.equal(view.resetHidden, false);
   assert.deepEqual(view.detachedIds, ["day", "solar"]);
   assert.equal(view.statusText, "時間固定 · 日 +1.2° · 節氣 −2.0°");
+});
+
+test("reset cancels active coast before clearing Free Compare offsets", () => {
+  const states = ringStates({ day:4.5, zodiac:7 });
+  const order = [];
+  const instrument = fakeNode();
+  const controlGroup = fakeNode();
+  const insertBefore = fakeNode();
+  const dragController = {
+    compareMode:true,
+    cancelInertia(options) {
+      order.push(["cancel", options, states.day.manualOffset]);
+    },
+    setCompareMode(enabled) {
+      this.compareMode = Boolean(enabled);
+    }
+  };
+  const documentRef = { createElement:() => fakeNode() };
+  const controller = createFreeCompareController({
+    instrument,
+    controlGroup,
+    insertBefore,
+    rings:RINGS,
+    ringStates:states,
+    dragController,
+    renderAllRingPoses:() => order.push(["render", states.day.manualOffset]),
+    stopPlayback:() => {},
+    documentRef
+  });
+
+  controller.resetAllOffsets();
+
+  assert.deepEqual(order[0], [
+    "cancel",
+    { detent:false, reason:"free-compare-reset" },
+    4.5
+  ]);
+  assert.deepEqual(order[1], ["render", 0]);
+  assert.equal(states.day.manualOffset, 0);
+  assert.equal(states.day.linked, true);
+  assert.equal(states.zodiac.manualOffset, 0);
+  assert.equal(states.zodiac.linked, true);
 });
