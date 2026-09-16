@@ -29,6 +29,10 @@ function requireEqual(actual, expected, label, url) {
   if (actual !== expected) throw new Error(`${label}: expected ${expected}, got ${actual}: ${url}`);
 }
 
+function requireIncludes(actual, expected, label, url) {
+  if (!actual?.includes(expected)) throw new Error(`${label}: expected to include ${expected}, got ${actual}: ${url}`);
+}
+
 function data(prefix, ring, role) {
   return `data-${prefix}-${ring}-${role}-opacity`;
 }
@@ -74,6 +78,28 @@ const probe = result.stdout.match(/<output[^>]+id="probe"[^>]*>/)?.[0] ?? "";
 if (!probe || attr(probe, "data-ready") !== "true") throw new Error(`scale-emphasis fixture did not settle: ${url}`);
 
 requireEqual(num(probe, "data-inner-width"), 390, "scale emphasis true viewport width", url);
+requireEqual(attr(probe, "data-time-window-group-label"), "觀察時間窗", "preset group semantic label", url);
+requireEqual(attr(probe, "data-time-window-visible-label"), "觀察時間窗", "preset group visible label", url);
+requireEqual(attr(probe, "data-time-window-visible-label-display"), "inline-flex", "visible label pseudo display", url);
+requireEqual(attr(probe, "data-time-window-visible-label-first-viewport"), "true", "visible label stays in first viewport", url);
+requireEqual(attr(probe, "data-time-window-group-inside-viewport"), "true", "observation-window row stays inside 390px viewport", url);
+requireEqual(attr(probe, "data-time-window-status-label"), "觀察時間窗", "timeline status semantic label", url);
+requireEqual(attr(probe, "data-time-window-effects"), "slider-range,playback-tempo,reading-emphasis", "time-window coupled effects", url);
+requireEqual(attr(probe, "data-time-window-geometry"), "unchanged", "time-window geometry contract", url);
+requireEqual(attr(probe, "data-time-window-phase"), "unchanged", "time-window phase contract", url);
+requireIncludes(attr(probe, "data-time-window-group-title"), "不改變圓盤幾何", "group must reject zoom semantics", url);
+for (const [name, visibleLabel, range] of [
+  ["day", "48 小時", "前後各 1 日"],
+  ["year", "一年", "前後約半年"],
+  ["cycle", "60 年", "前後約 30 年"]
+]) {
+  const aria = attr(probe, `data-${name}-button-aria-label`) ?? "";
+  requireIncludes(aria, `${visibleLabel}觀察時間窗`, `${name} preset names its observation window`, url);
+  requireIncludes(aria, range, `${name} preset exposes its range`, url);
+  requireIncludes(aria, "播放節奏", `${name} preset exposes playback coupling`, url);
+  requireIncludes(aria, "不改變圓盤幾何", `${name} preset rejects geometry zoom semantics`, url);
+}
+
 requireEqual(attr(probe, "data-initial-window"), "year", "initial one-year emphasis", url);
 requireEqual(attr(probe, "data-initial-focus"), "solar,month", "one-year focus rings", url);
 requireEqual(attr(probe, "data-initial-context"), "year", "one-year context rings", url);
@@ -103,7 +129,7 @@ requireEqual(attr(probe, "data-day-window"), "day", "48-hour emphasis mode", url
 requireEqual(attr(probe, "data-day-focus"), "hour,day", "48-hour focus rings", url);
 requireEqual(attr(probe, "data-day-context"), "solar", "48-hour context rings", url);
 requireEqual(attr(probe, "data-day-ambient"), "month,year", "48-hour ambient rings", url);
-requireEqual(attr(probe, "data-day-readout"), "日內 / 48 小時", "48-hour readout", url);
+requireEqual(attr(probe, "data-day-readout"), "48 小時", "48-hour observation-window readout", url);
 assertRole(probe, "day", "hour", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
 assertRole(probe, "day", "day", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
 assertRole(probe, "day", "solar", { surface:.52, structure:.62, context:.70, "active-surface":.78, active:1 }, url);
@@ -121,7 +147,7 @@ requireEqual(attr(probe, "data-cycle-window"), "cycle", "60-year emphasis mode",
 requireEqual(attr(probe, "data-cycle-focus"), "year", "60-year focus ring", url);
 requireEqual(attr(probe, "data-cycle-context"), "month,solar", "60-year context rings", url);
 requireEqual(attr(probe, "data-cycle-ambient"), "day,hour", "60-year ambient rings", url);
-requireEqual(attr(probe, "data-cycle-readout"), "六十年", "60-year readout", url);
+requireEqual(attr(probe, "data-cycle-readout"), "60 年", "60-year observation-window readout", url);
 assertRole(probe, "cycle", "year", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
 assertRole(probe, "cycle", "month", { surface:.70, structure:.78, context:.84, "active-surface":.90, active:1 }, url);
 assertRole(probe, "cycle", "solar", { surface:.56, structure:.66, context:.74, "active-surface":.82, active:1 }, url);
@@ -139,4 +165,4 @@ requireEqual(num(probe, "data-active-scale-buttons"), 1, "one active scale butto
 requireEqual(attr(probe, "data-current-scale-button"), "cycle", "final active scale button", url);
 requireEqual(attr(probe, "data-current-aria-scale"), "cycle", "final aria-current scale button", url);
 
-console.log(`[scale-emphasis] PASS 390px scale focus with receding active surfaces and full-strength datum labels: ${url}`);
+console.log(`[scale-emphasis] PASS 390px observation-window semantics + scale focus with receding active surfaces and full-strength datum labels: ${url}`);
