@@ -107,7 +107,29 @@
         }
 
         const selectedBefore = instrument.dataset.selectedInstantMs;
+        const scaleGroup = doc.querySelector('.instrument-toolbar > .toolbar-group:first-child');
+        const timelineStatusLabel = doc.querySelector(".timeline-status span");
+        const dayButton = doc.querySelector('[data-scale="day"]');
+        const yearButton = doc.querySelector('[data-scale="year"]');
+        const cycleButton = doc.querySelector('[data-scale="cycle"]');
+        const groupRect = scaleGroup?.getBoundingClientRect();
+        const pseudo = scaleGroup ? win.getComputedStyle(scaleGroup, "::before") : null;
+        const pseudoContent = (pseudo?.content ?? "").replace(/^["']|["']$/g, "");
+
         probe.dataset.innerWidth = String(win.innerWidth);
+        probe.dataset.timeWindowGroupLabel = scaleGroup?.getAttribute("aria-label") ?? "";
+        probe.dataset.timeWindowGroupTitle = scaleGroup?.getAttribute("title") ?? "";
+        probe.dataset.timeWindowVisibleLabel = pseudoContent;
+        probe.dataset.timeWindowVisibleLabelDisplay = pseudo?.display ?? "missing";
+        probe.dataset.timeWindowVisibleLabelFirstViewport = String(Boolean(groupRect && groupRect.width > 0 && groupRect.height > 0 && groupRect.top >= 0 && groupRect.bottom <= win.innerHeight));
+        probe.dataset.timeWindowGroupInsideViewport = String(Boolean(groupRect && groupRect.left >= 0 && groupRect.right <= win.innerWidth));
+        probe.dataset.timeWindowStatusLabel = timelineStatusLabel?.textContent?.trim() ?? "";
+        probe.dataset.timeWindowEffects = instrument.dataset.timeWindowEffects ?? "";
+        probe.dataset.timeWindowGeometry = instrument.dataset.timeWindowGeometry ?? "";
+        probe.dataset.timeWindowPhase = instrument.dataset.timeWindowPhase ?? "";
+        probe.dataset.dayButtonAriaLabel = dayButton?.getAttribute("aria-label") ?? "";
+        probe.dataset.yearButtonAriaLabel = yearButton?.getAttribute("aria-label") ?? "";
+        probe.dataset.cycleButtonAriaLabel = cycleButton?.getAttribute("aria-label") ?? "";
         probe.dataset.initialWindow = instrument.dataset.scaleWindow;
         probe.dataset.initialFocus = instrument.dataset.scaleFocusRings ?? "";
         probe.dataset.initialContext = instrument.dataset.scaleContextRings ?? "";
@@ -116,7 +138,7 @@
         snapshotTracks(win, doc, "year");
         snapshotRoles(win, doc, "year");
 
-        doc.querySelector('[data-scale="day"]')?.click();
+        dayButton?.click();
         settle(() => {
           probe.dataset.dayWindow = instrument.dataset.scaleWindow ?? "";
           probe.dataset.dayFocus = instrument.dataset.scaleFocusRings ?? "";
@@ -136,7 +158,7 @@
             probe.dataset.dayHoverYearActiveOpacity = String(opacity(win, doc, "#year-track .active-cycle-label"));
             delete svg.dataset.hoverRing;
 
-            doc.querySelector('[data-scale="cycle"]')?.click();
+            cycleButton?.click();
             settle(() => {
               probe.dataset.cycleWindow = instrument.dataset.scaleWindow ?? "";
               probe.dataset.cycleFocus = instrument.dataset.scaleFocusRings ?? "";
