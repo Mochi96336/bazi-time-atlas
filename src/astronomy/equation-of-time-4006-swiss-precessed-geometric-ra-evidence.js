@@ -1,0 +1,86 @@
+export const EQUATION_OF_TIME_4006_SWISS_PRECESSED_GEOMETRIC_RA_EVIDENCE = Object.freeze({
+  id:"swiss-eot-4006-precessed-geometric-ra-curvature-v1",
+  targetYear:4006,
+  scope:"geometric-mean-of-date-sun-ra-after-vondrak-precession",
+  provenance:Object.freeze({
+    researchPullRequest:257,
+    researchHeadSha:"2eab89a715f6e4abc9ca05baddaf5eb49b70d664",
+    workflowRunId:35126429925,
+    artifactId:10459522062,
+    artifactName:"swiss-precessed-geometric-ra-bound-4006",
+    artifactDigest:"sha256:675566391a634e9e248b886a14f99ef4614b64ca45cd63b737ee5e1cfd306b75",
+    swissUpstreamCommit:"9083a12d59e98034fb2337061481ac8800c16e64",
+    sourceGeometryEvidenceId:"swiss-eot-4006-swieph-segment-curvature-v1",
+    precessionMatrixEvidenceId:"swiss-eot-4006-vondrak-precession-matrix-v1"
+  }),
+  method:Object.freeze({
+    id:"swieph-geometric-j2000-plus-vondrak-precession-ra-curvature-envelope-v1",
+    rawSamplerMethod:"swieph-j2000-geometric-plus-vondrak-precession-et-grid-v1",
+    uniformEtGrid:true,
+    sampleIntervals:1461,
+    sampleStepEtDays:0.249828987573844,
+    sampleCoverRadiusEtDays:0.124914493786922,
+    betweenSampleXyLowerBound:"rho(t) >= rho(sample) - V_mean_of_date * cover_radius",
+    transformedVelocityInequality:"|(R x)'| <= |x'| + ||R'|| |x|",
+    transformedAccelerationInequality:"|(R x)''| <= |x''| + 2 ||R'|| |x'| + ||R''|| |x|",
+    raCurvatureInequality:"|alpha''| <= A_xy/rho + 2 V_xy^2/rho^2",
+    full3dVelocityAccelerationUsedForXy:true
+  }),
+  domain:Object.freeze({
+    startEtJd:3184221.651853002,
+    endEtJd:3184586.6520038475
+  }),
+  sample:Object.freeze({
+    minSampledPrecessedXyAu:0.9709572061243548,
+    minSampleIndex:308,
+    minSampleEtJd:3184298.5991811748,
+    gridMinimumIsContinuousLowerBound:false
+  }),
+  inputHardBounds:Object.freeze({
+    geometricJ2000PositionAu:5.276816389072819,
+    geometricJ2000VelocityAuPerDay:0.18629102131841138,
+    geometricJ2000AccelerationAuPerDaySquared:0.004258500764103926,
+    precessionMatrixFirstDerivativeOperatorNormPerDay:2.052417373487835e-6,
+    precessionMatrixSecondDerivativeOperatorNormPerDaySquared:1.564723396506781e-11
+  }),
+  derivedHardBounds:Object.freeze({
+    meanOfDateGeometricPositionAu:5.276816389072819,
+    meanOfDateGeometricVelocityAuPerDay:0.18630185154804502,
+    meanOfDateGeometricAccelerationAuPerDaySquared:0.004259265540528864,
+    hardMeanOfDateGeometricXyLowerAu:0.9476854046466644,
+    meanOfDateGeometricRaSecondDerivativeBoundRadPerDaySquared:0.0817866382898147,
+    meanOfDateGeometricRaSecondDerivativeBoundDegPerDaySquared:4.686029194569439
+  }),
+  planning:Object.freeze({
+    fullSwissEotSecondDerivativeThresholdDegPerDaySquared:104.94059155911904,
+    geometricMeanOfDateFractionOfThreshold:0.044654114532311655,
+    thresholdRemainingAfterGeometricMeanOfDateBoundDegPerDaySquared:100.2545623645496,
+    remainingProofLayers:Object.freeze([
+      "light-time",
+      "aberration",
+      "gravitational-deflection",
+      "nutation",
+      "long-term-sidereal-second-derivative"
+    ])
+  }),
+  interpretation:Object.freeze({
+    sourceDerivedContinuousBound:true,
+    geometricJ2000InputCertified:true,
+    vondrakPrecessionMatrixCertified:true,
+    precessedGeometricXySeparationContinuous:true,
+    meanOfDateGeometricRaSecondDerivativeCertified:true,
+    actualSwissPrecessionCorrectionCertified:false,
+    lightTimeCorrectionCertified:false,
+    aberrationCorrectionCertified:false,
+    deflectionCorrectionCertified:false,
+    nutationCorrectionCertified:false,
+    apparentPositionCorrectionChainCertified:false,
+    longTermSiderealSecondDerivativeCertified:false,
+    swissEotSecondDerivativeCertified:false,
+    swissEotDerivativeCertified:false,
+    continuousResidualUpperBound:false,
+    deterministicMembership:false,
+    recurrenceAuthorityGranted:false,
+    reason:"The merged SWIEPH geometric J2000 envelope and Vondrak matrix derivative certificate compose into a continuous curvature bound for the geometric Sun right ascension after precession to mean-of-date. Swiss light-time, aberration, deflection, nutation and long-term sidereal curvature remain outside this certificate."
+  })
+});

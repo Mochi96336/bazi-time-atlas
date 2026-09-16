@@ -31,6 +31,7 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
       maxNeval:25,
       rotatedSegments:2,
       referenceEllipseSegments:2,
+      maxPositionCoefficientEnvelopeAu:2.6377430220568567,
       maxVelocityBoundAuPerDay:0.09312868940877098,
       maxAccelerationBoundAuPerDaySquared:0.0021229403874431026
     }),
@@ -41,6 +42,7 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
       maxNeval:25,
       rotatedSegments:2,
       referenceEllipseSegments:2,
+      maxPositionCoefficientEnvelopeAu:2.6389840769983754,
       maxVelocityBoundAuPerDay:0.09312058315053731,
       maxAccelerationBoundAuPerDaySquared:0.0021229423368395533
     }),
@@ -51,12 +53,15 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
       maxNeval:27,
       rotatedSegments:14,
       referenceEllipseSegments:14,
+      maxPositionCoefficientEnvelopeAu:0.0073486184366444406,
       maxVelocityBoundAuPerDay:0.003435946247341305,
       maxAccelerationBoundAuPerDaySquared:0.0010384717415345916
     })
   }),
   derivedHardBounds:Object.freeze({
     earthMoonMassRatio:81.30055985272827,
+    earthPositionCoefficientEnvelopeAu:2.6378323120744436,
+    sunRelativePositionCoefficientEnvelopeAu:5.276816389072819,
     earthVelocityAuPerDay:0.09317043816787407,
     earthAccelerationAuPerDaySquared:0.0021355584272643733,
     sunRelativeVelocityAuPerDay:0.18629102131841138,
@@ -79,6 +84,7 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
   }),
   interpretation:Object.freeze({
     sourceDerivedContinuousBound:true,
+    chebyshevSegmentPositionVelocityAccelerationBoundsAnalytic:true,
     chebyshevSegmentVelocityAccelerationBoundsAnalytic:true,
     sampleBetweenDistanceLowerBoundUsesCertifiedVelocityEnvelope:true,
     geometricJ2000RaSecondDerivativeBoundAnalytic:true,
@@ -89,6 +95,6 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
     continuousResidualUpperBound:false,
     deterministicMembership:false,
     recurrenceAuthorityGranted:false,
-    reason:"Pinned SWIEPH post-rot_back Chebyshev coefficients provide a continuous geometric J2000 Sun-RA curvature bound. Swiss apparent-position corrections and long-term sidereal curvature remain outside this certificate, so it cannot yet certify the full Swiss Equation-of-Time second derivative."
+    reason:"Pinned SWIEPH post-rot_back Chebyshev coefficients provide continuous geometric J2000 position/velocity/acceleration envelopes and a Sun-RA curvature bound. Swiss apparent-position corrections and long-term sidereal curvature remain outside this certificate, so it cannot yet certify the full Swiss Equation-of-Time second derivative."
   })
 });
