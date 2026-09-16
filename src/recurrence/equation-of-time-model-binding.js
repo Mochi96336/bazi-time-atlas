@@ -1,4 +1,8 @@
 import { EQUATION_OF_TIME_4006_SWISS_EVIDENCE } from "../astronomy/equation-of-time-4006-swiss-evidence.js";
+import {
+  EQUATION_OF_TIME_EVIDENCE_KIND,
+  equationOfTimeEvidenceQualification
+} from "./equation-of-time-evidence-qualification.js";
 
 export const EQUATION_OF_TIME_MODEL_ID = Object.freeze({
   ATLAS_TYME_NREL_SPA_V1:"atlas-tyme-nrel-spa-v1"
@@ -20,7 +24,7 @@ const MODEL_REGISTRY = Object.freeze({
       Object.freeze({
         year:4006,
         evidenceId:EQUATION_OF_TIME_4006_SWISS_EVIDENCE.id,
-        evidenceKind:"empirical-grid-observed-production-max-abs",
+        evidenceKind:EQUATION_OF_TIME_EVIDENCE_KIND.EMPIRICAL_GRID_OBSERVED_PRODUCTION_MAX_ABS,
         validationScope:"target-year-empirical-grid-only",
         cadenceMinutes:SWISS_4006_DENSE.cadenceMinutes,
         samples:SWISS_4006_DENSE.samples,
@@ -52,7 +56,7 @@ function targetEvidenceForYear(record, year) {
     return Object.freeze({
       year,
       evidenceId:record.evidenceId,
-      evidenceKind:"modern-reference-differential",
+      evidenceKind:EQUATION_OF_TIME_EVIDENCE_KIND.MODERN_REFERENCE_DIFFERENTIAL,
       validationScope:record.validationScope,
       continuousUpperBound:false,
       recurrenceAuthority:false,
@@ -73,6 +77,10 @@ function binding(fields = {}) {
     validationScope:null,
     targetEvidenceAvailable:false,
     targetEvidence:null,
+    targetEvidenceQualification:null,
+    targetEvidenceContinuousBoundaryEligible:false,
+    targetEvidenceRequiresBoundaryClearance:false,
+    targetEvidenceUnconditionalEotAuthorityEligible:false,
     targetEvidenceAuthority:false,
     authorityGap:null,
     recurrenceValidatedYearRanges:Object.freeze([]),
@@ -98,6 +106,11 @@ export const UNBOUND_EQUATION_OF_TIME_MODEL = binding();
  * This prevents useful research evidence from being mislabeled as "no model"
  * without upgrading a sampled residual into deterministic recurrence proof.
  *
+ * Evidence is additionally classified by the typed qualification layer. Even
+ * a future non-zero continuous certified residual bound is only eligible for a
+ * target-specific boundary-clearance proof; it cannot by itself become
+ * unconditional EoT authority for every instant in a year.
+ *
  * Callers may select only a canonical `modelId`; they cannot supply their own
  * evidence id, validation interval, target-evidence metadata, or authority
  * boolean.
@@ -120,9 +133,18 @@ export function equationOfTimeModelBinding(modelId = null, targetYear = null) {
 
   const targetEvidence = targetEvidenceForYear(record, normalizedTargetYear);
   const targetEvidenceAvailable = targetEvidence !== null;
+  const targetEvidenceQualification = targetEvidence
+    ? equationOfTimeEvidenceQualification(targetEvidence)
+    : null;
+  const targetEvidenceUnconditionalEotAuthorityEligible =
+    targetEvidenceQualification?.unconditionalEotAuthorityEligible === true;
+  const targetEvidenceAuthority = targetEvidence?.recurrenceAuthority === true
+    && targetEvidenceUnconditionalEotAuthorityEligible;
   const coversTarget = normalizedTargetYear !== null
     && record.recurrenceValidatedYearRanges.some(range => rangeCoversYear(range, normalizedTargetYear));
-  const validatedForTarget = record.recurrenceAuthority && coversTarget;
+  const validatedForTarget = record.recurrenceAuthority
+    && coversTarget
+    && targetEvidenceAuthority;
 
   return binding({
     bound:true,
@@ -134,8 +156,14 @@ export function equationOfTimeModelBinding(modelId = null, targetYear = null) {
     validationScope:record.validationScope,
     targetEvidenceAvailable,
     targetEvidence,
-    targetEvidenceAuthority:targetEvidence?.recurrenceAuthority === true,
-    authorityGap:targetEvidence?.authorityGap ?? null,
+    targetEvidenceQualification,
+    targetEvidenceContinuousBoundaryEligible:
+      targetEvidenceQualification?.continuousBoundaryClearanceEligible === true,
+    targetEvidenceRequiresBoundaryClearance:
+      targetEvidenceQualification?.requiresTargetBoundaryClearance === true,
+    targetEvidenceUnconditionalEotAuthorityEligible,
+    targetEvidenceAuthority,
+    authorityGap:targetEvidenceQualification?.authorityGap ?? null,
     recurrenceValidatedYearRanges:record.recurrenceValidatedYearRanges,
     recurrenceAuthority:record.recurrenceAuthority,
     targetYear:normalizedTargetYear,
@@ -147,16 +175,21 @@ export function equationOfTimeModelBinding(modelId = null, targetYear = null) {
 }
 
 export const EQUATION_OF_TIME_MODEL_BINDING_CONTRACT = Object.freeze({
-  id:"recurrence-equation-of-time-model-binding-v3",
+  id:"recurrence-equation-of-time-model-binding-v4",
   canonicalModelIds:EQUATION_OF_TIME_MODEL_ID_VALUES,
   authorityOwnedByRegistry:true,
   targetEvidenceMetadataOwnedByRegistry:true,
+  targetEvidenceQualificationRequired:true,
   callersCannotDeclareEvidence:true,
   callersCannotDeclareValidatedCoverage:true,
   callersCannotDeclareTargetEvidence:true,
+  callersCannotDeclareEvidenceQualification:true,
   rejectsBooleanPresenceClaims:true,
   finiteOutputAloneIsNotValidation:true,
   targetEvidencePresenceDoesNotImplyRecurrenceAuthority:true,
   empiricalGridDoesNotImplyContinuousUpperBound:true,
+  continuousBoundDoesNotImplyUnconditionalAuthority:true,
+  nonzeroContinuousBoundRequiresTargetBoundaryClearance:true,
+  validatedCoverageAloneCannotGrantAuthority:true,
   modelPresenceDoesNotImplyRecurrenceAuthority:true
 });

@@ -16,6 +16,10 @@ test("Equation of Time model is explicitly unbound by default", () => {
   assert.equal(result.validatedForTarget, false);
   assert.equal(result.targetEvidenceAvailable, false);
   assert.equal(result.targetEvidence, null);
+  assert.equal(result.targetEvidenceQualification, null);
+  assert.equal(result.targetEvidenceContinuousBoundaryEligible, false);
+  assert.equal(result.targetEvidenceRequiresBoundaryClearance, false);
+  assert.equal(result.targetEvidenceUnconditionalEotAuthorityEligible, false);
   assert.equal(result.targetYear, null);
   assert.equal(result.authoritySource, "registry");
 });
@@ -35,6 +39,10 @@ test("canonical production EoT engine binds implementation and pinned modern evi
   assert.equal(result.targetEvidence.evidenceKind, "modern-reference-differential");
   assert.equal(result.targetEvidence.validationScope, "modern-reference-only");
   assert.equal(result.targetEvidence.recurrenceAuthority, false);
+  assert.equal(result.targetEvidenceQualification.continuousUpperBound, false);
+  assert.equal(result.targetEvidenceContinuousBoundaryEligible, false);
+  assert.equal(result.targetEvidenceRequiresBoundaryClearance, false);
+  assert.equal(result.targetEvidenceUnconditionalEotAuthorityEligible, false);
   assert.equal(result.targetEvidenceAuthority, false);
   assert.equal(result.authorityGap, "reference-evidence-is-not-recurrence-validation");
 });
@@ -52,6 +60,12 @@ test("year-4006 binding exposes corrected Swiss empirical evidence without promo
   assert.equal(result.targetEvidence.observedMaxAbsErrorSeconds, 1.4929317113205443);
   assert.equal(result.targetEvidence.continuousUpperBound, false);
   assert.equal(result.targetEvidence.recurrenceAuthority, false);
+  assert.equal(result.targetEvidenceQualification.continuousUpperBound, false);
+  assert.equal(result.targetEvidenceQualification.continuousBoundaryClearanceEligible, false);
+  assert.equal(result.targetEvidenceQualification.unconditionalEotAuthorityEligible, false);
+  assert.equal(result.targetEvidenceContinuousBoundaryEligible, false);
+  assert.equal(result.targetEvidenceRequiresBoundaryClearance, false);
+  assert.equal(result.targetEvidenceUnconditionalEotAuthorityEligible, false);
   assert.equal(result.targetEvidenceAuthority, false);
   assert.equal(result.authorityGap, "empirical-grid-is-not-continuous-bound");
   assert.equal(result.validatedForTarget, false);
@@ -63,6 +77,10 @@ test("years without registry-owned target evidence remain distinguishable from u
   assert.equal(result.bound, true);
   assert.equal(result.targetEvidenceAvailable, false);
   assert.equal(result.targetEvidence, null);
+  assert.equal(result.targetEvidenceQualification, null);
+  assert.equal(result.targetEvidenceContinuousBoundaryEligible, false);
+  assert.equal(result.targetEvidenceRequiresBoundaryClearance, false);
+  assert.equal(result.targetEvidenceUnconditionalEotAuthorityEligible, false);
   assert.equal(result.targetEvidenceAuthority, false);
   assert.equal(result.authorityGap, null);
   assert.equal(result.validatedForTarget, false);
@@ -72,6 +90,7 @@ test("modern and deep-time target evidence do not silently become recurrence aut
   for (const year of [2003, 2005, 2024, 4006]) {
     const result = equationOfTimeModelBinding(MODEL_ID, year);
     assert.equal(result.targetEvidenceAvailable, true);
+    assert.equal(result.targetEvidenceUnconditionalEotAuthorityEligible, false);
     assert.equal(result.targetEvidenceAuthority, false);
     assert.equal(result.recurrenceAuthority, false);
     assert.deepEqual(result.recurrenceValidatedYearRanges, []);
@@ -87,6 +106,7 @@ test("a bound model without target year cannot claim target evidence or validati
   assert.equal(result.targetYear, null);
   assert.equal(result.targetEvidenceAvailable, false);
   assert.equal(result.targetEvidence, null);
+  assert.equal(result.targetEvidenceQualification, null);
   assert.equal(result.coversTarget, false);
   assert.equal(result.validatedForTarget, false);
 });
@@ -98,7 +118,14 @@ test("legacy booleans, arbitrary objects, and unknown ids cannot forge EoT autho
       modelId:"forged",
       evidenceId:"forged-evidence",
       validatedCoverage:{ minYear:-9999, maxYear:9999 },
-      targetEvidence:{ evidenceId:"forged-target-evidence", recurrenceAuthority:true }
+      targetEvidence:{
+        evidenceId:"forged-target-evidence",
+        evidenceKind:"continuous-certified-upper-bound",
+        continuousUpperBound:true,
+        certifiedUpperBoundSeconds:0,
+        certificationMethod:"forged",
+        recurrenceAuthority:true
+      }
     }, 4006),
     /canonical non-empty string/
   );
@@ -110,15 +137,21 @@ test("invalid target years fail closed", () => {
   assert.throws(() => equationOfTimeModelBinding(MODEL_ID, Number.NaN), /targetYear/);
 });
 
-test("contract makes registry ownership and evidence boundaries explicit", () => {
+test("contract makes qualification and authority boundaries explicit", () => {
+  assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.id, "recurrence-equation-of-time-model-binding-v4");
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.authorityOwnedByRegistry, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.targetEvidenceMetadataOwnedByRegistry, true);
+  assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.targetEvidenceQualificationRequired, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.callersCannotDeclareEvidence, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.callersCannotDeclareValidatedCoverage, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.callersCannotDeclareTargetEvidence, true);
+  assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.callersCannotDeclareEvidenceQualification, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.rejectsBooleanPresenceClaims, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.finiteOutputAloneIsNotValidation, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.targetEvidencePresenceDoesNotImplyRecurrenceAuthority, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.empiricalGridDoesNotImplyContinuousUpperBound, true);
+  assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.continuousBoundDoesNotImplyUnconditionalAuthority, true);
+  assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.nonzeroContinuousBoundRequiresTargetBoundaryClearance, true);
+  assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.validatedCoverageAloneCannotGrantAuthority, true);
   assert.equal(EQUATION_OF_TIME_MODEL_BINDING_CONTRACT.modelPresenceDoesNotImplyRecurrenceAuthority, true);
 });
