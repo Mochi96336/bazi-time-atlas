@@ -277,14 +277,17 @@ function setSliderForScale() {
   scaleButtons.forEach(button => button.classList.toggle("active", button.dataset.scale === state.scale));
 }
 
-function stopPlayback() {
-  dragController?.cancelInertia?.({ detent:true, reason:"external-control" });
+function stopPlayback({ interruptActiveDrag = false, reason = "external-control" } = {}) {
+  if (interruptActiveDrag) {
+    dragController?.cancelActiveGesture?.({ detent:true, reason });
+  }
+  dragController?.cancelInertia?.({ detent:true, reason });
   playbackController?.stop();
 }
 
 function setSelectedInstant(instantMs, source = "command") {
   if (!Number.isFinite(instantMs)) return false;
-  stopPlayback();
+  stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
   clearLegacyProjection();
   state.selectedMs = instantMs;
   state.anchorMs = instantMs;
@@ -298,7 +301,7 @@ function setSelectedInstant(instantMs, source = "command") {
 
 function setTimeContext(timeContext, source = "command") {
   if (!timeContext) return false;
-  stopPlayback();
+  stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
   state.timeContext = timeContext;
   updateWheel();
   instrument.dataset.lastTimeContextSource = source;
@@ -314,6 +317,7 @@ function installPlayback() {
     playButton,
     updateWheel,
     prepareStart() {
+      dragController?.cancelActiveGesture?.({ detent:true, reason:"playback-start" });
       dragController?.cancelInertia?.({ detent:true, reason:"playback-start" });
       if (dragController?.compareMode) compareController?.setMode(false);
       clearLegacyProjection();
@@ -402,7 +406,7 @@ function installRingDrag() {
 function bindControls() {
   scaleButtons.forEach(button => {
     button.addEventListener("click", () => {
-      stopPlayback();
+      stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
       clearLegacyProjection();
       state.scale = button.dataset.scale;
       state.anchorMs = state.selectedMs;
@@ -411,7 +415,7 @@ function bindControls() {
     });
   });
   slider.addEventListener("input", () => {
-    stopPlayback();
+    stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
     clearLegacyProjection();
     state.selectedMs = state.anchorMs + Number(slider.value) * DAY_MS;
     updateWheel();
