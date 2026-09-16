@@ -23,6 +23,10 @@
   text-align: center;
 }
 
+.cycle-mobile-facts {
+  display: none;
+}
+
 .phase-node-label {
   font-size: 22px;
   font-weight: 760;
@@ -94,5 +98,46 @@
 
   .cycle-dot.active {
     r: 10px;
+  }
+
+  .cycle-mobile-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .cycle-mobile-facts > div {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: 6px;
+    align-items: baseline;
+    padding: 8px 9px;
+    border: 1px solid var(--hairline);
+    border-radius: 11px;
+    background: rgba(255,255,255,.018);
+  }
+
+  .cycle-mobile-facts span {
+    color: #727d76;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .07em;
+  }
+
+  .cycle-mobile-facts strong {
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .cycle-mobile-facts small {
+    min-width: 0;
+    overflow: hidden;
+    color: #89948d;
+    font-size: 8.5px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
