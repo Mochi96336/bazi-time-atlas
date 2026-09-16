@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { DAY_BOUNDARY } from "../src/calendar/day-boundary.js";
 import {
   ATLAS_SEXAGENARY_NAMES,
   ATLAS_UTC_OFFSET_HOURS,
@@ -12,9 +13,17 @@ import {
   resolveAtlasDisplayState,
   solarLongitudeAtInstant
 } from "../src/wheel/atlas-display-model.js";
+import {
+  DEFAULT_ATLAS_TIME_CONTEXT,
+  normalizeAtlasTimeContext
+} from "../src/wheel/atlas-time-context.js";
 
 test("atlas civil-time helpers preserve second-level UTC+8 controller semantics", () => {
   assert.equal(ATLAS_UTC_OFFSET_HOURS, 8);
+  assert.deepEqual(DEFAULT_ATLAS_TIME_CONTEXT, {
+    utcOffsetHours: 8,
+    dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+  });
   const instantMs = Date.UTC(2026, 8, 14, 4, 34, 37);
   const fields = civilFieldsFromInstant(instantMs);
   assert.deepEqual(fields, {
@@ -33,6 +42,33 @@ test("atlas civil-time helpers preserve second-level UTC+8 controller semantics"
     Date.UTC(2026, 8, 14, 4, 34, 0)
   );
   assert.equal(instantFromAtlasLocalInput("not-a-date"), null);
+});
+
+test("atlas local-clock helpers accept an explicit fixed-offset context without moving the instant", () => {
+  const timeContext = {
+    utcOffsetHours: 9,
+    dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+  };
+  const instantMs = Date.parse("2026-09-16T15:30:00.000Z");
+  const fields = civilFieldsFromInstant(instantMs, timeContext);
+  assert.deepEqual(fields, {
+    year: 2026,
+    month: 9,
+    day: 17,
+    hour: 0,
+    minute: 30,
+    second: 0
+  });
+  assert.equal(
+    instantFromAtlasLocalInput("2026-09-17T00:30:00", timeContext),
+    instantMs
+  );
+});
+
+test("atlas time context fails closed on invalid offset and day-boundary values", () => {
+  assert.throws(() => normalizeAtlasTimeContext({ utcOffsetHours: 15 }), /utcOffsetHours/);
+  assert.throws(() => normalizeAtlasTimeContext({ dayBoundary: "sunset" }), /dayBoundary/);
+  assert.throws(() => normalizeAtlasTimeContext(null), /object/);
 });
 
 test("instant deep links take precedence over legacy longitude projection", () => {
@@ -89,6 +125,7 @@ test("display model applies legacy projection without changing the physical inst
 test("physical display state keeps solar longitude and discrete phases intact", () => {
   const selectedMs = Date.UTC(2026, 8, 14, 4, 0, 0);
   const display = resolveAtlasDisplayState({ selectedMs });
+  assert.equal(display.timeContext, DEFAULT_ATLAS_TIME_CONTEXT);
   assert.equal(display.longitude, display.actualLongitude);
   assert.equal(display.actualLongitude, solarLongitudeAtInstant(selectedMs));
   assert.ok(display.phases.hour);
@@ -96,4 +133,45 @@ test("physical display state keeps solar longitude and discrete phases intact", 
   assert.ok(display.phases.month);
   assert.ok(display.phases.year);
   assert.equal(ATLAS_SEXAGENARY_NAMES.length, 60);
+});
+
+test("changing day-boundary convention preserves the instant, year, month and Sun", () => {
+  const selectedMs = Date.parse("2026-09-16T15:30:00.000Z"); // UTC+8 = 23:30
+  const ziInitial = resolveAtlasDisplayState({ selectedMs });
+  const civilMidnight = resolveAtlasDisplayState({
+    selectedMs,
+    timeContext: {
+      utcOffsetHours: 8,
+      dayBoundary: DAY_BOUNDARY.CIVIL_MIDNIGHT
+    }
+  });
+
+  assert.deepEqual(civilMidnight.fields, ziInitial.fields);
+  assert.equal(civilMidnight.yearName, ziInitial.yearName);
+  assert.equal(civilMidnight.monthName, ziInitial.monthName);
+  assert.equal(civilMidnight.actualLongitude, ziInitial.actualLongitude);
+  assert.equal(civilMidnight.activeTerm.name, ziInitial.activeTerm.name);
+  assert.notEqual(civilMidnight.pillars.day.name, ziInitial.pillars.day.name);
+  assert.notEqual(civilMidnight.phases.day.startMs, ziInitial.phases.day.startMs);
+  assert.equal(civilMidnight.phases.day.dayBoundary, DAY_BOUNDARY.CIVIL_MIDNIGHT);
+});
+
+test("changing fixed offset changes the civil representation but not the physical Sun", () => {
+  const selectedMs = Date.parse("2026-09-16T15:30:00.000Z");
+  const utc8 = resolveAtlasDisplayState({ selectedMs });
+  const utc9 = resolveAtlasDisplayState({
+    selectedMs,
+    timeContext: {
+      utcOffsetHours: 9,
+      dayBoundary: DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+    }
+  });
+
+  assert.equal(utc8.fields.day, 16);
+  assert.equal(utc8.fields.hour, 23);
+  assert.equal(utc9.fields.day, 17);
+  assert.equal(utc9.fields.hour, 0);
+  assert.equal(utc9.yearName, utc8.yearName);
+  assert.equal(utc9.monthName, utc8.monthName);
+  assert.ok(Math.abs(utc9.actualLongitude - utc8.actualLongitude) < 1e-9);
 });
