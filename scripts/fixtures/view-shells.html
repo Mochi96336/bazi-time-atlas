@@ -17,8 +17,8 @@
     <iframe id="atlas-mobile" class="mobile" title="atlas mobile"></iframe>
     <iframe id="recurrence-mobile" class="mobile" title="recurrence mobile"></iframe>
     <iframe id="birth-mobile" class="mobile" title="birth mobile"></iframe>
-    <iframe id="sexagenary-mobile" class="mobile" title="sexagenary mobile"></iframe>
-    <iframe id="sexagenary-desktop" class="desktop" title="sexagenary desktop"></iframe>
+    <iframe id="sexagenary-mobile" class="mobile" title="legacy Ganzhi mobile redirect"></iframe>
+    <iframe id="sexagenary-desktop" class="desktop" title="legacy Sexagenary desktop fallback"></iframe>
   </div>
   <output id="probe" data-ready="false"></output>
 
@@ -134,18 +134,21 @@
       probe.dataset.birthRelationSurface = surfaceToken(birthWin, relationOverview);
 
       const [sexMobileWin, sexMobileDoc] = docs["sexagenary-mobile"];
-      const sexMobileFacts = sexMobileDoc.querySelector("#cycle-mobile-facts");
+      const referenceInspector = sexMobileDoc.querySelector("#ganzhi-inspector");
+      const referenceGrid = sexMobileDoc.querySelector("#ganzhi-inspector-grid");
       probe.dataset.sexColorScheme = sexMobileWin.getComputedStyle(sexMobileDoc.body).colorScheme;
-      probe.dataset.sexInspectorHidden = String(hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-inspector")));
-      probe.dataset.sexExplainerHidden = String(hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-explainer")));
-      probe.dataset.sexWheelVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector("#sexagenary-wheel")));
-      probe.dataset.sexNeighborsVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector("#cycle-neighbors")));
-      probe.dataset.sexIndexVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-index-panel")));
-      probe.dataset.sexFactsVisible = String(!hidden(sexMobileWin, sexMobileFacts));
-      probe.dataset.sexMobileStemName = sexMobileDoc.querySelector("#mobile-stem-name")?.textContent.trim() ?? "missing";
-      probe.dataset.sexMobileStemMeta = sexMobileDoc.querySelector("#mobile-stem-meta")?.textContent.trim() ?? "missing";
-      probe.dataset.sexMobileBranchName = sexMobileDoc.querySelector("#mobile-branch-name")?.textContent.trim() ?? "missing";
-      probe.dataset.sexMobileBranchMeta = sexMobileDoc.querySelector("#mobile-branch-meta")?.textContent.trim() ?? "missing";
+      probe.dataset.sexLegacyWheelAbsent = String(!sexMobileDoc.querySelector("#sexagenary-wheel"));
+      probe.dataset.sexReferenceVisible = String(Boolean(referenceInspector && !hidden(sexMobileWin, referenceInspector)));
+      probe.dataset.sexReferenceMode = referenceInspector?.dataset.mode ?? "missing";
+      probe.dataset.sexReferencePillar = referenceInspector?.dataset.pillar ?? "missing";
+      probe.dataset.sexReferenceGanzhi = referenceInspector?.dataset.ganzhi ?? "missing";
+      probe.dataset.sexReferenceReady = referenceInspector?.dataset.ready ?? "missing";
+      probe.dataset.sexReferenceOrdinal = sexMobileDoc.querySelector("#ganzhi-inspector-ordinal")?.textContent.trim() ?? "missing";
+      probe.dataset.sexReferenceStemName = sexMobileDoc.querySelector("#ganzhi-inspector-stem")?.textContent.trim() ?? "missing";
+      probe.dataset.sexReferenceStemMeta = sexMobileDoc.querySelector("#ganzhi-inspector-stem-meta")?.textContent.trim() ?? "missing";
+      probe.dataset.sexReferenceBranchName = sexMobileDoc.querySelector("#ganzhi-inspector-branch")?.textContent.trim() ?? "missing";
+      probe.dataset.sexReferenceBranchMeta = sexMobileDoc.querySelector("#ganzhi-inspector-branch-meta")?.textContent.trim() ?? "missing";
+      probe.dataset.sexReferenceGridCount = String(referenceGrid?.querySelectorAll("[data-cycle-index]").length ?? -1);
 
       const [sexDesktopWin, sexDesktopDoc] = docs["sexagenary-desktop"];
       probe.dataset.sexDesktopInspectorVisible = String(!hidden(sexDesktopWin, sexDesktopDoc.querySelector(".cycle-inspector")));

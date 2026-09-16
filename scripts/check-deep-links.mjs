@@ -11,14 +11,14 @@ function findBrowser() {
   throw new Error("No system Chromium/Chrome executable found");
 }
 
-function dumpDom(path) {
+function dumpDom(path, virtualTimeBudget = 1200) {
   const browser = findBrowser();
   const url = new URL(path, baseURL).href;
   const result = spawnSync(browser, [
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
-    "--virtual-time-budget=1200",
+    `--virtual-time-budget=${virtualTimeBudget}`,
     "--dump-dom",
     url,
   ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
@@ -28,6 +28,14 @@ function dumpDom(path) {
     throw new Error(`Chromium DOM probe failed: ${url}`);
   }
   return { url, dom: result.stdout };
+}
+
+function tagById(dom, id) {
+  return dom.match(new RegExp(`<[^>]+id="${id}"[^>]*>`))?.[0] ?? "";
+}
+
+function attr(tag, name) {
+  return tag.match(new RegExp(`${name}="([^"]*)"`))?.[1] ?? null;
 }
 
 function openDetailsById(dom, id) {
@@ -169,16 +177,24 @@ const cases = [
   },
   {
     path: "sexagenary.html?ganzhi=%E4%B9%99%E9%85%89",
-    label: "Sexagenary Gan-Zhi deep link",
+    label: "Legacy Sexagenary Ganzhi deep link routes to Atlas reference",
+    virtualTimeBudget: 3000,
     assert(dom) {
-      return /id="cycle-center-value"[^>]*>乙酉<\/text>/.test(dom) &&
-        /id="cycle-title"[^>]*>乙酉<\/h2>/.test(dom);
+      const inspector = tagById(dom, "ganzhi-inspector");
+      return attr(inspector, "data-open") === "true" &&
+        attr(inspector, "data-mode") === "reference" &&
+        attr(inspector, "data-pillar") === "" &&
+        attr(inspector, "data-ganzhi") === "乙酉" &&
+        attr(inspector, "data-ready") === "true" &&
+        /id="ganzhi-inspector-title"[^>]*>乙酉<\/strong>/.test(dom) &&
+        /id="ganzhi-inspector-ordinal"[^>]*>22 \/ 60<\/b>/.test(dom) &&
+        !/id="cycle-title"[^>]*>乙酉<\/h2>/.test(dom);
     },
   },
 ];
 
 for (const testCase of cases) {
-  const { url, dom } = dumpDom(testCase.path);
+  const { url, dom } = dumpDom(testCase.path, testCase.virtualTimeBudget);
   if (!testCase.assert(dom)) {
     throw new Error(`${testCase.label} did not resolve expected state: ${url}`);
   }

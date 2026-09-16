@@ -107,7 +107,7 @@ if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) 
 }
 
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
-requireEqual(attr(probe, "data-sex-color-scheme"), "dark", "Sexagenary left the dark instrument color scheme", url);
+requireEqual(attr(probe, "data-sex-color-scheme"), "dark", "legacy Ganzhi mobile redirect left the Atlas dark instrument color scheme", url);
 if (!/^#?131915$/i.test(attr(probe, "data-birth-paper") ?? "")) {
   throw new Error(`Birth paper token drifted from the instrument shell (${attr(probe, "data-birth-paper")}): ${url}`);
 }
@@ -131,17 +131,20 @@ for (const [name, dataName] of [
   }
 }
 
-requireEqual(attr(probe, "data-sex-inspector-hidden"), "true", "Sexagenary mobile duplicate inspector is visible", url);
-requireEqual(attr(probe, "data-sex-explainer-hidden"), "true", "Sexagenary mobile duplicate explainer is visible", url);
-requireEqual(attr(probe, "data-sex-wheel-visible"), "true", "Sexagenary mobile wheel disappeared", url);
-requireEqual(attr(probe, "data-sex-neighbors-visible"), "true", "Sexagenary mobile neighbor navigation disappeared", url);
-requireEqual(attr(probe, "data-sex-index-visible"), "true", "Sexagenary mobile full-cycle disclosure disappeared", url);
-requireEqual(attr(probe, "data-sex-facts-visible"), "true", "Sexagenary mobile unique stem/branch facts disappeared with the inspector", url);
-requireEqual(attr(probe, "data-sex-mobile-stem-name"), "丁", "Sexagenary mobile facts did not follow the ?ganzhi=丁卯 selection", url);
-requireEqual(attr(probe, "data-sex-mobile-stem-meta"), "陰 · 火 · 4 / 10", "Sexagenary mobile stem metadata is stale or incomplete", url);
-requireEqual(attr(probe, "data-sex-mobile-branch-name"), "卯", "Sexagenary mobile branch fact did not follow the selected pair", url);
-requireEqual(attr(probe, "data-sex-mobile-branch-meta"), "陰 · 木 · 4 / 12", "Sexagenary mobile branch metadata is stale or incomplete", url);
-requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "Sexagenary desktop inspector should remain visible", url);
-requireEqual(attr(probe, "data-sex-desktop-facts-hidden"), "true", "Sexagenary desktop must not duplicate the mobile facts strip beside its inspector", url);
+requireEqual(attr(probe, "data-sex-legacy-wheel-absent"), "true", "legacy Ganzhi mobile URL still owns an independent Sexagenary wheel", url);
+requireEqual(attr(probe, "data-sex-reference-visible"), "true", "legacy Ganzhi mobile URL did not open the Atlas reference inspector", url);
+requireEqual(attr(probe, "data-sex-reference-mode"), "reference", "legacy Ganzhi mobile URL was mistaken for contextual pillar inspection", url);
+requireEqual(attr(probe, "data-sex-reference-pillar"), "", "standalone Ganzhi reference incorrectly claimed pillar ownership", url);
+requireEqual(attr(probe, "data-sex-reference-ganzhi"), "丁卯", "legacy Ganzhi mobile URL resolved the wrong reference item", url);
+requireEqual(attr(probe, "data-sex-reference-ready"), "true", "legacy Ganzhi mobile reference failed to resolve", url);
+requireEqual(attr(probe, "data-sex-reference-ordinal"), "04 / 60", "legacy Ganzhi mobile ordinal drifted", url);
+requireEqual(attr(probe, "data-sex-reference-stem-name"), "丁", "Atlas reference stem did not follow the legacy ?ganzhi=丁卯 selection", url);
+requireEqual(attr(probe, "data-sex-reference-stem-meta"), "陰 · 火 · 4 / 10", "Atlas reference stem metadata is stale or incomplete", url);
+requireEqual(attr(probe, "data-sex-reference-branch-name"), "卯", "Atlas reference branch did not follow the legacy selection", url);
+requireEqual(attr(probe, "data-sex-reference-branch-meta"), "陰 · 木 · 4 / 12", "Atlas reference branch metadata is stale or incomplete", url);
+requireEqual(attr(probe, "data-sex-reference-grid-count"), "60", "Atlas standalone reference lost the full 60-item disclosure", url);
 
-console.log(`[view-shells] PASS two-destination top-level nav + legacy Birth/Sexagenary compatibility + task-first Research: ${url}`);
+requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "bare legacy Sexagenary desktop fallback should remain visible in this migration slice", url);
+requireEqual(attr(probe, "data-sex-desktop-facts-hidden"), "true", "bare legacy Sexagenary desktop fallback must not duplicate the mobile facts strip beside its inspector", url);
+
+console.log(`[view-shells] PASS two-destination nav + Atlas Ganzhi redirect + legacy bare fallback + task-first Research: ${url}`);

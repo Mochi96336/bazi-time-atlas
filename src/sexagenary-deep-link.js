@@ -1,9 +1,13 @@
 import "./sexagenary.js";
-import { sexagenaryCycle } from "./sexagenary-data.js";
+import { sexagenaryReferenceByName } from "./ganzhi-inspector-model.js";
 
 const requestedGanZhi = new URLSearchParams(window.location.search).get("ganzhi");
-const index = sexagenaryCycle.findIndex(item => item.name === requestedGanZhi);
+const reference = sexagenaryReferenceByName(requestedGanZhi);
 
-if (index >= 0) {
-  document.querySelector(`[data-cycle-index="${index}"]`)?.click();
+if (reference) {
+  const target = new URL("./", window.location.href);
+  target.search = "";
+  target.hash = "";
+  target.searchParams.set("reference", reference.name);
+  window.location.replace(target.href);
 }
