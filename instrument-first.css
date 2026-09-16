@@ -37,6 +37,19 @@
   .analysis-toggle { top: 50px; right: 8px; }
   .analysis-close { top: 50px; left: 8px; }
 
+  /* Ordinary reading is not a playback workstation. Keep one immediate action
+     (Now), while observation-window presets, classification and playback remain
+     available when Analysis is explicitly opened. Hiding is presentation-only:
+     the canonical controls stay in the DOM for state ownership and test probes. */
+  #kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar {
+    inset: 8px 8px auto auto;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .toolbar-group[role="group"][aria-label="時間尺度"],
+  #kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button,
+  #kinetic-instrument:not([data-analysis-open="true"]) #play-button {
+    display: none;
+  }
+
   /* Keep the timestamp subordinate to the radial read-head instead of allowing
      a second HUD-sized focal object to form at the bottom of the wheel. */
   .instrument-readout {
@@ -60,8 +73,9 @@
     opacity: .72;
   }
 
-  /* Preserve precise desktop time entry for now, but demote it from a second
-     dashboard card. The later control pass can move it into the instrument. */
+  /* Exact time entry is a real input; the range/playback apparatus is analysis
+     tooling. Normal reading therefore collapses the old three-column timeline
+     to the datetime field instead of showing a second scale-control system. */
   .timeline-dock {
     margin-top: 6px;
     border: 0;
@@ -70,6 +84,18 @@
     background: transparent;
     opacity: .7;
     transition: opacity 140ms ease;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock {
+    grid-template-columns: minmax(260px, 360px);
+    justify-content: center;
+    opacity: .62;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .slider-wrap,
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .timeline-status {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
+    opacity: 1;
   }
   .timeline-dock:hover,
   .timeline-dock:focus-within { opacity: 1; }
