@@ -13,6 +13,14 @@ test("mobile exact time round-trips UTC+8 through second precision", () => {
   assert.equal(parseMobileAtlasInput(value), instantMs);
 });
 
+test("mobile exact time can round-trip a non-default fixed offset", () => {
+  const instantMs = Date.parse("2026-09-15T20:14:37.000Z");
+  const timeContext = { utcOffsetHours: 5.5 };
+  const value = formatMobileAtlasInput(instantMs, timeContext);
+  assert.equal(value, "2026-09-16T01:44:37");
+  assert.equal(parseMobileAtlasInput(value, timeContext), instantMs);
+});
+
 test("deep-time year 4006 stays representable in the mobile exact input", () => {
   const value = "4006-03-05T10:22:45";
   const instantMs = parseMobileAtlasInput(value);
