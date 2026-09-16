@@ -1,0 +1,94 @@
+/* Phase 1: make the atlas read as one instrument, not a dashboard card.
+   This layer is deliberately presentation-only: wheel geometry, time semantics,
+   interaction state and analysis tooling remain owned by their existing modules. */
+
+@media (min-width: 481px) {
+  .kinetic-shell {
+    width: min(1760px, 100%);
+    padding: 12px clamp(10px, 1.5vw, 24px) 22px;
+  }
+
+  .kinetic-topbar { min-height: 32px; }
+
+  /* The header already names the product. The authored hero repeats the same
+     reading rule several times before the user reaches the actual instrument. */
+  .atlas-intro { display: none; }
+
+  /* The wheel is the page surface. Remove the large rounded dashboard card and
+     give the radial stack enough height to become the first-screen object. */
+  .instrument-shell {
+    margin-top: 6px;
+    height: clamp(620px, calc(100dvh - 60px), 980px);
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Analysis may still signal mode entry, but it should not resurrect the old
+     elevated card treatment. */
+  #kinetic-instrument[data-analysis-open="true"] {
+    border-color: transparent;
+    box-shadow: inset 0 0 0 1px rgba(199, 217, 205, .08);
+  }
+
+  .instrument-toolbar { inset: 8px 8px auto; }
+  .analysis-toggle { top: 50px; right: 8px; }
+  .analysis-close { top: 50px; left: 8px; }
+
+  /* Keep the timestamp subordinate to the radial read-head instead of allowing
+     a second HUD-sized focal object to form at the bottom of the wheel. */
+  .instrument-readout {
+    bottom: 12px;
+    width: min(660px, calc(100% - 24px));
+  }
+  .readout-kicker { display: none; }
+  #instant-readout {
+    margin: 0 0 4px;
+    font-size: clamp(16px, 1.5vw, 22px);
+  }
+  .readout-meta {
+    gap: 6px 12px;
+    font-size: 9px;
+    opacity: .82;
+  }
+  .boundary-meta {
+    margin-top: 5px;
+    gap: 5px 10px;
+    font-size: 8px;
+    opacity: .72;
+  }
+
+  /* Preserve precise desktop time entry for now, but demote it from a second
+     dashboard card. The later control pass can move it into the instrument. */
+  .timeline-dock {
+    margin-top: 6px;
+    border: 0;
+    border-radius: 0;
+    padding: 8px 2px;
+    background: transparent;
+    opacity: .7;
+    transition: opacity 140ms ease;
+  }
+  .timeline-dock:hover,
+  .timeline-dock:focus-within { opacity: 1; }
+
+  /* Long-form teaching copy is not part of the ordinary reading path. Analysis
+     can still reveal it while the collapsed source boundary remains available. */
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .atlas-notes {
+    display: none;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .sources-panel {
+    margin-top: 8px;
+    border-top: 0;
+    padding-top: 0;
+    opacity: .55;
+  }
+}
+
+@media (min-width: 1100px) {
+  .instrument-shell {
+    height: clamp(760px, calc(100dvh - 60px), 980px);
+  }
+}
