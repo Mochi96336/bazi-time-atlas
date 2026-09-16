@@ -21,7 +21,14 @@ test("ordinary reading keeps long-form notes out of the main path", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
 });
 
-test("precise time control remains available but is visually demoted", () => {
-  assert.match(css, /\.timeline-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?opacity:\s*\.7;/);
+test("ordinary reading keeps only the immediate Now action in the wheel toolbar", () => {
+  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.toolbar-group\[role="group"\]\[aria-label="時間尺度"\],[\s\S]*?#classification-overlay-button,[\s\S]*?#play-button\s*\{\s*display:\s*none;/);
+  assert.doesNotMatch(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #now-button[\s\S]*?display:\s*none;/);
+});
+
+test("ordinary reading preserves exact datetime entry but removes the duplicate range and scale status", () => {
+  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{[\s\S]*?grid-template-columns:\s*minmax\(260px, 360px\);[\s\S]*?opacity:\s*\.62;/);
+  assert.match(css, /~ \.timeline-dock \.slider-wrap,[\s\S]*?~ \.timeline-dock \.timeline-status\s*\{\s*display:\s*none;/);
+  assert.match(css, /#kinetic-instrument\[data-analysis-open="true"\] ~ \.timeline-dock\s*\{\s*opacity:\s*1;/);
   assert.match(css, /\.timeline-dock:focus-within\s*\{\s*opacity:\s*1;/);
 });
