@@ -255,7 +255,8 @@ export function createRingDragController({
       lastAngle: angleAt(WHEEL_CENTER, world),
       dragActivated: false,
       pendingDelta: 0,
-      velocityEstimator
+      velocityEstimator,
+      trustedInput: event.isTrusted !== false
     };
     svg.dataset.activeRing = ring.id;
     updatePointerStyle();
@@ -308,7 +309,7 @@ export function createRingDragController({
 
     const releaseTimeMs = eventTimeMs(event);
     const velocityDegPerMs = gesture.velocityEstimator.velocityAt(releaseTimeMs, { maxSampleAgeMs });
-    if (allowInertia && startInertia(gesture, velocityDegPerMs, releaseTimeMs)) {
+    if (allowInertia && gesture.trustedInput && startInertia(gesture, velocityDegPerMs, releaseTimeMs)) {
       updatePointerStyle();
       return;
     }
