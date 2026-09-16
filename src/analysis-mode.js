@@ -1,3 +1,5 @@
+import { installAtlasVisibleTenGods } from "./atlas-visible-ten-gods.js";
+
 const instrument = document.querySelector("#kinetic-instrument");
 const openControl = document.querySelector("#analysis-toggle");
 const closeControl = document.querySelector("#analysis-close");
@@ -38,6 +40,7 @@ function setAnalysisOpen(open, { reset = false } = {}) {
   closeControl.hidden = !open;
 }
 
+installAtlasVisibleTenGods(instrument);
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false, { reset:true }));
 

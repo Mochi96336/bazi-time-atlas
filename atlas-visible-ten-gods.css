@@ -1,0 +1,91 @@
+/* Analysis-only visible-stem projection. This panel owns no time state and is
+   completely absent from the normal visual/accessibility flow. */
+.atlas-visible-ten-gods[hidden] {
+  display: none !important;
+}
+.atlas-visible-ten-gods {
+  margin: 0 18px 16px;
+  border: 1px solid rgba(199,217,205,.14);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: rgba(12,16,13,.46);
+}
+.atlas-visible-ten-gods-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+.atlas-visible-ten-gods-head > div {
+  display: grid;
+  gap: 2px;
+}
+.atlas-visible-ten-gods-head small {
+  color: #758077;
+  font-size: 7px;
+  letter-spacing: .12em;
+}
+.atlas-visible-ten-gods-head strong {
+  color: #d8dfda;
+  font-size: 11px;
+}
+.atlas-visible-ten-gods-master {
+  color: #c9d4cd;
+  font-size: 10px;
+  font-weight: 760;
+}
+.atlas-visible-ten-gods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(238,242,237,.07);
+  border-bottom: 1px solid rgba(238,242,237,.07);
+}
+.atlas-visible-ten-gods-cell {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 3px 7px;
+  padding: 8px 10px;
+}
+.atlas-visible-ten-gods-cell + .atlas-visible-ten-gods-cell {
+  border-left: 1px solid rgba(238,242,237,.065);
+}
+.atlas-visible-ten-gods-cell span {
+  color: #778179;
+  font-size: 8px;
+}
+.atlas-visible-ten-gods-cell strong {
+  justify-self: end;
+  color: #e1e6e2;
+  font-size: 13px;
+}
+.atlas-visible-ten-gods-cell small {
+  grid-column: 1 / -1;
+  color: #aab6ae;
+  font-size: 9px;
+  font-weight: 700;
+}
+.atlas-visible-ten-gods-note {
+  margin: 8px 0 0;
+  color: #707b73;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .atlas-visible-ten-gods {
+    margin: 0 9px 12px;
+    padding: 10px;
+  }
+  .atlas-visible-ten-gods-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .atlas-visible-ten-gods-cell:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid rgba(238,242,237,.065);
+  }
+  .atlas-visible-ten-gods-cell:nth-child(4) {
+    border-top: 1px solid rgba(238,242,237,.065);
+  }
+}
