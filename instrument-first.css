@@ -50,6 +50,24 @@
     display: none;
   }
 
+  /* "Now" is a reset shortcut, not a mode. Leave it reachable but stop giving
+     it the same pill/chrome vocabulary as analysis controls. */
+  #kinetic-instrument:not([data-analysis-open="true"]) #now-button {
+    min-height: 26px;
+    margin-left: 0;
+    border-color: transparent;
+    padding: 0 5px;
+    color: #747e77;
+    background: transparent;
+    backdrop-filter: none;
+    font-size: 9px;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) #now-button:hover {
+    color: #d7dfd9;
+    border-color: transparent;
+    background: transparent;
+  }
+
   /* Keep the timestamp subordinate to the radial read-head instead of allowing
      a second HUD-sized focal object to form at the bottom of the wheel. */
   .instrument-readout {
@@ -73,6 +91,17 @@
     opacity: .72;
   }
 
+  /* In ordinary reading the datum already shows its current states on the wheel.
+     Longitude, term and neighboring boundary diagnostics belong to Analysis, not
+     to a permanent second HUD underneath the read-head. */
+  #kinetic-instrument:not([data-analysis-open="true"]) .readout-meta,
+  #kinetic-instrument:not([data-analysis-open="true"]) .boundary-meta {
+    display: none;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) #instant-readout {
+    margin-bottom: 0;
+  }
+
   /* Exact time entry is a real input; the range/playback apparatus is analysis
      tooling. Normal reading therefore collapses the old three-column timeline
      to the datetime field instead of showing a second scale-control system. */
@@ -86,13 +115,33 @@
     transition: opacity 140ms ease;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock {
-    grid-template-columns: minmax(260px, 360px);
+    width: fit-content;
+    max-width: 100%;
+    margin: 3px auto 0;
+    grid-template-columns: minmax(190px, 230px);
+    gap: 0;
     justify-content: center;
-    opacity: .62;
+    padding: 0;
+    opacity: .48;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .slider-wrap,
   #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .timeline-status {
     display: none;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .instant-field {
+    gap: 2px;
+    color: #68726b;
+    font-size: 8px;
+    letter-spacing: .04em;
+    text-transform: none;
+    text-align: center;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .instant-field input {
+    border-color: transparent;
+    padding: 5px 7px;
+    background: transparent;
+    font-size: 10px;
+    text-align: center;
   }
   #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
     opacity: 1;
