@@ -245,7 +245,7 @@ export function createRingDragController({
   }
 
   function begin(event) {
-    if (event.button > 0) return;
+    if (event.button > 0 || active) return;
     const world = screenToWorld(svg, event.clientX, event.clientY);
     if (!world) return;
     const ring = ringAtWorldPoint(world);
