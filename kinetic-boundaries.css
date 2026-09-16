@@ -4,10 +4,10 @@
   justify-content: center;
   gap: 8px 14px;
   flex-wrap: wrap;
-  color: #7f8982;
+  color: #85898a;
   font-size: 9px;
 }
-.boundary-meta strong { color: #d7ddd8; font-weight: 720; }
+.boundary-meta strong { color: #d9dcdb; font-weight: 720; }
 
 .boundary-rail-wrap { position: relative; min-height: 28px; }
 .boundary-rail {
@@ -35,7 +35,7 @@
   height: 5px;
   border: 1px solid rgba(213, 163, 109, .62);
   border-radius: 50%;
-  background: #111512;
+  background: #101213;
 }
 .boundary-marker.li-chun {
   width: 2px;
@@ -52,7 +52,7 @@
   top: 15px;
   left: 50%;
   transform: translateX(-50%);
-  color: #68726b;
+  color: #6c7172;
   font-size: 7px;
   font-style: normal;
   white-space: nowrap;
@@ -60,7 +60,7 @@
 .boundary-marker.li-chun i { color: #c9bc95; font-weight: 760; }
 .boundary-mode {
   margin-top: 1px;
-  color: #5f6962;
+  color: #626768;
   font-size: 8px;
   text-align: center;
 }
@@ -74,7 +74,7 @@
 #year-track .year-sector { fill: color-mix(in srgb, var(--year) 24%, transparent); }
 #month-track .month-sector { fill: color-mix(in srgb, var(--month) 22%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 23%, transparent); }
-#guide-layer .guide-arc { stroke: rgba(238, 242, 237, .13); }
+#guide-layer .guide-arc { stroke: rgba(236, 239, 239, .13); }
 
 /* Layer visibility changes only presentation. Hidden tracks keep receiving model
    updates, so restoring a layer reveals its current phase rather than stale state. */
@@ -94,7 +94,7 @@
   outline-offset: 2px;
 }
 .ring-legend-row[data-ring-toggle][aria-pressed="false"] { opacity: .42; }
-.ring-legend-row[data-ring-toggle][aria-pressed="false"] strong { color: #778078; }
+.ring-legend-row[data-ring-toggle][aria-pressed="false"] strong { color: #797e7f; }
 .ring-legend-row[data-reference-active="true"] {
   background: rgba(244,230,183,.055);
   box-shadow: inset 2px 0 rgba(244,230,183,.58);
@@ -110,18 +110,18 @@
   width: fit-content;
   padding: 0 0 3px;
   pointer-events: auto;
-  color: #778179;
+  color: #7a7f80;
   font-size: 8px;
   font-weight: 760;
   letter-spacing: .08em;
 }
 .reference-frame-control select {
   min-height: 24px;
-  border: 1px solid rgba(238,242,237,.14);
+  border: 1px solid rgba(236,239,239,.14);
   border-radius: 999px;
   padding: 0 22px 0 8px;
-  color: #cbd1cc;
-  background: rgba(15,19,16,.78);
+  color: #cbd0cf;
+  background: rgba(15,17,18,.78);
   color-scheme: dark;
   font: inherit;
   letter-spacing: .04em;
@@ -161,7 +161,7 @@
 #kinetic-wheel[data-hover-ring="month"] #month-track .cycle-sector,
 #kinetic-wheel[data-hover-ring="day"] #day-track .cycle-sector,
 #kinetic-wheel[data-hover-ring="solar"] #solar-track .term-sector {
-  stroke: rgba(238, 242, 237, .27);
+  stroke: rgba(236, 239, 239, .27);
 }
 
 #kinetic-wheel[data-active-ring="hour"] #hour-track .cycle-sector,
