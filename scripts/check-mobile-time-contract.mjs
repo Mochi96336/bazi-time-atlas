@@ -18,7 +18,7 @@ function attr(tag, name) {
 const url = new URL("scripts/fixtures/mobile-time-contract.html", baseURL).href;
 const result = spawnSync(findBrowser(), [
   "--headless=new", "--no-sandbox", "--disable-gpu", "--force-device-scale-factor=1", "--hide-scrollbars",
-  "--run-all-compositor-stages-before-draw", "--virtual-time-budget=3500", "--window-size=1600,1000", "--dump-dom", url
+  "--run-all-compositor-stages-before-draw", "--virtual-time-budget=4000", "--window-size=1600,1000", "--dump-dom", url
 ], { encoding:"utf8", maxBuffer:16 * 1024 * 1024 });
 
 if (result.status !== 0) {
@@ -39,8 +39,31 @@ if (attr(probe, "data-apply-visible") !== "true") throw new Error(`exact-time ap
 const share = Number(attr(probe, "data-instrument-share"));
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`instrument no longer owns the first mobile viewport (share=${share}): ${url}`);
 
+if (attr(probe, "data-mobile-roundtrip-value") !== "2026-09-16T04:15:09") {
+  throw new Error(`mobile exact-time edit did not stay synchronized after apply: ${url}`);
+}
+const expectedMobileMs = Date.parse("2026-09-15T20:15:09.000Z");
+if (attr(probe, "data-mobile-selected-instant-ms") !== String(expectedMobileMs)) {
+  throw new Error(`mobile exact-time command did not update the physical Selected Instant: ${url}`);
+}
+if (attr(probe, "data-mobile-source") !== "mobile-exact") {
+  throw new Error(`mobile exact-time update bypassed the selected-instant command owner: ${url}`);
+}
+if (attr(probe, "data-mobile-url-instant") !== "2026-09-15T20:15:09.000Z") {
+  throw new Error(`mobile exact-time apply did not persist the exact instant into the URL: ${url}`);
+}
+if (attr(probe, "data-mobile-document-continuity") !== "true") {
+  throw new Error(`mobile exact-time apply rebuilt the document instead of updating in place: ${url}`);
+}
+if (attr(probe, "data-mobile-load-count") !== "1") {
+  throw new Error(`mobile exact-time apply caused an unexpected frame reload: ${url}`);
+}
+if (attr(probe, "data-mobile-status-state") !== "success" || attr(probe, "data-mobile-status-text") !== "已套用 · UTC+08:00") {
+  throw new Error(`mobile exact-time apply did not settle into a success state: ${url}`);
+}
+
 if (attr(probe, "data-desktop-inner-width") !== "1200") throw new Error(`fixture did not produce a 1200px desktop child viewport: ${url}`);
-if (attr(probe, "data-desktop-initial-step") !== "1") throw new Error(`desktop exact-time input is not second-level at runtime: ${url}`);
+if (attr(probe, "data-desktop-initial-step") !== "1") throw new Error(`desktop exact-time input is not second-level in markup: ${url}`);
 if (attr(probe, "data-desktop-initial-precision") !== "second") throw new Error(`desktop exact-time precision diagnostic missing: ${url}`);
 if (attr(probe, "data-desktop-initial-value") !== "2026-09-16T04:14:37") throw new Error(`desktop input truncated Selected Instant seconds on initial sync: ${url}`);
 if (attr(probe, "data-desktop-initial-valid") !== "true") throw new Error(`desktop second-level Selected Instant is invalid under its input step: ${url}`);
@@ -50,5 +73,8 @@ const expectedDesktopMs = Date.parse("2026-09-15T20:14:52.000Z");
 if (attr(probe, "data-desktop-selected-instant-ms") !== String(expectedDesktopMs)) {
   throw new Error(`desktop second-level round trip did not update the physical Selected Instant: ${url}`);
 }
+if (attr(probe, "data-desktop-source") !== "desktop-input") {
+  throw new Error(`desktop exact-time edit bypassed the selected-instant state owner: ${url}`);
+}
 
-console.log(`[exact-time] PASS mobile dock + desktop second-level round trip; mobile share=${share.toFixed(3)}: ${url}`);
+console.log(`[exact-time] PASS in-place mobile command + desktop second-level round trip; mobile share=${share.toFixed(3)}: ${url}`);

@@ -28,6 +28,9 @@
     desktopFrame.src = new URL(source, location.href).href;
     let mobileLoaded = false;
     let desktopLoaded = false;
+    let mobileLoadCount = 0;
+    let initialCaptured = false;
+    let mobileApplied = false;
     let desktopEdited = false;
 
     function snapshot() {
@@ -40,13 +43,14 @@
       const dock = mobileDoc?.querySelector("#mobile-time-dock");
       const input = mobileDoc?.querySelector("#mobile-instant-input");
       const apply = mobileDoc?.querySelector("#mobile-time-apply");
+      const status = mobileDoc?.querySelector("#mobile-time-status");
 
       const desktopWin = desktopFrame.contentWindow;
       const desktopDoc = desktopFrame.contentDocument;
       const desktopInstrument = desktopDoc?.querySelector("#kinetic-instrument");
       const desktopInput = desktopDoc?.querySelector("#instant-input");
 
-      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply ||
+      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply || !status ||
           !desktopWin || !desktopDoc || !desktopInstrument || !desktopInput) return;
 
       const dockStyle = mobileWin.getComputedStyle(dock);
@@ -54,22 +58,45 @@
       const instrumentRect = instrument.getBoundingClientRect();
       const dockRect = dock.getBoundingClientRect();
 
-      probe.dataset.innerWidth = String(mobileWin.innerWidth);
-      probe.dataset.dockDisplay = dockStyle.display;
-      probe.dataset.inputStep = input.getAttribute("step") ?? "";
-      probe.dataset.inputValue = input.value;
-      probe.dataset.shellOverflowY = shellStyle.overflowY;
-      probe.dataset.shellScrollable = String(shell.scrollHeight > shell.clientHeight + 2);
-      probe.dataset.instrumentShare = String(instrumentRect.height / mobileWin.innerHeight);
-      probe.dataset.dockAfterInstrument = String(dockRect.top >= instrumentRect.bottom - 1);
-      probe.dataset.applyVisible = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
+      if (!initialCaptured) {
+        initialCaptured = true;
+        probe.dataset.innerWidth = String(mobileWin.innerWidth);
+        probe.dataset.dockDisplay = dockStyle.display;
+        probe.dataset.inputStep = input.getAttribute("step") ?? "";
+        probe.dataset.inputValue = input.value;
+        probe.dataset.shellOverflowY = shellStyle.overflowY;
+        probe.dataset.shellScrollable = String(shell.scrollHeight > shell.clientHeight + 2);
+        probe.dataset.instrumentShare = String(instrumentRect.height / mobileWin.innerHeight);
+        probe.dataset.dockAfterInstrument = String(dockRect.top >= instrumentRect.bottom - 1);
+        probe.dataset.applyVisible = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
 
-      if (!desktopEdited) {
         probe.dataset.desktopInnerWidth = String(desktopWin.innerWidth);
         probe.dataset.desktopInitialStep = desktopInput.step;
         probe.dataset.desktopInitialPrecision = desktopInput.dataset.precision ?? "";
         probe.dataset.desktopInitialValue = desktopInput.value;
         probe.dataset.desktopInitialValid = String(desktopInput.validity.valid);
+      }
+
+      if (!mobileApplied) {
+        mobileApplied = true;
+        mobileWin.__exactTimeContinuity = "alive";
+        input.value = "2026-09-16T04:15:09";
+        input.dispatchEvent(new Event("input", { bubbles:true }));
+        apply.click();
+        setTimeout(snapshot, 150);
+        return;
+      }
+
+      probe.dataset.mobileRoundtripValue = input.value;
+      probe.dataset.mobileSelectedInstantMs = instrument.dataset.selectedInstantMs ?? "";
+      probe.dataset.mobileSource = instrument.dataset.lastSelectedInstantSource ?? "";
+      probe.dataset.mobileUrlInstant = new URL(mobileWin.location.href).searchParams.get("instant") ?? "";
+      probe.dataset.mobileDocumentContinuity = String(mobileWin.__exactTimeContinuity === "alive");
+      probe.dataset.mobileLoadCount = String(mobileLoadCount);
+      probe.dataset.mobileStatusState = status.dataset.state ?? "";
+      probe.dataset.mobileStatusText = status.textContent.trim();
+
+      if (!desktopEdited) {
         desktopEdited = true;
         desktopInput.value = "2026-09-16T04:14:52";
         desktopInput.dispatchEvent(new Event("change", { bubbles:true }));
@@ -80,10 +107,12 @@
       probe.dataset.desktopRoundtripValue = desktopInput.value;
       probe.dataset.desktopRoundtripValid = String(desktopInput.validity.valid);
       probe.dataset.desktopSelectedInstantMs = desktopInstrument.dataset.selectedInstantMs ?? "";
+      probe.dataset.desktopSource = desktopInstrument.dataset.lastSelectedInstantSource ?? "";
       probe.dataset.ready = "true";
     }
 
     mobileFrame.addEventListener("load", () => {
+      mobileLoadCount += 1;
       mobileLoaded = true;
       queueMicrotask(snapshot);
       setTimeout(snapshot, 100);
