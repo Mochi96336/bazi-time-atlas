@@ -18,7 +18,7 @@
     <iframe id="recurrence-mobile" class="mobile" title="recurrence mobile"></iframe>
     <iframe id="birth-mobile" class="mobile" title="birth mobile"></iframe>
     <iframe id="sexagenary-mobile" class="mobile" title="legacy Ganzhi mobile redirect"></iframe>
-    <iframe id="sexagenary-desktop" class="desktop" title="legacy Sexagenary desktop fallback"></iframe>
+    <iframe id="sexagenary-desktop" class="desktop" title="bare legacy Sexagenary desktop redirect"></iframe>
   </div>
   <output id="probe" data-ready="false"></output>
 
@@ -48,6 +48,24 @@
 
     function hidden(win, node) {
       return !node || win.getComputedStyle(node).display === "none";
+    }
+
+    function captureReference(prefix, win, doc) {
+      const inspector = doc.querySelector("#ganzhi-inspector");
+      const grid = doc.querySelector("#ganzhi-inspector-grid");
+      probe.dataset[`${prefix}ColorScheme`] = win.getComputedStyle(doc.body).colorScheme;
+      probe.dataset[`${prefix}LegacyWheelAbsent`] = String(!doc.querySelector("#sexagenary-wheel"));
+      probe.dataset[`${prefix}ReferenceVisible`] = String(Boolean(inspector && !hidden(win, inspector)));
+      probe.dataset[`${prefix}ReferenceMode`] = inspector?.dataset.mode ?? "missing";
+      probe.dataset[`${prefix}ReferencePillar`] = inspector?.dataset.pillar ?? "missing";
+      probe.dataset[`${prefix}ReferenceGanzhi`] = inspector?.dataset.ganzhi ?? "missing";
+      probe.dataset[`${prefix}ReferenceReady`] = inspector?.dataset.ready ?? "missing";
+      probe.dataset[`${prefix}ReferenceOrdinal`] = doc.querySelector("#ganzhi-inspector-ordinal")?.textContent.trim() ?? "missing";
+      probe.dataset[`${prefix}ReferenceStemName`] = doc.querySelector("#ganzhi-inspector-stem")?.textContent.trim() ?? "missing";
+      probe.dataset[`${prefix}ReferenceStemMeta`] = doc.querySelector("#ganzhi-inspector-stem-meta")?.textContent.trim() ?? "missing";
+      probe.dataset[`${prefix}ReferenceBranchName`] = doc.querySelector("#ganzhi-inspector-branch")?.textContent.trim() ?? "missing";
+      probe.dataset[`${prefix}ReferenceBranchMeta`] = doc.querySelector("#ganzhi-inspector-branch-meta")?.textContent.trim() ?? "missing";
+      probe.dataset[`${prefix}ReferenceGridCount`] = String(grid?.querySelectorAll("[data-cycle-index]").length ?? -1);
     }
 
     function capture() {
@@ -134,25 +152,10 @@
       probe.dataset.birthRelationSurface = surfaceToken(birthWin, relationOverview);
 
       const [sexMobileWin, sexMobileDoc] = docs["sexagenary-mobile"];
-      const referenceInspector = sexMobileDoc.querySelector("#ganzhi-inspector");
-      const referenceGrid = sexMobileDoc.querySelector("#ganzhi-inspector-grid");
-      probe.dataset.sexColorScheme = sexMobileWin.getComputedStyle(sexMobileDoc.body).colorScheme;
-      probe.dataset.sexLegacyWheelAbsent = String(!sexMobileDoc.querySelector("#sexagenary-wheel"));
-      probe.dataset.sexReferenceVisible = String(Boolean(referenceInspector && !hidden(sexMobileWin, referenceInspector)));
-      probe.dataset.sexReferenceMode = referenceInspector?.dataset.mode ?? "missing";
-      probe.dataset.sexReferencePillar = referenceInspector?.dataset.pillar ?? "missing";
-      probe.dataset.sexReferenceGanzhi = referenceInspector?.dataset.ganzhi ?? "missing";
-      probe.dataset.sexReferenceReady = referenceInspector?.dataset.ready ?? "missing";
-      probe.dataset.sexReferenceOrdinal = sexMobileDoc.querySelector("#ganzhi-inspector-ordinal")?.textContent.trim() ?? "missing";
-      probe.dataset.sexReferenceStemName = sexMobileDoc.querySelector("#ganzhi-inspector-stem")?.textContent.trim() ?? "missing";
-      probe.dataset.sexReferenceStemMeta = sexMobileDoc.querySelector("#ganzhi-inspector-stem-meta")?.textContent.trim() ?? "missing";
-      probe.dataset.sexReferenceBranchName = sexMobileDoc.querySelector("#ganzhi-inspector-branch")?.textContent.trim() ?? "missing";
-      probe.dataset.sexReferenceBranchMeta = sexMobileDoc.querySelector("#ganzhi-inspector-branch-meta")?.textContent.trim() ?? "missing";
-      probe.dataset.sexReferenceGridCount = String(referenceGrid?.querySelectorAll("[data-cycle-index]").length ?? -1);
+      captureReference("sex", sexMobileWin, sexMobileDoc);
 
       const [sexDesktopWin, sexDesktopDoc] = docs["sexagenary-desktop"];
-      probe.dataset.sexDesktopInspectorVisible = String(!hidden(sexDesktopWin, sexDesktopDoc.querySelector(".cycle-inspector")));
-      probe.dataset.sexDesktopFactsHidden = String(hidden(sexDesktopWin, sexDesktopDoc.querySelector("#cycle-mobile-facts")));
+      captureReference("sexDesktop", sexDesktopWin, sexDesktopDoc);
 
       probe.dataset.allNavMatch = String(Object.values(navMatches).every(Boolean));
       probe.dataset.ready = "true";

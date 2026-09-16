@@ -108,6 +108,7 @@ if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) 
 
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
 requireEqual(attr(probe, "data-sex-color-scheme"), "dark", "legacy Ganzhi mobile redirect left the Atlas dark instrument color scheme", url);
+requireEqual(attr(probe, "data-sex-desktop-color-scheme"), "dark", "bare legacy Sexagenary redirect left the Atlas dark instrument color scheme", url);
 if (!/^#?131915$/i.test(attr(probe, "data-birth-paper") ?? "")) {
   throw new Error(`Birth paper token drifted from the instrument shell (${attr(probe, "data-birth-paper")}): ${url}`);
 }
@@ -144,7 +145,15 @@ requireEqual(attr(probe, "data-sex-reference-branch-name"), "卯", "Atlas refere
 requireEqual(attr(probe, "data-sex-reference-branch-meta"), "陰 · 木 · 4 / 12", "Atlas reference branch metadata is stale or incomplete", url);
 requireEqual(attr(probe, "data-sex-reference-grid-count"), "60", "Atlas standalone reference lost the full 60-item disclosure", url);
 
-requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "bare legacy Sexagenary desktop fallback should remain visible in this migration slice", url);
-requireEqual(attr(probe, "data-sex-desktop-facts-hidden"), "true", "bare legacy Sexagenary desktop fallback must not duplicate the mobile facts strip beside its inspector", url);
+requireEqual(attr(probe, "data-sex-desktop-legacy-wheel-absent"), "true", "bare legacy Sexagenary URL still owns an independent wheel", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-visible"), "true", "bare legacy Sexagenary URL did not open the Atlas reference inspector", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-mode"), "reference", "bare legacy Sexagenary URL was mistaken for contextual pillar inspection", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-pillar"), "", "bare legacy Sexagenary default incorrectly claimed pillar ownership", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-ganzhi"), "甲子", "bare legacy Sexagenary URL did not preserve its historical default 甲子 selection", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-ready"), "true", "bare legacy Sexagenary default reference failed to resolve", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-ordinal"), "01 / 60", "bare legacy Sexagenary default ordinal drifted", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-stem-name"), "甲", "bare legacy Sexagenary default stem drifted", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-branch-name"), "子", "bare legacy Sexagenary default branch drifted", url);
+requireEqual(attr(probe, "data-sex-desktop-reference-grid-count"), "60", "bare legacy Sexagenary default lost the full 60-item disclosure", url);
 
-console.log(`[view-shells] PASS two-destination nav + Atlas Ganzhi redirect + legacy bare fallback + task-first Research: ${url}`);
+console.log(`[view-shells] PASS two-destination nav + all legacy Sexagenary shells route into Atlas references + task-first Research: ${url}`);
