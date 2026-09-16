@@ -1,0 +1,40 @@
+name: Research EoT production derivative bound 4006
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-eot-production-derivative-bound-4006.yml"
+      - "scripts/research-eot-production-derivative-bound.mjs"
+      - "src/astronomy/equation-of-time.js"
+      - "vendor/tyme4ts-1.5.2.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-derivative-bound:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Prepare pinned production vendor module
+        run: npm run vendor:prepare
+      - name: Compute analytic production derivative bound
+        env:
+          OUTPUT_DIR: tmp/eot-production-derivative-bound-4006
+        run: node scripts/research-eot-production-derivative-bound.mjs
+      - name: Upload production derivative certificate evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: eot-production-derivative-bound-4006
+          path: tmp/eot-production-derivative-bound-4006/
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6

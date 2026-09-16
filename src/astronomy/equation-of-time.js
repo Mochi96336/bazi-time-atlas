@@ -6,7 +6,7 @@ const MINUTES_PER_DEGREE = 4;
 const MINUTES_PER_REVOLUTION = 1440;
 const APPARENT_MEAN_LONGITUDE_CORRECTION_DEGREES = 0.0057183;
 
-const MEAN_OBLIQUITY_COEFFICIENTS = Object.freeze([
+export const EQUATION_OF_TIME_MEAN_OBLIQUITY_COEFFICIENTS = Object.freeze([
   84381.448,
   -4680.93,
   -1.55,
@@ -20,7 +20,7 @@ const MEAN_OBLIQUITY_COEFFICIENTS = Object.freeze([
   2.45
 ]);
 
-const SUN_MEAN_LONGITUDE_COEFFICIENTS = Object.freeze([
+export const EQUATION_OF_TIME_SUN_MEAN_LONGITUDE_COEFFICIENTS = Object.freeze([
   280.4664567,
   360007.6982779,
   0.03032028,
@@ -51,14 +51,14 @@ function polynomial(coefficients, x) {
 /** NREL SPA Appendix A.2 mean Sun longitude, degrees in [0, 360). */
 export function sunMeanLongitudeDegrees(julianMillenniumEphemeris) {
   assertFinite("julianMillenniumEphemeris", julianMillenniumEphemeris);
-  return normalizeDegrees(polynomial(SUN_MEAN_LONGITUDE_COEFFICIENTS, julianMillenniumEphemeris));
+  return normalizeDegrees(polynomial(EQUATION_OF_TIME_SUN_MEAN_LONGITUDE_COEFFICIENTS, julianMillenniumEphemeris));
 }
 
 /** NREL SPA equation 24 mean obliquity, degrees. */
 export function meanObliquityDegrees(julianMillenniumEphemeris) {
   assertFinite("julianMillenniumEphemeris", julianMillenniumEphemeris);
   const u = julianMillenniumEphemeris / 10;
-  return polynomial(MEAN_OBLIQUITY_COEFFICIENTS, u) / 3600;
+  return polynomial(EQUATION_OF_TIME_MEAN_OBLIQUITY_COEFFICIENTS, u) / 3600;
 }
 
 function rightAscensionDegrees(apparentLongitudeDegrees, obliquityDegrees) {
