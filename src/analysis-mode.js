@@ -1,3 +1,4 @@
+import { installAtlasSolarTimeAnalysis } from "./atlas-solar-time-analysis.js";
 import { installAtlasVisibleTenGods } from "./atlas-visible-ten-gods.js";
 
 const instrument = document.querySelector("#kinetic-instrument");
@@ -10,6 +11,15 @@ function installAnalysisFirstScreenStyles() {
   stylesheet.rel = "stylesheet";
   stylesheet.href = "./analysis-first-screen.css";
   stylesheet.dataset.analysisFirstScreen = "1";
+  document.head.append(stylesheet);
+}
+
+function installSolarTimeStyles() {
+  if (document.querySelector("link[data-atlas-solar-time-analysis]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./atlas-solar-time-analysis.css";
+  stylesheet.dataset.atlasSolarTimeAnalysis = "1";
   document.head.append(stylesheet);
 }
 
@@ -59,6 +69,8 @@ function setAnalysisOpen(open, { reset = false } = {}) {
 }
 
 installAnalysisFirstScreenStyles();
+installSolarTimeStyles();
+installAtlasSolarTimeAnalysis(instrument);
 installAtlasVisibleTenGods(instrument);
 // atlas-visible-ten-gods installs its own stylesheet dynamically. Install the
 // final desktop polish afterwards so it can flatten that panel without changing
