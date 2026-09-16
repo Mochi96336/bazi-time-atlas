@@ -183,6 +183,11 @@ function updateInspector(item) {
   document.querySelector("#branch-phase").textContent = `${item.branchIndex + 1} / 12`;
   document.querySelector("#cycle-relation").textContent = `第 ${item.ordinal} 位：天干走到 ${item.stem.name}，地支走到 ${item.branch.name}；兩者同為${item.stem.yinYang}。每前進一步，兩條序列各自前進一格。`;
 
+  document.querySelector("#mobile-stem-name").textContent = item.stem.name;
+  document.querySelector("#mobile-stem-meta").textContent = `${item.stem.yinYang} · ${item.stem.element} · ${item.stemIndex + 1} / 10`;
+  document.querySelector("#mobile-branch-name").textContent = item.branch.name;
+  document.querySelector("#mobile-branch-meta").textContent = `${item.branch.yinYang} · ${item.branch.element} · ${item.branchIndex + 1} / 12`;
+
   document.querySelector("#cycle-center-kicker").textContent = `${String(item.ordinal).padStart(2, "0")} / 60`;
   document.querySelector("#cycle-center-value").textContent = item.name;
   document.querySelector("#cycle-center-note").textContent = `${item.stem.name} · ${item.stemIndex + 1}/10　${item.branch.name} · ${item.branchIndex + 1}/12`;
