@@ -1,0 +1,26 @@
+/* Main atlas action hierarchy.
+   Reading and selecting the Selected Instant is the primary task. Playback only
+   animates that same instant, so it must not visually outrank the instrument. */
+#play-button.primary {
+  color: #9da69f;
+  background: rgba(15, 19, 16, .72);
+  border-color: var(--hairline);
+  min-width: 62px;
+}
+
+#play-button.primary:hover {
+  color: var(--ink);
+  border-color: rgba(238, 242, 237, .25);
+}
+
+/* Running playback still needs a clear state, but not the page's cursor-yellow
+   primary treatment. */
+#play-button.primary[aria-pressed="true"] {
+  color: #dce2dd;
+  background: rgba(199, 217, 205, .09);
+  border-color: rgba(199, 217, 205, .28);
+}
+
+@media (max-width: 480px) {
+  #play-button.primary { min-width: 48px; }
+}
