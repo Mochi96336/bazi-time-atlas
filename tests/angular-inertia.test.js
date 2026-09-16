@@ -25,6 +25,17 @@ test("stale release does not fling", () => {
   assert.equal(estimator.velocityAt(100), 0);
 });
 
+test("rejected timestamps do not contaminate the next valid velocity sample", () => {
+  const estimator = createAngularVelocityEstimator();
+  estimator.reset(0);
+  assert.equal(estimator.add(1, 10), true);
+  assert.equal(estimator.add(40, Number.NaN), false);
+  assert.equal(estimator.add(40, 5), false);
+  assert.equal(estimator.add(1, 20), true);
+  const velocity = estimator.velocityAt(20);
+  assert.ok(Math.abs(velocity - 0.1) < 1e-12, `velocity was ${velocity}`);
+});
+
 test("exponential integration is frame-rate independent", () => {
   function integrate(stepMs) {
     let velocityDegPerMs = 0.12;

@@ -28,11 +28,12 @@ export function createAngularVelocityEstimator({
 
   function add(deltaDegrees, timeMs) {
     if (!Number.isFinite(deltaDegrees)) throw new RangeError("deltaDegrees must be finite");
-    cumulativeDegrees += deltaDegrees;
     if (!Number.isFinite(timeMs)) return false;
 
     const last = samples.at(-1);
     if (last && timeMs < last.timeMs) return false;
+
+    cumulativeDegrees += deltaDegrees;
     if (last && timeMs === last.timeMs) {
       last.degrees = cumulativeDegrees;
       return true;
