@@ -373,6 +373,7 @@ export function createRingDragController({
     get isCoasting() { return coasting !== null; },
     get hoverRingId() { return hoverRingId; },
     destroy() {
+      cancelActiveGesture({ detent:false, reason:"destroy" });
       cancelInertia({ detent:false, reason:"destroy" });
       svg.removeEventListener("pointerdown", begin);
       svg.removeEventListener("pointermove", move);

@@ -194,3 +194,29 @@ test("document hidden still cancels an already coasting gesture exactly once", t
   assert.deepEqual(events.at(-1), ["end", "day", "document-hidden"]);
   assert.equal(events.filter(event => event[0] === "end").length, 1);
 });
+
+test("destroy ends an active linked gesture exactly once before removing listeners", t => {
+  forceSvgPointFallback(t);
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    prefersReducedMotion:() => true
+  });
+
+  svg.dispatchAt("pointerdown", "day", -90, 4, 0);
+  svg.dispatchAt("pointermove", "day", -88, 4, 40);
+  assert.equal(controller.activeMode, "linked");
+
+  controller.destroy();
+
+  assert.equal(controller.activeMode, null);
+  assert.equal(svg.dataset.activeRing, undefined);
+  assert.deepEqual(events.at(-1), ["end", "day", "destroy"]);
+  assert.equal(events.filter(event => event[0] === "end").length, 1);
+
+  svg.dispatchAt("pointerup", "day", -88, 4, 50);
+  assert.equal(events.filter(event => event[0] === "end").length, 1);
+});
