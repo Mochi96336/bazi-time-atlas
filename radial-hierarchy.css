@@ -27,10 +27,11 @@
 .ring-day strong,
 .ring-hour strong { color: #9da8a1; font-weight: 660; }
 
-/* Fast inner clocks need less label ink. Their geometry remains fully present,
-   but only every second rendered five-step label is shown (10-step cadence).
-   Slow shells keep the denser five-step labels because they are the structural
-   frame of the instrument. */
+/* The giant-disk geometry has enough arc length to render every sexagenary
+   identity. Slow outer shells therefore keep all 60 labels. Fast inner clocks
+   thin that complete label set by one half (30 visible identities) so the small
+   portrait camera does not become a text wall. Five-step labels remain a mild
+   typographic cadence aligned with the major ticks rather than the only labels. */
 #hour-track .cycle-label:nth-of-type(2n),
 #day-track .cycle-label:nth-of-type(2n) { display: none; }
 #hour-track .cycle-label {
@@ -38,15 +39,27 @@
   font-size: 8.5px;
   font-weight: 620;
 }
+#hour-track .cycle-label.major {
+  fill: rgba(202,216,208,.50);
+  font-weight: 680;
+}
 #day-track .cycle-label {
   fill: rgba(211,222,217,.44);
   font-size: 9px;
   font-weight: 640;
 }
+#day-track .cycle-label.major {
+  fill: rgba(211,222,217,.58);
+  font-weight: 700;
+}
 #month-track .cycle-label {
   fill: rgba(222,234,225,.72);
   font-size: 10px;
   font-weight: 720;
+}
+#month-track .cycle-label.major {
+  fill: rgba(230,239,233,.88);
+  font-weight: 780;
 }
 #year-track .cycle-label {
   fill: rgba(226,236,229,.84);
@@ -54,13 +67,16 @@
   font-weight: 800;
   letter-spacing: .02em;
 }
+#year-track .cycle-label.major {
+  fill: rgba(239,246,241,.96);
+  font-weight: 860;
+}
 
-/* Sparse labels describe the scale; one dynamic label on each Ganzhi ring
-   describes the sector currently crossing the Selected Instant datum. When
-   that sector is already one of the five-step samples, retire the sampled copy
-   so the read-head never becomes doubled text. The read-head anchor stays on
-   the datum, but its glyphs start at that anchor instead of being bisected by
-   the cursor stroke. */
+/* Static labels describe the whole phase scale; one dynamic label on each
+   Ganzhi ring describes the sector currently crossing the Selected Instant
+   datum. Retire that sector's static copy so the read-head never becomes
+   doubled text. The read-head anchor stays on the datum, but its glyphs start
+   at that anchor instead of being bisected by the cursor stroke. */
 .cycle-label.is-active-shadowed { visibility: hidden; }
 .active-cycle-label {
   text-anchor: start;

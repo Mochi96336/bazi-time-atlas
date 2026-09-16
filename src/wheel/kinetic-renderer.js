@@ -107,20 +107,22 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         class: `ring-tick${index % 5 === 0 ? " major" : ""}`
       }, group);
 
-      if (index % 5 === 0) {
-        const radius = (model.innerRadius + model.outerRadius) / 2;
-        const point = polar(radius, index * 6 + 3);
-        const text = el("text", {
-          x: point.x,
-          y: point.y,
-          class: "cycle-label",
-          "data-cycle-index": index,
-          "data-cycle-label": label,
-          transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
-        }, group);
-        text.textContent = label;
-        staticLabels.set(index, text);
-      }
+      // The current giant-disk geometry gives even the Hour ring enough arc
+      // length for a two-glyph Ganzhi identity in every six-degree sector.
+      // Render all 60 identities here; responsive/presentation CSS may still
+      // thin the fast inner clocks without throwing the data away at render time.
+      const radius = (model.innerRadius + model.outerRadius) / 2;
+      const point = polar(radius, index * 6 + 3);
+      const text = el("text", {
+        x: point.x,
+        y: point.y,
+        class: `cycle-label${index % 5 === 0 ? " major" : ""}`,
+        "data-cycle-index": index,
+        "data-cycle-label": label,
+        transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
+      }, group);
+      text.textContent = label;
+      staticLabels.set(index, text);
     });
 
     const activeLabel = el("text", {
