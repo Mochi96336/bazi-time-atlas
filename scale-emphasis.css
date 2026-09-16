@@ -2,6 +2,33 @@
    alter geometry, or attenuate the whole rotating track. Scale emphasis is
    owned by mark roles so Selected-Instant evidence keeps its native contrast. */
 
+/* Give the preset group an explicit visible product meaning without adding a
+   second DOM/state owner. The group is already the first toolbar group in the
+   canonical instrument; #222 may hide that whole group in ordinary desktop
+   reading, while Analysis and the phone composition keep the same semantics. */
+.instrument-toolbar > .toolbar-group:first-child::before {
+  content: "觀察時間窗";
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 1px;
+  color: #69736c;
+  font-size: 8px;
+  font-weight: 780;
+  letter-spacing: .07em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.instrument-toolbar > .toolbar-group:first-child::after {
+  content: "";
+  width: 1px;
+  height: 14px;
+  align-self: center;
+  margin-right: 0;
+  background: rgba(238,242,237,.11);
+}
+
 #hour-track,
 #day-track,
 #solar-track,
@@ -196,6 +223,28 @@
   --scale-structure-opacity: 1;
   --scale-context-opacity: 1;
   --scale-active-surface-opacity: 1;
+}
+
+@media (max-width: 480px) {
+  .instrument-toolbar > .toolbar-group:first-child::before {
+    min-height: 27px;
+    padding-left: 0;
+    font-size: 7px;
+    letter-spacing: .04em;
+  }
+  .instrument-toolbar > .toolbar-group:first-child::after {
+    height: 12px;
+  }
+  /* Preserve the pre-label one-row action contract. Without nowrap the new
+     label can squeeze two-character Chinese actions (notably 歸位) until they
+     wrap, which inflates the whole action group from 27px to 32px. */
+  .instrument-toolbar .control-button,
+  .instrument-toolbar .scale-button {
+    white-space: nowrap;
+  }
+  .instrument-toolbar .scale-button {
+    padding-inline: 6px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
