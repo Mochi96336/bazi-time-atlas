@@ -3,7 +3,9 @@ import {
   normalizeAtlasTimeContext
 } from "./wheel/atlas-time-context.js";
 
-const INPUT_RE = /^(\d{4,6})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?$/;
+export const MOBILE_ATLAS_INPUT_DISPLAY_FORMAT = "YYYY-MM-DD HH:mm:ss";
+
+const INPUT_RE = /^(\d{4,6})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?$/;
 
 function pad(value, size = 2) {
   return String(value).padStart(size, "0");
@@ -15,7 +17,7 @@ export function formatMobileAtlasInput(ms, timeContext = DEFAULT_ATLAS_TIME_CONT
   const shifted = new Date(ms + context.utcOffsetHours * 3_600_000);
   if (!Number.isFinite(shifted.getTime())) return "";
   return `${pad(shifted.getUTCFullYear(), 4)}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}`
-    + `T${pad(shifted.getUTCHours())}:${pad(shifted.getUTCMinutes())}:${pad(shifted.getUTCSeconds())}`;
+    + ` ${pad(shifted.getUTCHours())}:${pad(shifted.getUTCMinutes())}:${pad(shifted.getUTCSeconds())}`;
 }
 
 export function parseMobileAtlasInput(value, timeContext = DEFAULT_ATLAS_TIME_CONTEXT) {

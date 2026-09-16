@@ -5,6 +5,7 @@ import {
   normalizeAtlasTimeContext
 } from "./wheel/atlas-time-context.js";
 import {
+  MOBILE_ATLAS_INPUT_DISPLAY_FORMAT,
   formatMobileAtlasInput,
   parseMobileAtlasInput
 } from "./mobile-time-value.js";
@@ -39,10 +40,23 @@ function setStatus(message, state = "idle") {
   status.dataset.state = state;
 }
 
+function configureMobileInput() {
+  if (!input) return;
+  input.type = "text";
+  input.removeAttribute("step");
+  input.setAttribute("autocomplete", "off");
+  input.setAttribute("autocapitalize", "off");
+  input.setAttribute("spellcheck", "false");
+  input.placeholder = MOBILE_ATLAS_INPUT_DISPLAY_FORMAT;
+  input.dataset.displayFormat = MOBILE_ATLAS_INPUT_DISPLAY_FORMAT;
+  input.dataset.precision = "second";
+}
+
 function syncContextCopy(context) {
   const offsetLabel = formatAtlasUtcOffset(context.utcOffsetHours);
-  if (inputLabel) inputLabel.textContent = `選定時間，${offsetLabel}，秒級`;
-  input?.setAttribute("aria-label", `選定時間，${offsetLabel}，秒級`);
+  const accessibleLabel = `選定時間，${offsetLabel}，24 小時制，格式 ${MOBILE_ATLAS_INPUT_DISPLAY_FORMAT}，秒級`;
+  if (inputLabel) inputLabel.textContent = accessibleLabel;
+  input?.setAttribute("aria-label", accessibleLabel);
   if (!status || status.dataset.state === "idle") setStatus(`${offsetLabel} · 秒級`, "idle");
   dock?.setAttribute("data-utc-offset-hours", String(context.utcOffsetHours));
   dock?.setAttribute("data-day-boundary", context.dayBoundary);
@@ -66,7 +80,7 @@ function applyExactTime() {
   const instantMs = parseMobileAtlasInput(input.value, context);
   if (instantMs === null) {
     input.setAttribute("aria-invalid", "true");
-    setStatus("時間格式無效", "error");
+    setStatus(`請用 ${MOBILE_ATLAS_INPUT_DISPLAY_FORMAT}`, "error");
     return;
   }
   input.removeAttribute("aria-invalid");
@@ -85,6 +99,7 @@ function applyExactTime() {
   setStatus(`已套用 · ${formatAtlasUtcOffset(context.utcOffsetHours)}`, "success");
 }
 
+configureMobileInput();
 applyButton?.addEventListener("click", applyExactTime);
 input?.addEventListener("keydown", event => {
   if (event.key !== "Enter") return;
