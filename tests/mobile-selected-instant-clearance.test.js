@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const css = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
+const mobileCss = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
+const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 
 function mobile480Block(source) {
   const marker = "@media (max-width: 480px)";
@@ -11,12 +12,17 @@ function mobile480Block(source) {
   return source.slice(index);
 }
 
-test("mobile keeps the Selected Instant datum but retires the redundant SVG caption", () => {
-  const mobile = mobile480Block(css);
+test("mobile keeps the Selected Instant datum while shared reading CSS owns the redundant caption", () => {
+  const mobile = mobile480Block(mobileCss);
+  assert.doesNotMatch(
+    mobileCss,
+    /\.cursor-note/,
+    "mobile-time.css must not define a second Selected Instant caption policy"
+  );
   assert.match(
-    mobile,
-    /#cursor-layer\s+\.cursor-note\s*\{[^}]*display:\s*none;/s,
-    "the portrait cursor caption must not collide with the compact layer legend"
+    instrumentCss,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #cursor-layer \.cursor-note\s*\{\s*display:\s*none;/,
+    "ordinary reading must retire the redundant caption through the shared instrument owner"
   );
   assert.doesNotMatch(
     mobile,
