@@ -21,7 +21,7 @@ test("wheel sectors tile their coordinates without artificial angular gutters", 
 });
 
 test("sixty-step structure uses short minor ticks and longer five-step anchors", () => {
-  assert.match(renderer, /const tickLength = index % 5 === 0 \? 14 : 5;/);
+  assert.match(renderer, /const isMajor = index % 5 === 0;\s*\n\s*const tickLength = isMajor \? 14 : 5;/);
   assert.match(renderer, /model\.outerRadius - tickLength/);
 
   for (const ring of ["hour", "day", "month", "year"]) {
