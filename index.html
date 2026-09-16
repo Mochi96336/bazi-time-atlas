@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./classification-overlay.css">
   <link rel="stylesheet" href="./ux-analysis.css">
   <link rel="stylesheet" href="./mobile-time.css">
+  <link rel="stylesheet" href="./ganzhi-inspector.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -129,12 +130,37 @@
     </section>
 
     <section class="state-strip" aria-label="目前狀態摘要">
-      <div class="state-cell"><span>Year pillar</span><strong id="state-year">—</strong><small>立春切換</small></div>
-      <div class="state-cell"><span>Month pillar</span><strong id="state-month">—</strong><small>十二節切換</small></div>
-      <div class="state-cell"><span>Day pillar</span><strong id="state-day">—</strong><small>60 日序列</small></div>
-      <div class="state-cell"><span>Hour pillar</span><strong id="state-hour">—</strong><small>2 小時一格</small></div>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="year" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Year pillar</span><strong id="state-year">—</strong><small>立春切換</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="month" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Month pillar</span><strong id="state-month">—</strong><small>十二節切換</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="day" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Day pillar</span><strong id="state-day">—</strong><small>60 日序列</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="hour" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Hour pillar</span><strong id="state-hour">—</strong><small>2 小時一格</small></button>
       <div class="state-cell"><span>Solar / Zodiac</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
     </section>
+
+    <aside id="ganzhi-inspector" class="ganzhi-inspector" hidden role="dialog" aria-modal="false" aria-labelledby="ganzhi-inspector-title" data-open="false" data-ready="false">
+      <header class="ganzhi-inspector-head">
+        <span>六十甲子 reference</span>
+        <button id="ganzhi-inspector-close" class="ganzhi-inspector-close" type="button" aria-label="關閉六十甲子參考">關閉</button>
+      </header>
+      <div class="ganzhi-inspector-identity">
+        <strong id="ganzhi-inspector-title">—</strong>
+        <b id="ganzhi-inspector-ordinal">— / 60</b>
+        <small id="ganzhi-inspector-pillar">—</small>
+      </div>
+      <div class="ganzhi-inspector-parts">
+        <section><span>天干</span><strong id="ganzhi-inspector-stem">—</strong><small id="ganzhi-inspector-stem-meta">—</small></section>
+        <section><span>地支</span><strong id="ganzhi-inspector-branch">—</strong><small id="ganzhi-inspector-branch-meta">—</small></section>
+      </div>
+      <div class="ganzhi-inspector-neighbors" aria-label="六十甲子前後位置">
+        <span id="ganzhi-inspector-previous">—</span>
+        <strong id="ganzhi-inspector-current">—</strong>
+        <span id="ganzhi-inspector-next">—</span>
+      </div>
+      <details>
+        <summary>完整六十甲子</summary>
+        <div id="ganzhi-inspector-grid" class="ganzhi-inspector-grid" aria-label="完整六十甲子參考表"></div>
+      </details>
+    </aside>
 
     <section class="atlas-notes">
       <div>
@@ -171,6 +197,7 @@
   </div>
 
   <script type="module" src="./src/kinetic-atlas.js"></script>
+  <script type="module" src="./src/ganzhi-inspector.js"></script>
   <script type="module" src="./src/scale-emphasis-view.js"></script>
   <script type="module" src="./src/classification-overlay-view.js"></script>
   <script type="module" src="./src/kinetic-boundaries.js"></script>
