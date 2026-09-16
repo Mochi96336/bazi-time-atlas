@@ -2,7 +2,7 @@ export const DAY_MS = 86_400_000;
 
 export const KINETIC_SCALE_CONFIG = Object.freeze({
   day: Object.freeze({
-    label: "日內 / 48 小時",
+    label: "48 小時",
     spanDays: 1,
     sliderStep: 1 / 144,
     playDaysPerSecond: .25,
@@ -16,7 +16,7 @@ export const KINETIC_SCALE_CONFIG = Object.freeze({
     edgeLabel: "約半年"
   }),
   cycle: Object.freeze({
-    label: "六十年",
+    label: "60 年",
     spanDays: 365.2422 * 30,
     sliderStep: 1,
     playDaysPerSecond: 365.2422,
