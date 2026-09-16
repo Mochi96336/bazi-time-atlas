@@ -1,3 +1,5 @@
+@import "./main-action-hierarchy.css";
+
 /* Progressive disclosure for analysis-only controls.
    The default atlas is a time-reading instrument. Compare, classification,
    layer visibility and relative reference frames become available only while
