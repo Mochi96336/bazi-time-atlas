@@ -27,12 +27,10 @@
 .ring-day strong,
 .ring-hour strong { color: #9da8a1; font-weight: 660; }
 
-/* Fast inner clocks need less label ink. Their geometry remains fully present,
-   but only every second rendered five-step label is shown (10-step cadence).
-   Slow shells keep the denser five-step labels because they are the structural
-   frame of the instrument. */
-#hour-track .cycle-label:nth-of-type(2n),
-#day-track .cycle-label:nth-of-type(2n) { display: none; }
+/* Every six-degree Ganzhi state is named on the wheel. Five-step landmarks stay
+   stronger, while intervening states use quieter ink rather than disappearing.
+   The angular spacing is already generous enough for two-glyph labels across all
+   four radii; visual hierarchy, not omission, now carries density. */
 #hour-track .cycle-label {
   fill: rgba(202,216,208,.36);
   font-size: 8.5px;
@@ -55,12 +53,33 @@
   letter-spacing: .02em;
 }
 
-/* Sparse labels describe the scale; one dynamic label on each Ganzhi ring
-   describes the sector currently crossing the Selected Instant datum. When
-   that sector is already one of the five-step samples, retire the sampled copy
-   so the read-head never becomes doubled text. The read-head anchor stays on
-   the datum, but its glyphs start at that anchor instead of being bisected by
-   the cursor stroke. */
+#hour-track .minor-cycle-label {
+  fill: rgba(202,216,208,.22);
+  font-size: 7.2px;
+  font-weight: 540;
+}
+#day-track .minor-cycle-label {
+  fill: rgba(211,222,217,.27);
+  font-size: 7.6px;
+  font-weight: 560;
+}
+#month-track .minor-cycle-label {
+  fill: rgba(222,234,225,.42);
+  font-size: 8.2px;
+  font-weight: 600;
+}
+#year-track .minor-cycle-label {
+  fill: rgba(226,236,229,.50);
+  font-size: 8.8px;
+  font-weight: 640;
+  letter-spacing: 0;
+}
+
+/* Static labels describe the whole state field; one dynamic label on each
+   Ganzhi ring describes the state crossing the Selected Instant datum. The
+   corresponding static label is retired so the read-head never doubles text.
+   The read-head anchor stays on the datum, but its glyphs start at that anchor
+   instead of being bisected by the cursor stroke. */
 .cycle-label.is-active-shadowed { visibility: hidden; }
 .active-cycle-label {
   text-anchor: start;
@@ -228,6 +247,8 @@
   .ring-legend-row { grid-template-columns: 7px 48px minmax(58px, auto); gap: 6px; }
   #year-track .cycle-label { font-size: 10.5px; }
   #month-track .cycle-label { font-size: 9.5px; }
+  #year-track .minor-cycle-label { font-size: 8.2px; }
+  #month-track .minor-cycle-label { font-size: 7.8px; }
 }
 
 @media (max-width: 480px) {
@@ -260,6 +281,10 @@
   #day-track .cycle-label { font-size: 8px; }
   #month-track .cycle-label { font-size: 9px; }
   #year-track .cycle-label { font-size: 10px; }
+  #hour-track .minor-cycle-label,
+  #day-track .minor-cycle-label { font-size: 6.8px; }
+  #month-track .minor-cycle-label { font-size: 7.4px; }
+  #year-track .minor-cycle-label { font-size: 7.8px; }
 
   #hour-track .active-cycle-label { font-size: 8.5px; }
   #day-track .active-cycle-label { font-size: 9px; }
