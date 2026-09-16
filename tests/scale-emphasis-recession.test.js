@@ -19,13 +19,17 @@ function sharedRule(firstSelector, lastSelector) {
   return match[1];
 }
 
+function hasDirectDeclaration(body, property) {
+  return new RegExp(`(?:^|\\n)\\s*${property}\\s*:`, "m").test(body);
+}
+
 test("scale emphasis keeps coordinate tracks full-strength and recedes resting marks by role", () => {
   const tracks = sharedRule("#hour-track,", "#year-track");
   assert.match(tracks, /--scale-surface-opacity:\s*1;/);
   assert.match(tracks, /--scale-structure-opacity:\s*1;/);
   assert.match(tracks, /--scale-context-opacity:\s*1;/);
-  assert.match(tracks, /opacity:\s*1;/);
-  assert.match(tracks, /filter:\s*none;/);
+  assert.match(tracks, /(?:^|\n)\s*opacity:\s*1;/m);
+  assert.match(tracks, /(?:^|\n)\s*filter:\s*none;/m);
 
   const surfaces = sharedRule(
     "#hour-track .cycle-sector:not(.is-active),",
@@ -43,19 +47,29 @@ test("scale emphasis keeps coordinate tracks full-strength and recedes resting m
   assert.match(context, /opacity:\s*var\(--scale-context-opacity\);/);
 
   const active = sharedRule("#hour-track .cycle-sector.is-active,", "#zodiac-track .active-cycle-label");
-  assert.match(active, /opacity:\s*1;/);
-  assert.match(active, /filter:\s*none;/);
+  assert.match(active, /(?:^|\n)\s*opacity:\s*1;/m);
+  assert.match(active, /(?:^|\n)\s*filter:\s*none;/m);
 
-  assert.doesNotMatch(
-    css,
-    /data-scale-window="(?:day|year|cycle)"\]\s+#(?:hour|day|solar|zodiac|month|year)-track\s*\{[^}]*\bopacity\s*:/s,
-    "scale presets must not dim whole rotating track groups"
-  );
-  assert.doesNotMatch(
-    css,
-    /data-scale-window="(?:day|year|cycle)"\]\s+#(?:hour|day|solar|zodiac|month|year)-track\s*\{[^}]*\bfilter\s*:/s,
-    "scale presets must not apply brightness/saturation filters to whole tracks"
-  );
+  const recededRules = [
+    '#kinetic-instrument[data-scale-window="day"] #solar-track',
+    '#kinetic-instrument[data-scale-window="day"] #zodiac-track',
+    '#kinetic-instrument[data-scale-window="day"] #month-track',
+    '#kinetic-instrument[data-scale-window="day"] #year-track',
+    '#kinetic-instrument[data-scale-window="year"] #zodiac-track',
+    '#kinetic-instrument[data-scale-window="year"] #year-track',
+    '#kinetic-instrument[data-scale-window="year"] #day-track',
+    '#kinetic-instrument[data-scale-window="year"] #hour-track',
+    '#kinetic-instrument[data-scale-window="cycle"] #month-track',
+    '#kinetic-instrument[data-scale-window="cycle"] #solar-track',
+    '#kinetic-instrument[data-scale-window="cycle"] #zodiac-track',
+    '#kinetic-instrument[data-scale-window="cycle"] #day-track',
+    '#kinetic-instrument[data-scale-window="cycle"] #hour-track'
+  ];
+  for (const selector of recededRules) {
+    const body = rule(selector);
+    assert.equal(hasDirectDeclaration(body, "opacity"), false, `${selector} must not dim the whole rotating track`);
+    assert.equal(hasDirectDeclaration(body, "filter"), false, `${selector} must not filter the whole rotating track`);
+  }
 });
 
 test("48-hour recession is role-specific and preserves a full-strength active channel", () => {
@@ -76,8 +90,8 @@ test("48-hour recession is role-specific and preserves a full-strength active ch
 
   // Hour / Day inherit the full-strength defaults instead of needing a special
   // group-level opacity rule. This keeps focus semantics separate from tracks.
-  assert.doesNotMatch(css, /data-scale-window="day"\]\s+#day-track\s*\{[^}]*\bopacity\s*:/s);
-  assert.doesNotMatch(css, /data-scale-window="day"\]\s+#hour-track\s*\{[^}]*\bopacity\s*:/s);
+  assert.doesNotMatch(css, /data-scale-window="day"\]\s+#day-track\s*\{/);
+  assert.doesNotMatch(css, /data-scale-window="day"\]\s+#hour-track\s*\{/);
 });
 
 test("interaction restores resting mark roles without changing the already-full active channel", () => {
@@ -88,6 +102,6 @@ test("interaction restores resting mark roles without changing the already-full 
   assert.match(interaction, /--scale-surface-opacity:\s*1;/);
   assert.match(interaction, /--scale-structure-opacity:\s*1;/);
   assert.match(interaction, /--scale-context-opacity:\s*1;/);
-  assert.doesNotMatch(interaction, /\bopacity\s*:/);
-  assert.doesNotMatch(interaction, /\bfilter\s*:/);
+  assert.equal(hasDirectDeclaration(interaction, "opacity"), false);
+  assert.equal(hasDirectDeclaration(interaction, "filter"), false);
 });
