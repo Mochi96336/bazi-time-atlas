@@ -28,6 +28,10 @@ import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
 import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
 import {
+  clearLegacyProjectionUrl,
+  selectedInstantUrl
+} from "./interaction/selected-instant-url.js";
+import {
   DAY_MS,
   sliderStateForScale
 } from "./interaction/kinetic-playback.js";
@@ -149,7 +153,8 @@ function clearLegacyProjection() {
   if (!state.legacyProjection) return;
   state.legacyProjection = null;
   document.body.classList.remove("legacy-projection");
-  history.replaceState({}, "", location.pathname);
+  const href = clearLegacyProjectionUrl(location.href);
+  if (href) history.replaceState(history.state, "", href);
 }
 
 function setText(id, value) {
@@ -240,6 +245,8 @@ function setSelectedInstant(instantMs, source = "command") {
   setSliderForScale();
   updateWheel();
   instrument.dataset.lastSelectedInstantSource = source;
+  const href = selectedInstantUrl(location.href, instantMs);
+  if (href) history.replaceState(history.state, "", href);
   return true;
 }
 
