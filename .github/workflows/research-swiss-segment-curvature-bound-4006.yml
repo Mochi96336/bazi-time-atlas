@@ -1,0 +1,107 @@
+name: Research Swiss SWIEPH segment curvature bound 4006
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-swiss-segment-curvature-bound-4006.yml"
+      - "scripts/research-swiss-segment-curvature-bound-4006.c"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  swiss-segment-curvature-bound:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+
+      - name: Download pinned Swiss long-range ephemerides
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/sweph
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          for file in sepl_36.se1 semo_36.se1; do
+            curl -fsSL --retry 3 --retry-delay 2 \
+              "https://raw.githubusercontent.com/aloistr/swisseph/${SWISS_COMMIT}/ephe/${file}" \
+              -o "tmp/sweph/${file}"
+          done
+          cat <<'EOF' | sha256sum -c -
+          3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0  tmp/sweph/sepl_36.se1
+          f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
+          EOF
+
+      - name: Build pinned Swiss static library and source harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          mkdir -p tmp/swiss-segment-curvature-bound-4006
+          cc -O2 -std=gnu11 \
+            -I tmp/swisseph \
+            scripts/research-swiss-segment-curvature-bound-4006.c \
+            tmp/swisseph/libswe.a -lm \
+            -o tmp/swiss-segment-curvature-bound-4006/bound
+
+      - name: Prove SWIEPH segment kinematic envelopes
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp/swiss-segment-curvature-bound-4006/bound tmp/sweph \
+            | tee tmp/swiss-segment-curvature-bound-4006/manifest.json
+          python -m json.tool tmp/swiss-segment-curvature-bound-4006/manifest.json >/dev/null
+
+      - name: Verify segment coverage assumptions and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("tmp/swiss-segment-curvature-bound-4006/manifest.json")
+          m = json.loads(p.read_text())
+          step = float(m["sampleStepDays"])
+          for name, body in m["bodies"].items():
+              dseg = float(body["minSegmentDays"])
+              if not step <= dseg:
+                  raise SystemExit(f"sample cadence can skip {name} segments: step={step}, dseg={dseg}")
+              if int(body["segmentCount"]) <= 0:
+                  raise SystemExit(f"no segments inspected for {name}")
+          hard = m["derivedHardBounds"]
+          if not float(hard["hardSunRelativeXyLowerAu"]) > 0:
+              raise SystemExit("non-positive hard XY separation lower bound")
+          interp = m["interpretation"]
+          assert interp["chebyshevSegmentVelocityAccelerationBoundsAnalytic"] is True
+          assert interp["sampleBetweenDistanceLowerBoundUsesCertifiedVelocityEnvelope"] is True
+          assert interp["geometricJ2000RaSecondDerivativeBoundAnalytic"] is True
+          assert interp["apparentPositionCorrectionChainCertified"] is False
+          assert interp["longTermSiderealSecondDerivativeCertified"] is False
+          assert interp["swissEotSecondDerivativeCertified"] is False
+          assert interp["continuousResidualUpperBound"] is False
+          assert interp["recurrenceAuthorityGranted"] is False
+          PY
+
+      - name: Upload source-derived curvature evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swiss-segment-curvature-bound-4006
+          path: tmp/swiss-segment-curvature-bound-4006/manifest.json
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
