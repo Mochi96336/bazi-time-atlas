@@ -1,17 +1,19 @@
-name: Research Swiss SWIEPH segment curvature bound 4006
+name: Research legacy Swiss segment RA artifact 4006 (superseded)
 
 on:
   pull_request:
     paths:
       - ".github/workflows/research-swiss-segment-curvature-bound-4006.yml"
       - "scripts/research-swiss-segment-curvature-bound-4006.c"
+      - "src/astronomy/equation-of-time-4006-swiss-segment-curvature-evidence.js"
+      - "tests/equation-of-time-4006-swiss-segment-curvature-evidence.test.js"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  swiss-segment-curvature-bound:
+  legacy-swiss-segment-artifact:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -45,7 +47,7 @@ jobs:
           f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
           EOF
 
-      - name: Build pinned Swiss static library and source harness
+      - name: Build historical source harness
         shell: bash
         run: |
           set -euo pipefail
@@ -57,7 +59,7 @@ jobs:
             tmp/swisseph/libswe.a -lm \
             -o tmp/swiss-segment-curvature-bound-4006/bound
 
-      - name: Prove SWIEPH segment kinematic envelopes
+      - name: Reproduce historical segment manifest
         shell: bash
         run: |
           set -euo pipefail
@@ -65,7 +67,7 @@ jobs:
             | tee tmp/swiss-segment-curvature-bound-4006/manifest.json
           python -m json.tool tmp/swiss-segment-curvature-bound-4006/manifest.json >/dev/null
 
-      - name: Verify segment coverage assumptions and authority boundary
+      - name: Verify only surviving 3D PVA and distance authority
         shell: bash
         run: |
           set -euo pipefail
@@ -73,8 +75,7 @@ jobs:
           import json
           from pathlib import Path
 
-          p = Path("tmp/swiss-segment-curvature-bound-4006/manifest.json")
-          m = json.loads(p.read_text())
+          m = json.loads(Path("tmp/swiss-segment-curvature-bound-4006/manifest.json").read_text())
           step = float(m["sampleStepDays"])
           for name, body in m["bodies"].items():
               dseg = float(body["minSegmentDays"])
@@ -83,24 +84,24 @@ jobs:
               if int(body["segmentCount"]) <= 0:
                   raise SystemExit(f"no segments inspected for {name}")
           hard = m["derivedHardBounds"]
-          if not float(hard["hardSunRelativeXyLowerAu"]) > 0:
-              raise SystemExit("non-positive hard XY separation lower bound")
-          interp = m["interpretation"]
-          assert interp["chebyshevSegmentVelocityAccelerationBoundsAnalytic"] is True
-          assert interp["sampleBetweenDistanceLowerBoundUsesCertifiedVelocityEnvelope"] is True
-          assert interp["geometricJ2000RaSecondDerivativeBoundAnalytic"] is True
-          assert interp["apparentPositionCorrectionChainCertified"] is False
-          assert interp["longTermSiderealSecondDerivativeCertified"] is False
-          assert interp["swissEotSecondDerivativeCertified"] is False
-          assert interp["continuousResidualUpperBound"] is False
-          assert interp["recurrenceAuthorityGranted"] is False
+          assert float(hard["sunRelativeVelocityAuPerDay"]) > 0
+          assert float(hard["sunRelativeAccelerationAuPerDaySquared"]) > 0
+          assert float(hard["hardSunRelativeDistanceLowerAu"]) > 0
           PY
+          node --input-type=module <<'NODE'
+          const { EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE: e } =
+            await import("./src/astronomy/equation-of-time-4006-swiss-segment-curvature-evidence.js");
+          if (!e.supersession?.supersededForRightAscension || !e.supersession?.invalidForRightAscension) throw new Error("legacy RA claim must remain superseded");
+          if (e.interpretation.validForRightAscension !== false) throw new Error("legacy evidence regained RA authority");
+          if (e.interpretation.geometricJ2000RaSecondDerivativeBoundAnalytic !== false) throw new Error("legacy RA bound must not be certified");
+          if (!e.interpretation.sourceDerivedPvaCertificateStillValid || !e.interpretation.sourceDerivedDistanceCertificateStillValid) throw new Error("surviving 3D source certificates were lost");
+          NODE
 
-      - name: Upload source-derived curvature evidence
+      - name: Upload legacy superseded segment artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: swiss-segment-curvature-bound-4006
+          name: legacy-superseded-swiss-segment-ra-artifact-4006
           path: tmp/swiss-segment-curvature-bound-4006/manifest.json
           if-no-files-found: warn
           retention-days: 7
