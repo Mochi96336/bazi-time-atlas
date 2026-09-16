@@ -1,6 +1,8 @@
 export const WHEEL_CENTER = Object.freeze({ x: 600, y: 1360 });
 export const CURSOR_ANGLE = -90;
-export const FAN = Object.freeze({ start: -170, end: -10 });
+// Keep the fan centered on the Selected-Instant datum while giving the radial
+// stack a little more lateral breathing room than the pre-reset 160° frame.
+export const FAN = Object.freeze({ start: -165, end: -15 });
 
 // Radial position carries temporal scale: fast / short cycles live inside and
 // slow / long cycles move outward. Thickness is presentation-owned and instead
