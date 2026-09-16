@@ -26,6 +26,7 @@ import {
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
+import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
 import {
   DAY_MS,
   sliderStateForScale
@@ -230,6 +231,18 @@ function stopPlayback() {
   playbackController?.stop();
 }
 
+function setSelectedInstant(instantMs, source = "command") {
+  if (!Number.isFinite(instantMs)) return false;
+  stopPlayback();
+  clearLegacyProjection();
+  state.selectedMs = instantMs;
+  state.anchorMs = instantMs;
+  setSliderForScale();
+  updateWheel();
+  instrument.dataset.lastSelectedInstantSource = source;
+  return true;
+}
+
 function installPlayback() {
   playbackController = createKineticPlaybackController({
     state,
@@ -340,22 +353,17 @@ function bindControls() {
   });
   playButton.addEventListener("click", () => playbackController?.toggle());
   nowButton.addEventListener("click", () => {
-    stopPlayback();
-    clearLegacyProjection();
-    state.selectedMs = Date.now();
-    state.anchorMs = state.selectedMs;
-    setSliderForScale();
-    updateWheel();
+    setSelectedInstant(Date.now(), "now");
   });
   instantInput.addEventListener("change", () => {
     const instant = instantFromAtlasLocalInput(instantInput.value);
     if (instant === null || !Number.isFinite(instant)) return;
-    stopPlayback();
-    clearLegacyProjection();
-    state.selectedMs = instant;
-    state.anchorMs = instant;
-    setSliderForScale();
-    updateWheel();
+    setSelectedInstant(instant, "desktop-input");
+  });
+  instrument.addEventListener(SELECTED_INSTANT_COMMAND, event => {
+    const instant = Number(event.detail?.instantMs);
+    const source = typeof event.detail?.source === "string" ? event.detail.source : "command";
+    setSelectedInstant(instant, source);
   });
 }
 
