@@ -98,7 +98,6 @@ function installCrossViewLinks() {
   label.className = "birth-projection-kicker";
   label.textContent = "出生瞬間 · 太陽黃經";
   annualProjectionLink = document.createElement("a");
-  annualProjectionLink.href = "./?month=子&lambda=270&yearStem=乙";
   annualProjectionLink.textContent = "λ 270.00°　年度盤精確定位 →";
   annualProjectionMeta = document.createElement("span");
   annualProjectionMeta.className = "birth-projection-meta";
@@ -593,17 +592,11 @@ function renderResult(result, longitude, utcOffsetHours) {
   for (const key of Object.keys(pillarTargets)) {
     pillarTargets[key].textContent = pillars[key].name;
     summaryTargets[key].textContent = pillars[key].name;
-    const href = `./sexagenary.html?ganzhi=${encodeURIComponent(pillars[key].name)}`;
-    summaryCells[key].dataset.href = href;
-    summaryCells[key].setAttribute("aria-label", `${summaryLabels[key]} ${pillars[key].name}，在六十甲子 Reference view 查看`);
-    summaryCells[key].title = `在六十甲子查看 ${pillars[key].name}`;
   }
 
   renderTenGodRelationships(pillars);
   renderPillarRelations(pillars);
 
-  const lambda = longitude.toFixed(6);
-  annualProjectionLink.href = `./?month=${encodeURIComponent(pillars.month.branch)}&lambda=${encodeURIComponent(lambda)}&yearStem=${encodeURIComponent(pillars.year.stem)}`;
   annualProjectionLink.textContent = `λ ${longitude.toFixed(2)}°　年度盤精確定位 →`;
   annualProjectionMeta.textContent = `${pillars.month.branch}月 · 年干${pillars.year.stem} · ${formatUtcOffset(utcOffsetHours)}`;
 }
