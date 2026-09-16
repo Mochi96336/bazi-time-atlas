@@ -51,7 +51,7 @@ class FakeSvg {
   setPointerCapture() {}
   releasePointerCapture() {}
 
-  dispatchAt(type, ringId, angleDegrees, pointerId = 1, timeStamp = undefined) {
+  dispatchAt(type, ringId, angleDegrees, pointerId = 1, timeStamp = undefined, isTrusted = undefined) {
     const ring = ringModel(ringId);
     const radius = (ring.innerRadius + ring.outerRadius) / 2;
     const angle = angleDegrees * Math.PI / 180;
@@ -63,6 +63,7 @@ class FakeSvg {
       preventDefault() {}
     };
     if (Number.isFinite(timeStamp)) event.timeStamp = timeStamp;
+    if (typeof isTrusted === "boolean") event.isTrusted = isTrusted;
     this.listeners.get(type)?.(event);
   }
 }
@@ -262,4 +263,27 @@ test("grabbing a coasting free ring preserves its unsnapped pose", t => {
   assert.equal(events.at(-1)[0], "end");
   assert.equal(events.at(-1)[2], "grab");
   assert.equal(events.some(event => event[0] === "pose" && event[3] === "detent"), false);
+});
+
+test("synthetic browser-style pointer gestures never launch inertia", t => {
+  forceSvgPointFallback(t);
+  const frames = new FakeFrames();
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    requestFrame:frames.request,
+    cancelFrame:frames.cancel
+  });
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointerdown", "day", -90, 8, 0, false);
+  svg.dispatchAt("pointermove", "day", -88, 8, 1, false);
+  svg.dispatchAt("pointerup", "day", -88, 8, 2, false);
+
+  assert.equal(controller.isCoasting, false);
+  assert.deepEqual(events.at(-1), ["end", "day", "release"]);
+  assert.equal(frames.pending.size, 0);
 });
