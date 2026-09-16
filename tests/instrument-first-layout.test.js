@@ -49,6 +49,25 @@ test("ordinary reading keeps quiet observation-window lenses but hides analysis 
   );
 });
 
+test("ordinary time navigation keeps observation windows and Now in one left cluster", () => {
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-start;[\s\S]*?align-items:\s*center;[\s\S]*?gap:\s*2px;/
+  );
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar > \.toolbar-group\s*\{[\s\S]*?flex-wrap:\s*nowrap;/
+  );
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*1px;/
+  );
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar\s*\{[^}]*justify-content:\s*flex-start;/s
+  );
+});
+
 test("ordinary reading preserves exact datetime entry but removes duplicate range and diagnostics", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{[\s\S]*?grid-template-columns:\s*minmax\(190px, 230px\);[\s\S]*?opacity:\s*\.52;/);
   assert.match(css, /~ \.timeline-dock \.slider-wrap,[\s\S]*?~ \.timeline-dock \.timeline-status\s*\{\s*display:\s*none;/);
