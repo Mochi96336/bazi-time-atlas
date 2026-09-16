@@ -9,13 +9,13 @@ const classification = readFileSync(new URL("../classification-overlay.css", imp
 
 const TEMPORAL_TOKEN_DEFINITION = /--(?:hour|day|month|year|solar|zodiac)\s*:/g;
 
-test("base stylesheet is the single owner of the semantic temporal palette", () => {
-  assert.match(atlas, /--hour:\s*#6f8983;/);
-  assert.match(atlas, /--day:\s*#78928b;/);
-  assert.match(atlas, /--month:\s*#859e96;/);
-  assert.match(atlas, /--year:\s*#96aaa2;/);
-  assert.match(atlas, /--solar:\s*#c6a36f;/);
-  assert.match(atlas, /--zodiac:\s*#9089a7;/);
+test("base stylesheet is the single owner of the graphite temporal palette", () => {
+  assert.match(atlas, /--hour:\s*#52585b;/);
+  assert.match(atlas, /--day:\s*#62696c;/);
+  assert.match(atlas, /--month:\s*#777e81;/);
+  assert.match(atlas, /--year:\s*#93999b;/);
+  assert.match(atlas, /--solar:\s*#bc9257;/);
+  assert.match(atlas, /--zodiac:\s*#716e82;/);
 
   const atlasDefinitions = atlas.match(TEMPORAL_TOKEN_DEFINITION) ?? [];
   assert.equal(atlasDefinitions.length, 6, "kinetic-atlas.css must define each temporal token exactly once");
@@ -27,6 +27,15 @@ test("base stylesheet is the single owner of the semantic temporal palette", () 
   }
 });
 
+test("resting graphite palette does not regress to the former green clock family", () => {
+  for (const legacy of ["#6f8983", "#78928b", "#859e96", "#96aaa2", "#c7d9cd"]) {
+    assert.doesNotMatch(atlas, new RegExp(legacy, "i"));
+  }
+  assert.match(atlas, /--bg:\s*#090a0b;/);
+  assert.match(atlas, /--accent:\s*#c5c9c7;/);
+  assert.match(hierarchy, /achromatic\s+graphite family/);
+});
+
 test("annual coordinate colors are token-owned and do not reintroduce literal legacy orange or violet", () => {
   assert.match(hierarchy, /#solar-track \.term-sector \{[\s\S]*?var\(--solar\)/);
   assert.match(hierarchy, /#zodiac-track \.zodiac-sector \{[\s\S]*?var\(--zodiac\)/);
@@ -36,12 +45,25 @@ test("annual coordinate colors are token-owned and do not reintroduce literal le
   assert.doesNotMatch(hierarchy, /rgba\(153,139,180/);
 });
 
+test("M2 material stays CSS-light and reserves luminosity for Selected Instant", () => {
+  assert.match(hierarchy, /M2 anodized-graphite material/);
+  assert.doesNotMatch(hierarchy, /feTurbulence|filter:\s*url\(|background-image:\s*url\(/);
+  for (const ring of ["hour", "day", "month", "year"]) {
+    assert.doesNotMatch(
+      hierarchy,
+      new RegExp(`#${ring}-track \\.${ring}-sector \\{[^}]*drop-shadow`)
+    );
+  }
+  assert.match(hierarchy, /#cursor-layer \.cursor-line \{[\s\S]*?drop-shadow/);
+  assert.match(hierarchy, /No resting ring, Solar sector, or Zodiac sector receives glow/);
+});
+
 test("year hierarchy no longer borrows the warm Solar or Selected-Instant channel", () => {
   assert.doesNotMatch(hierarchy, /#fff2c9/);
   assert.doesNotMatch(hierarchy, /rgba\(244,236,207/);
-  assert.match(hierarchy, /#year-track \.active-cycle-label \{[\s\S]*?fill:\s*#f0f6f2;/);
-  assert.match(hierarchy, /#year-track \.ring-tick\.major \{ stroke: rgba\(231,239,234,.52\);/);
-  assert.match(atlas, /--cursor:\s*#f4e6b7;/);
+  assert.match(hierarchy, /#year-track \.active-cycle-label \{[\s\S]*?fill:\s*#f2f3f2;/);
+  assert.match(hierarchy, /#year-track \.ring-tick\.major \{ stroke: rgba\(235,238,236,.44\);/);
+  assert.match(atlas, /--cursor:\s*#f4dda0;/);
 });
 
 test("categorical multicolor remains opt-in analysis rather than resting clock identity", () => {
