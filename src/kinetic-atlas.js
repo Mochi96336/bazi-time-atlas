@@ -278,6 +278,7 @@ function setSliderForScale() {
 }
 
 function stopPlayback() {
+  dragController?.cancelInertia?.({ detent:true, reason:"external-control" });
   playbackController?.stop();
 }
 
@@ -313,6 +314,7 @@ function installPlayback() {
     playButton,
     updateWheel,
     prepareStart() {
+      dragController?.cancelInertia?.({ detent:true, reason:"playback-start" });
       if (dragController?.compareMode) compareController?.setMode(false);
       clearLegacyProjection();
     }
