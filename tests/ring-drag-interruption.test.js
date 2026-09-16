@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { WHEEL_CENTER, ringModel } from "../src/wheel/ring-model.js";
 import { createRingDragController } from "../src/wheel/ring-drag-controller.js";
 import { createRingState } from "../src/wheel/ring-state.js";
+import { RING_VISIBILITY_EVENT } from "../src/wheel/ring-visibility.js";
 
 function forceSvgPointFallback(t) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, "DOMPoint");
@@ -50,6 +51,10 @@ class FakeSvg {
 
   setPointerCapture() {}
   releasePointerCapture() {}
+
+  dispatch(type, detail = {}) {
+    this.listeners.get(type)?.({ detail });
+  }
 
   dispatchAt(type, ringId, angleDegrees, pointerId = 1, timeStamp = undefined) {
     const ring = ringModel(ringId);
@@ -218,5 +223,64 @@ test("destroy ends an active linked gesture exactly once before removing listene
   assert.equal(events.filter(event => event[0] === "end").length, 1);
 
   svg.dispatchAt("pointerup", "day", -88, 4, 50);
+  assert.equal(events.filter(event => event[0] === "end").length, 1);
+});
+
+test("hiding the active ring ends only that gesture and stale pointer events cannot resume it", t => {
+  forceSvgPointFallback(t);
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    prefersReducedMotion:() => true
+  });
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointerdown", "day", -90, 5, 0);
+  svg.dispatchAt("pointermove", "day", -88, 5, 40);
+  assert.equal(controller.activeMode, "linked");
+
+  svg.dispatch(RING_VISIBILITY_EVENT, { ringId:"month", visible:false });
+  assert.equal(controller.activeMode, "linked");
+
+  svg.dispatch(RING_VISIBILITY_EVENT, { ringId:"day", visible:false });
+  assert.equal(controller.activeMode, null);
+  assert.equal(svg.dataset.activeRing, undefined);
+  assert.deepEqual(events.at(-1), ["end", "day", "ring-hidden"]);
+  assert.equal(events.filter(event => event[0] === "end").length, 1);
+
+  svg.dispatchAt("pointermove", "day", -82, 5, 50);
+  svg.dispatchAt("pointerup", "day", -82, 5, 60);
+  assert.equal(events.filter(event => event[0] === "end").length, 1);
+});
+
+test("hiding a coasting ring cancels inertia and ends it exactly once", t => {
+  forceSvgPointFallback(t);
+  const frames = new FakeFrames();
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    requestFrame:frames.request,
+    cancelFrame:frames.cancel,
+    prefersReducedMotion:() => false
+  });
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointerdown", "day", -90, 6, 0);
+  svg.dispatchAt("pointermove", "day", -88, 6, 40);
+  svg.dispatchAt("pointerup", "day", -88, 6, 42);
+  assert.equal(controller.isCoasting, true);
+  assert.equal(frames.pending.size, 1);
+
+  svg.dispatch(RING_VISIBILITY_EVENT, { ringId:"day", visible:false });
+
+  assert.equal(controller.isCoasting, false);
+  assert.equal(frames.pending.size, 0);
+  assert.deepEqual(events.at(-1), ["end", "day", "ring-hidden"]);
   assert.equal(events.filter(event => event[0] === "end").length, 1);
 });
