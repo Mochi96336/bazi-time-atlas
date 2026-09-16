@@ -94,6 +94,25 @@
   }
 }
 
+/* The compact atlas still needs an explicit current-view owner because its
+   brand is hidden. Keep that owner typographic: one baseline, no dashboard
+   pill, fill or rounded control surface. */
+@media (max-width: 480px) {
+  .kinetic-topbar .site-nav a[aria-current="page"] {
+    border: 0;
+    border-radius: 0;
+    padding: 4px 0;
+    color: #d7e0da;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .kinetic-topbar .site-nav a[aria-current="page"]::after {
+    bottom: 0;
+    opacity: .72;
+  }
+}
+
 @media (max-width: 600px) {
   .topbar-actions { gap: 10px; }
   .site-nav { gap: 9px; }
