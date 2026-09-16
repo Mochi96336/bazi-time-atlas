@@ -1,4 +1,4 @@
-name: Research Swiss precessed geometric RA bound 4006
+name: Research legacy Swiss precessed RA artifact 4006 (superseded)
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  precessed-geometric-ra-bound:
+  legacy-precessed-ra-artifact:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -50,7 +50,7 @@ jobs:
           f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
           EOF
 
-      - name: Build pinned Swiss library and sampler
+      - name: Build historical precessed sampler
         shell: bash
         run: |
           set -euo pipefail
@@ -62,7 +62,7 @@ jobs:
             tmp/swisseph/libswe.a -lm \
             -o tmp/swiss-precessed-geometric-ra-bound-4006/sample
 
-      - name: Capture pinned mean-of-date geometric samples
+      - name: Reproduce historical precessed samples
         shell: bash
         run: |
           set -euo pipefail
@@ -70,14 +70,14 @@ jobs:
             | tee tmp/swiss-precessed-geometric-ra-bound-4006/raw.json
           python -m json.tool tmp/swiss-precessed-geometric-ra-bound-4006/raw.json >/dev/null
 
-      - name: Compose continuous RA curvature certificate
+      - name: Reproduce historical composition
         shell: bash
         run: |
           set -euo pipefail
           node scripts/compose-swiss-precessed-geometric-ra-bound-4006.mjs
           python -m json.tool tmp/swiss-precessed-geometric-ra-bound-4006/manifest.json >/dev/null
 
-      - name: Verify proof scope and authority boundary
+      - name: Verify historical reproduction remains non-authoritative
         shell: bash
         run: |
           set -euo pipefail
@@ -91,41 +91,26 @@ jobs:
           assert raw["sampleStepEtDays"] <= 0.25
           assert raw["sampleCoverRadiusEtDays"] <= 0.125
           assert raw["minSampledPrecessedXyAu"] > 0
-          assert raw["interpretation"]["uniformEtGrid"] is True
-          assert raw["interpretation"]["precessionAppliedByPinnedSwissSwiPrecess"] is True
           assert raw["interpretation"]["gridMinimumIsContinuousLowerBound"] is False
-          assert raw["interpretation"]["continuousRaCurvatureCertified"] is False
-
           hard = m["derivedHardBounds"]
           assert hard["meanOfDateGeometricVelocityAuPerDay"] > 0
           assert hard["meanOfDateGeometricAccelerationAuPerDaySquared"] > 0
-          assert hard["hardMeanOfDateGeometricXyLowerAu"] > 0
-          assert hard["meanOfDateGeometricRaSecondDerivativeBoundDegPerDaySquared"] > 0
-
-          i = m["interpretation"]
-          assert i["sourceDerivedContinuousBound"] is True
-          assert i["geometricJ2000InputCertified"] is True
-          assert i["vondrakPrecessionMatrixCertified"] is True
-          assert i["precessedGeometricXySeparationContinuous"] is True
-          assert i["meanOfDateGeometricRaSecondDerivativeCertified"] is True
-          assert i["actualSwissPrecessionCorrectionCertified"] is False
-          assert i["lightTimeCorrectionCertified"] is False
-          assert i["aberrationCorrectionCertified"] is False
-          assert i["deflectionCorrectionCertified"] is False
-          assert i["nutationCorrectionCertified"] is False
-          assert i["apparentPositionCorrectionChainCertified"] is False
-          assert i["longTermSiderealSecondDerivativeCertified"] is False
-          assert i["swissEotSecondDerivativeCertified"] is False
-          assert i["continuousResidualUpperBound"] is False
-          assert i["deterministicMembership"] is False
-          assert i["recurrenceAuthorityGranted"] is False
           PY
+          node --input-type=module <<'NODE'
+          const { EQUATION_OF_TIME_4006_SWISS_PRECESSED_GEOMETRIC_RA_EVIDENCE: e } =
+            await import("./src/astronomy/equation-of-time-4006-swiss-precessed-geometric-ra-evidence.js");
+          if (!e.supersession?.supersededForRightAscension || !e.supersession?.invalidForRightAscension) throw new Error("legacy precessed RA claim must remain superseded");
+          if (e.interpretation.validForRightAscension !== false) throw new Error("legacy precessed evidence regained RA authority");
+          if (e.interpretation.sourceDerivedContinuousBound !== false) throw new Error("legacy composition must not claim current continuous authority");
+          if (e.interpretation.meanOfDateGeometricRaSecondDerivativeCertified !== false) throw new Error("legacy precessed RA bound must not be certified");
+          if (!e.interpretation.geometricJ2000PvaEnvelopeCertified || !e.interpretation.vondrakPrecessionMatrixCertified) throw new Error("independent surviving certificates were lost");
+          NODE
 
-      - name: Upload source-derived precessed RA evidence
+      - name: Upload legacy superseded precessed artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: swiss-precessed-geometric-ra-bound-4006
+          name: legacy-superseded-swiss-precessed-ra-artifact-4006
           path: |
             tmp/swiss-precessed-geometric-ra-bound-4006/raw.json
             tmp/swiss-precessed-geometric-ra-bound-4006/manifest.json

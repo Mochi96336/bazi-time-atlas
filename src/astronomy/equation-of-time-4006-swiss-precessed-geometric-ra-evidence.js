@@ -1,7 +1,7 @@
 export const EQUATION_OF_TIME_4006_SWISS_PRECESSED_GEOMETRIC_RA_EVIDENCE = Object.freeze({
   id:"swiss-eot-4006-precessed-geometric-ra-curvature-v1",
   targetYear:4006,
-  scope:"geometric-mean-of-date-sun-ra-after-vondrak-precession",
+  scope:"historical-precession-composition-from-misframed-xy-sampler",
   provenance:Object.freeze({
     researchPullRequest:257,
     researchHeadSha:"2eab89a715f6e4abc9ca05baddaf5eb49b70d664",
@@ -12,6 +12,15 @@ export const EQUATION_OF_TIME_4006_SWISS_PRECESSED_GEOMETRIC_RA_EVIDENCE = Objec
     swissUpstreamCommit:"9083a12d59e98034fb2337061481ac8800c16e64",
     sourceGeometryEvidenceId:"swiss-eot-4006-swieph-segment-curvature-v1",
     precessionMatrixEvidenceId:"swiss-eot-4006-vondrak-precession-matrix-v1"
+  }),
+  supersession:Object.freeze({
+    supersededForRightAscension:true,
+    invalidForRightAscension:true,
+    defectId:"missing-seflg-equatorial-in-legacy-geometric-ra-samplers",
+    correctedEvidenceId:"swiss-eot-4006-equatorial-ra-frame-correction-v1",
+    correctedByPullRequest:262,
+    inputFrameToPrecession:"ecliptic-cartesian-j2000",
+    reason:"The historical sampler omitted SEFLG_EQUATORIAL, then fed its ecliptic Cartesian vector into equatorial precession. The Vondrak matrix derivative certificate and the source 3D P/V/A envelopes remain independently valid, but this composed XY/RA result is superseded."
   }),
   method:Object.freeze({
     id:"swieph-geometric-j2000-plus-vondrak-precession-ra-curvature-envelope-v1",
@@ -64,11 +73,14 @@ export const EQUATION_OF_TIME_4006_SWISS_PRECESSED_GEOMETRIC_RA_EVIDENCE = Objec
     ])
   }),
   interpretation:Object.freeze({
-    sourceDerivedContinuousBound:true,
-    geometricJ2000InputCertified:true,
+    sourceDerivedContinuousBound:false,
+    geometricJ2000PvaEnvelopeCertified:true,
+    geometricJ2000InputCertified:false,
     vondrakPrecessionMatrixCertified:true,
-    precessedGeometricXySeparationContinuous:true,
-    meanOfDateGeometricRaSecondDerivativeCertified:true,
+    legacyRaClaimSuperseded:true,
+    validForRightAscension:false,
+    precessedGeometricXySeparationContinuous:false,
+    meanOfDateGeometricRaSecondDerivativeCertified:false,
     actualSwissPrecessionCorrectionCertified:false,
     lightTimeCorrectionCertified:false,
     aberrationCorrectionCertified:false,
@@ -81,6 +93,6 @@ export const EQUATION_OF_TIME_4006_SWISS_PRECESSED_GEOMETRIC_RA_EVIDENCE = Objec
     continuousResidualUpperBound:false,
     deterministicMembership:false,
     recurrenceAuthorityGranted:false,
-    reason:"The merged SWIEPH geometric J2000 envelope and Vondrak matrix derivative certificate compose into a continuous curvature bound for the geometric Sun right ascension after precession to mean-of-date. Swiss light-time, aberration, deflection, nutation and long-term sidereal curvature remain outside this certificate."
+    reason:"The historical composition used an ecliptic Cartesian input where equatorial J2000 was required, so its XY/RA result is superseded. The source 3D P/V/A envelope and Vondrak matrix derivative certificate remain independently valid; use swiss-eot-4006-equatorial-ra-frame-correction-v1 for corrected mean-of-date right ascension."
   })
 });

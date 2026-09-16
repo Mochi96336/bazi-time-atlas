@@ -1,7 +1,7 @@
 export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.freeze({
   id:"swiss-eot-4006-swieph-segment-curvature-v1",
   targetYear:4006,
-  scope:"geometric-j2000-sun-ra-from-post-rotback-swieph-segments",
+  scope:"historical-swieph-segment-pva-and-ecliptic-xy-sampler",
   provenance:Object.freeze({
     researchPullRequest:236,
     researchHeadSha:"216b6f3d8b9e5c6f8e05f112fdcd748dac9cb51f",
@@ -12,6 +12,15 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
     swissUpstreamCommit:"9083a12d59e98034fb2337061481ac8800c16e64",
     sepl36Sha256:"3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0",
     semo36Sha256:"f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa"
+  }),
+  supersession:Object.freeze({
+    supersededForRightAscension:true,
+    invalidForRightAscension:true,
+    defectId:"missing-seflg-equatorial-in-legacy-geometric-ra-samplers",
+    correctedEvidenceId:"swiss-eot-4006-equatorial-ra-frame-correction-v1",
+    correctedByPullRequest:262,
+    sampledXyFrame:"ecliptic-cartesian-j2000",
+    reason:"The historical sampler requested SEFLG_XYZ without SEFLG_EQUATORIAL. Its 3D Chebyshev P/V/A and 3D distance envelopes remain rotation-invariant and usable, but its XY minimum and derived quantity named geometricJ2000RaSecondDerivativeBound are not right-ascension certificates."
   }),
   method:Object.freeze({
     id:"swieph-post-rotback-chebyshev-markov-envelope-v1",
@@ -86,8 +95,12 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
     sourceDerivedContinuousBound:true,
     chebyshevSegmentPositionVelocityAccelerationBoundsAnalytic:true,
     chebyshevSegmentVelocityAccelerationBoundsAnalytic:true,
+    sourceDerivedPvaCertificateStillValid:true,
+    sourceDerivedDistanceCertificateStillValid:true,
     sampleBetweenDistanceLowerBoundUsesCertifiedVelocityEnvelope:true,
-    geometricJ2000RaSecondDerivativeBoundAnalytic:true,
+    legacyRaClaimSuperseded:true,
+    validForRightAscension:false,
+    geometricJ2000RaSecondDerivativeBoundAnalytic:false,
     apparentPositionCorrectionChainCertified:false,
     longTermSiderealSecondDerivativeCertified:false,
     swissEotSecondDerivativeCertified:false,
@@ -95,6 +108,6 @@ export const EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE = Object.fre
     continuousResidualUpperBound:false,
     deterministicMembership:false,
     recurrenceAuthorityGranted:false,
-    reason:"Pinned SWIEPH post-rot_back Chebyshev coefficients provide continuous geometric J2000 position/velocity/acceleration envelopes and a Sun-RA curvature bound. Swiss apparent-position corrections and long-term sidereal curvature remain outside this certificate, so it cannot yet certify the full Swiss Equation-of-Time second derivative."
+    reason:"The pinned SWIEPH Chebyshev coefficient envelopes remain valid for rotation-invariant 3D P/V/A and distance bounds. The historical XY/RA claim is superseded because the sampler omitted SEFLG_EQUATORIAL; use swiss-eot-4006-equatorial-ra-frame-correction-v1 for right ascension."
   })
 });
