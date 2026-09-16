@@ -4,15 +4,23 @@ import { readFileSync } from "node:fs";
 
 const hierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
 const atlas = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
+const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
 
-test("resting wheel color encodes semantic families instead of five unrelated categories", () => {
-  assert.match(hierarchy, /--hour:\s*#6f8983;/);
-  assert.match(hierarchy, /--day:\s*#78928b;/);
-  assert.match(hierarchy, /--month:\s*#859e96;/);
-  assert.match(hierarchy, /--year:\s*#96aaa2;/);
-  assert.match(hierarchy, /--solar:\s*#c6a36f;/);
-  assert.match(hierarchy, /--zodiac:\s*#9089a7;/);
+const TEMPORAL_TOKEN_DEFINITION = /--(?:hour|day|month|year|solar|zodiac)\s*:/g;
+
+test("base stylesheet is the single owner of the semantic temporal palette", () => {
+  assert.match(atlas, /--hour:\s*#6f8983;/);
+  assert.match(atlas, /--day:\s*#78928b;/);
+  assert.match(atlas, /--month:\s*#859e96;/);
+  assert.match(atlas, /--year:\s*#96aaa2;/);
+  assert.match(atlas, /--solar:\s*#c6a36f;/);
+  assert.match(atlas, /--zodiac:\s*#9089a7;/);
+
+  const atlasDefinitions = atlas.match(TEMPORAL_TOKEN_DEFINITION) ?? [];
+  assert.equal(atlasDefinitions.length, 6, "kinetic-atlas.css must define each temporal token exactly once");
+  assert.doesNotMatch(hierarchy, TEMPORAL_TOKEN_DEFINITION, "radial hierarchy must consume, not redefine, temporal tokens");
+  assert.doesNotMatch(boundaries, TEMPORAL_TOKEN_DEFINITION, "boundary presentation must consume, not redefine, temporal tokens");
 
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.match(hierarchy, new RegExp(`#${ring}-track \\.${ring}-sector \\{ fill: color-mix\\(in srgb, var\\(--${ring}\\)`));
