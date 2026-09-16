@@ -250,17 +250,6 @@
     box-shadow: none;
   }
 
-  /* The read-head immediately above already states the selected time, zone and
-     precision. Keep ordinary idle chrome silent; transient apply/error feedback
-     may still surface in the existing status slot. */
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock .mobile-time-heading {
-    justify-content: flex-end;
-  }
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock .mobile-time-heading strong,
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock #mobile-time-status[data-state="idle"] {
-    display: none;
-  }
-
   #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
     min-height: 26px;
     padding-inline: 6px;
