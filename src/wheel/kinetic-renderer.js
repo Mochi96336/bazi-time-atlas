@@ -81,8 +81,11 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     group.classList.add("ring-track", `${id}-track`);
 
     sexagenary.forEach((label, index) => {
-      const start = index * 6 + .18;
-      const end = (index + 1) * 6 - .18;
+      // Sectors tile the full coordinate continuously. Discrete boundaries are
+      // expressed by short ticks and active/boundary evidence, not by cutting a
+      // dark angular gutter between every pair of neighboring states.
+      const start = index * 6;
+      const end = (index + 1) * 6;
       const path = el("path", {
         d: annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, start, end),
         class: `cycle-sector ${model.className}`,
@@ -93,7 +96,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       sectors.push(path);
 
       const tickAngle = index * 6;
-      const inner = polar(model.outerRadius - 8, tickAngle);
+      const tickLength = index % 5 === 0 ? 14 : 5;
+      const inner = polar(model.outerRadius - tickLength, tickAngle);
       const outer = polar(model.outerRadius, tickAngle);
       el("line", {
         x1: inner.x,
@@ -248,8 +252,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
           WHEEL_CENTER,
           model.innerRadius,
           RADII.solarTermOuter,
-          term.longitude + .15,
-          term.longitude + 15 - .15
+          term.longitude,
+          term.longitude + 15
         ),
         class: `term-sector ${term.kind}`,
         "data-term-index": index
@@ -295,8 +299,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
           WHEEL_CENTER,
           model.innerRadius,
           model.outerRadius,
-          sign.start + .15,
-          sign.end - .15
+          sign.start,
+          sign.end
         ),
         class: "zodiac-sector",
         "data-zodiac-index": index
