@@ -99,13 +99,18 @@
   line-height: 1;
   letter-spacing: .10em;
   text-transform: uppercase;
-  text-shadow: 0 1px 6px rgba(0,0,0,.78);
-  opacity: .82;
+  text-shadow: 0 1px 7px rgba(0,0,0,.94);
+  opacity: .96;
 }
+/* Keep fixed identities purely typographic. Extra leaders read like stray
+   sector ticks and can visually concatenate with moving Ganzhi labels. */
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
-  font-size: 9px;
-  font-weight: 800;
+  font-size: 10px;
+  font-weight: 850;
   white-space: nowrap;
+  /* Moving sector labels can cross this fixed spoke. A tight dark halo keeps
+     the identity legible without adding a chip, leader, or card surface. */
+  text-shadow: 0 0 3px #0b0f0c, 0 1px 7px rgba(0,0,0,.94);
 }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 20.3%; top: 32.0%; }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 24.1%; top: 46.7%; }
@@ -208,7 +213,7 @@
     transform: rotate(-9deg);
   }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
-    font-size: 7px;
+    font-size: 8px;
     letter-spacing: .08em;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 3%; top: 19%; }

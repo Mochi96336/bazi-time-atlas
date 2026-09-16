@@ -25,6 +25,36 @@ test("direct ring identities consume the same semantic palette as the instrument
   }
 });
 
+test("direct ring identities remain readable without becoming chips, leaders, or cards", () => {
+  assert.match(
+    analysisCss,
+    /\.ring-legend-row span\s*\{[\s\S]*?display:\s*inline-block;[\s\S]*?opacity:\s*\.96;/
+  );
+  assert.match(
+    analysisCss,
+    /\.ring-legend-row span::after\s*\{[\s\S]*?font-size:\s*10px;[\s\S]*?font-weight:\s*850;/
+  );
+  assert.match(
+    analysisCss,
+    /\.ring-legend-row span::after\s*\{[\s\S]*?text-shadow:\s*0 0 3px #0b0f0c,\s*0 1px 7px rgba\(0,0,0,\.94\);/,
+    "fixed identities need a tight cardless halo where moving sector labels cross their spoke"
+  );
+  assert.doesNotMatch(
+    analysisCss,
+    /\.ring-legend-row span::before\s*\{/,
+    "fixed identities must not grow leader chrome that reads like a sector tick"
+  );
+  assert.doesNotMatch(
+    analysisCss,
+    /\.ring-legend-row span\s*\{[^}]*background:/s,
+    "fixed identities should not grow another card surface"
+  );
+  assert.match(
+    analysisCss,
+    /@media \(max-width: 480px\)[\s\S]*?\.ring-legend-row span::after\s*\{[\s\S]*?font-size:\s*8px;/
+  );
+});
+
 test("analysis mode retains the interactive layer legend instead of duplicating a second control surface", () => {
   assert.match(
     analysisCss,
