@@ -49,25 +49,31 @@
         hourSurface:"#hour-track .cycle-sector:not(.is-active)",
         hourStructure:"#hour-track .ring-tick",
         hourContext:"#hour-track .cycle-label:not(.active-cycle-label)",
+        hourActiveSurface:"#hour-track .cycle-sector.is-active",
         hourActive:"#hour-track .active-cycle-label",
         daySurface:"#day-track .cycle-sector:not(.is-active)",
         dayStructure:"#day-track .ring-tick",
         dayContext:"#day-track .cycle-label:not(.active-cycle-label)",
+        dayActiveSurface:"#day-track .cycle-sector.is-active",
         dayActive:"#day-track .active-cycle-label",
         solarSurface:"#solar-track .term-sector:not(.is-active)",
         solarStructure:"#solar-track .term-mark",
         solarContext:"#solar-track .term-label:not(.active-cycle-label)",
+        solarActiveSurface:"#solar-track .term-sector.is-active",
         solarActive:"#solar-track .active-cycle-label",
         zodiacSurface:"#zodiac-track .zodiac-sector:not(.is-active)",
         zodiacContext:"#zodiac-track .zodiac-label:not(.active-cycle-label)",
+        zodiacActiveSurface:"#zodiac-track .zodiac-sector.is-active",
         zodiacActive:"#zodiac-track .active-cycle-label",
         monthSurface:"#month-track .cycle-sector:not(.is-active)",
         monthStructure:"#month-track .ring-tick",
         monthContext:"#month-track .cycle-label:not(.active-cycle-label)",
+        monthActiveSurface:"#month-track .cycle-sector.is-active",
         monthActive:"#month-track .active-cycle-label",
         yearSurface:"#year-track .cycle-sector:not(.is-active)",
         yearStructure:"#year-track .ring-tick",
         yearContext:"#year-track .cycle-label:not(.active-cycle-label)",
+        yearActiveSurface:"#year-track .cycle-sector.is-active",
         yearActive:"#year-track .active-cycle-label"
       };
       for (const [name, selector] of Object.entries(selectors)) {
@@ -126,6 +132,7 @@
             probe.dataset.dayHoverYearSurfaceOpacity = String(opacity(win, doc, "#year-track .cycle-sector:not(.is-active)"));
             probe.dataset.dayHoverYearStructureOpacity = String(opacity(win, doc, "#year-track .ring-tick"));
             probe.dataset.dayHoverYearContextOpacity = String(opacity(win, doc, "#year-track .cycle-label:not(.active-cycle-label)"));
+            probe.dataset.dayHoverYearActiveSurfaceOpacity = String(opacity(win, doc, "#year-track .cycle-sector.is-active"));
             probe.dataset.dayHoverYearActiveOpacity = String(opacity(win, doc, "#year-track .active-cycle-label"));
             delete svg.dataset.hoverRing;
 

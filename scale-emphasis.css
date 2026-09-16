@@ -11,12 +11,14 @@
   --scale-surface-opacity: 1;
   --scale-structure-opacity: 1;
   --scale-context-opacity: 1;
+  --scale-active-surface-opacity: 1;
   opacity: 1;
   filter: none;
 }
 
-/* Resting surfaces describe the phase field. Active sectors are deliberately
-   excluded: the Selected Instant must remain readable at every scale. */
+/* Resting surfaces describe the phase field. Active sectors use a separate
+   scale channel below so the read-head remains present without forcing every
+   ring's current sector to equal visual strength. */
 #hour-track .cycle-sector:not(.is-active),
 #day-track .cycle-sector:not(.is-active),
 #month-track .cycle-sector:not(.is-active),
@@ -50,16 +52,19 @@
   transition: opacity 180ms ease;
 }
 
-/* Active state is a separate visual channel, not a brighter version of the
-   resting field. Keep its opacity explicit so nth-child/static styling cannot
-   accidentally weaken the current read-head. Boundary gates keep the native
-   opacity defined by discrete-phase.css. */
+/* The Selected Instant datum and its active labels stay full-strength. The
+   filled sector behind each label is local surface evidence, not the datum
+   itself, so non-focus rings may recede without becoming ambiguous. */
 #hour-track .cycle-sector.is-active,
 #day-track .cycle-sector.is-active,
 #month-track .cycle-sector.is-active,
 #year-track .cycle-sector.is-active,
 #solar-track .term-sector.is-active,
-#zodiac-track .zodiac-sector.is-active,
+#zodiac-track .zodiac-sector.is-active {
+  opacity: var(--scale-active-surface-opacity);
+  filter: none;
+  transition: opacity 180ms ease;
+}
 #hour-track .active-cycle-label,
 #day-track .active-cycle-label,
 #month-track .active-cycle-label,
@@ -70,74 +75,89 @@
   filter: none;
 }
 
-/* 48 hours: Hour / Day are the focus. The slower shells remain visible as
-   phase context, but only their resting field recedes. */
+/* 48 hours: Hour / Day are the focus. Slower shells remain visible as phase
+   context. Their active surfaces stay stronger than resting context, but no
+   longer form a full-strength outer column that competes with the fast clocks. */
 #kinetic-instrument[data-scale-window="day"] #solar-track {
   --scale-surface-opacity: .52;
   --scale-structure-opacity: .62;
   --scale-context-opacity: .70;
+  --scale-active-surface-opacity: .78;
 }
 #kinetic-instrument[data-scale-window="day"] #zodiac-track {
   --scale-surface-opacity: .42;
   --scale-context-opacity: .56;
+  --scale-active-surface-opacity: .68;
 }
 #kinetic-instrument[data-scale-window="day"] #month-track {
   --scale-surface-opacity: .38;
   --scale-structure-opacity: .50;
   --scale-context-opacity: .58;
+  --scale-active-surface-opacity: .66;
 }
 #kinetic-instrument[data-scale-window="day"] #year-track {
   --scale-surface-opacity: .30;
   --scale-structure-opacity: .42;
   --scale-context-opacity: .50;
+  --scale-active-surface-opacity: .60;
 }
 
-/* One year: Solar / Month are primary. Year and fast clocks become context
-   without dimming their current identity at the Selected Instant. */
+/* One year: Solar / Month are primary. Year and fast clocks remain readable at
+   the datum, but their sector surfaces step behind the annual coordinate band. */
 #kinetic-instrument[data-scale-window="year"] #zodiac-track {
   --scale-surface-opacity: .78;
   --scale-context-opacity: .78;
+  --scale-active-surface-opacity: .84;
 }
 #kinetic-instrument[data-scale-window="year"] #year-track {
   --scale-surface-opacity: .56;
   --scale-structure-opacity: .66;
   --scale-context-opacity: .74;
+  --scale-active-surface-opacity: .82;
 }
 #kinetic-instrument[data-scale-window="year"] #day-track {
   --scale-surface-opacity: .46;
   --scale-structure-opacity: .58;
   --scale-context-opacity: .66;
+  --scale-active-surface-opacity: .74;
 }
 #kinetic-instrument[data-scale-window="year"] #hour-track {
   --scale-surface-opacity: .40;
   --scale-structure-opacity: .52;
   --scale-context-opacity: .62;
+  --scale-active-surface-opacity: .70;
 }
 
-/* Sixty years: Year is primary; other clocks remain legible phase context. */
+/* Sixty years: Year is primary; context surfaces step down toward the fast
+   inner clocks while their active labels still pin the same Selected Instant. */
 #kinetic-instrument[data-scale-window="cycle"] #month-track {
   --scale-surface-opacity: .70;
   --scale-structure-opacity: .78;
   --scale-context-opacity: .84;
+  --scale-active-surface-opacity: .90;
 }
 #kinetic-instrument[data-scale-window="cycle"] #solar-track {
   --scale-surface-opacity: .56;
   --scale-structure-opacity: .66;
   --scale-context-opacity: .74;
+  --scale-active-surface-opacity: .82;
 }
 #kinetic-instrument[data-scale-window="cycle"] #zodiac-track {
   --scale-surface-opacity: .44;
   --scale-context-opacity: .60;
+  --scale-active-surface-opacity: .72;
 }
 #kinetic-instrument[data-scale-window="cycle"] #day-track {
   --scale-surface-opacity: .46;
   --scale-structure-opacity: .56;
   --scale-context-opacity: .64;
+  --scale-active-surface-opacity: .72;
 }
 #kinetic-instrument[data-scale-window="cycle"] #hour-track {
   --scale-surface-opacity: .40;
   --scale-structure-opacity: .50;
   --scale-context-opacity: .60;
+  --scale-active-surface-opacity: .68;
 }
 
 /* The legend mirrors priority, but it is not allowed to own wheel visibility. */
@@ -158,8 +178,8 @@
 #kinetic-instrument[data-scale-window="cycle"] .ring-day:not([aria-pressed="false"]) { opacity: .64; }
 #kinetic-instrument[data-scale-window="cycle"] .ring-hour:not([aria-pressed="false"]) { opacity: .60; }
 
-/* Interaction temporarily promotes the resting marks of the ring under the
-   pointer. The current-state channel was already full strength. */
+/* Hover/drag is transient targeting feedback, so the manipulated ring regains
+   every mark role including the active sector surface. */
 #kinetic-wheel[data-hover-ring="hour"] #hour-track,
 #kinetic-wheel[data-active-ring="hour"] #hour-track,
 #kinetic-wheel[data-hover-ring="day"] #day-track,
@@ -175,6 +195,7 @@
   --scale-surface-opacity: 1;
   --scale-structure-opacity: 1;
   --scale-context-opacity: 1;
+  --scale-active-surface-opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
