@@ -122,15 +122,14 @@
 .cycle-sector:not(.is-active) { stroke: none; }
 
 /* Selected Instant is already owned by the shared ivory cursor and one dynamic
-   label per ring. Keep the active sector only as local phase context: a modest
-   surface lift plus a thin cursor-coloured outline, rather than four stacked
-   opaque wedges that visually collapse the fan into a central selection tower. */
+   label per ring. Keep the active sector only as a modest local surface lift.
+   Ganzhi active sectors stay borderless in ordinary reading so their four wedge
+   edges cannot reconnect into a second selection tower around the shared datum. */
 #hour-track .cycle-sector.is-active,
 #day-track .cycle-sector.is-active,
 #month-track .cycle-sector.is-active,
 #year-track .cycle-sector.is-active {
-  stroke: color-mix(in srgb, var(--cursor) 30%, transparent);
-  stroke-width: 1.05;
+  stroke: none;
 }
 #hour-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 24%, transparent); }
 #day-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 28%, transparent); }
