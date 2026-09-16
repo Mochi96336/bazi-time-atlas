@@ -163,6 +163,17 @@ export function createRingDragController({
     return true;
   }
 
+  function cancelActiveGesture({ detent = false, reason = "external" } = {}) {
+    if (!active) return false;
+    const gesture = active;
+    active = null;
+    delete svg.dataset.activeRing;
+    try { svg.releasePointerCapture(gesture.pointerId); } catch {}
+    if (gesture.dragActivated) endGesture(gesture, { detent, reason });
+    updatePointerStyle();
+    return true;
+  }
+
   function inertiaFrame(timestamp) {
     if (!coasting) return;
     const current = coasting;
@@ -226,9 +237,8 @@ export function createRingDragController({
 
   function setCompareMode(enabled) {
     cancelInertia({ detent:false, reason:"mode-change" });
+    cancelActiveGesture({ detent:false, reason:"mode-change" });
     compareMode = Boolean(enabled);
-    active = null;
-    delete svg.dataset.activeRing;
     updatePointerStyle();
     onModeChange?.(compareMode);
   }
@@ -329,6 +339,11 @@ export function createRingDragController({
     finish(event, { allowInertia:false });
   }
 
+  function lostPointerCapture(event) {
+    if (!active || event.pointerId !== active.pointerId) return;
+    cancelActiveGesture({ detent:true, reason:"lost-pointer-capture" });
+  }
+
   function leave() {
     if (!active) setHoverRing(null);
   }
@@ -341,6 +356,7 @@ export function createRingDragController({
   svg.addEventListener("pointermove", move);
   svg.addEventListener("pointerup", pointerUp);
   svg.addEventListener("pointercancel", pointerCancel);
+  svg.addEventListener("lostpointercapture", lostPointerCapture);
   svg.addEventListener("pointerleave", leave);
   visibilityTarget?.addEventListener?.("visibilitychange", visibilityChange);
   updatePointerStyle();
@@ -354,10 +370,12 @@ export function createRingDragController({
     get hoverRingId() { return hoverRingId; },
     destroy() {
       cancelInertia({ detent:false, reason:"destroy" });
+      cancelActiveGesture({ detent:false, reason:"destroy" });
       svg.removeEventListener("pointerdown", begin);
       svg.removeEventListener("pointermove", move);
       svg.removeEventListener("pointerup", pointerUp);
       svg.removeEventListener("pointercancel", pointerCancel);
+      svg.removeEventListener("lostpointercapture", lostPointerCapture);
       svg.removeEventListener("pointerleave", leave);
       visibilityTarget?.removeEventListener?.("visibilitychange", visibilityChange);
       delete svg.dataset.hoverRing;
