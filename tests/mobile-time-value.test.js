@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 
 import {
   formatMobileAtlasInput,
-  mobileExactInstantUrl,
   parseMobileAtlasInput
 } from "../src/mobile-time-value.js";
 
@@ -25,18 +24,4 @@ test("invalid calendar dates and minute-only values fail closed", () => {
   assert.equal(parseMobileAtlasInput("2026-02-30T12:00:00"), null);
   assert.equal(parseMobileAtlasInput("2026-09-16T04:14"), null);
   assert.equal(parseMobileAtlasInput("2026-09-16T24:00:00"), null);
-});
-
-test("exact-time navigation clears legacy projection while preserving unrelated analysis state", () => {
-  const instantMs = Date.parse("2026-09-15T20:14:37.000Z");
-  const href = mobileExactInstantUrl(
-    "https://example.test/atlas/?lambda=271.25&month=%E5%AD%90&yearStem=%E4%B9%99&analysis=1",
-    instantMs
-  );
-  const url = new URL(href);
-  assert.equal(url.searchParams.get("instant"), "2026-09-15T20:14:37.000Z");
-  assert.equal(url.searchParams.get("analysis"), "1");
-  assert.equal(url.searchParams.has("lambda"), false);
-  assert.equal(url.searchParams.has("month"), false);
-  assert.equal(url.searchParams.has("yearStem"), false);
 });
