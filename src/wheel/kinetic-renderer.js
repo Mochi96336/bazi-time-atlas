@@ -96,7 +96,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       sectors.push(path);
 
       const tickAngle = index * 6;
-      const tickLength = index % 5 === 0 ? 14 : 5;
+      const isMajor = index % 5 === 0;
+      const tickLength = isMajor ? 14 : 5;
       const inner = polar(model.outerRadius - tickLength, tickAngle);
       const outer = polar(model.outerRadius, tickAngle);
       el("line", {
@@ -104,23 +105,24 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         y1: inner.y,
         x2: outer.x,
         y2: outer.y,
-        class: `ring-tick${index % 5 === 0 ? " major" : ""}`
+        class: `ring-tick${isMajor ? " major" : ""}`
       }, group);
 
-      if (index % 5 === 0) {
-        const radius = (model.innerRadius + model.outerRadius) / 2;
-        const point = polar(radius, index * 6 + 3);
-        const text = el("text", {
-          x: point.x,
-          y: point.y,
-          class: "cycle-label",
-          "data-cycle-index": index,
-          "data-cycle-label": label,
-          transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
-        }, group);
-        text.textContent = label;
-        staticLabels.set(index, text);
-      }
+      // Every Ganzhi state owns a visible label. Major five-step landmarks keep
+      // the stronger class, while the remaining labels use a quieter minor class
+      // instead of disappearing and making the wheel look incomplete.
+      const radius = (model.innerRadius + model.outerRadius) / 2;
+      const point = polar(radius, index * 6 + 3);
+      const text = el("text", {
+        x: point.x,
+        y: point.y,
+        class: `cycle-label ${isMajor ? "major-cycle-label" : "minor-cycle-label"}`,
+        "data-cycle-index": index,
+        "data-cycle-label": label,
+        transform: `rotate(${index * 6 + 93} ${point.x} ${point.y})`
+      }, group);
+      text.textContent = label;
+      staticLabels.set(index, text);
     });
 
     const activeLabel = el("text", {
