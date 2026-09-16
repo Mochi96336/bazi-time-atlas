@@ -7,6 +7,7 @@
   <title>BaZi Time Atlas · Recurrence Lab</title>
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./recurrence.css">
+  <link rel="stylesheet" href="./research-tasks.css">
   <link rel="stylesheet" href="./astronomical-residuals.css">
   <link rel="stylesheet" href="./four-pillar-determinacy.css">
   <link rel="stylesheet" href="./near-recurrence.css">
@@ -32,130 +33,172 @@
       <p class="scope-note">外圈採 Berger 1978 長期軌道近似，春分固定為共同 0 點、全年正規化為 365.2422 日。它顯示軌道形狀殘差，不是西元 26026 年節氣的民用時刻預報。</p>
     </section>
 
-    <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散與天文回歸圓盤">
-      <div class="recurrence-toolbar">
-        <div class="base-date" aria-label="基準日期">
-          <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
-          <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
-          <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
-        </div>
-        <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="回歸候選"></div>
-      </div>
+    <nav class="research-task-nav" aria-label="研究問題">
+      <a href="#research-discrete"><span>01</span><strong>離散閉合</strong><small>哪些齒輪真正回原點</small></a>
+      <a href="#research-astronomy"><span>02</span><strong>天文差異</strong><small>外圈還差多少</small></a>
+      <a href="#research-evidence"><span>03</span><strong>四柱證據</strong><small>目前到底能證明什麼</small></a>
+    </nav>
 
-      <div class="recurrence-legend" aria-hidden="true">
-        <div><i class="gregorian-dot"></i><span>公曆骨架</span><strong id="gregorian-phase-readout">—</strong></div>
-        <div><i class="year-dot"></i><span>干支年序</span><strong id="year-phase-readout">—</strong></div>
-        <div><i class="day-dot"></i><span>干支日序</span><strong id="day-phase-readout">—</strong></div>
-        <div><i class="astronomy-dot"></i><span>十二節形狀</span><strong id="astronomy-legend-readout">—</strong></div>
-      </div>
-      <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
-        <span>Deep exact candidate</span>
-        <strong id="deep-time-badge-value">—</strong>
-      </div>
-
-      <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆、干支年日序與十二節天文殘差的巨大扇形回歸圓盤">
-        <g id="recurrence-guides"></g>
-        <g id="gregorian-ring"></g>
-        <g id="year-ring"></g>
-        <g id="day-ring"></g>
-        <g id="astronomy-residual-ring"></g>
-        <g id="recurrence-cursor"></g>
-      </svg>
-
-      <div class="recurrence-readout" aria-live="polite">
-        <div class="readout-kicker">Time displacement</div>
-        <div><strong id="delta-readout">0 年</strong> <span>→</span> <strong id="target-date-readout">2026-09-13</strong></div>
-        <p id="closure-summary">基準點：三層都在 0 相位。</p>
-      </div>
-    </section>
-
-    <section class="delta-dock" aria-label="時間差控制">
-      <label>位移年數
-        <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
-        <small id="delta-range-note">滑桿：0–24,000 年；深時間 exact 候選可由下方排名直接跳轉。</small>
-      </label>
-      <div class="delta-slider-wrap">
-        <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年的細部尺度" aria-describedby="delta-range-note">
-        <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
-      </div>
-      <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
-    </section>
-
-    <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
-      <div>
-        <span>Solar-term shape residual</span>
-        <strong id="astronomy-max-residual">—</strong>
-        <small id="astronomy-rms-residual">—</small>
-      </div>
-      <div>
-        <span>Orbital parameters</span>
-        <div id="astronomy-orbit-readout">—</div>
-        <small>殘差定義：目標年「自春分起的節氣偏移」−基準年同一偏移。</small>
-      </div>
-      <div>
-        <span>Visual scale</span>
-        <strong id="astronomy-scale-readout">—</strong>
-        <small>基準節點在虛線弧；目標節點依殘差徑向偏移。正值向外、負值向內。</small>
-      </div>
-    </section>
-    <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
-
-    <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">
-      <div class="determinacy-head">
+    <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
+      <header class="research-task-head">
+        <div class="research-task-index">01</div>
         <div>
-          <div class="eyebrow">Four-pillar determinacy boundary</div>
-          <h2>內圈「閉合」不等於四柱都已被外圈模型證明。</h2>
-          <p>十二節比較先把春分共同平移拿掉，所以能隔離立春與各月節的相對位置；但這個轉換也刻意丟掉了絕對民用日期與地方時相位。下列矩陣只陳述目前模型真正能支持的柱位，不把缺少的 civil-time 證據補成推論。</p>
+          <div class="eyebrow">Discrete closure</div>
+          <h2 id="research-discrete-title">先回答：哪些時間齒輪真的閉合？</h2>
+          <p>這一層只看可精確計算的公曆骨架、干支年序與干支日序。主圓盤仍保留外圈 residual 作為背景，但此處的判斷只由離散閉合負責。</p>
         </div>
-        <div class="determinacy-scope">
-          <span>Strongest supported claim</span>
-          <strong id="determinacy-scope-value">等待回歸／天文狀態</strong>
+      </header>
+
+      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散與天文回歸圓盤">
+        <div class="recurrence-toolbar">
+          <div class="base-date" aria-label="基準日期">
+            <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
+            <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
+            <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+          </div>
+          <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="回歸候選"></div>
         </div>
-      </div>
-      <div class="determinacy-grid">
-        <article class="determinacy-card" data-determinacy-pillar="year" data-status="pending" data-resolved="false"><header><span>Year</span><strong>年柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-        <article class="determinacy-card" data-determinacy-pillar="month" data-status="pending" data-resolved="false"><header><span>Month</span><strong>月柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-        <article class="determinacy-card" data-determinacy-pillar="day" data-status="pending" data-resolved="false"><header><span>Day</span><strong>日柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-        <article class="determinacy-card" data-determinacy-pillar="hour" data-status="pending" data-resolved="false"><header><span>Hour</span><strong>時柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-      </div>
-      <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
-    </section>
 
-    <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
-      <div class="near-search-head">
-        <div class="near-search-copy">
-          <div class="eyebrow">Exact-discrete candidates · astronomical ranking</div>
-          <h2>只在內圈全閉合的時刻，找外圈最接近的一次。</h2>
-          <p>搜尋只評估 24,000 年的整數倍，因此每個候選都保證公曆骨架、年序、日序 exact 回到 0；排序只看十二節形狀的最大絕對殘差，再以 RMS 打破平手。點任一排名或散點會把上方主圓盤直接跳到該深時間候選，URL 也同步成可重現狀態。這是「近回歸」搜尋，不會把最接近的候選標成真正週期。</p>
+        <div class="recurrence-legend" aria-hidden="true">
+          <div><i class="gregorian-dot"></i><span>公曆骨架</span><strong id="gregorian-phase-readout">—</strong></div>
+          <div><i class="year-dot"></i><span>干支年序</span><strong id="year-phase-readout">—</strong></div>
+          <div><i class="day-dot"></i><span>干支日序</span><strong id="day-phase-readout">—</strong></div>
+          <div><i class="astronomy-dot"></i><span>十二節形狀</span><strong id="astronomy-legend-readout">—</strong></div>
         </div>
-        <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
-        <div class="near-stat best"><span>目前最佳</span><strong id="near-best-delta">—</strong><small>仍是 24,000 年的整數倍</small></div>
-        <div class="near-stat"><span>最佳殘差</span><strong id="near-best-residual">—</strong><small>max absolute / RMS</small></div>
-      </div>
-      <div class="near-search-body">
-        <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
-        <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名"></div>
-      </div>
+        <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
+          <span>Deep exact candidate</span>
+          <strong id="deep-time-badge-value">—</strong>
+        </div>
+
+        <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆、干支年日序與十二節天文殘差的巨大扇形回歸圓盤">
+          <g id="recurrence-guides"></g>
+          <g id="gregorian-ring"></g>
+          <g id="year-ring"></g>
+          <g id="day-ring"></g>
+          <g id="astronomy-residual-ring"></g>
+          <g id="recurrence-cursor"></g>
+        </svg>
+
+        <div class="recurrence-readout" aria-live="polite">
+          <div class="readout-kicker">Time displacement</div>
+          <div><strong id="delta-readout">0 年</strong> <span>→</span> <strong id="target-date-readout">2026-09-13</strong></div>
+          <p id="closure-summary">基準點：三層都在 0 相位。</p>
+        </div>
+      </section>
+
+      <section class="delta-dock" aria-label="時間差控制">
+        <label>位移年數
+          <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
+          <small id="delta-range-note">滑桿：0–24,000 年；深時間 exact 候選可由下方排名直接跳轉。</small>
+        </label>
+        <div class="delta-slider-wrap">
+          <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年的細部尺度" aria-describedby="delta-range-note">
+          <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
+        </div>
+        <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
+      </section>
+
+      <section class="closure-grid" aria-label="目前閉合狀態">
+        <article data-closure="gregorian"><span>Gregorian frame</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
+        <article data-closure="year"><span>Year sequence</span><strong id="year-status">—</strong><small>60 年干支年序</small></article>
+        <article data-closure="day"><span>Day sequence</span><strong id="day-status">—</strong><small>60 日日序</small></article>
+        <article class="local-card"><span>First local Year + Day</span><strong id="local-recurrence">—</strong><small>只要求此基準日期的年序＋日序重遇</small></article>
+      </section>
+
+      <section class="milestone-table" aria-label="典型回歸候選">
+        <div class="milestone-head"><span>Δ years</span><span>公曆</span><span>年序</span><span>日序</span><span>意義</span></div>
+        <div id="milestone-rows"></div>
+      </section>
+
+      <section class="recurrence-notes research-task-note">
+        <div><div class="eyebrow">Why 24,000?</div><h2>400 年不是終點，60 年也不是。</h2><p>公曆每 400 年重複一次閏年配置，共 146,097 日；這在 60 日日序上等於偏移 57 格。要同時讓公曆骨架、60 年年序與 60 日日序都回到 0，相當於 60 個 400 年區塊，也就是 24,000 年；總日數 8,765,820 日，剛好也是 60 的倍數。</p></div>
+      </section>
     </section>
 
-    <section class="closure-grid" aria-label="目前閉合狀態">
-      <article data-closure="gregorian"><span>Gregorian frame</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
-      <article data-closure="year"><span>Year sequence</span><strong id="year-status">—</strong><small>60 年干支年序</small></article>
-      <article data-closure="day"><span>Day sequence</span><strong id="day-status">—</strong><small>60 日日序</small></article>
-      <article class="local-card"><span>First local Year + Day</span><strong id="local-recurrence">—</strong><small>只要求此基準日期的年序＋日序重遇</small></article>
+    <section id="research-astronomy" class="research-task" data-research-task="astronomy" aria-labelledby="research-astronomy-title">
+      <header class="research-task-head">
+        <div class="research-task-index">02</div>
+        <div>
+          <div class="eyebrow">Astronomical difference</div>
+          <h2 id="research-astronomy-title">再問：離散齒輪回來後，十二節還差多少？</h2>
+          <p>這一層只處理外圈的 seasonal shape residual。月界 exposure 與 near-recurrence 都是這個問題的延伸證據，不再和離散閉合、四柱 proof 混成同一排。</p>
+        </div>
+      </header>
+
+      <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
+        <div>
+          <span>Solar-term shape residual</span>
+          <strong id="astronomy-max-residual">—</strong>
+          <small id="astronomy-rms-residual">—</small>
+        </div>
+        <div>
+          <span>Orbital parameters</span>
+          <div id="astronomy-orbit-readout">—</div>
+          <small>殘差定義：目標年「自春分起的節氣偏移」−基準年同一偏移。</small>
+        </div>
+        <div>
+          <span>Visual scale</span>
+          <strong id="astronomy-scale-readout">—</strong>
+          <small>基準節點在虛線弧；目標節點依殘差徑向偏移。正值向外、負值向內。</small>
+        </div>
+      </section>
+      <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
+
+      <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
+        <div class="near-search-head">
+          <div class="near-search-copy">
+            <div class="eyebrow">Exact-discrete candidates · astronomical ranking</div>
+            <h2>只在內圈全閉合的時刻，找外圈最接近的一次。</h2>
+            <p>搜尋只評估 24,000 年的整數倍，因此每個候選都保證公曆骨架、年序、日序 exact 回到 0；排序只看十二節形狀的最大絕對殘差，再以 RMS 打破平手。點任一排名或散點會把上方主圓盤直接跳到該深時間候選，URL 也同步成可重現狀態。這是「近回歸」搜尋，不會把最接近的候選標成真正週期。</p>
+          </div>
+          <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
+          <div class="near-stat best"><span>目前最佳</span><strong id="near-best-delta">—</strong><small>仍是 24,000 年的整數倍</small></div>
+          <div class="near-stat"><span>最佳殘差</span><strong id="near-best-residual">—</strong><small>max absolute / RMS</small></div>
+        </div>
+        <div class="near-search-body">
+          <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
+          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名"></div>
+        </div>
+      </section>
+
+      <section class="recurrence-notes research-task-note">
+        <div><div class="eyebrow">Exact ≠ astronomical</div><h2>齒輪全回來，不代表十二節也回來。</h2><p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。上方搜尋器再問一步：在 Berger 模型可用範圍內，所有離散 exact 閉合點之中，哪一個天文形狀最接近基準年？</p></div>
+      </section>
     </section>
 
-    <section class="milestone-table" aria-label="典型回歸候選">
-      <div class="milestone-head"><span>Δ years</span><span>公曆</span><span>年序</span><span>日序</span><span>意義</span></div>
-      <div id="milestone-rows"></div>
-    </section>
+    <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">
+      <header class="research-task-head">
+        <div class="research-task-index">03</div>
+        <div>
+          <div class="eyebrow">Four-pillar evidence</div>
+          <h2 id="research-evidence-title">最後才問：這些結果能把四柱證到哪裡？</h2>
+          <p>先看四柱 determinacy；只有需要追根因時，才往下讀 Day / Hour resolution chain 與 seasonal source audit。它們是證據鏈，不再是和主圓盤並列的功能入口。</p>
+        </div>
+      </header>
 
-    <section class="recurrence-notes">
-      <div><div class="eyebrow">Why 24,000?</div><h2>400 年不是終點，60 年也不是。</h2><p>公曆每 400 年重複一次閏年配置，共 146,097 日；這在 60 日日序上等於偏移 57 格。要同時讓公曆骨架、60 年年序與 60 日日序都回到 0，相當於 60 個 400 年區塊，也就是 24,000 年；總日數 8,765,820 日，剛好也是 60 的倍數。</p></div>
-      <div><div class="eyebrow">Exact ≠ astronomical</div><h2>齒輪全回來，不代表十二節也回來。</h2><p>外圈把春分固定成共同起點，因此已經拿掉「整年一起提早或延後」的共同位移，只留下軌道偏心率與近日點方向改變造成的季節內部形狀差。下方搜尋器再問一步：在 Berger 模型可用範圍內，所有離散 exact 閉合點之中，哪一個天文形狀最接近基準年？</p></div>
-    </section>
+      <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">
+        <div class="determinacy-head">
+          <div>
+            <div class="eyebrow">Four-pillar determinacy boundary</div>
+            <h2>內圈「閉合」不等於四柱都已被外圈模型證明。</h2>
+            <p>十二節比較先把春分共同平移拿掉，所以能隔離立春與各月節的相對位置；但這個轉換也刻意丟掉了絕對民用日期與地方時相位。下列矩陣只陳述目前模型真正能支持的柱位，不把缺少的 civil-time 證據補成推論。</p>
+          </div>
+          <div class="determinacy-scope">
+            <span>Strongest supported claim</span>
+            <strong id="determinacy-scope-value">等待回歸／天文狀態</strong>
+          </div>
+        </div>
+        <div class="determinacy-grid">
+          <article class="determinacy-card" data-determinacy-pillar="year" data-status="pending" data-resolved="false"><header><span>Year</span><strong>年柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+          <article class="determinacy-card" data-determinacy-pillar="month" data-status="pending" data-resolved="false"><header><span>Month</span><strong>月柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+          <article class="determinacy-card" data-determinacy-pillar="day" data-status="pending" data-resolved="false"><header><span>Day</span><strong>日柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+          <article class="determinacy-card" data-determinacy-pillar="hour" data-status="pending" data-resolved="false"><header><span>Hour</span><strong>時柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+        </div>
+        <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
+      </section>
 
-    <details class="model-boundary"><summary>模型邊界與來源</summary><p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把任何搜尋結果稱為遠未來精確節氣時刻或真正週期。</p></details>
+      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用向前外推的 proleptic Gregorian 規則與純整數模運算。天文外圈使用 André Berger 1978 長期軌道參數算法的偏心率與近日點黃經；該算法的參考實作聲明在距今約 ±1,000,000 年內具有其設計精度。本頁只把它用於「春分錨定、365.2422 日正規化」的十二節形狀比較，不處理 ΔT、短週期行星攝動、歷史民用曆法，也不把任何搜尋結果稱為遠未來精確節氣時刻或真正週期。</p></details>
+    </section>
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
