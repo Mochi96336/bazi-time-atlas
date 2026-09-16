@@ -18,8 +18,8 @@ function attr(tag, name) {
 const url = new URL("scripts/fixtures/mobile-time-contract.html", baseURL).href;
 const result = spawnSync(findBrowser(), [
   "--headless=new", "--no-sandbox", "--disable-gpu", "--force-device-scale-factor=1", "--hide-scrollbars",
-  "--run-all-compositor-stages-before-draw", "--virtual-time-budget=3000", "--window-size=500,844", "--dump-dom", url
-], { encoding:"utf8", maxBuffer:12 * 1024 * 1024 });
+  "--run-all-compositor-stages-before-draw", "--virtual-time-budget=3500", "--window-size=1600,1000", "--dump-dom", url
+], { encoding:"utf8", maxBuffer:16 * 1024 * 1024 });
 
 if (result.status !== 0) {
   process.stderr.write(result.stderr ?? "");
@@ -27,8 +27,8 @@ if (result.status !== 0) {
 }
 
 const probe = result.stdout.match(/<output[^>]+id="probe"[^>]*>/)?.[0] ?? "";
-if (attr(probe, "data-ready") !== "true") throw new Error(`mobile precise-time fixture did not settle: ${url}`);
-if (attr(probe, "data-inner-width") !== "390") throw new Error(`fixture did not produce a 390px child viewport: ${url}`);
+if (attr(probe, "data-ready") !== "true") throw new Error(`exact-time fixture did not settle: ${url}`);
+if (attr(probe, "data-inner-width") !== "390") throw new Error(`fixture did not produce a 390px mobile child viewport: ${url}`);
 if (attr(probe, "data-dock-display") !== "grid") throw new Error(`mobile exact-time dock is not visible: ${url}`);
 if (attr(probe, "data-input-step") !== "1") throw new Error(`mobile exact-time input lost second precision: ${url}`);
 if (attr(probe, "data-input-value") !== "2026-09-16T04:14:37") throw new Error(`mobile input is not synchronized to Selected Instant: ${url}`);
@@ -39,4 +39,16 @@ if (attr(probe, "data-apply-visible") !== "true") throw new Error(`exact-time ap
 const share = Number(attr(probe, "data-instrument-share"));
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`instrument no longer owns the first mobile viewport (share=${share}): ${url}`);
 
-console.log(`[mobile-time] PASS second-level exact entry below instrument; share=${share.toFixed(3)}: ${url}`);
+if (attr(probe, "data-desktop-inner-width") !== "1200") throw new Error(`fixture did not produce a 1200px desktop child viewport: ${url}`);
+if (attr(probe, "data-desktop-initial-step") !== "1") throw new Error(`desktop exact-time input is not second-level at runtime: ${url}`);
+if (attr(probe, "data-desktop-initial-precision") !== "second") throw new Error(`desktop exact-time precision diagnostic missing: ${url}`);
+if (attr(probe, "data-desktop-initial-value") !== "2026-09-16T04:14:37") throw new Error(`desktop input truncated Selected Instant seconds on initial sync: ${url}`);
+if (attr(probe, "data-desktop-initial-valid") !== "true") throw new Error(`desktop second-level Selected Instant is invalid under its input step: ${url}`);
+if (attr(probe, "data-desktop-roundtrip-value") !== "2026-09-16T04:14:52") throw new Error(`desktop exact-time edit did not preserve typed seconds: ${url}`);
+if (attr(probe, "data-desktop-roundtrip-valid") !== "true") throw new Error(`desktop second-level edit became invalid: ${url}`);
+const expectedDesktopMs = Date.parse("2026-09-15T20:14:52.000Z");
+if (attr(probe, "data-desktop-selected-instant-ms") !== String(expectedDesktopMs)) {
+  throw new Error(`desktop second-level round trip did not update the physical Selected Instant: ${url}`);
+}
+
+console.log(`[exact-time] PASS mobile dock + desktop second-level round trip; mobile share=${share.toFixed(3)}: ${url}`);
