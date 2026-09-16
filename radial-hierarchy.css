@@ -121,12 +121,21 @@
 
 .cycle-sector:not(.is-active) { stroke: none; }
 
+/* Selected Instant is already owned by the shared ivory cursor and one dynamic
+   label per ring. Keep the active sector only as local phase context: a modest
+   surface lift plus a thin cursor-coloured outline, rather than four stacked
+   opaque wedges that visually collapse the fan into a central selection tower. */
 #hour-track .cycle-sector.is-active,
-#day-track .cycle-sector.is-active {
-  fill: color-mix(in srgb, currentColor 40%, transparent);
+#day-track .cycle-sector.is-active,
+#month-track .cycle-sector.is-active,
+#year-track .cycle-sector.is-active {
+  stroke: color-mix(in srgb, var(--cursor) 30%, transparent);
+  stroke-width: 1.05;
 }
-#month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 58%, transparent); }
-#year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 66%, transparent); }
+#hour-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 24%, transparent); }
+#day-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 28%, transparent); }
+#month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 38%, transparent); }
+#year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 48%, transparent); }
 
 /* Every six-degree boundary still exists as a short tick, but only each fifth
    boundary is allowed to read as structural. This preserves the 60-step phase
