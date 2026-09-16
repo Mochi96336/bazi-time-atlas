@@ -66,17 +66,80 @@
   display: none !important;
 }
 
-/* The live layer list is a readout in the normal product view. It only becomes
-   a layer-visibility control after the user explicitly enters Analysis. */
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row[data-ring-toggle] {
+/* In the reading view the existing legend DOM becomes five fixed identity
+   labels laid directly over the radial stack. Active values already live on
+   the Selected Instant read-head, so dots and duplicated values disappear.
+   Analysis reuses the same DOM as the full layer-control legend. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend {
+  inset: 0;
+  display: block;
   pointer-events: none;
-  cursor: default;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
+  position: absolute;
+  display: block;
+  width: auto;
   padding: 0;
   margin: 0;
   border-radius: 0;
+  pointer-events: none;
+  cursor: default;
+  /* Desktop positions follow a -117deg spoke through each ring midpoint; the
+     label angle follows the local tangent instead of an arbitrary HUD slant. */
+  transform: rotate(-27deg);
+  transform-origin: left center;
 }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row i,
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row strong {
+  display: none;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span {
+  display: inline-block;
+  font-size: 0;
+  line-height: 1;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 6px rgba(0,0,0,.78);
+  opacity: .82;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 20.3%; top: 32.0%; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 24.1%; top: 46.7%; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 27.9%; top: 61.9%; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 31.7%; top: 76.6%; }
+/* The innermost identity uses the outer edge of the Hour band on desktop so
+   it remains inside the ring without sitting underneath the centered timestamp. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 33.4%; top: 83.4%; }
+/* Semantic variables keep these labels in lockstep with the instrument color
+   grammar. Fallbacks preserve the current standalone appearance before the
+   palette layer that defines --hour is loaded. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span { color: var(--year, #d8cfa8); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span { color: var(--month, #b8cdbb); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: var(--solar, #e5bd91); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--day, #abc2cc); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--hour, #9eb7c1); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span::after { content: "年 · YEAR"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span::after { content: "月 · MONTH"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span::after { content: "太陽 · SOLAR"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span::after { content: "日 · DAY"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span::after { content: "時 · HOUR"; }
+
 #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
   pointer-events: auto;
+}
+
+/* The five-cell strip repeats active state already represented at the datum.
+   Retire it from ordinary reading; Analysis can still expose the diagnostic
+   summary without creating a second owner for Selected Instant. */
+#kinetic-instrument:not([data-analysis-open="true"]) ~ .state-strip {
+  display: none;
+}
+#kinetic-instrument[data-analysis-open="true"] ~ .state-strip {
+  display: grid;
 }
 
 /* Analysis is a temporary lens over the same Selected Instant, not a second
@@ -97,6 +160,19 @@
   letter-spacing: .035em;
 }
 
+/* Compact framing uses a -110deg spoke so the same midpoint rule stays inside
+   the narrower camera instead of drifting into the outer empty field. */
+@media (min-width: 481px) and (max-width: 820px) {
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
+    transform: rotate(-20deg);
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 14.5%; top: 26.8%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 19.0%; top: 42.4%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 23.7%; top: 58.4%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 28.1%; top: 73.8%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 30.2%; top: 81.0%; }
+}
+
 @media (max-width: 480px) {
   .analysis-toggle,
   .analysis-close {
@@ -107,4 +183,19 @@
   }
   .analysis-toggle { right: 9px; }
   .analysis-close { left: 9px; }
+
+  /* Portrait positions follow the visible radial stack, while Analysis owns a
+     separate structured grid through mobile-legend.css. */
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
+    transform: rotate(-9deg);
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
+    font-size: 7px;
+    letter-spacing: .08em;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 3%; top: 19%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 7%; top: 37%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 12%; top: 54%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 18%; top: 69%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 25%; top: 82%; }
 }
