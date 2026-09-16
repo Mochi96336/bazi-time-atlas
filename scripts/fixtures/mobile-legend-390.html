@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px legend layout harness</title>
+  <style>
+    html, body { margin:0; width:500px; min-height:100%; overflow:hidden; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:844px; border:0; background:#0b0f0c; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px legend layout viewport"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const analysis = params.get("analysis") === "1";
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    const query = new URLSearchParams({ instant:"2027-03-15T13:20:09.000Z" });
+    if (analysis) query.set("analysis", "1");
+    frame.src = new URL(`../../?${query}`, location.href).href;
+
+    function writeRect(name, rect) {
+      for (const edge of ["top", "right", "bottom", "left", "width", "height"]) {
+        const value = Number(rect?.[edge] ?? NaN);
+        probe.dataset[`${name}${edge[0].toUpperCase()}${edge.slice(1)}`] = Number.isFinite(value) ? value.toFixed(2) : "NaN";
+      }
+    }
+
+    function visible(win, node) {
+      if (!node) return false;
+      const style = win.getComputedStyle(node);
+      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || 1) > 0;
+    }
+
+    function snapshot() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!win || !doc) return;
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const legend = doc.querySelector(".ring-legend");
+      if (!instrument || !legend) return;
+
+      writeRect("legend", legend.getBoundingClientRect());
+      for (const id of ["year", "month", "day", "hour", "solar"]) {
+        writeRect(id, doc.querySelector(`.ring-${id}`)?.getBoundingClientRect());
+      }
+
+      const reference = doc.querySelector(".reference-frame-control");
+      const open = doc.querySelector("#analysis-toggle");
+      const close = doc.querySelector("#analysis-close");
+      writeRect("reference", reference?.getBoundingClientRect());
+      writeRect("open", open?.getBoundingClientRect());
+      writeRect("close", close?.getBoundingClientRect());
+
+      probe.dataset.referenceVisible = String(visible(win, reference));
+      probe.dataset.openVisible = String(visible(win, open));
+      probe.dataset.closeVisible = String(visible(win, close));
+      probe.dataset.analysisOpen = instrument.dataset.analysisOpen ?? "";
+      probe.dataset.innerWidth = String(win.innerWidth);
+      probe.dataset.ready = "true";
+    }
+
+    frame.addEventListener("load", () => {
+      snapshot();
+      queueMicrotask(snapshot);
+      setTimeout(snapshot, 100);
+      setTimeout(snapshot, 700);
+    });
+  </script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+@import url("./mobile-legend.css");
+
 .mobile-time-dock { display: none; }
 
 @media (max-width: 480px) {
