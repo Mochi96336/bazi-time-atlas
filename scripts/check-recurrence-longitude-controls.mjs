@@ -73,6 +73,7 @@ const meanSolar = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=121.
 const meanPanel = tagById(meanSolar.dom, "day-hour-proof-chain");
 const meanControls = tagById(meanSolar.dom, "target-instant-controls");
 const meanInstrument = tagById(meanSolar.dom, "recurrence-instrument");
+const meanDiagnostic = tagById(meanSolar.dom, "eot-observed-clearance-diagnostic");
 if (
   attr(meanPanel, "data-first-hard-blocker") !== "none"
   || attr(meanPanel, "data-longitude-degrees") !== "121.5"
@@ -85,6 +86,12 @@ if (
   || attr(meanInstrument, "data-day-hour-proof-longitude-bound") !== "true"
 ) {
   throw new Error(`mean-solar longitude did not propagate through query/control/proof/instrument: ${meanSolar.url}`);
+}
+if (
+  attr(meanDiagnostic, "data-status") !== "not-applicable"
+  || attr(meanDiagnostic, "data-available") !== "false"
+) {
+  throw new Error(`EoT observed-clearance diagnostic must stay non-applicable outside local apparent solar: ${meanSolar.url}`);
 }
 expectStage(meanSolar.dom, "longitude", "satisfied", "bound mean solar", meanSolar.url);
 expectStage(meanSolar.dom, "equation-of-time", "not-required", "bound mean solar", meanSolar.url);
@@ -117,6 +124,7 @@ const apparent = dumpDom(`${fixedZonePath}&clockBasis=local-apparent-solar&lon=-
 const apparentPanel = tagById(apparent.dom, "day-hour-proof-chain");
 const apparentControls = tagById(apparent.dom, "target-instant-controls");
 const apparentInstrument = tagById(apparent.dom, "recurrence-instrument");
+const apparentDiagnostic = tagById(apparent.dom, "eot-observed-clearance-diagnostic");
 if (
   attr(apparentPanel, "data-first-hard-blocker") !== "equation-of-time"
   || attr(apparentPanel, "data-longitude-degrees") !== "-74.006"
@@ -146,7 +154,34 @@ if (
 ) {
   throw new Error(`4006 EoT target evidence must be visible without being promoted to recurrence authority: ${apparent.url}`);
 }
-console.log(`[recurrence-longitude] PASS west longitude advances apparent solar to non-authoritative year-4006 EoT evidence: ${apparent.url}`);
+if (
+  attr(apparentDiagnostic, "data-available") !== "true"
+  || attr(apparentDiagnostic, "data-status") !== "clears-observed-eot-envelope-only"
+  || attr(apparentDiagnostic, "data-observed-envelope-seconds") !== "1.4929317113205443"
+  || attr(apparentDiagnostic, "data-clears-observed-envelope") !== "true"
+  || attr(apparentDiagnostic, "data-evidence-id") !== "swiss-ephemeris-eot-4006-dense-v2"
+  || attr(apparentDiagnostic, "data-continuous-upper-bound") !== "false"
+  || attr(apparentDiagnostic, "data-deterministic-membership") !== "false"
+  || attr(apparentDiagnostic, "data-recurrence-authority-granted") !== "false"
+  || attr(apparentDiagnostic, "data-governing-margin-seconds") === null
+  || attr(apparentDiagnostic, "data-remaining-observed-margin-seconds") === null
+) {
+  throw new Error(`year-4006 observed EoT clearance diagnostic must expose evidence without granting authority: ${apparent.url}`);
+}
+if (
+  !apparent.dom.includes("Observed EoT boundary clearance · diagnostic only")
+  || !apparent.dom.includes("不是 continuous upper bound")
+  || !apparent.dom.includes("deterministicMembership=false · recurrenceAuthority=false")
+) {
+  throw new Error(`observed EoT clearance UI must label its empirical-only authority boundary: ${apparent.url}`);
+}
+if (
+  attr(apparentPanel, "data-hour-resolved") !== "false"
+  || attr(stageTag(apparent.dom, "equation-of-time"), "data-status") !== "evidence-not-authoritative"
+) {
+  throw new Error(`observed clearance diagnostic must not promote the Hour proof chain: ${apparent.url}`);
+}
+console.log(`[recurrence-longitude] PASS west longitude exposes year-4006 observed EoT boundary clearance without authority promotion: ${apparent.url}`);
 
 for (const rawLongitude of ["181", "-181", "abc"]) {
   const invalid = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=${encodeURIComponent(rawLongitude)}`);
