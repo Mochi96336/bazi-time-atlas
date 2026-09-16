@@ -239,10 +239,8 @@ export function createRingDragController({
 
   function setCompareMode(enabled) {
     cancelInertia({ detent:false, reason:"mode-change" });
+    cancelActiveGesture({ detent:true, reason:"mode-change" });
     compareMode = Boolean(enabled);
-    active = null;
-    delete svg.dataset.activeRing;
-    updatePointerStyle();
     onModeChange?.(compareMode);
   }
 
