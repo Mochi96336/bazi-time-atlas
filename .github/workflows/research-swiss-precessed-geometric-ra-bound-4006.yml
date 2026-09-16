@@ -1,0 +1,134 @@
+name: Research Swiss precessed geometric RA bound 4006
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-swiss-precessed-geometric-ra-bound-4006.yml"
+      - "scripts/research-swiss-precessed-geometric-ra-samples-4006.c"
+      - "scripts/compose-swiss-precessed-geometric-ra-bound-4006.mjs"
+      - "src/astronomy/equation-of-time-4006-swiss-segment-curvature-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-vondrak-precession-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-precessed-geometric-ra-evidence.js"
+      - "tests/equation-of-time-4006-swiss-precessed-geometric-ra-evidence.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  precessed-geometric-ra-bound:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+
+      - name: Download pinned Swiss long-range ephemerides
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/sweph
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          for file in sepl_36.se1 semo_36.se1; do
+            curl -fsSL --retry 3 --retry-delay 2 \
+              "https://raw.githubusercontent.com/aloistr/swisseph/${SWISS_COMMIT}/ephe/${file}" \
+              -o "tmp/sweph/${file}"
+          done
+          cat <<'EOF' | sha256sum -c -
+          3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0  tmp/sweph/sepl_36.se1
+          f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
+          EOF
+
+      - name: Build pinned Swiss library and sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          mkdir -p tmp/swiss-precessed-geometric-ra-bound-4006
+          cc -O2 -std=gnu11 \
+            -I tmp/swisseph \
+            scripts/research-swiss-precessed-geometric-ra-samples-4006.c \
+            tmp/swisseph/libswe.a -lm \
+            -o tmp/swiss-precessed-geometric-ra-bound-4006/sample
+
+      - name: Capture pinned mean-of-date geometric samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp/swiss-precessed-geometric-ra-bound-4006/sample tmp/sweph \
+            | tee tmp/swiss-precessed-geometric-ra-bound-4006/raw.json
+          python -m json.tool tmp/swiss-precessed-geometric-ra-bound-4006/raw.json >/dev/null
+
+      - name: Compose continuous RA curvature certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/compose-swiss-precessed-geometric-ra-bound-4006.mjs
+          python -m json.tool tmp/swiss-precessed-geometric-ra-bound-4006/manifest.json >/dev/null
+
+      - name: Verify proof scope and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          raw = json.loads(Path("tmp/swiss-precessed-geometric-ra-bound-4006/raw.json").read_text())
+          m = json.loads(Path("tmp/swiss-precessed-geometric-ra-bound-4006/manifest.json").read_text())
+          assert raw["targetYear"] == 4006
+          assert raw["sampleStepEtDays"] <= 0.25
+          assert raw["sampleCoverRadiusEtDays"] <= 0.125
+          assert raw["minSampledPrecessedXyAu"] > 0
+          assert raw["interpretation"]["uniformEtGrid"] is True
+          assert raw["interpretation"]["precessionAppliedByPinnedSwissSwiPrecess"] is True
+          assert raw["interpretation"]["gridMinimumIsContinuousLowerBound"] is False
+          assert raw["interpretation"]["continuousRaCurvatureCertified"] is False
+
+          hard = m["derivedHardBounds"]
+          assert hard["meanOfDateGeometricVelocityAuPerDay"] > 0
+          assert hard["meanOfDateGeometricAccelerationAuPerDaySquared"] > 0
+          assert hard["hardMeanOfDateGeometricXyLowerAu"] > 0
+          assert hard["meanOfDateGeometricRaSecondDerivativeBoundDegPerDaySquared"] > 0
+
+          i = m["interpretation"]
+          assert i["sourceDerivedContinuousBound"] is True
+          assert i["geometricJ2000InputCertified"] is True
+          assert i["vondrakPrecessionMatrixCertified"] is True
+          assert i["precessedGeometricXySeparationContinuous"] is True
+          assert i["meanOfDateGeometricRaSecondDerivativeCertified"] is True
+          assert i["actualSwissPrecessionCorrectionCertified"] is False
+          assert i["lightTimeCorrectionCertified"] is False
+          assert i["aberrationCorrectionCertified"] is False
+          assert i["deflectionCorrectionCertified"] is False
+          assert i["nutationCorrectionCertified"] is False
+          assert i["apparentPositionCorrectionChainCertified"] is False
+          assert i["longTermSiderealSecondDerivativeCertified"] is False
+          assert i["swissEotSecondDerivativeCertified"] is False
+          assert i["continuousResidualUpperBound"] is False
+          assert i["deterministicMembership"] is False
+          assert i["recurrenceAuthorityGranted"] is False
+          PY
+
+      - name: Upload source-derived precessed RA evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swiss-precessed-geometric-ra-bound-4006
+          path: |
+            tmp/swiss-precessed-geometric-ra-bound-4006/raw.json
+            tmp/swiss-precessed-geometric-ra-bound-4006/manifest.json
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
