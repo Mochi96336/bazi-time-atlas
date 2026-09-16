@@ -1,0 +1,90 @@
+.birth-input-intro {
+  margin: -5px 0 1px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.birth-advanced-controls {
+  margin: 2px 0 0;
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  background: rgba(255,255,255,.24);
+  overflow: hidden;
+}
+.birth-advanced-controls > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 12px;
+  padding: 11px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.birth-advanced-controls > summary::-webkit-details-marker { display: none; }
+.birth-advanced-controls > summary::after {
+  content: "+";
+  grid-column: 3;
+  grid-row: 1;
+  color: #87928c;
+  font-size: 16px;
+  line-height: 1;
+}
+.birth-advanced-controls[open] > summary::after { content: "−"; }
+.birth-advanced-summary-copy {
+  display: grid;
+  gap: 1px;
+}
+.birth-advanced-summary-copy small {
+  color: #929b96;
+  font-size: 7px;
+  letter-spacing: .1em;
+}
+.birth-advanced-summary-copy strong {
+  color: #4f5b55;
+  font-size: 11px;
+}
+#birth-advanced-summary {
+  justify-self: end;
+  color: #748079;
+  font-size: 9px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.birth-advanced-controls[open] > summary {
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+}
+.birth-advanced-body {
+  display: grid;
+  gap: 13px;
+  padding: 13px 12px 12px;
+}
+.birth-advanced-body .clock-zone-row {
+  grid-template-columns: minmax(104px, 140px);
+}
+.birth-advanced-body .time-basis-note {
+  padding-top: 11px;
+}
+
+@media (max-width: 900px) {
+  .birth-controls > .birth-input-intro,
+  .birth-controls > .birth-advanced-controls { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .birth-controls { grid-template-columns: 1fr; }
+  .birth-controls > .eyebrow,
+  .birth-controls > .birth-input-intro,
+  .birth-controls > .birth-field-group,
+  .birth-controls > .birth-advanced-controls { grid-column: 1 / -1; }
+  .birth-input-intro { font-size: 9px; }
+  .birth-advanced-controls > summary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 10px;
+  }
+  #birth-advanced-summary { font-size: 8px; }
+  .birth-advanced-body { padding: 11px 10px 10px; }
+}
