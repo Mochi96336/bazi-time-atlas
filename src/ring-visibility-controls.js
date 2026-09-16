@@ -1,5 +1,6 @@
 import "./reference-frame-controls.js";
 import { RINGS } from "./wheel/ring-model.js";
+import { RING_VISIBILITY_EVENT } from "./wheel/ring-visibility.js";
 
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
@@ -27,6 +28,7 @@ function syncDiagnostics() {
 
 function setRingVisible(id, visible) {
   if (!RINGS.some(ring => ring.id === id)) return;
+  const wasHidden = hiddenRings.has(id);
   if (visible) hiddenRings.delete(id);
   else hiddenRings.add(id);
 
@@ -49,6 +51,11 @@ function setRingVisible(id, visible) {
     row.title = `${visible ? "隱藏" : "顯示"}${label}圓環`;
   }
   syncDiagnostics();
+  if (wasHidden !== hidden) {
+    svg?.dispatchEvent(new CustomEvent(RING_VISIBILITY_EVENT, {
+      detail:{ ringId:id, visible }
+    }));
+  }
 }
 
 function toggleRing(id) {
