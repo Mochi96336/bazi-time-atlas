@@ -2,6 +2,13 @@ import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const EPS = 1.5;
+const DIRECT_LABELS = [
+  ["year", "年 · YEAR"],
+  ["month", "月 · MONTH"],
+  ["solar", "太陽 · SOLAR"],
+  ["day", "日 · DAY"],
+  ["hour", "時 · HOUR"]
+];
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -55,7 +62,110 @@ function overlaps(a, b) {
   return a.left < b.right - EPS && a.right > b.left + EPS && a.top < b.bottom - EPS && a.bottom > b.top + EPS;
 }
 
-function validateRows(run, { analysis }) {
+function inside(inner, outer) {
+  return inner.left >= outer.left - EPS && inner.right <= outer.right + EPS && inner.top >= outer.top - EPS && inner.bottom <= outer.bottom + EPS;
+}
+
+function validateNormal(run, probe) {
+  const instrument = rect(probe, "instrument", "normal", run.url);
+  const legend = rect(probe, "legend", "normal", run.url);
+  const labels = DIRECT_LABELS.map(([id, expected]) => ({ id, expected, box:rect(probe, id, "normal", run.url) }));
+
+  if (Math.abs(legend.left - instrument.left) > EPS || Math.abs(legend.top - instrument.top) > EPS || legend.width < instrument.width * 0.98 || legend.height < instrument.height * 0.98) {
+    throw new Error(`normal: direct-label overlay no longer owns the instrument frame (legend=${JSON.stringify(legend)}, instrument=${JSON.stringify(instrument)}): ${run.url}`);
+  }
+
+  let previousCenter = -Infinity;
+  for (const { id, expected, box } of labels) {
+    if (!inside(box, instrument)) {
+      throw new Error(`normal: ${id} identity escaped the instrument frame (${JSON.stringify(box)}): ${run.url}`);
+    }
+    const center = (box.top + box.bottom) / 2;
+    if (center <= previousCenter + instrument.height * 0.07) {
+      throw new Error(`normal: radial identity order collapsed near ${id} (center=${center}, previous=${previousCenter}): ${run.url}`);
+    }
+    previousCenter = center;
+
+    const identity = requireAttr(probe, `data-${id}-identity`, "normal", run.url);
+    const dotVisible = requireAttr(probe, `data-${id}-dot-visible`, "normal", run.url);
+    const valueVisible = requireAttr(probe, `data-${id}-value-visible`, "normal", run.url);
+    const position = requireAttr(probe, `data-${id}-position`, "normal", run.url);
+    if (!identity.includes(expected)) {
+      throw new Error(`normal: ${id} identity text mismatch (${identity} !~= ${expected}): ${run.url}`);
+    }
+    if (dotVisible !== "false" || valueVisible !== "false" || position !== "absolute") {
+      throw new Error(`normal: ${id} still behaves like a live HUD row (dot=${dotVisible}, value=${valueVisible}, position=${position}): ${run.url}`);
+    }
+  }
+
+  if (requireAttr(probe, "data-reference-visible", "normal", run.url) !== "false" ||
+      requireAttr(probe, "data-open-visible", "normal", run.url) !== "true" ||
+      requireAttr(probe, "data-close-visible", "normal", run.url) !== "false" ||
+      requireAttr(probe, "data-state-strip-visible", "normal", run.url) !== "false" ||
+      requireAttr(probe, "data-analysis-open", "normal", run.url) !== "false") {
+    throw new Error(`normal: progressive-disclosure visibility contract failed: ${run.url}`);
+  }
+
+  console.log(`[mobile-legend] PASS normal direct radial identities; ${labels.map(({id, box}) => `${id}=${((box.top + box.bottom) / 2).toFixed(1)}`).join(", ")}: ${run.url}`);
+}
+
+function validateAnalysis(run, probe) {
+  const legend = rect(probe, "legend", "analysis", run.url);
+  const rows = ["year", "month", "day", "hour"].map(id => ({ id, box:rect(probe, id, "analysis", run.url) }));
+  const solar = rect(probe, "solar", "analysis", run.url);
+  const rowTop = rows[0].box.top;
+  const rowBottom = Math.max(...rows.map(row => row.box.bottom));
+
+  for (const row of rows) {
+    if (Math.abs(row.box.top - rowTop) > EPS) {
+      throw new Error(`analysis: ${row.id} escaped first row (${row.box.top} vs ${rowTop}): ${run.url}`);
+    }
+    if (row.box.left < legend.left - EPS || row.box.right > legend.right + EPS) {
+      throw new Error(`analysis: ${row.id} overflowed legend bounds: ${run.url}`);
+    }
+    if (requireAttr(probe, `data-${row.id}-dot-visible`, "analysis", run.url) !== "true" || requireAttr(probe, `data-${row.id}-value-visible`, "analysis", run.url) !== "true") {
+      throw new Error(`analysis: ${row.id} did not restore full legend content: ${run.url}`);
+    }
+  }
+  for (let i = 1; i < rows.length; i += 1) {
+    if (rows[i - 1].box.left >= rows[i].box.left || rows[i - 1].box.right > rows[i].box.left + EPS) {
+      throw new Error(`analysis: first row is not ordered/non-overlapping at ${rows[i - 1].id}->${rows[i].id}: ${run.url}`);
+    }
+  }
+  if (solar.top <= rowBottom - EPS) {
+    throw new Error(`analysis: solar row did not move below four-pillar row (${solar.top} <= ${rowBottom}): ${run.url}`);
+  }
+  if (solar.left < legend.left - EPS || solar.right > legend.right + EPS || solar.width < legend.width * 0.90) {
+    throw new Error(`analysis: solar row does not span the legend (${solar.left},${solar.right}, width=${solar.width}/${legend.width}): ${run.url}`);
+  }
+  if (requireAttr(probe, "data-solar-dot-visible", "analysis", run.url) !== "true" || requireAttr(probe, "data-solar-value-visible", "analysis", run.url) !== "true") {
+    throw new Error(`analysis: solar row did not restore full legend content: ${run.url}`);
+  }
+
+  if (requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true" ||
+      requireAttr(probe, "data-reference-visible", "analysis", run.url) !== "true" ||
+      requireAttr(probe, "data-open-visible", "analysis", run.url) !== "false" ||
+      requireAttr(probe, "data-close-visible", "analysis", run.url) !== "true" ||
+      requireAttr(probe, "data-state-strip-visible", "analysis", run.url) !== "true") {
+    throw new Error(`analysis: progressive-disclosure visibility contract failed: ${run.url}`);
+  }
+
+  const reference = rect(probe, "reference", "analysis", run.url);
+  const close = rect(probe, "close", "analysis", run.url);
+  if (reference.top <= solar.bottom - EPS) {
+    throw new Error(`analysis: reference frame did not get its own row (${reference.top} <= ${solar.bottom}): ${run.url}`);
+  }
+  if (reference.left < legend.left - EPS || reference.right > legend.right + EPS || reference.width < legend.width * 0.90) {
+    throw new Error(`analysis: reference row does not span the legend: ${run.url}`);
+  }
+  if (overlaps(reference, close) || close.top < reference.bottom - EPS) {
+    throw new Error(`analysis: Analysis close overlaps reference row (reference bottom=${reference.bottom}, close top=${close.top}): ${run.url}`);
+  }
+
+  console.log(`[mobile-legend] PASS Analysis structured grid; solar=${solar.top.toFixed(1)}, reference=${reference.top.toFixed(1)}, close=${close.top.toFixed(1)}: ${run.url}`);
+}
+
+function validate(run, { analysis }) {
   const probe = tagById(run.dom, "probe");
   if (requireAttr(probe, "data-ready", "legend", run.url) !== "true") {
     throw new Error(`legend: fixture did not settle: ${run.url}`);
@@ -63,62 +173,9 @@ function validateRows(run, { analysis }) {
   if (Number(requireAttr(probe, "data-inner-width", "legend", run.url)) !== 390) {
     throw new Error(`legend: fixture is not a true 390px viewport: ${run.url}`);
   }
-
-  const legend = rect(probe, "legend", "legend", run.url);
-  const rows = ["year", "month", "day", "hour"].map(id => ({ id, box:rect(probe, id, "legend", run.url) }));
-  const solar = rect(probe, "solar", "legend", run.url);
-
-  const rowTop = rows[0].box.top;
-  const rowBottom = Math.max(...rows.map(row => row.box.bottom));
-  for (const row of rows) {
-    if (Math.abs(row.box.top - rowTop) > EPS) {
-      throw new Error(`legend: ${row.id} escaped first row (${row.box.top} vs ${rowTop}): ${run.url}`);
-    }
-    if (row.box.left < legend.left - EPS || row.box.right > legend.right + EPS) {
-      throw new Error(`legend: ${row.id} overflowed legend bounds: ${run.url}`);
-    }
-  }
-  for (let i = 1; i < rows.length; i += 1) {
-    if (rows[i - 1].box.left >= rows[i].box.left || rows[i - 1].box.right > rows[i].box.left + EPS) {
-      throw new Error(`legend: first row is not ordered/non-overlapping at ${rows[i - 1].id}->${rows[i].id}: ${run.url}`);
-    }
-  }
-  if (solar.top <= rowBottom - EPS) {
-    throw new Error(`legend: solar row did not move below four-pillar row (${solar.top} <= ${rowBottom}): ${run.url}`);
-  }
-  if (solar.left < legend.left - EPS || solar.right > legend.right + EPS || solar.width < legend.width * 0.90) {
-    throw new Error(`legend: solar row does not span the legend (${solar.left},${solar.right}, width=${solar.width}/${legend.width}): ${run.url}`);
-  }
-
-  const referenceVisible = requireAttr(probe, "data-reference-visible", "legend", run.url) === "true";
-  const openVisible = requireAttr(probe, "data-open-visible", "legend", run.url) === "true";
-  const closeVisible = requireAttr(probe, "data-close-visible", "legend", run.url) === "true";
-  const analysisOpen = requireAttr(probe, "data-analysis-open", "legend", run.url);
-
-  if (!analysis) {
-    if (analysisOpen !== "false" || referenceVisible || !openVisible || closeVisible) {
-      throw new Error(`legend: normal mode visibility contract failed (analysis=${analysisOpen}, ref=${referenceVisible}, open=${openVisible}, close=${closeVisible}): ${run.url}`);
-    }
-    console.log(`[mobile-legend] PASS normal 390px grid; row=${rowTop.toFixed(1)}, solar=${solar.top.toFixed(1)}: ${run.url}`);
-    return;
-  }
-
-  if (analysisOpen !== "true" || !referenceVisible || openVisible || !closeVisible) {
-    throw new Error(`legend: Analysis visibility contract failed (analysis=${analysisOpen}, ref=${referenceVisible}, open=${openVisible}, close=${closeVisible}): ${run.url}`);
-  }
-  const reference = rect(probe, "reference", "legend", run.url);
-  const close = rect(probe, "close", "legend", run.url);
-  if (reference.top <= solar.bottom - EPS) {
-    throw new Error(`legend: reference frame did not get its own row (${reference.top} <= ${solar.bottom}): ${run.url}`);
-  }
-  if (reference.left < legend.left - EPS || reference.right > legend.right + EPS || reference.width < legend.width * 0.90) {
-    throw new Error(`legend: reference row does not span the legend: ${run.url}`);
-  }
-  if (overlaps(reference, close) || close.top < reference.bottom - EPS) {
-    throw new Error(`legend: Analysis close overlaps reference row (reference bottom=${reference.bottom}, close top=${close.top}): ${run.url}`);
-  }
-  console.log(`[mobile-legend] PASS Analysis 390px grid; solar=${solar.top.toFixed(1)}, reference=${reference.top.toFixed(1)}, close=${close.top.toFixed(1)}: ${run.url}`);
+  if (analysis) validateAnalysis(run, probe);
+  else validateNormal(run, probe);
 }
 
-validateRows(dump("scripts/fixtures/mobile-legend-390.html"), { analysis:false });
-validateRows(dump("scripts/fixtures/mobile-legend-390.html?analysis=1"), { analysis:true });
+validate(dump("scripts/fixtures/mobile-legend-390.html"), { analysis:false });
+validate(dump("scripts/fixtures/mobile-legend-390.html?analysis=1"), { analysis:true });

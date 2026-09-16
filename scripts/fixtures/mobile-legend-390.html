@@ -43,14 +43,24 @@
       const legend = doc.querySelector(".ring-legend");
       if (!instrument || !legend) return;
 
+      writeRect("instrument", instrument.getBoundingClientRect());
       writeRect("legend", legend.getBoundingClientRect());
-      for (const id of ["year", "month", "day", "hour", "solar"]) {
-        writeRect(id, doc.querySelector(`.ring-${id}`)?.getBoundingClientRect());
+      for (const id of ["year", "month", "solar", "day", "hour"]) {
+        const row = doc.querySelector(`.ring-${id}`);
+        const dot = row?.querySelector("i") ?? null;
+        const label = row?.querySelector("span") ?? null;
+        const value = row?.querySelector("strong") ?? null;
+        writeRect(id, row?.getBoundingClientRect());
+        probe.dataset[`${id}DotVisible`] = String(visible(win, dot));
+        probe.dataset[`${id}ValueVisible`] = String(visible(win, value));
+        probe.dataset[`${id}Identity`] = label ? win.getComputedStyle(label, "::after").content : "";
+        probe.dataset[`${id}Position`] = row ? win.getComputedStyle(row).position : "";
       }
 
       const reference = doc.querySelector(".reference-frame-control");
       const open = doc.querySelector("#analysis-toggle");
       const close = doc.querySelector("#analysis-close");
+      const stateStrip = doc.querySelector(".state-strip");
       writeRect("reference", reference?.getBoundingClientRect());
       writeRect("open", open?.getBoundingClientRect());
       writeRect("close", close?.getBoundingClientRect());
@@ -58,6 +68,7 @@
       probe.dataset.referenceVisible = String(visible(win, reference));
       probe.dataset.openVisible = String(visible(win, open));
       probe.dataset.closeVisible = String(visible(win, close));
+      probe.dataset.stateStripVisible = String(visible(win, stateStrip));
       probe.dataset.analysisOpen = instrument.dataset.analysisOpen ?? "";
       probe.dataset.innerWidth = String(win.innerWidth);
       probe.dataset.ready = "true";
