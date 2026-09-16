@@ -10,9 +10,11 @@ function mutableUrl(currentHref) {
 
 export function selectedInstantUrl(currentHref, instantMs) {
   if (!Number.isFinite(instantMs)) return null;
+  const instant = new Date(instantMs);
+  if (!Number.isFinite(instant.getTime())) return null;
   const url = mutableUrl(currentHref);
   if (!url) return null;
-  url.searchParams.set("instant", new Date(instantMs).toISOString());
+  url.searchParams.set("instant", instant.toISOString());
   for (const key of LEGACY_PROJECTION_KEYS) url.searchParams.delete(key);
   return url.href;
 }
