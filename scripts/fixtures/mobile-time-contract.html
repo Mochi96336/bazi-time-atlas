@@ -64,7 +64,11 @@
         initialCaptured = true;
         probe.dataset.innerWidth = String(mobileWin.innerWidth);
         probe.dataset.dockDisplay = dockStyle.display;
+        probe.dataset.inputType = input.type;
         probe.dataset.inputStep = input.getAttribute("step") ?? "";
+        probe.dataset.inputPlaceholder = input.placeholder;
+        probe.dataset.inputDisplayFormat = input.dataset.displayFormat ?? "";
+        probe.dataset.inputPrecision = input.dataset.precision ?? "";
         probe.dataset.inputValue = input.value;
         probe.dataset.mobileInitialReadout = mobileReadout.textContent.trim();
         probe.dataset.mobileInitialUtc = instrument.dataset.utcOffsetHours ?? "";
@@ -76,6 +80,7 @@
         probe.dataset.applyVisible = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
 
         probe.dataset.desktopInnerWidth = String(desktopWin.innerWidth);
+        probe.dataset.desktopInitialType = desktopInput.type;
         probe.dataset.desktopInitialStep = desktopInput.step;
         probe.dataset.desktopInitialPrecision = desktopInput.dataset.precision ?? "";
         probe.dataset.desktopInitialValue = desktopInput.value;
@@ -88,7 +93,7 @@
       if (!mobileApplied) {
         mobileApplied = true;
         mobileWin.__exactTimeContinuity = "alive";
-        input.value = "2026-09-16T05:15:09";
+        input.value = "2026-09-16 05:15:09";
         input.dispatchEvent(new Event("input", { bubbles:true }));
         apply.click();
         setTimeout(snapshot, 150);

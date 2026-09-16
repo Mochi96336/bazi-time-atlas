@@ -30,8 +30,12 @@ const probe = result.stdout.match(/<output[^>]+id="probe"[^>]*>/)?.[0] ?? "";
 if (attr(probe, "data-ready") !== "true") throw new Error(`exact-time fixture did not settle: ${url}`);
 if (attr(probe, "data-inner-width") !== "390") throw new Error(`fixture did not produce a 390px mobile child viewport: ${url}`);
 if (attr(probe, "data-dock-display") !== "grid") throw new Error(`mobile exact-time dock is not visible: ${url}`);
-if (attr(probe, "data-input-step") !== "1") throw new Error(`mobile exact-time input lost second precision: ${url}`);
-if (attr(probe, "data-input-value") !== "2026-09-16T05:14:37") throw new Error(`mobile input is not synchronized to UTC+09 Selected Instant: ${url}`);
+if (attr(probe, "data-input-type") !== "text") throw new Error(`mobile exact-time display still delegates formatting to native datetime-local chrome: ${url}`);
+if (attr(probe, "data-input-step") !== "") throw new Error(`mobile exact-time text display retained a datetime-local step contract: ${url}`);
+if (attr(probe, "data-input-placeholder") !== "YYYY-MM-DD HH:mm:ss") throw new Error(`mobile exact-time placeholder is not deterministic: ${url}`);
+if (attr(probe, "data-input-display-format") !== "YYYY-MM-DD HH:mm:ss") throw new Error(`mobile exact-time display-format contract missing: ${url}`);
+if (attr(probe, "data-input-precision") !== "second") throw new Error(`mobile exact-time display lost second precision: ${url}`);
+if (attr(probe, "data-input-value") !== "2026-09-16 05:14:37") throw new Error(`mobile input is not synchronized in app-owned UTC+09 display format: ${url}`);
 if (attr(probe, "data-mobile-initial-readout") !== "2026-09-16 · 05:14:37 · UTC+09:00") {
   throw new Error(`mobile Selected Instant readout ignored URL temporal context: ${url}`);
 }
@@ -45,8 +49,8 @@ if (attr(probe, "data-apply-visible") !== "true") throw new Error(`exact-time ap
 const share = Number(attr(probe, "data-instrument-share"));
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`instrument no longer owns the first mobile viewport (share=${share}): ${url}`);
 
-if (attr(probe, "data-mobile-roundtrip-value") !== "2026-09-16T05:15:09") {
-  throw new Error(`mobile exact-time edit did not stay synchronized after apply: ${url}`);
+if (attr(probe, "data-mobile-roundtrip-value") !== "2026-09-16 05:15:09") {
+  throw new Error(`mobile exact-time edit did not stay synchronized in deterministic display format: ${url}`);
 }
 const expectedMobileMs = Date.parse("2026-09-15T20:15:09.000Z");
 if (attr(probe, "data-mobile-selected-instant-ms") !== String(expectedMobileMs)) {
@@ -78,6 +82,7 @@ if (attr(probe, "data-mobile-status-state") !== "success" || attr(probe, "data-m
 }
 
 if (attr(probe, "data-desktop-inner-width") !== "1200") throw new Error(`fixture did not produce a 1200px desktop child viewport: ${url}`);
+if (attr(probe, "data-desktop-initial-type") !== "datetime-local") throw new Error(`desktop exact-time input stopped using native datetime-local semantics: ${url}`);
 if (attr(probe, "data-desktop-initial-step") !== "1") throw new Error(`desktop exact-time input is not second-level in markup: ${url}`);
 if (attr(probe, "data-desktop-initial-precision") !== "second") throw new Error(`desktop exact-time precision diagnostic missing: ${url}`);
 if (attr(probe, "data-desktop-initial-value") !== "2026-09-16T05:14:37") throw new Error(`desktop input ignored UTC+09 Selected Instant context: ${url}`);
@@ -110,4 +115,4 @@ if (attr(probe, "data-desktop-legacy-keys") !== "false") {
   throw new Error(`desktop committed instant retained legacy projection keys: ${url}`);
 }
 
-console.log(`[exact-time] PASS shared UTC+09/civil-midnight context + symmetric URL persistence; mobile share=${share.toFixed(3)}: ${url}`);
+console.log(`[exact-time] PASS deterministic mobile 24h display + shared UTC+09/civil-midnight state ownership; mobile share=${share.toFixed(3)}: ${url}`);

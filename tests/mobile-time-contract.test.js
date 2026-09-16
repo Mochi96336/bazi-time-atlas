@@ -12,14 +12,23 @@ const [html, css, mobileController, kineticAtlas, commandContract] = await Promi
 
 test("mobile atlas exposes a dedicated second-level exact-time dock", () => {
   assert.match(html, /id="mobile-time-dock"/);
-  assert.match(html, /id="mobile-instant-input"[^>]*step="1"/);
+  assert.match(html, /id="mobile-instant-input"/);
   assert.match(html, /id="mobile-time-apply"/);
   assert.match(html, /src="\.\/src\/mobile-time-control\.js"/);
   assert.match(html, /href="\.\/mobile-time\.css"/);
 });
 
+test("mobile visible exact-time format belongs to the mobile controller", () => {
+  assert.match(mobileController, /input\.type\s*=\s*"text"/);
+  assert.match(mobileController, /input\.removeAttribute\("step"\)/);
+  assert.match(mobileController, /input\.placeholder\s*=\s*MOBILE_ATLAS_INPUT_DISPLAY_FORMAT/);
+  assert.match(mobileController, /input\.dataset\.displayFormat\s*=\s*MOBILE_ATLAS_INPUT_DISPLAY_FORMAT/);
+  assert.match(mobileController, /input\.dataset\.precision\s*=\s*"second"/);
+  assert.match(mobileController, /24 小時制/);
+});
+
 test("desktop exact-time precision belongs to desktop markup, not the mobile controller", () => {
-  assert.match(html, /id="instant-input"[^>]*step="1"[^>]*data-precision="second"/);
+  assert.match(html, /id="instant-input"[^>]*type="datetime-local"[^>]*step="1"[^>]*data-precision="second"/);
   assert.doesNotMatch(mobileController, /desktopInput|#instant-input/);
 });
 
