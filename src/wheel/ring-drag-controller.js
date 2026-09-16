@@ -12,6 +12,7 @@ import {
   setManualOffset,
   snappedOffset
 } from "./ring-state.js";
+import { RING_VISIBILITY_EVENT, ringIsVisible } from "./ring-visibility.js";
 
 const DETENT_EPSILON = 1e-9;
 
@@ -33,11 +34,6 @@ function screenToWorld(svg, clientX, clientY) {
 export function ringAtWorldPoint(point) {
   const radius = Math.hypot(point.x - WHEEL_CENTER.x, point.y - WHEEL_CENTER.y);
   return RINGS.find(ring => radius >= ring.innerRadius && radius <= ring.outerRadius) ?? null;
-}
-
-function ringIsVisible(svg, ringId) {
-  const hidden = (svg.dataset.hiddenRings ?? "").split(",").filter(Boolean);
-  return !hidden.includes(ringId);
 }
 
 function eventTimeMs(event) {
@@ -355,12 +351,21 @@ export function createRingDragController({
     cancelInertia({ detent:true, reason:"document-hidden" });
   }
 
+  function ringVisibilityChange(event) {
+    const { ringId, visible } = event?.detail ?? {};
+    if (visible !== false || typeof ringId !== "string") return;
+    if (active?.ringId === ringId) cancelActiveGesture({ detent:true, reason:"ring-hidden" });
+    if (coasting?.ringId === ringId) cancelInertia({ detent:true, reason:"ring-hidden" });
+    if (hoverRingId === ringId) setHoverRing(null);
+  }
+
   svg.addEventListener("pointerdown", begin);
   svg.addEventListener("pointermove", move);
   svg.addEventListener("pointerup", pointerUp);
   svg.addEventListener("pointercancel", pointerCancel);
   svg.addEventListener("lostpointercapture", lostPointerCapture);
   svg.addEventListener("pointerleave", leave);
+  svg.addEventListener(RING_VISIBILITY_EVENT, ringVisibilityChange);
   visibilityTarget?.addEventListener?.("visibilitychange", visibilityChange);
   updatePointerStyle();
 
@@ -381,6 +386,7 @@ export function createRingDragController({
       svg.removeEventListener("pointercancel", pointerCancel);
       svg.removeEventListener("lostpointercapture", lostPointerCapture);
       svg.removeEventListener("pointerleave", leave);
+      svg.removeEventListener(RING_VISIBILITY_EVENT, ringVisibilityChange);
       visibilityTarget?.removeEventListener?.("visibilitychange", visibilityChange);
       delete svg.dataset.hoverRing;
       delete svg.dataset.activeRing;
