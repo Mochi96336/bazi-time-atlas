@@ -32,7 +32,8 @@
       const instrument = doc?.querySelector("#kinetic-instrument");
       const button = doc?.querySelector("#classification-overlay-button");
       const legend = doc?.querySelector("#classification-overlay-legend");
-      if (!win || !doc || !instrument || !button || !legend) return;
+      const mobileDock = doc?.querySelector("#mobile-time-dock");
+      if (!win || !doc || !instrument || !button || !legend || !mobileDock) return;
 
       const disableTransitions = doc.createElement("style");
       disableTransitions.textContent = "#kinetic-wheel *{transition:none!important}";
@@ -77,10 +78,21 @@
         button.click();
         settle(() => {
           const legendRect = legend.getBoundingClientRect();
+          const instrumentRect = instrument.getBoundingClientRect();
+          const dockRect = mobileDock.getBoundingClientRect();
+          const instrumentStyle = win.getComputedStyle(instrument);
           probe.dataset.onOverlay = instrument.dataset.classificationOverlay ?? "";
           probe.dataset.onPressed = button.getAttribute("aria-pressed") ?? "";
           probe.dataset.onLegendHidden = String(hidden(win, legend));
           probe.dataset.onLegendHeight = String(Math.round(legendRect.height));
+          probe.dataset.onInstrumentBottom = String(instrumentRect.bottom);
+          probe.dataset.onLegendTop = String(legendRect.top);
+          probe.dataset.onLegendBottom = String(legendRect.bottom);
+          probe.dataset.onDockTop = String(dockRect.top);
+          probe.dataset.onLegendInstrumentOverlap = String(legendRect.top < instrumentRect.bottom);
+          probe.dataset.onLegendDockOverlap = String(legendRect.bottom > dockRect.top);
+          probe.dataset.onInstrumentOverflow = instrumentStyle.overflow;
+          probe.dataset.onInstrumentMarginBottom = instrumentStyle.marginBottom;
           probe.dataset.onBaziCurrentHidden = String(hidden(win, baziCurrent));
           probe.dataset.onZodiacCurrentHidden = String(hidden(win, zodiacCurrent));
           probe.dataset.selectedOn = instrument.dataset.selectedInstantMs ?? "";
