@@ -1,3 +1,4 @@
+import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
 import {
   formatMobileAtlasInput,
   mobileExactInstantUrl,
@@ -7,16 +8,9 @@ import {
 const instrument = document.querySelector("#kinetic-instrument");
 const dock = document.querySelector("#mobile-time-dock");
 const input = document.querySelector("#mobile-instant-input");
-const desktopInput = document.querySelector("#instant-input");
 const applyButton = document.querySelector("#mobile-time-apply");
 const status = document.querySelector("#mobile-time-status");
 const mobileQuery = window.matchMedia("(max-width: 480px)");
-
-if (desktopInput) {
-  desktopInput.step = "1";
-  desktopInput.setAttribute("aria-label", "選定時間，UTC+8，秒級");
-  desktopInput.dataset.precision = "second";
-}
 
 function syncFromInstrument() {
   if (!instrument || !input || document.activeElement === input) return;
@@ -42,12 +36,24 @@ function applyExactTime() {
   }
   input.removeAttribute("aria-invalid");
   const href = mobileExactInstantUrl(location.href, instantMs);
-  if (!href) {
+  if (!href || !instrument) {
     setStatus("無法套用時間", "error");
     return;
   }
+
   setStatus("套用中…", "pending");
-  location.assign(href);
+  instrument.dispatchEvent(new CustomEvent(SELECTED_INSTANT_COMMAND, {
+    detail:{ instantMs, source:"mobile-exact" }
+  }));
+
+  if (Number(instrument.dataset.selectedInstantMs) !== Math.round(instantMs)) {
+    setStatus("無法套用時間", "error");
+    return;
+  }
+
+  history.replaceState(history.state, "", href);
+  syncFromInstrument();
+  setStatus("已套用 · UTC+08:00", "success");
 }
 
 applyButton?.addEventListener("click", applyExactTime);
