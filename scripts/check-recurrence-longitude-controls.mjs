@@ -116,24 +116,37 @@ console.log(`[recurrence-longitude] PASS lon=0 remains a valid bound longitude: 
 const apparent = dumpDom(`${fixedZonePath}&clockBasis=local-apparent-solar&lon=-74.006`);
 const apparentPanel = tagById(apparent.dom, "day-hour-proof-chain");
 const apparentControls = tagById(apparent.dom, "target-instant-controls");
+const apparentInstrument = tagById(apparent.dom, "recurrence-instrument");
 if (
   attr(apparentPanel, "data-first-hard-blocker") !== "equation-of-time"
   || attr(apparentPanel, "data-longitude-degrees") !== "-74.006"
   || attr(apparentPanel, "data-longitude-bound") !== "true"
   || attr(apparentPanel, "data-needs-longitude") !== "true"
   || attr(apparentPanel, "data-needs-equation-of-time") !== "true"
+  || attr(apparentPanel, "data-equation-of-time-target-evidence-available") !== "true"
+  || attr(apparentPanel, "data-equation-of-time-target-evidence-authority") !== "false"
   || attr(apparentPanel, "data-hour-resolved") !== "false"
   || attr(apparentControls, "data-longitude") !== "-74.006"
+  || attr(apparentInstrument, "data-day-hour-proof-equation-of-time-target-evidence-available") !== "true"
+  || attr(apparentInstrument, "data-day-hour-proof-equation-of-time-target-evidence-authority") !== "false"
 ) {
-  throw new Error(`apparent-solar longitude must advance exactly to Equation of Time: ${apparent.url}`);
+  throw new Error(`apparent-solar longitude must advance to evidence-present but non-authoritative Equation of Time: ${apparent.url}`);
 }
 expectStage(apparent.dom, "longitude", "satisfied", "bound apparent solar", apparent.url);
-expectStage(apparent.dom, "equation-of-time", "missing-deep-time-model", "bound apparent solar", apparent.url);
+expectStage(apparent.dom, "equation-of-time", "evidence-not-authoritative", "bound apparent solar", apparent.url);
 const apparentBlockers = textById(apparent.dom, "proof-chain-hour-blockers");
 if (!apparentBlockers.includes("Equation of Time") || apparentBlockers.includes("經度")) {
   throw new Error(`apparent-solar blocker ownership did not advance past longitude: ${apparent.url}`);
 }
-console.log(`[recurrence-longitude] PASS west longitude advances apparent solar to Equation of Time: ${apparent.url}`);
+if (
+  !apparent.dom.includes("有實證 · 未授權")
+  || !apparent.dom.includes("swiss-ephemeris-eot-4006-dense-v2")
+  || !apparent.dom.includes("continuousUpperBound=false")
+  || !apparent.dom.includes("recurrenceAuthority=false")
+) {
+  throw new Error(`4006 EoT target evidence must be visible without being promoted to recurrence authority: ${apparent.url}`);
+}
+console.log(`[recurrence-longitude] PASS west longitude advances apparent solar to non-authoritative year-4006 EoT evidence: ${apparent.url}`);
 
 for (const rawLongitude of ["181", "-181", "abc"]) {
   const invalid = dumpDom(`${fixedZonePath}&clockBasis=local-mean-solar&lon=${encodeURIComponent(rawLongitude)}`);

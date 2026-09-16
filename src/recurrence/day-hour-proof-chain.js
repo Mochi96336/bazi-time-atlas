@@ -22,6 +22,7 @@ import {
 
 const HARD_BLOCKER_STATUSES = new Set([
   "uncertain-estimate",
+  "evidence-not-authoritative",
   "missing-deep-time-model",
   "missing-model",
   "unbound-convention"
@@ -104,6 +105,16 @@ function equationOfTimeDetail(binding, clockBasis, needsEquationOfTime) {
   }
   if (!binding.validatedForTarget) {
     const target = binding.targetYear === null ? "目前 target" : String(binding.targetYear);
+    if (binding.targetEvidenceAvailable && binding.targetEvidence) {
+      const evidence = binding.targetEvidence;
+      const grid = Number.isFinite(evidence.cadenceMinutes) && Number.isInteger(evidence.samples)
+        ? `；${evidence.cadenceMinutes} 分鐘網格 ${evidence.samples.toLocaleString("en-US")} 點`
+        : "";
+      const observed = Number.isFinite(evidence.observedMaxAbsErrorSeconds)
+        ? `，observed max |ΔEoT| ${evidence.observedMaxAbsErrorSeconds.toFixed(3)} s`
+        : "";
+      return `已綁定 ${binding.modelId}，且 ${target} 有 registry-owned target evidence ${evidence.evidenceId} (${evidence.evidenceKind})${grid}${observed}。但 continuousUpperBound=${evidence.continuousUpperBound === true}、recurrenceAuthority=${evidence.recurrenceAuthority === true}；有實證不等於可唯一判定 Hour。`;
+    }
     return `已找到 ${binding.modelId}，但其 ${binding.validationScope ?? "registered"} evidence 沒有授權 ${target} 的 recurrence EoT；model presence 不等於 target-era validation。`;
   }
   return `EoT model ${binding.modelId} 已由 ${binding.evidenceId} 驗證涵蓋 target year ${binding.targetYear}。`;
@@ -295,7 +306,15 @@ export function dayHourResolutionProof({
     stage(
       "equation-of-time",
       "Equation of Time",
-      !clockBasis ? "conditional" : needsEquationOfTime ? (equationOfTimeModel.validatedForTarget ? "satisfied" : "missing-deep-time-model") : "not-required",
+      !clockBasis
+        ? "conditional"
+        : needsEquationOfTime
+          ? equationOfTimeModel.validatedForTarget
+            ? "satisfied"
+            : equationOfTimeModel.targetEvidenceAvailable
+              ? "evidence-not-authoritative"
+              : "missing-deep-time-model"
+          : "not-required",
       equationOfTimeDetail(equationOfTimeModel, clockBasis, needsEquationOfTime),
       "astronomy"
     ),
@@ -326,6 +345,8 @@ export function dayHourResolutionProof({
     longitudeBound,
     equationOfTimeModel:Object.freeze({ ...equationOfTimeModel }),
     equationOfTimeModelValidated:equationOfTimeModel.validatedForTarget,
+    equationOfTimeTargetEvidenceAvailable:equationOfTimeModel.targetEvidenceAvailable,
+    equationOfTimeTargetEvidenceAuthority:equationOfTimeModel.targetEvidenceAuthority,
     needsLongitude,
     needsEquationOfTime,
     earthRotationEstimateCapability,
