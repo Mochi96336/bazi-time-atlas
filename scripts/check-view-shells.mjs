@@ -63,7 +63,7 @@ if (!probe || attr(probe, "data-ready") !== "true") {
   throw new Error(`cross-view shell fixture did not settle: ${url}`);
 }
 
-const expectedNav = "時間圖譜|出生|六十甲子|研究";
+const expectedNav = "時間圖譜|研究";
 const navIds = ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarymobile", "sexagenarydesktop"];
 for (const id of navIds) {
   requireEqual(attr(probe, `data-${id}-nav`), expectedNav, `${id} navigation drifted`, url);
@@ -144,4 +144,4 @@ requireEqual(attr(probe, "data-sex-mobile-branch-meta"), "陰 · 木 · 4 / 12",
 requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "Sexagenary desktop inspector should remain visible", url);
 requireEqual(attr(probe, "data-sex-desktop-facts-hidden"), "true", "Sexagenary desktop must not duplicate the mobile facts strip beside its inspector", url);
 
-console.log(`[view-shells] PASS primary nav + task-first Research + compact dark Birth + mobile Sexagenary facts without duplicate inspector: ${url}`);
+console.log(`[view-shells] PASS two-destination top-level nav + legacy Birth/Sexagenary compatibility + task-first Research: ${url}`);
