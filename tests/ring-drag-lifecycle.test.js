@@ -51,7 +51,7 @@ class FakeSvg {
   setPointerCapture() {}
   releasePointerCapture() {}
 
-  dispatchAt(type, ringId, angleDegrees, pointerId = 1) {
+  dispatchAt(type, ringId, angleDegrees, pointerId = 1, timeStamp = undefined) {
     const ring = ringModel(ringId);
     const radius = (ring.innerRadius + ring.outerRadius) / 2;
     const angle = angleDegrees * Math.PI / 180;
@@ -62,14 +62,39 @@ class FakeSvg {
       clientY: WHEEL_CENTER.y + Math.sin(angle) * radius,
       preventDefault() {}
     };
+    if (Number.isFinite(timeStamp)) event.timeStamp = timeStamp;
     this.listeners.get(type)?.(event);
   }
 }
 
-function setupController(callbacks = {}) {
+class FakeFrames {
+  constructor() {
+    this.nextId = 1;
+    this.pending = new Map();
+  }
+
+  request = callback => {
+    const id = this.nextId++;
+    this.pending.set(id, callback);
+    return id;
+  };
+
+  cancel = id => this.pending.delete(id);
+
+  run(timeStamp) {
+    const entry = this.pending.entries().next().value;
+    if (!entry) return false;
+    const [id, callback] = entry;
+    this.pending.delete(id);
+    callback(timeStamp);
+    return true;
+  }
+}
+
+function setupController(callbacks = {}, inertiaOptions = {}) {
   const svg = new FakeSvg();
   const ringStates = { day: createRingState("day") };
-  const controller = createRingDragController({ svg, ringStates, ...callbacks });
+  const controller = createRingDragController({ svg, ringStates, ...callbacks, inertiaOptions });
   return { svg, ringStates, controller };
 }
 
@@ -150,4 +175,91 @@ test("free compare start and end are also deferred until activation", t => {
   assert.equal(events.at(-1)[0], "end");
   assert.equal(ringStates.day.manualOffset, 0);
   assert.equal(ringStates.day.linked, true);
+});
+
+test("linked release coasts through the same delta callback and delays end", t => {
+  forceSvgPointFallback(t);
+  const frames = new FakeFrames();
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    requestFrame:frames.request,
+    cancelFrame:frames.cancel,
+    prefersReducedMotion:() => false
+  });
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointerdown", "day", -90, 1, 0);
+  svg.dispatchAt("pointermove", "day", -88, 1, 40);
+  svg.dispatchAt("pointerup", "day", -88, 1, 42);
+  assert.equal(controller.isCoasting, true);
+  assert.equal(events.some(event => event[0] === "end"), false);
+
+  frames.run(58);
+  assert.equal(events.filter(event => event[0] === "delta").length, 2);
+  let timestamp = 74;
+  while (controller.isCoasting && timestamp < 2000) {
+    frames.run(timestamp);
+    timestamp += 16;
+  }
+
+  assert.equal(controller.isCoasting, false);
+  assert.deepEqual(events.at(-1), ["end", "day", "inertia-settled"]);
+  assert.equal(events.filter(event => event[0] === "end").length, 1);
+});
+
+test("pointercancel never launches inertia", t => {
+  forceSvgPointFallback(t);
+  const frames = new FakeFrames();
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    requestFrame:frames.request,
+    cancelFrame:frames.cancel
+  });
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointerdown", "day", -90, 1, 0);
+  svg.dispatchAt("pointermove", "day", -88, 1, 40);
+  svg.dispatchAt("pointercancel", "day", -88, 1, 42);
+  assert.equal(controller.isCoasting, false);
+  assert.deepEqual(events.at(-1), ["end", "day", "pointer-cancel"]);
+  assert.equal(frames.pending.size, 0);
+});
+
+test("grabbing a coasting free ring preserves its unsnapped pose", t => {
+  forceSvgPointFallback(t);
+  const frames = new FakeFrames();
+  const events = [];
+  const { svg, ringStates, controller } = setupController({
+    onDragStart: id => events.push(["start", id]),
+    onPoseChange: (id, _state, delta, detail) => events.push(["pose", id, delta, detail.phase]),
+    onDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason, detail.detentOffset])
+  }, {
+    requestFrame:frames.request,
+    cancelFrame:frames.cancel
+  });
+  t.after(() => controller.destroy());
+  controller.setCompareMode(true);
+
+  svg.dispatchAt("pointerdown", "day", -90, 1, 0);
+  svg.dispatchAt("pointermove", "day", -88, 1, 40);
+  svg.dispatchAt("pointerup", "day", -88, 1, 42);
+  frames.run(58);
+  const beforeGrab = ringStates.day.manualOffset;
+  assert.notEqual(beforeGrab, Math.round(beforeGrab / 6) * 6);
+  assert.equal(controller.isCoasting, true);
+
+  svg.dispatchAt("pointerdown", "day", -88, 2, 60);
+  assert.equal(controller.isCoasting, false);
+  assert.equal(ringStates.day.manualOffset, beforeGrab);
+  assert.equal(events.at(-1)[0], "end");
+  assert.equal(events.at(-1)[2], "grab");
+  assert.equal(events.some(event => event[0] === "pose" && event[3] === "detent"), false);
 });
