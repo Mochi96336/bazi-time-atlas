@@ -209,11 +209,11 @@
 
   /* Portrait positions follow the visible radial stack, while Analysis owns a
      separate structured grid through mobile-legend.css. Moving sector values
-     occupy each band's midpoint, so fixed identities share a small inward
-     quiet-lane offset instead of competing on the same radial centerline. */
+     occupy each band's midpoint, so fixed identities sit deeper toward the
+     inner edge of each band instead of competing on that moving centerline. */
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
     transform: rotate(-9deg);
-    margin: 10px 0 0 4px;
+    margin: 26px 0 0 4px;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
     font-size: 8px;
