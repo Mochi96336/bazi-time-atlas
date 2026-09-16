@@ -1,6 +1,8 @@
 import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
+const MIN_WHEEL_LEGEND_GAP_PX = 6;
+const MIN_LEGEND_DOCK_GAP_PX = 6;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -64,6 +66,37 @@ const legendHeight = Number(attr(probe, "data-on-legend-height"));
 if (!Number.isFinite(legendHeight) || legendHeight > 90) {
   throw new Error(`classification overlay mobile legend is too tall (${legendHeight}px): ${url}`);
 }
+
+const instrumentBottom = Number(attr(probe, "data-on-instrument-bottom"));
+const legendTop = Number(attr(probe, "data-on-legend-top"));
+const legendBottom = Number(attr(probe, "data-on-legend-bottom"));
+const dockTop = Number(attr(probe, "data-on-dock-top"));
+if (![instrumentBottom, legendTop, legendBottom, dockTop].every(Number.isFinite)) {
+  throw new Error(`classification mobile band geometry is not finite: ${url}`);
+}
+const wheelGap = legendTop - instrumentBottom;
+const dockGap = dockTop - legendBottom;
+const marginBottom = attr(probe, "data-on-instrument-margin-bottom") ?? "";
+if (attr(probe, "data-on-legend-instrument-overlap") !== "false") {
+  throw new Error(
+    `mobile classification band covers the wheel; legendHeight=${legendHeight}px, wheelGap=${wheelGap}px, ` +
+    `dockGap=${dockGap}px, marginBottom=${marginBottom}: ${url}`
+  );
+}
+if (attr(probe, "data-on-legend-dock-overlap") !== "false") {
+  throw new Error(
+    `mobile classification band covers exact-time controls; legendHeight=${legendHeight}px, wheelGap=${wheelGap}px, ` +
+    `dockGap=${dockGap}px, marginBottom=${marginBottom}: ${url}`
+  );
+}
+requireEqual(attr(probe, "data-on-instrument-overflow"), "visible", "classification mode must allow its below-wheel band to render", url);
+if (wheelGap < MIN_WHEEL_LEGEND_GAP_PX) {
+  throw new Error(`classification band needs >=${MIN_WHEEL_LEGEND_GAP_PX}px below the instrument; got ${wheelGap}px: ${url}`);
+}
+if (dockGap < MIN_LEGEND_DOCK_GAP_PX) {
+  throw new Error(`classification band needs >=${MIN_LEGEND_DOCK_GAP_PX}px above exact-time controls; got ${dockGap}px: ${url}`);
+}
+
 requireEqual(attr(probe, "data-on-bazi-current-hidden"), "true", "mobile BaZi current summary should not float over the wheel", url);
 requireEqual(attr(probe, "data-on-zodiac-current-hidden"), "true", "mobile zodiac current summary should not float over the wheel", url);
 if (attr(probe, "data-jia-zi-fill-before") === attr(probe, "data-jia-zi-fill-on")) {
@@ -100,4 +133,8 @@ requireEqual(attr(probe, "data-off-overlay"), "off", "classification overlay dis
 requireEqual(attr(probe, "data-off-pressed"), "false", "classification overlay disabled button state", url);
 requireEqual(attr(probe, "data-off-legend-hidden"), "true", "classification overlay legend disabled visibility", url);
 
-console.log(`[classification-overlay] PASS compact 390px separate BaZi five-element and zodiac element/modality grammars without mutating Selected Instant: ${url}`);
+console.log(
+  `[classification-overlay] PASS compact 390px separate BaZi five-element and zodiac element/modality grammars; ` +
+  `legendHeight=${legendHeight}px, wheelGap=${wheelGap.toFixed(1)}px, dockGap=${dockGap.toFixed(1)}px, marginBottom=${marginBottom}; ` +
+  `Selected Instant unchanged: ${url}`
+);
