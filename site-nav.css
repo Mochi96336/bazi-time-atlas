@@ -75,6 +75,44 @@
   opacity: .88;
 }
 
+/* On the desktop atlas itself, the brand already owns current-view identity.
+   Remove the second self-link owner and its separator chrome while preserving
+   the Research exit. Mobile keeps the current-page link because its brand is
+   intentionally suppressed in the compact shell. */
+@media (min-width: 481px) {
+  .kinetic-topbar .site-nav a[aria-current="page"] {
+    display: none;
+  }
+
+  .kinetic-topbar .site-nav a.research-link[data-nav-role="research"] {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .kinetic-topbar .site-nav a.research-link[data-nav-role="research"]::before {
+    display: none;
+  }
+}
+
+/* The compact atlas still needs an explicit current-view owner because its
+   brand is hidden. Keep that owner typographic: one baseline, no dashboard
+   pill, fill or rounded control surface. */
+@media (max-width: 480px) {
+  .kinetic-topbar .site-nav a[aria-current="page"] {
+    border: 0;
+    border-radius: 0;
+    padding: 4px 0;
+    color: var(--accent);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .kinetic-topbar .site-nav a[aria-current="page"]::after {
+    bottom: 0;
+    opacity: .72;
+  }
+}
+
 @media (max-width: 600px) {
   .topbar-actions { gap: 10px; }
   .site-nav { gap: 9px; }
