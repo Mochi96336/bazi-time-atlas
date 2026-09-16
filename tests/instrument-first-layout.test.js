@@ -45,6 +45,21 @@ test("mobile ordinary reading flattens exact-time chrome without hiding editing"
   );
 });
 
+test("mobile ordinary idle exact-time rail removes duplicate metadata but preserves feedback states", () => {
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock \.mobile-time-heading\s*\{[^}]*justify-content:\s*flex-end;/s
+  );
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock \.mobile-time-heading strong,[\s\S]*?#mobile-time-status\[data-state="idle"\]\s*\{\s*display:\s*none;/
+  );
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock #mobile-time-status:not\(\[data-state="idle"\]\)\s*\{[^}]*display:\s*none;/s
+  );
+});
+
 test("ordinary reading keeps long-form notes out of the main path", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
 });
