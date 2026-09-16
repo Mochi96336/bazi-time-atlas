@@ -184,6 +184,24 @@
   .analysis-toggle { right: 9px; }
   .analysis-close { left: 9px; }
 
+  /* Analysis can expose five legitimate actions at once (Compare, Reset,
+     Classification, Now, Play). Keep their full labels and 27px row height,
+     but remove desktop horizontal generosity so the action group can coexist
+     with the observation-window group inside a true 390px toolbar. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child {
+    gap: 3px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child .control-button {
+    padding-inline: 5px;
+    font-size: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #now-button {
+    margin-left: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #play-button {
+    min-width: 42px;
+  }
+
   /* Portrait positions follow the visible radial stack, while Analysis owns a
      separate structured grid through mobile-legend.css. */
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
