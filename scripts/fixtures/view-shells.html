@@ -29,7 +29,7 @@
       ["atlas-mobile", "../../"],
       ["recurrence-mobile", "../../recurrence.html"],
       ["birth-mobile", "../../birth.html"],
-      ["sexagenary-mobile", "../../sexagenary.html"],
+      ["sexagenary-mobile", "../../sexagenary.html?ganzhi=丁卯"],
       ["sexagenary-desktop", "../../sexagenary.html"]
     ];
 
@@ -134,15 +134,22 @@
       probe.dataset.birthRelationSurface = surfaceToken(birthWin, relationOverview);
 
       const [sexMobileWin, sexMobileDoc] = docs["sexagenary-mobile"];
+      const sexMobileFacts = sexMobileDoc.querySelector("#cycle-mobile-facts");
       probe.dataset.sexColorScheme = sexMobileWin.getComputedStyle(sexMobileDoc.body).colorScheme;
       probe.dataset.sexInspectorHidden = String(hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-inspector")));
       probe.dataset.sexExplainerHidden = String(hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-explainer")));
       probe.dataset.sexWheelVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector("#sexagenary-wheel")));
       probe.dataset.sexNeighborsVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector("#cycle-neighbors")));
       probe.dataset.sexIndexVisible = String(!hidden(sexMobileWin, sexMobileDoc.querySelector(".cycle-index-panel")));
+      probe.dataset.sexFactsVisible = String(!hidden(sexMobileWin, sexMobileFacts));
+      probe.dataset.sexMobileStemName = sexMobileDoc.querySelector("#mobile-stem-name")?.textContent.trim() ?? "missing";
+      probe.dataset.sexMobileStemMeta = sexMobileDoc.querySelector("#mobile-stem-meta")?.textContent.trim() ?? "missing";
+      probe.dataset.sexMobileBranchName = sexMobileDoc.querySelector("#mobile-branch-name")?.textContent.trim() ?? "missing";
+      probe.dataset.sexMobileBranchMeta = sexMobileDoc.querySelector("#mobile-branch-meta")?.textContent.trim() ?? "missing";
 
       const [sexDesktopWin, sexDesktopDoc] = docs["sexagenary-desktop"];
       probe.dataset.sexDesktopInspectorVisible = String(!hidden(sexDesktopWin, sexDesktopDoc.querySelector(".cycle-inspector")));
+      probe.dataset.sexDesktopFactsHidden = String(hidden(sexDesktopWin, sexDesktopDoc.querySelector("#cycle-mobile-facts")));
 
       probe.dataset.allNavMatch = String(Object.values(navMatches).every(Boolean));
       probe.dataset.ready = "true";

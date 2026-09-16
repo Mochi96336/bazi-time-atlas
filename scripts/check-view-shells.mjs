@@ -136,6 +136,12 @@ requireEqual(attr(probe, "data-sex-explainer-hidden"), "true", "Sexagenary mobil
 requireEqual(attr(probe, "data-sex-wheel-visible"), "true", "Sexagenary mobile wheel disappeared", url);
 requireEqual(attr(probe, "data-sex-neighbors-visible"), "true", "Sexagenary mobile neighbor navigation disappeared", url);
 requireEqual(attr(probe, "data-sex-index-visible"), "true", "Sexagenary mobile full-cycle disclosure disappeared", url);
+requireEqual(attr(probe, "data-sex-facts-visible"), "true", "Sexagenary mobile unique stem/branch facts disappeared with the inspector", url);
+requireEqual(attr(probe, "data-sex-mobile-stem-name"), "丁", "Sexagenary mobile facts did not follow the ?ganzhi=丁卯 selection", url);
+requireEqual(attr(probe, "data-sex-mobile-stem-meta"), "陰 · 火 · 4 / 10", "Sexagenary mobile stem metadata is stale or incomplete", url);
+requireEqual(attr(probe, "data-sex-mobile-branch-name"), "卯", "Sexagenary mobile branch fact did not follow the selected pair", url);
+requireEqual(attr(probe, "data-sex-mobile-branch-meta"), "陰 · 木 · 4 / 12", "Sexagenary mobile branch metadata is stale or incomplete", url);
 requireEqual(attr(probe, "data-sex-desktop-inspector-visible"), "true", "Sexagenary desktop inspector should remain visible", url);
+requireEqual(attr(probe, "data-sex-desktop-facts-hidden"), "true", "Sexagenary desktop must not duplicate the mobile facts strip beside its inspector", url);
 
-console.log(`[view-shells] PASS primary nav + task-first Research + substantial first-viewport instrument + compact dark Birth/Sexagenary 390px hierarchy: ${url}`);
+console.log(`[view-shells] PASS primary nav + task-first Research + compact dark Birth + mobile Sexagenary facts without duplicate inspector: ${url}`);
