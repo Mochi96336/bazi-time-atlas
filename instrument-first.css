@@ -126,6 +126,21 @@
   display: none;
 }
 
+/* Observation-window choice and Now are one time-navigation cluster. Keep the
+   Analysis entry separate as a mode switch instead of scattering time actions
+   across opposite corners of the instrument. */
+#kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar > .toolbar-group {
+  flex-wrap: nowrap;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar > .toolbar-group:last-child {
+  margin-left: 1px;
+}
+
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
   min-height: 28px;
   border: 0;
