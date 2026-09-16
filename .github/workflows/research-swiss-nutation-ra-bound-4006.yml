@@ -1,0 +1,173 @@
+name: Research Swiss nutation RA bound 4006
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-swiss-nutation-ra-bound-4006.yml"
+      - "scripts/research-swiss-nutated-ra-samples-4006.c"
+      - "scripts/compose-swiss-nutation-ra-bound-4006.mjs"
+      - "src/astronomy/equation-of-time-4006-swiss-vondrak-precession-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-annual-aberration-ra-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-nutation-ra-evidence.js"
+      - "tests/equation-of-time-4006-swiss-nutation-ra-evidence.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nutation-ra-bound:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+
+      - name: Audit pinned Sun and IAU 2000B nutation structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          sweph = Path("tmp/swisseph/sweph.c").read_text()
+          lib = Path("tmp/swisseph/swephlib.c").read_text()
+          hdr = Path("tmp/swisseph/swephexp.h").read_text()
+          tab = Path("tmp/swisseph/swenut2000a.h").read_text()
+
+          assert "#define SEMOD_NUT_DEFAULT           SEMOD_NUT_IAU_2000B" in hdr
+          assert "#define NLS_2000B 77" in tab
+          assert "if (nut_model == SEMOD_NUT_IAU_2000B)" in lib
+          assert "inls = NLS_2000B;" in lib
+
+          start = sweph.index("static int app_pos_etc_sun(int32 iflag, char *serr)\n{")
+          end = sweph.index("static int app_pos_etc_moon", start)
+          sun = sweph[start:end]
+          aberr = sun.index("swi_aberr_light(xx, xobs, iflag);")
+          precess = sun.index("swi_precess(xx, pedp->teval, iflag, J2000_TO_J);")
+          finish = sun.index("return app_pos_rest(pedp, iflag, xx, xxsv, oe, serr);")
+          if not (aberr < precess < finish):
+              raise SystemExit("unexpected Sun aberration/precession/finishing order")
+          if "swi_deflect_light(" in sun:
+              raise SystemExit("pinned geocentric Sun path unexpectedly applies gravitational deflection")
+
+          # The source commit itself is immutable and the Sun path above is locked to
+          # app_pos_rest(). Verify that shared finishing path still owns nutation.
+          if "if (!(iflag & SEFLG_NONUT))" not in sweph or "swi_nutate(xx, iflag, FALSE);" not in sweph:
+              raise SystemExit("pinned app_pos_rest nutation path changed")
+          PY
+
+      - name: Download pinned Swiss long-range ephemerides
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/sweph
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          for file in sepl_36.se1 semo_36.se1; do
+            curl -fsSL --retry 3 --retry-delay 2 \
+              "https://raw.githubusercontent.com/aloistr/swisseph/${SWISS_COMMIT}/ephe/${file}" \
+              -o "tmp/sweph/${file}"
+          done
+          cat <<'EOF' | sha256sum -c -
+          3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0  tmp/sweph/sepl_36.se1
+          f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
+          EOF
+
+      - name: Build pinned Swiss library and nutated Sun sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          mkdir -p tmp/swiss-nutation-ra-bound-4006
+          cc -O2 -std=gnu11 \
+            -I tmp/swisseph \
+            scripts/research-swiss-nutated-ra-samples-4006.c \
+            tmp/swisseph/libswe.a -lm \
+            -o tmp/swiss-nutation-ra-bound-4006/sample
+
+      - name: Capture exact pinned apparent-Sun nutation samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp/swiss-nutation-ra-bound-4006/sample tmp/sweph \
+            | tee tmp/swiss-nutation-ra-bound-4006/raw.json
+          python -m json.tool tmp/swiss-nutation-ra-bound-4006/raw.json >/dev/null
+
+      - name: Compose continuous IAU 2000B nutation certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/compose-swiss-nutation-ra-bound-4006.mjs
+          python -m json.tool tmp/swiss-nutation-ra-bound-4006/manifest.json >/dev/null
+
+      - name: Verify proof scope and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          raw = json.loads(Path("tmp/swiss-nutation-ra-bound-4006/raw.json").read_text())
+          m = json.loads(Path("tmp/swiss-nutation-ra-bound-4006/manifest.json").read_text())
+
+          assert raw["targetYear"] == 4006
+          assert raw["sampleStepEtDays"] <= 0.25
+          assert raw["sampleCoverRadiusEtDays"] <= 0.125
+          assert raw["minSampledNutatedEquatorialXyAu"] > 0
+          r = raw["interpretation"]
+          assert r["lightTimeEnabled"] is True
+          assert r["annualAberrationEnabled"] is True
+          assert r["vondrakPrecessionEnabled"] is True
+          assert r["defaultNutationEnabled"] is True
+          assert r["gridMinimumIsContinuousLowerBound"] is False
+          assert r["continuousRaCurvatureCertified"] is False
+
+          assert m["provenance"]["nutationModel"] == "SEMOD_NUT_IAU_2000B"
+          assert m["provenance"]["luniSolarTermCount"] == 77
+          n = m["nutationMatrixHardBounds"]
+          assert n["firstDerivativeOperatorNormPerDay"] > 0
+          assert n["secondDerivativeOperatorNormPerDaySquared"] > 0
+          assert n["meanObliquitySinLower"] > 0
+          hard = m["derivedHardBounds"]
+          assert hard["hardNutatedEquatorialXyLowerAu"] > 0
+          assert 0 < hard["nutatedRaSecondDerivativeBoundDegPerDaySquared"] < m["planning"]["fullSwissEotSecondDerivativeThresholdDegPerDaySquared"]
+
+          i = m["interpretation"]
+          assert i["sourceDerivedContinuousBound"] is True
+          assert i["iau2000bDefaultModelSourceAudited"] is True
+          assert i["iau2000bTermDerivativeBoundsAnalytic"] is True
+          assert i["nutationMatrixFirstDerivativeCertified"] is True
+          assert i["nutationMatrixSecondDerivativeCertified"] is True
+          assert i["nutationCertified"] is True
+          assert i["apparentPositionCorrectionChainCertified"] is True
+          assert i["nutatedXySeparationContinuous"] is True
+          assert i["nutatedRaSecondDerivativeCertified"] is True
+          assert i["longTermSiderealSecondDerivativeCertified"] is False
+          assert i["swissEotSecondDerivativeCertified"] is False
+          assert i["swissEotDerivativeCertified"] is False
+          assert i["continuousResidualUpperBound"] is False
+          assert i["deterministicMembership"] is False
+          assert i["recurrenceAuthorityGranted"] is False
+          PY
+
+      - name: Upload source-derived nutation evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swiss-nutation-ra-bound-4006
+          path: |
+            tmp/swiss-nutation-ra-bound-4006/raw.json
+            tmp/swiss-nutation-ra-bound-4006/manifest.json
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
