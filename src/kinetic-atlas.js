@@ -1,3 +1,4 @@
+import "./time-context-control.js";
 import { solarTerms, zodiacSigns } from "./data.js";
 import {
   CURSOR_ANGLE,
@@ -26,7 +27,8 @@ import {
 import {
   DEFAULT_ATLAS_TIME_CONTEXT,
   atlasTimeContextFromSearch,
-  formatAtlasUtcOffset
+  formatAtlasUtcOffset,
+  writeAtlasTimeContextSearch
 } from "./wheel/atlas-time-context.js";
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
@@ -35,6 +37,10 @@ import {
   SELECTED_INSTANT_COMMAND,
   selectedInstantFromCommandDetail
 } from "./interaction/selected-instant-command.js";
+import {
+  TIME_CONTEXT_COMMAND,
+  timeContextFromCommandDetail
+} from "./interaction/time-context-command.js";
 import {
   clearLegacyProjectionUrl,
   selectedInstantUrl
@@ -168,6 +174,16 @@ function clearLegacyProjection() {
   if (href) history.replaceState(history.state, "", href);
 }
 
+function temporalContextUrl(currentHref, timeContext) {
+  try {
+    const url = new URL(currentHref);
+    writeAtlasTimeContextSearch(url.searchParams, timeContext);
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
 function setText(id, value) {
   const node = document.querySelector(`#${id}`);
   if (node) node.textContent = value;
@@ -185,6 +201,9 @@ function updateReadout(display) {
     timeContext
   } = display;
   const offsetLabel = formatAtlasUtcOffset(timeContext.utcOffsetHours);
+  const basisLabel = timeContext.dayBoundary === DEFAULT_ATLAS_TIME_CONTEXT.dayBoundary
+    ? offsetLabel
+    : `${offsetLabel} · 00:00`;
   setText("instant-readout", `${formatAtlasCivil(fields)} · ${offsetLabel}`);
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
@@ -200,7 +219,7 @@ function updateReadout(display) {
   setText("state-hour", pillars.hour.name);
   setText("state-zodiac", activeZodiac.name);
   setText("state-term", activeTerm.name);
-  if (timeBasisReadout) timeBasisReadout.textContent = offsetLabel;
+  if (timeBasisReadout) timeBasisReadout.textContent = basisLabel;
   if (instantInput) instantInput.setAttribute("aria-label", `選定時間，${offsetLabel}，秒級`);
   instrument.dataset.selectedInstantMs = String(Math.round(state.selectedMs));
   instrument.dataset.utcOffsetHours = String(timeContext.utcOffsetHours);
@@ -272,6 +291,17 @@ function setSelectedInstant(instantMs, source = "command") {
   updateWheel();
   instrument.dataset.lastSelectedInstantSource = source;
   const href = selectedInstantUrl(location.href, instantMs, state.timeContext);
+  if (href) history.replaceState(history.state, "", href);
+  return true;
+}
+
+function setTimeContext(timeContext, source = "command") {
+  if (!timeContext) return false;
+  stopPlayback();
+  state.timeContext = timeContext;
+  updateWheel();
+  instrument.dataset.lastTimeContextSource = source;
+  const href = temporalContextUrl(location.href, timeContext);
   if (href) history.replaceState(history.state, "", href);
   return true;
 }
@@ -398,6 +428,12 @@ function bindControls() {
     if (instant === null) return;
     const source = typeof event.detail?.source === "string" ? event.detail.source : "command";
     setSelectedInstant(instant, source);
+  });
+  instrument.addEventListener(TIME_CONTEXT_COMMAND, event => {
+    const timeContext = timeContextFromCommandDetail(event.detail);
+    if (timeContext === null) return;
+    const source = typeof event.detail?.source === "string" ? event.detail.source : "command";
+    setTimeContext(timeContext, source);
   });
 }
 
