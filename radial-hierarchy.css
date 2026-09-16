@@ -2,6 +2,21 @@
    This sheet changes presentation only. Ring geometry, motion and boundary
    semantics remain owned by the wheel model and renderer. */
 
+/* Color grammar belongs to the composed instrument, not to each clock as an
+   independent category. The four Ganzhi clocks are one cool, low-chroma family
+   whose lightness opens outward with temporal scale. Solar longitude keeps the
+   single warm brass channel; derived Zodiac stays a recessed violet; the ivory
+   cursor remains reserved for the Selected Instant. Classification mode may
+   deliberately replace this resting grammar with categorical element colors. */
+:root {
+  --hour: #6f8983;
+  --day: #78928b;
+  --month: #859e96;
+  --year: #96aaa2;
+  --solar: #c6a36f;
+  --zodiac: #9089a7;
+}
+
 /* Read the legend the same way the eye reads the fan: outer / slow first,
    then walk inward toward the fast clocks. Keep the legend about layer
    identity/current state; cycle scale is already encoded by radius and the
@@ -13,7 +28,7 @@
 .ring-hour { order: 5; }
 
 .ring-legend-row { grid-template-columns: 8px 54px minmax(64px, auto); }
-.ring-year strong { color: #e4ddc4; font-weight: 800; }
+.ring-year strong { color: #dce6df; font-weight: 800; }
 .ring-month strong { color: #d4dfd7; font-weight: 760; }
 .ring-solar strong { color: #c7b89f; font-weight: 700; }
 .ring-day strong,
@@ -41,7 +56,7 @@
   font-weight: 720;
 }
 #year-track .cycle-label {
-  fill: rgba(244,236,207,.84);
+  fill: rgba(226,236,229,.84);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .02em;
@@ -80,7 +95,7 @@
   font-weight: 820;
 }
 #year-track .active-cycle-label {
-  fill: #fff2c9;
+  fill: #f0f6f2;
   font-size: 11.5px;
   font-weight: 860;
 }
@@ -114,50 +129,53 @@
 #hour-track .ring-tick.major { stroke: rgba(238,242,237,.23); stroke-width: 1.05; }
 #day-track .ring-tick.major { stroke: rgba(238,242,237,.28); stroke-width: 1.1; }
 #month-track .ring-tick.major { stroke: rgba(238,242,237,.40); stroke-width: 1.2; }
-#year-track .ring-tick.major { stroke: rgba(244,238,218,.52); stroke-width: 1.35; }
+#year-track .ring-tick.major { stroke: rgba(231,239,234,.52); stroke-width: 1.35; }
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
    not two more peer clocks. Resting sectors form continuous surfaces. Exact
    term boundaries stay in the dedicated marks, with 節 (jie) carrying the
    stronger cadence; active state may use a border because it is singular. */
 #guide-layer .guide-arc.annual-subdivide {
-  stroke: rgba(213,163,109,.12);
+  stroke: color-mix(in srgb, var(--solar) 12%, transparent);
   stroke-dasharray: 3 6;
 }
 #solar-track .term-sector {
-  fill: rgba(213,163,109,.045);
+  fill: color-mix(in srgb, var(--solar) 4.5%, transparent);
   stroke: none;
 }
-#solar-track .term-sector.jie { fill: rgba(213,163,109,.075); }
+#solar-track .term-sector.jie { fill: color-mix(in srgb, var(--solar) 7.5%, transparent); }
 #solar-track .term-sector.is-active {
-  fill: rgba(213,163,109,.19);
-  stroke: rgba(244,230,183,.42);
+  fill: color-mix(in srgb, var(--solar) 19%, transparent);
+  stroke: color-mix(in srgb, var(--cursor) 42%, transparent);
   stroke-width: 1.15;
 }
 #solar-track .term-mark { opacity: .30; stroke-width: .8; }
 #solar-track .term-mark.jie { opacity: .70; stroke-width: 1.15; }
 #solar-track .term-label {
-  fill: #aa9c86;
+  fill: color-mix(in srgb, var(--solar) 62%, var(--muted));
   font-size: 10px;
   font-weight: 650;
 }
-#solar-track .term-label.jie { fill: #cfb58f; font-weight: 760; }
+#solar-track .term-label.jie {
+  fill: color-mix(in srgb, var(--solar) 72%, var(--ink));
+  font-weight: 760;
+}
 
 #zodiac-track {
   pointer-events: none;
   opacity: .78;
 }
 #zodiac-track .zodiac-sector {
-  fill: rgba(153,139,180,.055);
+  fill: color-mix(in srgb, var(--zodiac) 5.5%, transparent);
   stroke: none;
 }
 #zodiac-track .zodiac-sector.is-active {
-  fill: rgba(153,139,180,.15);
-  stroke: rgba(214,204,231,.38);
+  fill: color-mix(in srgb, var(--zodiac) 15%, transparent);
+  stroke: color-mix(in srgb, var(--zodiac) 58%, var(--ink));
   stroke-width: 1.1;
 }
 #zodiac-track .zodiac-label {
-  fill: #a49ab8;
+  fill: color-mix(in srgb, var(--zodiac) 72%, var(--muted));
   font-size: 10px;
   font-weight: 680;
 }

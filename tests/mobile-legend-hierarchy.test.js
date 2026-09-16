@@ -13,7 +13,7 @@ function mobile480Block(source) {
 }
 
 test("mobile legend keeps per-ring hierarchy ink instead of flattening every value", () => {
-  assert.match(css, /\.ring-year strong\s*\{[^}]*color:\s*#e4ddc4;[^}]*font-weight:\s*800;/s);
+  assert.match(css, /\.ring-year strong\s*\{[^}]*color:\s*#dce6df;[^}]*font-weight:\s*800;/s);
   assert.match(css, /\.ring-month strong\s*\{[^}]*color:\s*#d4dfd7;[^}]*font-weight:\s*760;/s);
   assert.match(css, /\.ring-solar strong\s*\{[^}]*color:\s*#c7b89f;[^}]*font-weight:\s*700;/s);
   assert.match(css, /\.ring-day strong,\s*\.ring-hour strong\s*\{[^}]*color:\s*#9da8a1;[^}]*font-weight:\s*660;/s);
