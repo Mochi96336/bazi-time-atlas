@@ -23,7 +23,7 @@
     const mobileFrame = document.querySelector("#mobile-stage");
     const desktopFrame = document.querySelector("#desktop-stage");
     const probe = document.querySelector("#probe");
-    const source = "../../?instant=2026-09-15T20%3A14%3A37.000Z";
+    const source = "../../?instant=2026-09-15T20%3A14%3A37.000Z&lambda=271.25&month=%E5%AD%90&yearStem=%E4%B9%99&keep=1#analysis";
     mobileFrame.src = new URL(source, location.href).href;
     desktopFrame.src = new URL(source, location.href).href;
     let mobileLoaded = false;
@@ -87,10 +87,14 @@
         return;
       }
 
+      const mobileUrl = new URL(mobileWin.location.href);
       probe.dataset.mobileRoundtripValue = input.value;
       probe.dataset.mobileSelectedInstantMs = instrument.dataset.selectedInstantMs ?? "";
       probe.dataset.mobileSource = instrument.dataset.lastSelectedInstantSource ?? "";
-      probe.dataset.mobileUrlInstant = new URL(mobileWin.location.href).searchParams.get("instant") ?? "";
+      probe.dataset.mobileUrlInstant = mobileUrl.searchParams.get("instant") ?? "";
+      probe.dataset.mobileUrlKeep = mobileUrl.searchParams.get("keep") ?? "";
+      probe.dataset.mobileUrlHash = mobileUrl.hash;
+      probe.dataset.mobileLegacyKeys = String(["lambda", "month", "yearStem"].some(key => mobileUrl.searchParams.has(key)));
       probe.dataset.mobileDocumentContinuity = String(mobileWin.__exactTimeContinuity === "alive");
       probe.dataset.mobileLoadCount = String(mobileLoadCount);
       probe.dataset.mobileStatusState = status.dataset.state ?? "";
@@ -104,10 +108,15 @@
         return;
       }
 
+      const desktopUrl = new URL(desktopWin.location.href);
       probe.dataset.desktopRoundtripValue = desktopInput.value;
       probe.dataset.desktopRoundtripValid = String(desktopInput.validity.valid);
       probe.dataset.desktopSelectedInstantMs = desktopInstrument.dataset.selectedInstantMs ?? "";
       probe.dataset.desktopSource = desktopInstrument.dataset.lastSelectedInstantSource ?? "";
+      probe.dataset.desktopUrlInstant = desktopUrl.searchParams.get("instant") ?? "";
+      probe.dataset.desktopUrlKeep = desktopUrl.searchParams.get("keep") ?? "";
+      probe.dataset.desktopUrlHash = desktopUrl.hash;
+      probe.dataset.desktopLegacyKeys = String(["lambda", "month", "yearStem"].some(key => desktopUrl.searchParams.has(key)));
       probe.dataset.ready = "true";
     }
 

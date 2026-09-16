@@ -1,7 +1,6 @@
 import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
 import {
   formatMobileAtlasInput,
-  mobileExactInstantUrl,
   parseMobileAtlasInput
 } from "./mobile-time-value.js";
 
@@ -27,7 +26,7 @@ function setStatus(message, state = "idle") {
 }
 
 function applyExactTime() {
-  if (!mobileQuery.matches || !input) return;
+  if (!mobileQuery.matches || !input || !instrument) return;
   const instantMs = parseMobileAtlasInput(input.value);
   if (instantMs === null) {
     input.setAttribute("aria-invalid", "true");
@@ -35,11 +34,6 @@ function applyExactTime() {
     return;
   }
   input.removeAttribute("aria-invalid");
-  const href = mobileExactInstantUrl(location.href, instantMs);
-  if (!href || !instrument) {
-    setStatus("無法套用時間", "error");
-    return;
-  }
 
   setStatus("套用中…", "pending");
   instrument.dispatchEvent(new CustomEvent(SELECTED_INSTANT_COMMAND, {
@@ -51,7 +45,6 @@ function applyExactTime() {
     return;
   }
 
-  history.replaceState(history.state, "", href);
   syncFromInstrument();
   setStatus("已套用 · UTC+08:00", "success");
 }

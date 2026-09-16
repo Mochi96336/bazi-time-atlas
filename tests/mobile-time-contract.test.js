@@ -23,14 +23,17 @@ test("desktop exact-time precision belongs to desktop markup, not the mobile con
   assert.doesNotMatch(mobileController, /desktopInput|#instant-input/);
 });
 
-test("mobile exact time commands the kinetic state owner without reloading the document", () => {
+test("mobile exact time commands the kinetic state owner without owning navigation or URL persistence", () => {
   assert.match(commandContract, /SELECTED_INSTANT_COMMAND\s*=\s*"atlas:set-selected-instant"/);
   assert.match(mobileController, /dispatchEvent\(new CustomEvent\(SELECTED_INSTANT_COMMAND/);
-  assert.match(mobileController, /history\.replaceState\(history\.state,\s*"",\s*href\)/);
-  assert.doesNotMatch(mobileController, /location\.assign|location\.replace|location\.reload/);
+  assert.doesNotMatch(mobileController, /history\.replaceState|location\.assign|location\.replace|location\.reload/);
   assert.match(kineticAtlas, /function setSelectedInstant\(instantMs, source = "command"\)/);
+  assert.match(kineticAtlas, /selectedInstantUrl\(location\.href, instantMs\)/);
+  assert.match(kineticAtlas, /clearLegacyProjectionUrl\(location\.href\)/);
+  assert.match(kineticAtlas, /history\.replaceState\(history\.state,\s*"",\s*href\)/);
   assert.match(kineticAtlas, /instrument\.addEventListener\(SELECTED_INSTANT_COMMAND/);
   assert.match(kineticAtlas, /setSelectedInstant\(instant, "desktop-input"\)/);
+  assert.match(kineticAtlas, /setSelectedInstant\(Date\.now\(\), "now"\)/);
 });
 
 test("mobile shell scrolls internally while preserving the instrument-first viewport", () => {

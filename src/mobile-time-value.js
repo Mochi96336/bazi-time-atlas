@@ -51,11 +51,3 @@ export function parseMobileAtlasInput(value) {
 
   return shifted.getTime() - MOBILE_ATLAS_UTC_OFFSET_HOURS * 3_600_000;
 }
-
-export function mobileExactInstantUrl(currentHref, instantMs) {
-  if (!Number.isFinite(instantMs)) return null;
-  const url = new URL(currentHref);
-  url.searchParams.set("instant", new Date(instantMs).toISOString());
-  for (const key of ["lambda", "month", "yearStem"]) url.searchParams.delete(key);
-  return url.href;
-}
