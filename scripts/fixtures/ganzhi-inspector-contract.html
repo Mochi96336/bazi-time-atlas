@@ -4,10 +4,7 @@
   <meta charset="utf-8">
   <title>Ganzhi inspector contract</title>
   <style>
-    html, body { margin:0; width:1260px; min-height:980px; background:#080b09; }
-    iframe { width:1200px; height:900px; border:0; display:block; }
-    #deep-link-frame { position:absolute; left:-2400px; top:0; }
-    #probe { display:none; }
+    html,body{margin:0;width:1260px;min-height:980px;background:#080b09}iframe{width:1200px;height:900px;border:0;display:block}#deep-link-frame{position:absolute;left:-2400px;top:0}#probe{display:none}
   </style>
 </head>
 <body>
@@ -15,129 +12,58 @@
   <iframe id="deep-link-frame" title="Atlas Ganzhi inspector deep link"></iframe>
   <output id="probe" data-ready="false"></output>
   <script>
-    const probe = document.querySelector("#probe");
-    const atlasFrame = document.querySelector("#atlas-frame");
-    const deepLinkFrame = document.querySelector("#deep-link-frame");
-    const instant = "2026-09-13T23:43:42.000Z";
-    const loaded = new Set();
-    let captureStarted = false;
-    let readinessAttempts = 0;
-
-    function visible(win, node) {
-      return Boolean(node) && win.getComputedStyle(node).display !== "none";
+    const probe=document.querySelector("#probe");
+    const atlasFrame=document.querySelector("#atlas-frame");
+    const deepLinkFrame=document.querySelector("#deep-link-frame");
+    const instant="2026-09-13T23:43:42.000Z";
+    const loaded=new Set();
+    let captureStarted=false,readinessAttempts=0;
+    const put=(key,value)=>{probe.dataset[key]=String(value)};
+    const visible=(win,node)=>Boolean(node)&&win.getComputedStyle(node).display!=="none";
+    const textReady=(doc,selector)=>{const value=doc.querySelector(selector)?.textContent?.trim()??"";return value!==""&&value!=="—"};
+    function pagesReady(){
+      if(loaded.size!==2)return false;
+      const doc=atlasFrame.contentDocument,deepDoc=deepLinkFrame.contentDocument;
+      if(!doc?.body||!deepDoc?.body)return false;
+      const baseReady=["#state-year","#state-month","#state-day","#state-hour"].every(selector=>textReady(doc,selector));
+      const deepInspector=deepDoc.querySelector("#ganzhi-inspector"),deepStructure=deepDoc.querySelector("#ganzhi-structure");
+      return baseReady&&textReady(deepDoc,"#state-day")&&deepInspector?.dataset.ready==="true"&&deepStructure?.dataset.ready==="true"&&visible(deepLinkFrame.contentWindow,deepInspector);
     }
-
-    function textReady(doc, selector) {
-      const value = doc.querySelector(selector)?.textContent?.trim() ?? "";
-      return value !== "" && value !== "—";
+    function pollReadiness(){
+      if(captureStarted)return;
+      readinessAttempts+=1;
+      if(pagesReady())return exerciseOnce();
+      if(readinessAttempts<30)setTimeout(pollReadiness,150);
     }
-
-    function pagesReady() {
-      if (loaded.size !== 2) return false;
-      const doc = atlasFrame.contentDocument;
-      const deepDoc = deepLinkFrame.contentDocument;
-      if (!doc?.body || !deepDoc?.body) return false;
-      const basePillarsReady = ["#state-year", "#state-month", "#state-day", "#state-hour"]
-        .every(selector => textReady(doc, selector));
-      const deepInspector = deepDoc.querySelector("#ganzhi-inspector");
-      return basePillarsReady
-        && textReady(deepDoc, "#state-day")
-        && deepInspector?.dataset.ready === "true"
-        && visible(deepLinkFrame.contentWindow, deepInspector);
-    }
-
-    function pollReadiness() {
-      if (captureStarted) return;
-      readinessAttempts += 1;
-      if (pagesReady()) {
-        exerciseOnce();
-        return;
-      }
-      if (readinessAttempts < 30) setTimeout(pollReadiness, 150);
-    }
-
-    function exerciseOnce() {
-      if (captureStarted || !pagesReady()) return;
-      captureStarted = true;
-
-      const win = atlasFrame.contentWindow;
-      const doc = atlasFrame.contentDocument;
-      const deepWin = deepLinkFrame.contentWindow;
-      const deepDoc = deepLinkFrame.contentDocument;
-      const instrument = doc.querySelector("#kinetic-instrument");
-      const strip = doc.querySelector(".state-strip");
-      const yearTrigger = doc.querySelector('[data-ganzhi-reference="year"]');
-      const monthTrigger = doc.querySelector('[data-ganzhi-reference="month"]');
-      const inspector = doc.querySelector("#ganzhi-inspector");
-      const solarCell = doc.querySelector(".state-strip .state-cell:not(.state-cell-reference)");
-      const referenceCells = [...doc.querySelectorAll(".state-strip .state-cell-reference")];
-      const baseline = strip?.getBoundingClientRect();
-      const selectedBefore = instrument?.dataset.selectedInstantMs ?? "missing";
-      const closedHeights = [...referenceCells, solarCell]
-        .filter(Boolean)
-        .map(node => node.getBoundingClientRect().height);
-      const closedTops = [...referenceCells, solarCell]
-        .filter(Boolean)
-        .map(node => node.getBoundingClientRect().top);
-      probe.dataset.closedCellCount = String(closedHeights.length);
-      probe.dataset.closedCellHeightAligned = String(
-        closedHeights.length === 5 && Math.max(...closedHeights) - Math.min(...closedHeights) <= 1
-      );
-      probe.dataset.closedCellTopAligned = String(
-        closedTops.length === 5 && Math.max(...closedTops) - Math.min(...closedTops) <= 1
-      );
-
+    function exerciseOnce(){
+      if(captureStarted||!pagesReady())return;
+      captureStarted=true;
+      const win=atlasFrame.contentWindow,doc=atlasFrame.contentDocument,deepWin=deepLinkFrame.contentWindow,deepDoc=deepLinkFrame.contentDocument;
+      const instrument=doc.querySelector("#kinetic-instrument"),strip=doc.querySelector(".state-strip"),yearTrigger=doc.querySelector('[data-ganzhi-reference="year"]'),monthTrigger=doc.querySelector('[data-ganzhi-reference="month"]'),inspector=doc.querySelector("#ganzhi-inspector"),structure=doc.querySelector("#ganzhi-structure");
+      const solarCell=doc.querySelector(".state-strip .state-cell:not(.state-cell-reference)"),referenceCells=[...doc.querySelectorAll(".state-strip .state-cell-reference")],baseline=strip?.getBoundingClientRect(),selectedBefore=instrument?.dataset.selectedInstantMs??"missing";
+      const cells=[...referenceCells,solarCell].filter(Boolean),heights=cells.map(node=>node.getBoundingClientRect().height),tops=cells.map(node=>node.getBoundingClientRect().top);
+      put("closedCellCount",heights.length);put("closedCellHeightAligned",heights.length===5&&Math.max(...heights)-Math.min(...heights)<=1);put("closedCellTopAligned",tops.length===5&&Math.max(...tops)-Math.min(...tops)<=1);
       yearTrigger?.click();
-      setTimeout(() => {
-        const opened = strip?.getBoundingClientRect();
-        const currentYear = doc.querySelector("#state-year")?.textContent.trim() ?? "missing";
-        const openedUrl = new URL(win.location.href);
-        probe.dataset.openVisible = String(visible(win, inspector));
-        probe.dataset.openPosition = inspector ? win.getComputedStyle(inspector).position : "missing";
-        probe.dataset.stripTopStable = String(Math.round(baseline?.top ?? -1) === Math.round(opened?.top ?? -2));
-        probe.dataset.stripHeightStable = String(Math.round(baseline?.height ?? -1) === Math.round(opened?.height ?? -2));
-        probe.dataset.selectedStable = String(selectedBefore === (instrument?.dataset.selectedInstantMs ?? "changed"));
-        probe.dataset.urlInspect = openedUrl.searchParams.get("inspect") ?? "missing";
-        probe.dataset.urlInstant = openedUrl.searchParams.get("instant") ?? "missing";
-        probe.dataset.inspectorPillar = inspector?.dataset.pillar ?? "missing";
-        probe.dataset.inspectorGanzhi = inspector?.dataset.ganzhi ?? "missing";
-        probe.dataset.stateYear = currentYear;
-        probe.dataset.inspectorReady = inspector?.dataset.ready ?? "missing";
-        probe.dataset.gridCount = String(doc.querySelectorAll("#ganzhi-inspector-grid [data-cycle-index]").length);
-        probe.dataset.gridButtonCount = String(doc.querySelectorAll("#ganzhi-inspector-grid button").length);
-
-        monthTrigger?.click();
-        probe.dataset.monthPillar = inspector?.dataset.pillar ?? "missing";
-        probe.dataset.monthGanzhi = inspector?.dataset.ganzhi ?? "missing";
-        probe.dataset.stateMonth = doc.querySelector("#state-month")?.textContent.trim() ?? "missing";
-        probe.dataset.selectedAfterSwitch = String(selectedBefore === (instrument?.dataset.selectedInstantMs ?? "changed"));
-
-        doc.querySelector("#ganzhi-inspector-close")?.click();
-        probe.dataset.closedHidden = String(!visible(win, inspector));
-        probe.dataset.closedInspectMissing = String(!new URL(win.location.href).searchParams.has("inspect"));
-        probe.dataset.selectedAfterClose = String(selectedBefore === (instrument?.dataset.selectedInstantMs ?? "changed"));
-
-        const deepInspector = deepDoc.querySelector("#ganzhi-inspector");
-        probe.dataset.deepVisible = String(visible(deepWin, deepInspector));
-        probe.dataset.deepPillar = deepInspector?.dataset.pillar ?? "missing";
-        probe.dataset.deepGanzhi = deepInspector?.dataset.ganzhi ?? "missing";
-        probe.dataset.deepStateDay = deepDoc.querySelector("#state-day")?.textContent.trim() ?? "missing";
-        probe.dataset.deepReady = deepInspector?.dataset.ready ?? "missing";
-        probe.dataset.readinessAttempts = String(readinessAttempts);
-        probe.dataset.ready = "true";
-      }, 80);
+      setTimeout(()=>{
+        const opened=strip?.getBoundingClientRect(),openedUrl=new URL(win.location.href),currentYear=doc.querySelector("#state-year")?.textContent.trim()??"missing";
+        put("openVisible",visible(win,inspector));put("openPosition",inspector?win.getComputedStyle(inspector).position:"missing");put("stripTopStable",Math.round(baseline?.top??-1)===Math.round(opened?.top??-2));put("stripHeightStable",Math.round(baseline?.height??-1)===Math.round(opened?.height??-2));put("selectedStable",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));put("urlInspect",openedUrl.searchParams.get("inspect")??"missing");put("urlInstant",openedUrl.searchParams.get("instant")??"missing");put("inspectorPillar",inspector?.dataset.pillar??"missing");put("inspectorGanzhi",inspector?.dataset.ganzhi??"missing");put("stateYear",currentYear);put("inspectorReady",inspector?.dataset.ready??"missing");put("structureReady",structure?.dataset.ready??"missing");put("structureTabCount",doc.querySelectorAll("#ganzhi-structure [data-structure-tab]").length);put("structureDefaultTab",structure?.dataset.activeTab??"missing");put("structureBasicVisible",visible(win,doc.querySelector('[data-structure-panel="basic"]')));put("gridCount",doc.querySelectorAll("#ganzhi-inspector-grid [data-cycle-index]").length);put("gridButtonCount",doc.querySelectorAll("#ganzhi-inspector-grid button").length);
+        const tabs=[...doc.querySelectorAll("#ganzhi-structure [data-structure-tab]")],basic=tabs.find(tab=>tab.dataset.structureTab==="basic"),ten=tabs.find(tab=>tab.dataset.structureTab==="ten-gods"),relations=tabs.find(tab=>tab.dataset.structureTab==="relations"),stops=()=>tabs.map(tab=>String(tab.tabIndex)).join(","),press=(tab,key)=>tab?.dispatchEvent(new win.KeyboardEvent("keydown",{key,bubbles:true}));
+        put("keyboardInitialStops",stops());
+        basic?.focus();press(basic,"ArrowLeft");put("keyboardLeftWrapTab",structure?.dataset.activeTab??"missing");put("keyboardLeftWrapFocus",doc.activeElement===relations);put("keyboardLeftWrapStops",stops());put("selectedAfterKeyboardLeft",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        press(relations,"ArrowRight");put("keyboardRightWrapTab",structure?.dataset.activeTab??"missing");put("keyboardRightWrapFocus",doc.activeElement===basic);put("keyboardRightWrapStops",stops());put("selectedAfterKeyboardRight",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        press(basic,"End");put("keyboardEndTab",structure?.dataset.activeTab??"missing");put("keyboardEndFocus",doc.activeElement===relations);
+        press(relations,"Home");put("keyboardHomeTab",structure?.dataset.activeTab??"missing");put("keyboardHomeFocus",doc.activeElement===basic);put("keyboardHomeStops",stops());put("selectedAfterKeyboardHome",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        ten?.click();put("structureTenGodTab",structure?.dataset.activeTab??"missing");put("tenGodRowCount",doc.querySelectorAll("#ganzhi-structure .ganzhi-ten-god-row").length);put("tenGodHiddenCount",doc.querySelectorAll("#ganzhi-structure .ganzhi-ten-god-row [data-hidden-stem]").length);put("selectedAfterTenGod",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        relations?.click();put("structureRelationsTab",structure?.dataset.activeTab??"missing");put("relationFamilies",doc.querySelector('[data-structure-panel="relations"]')?.dataset.relationFamilies??"missing");put("relationsVisible",visible(win,doc.querySelector('[data-structure-panel="relations"]')));put("selectedAfterRelations",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        monthTrigger?.click();put("monthPillar",inspector?.dataset.pillar??"missing");put("monthGanzhi",inspector?.dataset.ganzhi??"missing");put("stateMonth",doc.querySelector("#state-month")?.textContent.trim()??"missing");put("tabAfterPillarSwitch",structure?.dataset.activeTab??"missing");put("selectedAfterSwitch",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        doc.querySelector("#ganzhi-inspector-close")?.click();put("closedHidden",!visible(win,inspector));put("closedInspectMissing",!new URL(win.location.href).searchParams.has("inspect"));put("selectedAfterClose",selectedBefore===(instrument?.dataset.selectedInstantMs??"changed"));
+        const deepInspector=deepDoc.querySelector("#ganzhi-inspector"),deepStructure=deepDoc.querySelector("#ganzhi-structure");put("deepVisible",visible(deepWin,deepInspector));put("deepPillar",deepInspector?.dataset.pillar??"missing");put("deepGanzhi",deepInspector?.dataset.ganzhi??"missing");put("deepStateDay",deepDoc.querySelector("#state-day")?.textContent.trim()??"missing");put("deepReady",deepInspector?.dataset.ready??"missing");put("deepStructureReady",deepStructure?.dataset.ready??"missing");put("deepStructureTab",deepStructure?.dataset.activeTab??"missing");put("readinessAttempts",readinessAttempts);put("ready",true);
+      },80);
     }
-
-    for (const frame of [atlasFrame, deepLinkFrame]) {
-      frame.addEventListener("load", () => {
-        loaded.add(frame.id);
-        pollReadiness();
-      });
-    }
-
-    atlasFrame.src = new URL(`../../?instant=${encodeURIComponent(instant)}`, location.href).href;
-    deepLinkFrame.src = new URL(`../../?instant=${encodeURIComponent(instant)}&inspect=day`, location.href).href;
-    setTimeout(pollReadiness, 300);
+    for(const frame of [atlasFrame,deepLinkFrame])frame.addEventListener("load",()=>{loaded.add(frame.id);pollReadiness()});
+    atlasFrame.src=new URL(`../../?instant=${encodeURIComponent(instant)}`,location.href).href;
+    deepLinkFrame.src=new URL(`../../?instant=${encodeURIComponent(instant)}&inspect=day`,location.href).href;
+    setTimeout(pollReadiness,300);
   </script>
 </body>
 </html>

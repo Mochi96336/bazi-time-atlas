@@ -168,6 +168,130 @@
 .ganzhi-inspector-grid > span.active small,
 .ganzhi-inspector-grid > span.active strong { color: #eef3ef; }
 
+.ganzhi-inspector[data-mode="pillar"] > .ganzhi-inspector-neighbors,
+.ganzhi-inspector[data-mode="pillar"] > details { display: none; }
+.ganzhi-structure[hidden] { display: none !important; }
+.ganzhi-structure {
+  border-top: 1px solid #28312b;
+  padding: 0 16px 16px;
+}
+.ganzhi-structure-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 10px 0 12px;
+}
+.ganzhi-structure-tab {
+  appearance: none;
+  border: 0;
+  border-bottom: 1px solid #2b342e;
+  padding: 7px 4px;
+  background: transparent;
+  color: #77837b;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ganzhi-structure-tab:hover,
+.ganzhi-structure-tab:focus-visible,
+.ganzhi-structure-tab.active {
+  border-bottom-color: #8b9b90;
+  color: #eef3ef;
+  outline: none;
+}
+.ganzhi-structure-panel[hidden] { display: none !important; }
+.ganzhi-structure-panel {
+  display: grid;
+  gap: 12px;
+}
+.ganzhi-structure-day-master {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ganzhi-structure-day-master small,
+.ganzhi-structure-hidden > small,
+.ganzhi-relation-family > small {
+  color: #758078;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.ganzhi-structure-day-master strong { font-size: 13px; }
+.ganzhi-structure-pillar-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.ganzhi-structure-pillar {
+  min-width: 0;
+  border-top: 1px solid #2b342e;
+  padding-top: 7px;
+}
+.ganzhi-structure-pillar[data-selected="true"] { border-top-color: #9eada3; }
+.ganzhi-structure-pillar small,
+.ganzhi-structure-pillar strong { display: block; }
+.ganzhi-structure-pillar small { color: #6f7a73; font-size: 8px; }
+.ganzhi-structure-pillar strong { margin-top: 2px; font-size: 12px; }
+/* Hidden stems are compact data tokens, not controls. Keep the role / stem /
+   Ten-God tuple typographic so dense structure inspection does not become a
+   field of pill-shaped UI chrome. */
+.ganzhi-structure-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+}
+.ganzhi-structure-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 0;
+  color: #aeb8b1;
+  font-size: 9px;
+}
+.ganzhi-structure-chip i { color: #68736c; font-style: normal; font-size: 8px; }
+.ganzhi-structure-chip b { color: #e1e7e2; }
+.ganzhi-structure-chip strong { font-size: 9px; }
+.ganzhi-ten-god-list { display: grid; gap: 8px; }
+.ganzhi-ten-god-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 2px 8px;
+  align-items: baseline;
+  border-top: 1px solid #2a332d;
+  padding-top: 7px;
+}
+.ganzhi-ten-god-row > small { color: #6f7a73; font-size: 8px; }
+.ganzhi-ten-god-row > b { font-size: 11px; }
+.ganzhi-ten-god-row > strong { justify-self: end; font-size: 11px; }
+.ganzhi-ten-god-row > span { grid-column: 1 / -1; color: #7f8b83; font-size: 9px; }
+.ganzhi-ten-god-row .ganzhi-structure-hidden { grid-column: 1 / -1; }
+.ganzhi-ten-god-derivation { padding: 0 !important; }
+.ganzhi-ten-god-map { display: grid; gap: 4px; margin-top: 8px; }
+.ganzhi-ten-god-map-row {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 8px;
+  color: #929d96;
+  font-size: 9px;
+}
+.ganzhi-ten-god-map-row small { color: #707b74; }
+.ganzhi-relation-family { display: grid; gap: 6px; }
+.ganzhi-relation-list { display: grid; gap: 4px; }
+.ganzhi-relation-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  border-top: 1px solid #28312b;
+  padding-top: 6px;
+  font-size: 10px;
+}
+.ganzhi-relation-item strong { color: #dce3de; }
+.ganzhi-relation-item span { color: #87928b; }
+.ganzhi-relation-empty,
+.ganzhi-structure-wait { color: #78837c; font-size: 10px; }
+
 @media (max-width: 640px) {
   .ganzhi-inspector {
     right: 12px;
@@ -180,5 +304,6 @@
   .ganzhi-inspector-identity { padding: 14px; }
   .ganzhi-inspector-parts { padding: 0 14px 10px; }
   .ganzhi-inspector-neighbors { margin: 0 14px 12px; }
-  .ganzhi-inspector details { padding: 0 14px 14px; }
+  .ganzhi-inspector > details { padding: 0 14px 14px; }
+  .ganzhi-structure { padding: 0 14px 14px; }
 }
