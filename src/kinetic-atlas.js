@@ -23,6 +23,11 @@ import {
   resolveAtlasDisplayState,
   solarLongitudeAtInstant
 } from "./wheel/atlas-display-model.js";
+import {
+  DEFAULT_ATLAS_TIME_CONTEXT,
+  atlasTimeContextFromSearch,
+  formatAtlasUtcOffset
+} from "./wheel/atlas-time-context.js";
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
@@ -46,6 +51,7 @@ const instantInput = document.querySelector("#instant-input");
 const playButton = document.querySelector("#play-button");
 const nowButton = document.querySelector("#now-button");
 const scaleButtons = [...document.querySelectorAll("[data-scale]")];
+const timeBasisReadout = document.querySelector(".readout-meta span:last-child strong");
 
 const renderer = createKineticRenderer({
   svg,
@@ -57,6 +63,7 @@ const renderer = createKineticRenderer({
 const state = {
   anchorMs: Date.now(),
   selectedMs: Date.now(),
+  timeContext: DEFAULT_ATLAS_TIME_CONTEXT,
   scale: "year",
   playing: false,
   animationFrame: null,
@@ -141,6 +148,7 @@ function alignLongitudeTracks(longitude) {
 }
 
 function applyInitialSearchState() {
+  state.timeContext = atlasTimeContextFromSearch(location.search);
   const parsed = parseAtlasSearch(location.search);
   if (Number.isFinite(parsed.instantMs)) {
     state.anchorMs = parsed.instantMs;
@@ -166,8 +174,18 @@ function setText(id, value) {
 }
 
 function updateReadout(display) {
-  const { fields, longitude, pillars, yearName, monthName, activeTerm, activeZodiac } = display;
-  setText("instant-readout", `${formatAtlasCivil(fields)} · UTC+08:00`);
+  const {
+    fields,
+    longitude,
+    pillars,
+    yearName,
+    monthName,
+    activeTerm,
+    activeZodiac,
+    timeContext
+  } = display;
+  const offsetLabel = formatAtlasUtcOffset(timeContext.utcOffsetHours);
+  setText("instant-readout", `${formatAtlasCivil(fields)} · ${offsetLabel}`);
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
   setText("hour-active", pillars.hour.name);
@@ -182,7 +200,11 @@ function updateReadout(display) {
   setText("state-hour", pillars.hour.name);
   setText("state-zodiac", activeZodiac.name);
   setText("state-term", activeTerm.name);
+  if (timeBasisReadout) timeBasisReadout.textContent = offsetLabel;
+  if (instantInput) instantInput.setAttribute("aria-label", `選定時間，${offsetLabel}，秒級`);
   instrument.dataset.selectedInstantMs = String(Math.round(state.selectedMs));
+  instrument.dataset.utcOffsetHours = String(timeContext.utcOffsetHours);
+  instrument.dataset.dayBoundary = timeContext.dayBoundary;
   instrument.dataset.yearPillar = yearName;
   instrument.dataset.monthPillar = monthName;
   instrument.dataset.dayPillar = pillars.day.name;
@@ -207,7 +229,8 @@ function updateReadout(display) {
 function updateWheel() {
   currentDisplay = resolveAtlasDisplayState({
     selectedMs: state.selectedMs,
-    legacyProjection: state.legacyProjection
+    legacyProjection: state.legacyProjection,
+    timeContext: state.timeContext
   });
   alignCycleRing("hour", currentDisplay.hourIndex, currentDisplay.phases.hour);
   alignCycleRing("day", currentDisplay.dayIndex, currentDisplay.phases.day);
@@ -248,7 +271,7 @@ function setSelectedInstant(instantMs, source = "command") {
   setSliderForScale();
   updateWheel();
   instrument.dataset.lastSelectedInstantSource = source;
-  const href = selectedInstantUrl(location.href, instantMs);
+  const href = selectedInstantUrl(location.href, instantMs, state.timeContext);
   if (href) history.replaceState(history.state, "", href);
   return true;
 }
@@ -272,7 +295,7 @@ function applyLinkedDragToTime(id, deltaDegrees) {
     ringId: id,
     instantMs: beforeMs,
     deltaDegrees,
-    longitudeAtMs: solarLongitudeAtInstant
+    longitudeAtMs: instantMs => solarLongitudeAtInstant(instantMs, state.timeContext)
   });
   instrument.dataset.linkedScrubMode = "continuous";
   instrument.dataset.linkedScrubBoundaries = String(result.crossedBoundaries ?? 0);
@@ -366,7 +389,7 @@ function bindControls() {
     setSelectedInstant(Date.now(), "now");
   });
   instantInput.addEventListener("change", () => {
-    const instant = instantFromAtlasLocalInput(instantInput.value);
+    const instant = instantFromAtlasLocalInput(instantInput.value, state.timeContext);
     if (instant === null || !Number.isFinite(instant)) return;
     setSelectedInstant(instant, "desktop-input");
   });

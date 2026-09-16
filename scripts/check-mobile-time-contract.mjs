@@ -31,7 +31,13 @@ if (attr(probe, "data-ready") !== "true") throw new Error(`exact-time fixture di
 if (attr(probe, "data-inner-width") !== "390") throw new Error(`fixture did not produce a 390px mobile child viewport: ${url}`);
 if (attr(probe, "data-dock-display") !== "grid") throw new Error(`mobile exact-time dock is not visible: ${url}`);
 if (attr(probe, "data-input-step") !== "1") throw new Error(`mobile exact-time input lost second precision: ${url}`);
-if (attr(probe, "data-input-value") !== "2026-09-16T04:14:37") throw new Error(`mobile input is not synchronized to Selected Instant: ${url}`);
+if (attr(probe, "data-input-value") !== "2026-09-16T05:14:37") throw new Error(`mobile input is not synchronized to UTC+09 Selected Instant: ${url}`);
+if (attr(probe, "data-mobile-initial-readout") !== "2026-09-16 · 05:14:37 · UTC+09:00") {
+  throw new Error(`mobile Selected Instant readout ignored URL temporal context: ${url}`);
+}
+if (attr(probe, "data-mobile-initial-utc") !== "9" || attr(probe, "data-mobile-initial-boundary") !== "civil-midnight") {
+  throw new Error(`mobile instrument did not expose resolved temporal context: ${url}`);
+}
 if (!["auto", "scroll"].includes(attr(probe, "data-shell-overflow-y"))) throw new Error(`mobile shell is not vertically scrollable: ${url}`);
 if (attr(probe, "data-shell-scrollable") !== "true") throw new Error(`mobile shell has no reachable content below the disk: ${url}`);
 if (attr(probe, "data-dock-after-instrument") !== "true") throw new Error(`exact-time dock does not follow the instrument in reading order: ${url}`);
@@ -39,7 +45,7 @@ if (attr(probe, "data-apply-visible") !== "true") throw new Error(`exact-time ap
 const share = Number(attr(probe, "data-instrument-share"));
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`instrument no longer owns the first mobile viewport (share=${share}): ${url}`);
 
-if (attr(probe, "data-mobile-roundtrip-value") !== "2026-09-16T04:15:09") {
+if (attr(probe, "data-mobile-roundtrip-value") !== "2026-09-16T05:15:09") {
   throw new Error(`mobile exact-time edit did not stay synchronized after apply: ${url}`);
 }
 const expectedMobileMs = Date.parse("2026-09-15T20:15:09.000Z");
@@ -51,6 +57,9 @@ if (attr(probe, "data-mobile-source") !== "mobile-exact") {
 }
 if (attr(probe, "data-mobile-url-instant") !== "2026-09-15T20:15:09.000Z") {
   throw new Error(`mobile exact-time apply did not persist the exact instant into the URL: ${url}`);
+}
+if (attr(probe, "data-mobile-url-utc") !== "9" || attr(probe, "data-mobile-url-boundary") !== "civil-midnight") {
+  throw new Error(`mobile exact-time apply discarded non-default temporal context: ${url}`);
 }
 if (attr(probe, "data-mobile-url-keep") !== "1" || attr(probe, "data-mobile-url-hash") !== "#analysis") {
   throw new Error(`mobile committed instant discarded unrelated URL state: ${url}`);
@@ -64,16 +73,22 @@ if (attr(probe, "data-mobile-document-continuity") !== "true") {
 if (attr(probe, "data-mobile-load-count") !== "1") {
   throw new Error(`mobile exact-time apply caused an unexpected frame reload: ${url}`);
 }
-if (attr(probe, "data-mobile-status-state") !== "success" || attr(probe, "data-mobile-status-text") !== "已套用 · UTC+08:00") {
-  throw new Error(`mobile exact-time apply did not settle into a success state: ${url}`);
+if (attr(probe, "data-mobile-status-state") !== "success" || attr(probe, "data-mobile-status-text") !== "已套用 · UTC+09:00") {
+  throw new Error(`mobile exact-time apply did not settle into the active context: ${url}`);
 }
 
 if (attr(probe, "data-desktop-inner-width") !== "1200") throw new Error(`fixture did not produce a 1200px desktop child viewport: ${url}`);
 if (attr(probe, "data-desktop-initial-step") !== "1") throw new Error(`desktop exact-time input is not second-level in markup: ${url}`);
 if (attr(probe, "data-desktop-initial-precision") !== "second") throw new Error(`desktop exact-time precision diagnostic missing: ${url}`);
-if (attr(probe, "data-desktop-initial-value") !== "2026-09-16T04:14:37") throw new Error(`desktop input truncated Selected Instant seconds on initial sync: ${url}`);
+if (attr(probe, "data-desktop-initial-value") !== "2026-09-16T05:14:37") throw new Error(`desktop input ignored UTC+09 Selected Instant context: ${url}`);
 if (attr(probe, "data-desktop-initial-valid") !== "true") throw new Error(`desktop second-level Selected Instant is invalid under its input step: ${url}`);
-if (attr(probe, "data-desktop-roundtrip-value") !== "2026-09-16T04:14:52") throw new Error(`desktop exact-time edit did not preserve typed seconds: ${url}`);
+if (attr(probe, "data-desktop-initial-readout") !== "2026-09-16 · 05:14:37 · UTC+09:00") {
+  throw new Error(`desktop Selected Instant readout ignored URL temporal context: ${url}`);
+}
+if (attr(probe, "data-desktop-initial-utc") !== "9" || attr(probe, "data-desktop-initial-boundary") !== "civil-midnight") {
+  throw new Error(`desktop instrument did not expose resolved temporal context: ${url}`);
+}
+if (attr(probe, "data-desktop-roundtrip-value") !== "2026-09-16T05:14:52") throw new Error(`desktop exact-time edit did not preserve typed seconds: ${url}`);
 if (attr(probe, "data-desktop-roundtrip-valid") !== "true") throw new Error(`desktop second-level edit became invalid: ${url}`);
 const expectedDesktopMs = Date.parse("2026-09-15T20:14:52.000Z");
 if (attr(probe, "data-desktop-selected-instant-ms") !== String(expectedDesktopMs)) {
@@ -85,6 +100,9 @@ if (attr(probe, "data-desktop-source") !== "desktop-input") {
 if (attr(probe, "data-desktop-url-instant") !== "2026-09-15T20:14:52.000Z") {
   throw new Error(`desktop exact-time edit did not persist the committed Selected Instant into the URL: ${url}`);
 }
+if (attr(probe, "data-desktop-url-utc") !== "9" || attr(probe, "data-desktop-url-boundary") !== "civil-midnight") {
+  throw new Error(`desktop exact-time edit discarded non-default temporal context: ${url}`);
+}
 if (attr(probe, "data-desktop-url-keep") !== "1" || attr(probe, "data-desktop-url-hash") !== "#analysis") {
   throw new Error(`desktop committed instant discarded unrelated URL state: ${url}`);
 }
@@ -92,4 +110,4 @@ if (attr(probe, "data-desktop-legacy-keys") !== "false") {
   throw new Error(`desktop committed instant retained legacy projection keys: ${url}`);
 }
 
-console.log(`[exact-time] PASS symmetric committed URL persistence + in-place mobile command; mobile share=${share.toFixed(3)}: ${url}`);
+console.log(`[exact-time] PASS shared UTC+09/civil-midnight context + symmetric URL persistence; mobile share=${share.toFixed(3)}: ${url}`);

@@ -27,8 +27,12 @@ test("mobile exact time commands the kinetic state owner without owning navigati
   assert.match(commandContract, /SELECTED_INSTANT_COMMAND\s*=\s*"atlas:set-selected-instant"/);
   assert.match(mobileController, /dispatchEvent\(new CustomEvent\(SELECTED_INSTANT_COMMAND/);
   assert.doesNotMatch(mobileController, /history\.replaceState|location\.assign|location\.replace|location\.reload/);
+  assert.match(mobileController, /formatMobileAtlasInput\(selectedMs, context\)/);
+  assert.match(mobileController, /parseMobileAtlasInput\(input\.value, context\)/);
+  assert.match(kineticAtlas, /timeContext:\s*DEFAULT_ATLAS_TIME_CONTEXT/);
+  assert.match(kineticAtlas, /atlasTimeContextFromSearch\(location\.search\)/);
   assert.match(kineticAtlas, /function setSelectedInstant\(instantMs, source = "command"\)/);
-  assert.match(kineticAtlas, /selectedInstantUrl\(location\.href, instantMs\)/);
+  assert.match(kineticAtlas, /selectedInstantUrl\(location\.href, instantMs, state\.timeContext\)/);
   assert.match(kineticAtlas, /clearLegacyProjectionUrl\(location\.href\)/);
   assert.match(kineticAtlas, /history\.replaceState\(history\.state,\s*"",\s*href\)/);
   assert.match(kineticAtlas, /instrument\.addEventListener\(SELECTED_INSTANT_COMMAND/);
