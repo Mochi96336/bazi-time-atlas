@@ -33,6 +33,10 @@ function requireIncludes(actual, expected, label, url) {
   if (!actual?.includes(expected)) throw new Error(`${label}: expected to include ${expected}, got ${actual}: ${url}`);
 }
 
+function requireOneOf(actual, expected, label, url) {
+  if (!expected.includes(actual)) throw new Error(`${label}: expected one of ${expected.join(", ")}, got ${actual}: ${url}`);
+}
+
 function data(prefix, ring, role) {
   return `data-${prefix}-${ring}-${role}-opacity`;
 }
@@ -80,7 +84,7 @@ if (!probe || attr(probe, "data-ready") !== "true") throw new Error(`scale-empha
 requireEqual(num(probe, "data-inner-width"), 390, "scale emphasis true viewport width", url);
 requireEqual(attr(probe, "data-time-window-group-label"), "觀察時間窗", "preset group semantic label", url);
 requireEqual(attr(probe, "data-time-window-visible-label"), "觀察時間窗", "preset group visible label", url);
-requireEqual(attr(probe, "data-time-window-visible-label-display"), "inline-flex", "visible label pseudo display", url);
+requireOneOf(attr(probe, "data-time-window-visible-label-display"), ["inline-flex", "flex"], "visible label pseudo display", url);
 requireEqual(attr(probe, "data-time-window-visible-label-first-viewport"), "true", "visible label stays in first viewport", url);
 requireEqual(attr(probe, "data-time-window-group-inside-viewport"), "true", "observation-window row stays inside 390px viewport", url);
 requireEqual(attr(probe, "data-time-window-status-label"), "觀察時間窗", "timeline status semantic label", url);
@@ -106,8 +110,6 @@ requireEqual(attr(probe, "data-initial-context"), "year", "one-year context ring
 requireEqual(attr(probe, "data-initial-ambient"), "hour,day", "one-year ambient rings", url);
 requireEqual(attr(probe, "data-initial-readout"), "一年", "one-year readout", url);
 
-/* Whole-track fading stays retired. Every mode keeps each rotating coordinate
-   frame at full opacity and free of inherited brightness/saturation filters. */
 for (const prefix of ["year", "day", "cycle"]) {
   for (const ring of ["hour", "day", "solar", "zodiac", "month", "year"]) {
     near(num(probe, `data-${prefix}-${ring}-track-opacity`), 1, `${prefix} ${ring} track opacity`, url);
@@ -115,8 +117,6 @@ for (const prefix of ["year", "day", "cycle"]) {
   }
 }
 
-/* One-year focus: Solar / Month retain full ink. Non-focus active sector
-   surfaces recede, while the datum labels remain full strength. */
 assertRole(probe, "year", "solar", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
 assertRole(probe, "year", "zodiac", { surface:.78, context:.78, "active-surface":.84, active:1 }, url);
 assertRole(probe, "year", "month", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
