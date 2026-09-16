@@ -17,8 +17,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #8f9992;
-  background: rgba(15,19,16,.54);
+  color: #909596;
+  background: rgba(15,17,18,.54);
   font-size: 8px;
   font-weight: 720;
   letter-spacing: .04em;
@@ -35,16 +35,16 @@
 .analysis-toggle { right: 16px; }
 .analysis-close {
   left: 16px;
-  color: #c5d3ca;
-  border-color: rgba(199,217,205,.18);
-  background: rgba(199,217,205,.055);
+  color: #c8cccb;
+  border-color: rgba(200,204,203,.18);
+  background: rgba(200,204,203,.055);
 }
 .analysis-toggle:hover,
 .analysis-toggle:focus-visible,
 .analysis-close:hover,
 .analysis-close:focus-visible {
   color: var(--ink);
-  border-color: rgba(238,242,237,.24);
+  border-color: rgba(236,239,239,.24);
   background: rgba(255,255,255,.04);
 }
 .analysis-toggle:focus-visible,
@@ -110,7 +110,7 @@
   white-space: nowrap;
   /* Moving sector labels can cross this fixed spoke. A tight dark halo keeps
      the identity legible without adding a chip, leader, or card surface. */
-  text-shadow: 0 0 3px #0b0f0c, 0 1px 7px rgba(0,0,0,.94);
+  text-shadow: 0 0 3px #090a0b, 0 1px 7px rgba(0,0,0,.94);
 }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 20.3%; top: 32.0%; }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 24.1%; top: 46.7%; }
@@ -120,13 +120,13 @@
    it remains inside the ring without sitting underneath the centered timestamp. */
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 33.4%; top: 83.4%; }
 /* Semantic variables keep these labels in lockstep with the instrument color
-   grammar. Fallbacks preserve the current standalone appearance before the
-   palette layer that defines --hour is loaded. */
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span { color: var(--year, #d8cfa8); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span { color: var(--month, #b8cdbb); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: var(--solar, #e5bd91); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--day, #abc2cc); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--hour, #9eb7c1); }
+   grammar. Fallbacks match the production M2 palette if this layer is inspected
+   before the token stylesheet has loaded. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span { color: var(--year, #93999b); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span { color: var(--month, #777e81); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: var(--solar, #bc9257); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--day, #62696c); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--hour, #52585b); }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-year span::after { content: "年"; }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-month span::after { content: "月"; }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span::after { content: "太陽"; }
@@ -151,12 +151,12 @@
    product state. The mild edge cue makes mode entry visible without changing
    time geometry or any domain calculation. */
 #kinetic-instrument[data-analysis-open="true"] {
-  border-color: rgba(199,217,205,.22);
-  box-shadow: 0 34px 100px rgba(0,0,0,.28), inset 0 0 0 1px rgba(199,217,205,.035);
+  border-color: rgba(200,204,203,.22);
+  box-shadow: 0 34px 100px rgba(0,0,0,.28), inset 0 0 0 1px rgba(200,204,203,.035);
 }
 #kinetic-instrument[data-analysis-open="true"] .reference-frame-control::before {
   content: "分析 · ";
-  color: #9eaaa2;
+  color: #9fa4a5;
 }
 
 /* Free Compare must never look like ordinary time scrubbing. */

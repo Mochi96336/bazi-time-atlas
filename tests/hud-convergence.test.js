@@ -36,7 +36,7 @@ test("direct ring identities remain readable without becoming chips, leaders, or
   );
   assert.match(
     analysisCss,
-    /\.ring-legend-row span::after\s*\{[\s\S]*?text-shadow:\s*0 0 3px #0b0f0c,\s*0 1px 7px rgba\(0,0,0,\.94\);/,
+    /\.ring-legend-row span::after\s*\{[\s\S]*?text-shadow:\s*0 0 3px #090a0b,\s*0 1px 7px rgba\(0,0,0,\.94\);/,
     "fixed identities need a tight cardless halo where moving sector labels cross their spoke"
   );
   assert.doesNotMatch(
