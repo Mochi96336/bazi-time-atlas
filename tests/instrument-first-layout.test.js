@@ -17,6 +17,15 @@ test("desktop reading view removes narrative and elevated card chrome", () => {
   assert.match(css, /\.instrument-shell\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
 });
 
+test("mobile reading view removes hero/card chrome without stealing shell scroll ownership", () => {
+  const mobile = css.match(/@media \(max-width: 480px\) \{([\s\S]*?)\n\}/);
+  assert.ok(mobile, "mobile instrument-first override must exist");
+  assert.doesNotMatch(mobile[1], /\.kinetic-shell\s*\{/);
+  assert.doesNotMatch(mobile[1], /grid-template-rows/);
+  assert.match(mobile[1], /\.atlas-intro\s*\{\s*display:\s*none;/);
+  assert.match(mobile[1], /\.instrument-shell\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
+});
+
 test("ordinary reading keeps long-form notes out of the main path", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
 });

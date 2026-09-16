@@ -185,6 +185,20 @@
 }
 
 @media (max-width: 480px) {
+  /* Mobile now follows the same instrument-first composition as desktop. Keep
+     mobile-time.css ownership of shell rows/scrolling so the exact-time dock
+     remains reachable below the first-screen wheel; hiding the hero is enough
+     to remove its grid contribution. */
+  .atlas-intro {
+    display: none;
+  }
+  .instrument-shell {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
   #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
     min-height: 26px;
     padding-inline: 6px;
