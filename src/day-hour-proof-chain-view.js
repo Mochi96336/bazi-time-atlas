@@ -2,6 +2,7 @@ import { deepTimeEarthRotationEstimateSupportsYear } from "./astronomy/deep-time
 import { DAY_BOUNDARY, DAY_BOUNDARY_VALUES } from "./calendar/day-boundary.js";
 import { DAY_HOUR_TIME_BASIS, DAY_HOUR_TIME_BASIS_VALUES } from "./calendar/day-hour-time-basis.js";
 import { currentRecurrenceDayHourProof } from "./recurrence/day-hour-proof-chain.js";
+import { EQUATION_OF_TIME_MODEL_ID } from "./recurrence/equation-of-time-model-binding.js";
 import { fixedZoneTargetClock } from "./recurrence/fixed-zone-target-clock.js";
 import { geographicLongitudeBinding } from "./recurrence/geographic-longitude-binding.js";
 import { recurrenceState } from "./recurrence/gregorian-cycle.js";
@@ -20,6 +21,7 @@ const DEFAULT_UT1_OFFSET_HOURS = 8;
 const STATUS_LABELS = Object.freeze({
   satisfied:"已有",
   "uncertain-estimate":"有估計 · 不確定",
+  "evidence-not-authoritative":"有實證 · 未授權",
   "missing-deep-time-model":"缺深時間模型",
   "missing-model":"缺模型",
   blocked:"前置阻塞",
@@ -535,6 +537,8 @@ function refresh() {
     dayBoundary,
     clockBasis,
     longitudeDegrees,
+    equationOfTimeModelId:EQUATION_OF_TIME_MODEL_ID.ATLAS_TYME_NREL_SPA_V1,
+    targetYear,
     earthRotationEstimateAvailable
   });
   const stages = panel.querySelector("#proof-chain-stages");
@@ -565,11 +569,13 @@ function refresh() {
                     ? "日柱在明示的地方鐘面與日界 convention 下已可解析；時柱仍需明示 civil / local mean solar / local apparent solar clock basis。"
                     : proof.firstHardBlocker === "longitude"
                       ? "已明示採用太陽時計時；下一個硬條件是觀測地經度。local mean solar 到此只缺經度，local apparent solar 還會再需要 Equation of Time。"
-                      : proof.firstHardBlocker === "equation-of-time"
-                        ? "經度已綁定；local apparent solar clock 還需要該 epoch 可用的 Equation of Time 模型。"
-                        : proof.hour.resolved
-                          ? "Day 與 Hour proof chain 已在目前明示 conventions 下解析；這不擴張任何未來政治時區主張。"
-                          : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
+                      : proof.firstHardBlocker === "equation-of-time" && firstBlockerStage?.status === "evidence-not-authoritative"
+                        ? "production EoT model 與 target-year 實證都已存在，但目前 evidence 不是 continuous upper bound，也沒有 recurrence authority；因此仍不能唯一判定 Hour。"
+                        : proof.firstHardBlocker === "equation-of-time"
+                          ? "經度已綁定；local apparent solar clock 還缺該 target year 可授權 recurrence 的 Equation of Time evidence。"
+                          : proof.hour.resolved
+                            ? "Day 與 Hour proof chain 已在目前明示 conventions 下解析；這不擴張任何未來政治時區主張。"
+                            : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
   );
   setText("proof-chain-day-status", proof.day.resolved ? "resolved" : "blocked");
   setText(
@@ -601,6 +607,8 @@ function refresh() {
   panel.dataset.longitudeControlValid = targetClockControls?.root.dataset.longitudeValid ?? "true";
   panel.dataset.needsLongitude = String(proof.needsLongitude);
   panel.dataset.needsEquationOfTime = String(proof.needsEquationOfTime);
+  panel.dataset.equationOfTimeTargetEvidenceAvailable = String(proof.equationOfTimeTargetEvidenceAvailable);
+  panel.dataset.equationOfTimeTargetEvidenceAuthority = String(proof.equationOfTimeTargetEvidenceAuthority);
   panel.dataset.earthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
   panel.dataset.earthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   panel.dataset.dayResolved = String(proof.day.resolved);
@@ -624,6 +632,8 @@ function refresh() {
   instrument.dataset.dayHourProofLongitudeBound = String(proof.longitudeBound);
   instrument.dataset.dayHourProofNeedsLongitude = String(proof.needsLongitude);
   instrument.dataset.dayHourProofNeedsEquationOfTime = String(proof.needsEquationOfTime);
+  instrument.dataset.dayHourProofEquationOfTimeTargetEvidenceAvailable = String(proof.equationOfTimeTargetEvidenceAvailable);
+  instrument.dataset.dayHourProofEquationOfTimeTargetEvidenceAuthority = String(proof.equationOfTimeTargetEvidenceAuthority);
   instrument.dataset.dayHourProofEarthRotationBridgeRequired = String(proof.earthRotationBridgeRequired);
   instrument.dataset.dayHourProofEarthRotationEstimateAvailable = String(proof.earthRotationEstimateAvailable);
   instrument.dataset.dayHourProofDayResolved = String(proof.day.resolved);

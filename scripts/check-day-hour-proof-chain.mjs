@@ -344,18 +344,23 @@ if (
   || attr(apparentPanel, "data-clock-basis") !== "local-apparent-solar"
   || attr(apparentPanel, "data-needs-longitude") !== "true"
   || attr(apparentPanel, "data-needs-equation-of-time") !== "true"
+  || attr(apparentPanel, "data-equation-of-time-target-evidence-available") !== "true"
+  || attr(apparentPanel, "data-equation-of-time-target-evidence-authority") !== "false"
   || attr(apparentPanel, "data-hour-resolved") !== "false"
 ) {
-  throw new Error(`4006 apparent-solar proof: explicit basis must expose longitude + Equation of Time: ${apparentSolar.url}`);
+  throw new Error(`4006 apparent-solar proof: explicit basis must expose longitude + non-authoritative Equation of Time evidence: ${apparentSolar.url}`);
 }
 expectStage(apparentSolar.dom, "clock-basis", "satisfied", "4006 apparent-solar proof", apparentSolar.url);
 expectStage(apparentSolar.dom, "longitude", "unbound-convention", "4006 apparent-solar proof", apparentSolar.url);
-expectStage(apparentSolar.dom, "equation-of-time", "missing-deep-time-model", "4006 apparent-solar proof", apparentSolar.url);
+expectStage(apparentSolar.dom, "equation-of-time", "evidence-not-authoritative", "4006 apparent-solar proof", apparentSolar.url);
 const apparentBlockers = textById(apparentSolar.dom, "proof-chain-hour-blockers");
 if (!apparentBlockers.includes("經度") || !apparentBlockers.includes("Equation of Time")) {
   throw new Error(`4006 apparent-solar proof: both downstream blockers must be visible: ${apparentSolar.url}`);
 }
-console.log(`[day-hour-proof] PASS explicit local-apparent-solar basis exposes longitude and EoT blockers: ${apparentSolar.url}`);
+if (!apparentSolar.dom.includes("swiss-ephemeris-eot-4006-dense-v2") || !apparentSolar.dom.includes("有實證 · 未授權")) {
+  throw new Error(`4006 apparent-solar proof: target-year EoT evidence must be visible without authority promotion: ${apparentSolar.url}`);
+}
+console.log(`[day-hour-proof] PASS explicit local-apparent-solar basis exposes longitude and non-authoritative EoT evidence: ${apparentSolar.url}`);
 
 const invalidClock = dumpDom(`${fixedZonePath}&dayBoundary=zi-initial-next-day&clockBasis=sundial-ish`);
 const invalidClockPanel = tagById(invalidClock.dom, "day-hour-proof-chain");

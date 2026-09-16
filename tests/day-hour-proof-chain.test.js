@@ -224,7 +224,7 @@ test("local mean solar Hour adds typed longitude but not Equation of Time", () =
   assert.deepEqual(resolved.hour.blockers, []);
 });
 
-test("local apparent solar Hour requires registry-validated target-year EoT authority", () => {
+test("local apparent solar Hour distinguishes target evidence from recurrence authority", () => {
   const unbound = proof({
     clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
     longitudeDegrees:121.5,
@@ -253,13 +253,32 @@ test("local apparent solar Hour requires registry-validated target-year EoT auth
       equationOfTimeModelId:EQUATION_OF_TIME_MODEL_ID.ATLAS_TYME_NREL_SPA_V1
     });
     assert.equal(registered.equationOfTimeModel.bound, true);
+    assert.equal(registered.equationOfTimeModel.targetEvidenceAvailable, true);
+    assert.equal(registered.equationOfTimeTargetEvidenceAvailable, true);
+    assert.equal(registered.equationOfTimeTargetEvidenceAuthority, false);
     assert.equal(registered.equationOfTimeModel.recurrenceAuthority, false);
     assert.equal(registered.equationOfTimeModelValidated, false);
     assert.equal(registered.firstHardBlocker, "equation-of-time");
     assert.equal(registered.hour.resolved, false);
     assert.deepEqual(registered.hour.blockers, ["equationOfTimeModel"]);
-    assert.equal(registered.stages.find(stage => stage.id === "equation-of-time").status, "missing-deep-time-model");
+    assert.equal(registered.stages.find(stage => stage.id === "equation-of-time").status, "evidence-not-authoritative");
   }
+
+  const uncovered = proof({
+    clockBasis:DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR,
+    longitudeDegrees:121.5,
+    targetYear:4007,
+    equationOfTimeModelId:EQUATION_OF_TIME_MODEL_ID.ATLAS_TYME_NREL_SPA_V1
+  });
+  assert.equal(uncovered.equationOfTimeModel.bound, true);
+  assert.equal(uncovered.equationOfTimeModel.targetEvidenceAvailable, false);
+  assert.equal(uncovered.equationOfTimeTargetEvidenceAvailable, false);
+  assert.equal(uncovered.equationOfTimeTargetEvidenceAuthority, false);
+  assert.equal(uncovered.equationOfTimeModelValidated, false);
+  assert.equal(uncovered.firstHardBlocker, "equation-of-time");
+  assert.equal(uncovered.hour.resolved, false);
+  assert.deepEqual(uncovered.hour.blockers, ["equationOfTimeModel"]);
+  assert.equal(uncovered.stages.find(stage => stage.id === "equation-of-time").status, "missing-deep-time-model");
 });
 
 test("legacy longitudeBound boolean cannot masquerade as a geographic coordinate", () => {
