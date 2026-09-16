@@ -55,11 +55,11 @@ test("direct ring identities remain readable without becoming chips, leaders, or
   );
 });
 
-test("mobile fixed identities leave the moving sector-label centerline", () => {
+test("mobile fixed identities use an inner-edge quiet lane away from moving values", () => {
   assert.match(
     analysisCss,
-    /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend-row \{[\s\S]*?transform:\s*rotate\(-9deg\);[\s\S]*?margin:\s*10px 0 0 4px;/,
-    "mobile fixed identities need a shared inward quiet lane instead of occupying the sector-label midpoint"
+    /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend-row \{[\s\S]*?transform:\s*rotate\(-9deg\);[\s\S]*?margin:\s*26px 0 0 4px;/,
+    "mobile fixed identities need enough radial separation to stay off the moving sector-label midpoint"
   );
 });
 
