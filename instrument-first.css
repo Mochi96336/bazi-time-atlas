@@ -251,9 +251,10 @@
   }
 
   /* The read-head immediately above already states the selected time, zone and
-     precision. Keep ordinary idle chrome silent; transient apply/error feedback
-     may still surface in the existing status slot. */
+     precision. Keep ordinary idle chrome silent while reserving one feedback
+     line so pending/success/error states do not move the rail or shell. */
   #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock .mobile-time-heading {
+    min-height: 10px;
     justify-content: flex-end;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock .mobile-time-heading strong,
