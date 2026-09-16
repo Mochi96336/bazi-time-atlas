@@ -91,15 +91,90 @@
   font-size: 9px;
   line-height: 1.55;
 }
+.eot-observed-clearance-diagnostic {
+  margin-top: 9px;
+  padding: 9px 10px;
+  border: 1px solid rgba(238,242,237,.09);
+  border-radius: 11px;
+  background: rgba(255,255,255,.012);
+}
+.eot-observed-clearance-diagnostic[hidden] { display: none; }
+.eot-clearance-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.eot-clearance-head span {
+  display: block;
+  color: #707b73;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.eot-clearance-head strong {
+  display: block;
+  margin-top: 2px;
+  color: #d8ded9;
+  font-size: 11px;
+}
+.eot-clearance-head b {
+  color: #aab3ad;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.eot-observed-clearance-diagnostic[data-status="observed-eot-envelope-reaches-boundary"] .eot-clearance-head b,
+.eot-observed-clearance-diagnostic[data-status="unavailable"] .eot-clearance-head b {
+  color: #c99b90;
+}
+.eot-clearance-facts {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, minmax(92px,.7fr));
+  gap: 7px;
+  margin-top: 8px;
+}
+.eot-clearance-facts span {
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(238,242,237,.07);
+}
+.eot-clearance-facts em,
+.eot-clearance-facts strong {
+  display: block;
+}
+.eot-clearance-facts em {
+  color: #68736b;
+  font-size: 7px;
+  font-style: normal;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.eot-clearance-facts strong {
+  margin-top: 2px;
+  color: #aeb8b1;
+  font-size: 9px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+#eot-clearance-note {
+  margin: 7px 0 0;
+  color: #737e76;
+  font-size: 8px;
+  line-height: 1.45;
+}
 @media (max-width: 1100px) {
   .target-instant-fields { grid-template-columns: 1fr 1fr; }
   #target-instant-status { grid-column: 1 / -1; }
+  .eot-clearance-facts { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 760px) {
   .target-instant-control-head { align-items: flex-start; flex-direction: column; }
+  .eot-clearance-head { flex-direction: column; gap: 4px; }
 }
 @media (max-width: 480px) {
   .target-instant-controls { padding: 10px; }
   .target-instant-fields { grid-template-columns: 1fr; }
   #target-instant-status { grid-column: auto; }
+  .eot-clearance-facts { grid-template-columns: 1fr; }
 }
