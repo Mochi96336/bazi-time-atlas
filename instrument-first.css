@@ -185,12 +185,10 @@
 }
 
 @media (max-width: 480px) {
-  /* Mobile now follows the same instrument-first composition as desktop. The
-     legacy hero and rounded dashboard shell were the last homepage chrome still
-     consuming the first viewport before the actual wheel. */
-  .kinetic-shell {
-    grid-template-rows: auto minmax(0, 1fr);
-  }
+  /* Mobile now follows the same instrument-first composition as desktop. Keep
+     mobile-time.css ownership of shell rows/scrolling so the exact-time dock
+     remains reachable below the first-screen wheel; hiding the hero is enough
+     to remove its grid contribution. */
   .atlas-intro {
     display: none;
   }
