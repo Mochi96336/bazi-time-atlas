@@ -55,6 +55,14 @@ test("direct ring identities remain readable without becoming chips, leaders, or
   );
 });
 
+test("mobile fixed identities leave the moving sector-label centerline", () => {
+  assert.match(
+    analysisCss,
+    /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend-row \{[\s\S]*?transform:\s*rotate\(-9deg\);[\s\S]*?margin:\s*10px 0 0 4px;/,
+    "mobile fixed identities need a shared inward quiet lane instead of occupying the sector-label midpoint"
+  );
+});
+
 test("analysis mode retains the interactive layer legend instead of duplicating a second control surface", () => {
   assert.match(
     analysisCss,
