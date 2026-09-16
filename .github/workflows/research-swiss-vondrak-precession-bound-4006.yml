@@ -1,0 +1,82 @@
+name: Research Swiss Vondrak precession bound 4006
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-swiss-vondrak-precession-bound-4006.py"
+      - ".github/workflows/research-swiss-vondrak-precession-bound-4006.yml"
+      - "src/astronomy/equation-of-time-4006-swiss-vondrak-precession-evidence.js"
+      - "tests/equation-of-time-4006-swiss-vondrak-precession-evidence.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vondrak-precession-bound:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+          # The default-model macro lives in swephexp.h while the Vondrak
+          # coefficient tables and pre_pmat/precess_3 implementation live in
+          # swephlib.c.  Feed the proof a pinned source bundle so both guards
+          # are checked against the same exact upstream commit.
+          cat tmp/swisseph/swephexp.h tmp/swisseph/swephlib.c > tmp/swisseph/vondrak-proof-source.c
+
+      - name: Derive continuous Vondrak precession matrix bounds
+        env:
+          SWISS_SOURCE: tmp/swisseph/vondrak-proof-source.c
+          OUTPUT_DIR: tmp/swiss-vondrak-precession-bound-4006
+        run: python scripts/research-swiss-vondrak-precession-bound-4006.py
+
+      - name: Verify proof scope and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          m = json.loads(Path("tmp/swiss-vondrak-precession-bound-4006/manifest.json").read_text())
+          assert m["targetYear"] == 4006
+          assert m["source"]["defaultModel"] == "SEMOD_PREC_VONDRAK_2011"
+          assert m["crossProductHardBounds"]["hardNormLower"] > 0
+          assert m["crossProductHardBounds"]["sampleStepDays"] <= 1.0
+          b = m["precessionMatrixHardBounds"]
+          assert b["firstDerivativeOperatorNormPerDay"] > 0
+          assert b["secondDerivativeOperatorNormPerDaySquared"] > 0
+          i = m["interpretation"]
+          assert i["sourceDerivedContinuousBound"] is True
+          assert i["vondrakCoefficientDerivativeBoundsAnalytic"] is True
+          assert i["poleDerivativeBoundsAnalytic"] is True
+          assert i["crossProductNonSingularityContinuous"] is True
+          assert i["precessionMatrixFirstDerivativeCertified"] is True
+          assert i["precessionMatrixSecondDerivativeCertified"] is True
+          assert i["precessionRaCorrectionCertified"] is False
+          assert i["apparentPositionCorrectionChainCertified"] is False
+          assert i["longTermSiderealSecondDerivativeCertified"] is False
+          assert i["swissEotSecondDerivativeCertified"] is False
+          assert i["continuousResidualUpperBound"] is False
+          assert i["deterministicMembership"] is False
+          assert i["recurrenceAuthorityGranted"] is False
+          PY
+
+      - name: Upload Vondrak precession evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: swiss-vondrak-precession-bound-4006
+          path: tmp/swiss-vondrak-precession-bound-4006/manifest.json
+          retention-days: 7
