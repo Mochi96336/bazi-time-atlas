@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { EQUATION_OF_TIME_4006_SWISS_SEGMENT_CURVATURE_EVIDENCE as evidence } from "../src/astronomy/equation-of-time-4006-swiss-segment-curvature-evidence.js";
 
-test("SWIEPH segment curvature evidence freezes pinned source provenance", () => {
+test("SWIEPH segment evidence preserves pinned historical provenance", () => {
   assert.equal(evidence.id, "swiss-eot-4006-swieph-segment-curvature-v1");
   assert.equal(evidence.targetYear, 4006);
   assert.equal(evidence.provenance.researchPullRequest, 236);
@@ -15,8 +15,14 @@ test("SWIEPH segment curvature evidence freezes pinned source provenance", () =>
   );
 });
 
-test("every inspected SWIEPH body has segment cadence safely wider than the inspection grid", () => {
-  assert.equal(evidence.method.sampleStepDays, 0.25);
+test("source-derived 3D PVA and distance envelopes remain valid after the RA-frame correction", () => {
+  const hard = evidence.derivedHardBounds;
+  assert.equal(evidence.interpretation.sourceDerivedPvaCertificateStillValid, true);
+  assert.equal(evidence.interpretation.sourceDerivedDistanceCertificateStillValid, true);
+  assert.equal(hard.sunRelativeVelocityAuPerDay, 0.18629102131841138);
+  assert.equal(hard.sunRelativeAccelerationAuPerDaySquared, 0.004258500764103926);
+  assert.equal(hard.hardSunRelativeDistanceLowerAu, 0.9609178462592118);
+
   for (const body of Object.values(evidence.bodies)) {
     assert.ok(body.segmentCount > 0);
     assert.ok(evidence.method.sampleStepDays <= body.minSegmentDays);
@@ -25,44 +31,37 @@ test("every inspected SWIEPH body has segment cadence safely wider than the insp
   }
 });
 
-test("source-derived geometry yields a positive continuous separation and RA curvature bound", () => {
-  const hard = evidence.derivedHardBounds;
-  assert.ok(hard.hardSunRelativeXyLowerAu > 0.96);
-  assert.ok(hard.hardSunRelativeDistanceLowerAu > 0.96);
+test("legacy #236 XY and RA result is retained only as superseded historical evidence", () => {
+  assert.equal(evidence.supersession.supersededForRightAscension, true);
+  assert.equal(evidence.supersession.invalidForRightAscension, true);
   assert.equal(
-    hard.geometricJ2000RaSecondDerivativeBoundDegPerDaySquared,
+    evidence.supersession.defectId,
+    "missing-seflg-equatorial-in-legacy-geometric-ra-samplers"
+  );
+  assert.equal(
+    evidence.supersession.correctedEvidenceId,
+    "swiss-eot-4006-equatorial-ra-frame-correction-v1"
+  );
+  assert.equal(evidence.supersession.correctedByPullRequest, 262);
+  assert.equal(evidence.supersession.sampledXyFrame, "ecliptic-cartesian-j2000");
+
+  assert.equal(evidence.derivedHardBounds.minSampledSunRelativeXyAu, 0.9841964643063003);
+  assert.equal(
+    evidence.derivedHardBounds.geometricJ2000RaSecondDerivativeBoundDegPerDaySquared,
     4.560881140839361
   );
-  assert.ok(
-    hard.geometricJ2000RaSecondDerivativeBoundDegPerDaySquared <
-      evidence.planning.fullSwissEotSecondDerivativeThresholdDegPerDaySquared
-  );
+  assert.equal(evidence.interpretation.legacyRaClaimSuperseded, true);
+  assert.equal(evidence.interpretation.validForRightAscension, false);
+  assert.equal(evidence.interpretation.geometricJ2000RaSecondDerivativeBoundAnalytic, false);
 });
 
-test("geometric certificate leaves most of the Swiss EoT curvature budget for missing layers", () => {
-  assert.equal(evidence.planning.geometricFractionOfThreshold, 0.043461553561664035);
-  assert.equal(
-    evidence.planning.thresholdRemainingAfterGeometricBoundDegPerDaySquared,
-    100.37971041827969
-  );
-  assert.ok(evidence.planning.requiredThresholdToGeometricBoundRatio > 23);
-  assert.deepEqual(evidence.planning.remainingProofLayers, [
-    "apparent-position-correction-chain",
-    "long-term-sidereal-second-derivative"
-  ]);
-});
-
-test("geometric hard bound never promotes itself into full Swiss EoT authority", () => {
-  const interpretation = evidence.interpretation;
-  assert.equal(interpretation.sourceDerivedContinuousBound, true);
-  assert.equal(interpretation.chebyshevSegmentVelocityAccelerationBoundsAnalytic, true);
-  assert.equal(interpretation.sampleBetweenDistanceLowerBoundUsesCertifiedVelocityEnvelope, true);
-  assert.equal(interpretation.geometricJ2000RaSecondDerivativeBoundAnalytic, true);
-  assert.equal(interpretation.apparentPositionCorrectionChainCertified, false);
-  assert.equal(interpretation.longTermSiderealSecondDerivativeCertified, false);
-  assert.equal(interpretation.swissEotSecondDerivativeCertified, false);
-  assert.equal(interpretation.swissEotDerivativeCertified, false);
-  assert.equal(interpretation.continuousResidualUpperBound, false);
-  assert.equal(interpretation.deterministicMembership, false);
-  assert.equal(interpretation.recurrenceAuthorityGranted, false);
+test("legacy segment evidence never promotes itself into Swiss EoT authority", () => {
+  const i = evidence.interpretation;
+  assert.equal(i.apparentPositionCorrectionChainCertified, false);
+  assert.equal(i.longTermSiderealSecondDerivativeCertified, false);
+  assert.equal(i.swissEotSecondDerivativeCertified, false);
+  assert.equal(i.swissEotDerivativeCertified, false);
+  assert.equal(i.continuousResidualUpperBound, false);
+  assert.equal(i.deterministicMembership, false);
+  assert.equal(i.recurrenceAuthorityGranted, false);
 });

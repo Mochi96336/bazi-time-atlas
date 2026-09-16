@@ -221,6 +221,35 @@
     box-shadow: none;
   }
 
+  /* Exact editing remains available below the wheel, but ordinary reading does
+     not need another rounded dashboard card or a second filled primary CTA.
+     Analysis keeps the structured dock from mobile-time.css. */
+  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock {
+    margin-top: 5px;
+    padding: 8px 2px 4px;
+    border: 0;
+    border-top: 1px solid rgba(238,242,237,.08);
+    border-radius: 0;
+    background: transparent;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock #mobile-instant-input {
+    border: 0;
+    border-bottom: 1px solid rgba(238,242,237,.16);
+    border-radius: 0;
+    padding-inline: 3px;
+    background: transparent;
+    box-shadow: none;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock #mobile-time-apply {
+    min-width: 44px;
+    border: 0;
+    border-radius: 0;
+    padding-inline: 6px;
+    color: var(--cursor);
+    background: transparent;
+    box-shadow: none;
+  }
+
   #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
     min-height: 26px;
     padding-inline: 6px;

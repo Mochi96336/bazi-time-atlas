@@ -1,0 +1,135 @@
+name: Research Swiss equatorial RA frame correction 4006
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-swiss-equatorial-ra-frame-correction-4006.yml"
+      - "scripts/research-swiss-equatorial-ra-frame-correction-4006.c"
+      - "scripts/compose-swiss-equatorial-ra-frame-correction-4006.mjs"
+      - "src/astronomy/equation-of-time-4006-swiss-segment-curvature-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-vondrak-precession-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-ra-frame-correction-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-precessed-geometric-ra-evidence.js"
+      - "tests/equation-of-time-4006-swiss-ra-frame-correction-evidence.test.js"
+      - "tests/equation-of-time-4006-swiss-segment-curvature-evidence.test.js"
+      - "tests/equation-of-time-4006-swiss-precessed-geometric-ra-evidence.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  equatorial-ra-frame-correction:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+
+      - name: Download pinned Swiss long-range ephemerides
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/sweph
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          for file in sepl_36.se1 semo_36.se1; do
+            curl -fsSL --retry 3 --retry-delay 2 \
+              "https://raw.githubusercontent.com/aloistr/swisseph/${SWISS_COMMIT}/ephe/${file}" \
+              -o "tmp/sweph/${file}"
+          done
+          cat <<'EOF' | sha256sum -c -
+          3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0  tmp/sweph/sepl_36.se1
+          f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
+          EOF
+
+      - name: Build corrected equatorial sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          mkdir -p tmp/swiss-equatorial-ra-frame-correction-4006
+          cc -O2 -std=gnu11 \
+            -I tmp/swisseph \
+            scripts/research-swiss-equatorial-ra-frame-correction-4006.c \
+            tmp/swisseph/libswe.a -lm \
+            -o tmp/swiss-equatorial-ra-frame-correction-4006/sample
+
+      - name: Capture corrected J2000 and mean-of-date RA frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp/swiss-equatorial-ra-frame-correction-4006/sample tmp/sweph \
+            | tee tmp/swiss-equatorial-ra-frame-correction-4006/raw.json
+          python -m json.tool tmp/swiss-equatorial-ra-frame-correction-4006/raw.json >/dev/null
+
+      - name: Compose corrected continuous RA bounds
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/compose-swiss-equatorial-ra-frame-correction-4006.mjs
+          python -m json.tool tmp/swiss-equatorial-ra-frame-correction-4006/manifest.json >/dev/null
+
+      - name: Verify correction and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          raw = json.loads(Path("tmp/swiss-equatorial-ra-frame-correction-4006/raw.json").read_text())
+          m = json.loads(Path("tmp/swiss-equatorial-ra-frame-correction-4006/manifest.json").read_text())
+          assert raw["targetYear"] == 4006
+          assert raw["sampleStepEtDays"] <= 0.25
+          assert raw["sampleCoverRadiusEtDays"] <= 0.125
+          i = raw["interpretation"]
+          assert i["equatorialFlagExplicit"] is True
+          assert i["trueGeometricPosition"] is True
+          assert i["j2000SampleIsEquatorial"] is True
+          assert i["meanOfDateSampleIsEquatorial"] is True
+          assert i["gridMinimumIsContinuousLowerBound"] is False
+          assert raw["j2000"]["minSampledEquatorialXyAu"] > 0
+          assert raw["meanOfDate"]["minSampledEquatorialXyAu"] > 0
+
+          defect = m["defect"]
+          assert defect["id"] == "missing-seflg-equatorial-in-legacy-geometric-ra-samplers"
+          hard = m["correctedHardBounds"]
+          assert hard["hardJ2000EquatorialXyLowerAu"] > 0
+          assert hard["hardMeanOfDateEquatorialXyLowerAu"] > 0
+          assert hard["geometricJ2000RaSecondDerivativeBoundDegPerDaySquared"] > 0
+          assert hard["meanOfDateGeometricRaSecondDerivativeBoundDegPerDaySquared"] > 0
+          interp = m["interpretation"]
+          assert interp["coordinateFrameCorrectionCertified"] is True
+          assert interp["legacy236RaClaimSuperseded"] is True
+          assert interp["legacy257RaClaimSuperseded"] is True
+          assert interp["sourceDerivedPvaCertificateStillValid"] is True
+          assert interp["sourceDerivedDistanceCertificateStillValid"] is True
+          assert interp["geometricJ2000RaSecondDerivativeCertified"] is True
+          assert interp["meanOfDateGeometricRaSecondDerivativeCertified"] is True
+          assert interp["lightTimeCorrectionCertified"] is False
+          assert interp["swissEotSecondDerivativeCertified"] is False
+          assert interp["continuousResidualUpperBound"] is False
+          assert interp["recurrenceAuthorityGranted"] is False
+          PY
+
+      - name: Upload corrected RA-frame evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swiss-equatorial-ra-frame-correction-4006
+          path: |
+            tmp/swiss-equatorial-ra-frame-correction-4006/raw.json
+            tmp/swiss-equatorial-ra-frame-correction-4006/manifest.json
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6

@@ -26,6 +26,25 @@ test("mobile reading view removes hero/card chrome without stealing shell scroll
   assert.match(mobile[1], /\.instrument-shell\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
 });
 
+test("mobile ordinary reading flattens exact-time chrome without hiding editing", () => {
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(238,242,237,\.08\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
+  );
+  assert.match(
+    css,
+    /\.mobile-time-dock #mobile-instant-input\s*\{[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/
+  );
+  assert.match(
+    css,
+    /\.mobile-time-dock #mobile-time-apply\s*\{[\s\S]*?min-width:\s*44px;[\s\S]*?color:\s*var\(--cursor\);[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/
+  );
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock\s*\{[^}]*display:\s*none;/s
+  );
+});
+
 test("ordinary reading keeps long-form notes out of the main path", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
 });
