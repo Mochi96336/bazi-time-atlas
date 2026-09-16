@@ -3,19 +3,12 @@
    semantics remain owned by the wheel model and renderer. */
 
 /* Color grammar belongs to the composed instrument, not to each clock as an
-   independent category. The four Ganzhi clocks are one cool, low-chroma family
-   whose lightness opens outward with temporal scale. Solar longitude keeps the
-   single warm brass channel; derived Zodiac stays a recessed violet; the ivory
+   independent category. The canonical semantic tokens live in kinetic-atlas.css;
+   this layer only consumes them. The four Ganzhi clocks are one cool, low-chroma
+   family whose lightness opens outward with temporal scale. Solar longitude keeps
+   the single warm brass channel; derived Zodiac stays a recessed violet; the ivory
    cursor remains reserved for the Selected Instant. Classification mode may
    deliberately replace this resting grammar with categorical element colors. */
-:root {
-  --hour: #6f8983;
-  --day: #78928b;
-  --month: #859e96;
-  --year: #96aaa2;
-  --solar: #c6a36f;
-  --zodiac: #9089a7;
-}
 
 /* Read the legend the same way the eye reads the fan: outer / slow first,
    then walk inward toward the fast clocks. Keep the legend about layer

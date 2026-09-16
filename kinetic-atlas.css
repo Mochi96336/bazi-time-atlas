@@ -8,11 +8,15 @@
   --faint: #59625c;
   --hairline: rgba(238, 242, 237, .12);
   --cursor: #f4e6b7;
-  --year: #b5aa80;
-  --month: #8ca890;
-  --day: #7898a6;
-  --solar: #d5a36d;
-  --zodiac: #998bb4;
+  /* Canonical temporal palette. Downstream presentation layers consume these
+     semantic roles but must not redefine them; color meaning must not depend on
+     stylesheet load order. */
+  --hour: #6f8983;
+  --day: #78928b;
+  --month: #859e96;
+  --year: #96aaa2;
+  --solar: #c6a36f;
+  --zodiac: #9089a7;
   --accent: #c7d9cd;
   --danger: #d19784;
 }
