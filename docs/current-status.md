@@ -1,6 +1,6 @@
 # BaZi Time Atlas — current implementation checkpoint
 
-Updated through the current production wheel, deterministic visual-evidence, typed Day/Hour proof-chain and bounded DE441 seasonal-event runtime work on main, including PRs #145–#150.
+Updated through the current production wheel, deterministic visual evidence, typed Day/Hour proof chain, bounded DE441 seasonal-event runtime work, and the Atlas temporal-context state/control migration on main.
 
 This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is historical design rationale and must not override behavior locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
 
@@ -10,8 +10,8 @@ The landing page is a kinetic time instrument rather than a dashboard. One **Sel
 
 Radial position and radial thickness both carry temporal meaning: short / fast cycles live inside and are thinner; long / slow cycles live outside and are wider. The primary stack runs inner → outer as:
 
-1. **Hour pillar** — 60-state wheel with double-hour boundaries under the atlas UTC+08:00 reference clock.
-2. **Day pillar** — 60-state wheel using the current Zi-initial 23:00 day-boundary convention.
+1. **Hour pillar** — 60-state wheel with double-hour boundaries under the Atlas fixed-offset temporal context; the production default is UTC+08:00.
+2. **Day pillar** — 60-state wheel using the configured day-boundary convention; the production default is Zi-initial 23:00.
 3. **Solar annual band** — one continuous apparent-solar-longitude cycle per year. It contains the 24 solar-term structure and the derived tropical-zodiac classification sub-band.
 4. **Month pillar** — 60-state wheel changing only at exact **jie** boundaries.
 5. **Year pillar** — 60-state wheel changing at exact Li Chun.
@@ -22,11 +22,13 @@ The visual thesis remains: **one instant, multiple coordinate systems, no fake u
 
 ## Navigation contract
 
-Primary product navigation remains intentionally focused:
+Primary product navigation is deliberately reduced to the two actual product-level destinations:
 
-`時間圖譜 → 出生 → 六十甲子 → 研究`
+`時間圖譜 → 研究`
 
-The recurrence/deep-time lab remains available at its existing URL, but it is the visually secondary final **Research** destination rather than a peer primary product surface. Cross-view browser checks lock the order, labels, href and secondary treatment across desktop and mobile fixtures.
+`出生` and `六十甲子` remain reachable at their existing URLs as compatibility/support surfaces while their useful capabilities are absorbed into the Atlas. They are **not** top-level product views and must not reappear in `.site-nav`. Existing Birth → Sexagenary deep links and `?ganzhi=` reference links remain valid during the migration so navigation cleanup does not delete functionality.
+
+The recurrence/deep-time lab remains the visually secondary final **Research** destination. Cross-view browser checks lock the two-item order, labels, href and secondary treatment across the Atlas, Research and retained compatibility surfaces on desktop/mobile fixtures.
 
 ## Main-instrument capabilities
 
@@ -45,7 +47,9 @@ Implemented on the current instrument:
 - continuous temporal motion across state boundaries rather than centre-snapping each active tooth;
 - exact shared-boundary highlighting only when resolved next-boundary timestamps are identical;
 - scale-dependent reading emphasis without hiding true layers;
-- optional classification overlay keeping BaZi Five-Phase and tropical-zodiac element/modality systems visually and semantically separate.
+- optional classification overlay keeping BaZi Five-Phase and tropical-zodiac element/modality systems visually and semantically separate;
+- one authoritative temporal context shared by desktop/mobile exact-time entry, wheel resolution, linked solar scrubbing, boundary readouts and canonical URLs;
+- a low-density temporal-context popover that reuses the existing time-basis readout instead of adding a permanent settings row or toolbar control.
 
 Scale presets change reading priority, not geometry:
 
@@ -57,7 +61,7 @@ The Visual PNG self-check now captures all three scale states at desktop `1440×
 
 Two important shared-boundary examples are represented directly:
 
-- Hour + Day can share the 23:00 Zi-initial transition.
+- Hour + Day can share the 23:00 Zi-initial transition under that selected day-boundary convention.
 - Year + Month share the exact Li Chun transition while the active month interval ends at Li Chun.
 
 Visual collinearity alone is never treated as temporal concurrence.
@@ -66,9 +70,9 @@ Visual collinearity alone is never treated as temporal concurrence.
 
 The main page is split so domain/display and interaction semantics do not accumulate indefinitely inside the browser bootstrap.
 
-`src/wheel/atlas-display-model.js` owns the pure Selected Instant → display/domain mapping used by the kinetic atlas, including pinned UTC+08 instant/civil-field conversion, apparent solar longitude lookup, current pillar/discrete-phase resolution and legacy projection interpretation.
+`src/wheel/atlas-display-model.js` owns the pure Selected Instant + explicit temporal context → display/domain mapping used by the kinetic atlas, including fixed-offset civil-field conversion, apparent solar longitude lookup, current pillar/discrete-phase resolution and legacy projection interpretation.
 
-`src/kinetic-atlas.js` remains the page/root orchestrator. It owns canonical page state, DOM readout mutation, renderer coordination and component wiring while delegating interaction lifecycles.
+`src/kinetic-atlas.js` remains the page/root orchestrator. It owns canonical page state, temporal-context mutation, canonical URL persistence, DOM readout mutation, renderer coordination and component wiring while delegating interaction lifecycles.
 
 Interaction ownership remains explicit:
 
@@ -76,7 +80,10 @@ Interaction ownership remains explicit:
 - `src/interaction/linked-ring-scrub.js` — linked angular drag → canonical Selected Instant conversion;
 - `src/interaction/free-compare-controller.js` — Free Compare mode and manual-offset reset/view state;
 - `src/interaction/kinetic-playback.js` — pure scale, slider and playback advance mathematics;
-- `src/interaction/kinetic-playback-controller.js` — RAF plus playback start/stop/toggle lifecycle.
+- `src/interaction/kinetic-playback-controller.js` — RAF plus playback start/stop/toggle lifecycle;
+- `src/interaction/selected-instant-command.js` — fail-closed Selected Instant command boundary;
+- `src/interaction/time-context-command.js` — fail-closed complete temporal-context command boundary;
+- `src/time-context-control.js` — low-density popover that emits context commands without owning page state or navigation.
 
 Other ownership boundaries remain:
 
@@ -94,12 +101,13 @@ The practical atlas keeps calendar rules and presentation separate:
 
 - Year identity changes only at exact Li Chun.
 - Month identity changes only at exact **jie**.
-- Day identity follows the configured Zi-initial-next-day rule used by the current atlas.
-- Hour identity follows double-hours beginning at odd local clock hours.
+- Day identity follows the configured canonical day-boundary rule (`zi-initial-next-day` or `civil-midnight`).
+- Hour identity follows double-hours beginning at odd local clock hours under the selected fixed-offset civil context.
 - Continuous solar phase is never interpolated into discrete Ganzhi identity.
 - Tropical Zodiac is read from the same solar-longitude phase and does not create another clock.
 - Legacy annual longitude projection suppresses Month progress/boundary precision when the projected Month is not owned by a complete physical instant.
 - Exact shared-boundary state is a timestamp equality claim, not a drawing coincidence.
+- Changing temporal context reinterprets the same physical Selected Instant; it does not silently move `selectedMs` or create a different instant.
 
 ## Recurrence / deep-time state
 
@@ -195,7 +203,7 @@ A `fixed-zone-from-ut1` target instant may derive the matching proleptic local-z
 
 The Day proof also uses the canonical typed day-boundary contract shared with the Birth engine: `zi-initial-next-day` or `civil-midnight`. The legacy `dayBoundaryBound:true` boolean is not authority and cannot unlock the proof by itself.
 
-The recurrence research controls expose those two canonical day-boundary choices independently from the fixed-zone target toggle. No value is selected by default. An absent `dayBoundary` remains explicitly unbound, and an invalid value fails closed instead of inheriting the Birth-page default.
+The recurrence research controls expose those two canonical day-boundary choices independently from the fixed-zone target toggle. No value is selected by default. An absent `dayBoundary` remains explicitly unbound, and an invalid value fails closed instead of inheriting the Atlas/Birth default.
 
 For the year-4006 fixed-zone research target with `UT1 +8 h`:
 
@@ -250,7 +258,7 @@ Every main-instrument or deep-time PR should continue to preserve:
 - recurrence / astronomical residual / determinacy / proof-chain gates;
 - source-role provenance and fail-closed deep-time semantics;
 - explicit runtime coverage distinct from broad source-ephemeris coverage;
-- cross-view navigation hierarchy;
+- exactly two top-level navigation destinations (`時間圖譜`, `研究`) while retained Birth/Sexagenary URLs continue to pass compatibility/deep-link checks;
 - desktop/mobile PNG inspection when presentation changes.
 
 ## Current frontier
@@ -259,8 +267,9 @@ Every main-instrument or deep-time PR should continue to preserve:
 2. **Add a production absolute-state adapter only if a real runtime use case requires on-demand states/crossings.** Proof-only pinned windows must not be rebranded as general runtime coverage; any adapter needs explicit bundled data, source/time/frame semantics and runtime coverage.
 3. **Continue the year-4006 Day / Hour proof from the `clock-basis` blocker.** Explicit day-boundary selection is now wired and can resolve Day; the next production-safe step is to bind civil / local-mean-solar / local-apparent-solar clock basis without conflating it with target-instant time scale or future political timezone policy.
 4. **Validate target eras independently.** Passing 2026 or 4006 does not authorize another century or millennium by interpolation of confidence.
-5. **Keep Research secondary to the product instrument.** New evidence surfaces should not turn the landing page back into a dashboard.
-6. **Protect `main` at the repository-settings layer.** Source-controlled CI is strong enough to serve as required checks once a ruleset is enabled.
-7. **Optional Western sky only after the above remains stable.** Planets/aspects require explicit ephemeris provenance and remain distinct from BaZi classifications.
+5. **Absorb useful Birth / Sexagenary capabilities into contextual Atlas controls and inspectors before retiring their legacy URLs.** Navigation demotion is not permission to delete deep-link compatibility or reference capability early.
+6. **Keep Research secondary to the product instrument.** New evidence surfaces should not turn the landing page back into a dashboard.
+7. **Protect `main` at the repository-settings layer.** Source-controlled CI is strong enough to serve as required checks once a ruleset is enabled.
+8. **Optional Western sky only after the above remains stable.** Planets/aspects require explicit ephemeris provenance and remain distinct from BaZi classifications.
 
-The current direction is therefore: keep radial position and motion semantically meaningful, keep classification systems distinct, keep controller/domain ownership narrow, publish only source-backed absolute-time results inside explicit runtime coverage, and never convert broad model/source coverage into unsupported certainty.
+The current direction is therefore: keep radial position and motion semantically meaningful, keep classification systems distinct, keep controller/domain ownership narrow, keep product navigation centered on the Atlas rather than contextual reference pages, publish only source-backed absolute-time results inside explicit runtime coverage, and never convert broad model/source coverage into unsupported certainty.
