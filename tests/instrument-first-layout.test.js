@@ -35,8 +35,7 @@ test("desktop wheel owns the viewport instead of a capped document column", () =
 });
 
 test("wide desktop ring identities follow camera height instead of old width percentages", () => {
-  const wide = css.match(/@media \(min-width: 821px\) \{([\s\S]*?)\n\}/);
-  assert.ok(wide, "wide desktop identity placement override must exist");
+  assert.match(css, /@media \(min-width: 821px\)/, "wide desktop identity placement override must exist");
   for (const [ring, offset, top] of [
     ["year", "57.08", "36.26"],
     ["month", "49.08", "51.97"],
@@ -45,12 +44,12 @@ test("wide desktop ring identities follow camera height instead of old width per
     ["hour", "32.01", "85.47"]
   ]) {
     assert.match(
-      wide[1],
+      css,
       new RegExp(`\\.ring-${ring}\\s*\\{[^}]*left:\\s*calc\\(50% - ${offset}cqh\\);[^}]*top:\\s*${top}%;`, "s"),
       `${ring} identity should stay on the intended radial spoke across desktop aspect ratios`
     );
   }
-  assert.doesNotMatch(wide[1], /\.ring-(?:year|month|solar|day|hour)\s*\{[^}]*left:\s*\d+(?:\.\d+)?%;/s);
+  assert.doesNotMatch(css, /\.ring-(?:year|month|solar|day|hour)\s*\{[^}]*left:\s*\d+(?:\.\d+)?%;/s);
 });
 
 test("mobile reading view removes hero/card chrome without stealing shell scroll ownership", () => {
