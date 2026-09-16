@@ -42,8 +42,8 @@ if (attr(probe, "data-mobile-initial-readout") !== "2026-09-16 · 05:14:37 · UT
 if (attr(probe, "data-mobile-initial-utc") !== "9" || attr(probe, "data-mobile-initial-boundary") !== "civil-midnight") {
   throw new Error(`mobile instrument did not expose resolved temporal context: ${url}`);
 }
-if (!["auto", "scroll"].includes(attr(probe, "data-shell-overflow-y"))) throw new Error(`mobile shell is not vertically scrollable: ${url}`);
-if (attr(probe, "data-shell-scrollable") !== "true") throw new Error(`mobile shell has no reachable content below the disk: ${url}`);
+if (!["auto", "scroll"].includes(attr(probe, "data-shell-overflow-y"))) throw new Error(`mobile shell cannot scroll vertically when overflow is needed: ${url}`);
+if (attr(probe, "data-dock-reachable") !== "true") throw new Error(`mobile exact-time dock is not reachable in the shell viewport or its scroll range: ${url}`);
 if (attr(probe, "data-dock-after-instrument") !== "true") throw new Error(`exact-time dock does not follow the instrument in reading order: ${url}`);
 if (attr(probe, "data-apply-visible") !== "true") throw new Error(`exact-time apply action is not visible: ${url}`);
 const share = Number(attr(probe, "data-instrument-share"));
@@ -115,4 +115,4 @@ if (attr(probe, "data-desktop-legacy-keys") !== "false") {
   throw new Error(`desktop committed instant retained legacy projection keys: ${url}`);
 }
 
-console.log(`[exact-time] PASS deterministic mobile 24h display + shared UTC+09/civil-midnight state ownership; mobile share=${share.toFixed(3)}: ${url}`);
+console.log(`[exact-time] PASS deterministic mobile 24h display + reachable exact-time dock + shared UTC+09/civil-midnight state ownership; mobile share=${share.toFixed(3)}: ${url}`);
