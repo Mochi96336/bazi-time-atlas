@@ -57,8 +57,17 @@
 
       const dockStyle = mobileWin.getComputedStyle(dock);
       const shellStyle = mobileWin.getComputedStyle(shell);
+      const shellRect = shell.getBoundingClientRect();
       const instrumentRect = instrument.getBoundingClientRect();
       const dockRect = dock.getBoundingClientRect();
+      const shellScrollable = shell.scrollHeight > shell.clientHeight + 2;
+      const shellCanScroll = ["auto", "scroll"].includes(shellStyle.overflowY) && shellScrollable;
+      const dockInShellViewport = dockRect.top >= shellRect.top - 1 && dockRect.bottom <= shellRect.bottom + 1;
+      const dockTopInContent = dockRect.top - shellRect.top + shell.scrollTop;
+      const dockBottomInContent = dockRect.bottom - shellRect.top + shell.scrollTop;
+      const dockWithinScrollableContent = dockTopInContent >= -1 && dockBottomInContent <= shell.scrollHeight + 1;
+      const dockFitsShellViewport = dockRect.height <= shell.clientHeight + 2;
+      const dockReachable = dockInShellViewport || (shellCanScroll && dockWithinScrollableContent && dockFitsShellViewport);
 
       if (!initialCaptured) {
         initialCaptured = true;
@@ -74,7 +83,9 @@
         probe.dataset.mobileInitialUtc = instrument.dataset.utcOffsetHours ?? "";
         probe.dataset.mobileInitialBoundary = instrument.dataset.dayBoundary ?? "";
         probe.dataset.shellOverflowY = shellStyle.overflowY;
-        probe.dataset.shellScrollable = String(shell.scrollHeight > shell.clientHeight + 2);
+        probe.dataset.shellScrollable = String(shellScrollable);
+        probe.dataset.dockInShellViewport = String(dockInShellViewport);
+        probe.dataset.dockReachable = String(dockReachable);
         probe.dataset.instrumentShare = String(instrumentRect.height / mobileWin.innerHeight);
         probe.dataset.dockAfterInstrument = String(dockRect.top >= instrumentRect.bottom - 1);
         probe.dataset.applyVisible = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);

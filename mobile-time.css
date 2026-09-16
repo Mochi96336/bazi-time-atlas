@@ -18,10 +18,11 @@
     min-height: 620px;
   }
 
-  /* The portrait composition already exposes Selected Instant through the
-     datum line and exact timestamp. The SVG caption otherwise lands directly
-     in the compact five-layer legend, so retire only that redundant caption. */
-  #cursor-layer .cursor-note { display: none; }
+  /* Ordinary reading uses the editable exact-time dock as its single textual
+     precision surface. Analysis keeps the full diagnostic instrument readout. */
+  #kinetic-instrument:not([data-analysis-open="true"]) .instrument-readout {
+    display: none;
+  }
 
   .mobile-time-dock {
     display: grid;
