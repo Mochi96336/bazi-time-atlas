@@ -12,6 +12,7 @@ const pages = [
   // Lock the original wheel-alignment regression at 2026-09-14 07:43:42 UTC+08.
   // The controller deep link is an absolute UTC instant, so this is 2026-09-13T23:43:42Z.
   { key: "annual-selected-instant", path: "?instant=2026-09-13T23%3A43%3A42.000Z" },
+  { key: "annual-ganzhi-inspector", path: "?instant=2026-09-13T23%3A43%3A42.000Z&inspect=year" },
   { key: "annual-classification", path: "?classification=1&instant=2027-03-15T13%3A20%3A09.000Z" },
   { key: "annual-birth", path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1" },
   { key: "recurrence", path: "recurrence.html" },
