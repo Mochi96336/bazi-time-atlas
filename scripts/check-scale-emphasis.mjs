@@ -29,10 +29,6 @@ function requireEqual(actual, expected, label, url) {
   if (actual !== expected) throw new Error(`${label}: expected ${expected}, got ${actual}: ${url}`);
 }
 
-function cap(value) {
-  return value[0].toUpperCase() + value.slice(1);
-}
-
 function data(prefix, ring, role) {
   return `data-${prefix}-${ring}-${role}-opacity`;
 }
@@ -47,9 +43,11 @@ function assertRoleRamp(tag, prefix, ring, url) {
   const surface = num(tag, data(prefix, ring, "surface"));
   const structure = num(tag, data(prefix, ring, "structure"));
   const context = num(tag, data(prefix, ring, "context"));
+  const activeSurface = num(tag, data(prefix, ring, "active-surface"));
   const active = num(tag, data(prefix, ring, "active"));
-  if (![surface, structure, context, active].every(Number.isFinite) || !(surface < structure && structure < context && context < active)) {
-    throw new Error(`${prefix} ${ring}: expected surface < structure < context < active, got ${surface},${structure},${context},${active}: ${url}`);
+  if (![surface, structure, context, activeSurface, active].every(Number.isFinite)
+    || !(surface < structure && structure < context && context < activeSurface && activeSurface < active)) {
+    throw new Error(`${prefix} ${ring}: expected surface < structure < context < activeSurface < activeLabel, got ${surface},${structure},${context},${activeSurface},${active}: ${url}`);
   }
 }
 
@@ -82,7 +80,7 @@ requireEqual(attr(probe, "data-initial-context"), "year", "one-year context ring
 requireEqual(attr(probe, "data-initial-ambient"), "hour,day", "one-year ambient rings", url);
 requireEqual(attr(probe, "data-initial-readout"), "一年", "one-year readout", url);
 
-/* Whole-track fading is retired. Every mode keeps each rotating coordinate
+/* Whole-track fading stays retired. Every mode keeps each rotating coordinate
    frame at full opacity and free of inherited brightness/saturation filters. */
 for (const prefix of ["year", "day", "cycle"]) {
   for (const ring of ["hour", "day", "solar", "zodiac", "month", "year"]) {
@@ -91,14 +89,14 @@ for (const prefix of ["year", "day", "cycle"]) {
   }
 }
 
-/* One-year focus: Solar / Month retain full resting ink. Context rings recede
-   by role while their active read-head remains full strength. */
-assertRole(probe, "year", "solar", { surface:1, structure:1, context:1, active:1 }, url);
-assertRole(probe, "year", "zodiac", { surface:.78, context:.78, active:1 }, url);
-assertRole(probe, "year", "month", { surface:1, structure:1, context:1, active:1 }, url);
-assertRole(probe, "year", "year", { surface:.56, structure:.66, context:.74, active:1 }, url);
-assertRole(probe, "year", "day", { surface:.46, structure:.58, context:.66, active:1 }, url);
-assertRole(probe, "year", "hour", { surface:.40, structure:.52, context:.62, active:1 }, url);
+/* One-year focus: Solar / Month retain full ink. Non-focus active sector
+   surfaces recede, while the datum labels remain full strength. */
+assertRole(probe, "year", "solar", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
+assertRole(probe, "year", "zodiac", { surface:.78, context:.78, "active-surface":.84, active:1 }, url);
+assertRole(probe, "year", "month", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
+assertRole(probe, "year", "year", { surface:.56, structure:.66, context:.74, "active-surface":.82, active:1 }, url);
+assertRole(probe, "year", "day", { surface:.46, structure:.58, context:.66, "active-surface":.74, active:1 }, url);
+assertRole(probe, "year", "hour", { surface:.40, structure:.52, context:.62, "active-surface":.70, active:1 }, url);
 for (const ring of ["year", "day", "hour"]) assertRoleRamp(probe, "year", ring, url);
 
 requireEqual(attr(probe, "data-day-window"), "day", "48-hour emphasis mode", url);
@@ -106,29 +104,30 @@ requireEqual(attr(probe, "data-day-focus"), "hour,day", "48-hour focus rings", u
 requireEqual(attr(probe, "data-day-context"), "solar", "48-hour context rings", url);
 requireEqual(attr(probe, "data-day-ambient"), "month,year", "48-hour ambient rings", url);
 requireEqual(attr(probe, "data-day-readout"), "日內 / 48 小時", "48-hour readout", url);
-assertRole(probe, "day", "hour", { surface:1, structure:1, context:1, active:1 }, url);
-assertRole(probe, "day", "day", { surface:1, structure:1, context:1, active:1 }, url);
-assertRole(probe, "day", "solar", { surface:.52, structure:.62, context:.70, active:1 }, url);
-assertRole(probe, "day", "zodiac", { surface:.42, context:.56, active:1 }, url);
-assertRole(probe, "day", "month", { surface:.38, structure:.50, context:.58, active:1 }, url);
-assertRole(probe, "day", "year", { surface:.30, structure:.42, context:.50, active:1 }, url);
+assertRole(probe, "day", "hour", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
+assertRole(probe, "day", "day", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
+assertRole(probe, "day", "solar", { surface:.52, structure:.62, context:.70, "active-surface":.78, active:1 }, url);
+assertRole(probe, "day", "zodiac", { surface:.42, context:.56, "active-surface":.68, active:1 }, url);
+assertRole(probe, "day", "month", { surface:.38, structure:.50, context:.58, "active-surface":.66, active:1 }, url);
+assertRole(probe, "day", "year", { surface:.30, structure:.42, context:.50, "active-surface":.60, active:1 }, url);
 for (const ring of ["solar", "month", "year"]) assertRoleRamp(probe, "day", ring, url);
 near(num(probe, "data-day-hover-year-surface-opacity"), 1, "hovered Year surface returns to full ink", url);
 near(num(probe, "data-day-hover-year-structure-opacity"), 1, "hovered Year structure returns to full ink", url);
 near(num(probe, "data-day-hover-year-context-opacity"), 1, "hovered Year context returns to full ink", url);
-near(num(probe, "data-day-hover-year-active-opacity"), 1, "hovered Year active remains full ink", url);
+near(num(probe, "data-day-hover-year-active-surface-opacity"), 1, "hovered Year active surface returns to full ink", url);
+near(num(probe, "data-day-hover-year-active-opacity"), 1, "hovered Year active label remains full ink", url);
 
 requireEqual(attr(probe, "data-cycle-window"), "cycle", "60-year emphasis mode", url);
 requireEqual(attr(probe, "data-cycle-focus"), "year", "60-year focus ring", url);
 requireEqual(attr(probe, "data-cycle-context"), "month,solar", "60-year context rings", url);
 requireEqual(attr(probe, "data-cycle-ambient"), "day,hour", "60-year ambient rings", url);
 requireEqual(attr(probe, "data-cycle-readout"), "六十年", "60-year readout", url);
-assertRole(probe, "cycle", "year", { surface:1, structure:1, context:1, active:1 }, url);
-assertRole(probe, "cycle", "month", { surface:.70, structure:.78, context:.84, active:1 }, url);
-assertRole(probe, "cycle", "solar", { surface:.56, structure:.66, context:.74, active:1 }, url);
-assertRole(probe, "cycle", "zodiac", { surface:.44, context:.60, active:1 }, url);
-assertRole(probe, "cycle", "day", { surface:.46, structure:.56, context:.64, active:1 }, url);
-assertRole(probe, "cycle", "hour", { surface:.40, structure:.50, context:.60, active:1 }, url);
+assertRole(probe, "cycle", "year", { surface:1, structure:1, context:1, "active-surface":1, active:1 }, url);
+assertRole(probe, "cycle", "month", { surface:.70, structure:.78, context:.84, "active-surface":.90, active:1 }, url);
+assertRole(probe, "cycle", "solar", { surface:.56, structure:.66, context:.74, "active-surface":.82, active:1 }, url);
+assertRole(probe, "cycle", "zodiac", { surface:.44, context:.60, "active-surface":.72, active:1 }, url);
+assertRole(probe, "cycle", "day", { surface:.46, structure:.56, context:.64, "active-surface":.72, active:1 }, url);
+assertRole(probe, "cycle", "hour", { surface:.40, structure:.50, context:.60, "active-surface":.68, active:1 }, url);
 for (const ring of ["month", "solar", "day", "hour"]) assertRoleRamp(probe, "cycle", ring, url);
 
 requireEqual(attr(probe, "data-all-primary-displayed"), "true", "scale emphasis must not hide primary layers", url);
@@ -140,4 +139,4 @@ requireEqual(num(probe, "data-active-scale-buttons"), 1, "one active scale butto
 requireEqual(attr(probe, "data-current-scale-button"), "cycle", "final active scale button", url);
 requireEqual(attr(probe, "data-current-aria-scale"), "cycle", "final aria-current scale button", url);
 
-console.log(`[scale-emphasis] PASS 390px mark-level focus with full-strength Selected Instant evidence: ${url}`);
+console.log(`[scale-emphasis] PASS 390px scale focus with receding active surfaces and full-strength datum labels: ${url}`);

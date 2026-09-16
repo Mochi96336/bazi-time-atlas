@@ -23,11 +23,12 @@ function hasDirectDeclaration(body, property) {
   return new RegExp(`(?:^|\\n)\\s*${property}\\s*:`, "m").test(body);
 }
 
-test("scale emphasis keeps coordinate tracks full-strength and recedes resting marks by role", () => {
+test("scale emphasis keeps coordinate tracks full-strength while mark roles carry focus", () => {
   const tracks = sharedRule("#hour-track,", "#year-track");
   assert.match(tracks, /--scale-surface-opacity:\s*1;/);
   assert.match(tracks, /--scale-structure-opacity:\s*1;/);
   assert.match(tracks, /--scale-context-opacity:\s*1;/);
+  assert.match(tracks, /--scale-active-surface-opacity:\s*1;/);
   assert.match(tracks, /(?:^|\n)\s*opacity:\s*1;/m);
   assert.match(tracks, /(?:^|\n)\s*filter:\s*none;/m);
 
@@ -46,9 +47,13 @@ test("scale emphasis keeps coordinate tracks full-strength and recedes resting m
   );
   assert.match(context, /opacity:\s*var\(--scale-context-opacity\);/);
 
-  const active = sharedRule("#hour-track .cycle-sector.is-active,", "#zodiac-track .active-cycle-label");
-  assert.match(active, /(?:^|\n)\s*opacity:\s*1;/m);
-  assert.match(active, /(?:^|\n)\s*filter:\s*none;/m);
+  const activeSurface = sharedRule("#hour-track .cycle-sector.is-active,", "#zodiac-track .zodiac-sector.is-active");
+  assert.match(activeSurface, /opacity:\s*var\(--scale-active-surface-opacity\);/);
+  assert.match(activeSurface, /(?:^|\n)\s*filter:\s*none;/m);
+
+  const activeLabel = sharedRule("#hour-track .active-cycle-label,", "#zodiac-track .active-cycle-label");
+  assert.match(activeLabel, /(?:^|\n)\s*opacity:\s*1;/m);
+  assert.match(activeLabel, /(?:^|\n)\s*filter:\s*none;/m);
 
   const recededRules = [
     '#kinetic-instrument[data-scale-window="day"] #solar-track',
@@ -72,29 +77,44 @@ test("scale emphasis keeps coordinate tracks full-strength and recedes resting m
   }
 });
 
-test("48-hour recession is role-specific and preserves a full-strength active channel", () => {
+test("48-hour recession preserves datum labels while active surfaces join the focus ramp", () => {
   const solar = rule('#kinetic-instrument[data-scale-window="day"] #solar-track');
   assert.match(solar, /--scale-surface-opacity:\s*\.52;/);
   assert.match(solar, /--scale-structure-opacity:\s*\.62;/);
   assert.match(solar, /--scale-context-opacity:\s*\.70;/);
+  assert.match(solar, /--scale-active-surface-opacity:\s*\.78;/);
 
   const month = rule('#kinetic-instrument[data-scale-window="day"] #month-track');
   assert.match(month, /--scale-surface-opacity:\s*\.38;/);
   assert.match(month, /--scale-structure-opacity:\s*\.50;/);
   assert.match(month, /--scale-context-opacity:\s*\.58;/);
+  assert.match(month, /--scale-active-surface-opacity:\s*\.66;/);
 
   const year = rule('#kinetic-instrument[data-scale-window="day"] #year-track');
   assert.match(year, /--scale-surface-opacity:\s*\.30;/);
   assert.match(year, /--scale-structure-opacity:\s*\.42;/);
   assert.match(year, /--scale-context-opacity:\s*\.50;/);
+  assert.match(year, /--scale-active-surface-opacity:\s*\.60;/);
 
-  // Hour / Day inherit the full-strength defaults instead of needing a special
-  // group-level opacity rule. This keeps focus semantics separate from tracks.
   assert.doesNotMatch(css, /data-scale-window="day"\]\s+#day-track\s*\{/);
   assert.doesNotMatch(css, /data-scale-window="day"\]\s+#hour-track\s*\{/);
 });
 
-test("interaction restores resting mark roles without changing the already-full active channel", () => {
+test("one-year and sixty-year modes keep active surfaces ordered behind their full datum labels", () => {
+  const yearContext = rule('#kinetic-instrument[data-scale-window="year"] #year-track');
+  assert.match(yearContext, /--scale-context-opacity:\s*\.74;/);
+  assert.match(yearContext, /--scale-active-surface-opacity:\s*\.82;/);
+
+  const cycleMonth = rule('#kinetic-instrument[data-scale-window="cycle"] #month-track');
+  assert.match(cycleMonth, /--scale-context-opacity:\s*\.84;/);
+  assert.match(cycleMonth, /--scale-active-surface-opacity:\s*\.90;/);
+
+  const cycleHour = rule('#kinetic-instrument[data-scale-window="cycle"] #hour-track');
+  assert.match(cycleHour, /--scale-context-opacity:\s*\.60;/);
+  assert.match(cycleHour, /--scale-active-surface-opacity:\s*\.68;/);
+});
+
+test("interaction restores every mark role including the receded active surface", () => {
   const interaction = sharedRule(
     '#kinetic-wheel[data-hover-ring="hour"] #hour-track,',
     '#kinetic-wheel[data-active-ring="year"] #year-track'
@@ -102,6 +122,7 @@ test("interaction restores resting mark roles without changing the already-full 
   assert.match(interaction, /--scale-surface-opacity:\s*1;/);
   assert.match(interaction, /--scale-structure-opacity:\s*1;/);
   assert.match(interaction, /--scale-context-opacity:\s*1;/);
+  assert.match(interaction, /--scale-active-surface-opacity:\s*1;/);
   assert.equal(hasDirectDeclaration(interaction, "opacity"), false);
   assert.equal(hasDirectDeclaration(interaction, "filter"), false);
 });
