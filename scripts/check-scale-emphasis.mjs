@@ -29,13 +29,27 @@ function requireEqual(actual, expected, label, url) {
   if (actual !== expected) throw new Error(`${label}: expected ${expected}, got ${actual}: ${url}`);
 }
 
-function requireIncludes(actual, expected, label, url) {
-  if (!(actual ?? "").includes(expected)) throw new Error(`${label}: expected ${JSON.stringify(actual)} to include ${expected}: ${url}`);
+function cap(value) {
+  return value[0].toUpperCase() + value.slice(1);
 }
 
-function requireDescending(values, label, url) {
-  if (!values.every(Number.isFinite) || values.some((value, index) => index > 0 && values[index - 1] <= value)) {
-    throw new Error(`${label}: expected strictly descending opacity, got ${values.join(",")}: ${url}`);
+function data(prefix, ring, role) {
+  return `data-${prefix}-${ring}-${role}-opacity`;
+}
+
+function assertRole(tag, prefix, ring, expected, url) {
+  for (const [role, value] of Object.entries(expected)) {
+    near(num(tag, data(prefix, ring, role)), value, `${prefix} ${ring} ${role}`, url);
+  }
+}
+
+function assertRoleRamp(tag, prefix, ring, url) {
+  const surface = num(tag, data(prefix, ring, "surface"));
+  const structure = num(tag, data(prefix, ring, "structure"));
+  const context = num(tag, data(prefix, ring, "context"));
+  const active = num(tag, data(prefix, ring, "active"));
+  if (![surface, structure, context, active].every(Number.isFinite) || !(surface < structure && structure < context && context < active)) {
+    throw new Error(`${prefix} ${ring}: expected surface < structure < context < active, got ${surface},${structure},${context},${active}: ${url}`);
   }
 }
 
@@ -67,71 +81,55 @@ requireEqual(attr(probe, "data-initial-focus"), "solar,month", "one-year focus r
 requireEqual(attr(probe, "data-initial-context"), "year", "one-year context rings", url);
 requireEqual(attr(probe, "data-initial-ambient"), "hour,day", "one-year ambient rings", url);
 requireEqual(attr(probe, "data-initial-readout"), "一年", "one-year readout", url);
-near(num(probe, "data-year-solar-opacity"), 1, "one-year Solar opacity", url);
-near(num(probe, "data-year-zodiac-opacity"), 1, "one-year Zodiac opacity", url);
-near(num(probe, "data-year-month-opacity"), 1, "one-year Month opacity", url);
-near(num(probe, "data-year-year-opacity"), .62, "one-year Year context opacity", url);
-near(num(probe, "data-year-day-opacity"), .54, "one-year Day ambient opacity", url);
-near(num(probe, "data-year-hour-opacity"), .46, "one-year Hour ambient opacity", url);
-requireEqual(attr(probe, "data-year-solar-filter"), "none", "one-year Solar filter", url);
-requireEqual(attr(probe, "data-year-month-filter"), "none", "one-year Month filter", url);
-requireEqual(attr(probe, "data-year-year-filter"), "none", "one-year Year filter", url);
-requireDescending([
-  num(probe, "data-year-year-opacity"),
-  num(probe, "data-year-day-opacity"),
-  num(probe, "data-year-hour-opacity")
-], "one-year context hierarchy Year > Day > Hour", url);
+
+/* Whole-track fading is retired. Every mode keeps each rotating coordinate
+   frame at full opacity and free of inherited brightness/saturation filters. */
+for (const prefix of ["year", "day", "cycle"]) {
+  for (const ring of ["hour", "day", "solar", "zodiac", "month", "year"]) {
+    near(num(probe, `data-${prefix}-${ring}-track-opacity`), 1, `${prefix} ${ring} track opacity`, url);
+    requireEqual(attr(probe, `data-${prefix}-${ring}-track-filter`), "none", `${prefix} ${ring} track filter`, url);
+  }
+}
+
+/* One-year focus: Solar / Month retain full resting ink. Context rings recede
+   by role while their active read-head remains full strength. */
+assertRole(probe, "year", "solar", { surface:1, structure:1, context:1, active:1 }, url);
+assertRole(probe, "year", "zodiac", { surface:.78, context:.78, active:1 }, url);
+assertRole(probe, "year", "month", { surface:1, structure:1, context:1, active:1 }, url);
+assertRole(probe, "year", "year", { surface:.56, structure:.66, context:.74, active:1 }, url);
+assertRole(probe, "year", "day", { surface:.46, structure:.58, context:.66, active:1 }, url);
+assertRole(probe, "year", "hour", { surface:.40, structure:.52, context:.62, active:1 }, url);
+for (const ring of ["year", "day", "hour"]) assertRoleRamp(probe, "year", ring, url);
 
 requireEqual(attr(probe, "data-day-window"), "day", "48-hour emphasis mode", url);
 requireEqual(attr(probe, "data-day-focus"), "hour,day", "48-hour focus rings", url);
 requireEqual(attr(probe, "data-day-context"), "solar", "48-hour context rings", url);
 requireEqual(attr(probe, "data-day-ambient"), "month,year", "48-hour ambient rings", url);
 requireEqual(attr(probe, "data-day-readout"), "日內 / 48 小時", "48-hour readout", url);
-near(num(probe, "data-day-hour-opacity"), 1, "48-hour Hour opacity", url);
-near(num(probe, "data-day-day-opacity"), 1, "48-hour Day opacity", url);
-near(num(probe, "data-day-solar-opacity"), .40, "48-hour Solar context opacity", url);
-near(num(probe, "data-day-zodiac-opacity"), .40, "48-hour Zodiac follows Solar opacity", url);
-near(num(probe, "data-day-month-opacity"), .22, "48-hour Month ambient opacity", url);
-near(num(probe, "data-day-year-opacity"), .14, "48-hour Year ambient opacity", url);
-requireDescending([
-  num(probe, "data-day-day-opacity"),
-  num(probe, "data-day-solar-opacity"),
-  num(probe, "data-day-month-opacity"),
-  num(probe, "data-day-year-opacity")
-], "48-hour focus hierarchy Day > Solar > Month > Year", url);
-requireEqual(attr(probe, "data-day-hour-filter"), "none", "48-hour Hour filter", url);
-requireEqual(attr(probe, "data-day-day-filter"), "none", "48-hour Day filter", url);
-requireIncludes(attr(probe, "data-day-solar-filter"), "saturate(0.72)", "48-hour Solar saturation recession", url);
-requireIncludes(attr(probe, "data-day-solar-filter"), "brightness(0.78)", "48-hour Solar luminance recession", url);
-requireEqual(attr(probe, "data-day-zodiac-filter"), attr(probe, "data-day-solar-filter"), "48-hour Zodiac follows Solar filter", url);
-requireIncludes(attr(probe, "data-day-month-filter"), "saturate(0.56)", "48-hour Month saturation recession", url);
-requireIncludes(attr(probe, "data-day-month-filter"), "brightness(0.62)", "48-hour Month luminance recession", url);
-requireIncludes(attr(probe, "data-day-year-filter"), "saturate(0.48)", "48-hour Year saturation recession", url);
-requireIncludes(attr(probe, "data-day-year-filter"), "brightness(0.55)", "48-hour Year luminance recession", url);
-near(num(probe, "data-day-hover-year-opacity"), 1, "hovered 48-hour Year returns to full opacity", url);
-requireEqual(attr(probe, "data-day-hover-year-filter"), "none", "hovered 48-hour Year clears recession filter", url);
+assertRole(probe, "day", "hour", { surface:1, structure:1, context:1, active:1 }, url);
+assertRole(probe, "day", "day", { surface:1, structure:1, context:1, active:1 }, url);
+assertRole(probe, "day", "solar", { surface:.52, structure:.62, context:.70, active:1 }, url);
+assertRole(probe, "day", "zodiac", { surface:.42, context:.56, active:1 }, url);
+assertRole(probe, "day", "month", { surface:.38, structure:.50, context:.58, active:1 }, url);
+assertRole(probe, "day", "year", { surface:.30, structure:.42, context:.50, active:1 }, url);
+for (const ring of ["solar", "month", "year"]) assertRoleRamp(probe, "day", ring, url);
+near(num(probe, "data-day-hover-year-surface-opacity"), 1, "hovered Year surface returns to full ink", url);
+near(num(probe, "data-day-hover-year-structure-opacity"), 1, "hovered Year structure returns to full ink", url);
+near(num(probe, "data-day-hover-year-context-opacity"), 1, "hovered Year context returns to full ink", url);
+near(num(probe, "data-day-hover-year-active-opacity"), 1, "hovered Year active remains full ink", url);
 
 requireEqual(attr(probe, "data-cycle-window"), "cycle", "60-year emphasis mode", url);
 requireEqual(attr(probe, "data-cycle-focus"), "year", "60-year focus ring", url);
 requireEqual(attr(probe, "data-cycle-context"), "month,solar", "60-year context rings", url);
 requireEqual(attr(probe, "data-cycle-ambient"), "day,hour", "60-year ambient rings", url);
 requireEqual(attr(probe, "data-cycle-readout"), "六十年", "60-year readout", url);
-near(num(probe, "data-cycle-year-opacity"), 1, "60-year Year opacity", url);
-near(num(probe, "data-cycle-month-opacity"), .70, "60-year Month context opacity", url);
-near(num(probe, "data-cycle-solar-opacity"), .52, "60-year Solar context opacity", url);
-near(num(probe, "data-cycle-zodiac-opacity"), .52, "60-year Zodiac follows Solar opacity", url);
-near(num(probe, "data-cycle-day-opacity"), .48, "60-year Day ambient opacity", url);
-near(num(probe, "data-cycle-hour-opacity"), .40, "60-year Hour ambient opacity", url);
-requireEqual(attr(probe, "data-cycle-solar-filter"), "none", "60-year Solar filter does not inherit 48-hour recession", url);
-requireEqual(attr(probe, "data-cycle-month-filter"), "none", "60-year Month filter does not inherit 48-hour recession", url);
-requireEqual(attr(probe, "data-cycle-year-filter"), "none", "60-year Year filter does not inherit 48-hour recession", url);
-requireDescending([
-  num(probe, "data-cycle-year-opacity"),
-  num(probe, "data-cycle-month-opacity"),
-  num(probe, "data-cycle-solar-opacity"),
-  num(probe, "data-cycle-day-opacity"),
-  num(probe, "data-cycle-hour-opacity")
-], "60-year hierarchy Year > Month > Solar > Day > Hour", url);
+assertRole(probe, "cycle", "year", { surface:1, structure:1, context:1, active:1 }, url);
+assertRole(probe, "cycle", "month", { surface:.70, structure:.78, context:.84, active:1 }, url);
+assertRole(probe, "cycle", "solar", { surface:.56, structure:.66, context:.74, active:1 }, url);
+assertRole(probe, "cycle", "zodiac", { surface:.44, context:.60, active:1 }, url);
+assertRole(probe, "cycle", "day", { surface:.46, structure:.56, context:.64, active:1 }, url);
+assertRole(probe, "cycle", "hour", { surface:.40, structure:.50, context:.60, active:1 }, url);
+for (const ring of ["month", "solar", "day", "hour"]) assertRoleRamp(probe, "cycle", ring, url);
 
 requireEqual(attr(probe, "data-all-primary-displayed"), "true", "scale emphasis must not hide primary layers", url);
 requireEqual(attr(probe, "data-zodiac-displayed"), "true", "scale emphasis must not hide Zodiac overlay", url);
@@ -142,4 +140,4 @@ requireEqual(num(probe, "data-active-scale-buttons"), 1, "one active scale butto
 requireEqual(attr(probe, "data-current-scale-button"), "cycle", "final active scale button", url);
 requireEqual(attr(probe, "data-current-aria-scale"), "cycle", "final aria-current scale button", url);
 
-console.log(`[scale-emphasis] PASS 390px area-aware focus without hiding layers or changing Selected Instant: ${url}`);
+console.log(`[scale-emphasis] PASS 390px mark-level focus with full-strength Selected Instant evidence: ${url}`);

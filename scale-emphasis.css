@@ -1,81 +1,165 @@
-/* Time-window presets change only visual reading priority. They never hide a
-   time layer or alter its rotation/boundary semantics. */
+/* Time-window presets change reading priority only. They never hide a layer,
+   alter geometry, or attenuate the whole rotating track. Scale emphasis is
+   owned by mark roles so Selected-Instant evidence keeps its native contrast. */
 
 #hour-track,
 #day-track,
 #solar-track,
 #zodiac-track,
 #month-track,
-#year-track,
-.ring-legend-row[data-ring-toggle] {
-  transition: opacity 180ms ease, filter 180ms ease;
-}
-
-/* 48 hours: Hour / Day are physically the narrowest rings, so opacity alone is
-   not enough to overcome the much larger painted area of the slow outer shells.
-   Keep canonical radii untouched and progressively remove ink from Solar,
-   Month and Year instead. They remain present as phase context and recover full
-   contrast immediately when the user hovers or drags them. */
-#kinetic-instrument[data-scale-window="day"] #hour-track,
-#kinetic-instrument[data-scale-window="day"] #day-track {
+#year-track {
+  --scale-surface-opacity: 1;
+  --scale-structure-opacity: 1;
+  --scale-context-opacity: 1;
   opacity: 1;
   filter: none;
 }
-#kinetic-instrument[data-scale-window="day"] #solar-track,
+
+/* Resting surfaces describe the phase field. Active sectors are deliberately
+   excluded: the Selected Instant must remain readable at every scale. */
+#hour-track .cycle-sector:not(.is-active),
+#day-track .cycle-sector:not(.is-active),
+#month-track .cycle-sector:not(.is-active),
+#year-track .cycle-sector:not(.is-active),
+#solar-track .term-sector:not(.is-active),
+#zodiac-track .zodiac-sector:not(.is-active) {
+  opacity: var(--scale-surface-opacity);
+  transition: opacity 180ms ease;
+}
+
+/* Structural marks may recede farther than active evidence, but they stay
+   present so every ring still reads as part of one mechanism. */
+#hour-track .ring-tick,
+#day-track .ring-tick,
+#month-track .ring-tick,
+#year-track .ring-tick,
+#solar-track .term-mark {
+  opacity: var(--scale-structure-opacity);
+  transition: opacity 180ms ease;
+}
+
+/* Static labels are context. Dynamic read-head labels are excluded below and
+   therefore never inherit the ambient scale fade. */
+#hour-track .cycle-label:not(.active-cycle-label),
+#day-track .cycle-label:not(.active-cycle-label),
+#month-track .cycle-label:not(.active-cycle-label),
+#year-track .cycle-label:not(.active-cycle-label),
+#solar-track .term-label:not(.active-cycle-label),
+#zodiac-track .zodiac-label:not(.active-cycle-label) {
+  opacity: var(--scale-context-opacity);
+  transition: opacity 180ms ease;
+}
+
+/* Active state is a separate visual channel, not a brighter version of the
+   resting field. Keep its opacity explicit so nth-child/static styling cannot
+   accidentally weaken the current read-head. Boundary gates keep the native
+   opacity defined by discrete-phase.css. */
+#hour-track .cycle-sector.is-active,
+#day-track .cycle-sector.is-active,
+#month-track .cycle-sector.is-active,
+#year-track .cycle-sector.is-active,
+#solar-track .term-sector.is-active,
+#zodiac-track .zodiac-sector.is-active,
+#hour-track .active-cycle-label,
+#day-track .active-cycle-label,
+#month-track .active-cycle-label,
+#year-track .active-cycle-label,
+#solar-track .active-cycle-label,
+#zodiac-track .active-cycle-label {
+  opacity: 1;
+  filter: none;
+}
+
+/* 48 hours: Hour / Day are the focus. The slower shells remain visible as
+   phase context, but only their resting field recedes. */
+#kinetic-instrument[data-scale-window="day"] #solar-track {
+  --scale-surface-opacity: .52;
+  --scale-structure-opacity: .62;
+  --scale-context-opacity: .70;
+}
 #kinetic-instrument[data-scale-window="day"] #zodiac-track {
-  opacity: .40;
-  filter: saturate(.72) brightness(.78);
+  --scale-surface-opacity: .42;
+  --scale-context-opacity: .56;
 }
 #kinetic-instrument[data-scale-window="day"] #month-track {
-  opacity: .22;
-  filter: saturate(.56) brightness(.62);
+  --scale-surface-opacity: .38;
+  --scale-structure-opacity: .50;
+  --scale-context-opacity: .58;
 }
 #kinetic-instrument[data-scale-window="day"] #year-track {
-  opacity: .14;
-  filter: saturate(.48) brightness(.55);
+  --scale-surface-opacity: .30;
+  --scale-structure-opacity: .42;
+  --scale-context-opacity: .50;
 }
 
-/* One year: continuous Solar plus jie-driven Month are the useful comparison.
-   Fast clocks remain secondary, but their floor mirrors the legend so the
-   Selected Instant read-head never disappears into the contextual fade. */
-#kinetic-instrument[data-scale-window="year"] #solar-track,
-#kinetic-instrument[data-scale-window="year"] #zodiac-track,
-#kinetic-instrument[data-scale-window="year"] #month-track { opacity: 1; }
-#kinetic-instrument[data-scale-window="year"] #year-track { opacity: .62; }
-#kinetic-instrument[data-scale-window="year"] #day-track { opacity: .54; }
-#kinetic-instrument[data-scale-window="year"] #hour-track { opacity: .46; }
+/* One year: Solar / Month are primary. Year and fast clocks become context
+   without dimming their current identity at the Selected Instant. */
+#kinetic-instrument[data-scale-window="year"] #zodiac-track {
+  --scale-surface-opacity: .78;
+  --scale-context-opacity: .78;
+}
+#kinetic-instrument[data-scale-window="year"] #year-track {
+  --scale-surface-opacity: .56;
+  --scale-structure-opacity: .66;
+  --scale-context-opacity: .74;
+}
+#kinetic-instrument[data-scale-window="year"] #day-track {
+  --scale-surface-opacity: .46;
+  --scale-structure-opacity: .58;
+  --scale-context-opacity: .66;
+}
+#kinetic-instrument[data-scale-window="year"] #hour-track {
+  --scale-surface-opacity: .40;
+  --scale-structure-opacity: .52;
+  --scale-context-opacity: .62;
+}
 
-/* Sixty years: the outer Year shell becomes the primary reading. Month and the
-   annual band remain secondary phase context; fast clocks recede without
-   falling below the matching legend context floor. */
-#kinetic-instrument[data-scale-window="cycle"] #year-track { opacity: 1; }
-#kinetic-instrument[data-scale-window="cycle"] #month-track { opacity: .70; }
-#kinetic-instrument[data-scale-window="cycle"] #solar-track,
-#kinetic-instrument[data-scale-window="cycle"] #zodiac-track { opacity: .52; }
-#kinetic-instrument[data-scale-window="cycle"] #day-track { opacity: .48; }
-#kinetic-instrument[data-scale-window="cycle"] #hour-track { opacity: .40; }
+/* Sixty years: Year is primary; other clocks remain legible phase context. */
+#kinetic-instrument[data-scale-window="cycle"] #month-track {
+  --scale-surface-opacity: .70;
+  --scale-structure-opacity: .78;
+  --scale-context-opacity: .84;
+}
+#kinetic-instrument[data-scale-window="cycle"] #solar-track {
+  --scale-surface-opacity: .56;
+  --scale-structure-opacity: .66;
+  --scale-context-opacity: .74;
+}
+#kinetic-instrument[data-scale-window="cycle"] #zodiac-track {
+  --scale-surface-opacity: .44;
+  --scale-context-opacity: .60;
+}
+#kinetic-instrument[data-scale-window="cycle"] #day-track {
+  --scale-surface-opacity: .46;
+  --scale-structure-opacity: .56;
+  --scale-context-opacity: .64;
+}
+#kinetic-instrument[data-scale-window="cycle"] #hour-track {
+  --scale-surface-opacity: .40;
+  --scale-structure-opacity: .50;
+  --scale-context-opacity: .60;
+}
 
-/* The legend mirrors reading priority, but an explicitly hidden layer keeps the
-   visibility-control styling instead of being revived by emphasis. */
+/* The legend mirrors priority, but it is not allowed to own wheel visibility. */
+.ring-legend-row[data-ring-toggle] { transition: opacity 180ms ease; }
 #kinetic-instrument[data-scale-window="day"] .ring-hour:not([aria-pressed="false"]),
 #kinetic-instrument[data-scale-window="day"] .ring-day:not([aria-pressed="false"]),
 #kinetic-instrument[data-scale-window="year"] .ring-solar:not([aria-pressed="false"]),
 #kinetic-instrument[data-scale-window="year"] .ring-month:not([aria-pressed="false"]),
 #kinetic-instrument[data-scale-window="cycle"] .ring-year:not([aria-pressed="false"]) { opacity: 1; }
+#kinetic-instrument[data-scale-window="day"] .ring-solar:not([aria-pressed="false"]) { opacity: .72; }
+#kinetic-instrument[data-scale-window="day"] .ring-month:not([aria-pressed="false"]) { opacity: .58; }
+#kinetic-instrument[data-scale-window="day"] .ring-year:not([aria-pressed="false"]) { opacity: .50; }
+#kinetic-instrument[data-scale-window="year"] .ring-year:not([aria-pressed="false"]) { opacity: .78; }
+#kinetic-instrument[data-scale-window="year"] .ring-day:not([aria-pressed="false"]) { opacity: .68; }
+#kinetic-instrument[data-scale-window="year"] .ring-hour:not([aria-pressed="false"]) { opacity: .62; }
+#kinetic-instrument[data-scale-window="cycle"] .ring-month:not([aria-pressed="false"]) { opacity: .84; }
+#kinetic-instrument[data-scale-window="cycle"] .ring-solar:not([aria-pressed="false"]) { opacity: .74; }
+#kinetic-instrument[data-scale-window="cycle"] .ring-day:not([aria-pressed="false"]) { opacity: .64; }
+#kinetic-instrument[data-scale-window="cycle"] .ring-hour:not([aria-pressed="false"]) { opacity: .60; }
 
-#kinetic-instrument[data-scale-window="day"] .ring-solar:not([aria-pressed="false"]) { opacity: .62; }
-#kinetic-instrument[data-scale-window="day"] .ring-month:not([aria-pressed="false"]) { opacity: .38; }
-#kinetic-instrument[data-scale-window="day"] .ring-year:not([aria-pressed="false"]) { opacity: .28; }
-#kinetic-instrument[data-scale-window="year"] .ring-year:not([aria-pressed="false"]) { opacity: .72; }
-#kinetic-instrument[data-scale-window="year"] .ring-day:not([aria-pressed="false"]) { opacity: .54; }
-#kinetic-instrument[data-scale-window="year"] .ring-hour:not([aria-pressed="false"]) { opacity: .46; }
-#kinetic-instrument[data-scale-window="cycle"] .ring-month:not([aria-pressed="false"]) { opacity: .78; }
-#kinetic-instrument[data-scale-window="cycle"] .ring-solar:not([aria-pressed="false"]) { opacity: .64; }
-#kinetic-instrument[data-scale-window="cycle"] .ring-day:not([aria-pressed="false"]) { opacity: .48; }
-#kinetic-instrument[data-scale-window="cycle"] .ring-hour:not([aria-pressed="false"]) { opacity: .40; }
-
-/* Interaction always wins over ambient recession. A ring under the pointer or
-   actively dragged returns to full contrast without changing the time window. */
+/* Interaction temporarily promotes the resting marks of the ring under the
+   pointer. The current-state channel was already full strength. */
 #kinetic-wheel[data-hover-ring="hour"] #hour-track,
 #kinetic-wheel[data-active-ring="hour"] #hour-track,
 #kinetic-wheel[data-hover-ring="day"] #day-track,
@@ -88,16 +172,28 @@
 #kinetic-wheel[data-active-ring="month"] #month-track,
 #kinetic-wheel[data-hover-ring="year"] #year-track,
 #kinetic-wheel[data-active-ring="year"] #year-track {
-  opacity: 1;
-  filter: none;
+  --scale-surface-opacity: 1;
+  --scale-structure-opacity: 1;
+  --scale-context-opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #hour-track,
-  #day-track,
-  #solar-track,
-  #zodiac-track,
-  #month-track,
-  #year-track,
+  #hour-track .cycle-sector,
+  #day-track .cycle-sector,
+  #month-track .cycle-sector,
+  #year-track .cycle-sector,
+  #solar-track .term-sector,
+  #zodiac-track .zodiac-sector,
+  #hour-track .ring-tick,
+  #day-track .ring-tick,
+  #month-track .ring-tick,
+  #year-track .ring-tick,
+  #solar-track .term-mark,
+  #hour-track .cycle-label,
+  #day-track .cycle-label,
+  #month-track .cycle-label,
+  #year-track .cycle-label,
+  #solar-track .term-label,
+  #zodiac-track .zodiac-label,
   .ring-legend-row[data-ring-toggle] { transition: none; }
 }
