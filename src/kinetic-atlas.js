@@ -30,6 +30,7 @@ import {
   formatAtlasUtcOffset,
   writeAtlasTimeContextSearch
 } from "./wheel/atlas-time-context.js";
+import { createFrameCommitQueue } from "./interaction/frame-commit-queue.js";
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
 import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
@@ -88,6 +89,23 @@ let currentDisplay = null;
 let dragController = null;
 let compareController = null;
 let playbackController = null;
+
+const pendingFreePoseRings = new Set();
+const freePoseCommitQueue = createFrameCommitQueue({
+  commit() {
+    if (!pendingFreePoseRings.size) return;
+    const ringIds = [...pendingFreePoseRings];
+    pendingFreePoseRings.clear();
+    ringIds.forEach(renderRingPose);
+    compareController?.update();
+  }
+});
+const linkedWheelCommitQueue = createFrameCommitQueue({
+  commit() {
+    setSliderForScale();
+    updateWheel();
+  }
+});
 
 function cycleIndexForRing(id, display) {
   if (id === "hour") return display.hourIndex;
@@ -339,8 +357,20 @@ function applyLinkedDragToTime(id, deltaDegrees) {
 
   state.selectedMs = result.instantMs;
   state.anchorMs = result.instantMs;
-  setSliderForScale();
-  updateWheel();
+
+  // Pointer devices can deliver several coalesced samples inside one display
+  // frame. Keep every semantic time step, but collapse slider/readout/SVG work
+  // to one animation-frame commit. Inertia is already requestAnimationFrame-
+  // bounded by the drag controller, so render it immediately without adding a
+  // second frame of visual latency.
+  if (dragController?.isCoasting) {
+    linkedWheelCommitQueue.cancel();
+    setSliderForScale();
+    updateWheel();
+  } else {
+    linkedWheelCommitQueue.schedule();
+  }
+
   instrument.dataset.lastLinkedScrubRing = id;
   instrument.dataset.lastLinkedScrubDeltaMs = String(Math.round(result.instantMs - beforeMs));
 }
@@ -351,15 +381,28 @@ function installRingDrag() {
     ringStates,
     onDragStart(id) {
       stopPlayback();
+      freePoseCommitQueue.cancel();
+      pendingFreePoseRings.clear();
       instrument.dataset.dragRing = id;
       instrument.dataset.dragMode = "free";
     },
-    onPoseChange(id) {
-      renderRingPose(id);
+    onPoseChange(id, _ringState, _deltaDegrees, detail) {
       instrument.dataset.lastDraggedRing = id;
+      if (detail?.phase === "drag") {
+        pendingFreePoseRings.add(id);
+        freePoseCommitQueue.schedule();
+        return;
+      }
+
+      // Detents and inertia are already low-frequency/frame-bounded. Replace any
+      // stale queued drag frame with the newest authoritative pose immediately.
+      freePoseCommitQueue.cancel();
+      pendingFreePoseRings.clear();
+      renderRingPose(id);
       compareController?.update();
     },
     onDragEnd(id) {
+      freePoseCommitQueue.flush();
       instrument.dataset.lastDraggedRing = id;
       delete instrument.dataset.dragRing;
       delete instrument.dataset.dragMode;
@@ -367,6 +410,7 @@ function installRingDrag() {
     },
     onLinkedDragStart(id) {
       stopPlayback();
+      linkedWheelCommitQueue.cancel();
       if (state.legacyProjection) {
         clearLegacyProjection();
         updateWheel();
@@ -380,6 +424,7 @@ function installRingDrag() {
       applyLinkedDragToTime(id, deltaDegrees);
     },
     onLinkedDragEnd(id) {
+      linkedWheelCommitQueue.flush();
       instrument.dataset.lastLinkedScrubRing = id;
       instrument.dataset.linkedScrubEndMs = String(Math.round(state.selectedMs));
       delete instrument.dataset.dragRing;
