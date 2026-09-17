@@ -1,13 +1,16 @@
-/* Mobile legend composition owns the Analysis control grid only. Normal reading
+/* Mobile legend composition owns the Analysis control rail only. Normal reading
    identity labels are positioned directly on the radial stack by ux-analysis.css.
    Wheel geometry, time state, classification flow and layer semantics stay in
    their existing owners. */
 @media (max-width: 480px) {
+  /* Analysis needs layer visibility, not five duplicate current-value readouts.
+     Keep every ring toggle reachable in one compact row, then give reference
+     frame selection its own second row. */
   #kinetic-instrument[data-analysis-open="true"] .ring-legend {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: center;
-    gap: 2px 4px;
+    gap: 2px 3px;
   }
 
   #kinetic-instrument[data-analysis-open="true"] .ring-legend-row,
@@ -22,30 +25,44 @@
     min-width: 0;
     margin: 0;
     padding: 0;
-    gap: 4px;
+    gap: 3px;
     align-items: center;
+    justify-content: center;
     white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row i {
+    width: 4px;
+    height: 4px;
+    flex: 0 0 auto;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    font-size: 6.5px;
+    letter-spacing: .035em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row strong {
+    display: none;
   }
 
   #kinetic-instrument[data-analysis-open="true"] .ring-year { grid-column: 1; grid-row: 1; }
   #kinetic-instrument[data-analysis-open="true"] .ring-month { grid-column: 2; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-day { grid-column: 3; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-hour { grid-column: 4; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-solar { grid-column: 1 / -1; grid-row: 2; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-solar { grid-column: 3; grid-row: 1; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-day { grid-column: 4; grid-row: 1; }
+  #kinetic-instrument[data-analysis-open="true"] .ring-hour { grid-column: 5; grid-row: 1; }
 
   #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
     grid-column: 1 / -1;
-    grid-row: 3;
+    grid-row: 2;
     width: 100%;
     min-width: 0;
   }
 
-  /* Analysis adds a third legend row. Keep its exit/status controls below that
-     row. Classification owns its separate below-instrument flow band. */
+  /* With duplicate values removed, Analysis chrome is two rows instead of
+     three. Keep exit / compare status below that rail without consuming the
+     wheel's upper reading field. */
   #kinetic-instrument[data-analysis-open="true"] .analysis-close {
-    top: 96px;
+    top: 78px;
   }
   #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
-    top: 96px;
+    top: 78px;
   }
 }

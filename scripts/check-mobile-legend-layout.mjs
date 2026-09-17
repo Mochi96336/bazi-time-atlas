@@ -111,35 +111,30 @@ function validateNormal(run, probe) {
 
 function validateAnalysis(run, probe) {
   const legend = rect(probe, "legend", "analysis", run.url);
-  const rows = ["year", "month", "day", "hour"].map(id => ({ id, box:rect(probe, id, "analysis", run.url) }));
-  const solar = rect(probe, "solar", "analysis", run.url);
+  const rows = ["year", "month", "solar", "day", "hour"].map(id => ({ id, box:rect(probe, id, "analysis", run.url) }));
   const rowTop = rows[0].box.top;
   const rowBottom = Math.max(...rows.map(row => row.box.bottom));
 
+  /* Analysis exposes five layer toggles in one compact evidence row. The exact
+     current values belong to the Selected Instant read-head and must not be
+     repeated here. */
   for (const row of rows) {
     if (Math.abs(row.box.top - rowTop) > EPS) {
-      throw new Error(`analysis: ${row.id} escaped first row (${row.box.top} vs ${rowTop}): ${run.url}`);
+      throw new Error(`analysis: ${row.id} escaped compact first row (${row.box.top} vs ${rowTop}): ${run.url}`);
     }
     if (row.box.left < legend.left - EPS || row.box.right > legend.right + EPS) {
       throw new Error(`analysis: ${row.id} overflowed legend bounds: ${run.url}`);
     }
-    if (requireAttr(probe, `data-${row.id}-dot-visible`, "analysis", run.url) !== "true" || requireAttr(probe, `data-${row.id}-value-visible`, "analysis", run.url) !== "true") {
-      throw new Error(`analysis: ${row.id} did not restore full legend content: ${run.url}`);
+    const dotVisible = requireAttr(probe, `data-${row.id}-dot-visible`, "analysis", run.url);
+    const valueVisible = requireAttr(probe, `data-${row.id}-value-visible`, "analysis", run.url);
+    if (dotVisible !== "true" || valueVisible !== "false") {
+      throw new Error(`analysis: ${row.id} evidence ownership drifted (dot=${dotVisible}, duplicateValue=${valueVisible}): ${run.url}`);
     }
   }
   for (let i = 1; i < rows.length; i += 1) {
     if (rows[i - 1].box.left >= rows[i].box.left || rows[i - 1].box.right > rows[i].box.left + EPS) {
-      throw new Error(`analysis: first row is not ordered/non-overlapping at ${rows[i - 1].id}->${rows[i].id}: ${run.url}`);
+      throw new Error(`analysis: compact ring row is not ordered/non-overlapping at ${rows[i - 1].id}->${rows[i].id}: ${run.url}`);
     }
-  }
-  if (solar.top <= rowBottom - EPS) {
-    throw new Error(`analysis: solar row did not move below four-pillar row (${solar.top} <= ${rowBottom}): ${run.url}`);
-  }
-  if (solar.left < legend.left - EPS || solar.right > legend.right + EPS || solar.width < legend.width * 0.90) {
-    throw new Error(`analysis: solar row does not span the legend (${solar.left},${solar.right}, width=${solar.width}/${legend.width}): ${run.url}`);
-  }
-  if (requireAttr(probe, "data-solar-dot-visible", "analysis", run.url) !== "true" || requireAttr(probe, "data-solar-value-visible", "analysis", run.url) !== "true") {
-    throw new Error(`analysis: solar row did not restore full legend content: ${run.url}`);
   }
 
   if (requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true" ||
@@ -152,17 +147,17 @@ function validateAnalysis(run, probe) {
 
   const reference = rect(probe, "reference", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
-  if (reference.top <= solar.bottom - EPS) {
-    throw new Error(`analysis: reference frame did not get its own row (${reference.top} <= ${solar.bottom}): ${run.url}`);
+  if (reference.top <= rowBottom - EPS) {
+    throw new Error(`analysis: reference frame did not get the second row (${reference.top} <= ${rowBottom}): ${run.url}`);
   }
   if (reference.left < legend.left - EPS || reference.right > legend.right + EPS || reference.width < legend.width * 0.90) {
     throw new Error(`analysis: reference row does not span the legend: ${run.url}`);
   }
   if (overlaps(reference, close) || close.top < reference.bottom - EPS) {
-    throw new Error(`analysis: Analysis close overlaps reference row (reference bottom=${reference.bottom}, close top=${close.top}): ${run.url}`);
+    throw new Error(`analysis: Analysis close overlaps compact reference row (reference bottom=${reference.bottom}, close top=${close.top}): ${run.url}`);
   }
 
-  console.log(`[mobile-legend] PASS Analysis structured grid; solar=${solar.top.toFixed(1)}, reference=${reference.top.toFixed(1)}, close=${close.top.toFixed(1)}: ${run.url}`);
+  console.log(`[mobile-legend] PASS Analysis compact evidence rail; rings=${rowTop.toFixed(1)}, reference=${reference.top.toFixed(1)}, close=${close.top.toFixed(1)}: ${run.url}`);
 }
 
 function validate(run, { analysis }) {
