@@ -14,29 +14,40 @@ const instrument = document.querySelector("#kinetic-instrument");
 const svg = document.querySelector("#kinetic-wheel");
 let scheduled = false;
 let initializationObserver = null;
+const phaseNodeCache = new Map();
 
 function phaseNodes(id) {
+  const cached = phaseNodeCache.get(id);
+  if (cached) return cached;
+
   const group = document.querySelector(`#${id}-track`);
-  return {
+  const nodes = {
     group,
     path: group?.querySelector(`.state-phase-progress[data-phase-ring="${id}"]`) ?? null,
     bead: group?.querySelector(`.state-phase-bead[data-phase-ring="${id}"]`) ?? null,
     gate: group?.querySelector(`.state-boundary-gate[data-boundary-ring="${id}"]`) ?? null,
-    halo: group?.querySelector(`.state-boundary-shared-halo[data-boundary-ring="${id}"]`) ?? null,
-    active: group?.querySelector(".cycle-sector.is-active") ?? null
+    halo: group?.querySelector(`.state-boundary-shared-halo[data-boundary-ring="${id}"]`) ?? null
   };
+  if (nodes.group && nodes.path && nodes.bead && nodes.gate && nodes.halo) {
+    phaseNodeCache.set(id, nodes);
+  }
+  return nodes;
 }
 
-function phaseSlotsReady() {
-  return RING_IDS.every(id => {
-    const { group, path, bead, gate, halo, active } = phaseNodes(id);
-    return Boolean(group && path && bead && gate && halo && active);
-  });
-}
-
-function activeIndex(id) {
-  const index = Number(phaseNodes(id).active?.dataset.cycleIndex);
+function activeIndex(group) {
+  const index = Number(group?.querySelector(".cycle-sector.is-active")?.dataset.cycleIndex);
   return Number.isInteger(index) ? index : null;
+}
+
+function readyActiveIndices() {
+  const indices = new Map();
+  for (const id of RING_IDS) {
+    const { group, path, bead, gate, halo } = phaseNodes(id);
+    const index = activeIndex(group);
+    if (!group || !path || !bead || !gate || !halo || index === null) return null;
+    indices.set(id, index);
+  }
+  return indices;
 }
 
 function clearBoundaryGate(id) {
@@ -164,7 +175,8 @@ function refresh() {
   scheduled = false;
   if (!instrument || !svg) return;
   const instantMs = Number(instrument.dataset.selectedInstantMs);
-  if (!Number.isFinite(instantMs) || !phaseSlotsReady()) {
+  const activeIndices = readyActiveIndices();
+  if (!Number.isFinite(instantMs) || !activeIndices) {
     instrument.dataset.discretePhaseInit = "waiting-slots";
     return;
   }
@@ -178,7 +190,7 @@ function refresh() {
   const boundaryGroups = exactNextBoundaryGroups(phases);
   const sharedGroups = boundaryGroups.filter(group => group.shared);
   const peers = sharedPeersByRing(boundaryGroups);
-  for (const id of RING_IDS) renderPhase(id, activeIndex(id), phases[id], peers.get(id));
+  for (const id of RING_IDS) renderPhase(id, activeIndices.get(id), phases[id], peers.get(id));
 
   instrument.dataset.discretePhaseMode = "true-boundaries";
   instrument.dataset.discretePhaseRings = RING_IDS.filter(id => phases[id]).join(",");
