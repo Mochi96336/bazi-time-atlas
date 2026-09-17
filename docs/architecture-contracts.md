@@ -4,7 +4,7 @@ Status: **Accepted**
 
 This document records cross-cutting contracts that are already enforced by the current implementation and regression suite. It is not a future-design wishlist. A change that intentionally alters one of these contracts must update the relevant model/tests and this document in the same review boundary.
 
-`docs/current-status.md` describes the current product checkpoint. `docs/kinetic-atlas-plan.md` is historical rationale. When historical prose conflicts with current tests or the contracts below, the current tests and this document win.
+Documentation roles are complementary rather than competing sources of truth: `docs/current-status.md` is the current product/implementation checkpoint; this file is the normative cross-cutting architecture contract; `docs/kinetic-atlas-plan.md` is historical rationale. When prose disagrees with production behavior, the implementation plus its regression evidence must be reconciled with the responsible current document rather than treating an older statement as authority.
 
 ## 1. Selected Instant is the canonical time authority
 
@@ -16,16 +16,20 @@ Actions in linked-time mode may change the Selected Instant: explicit datetime i
 
 A legacy annual longitude projection is also not a second physical instant. When only a projected annual state is known, Month progress/boundary precision must remain suppressed wherever a complete physical instant is required.
 
-## 2. The atlas civil reference is explicitly UTC+08:00
+## 2. Atlas temporal context is explicit and shareable
 
-The practical atlas uses its pinned UTC+08:00 reference clock for civil-field interpretation. This is a product/calendar convention, not browser geolocation and not an inference from the viewer's machine timezone.
+The practical Atlas has one typed temporal context containing a fixed UTC offset and a canonical day-boundary convention. The production default remains **UTC+08:00 + Zi-initial 23:00 next-day**, but that default is not an immutable civil authority: explicit supported temporal-context changes reinterpret the same physical Selected Instant and persist canonically in the Atlas URL.
+
+The fixed offset is a product/calendar convention. It is not browser geolocation, not an inference from the viewer's machine timezone, and not geographic longitude. In particular, a UTC offset must never be multiplied by 15° and silently promoted into longitude for solar-time analysis.
 
 Current discrete boundary contracts are:
 
 - Year identity changes at the exact **Li Chun** boundary.
 - Month identity changes at exact **jie** boundaries.
-- Day identity uses the atlas's current **Zi-initial 23:00 next-day** convention.
-- Hour identity uses double-hours beginning at odd local clock hours.
+- Day identity uses the selected canonical day-boundary convention: `zi-initial-next-day` or `civil-midnight`.
+- Hour identity uses double-hours beginning at odd local clock hours under the selected fixed-offset civil context.
+
+Changing temporal context does not silently move `selectedMs`; it re-resolves calendar/display state at the same physical instant. Malformed explicit context fails closed to the complete production default rather than applying a partial custom state.
 
 Continuous progress through a discrete state does not interpolate or rename the discrete Ganzhi identity. Boundary gates change only when the corresponding exact boundary is crossed.
 
@@ -54,6 +58,8 @@ Current ownership is:
 
 A sub-threshold pointer press may expose press/grab feedback, but it must not create a drag lifecycle or mutate time/offset state until the drag activation contract is satisfied.
 
+Gesture ownership is interruption-safe. External Selected Instant or temporal-context authority, playback takeover, Free Compare reset/mode changes, document hiding, controller teardown, pointer-capture loss/failure and hiding the actively owned ring must not leave a stale drag or inertial owner able to mutate time or manual offsets after ownership has ended.
+
 ## 5. Geometry, camera and CSS have different authority
 
 World geometry, responsive camera framing and CSS layout remain separate responsibilities. The detailed camera contract lives in `docs/camera-ownership.md`.
@@ -72,13 +78,13 @@ Seasonal-epoch providers are classified by capability:
 - **absolute-state-basis** — continuous Earth/Sun state basis such as DE441; the app must still perform the declared time/frame/apparent-direction transformation and crossing solve.
 - **direct-seasonal-event** — directly supplies target longitude-crossing epochs on a declared time basis and coverage range.
 
-These roles are not interchangeable. A direct-event provider must not be described as DE441 merely because DE441/Horizons evidence was used to validate it. Conversely, possession of DE441 state vectors does not by itself mean the app has a direct solar-term event provider.
+These roles are not interchangeable. A direct-event provider must not be described as a general DE441 state adapter merely because DE441/Horizons evidence was used to validate it. Conversely, possession of DE441 state vectors does not by itself mean the app has a direct solar-term event provider.
 
 Coverage is fail-closed. Modern agreement or a useful distant-era comparison does not authorize widening a provider's production range without independent target-era evidence meeting the declared promotion budget.
 
-## 7. Absolute-state seasonal solving has an explicit transformation chain
+## 7. Absolute-state proof and production seasonal-event authority stay distinct
 
-The app-owned absolute-state solver core must keep the following layers visible in provenance/tests rather than collapsing them into an unnamed "astronomy" conversion:
+The app-owned absolute-state solver core keeps the following layers visible in provenance/tests rather than collapsing them into an unnamed "astronomy" conversion:
 
 1. source Earth/Sun states and their origin/frame/time basis;
 2. TT to ephemeris-time conversion as required by the source;
@@ -89,9 +95,16 @@ The app-owned absolute-state solver core must keep the following layers visible 
 
 If the implementation has not demonstrated all corrections required for a claimed target observable, it must fail closed rather than relabel a partial model as Horizons-equivalent truth.
 
-The current DE441 proof path has demonstrated a **geocentric Sun-center apparent ICRF direction** for pinned 2026 and 4006 proof windows using one-iteration light time plus NAIF-style stellar aberration, and that result agrees with the corresponding Horizons observer/vector layers to the recorded evidence precision. The accompanying ecliptic-of-date frame proof is also validated. The observed absence of an additional gravitational-deflection residual is specific to this Sun-center seasonal-longitude use case and must **not** be generalized to arbitrary targets.
+For catalogue year **4006**, the complete DE441/Horizons-backed proof chain has been composed and independently validated for all 24 canonical 15° crossings. The recorded maximum epoch error is **0.161 s**, inside the declared **2 s** promotion budget. That evidence proves the bounded target-year result; it does not grant general production authority across the full theoretical DE441 ephemeris range.
 
-Those proofs still do not make a production seasonal-event pipeline. The longitude-crossing root solve has not yet been composed and validated end to end with the proven state/apparent/frame layers, and the production DE441 data path remains unintegrated. Promotion therefore remains fail-closed.
+Production deliberately does **not** expose the proof-only DE441 state windows as a general absolute-state runtime adapter. Instead, the validated year-4006 result is published through the bounded direct-seasonal-event provider `jpl-de441-seasonal-events-v1`, on TT, with exactly 24 canonical crossings and catalogue-year coverage **4006 only**. Runtime registration re-assesses the pinned product/evidence and fails closed if provenance, payload identity, coverage or parity checks fail.
+
+Therefore these statements are simultaneously required:
+
+- a year-4006 seasonal event may resolve through the reviewed direct-event runtime provider;
+- generic absolute-state adapter flags may remain false;
+- proof-only state windows must not be relabelled as general runtime coverage;
+- DE441's broad source ephemeris range must not be inherited as production seasonal-event coverage without independent target-era validation.
 
 ## 8. A seasonal epoch does not resolve all four pillars
 
@@ -103,7 +116,7 @@ The downstream Day/Hour clock basis is a different choice: `civil`, `local-mean-
 
 A fixed offset from UT1 is also not a prediction of future UTC, daylight-saving, or political timezone rules. Deep-time ΔT evidence may support an explicitly uncertain TT→UT1 estimate, but it cannot silently resolve future UTC/civil policy. Any target binding or local-clock projection that needs those policies must remain fail-closed until they are explicitly supplied.
 
-Day/Hour proof therefore requires a separate chain covering the target instant and its reference basis, any required TT↔UT1 / ΔT and Earth-rotation projection, civil/local-zone policy, day-boundary convention, selected Day/Hour clock basis and downstream pillar reconstruction.
+Day/Hour proof therefore requires a separate chain covering the target instant and its reference basis, any required TT↔UT1 / ΔT and Earth-rotation projection, civil/local-zone policy, day-boundary convention, selected Day/Hour clock basis, longitude when a solar basis requires it, and downstream pillar reconstruction.
 
 Therefore an astronomical event timestamp must never be promoted directly into "all four pillars resolved" without that independent proof chain.
 
