@@ -36,7 +36,7 @@ test("Graphite M2 boundary chrome is neutral rather than moss-green", () => {
   assert.match(boundaries, /\.reference-frame-control select \{[\s\S]*?background:\s*rgba\(15,17,18,\.78\);/);
 });
 
-test("Analysis-only inspector and visible-stem chrome no longer carry moss surfaces", () => {
+test("Analysis-only inspector and visible-stem chrome consume neutral M2 surfaces", () => {
   rejectLegacy(inspector, [
     "#313b34",
     "rgba(19, 25, 21, .97)",
@@ -59,9 +59,9 @@ test("Analysis-only inspector and visible-stem chrome no longer carry moss surfa
     "#707b73"
   ]);
 
-  assert.match(inspector, /\.ganzhi-inspector \{[\s\S]*?border:\s*1px solid #34393a;[\s\S]*?background:\s*rgba\(18, 20, 21, \.97\);/);
+  assert.match(inspector, /\.ganzhi-inspector \{[\s\S]*?border:\s*1px solid var\(--m2-raised-border\);[\s\S]*?background:\s*var\(--m2-raised-surface\);/);
   assert.match(inspector, /\.ganzhi-inspector-grid > span\.active \{[\s\S]*?background:\s*rgba\(157, 162, 163, \.09\);/);
-  assert.match(visibleTenGods, /\.atlas-visible-ten-gods \{[\s\S]*?border:\s*1px solid rgba\(236,239,239,\.10\);[\s\S]*?background:\s*rgba\(12,14,15,\.46\);/);
+  assert.match(visibleTenGods, /\.atlas-visible-ten-gods \{[\s\S]*?border:\s*1px solid var\(--m2-recessed-border\);[\s\S]*?background:\s*var\(--m2-recessed-surface\);/);
 });
 
 test("instrument-first and Analysis controls keep neutral Graphite M2 chrome", () => {

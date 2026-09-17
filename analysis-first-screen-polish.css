@@ -1,9 +1,10 @@
 /* Second-pass desktop Analysis polish. This sheet is intentionally installed
    after the visible-ten-gods sheet so the remaining informational panels can be
-   flattened without changing their data ownership or compact/mobile layouts. */
+   integrated into the instrument surface without changing their data ownership
+   or compact/mobile layouts. */
 @media (min-width: 821px) {
-  /* The visible-stems comparison is useful evidence, but not a second card.
-     Compress it into the same quiet top rail as the other Analysis chrome. */
+  /* Evidence remains a rail, not a floating card. The shallow inset treatment
+     makes it read as a machined recess in the instrument face. */
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
     position: absolute;
     z-index: 6;
@@ -12,11 +13,12 @@
     right: clamp(310px, 24vw, 360px);
     margin: 0;
     border: 0;
-    border-top: 1px solid rgba(236,239,239,.075);
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-bottom: 1px solid var(--m2-etched-light-soft);
     border-radius: 0;
     padding: 5px 0 0;
-    background: transparent;
-    box-shadow: none;
+    background: var(--m2-recessed-rail-gradient);
+    box-shadow: var(--m2-recessed-rail-shadow);
     backdrop-filter: none;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) minmax(180px, 30ch);
@@ -108,20 +110,19 @@
     opacity: .72;
   }
 
-  /* Classification is an optional lens, not a floating dashboard card. Keep the
-     actual legend rows/keys/explanation, but align them to the same evidence rail
-     and strip the old rounded panel surface. */
+  /* Classification stays part of the instrument face. Its edge is etched and
+     its surface recessed; there is still no floating-card shadow or radius. */
   #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
     top: 72px;
     right: clamp(18px, 2vw, 32px);
     width: min(270px, calc(100% - 36px));
     border: 0;
-    border-left: 1px solid rgba(236,239,239,.085);
+    border-left: 1px solid var(--m2-etched-dark-soft);
     border-radius: 0;
     padding: 4px 0 4px 10px;
-    background: transparent;
+    background: var(--m2-recessed-rail-gradient);
     backdrop-filter: none;
-    box-shadow: none;
+    box-shadow: var(--m2-recessed-side-shadow);
   }
   #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row + .classification-row {
     margin-top: 4px;

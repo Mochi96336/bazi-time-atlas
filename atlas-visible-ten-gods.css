@@ -5,15 +5,12 @@
 }
 .atlas-visible-ten-gods {
   margin: 0 18px 16px;
-  border: 1px solid rgba(236,239,239,.10);
+  border: 1px solid var(--m2-recessed-border);
   border-radius: 12px;
   padding: 12px 14px;
-  background: rgba(12,14,15,.46);
-  background-image: linear-gradient(180deg, rgba(255,255,255,.012) 0%, rgba(255,255,255,0) 44%, rgba(0,0,0,.05) 100%);
-  box-shadow:
-    0 10px 26px rgba(0,0,0,.10),
-    inset 0 1px 0 rgba(236,239,239,.025),
-    inset 0 -1px 0 rgba(0,0,0,.24);
+  background: var(--m2-recessed-surface);
+  background-image: var(--m2-recessed-gradient);
+  box-shadow: var(--m2-recessed-shadow);
 }
 .atlas-visible-ten-gods-head {
   display: flex;
@@ -43,8 +40,11 @@
 .atlas-visible-ten-gods-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid rgba(236,239,239,.07);
-  border-bottom: 1px solid rgba(236,239,239,.07);
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  border-bottom: 1px solid var(--m2-etched-dark-soft);
+  box-shadow:
+    inset 0 1px 0 var(--m2-etched-light-soft),
+    inset 0 -1px 0 var(--m2-etched-light-soft);
 }
 .atlas-visible-ten-gods-cell {
   display: grid;
