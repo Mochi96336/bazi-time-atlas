@@ -3,49 +3,36 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
+const view = readFileSync(new URL("../src/inverse-time-search-view.js", import.meta.url), "utf8");
 
-test("inverse search is a centered working rail rather than a full-width control wall", () => {
-  assert.match(
-    css,
-    /\.inverse-time-search-panel\s*\{[\s\S]*?width:\s*min\(960px,\s*calc\(100% - 40px\)\);[\s\S]*?margin:\s*26px auto 12px;[\s\S]*?padding:\s*20px 0 8px;/
-  );
-  assert.doesNotMatch(css, /\.inverse-time-search-panel\s*\{[^}]*background:/s);
-  assert.doesNotMatch(css, /\.inverse-time-search-panel\s*\{[^}]*border-radius:/s);
+test("find-time has no detached form panel or range picker", () => {
+  assert.doesNotMatch(css, /inverse-time-search-panel|inverse-search-constraints|inverse-search-range/);
+  assert.doesNotMatch(view, /data-inverse-pillar|data-inverse-range|搜尋範圍/);
+  assert.doesNotMatch(view, /<select|<input/);
 });
 
-test("desktop separates constraints, utility actions and search authority", () => {
+test("the wheel-native result is one compact instrument readout", () => {
   assert.match(
     css,
-    /\.inverse-search-constraints\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\);[\s\S]*?gap:\s*14px 20px;[\s\S]*?margin-top:\s*20px;/
+    /\.inverse-time-search-readout\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?width:\s*min\(620px, calc\(100% - 32px\)\);[\s\S]*?grid-template-columns:/
   );
-  assert.match(
-    css,
-    /\.inverse-search-actions\s*\{[\s\S]*?grid-template-columns:\s*auto auto minmax\(150px, 1fr\) auto;[\s\S]*?gap:\s*10px 18px;[\s\S]*?margin-top:\s*18px;/
-  );
-  assert.match(css, /\.inverse-search-range\s*\{[\s\S]*?width:\s*160px;[\s\S]*?justify-self:\s*end;/);
+  assert.doesNotMatch(css, /\.inverse-time-search-readout\s*\{[^}]*border-radius:/s);
+  assert.doesNotMatch(css, /\.inverse-time-search-readout\s*\{[^}]*box-shadow:/s);
 });
 
-test("390px composition uses a deliberate two-column control rhythm", () => {
+test("390px find-time stays a compact two-row overlay rather than a control wall", () => {
   assert.match(css, /@media \(max-width: 480px\)/);
   assert.match(
     css,
-    /@media \(max-width: 480px\) \{[\s\S]*?\.inverse-search-constraints\s*\{[\s\S]*?gap:\s*12px 14px;[\s\S]*?margin-top:\s*16px;/
+    /@media \(max-width: 480px\) \{[\s\S]*?\.inverse-time-search-readout\s*\{[\s\S]*?width:\s*calc\(100% - 20px\);[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto;/
   );
-  assert.match(
-    css,
-    /@media \(max-width: 480px\) \{[\s\S]*?\.inverse-search-actions\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto;[\s\S]*?gap:\s*10px 12px;[\s\S]*?margin-top:\s*16px;/
-  );
-  assert.match(css, /\[data-inverse-current\]\s*\{\s*grid-column:\s*1;/);
-  assert.match(css, /\[data-inverse-clear\]\s*\{\s*grid-column:\s*2;/);
-  assert.match(css, /\.inverse-search-range\s*\{[\s\S]*?grid-column:\s*1;[\s\S]*?width:\s*100%;/);
-  assert.match(css, /\[data-inverse-run\]\s*\{[\s\S]*?grid-column:\s*2;[\s\S]*?min-width:\s*76px;/);
+  assert.match(css, /\.inverse-time-search-readout strong\s*\{[\s\S]*?grid-column:\s*1 \/ -1;/);
 });
 
-test("result rows gain readable separation without becoming cards", () => {
-  assert.match(
-    css,
-    /\.inverse-search-result\s*\{[\s\S]*?gap:\s*14px;[\s\S]*?padding:\s*11px 4px;[\s\S]*?background:\s*transparent;/
-  );
-  assert.doesNotMatch(css, /\.inverse-search-result\s*\{[^}]*border-radius:/s);
-  assert.doesNotMatch(css, /\.inverse-search-result\s*\{[^}]*box-shadow:/s);
+test("the annual solar band is visually demoted while four pillar rings stay direct-manipulation targets", () => {
+  assert.match(css, /data-inverse-time-search="active"\] #solar-track,[\s\S]*?#zodiac-track[\s\S]*?opacity:\s*\.38/);
+  for (const id of ["year", "month", "day", "hour"]) {
+    assert.match(css, new RegExp(`#${id}-track`));
+  }
+  assert.match(css, /cursor:\s*grab/);
 });
