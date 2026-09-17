@@ -1,0 +1,64 @@
+.research-discrete-drilldown {
+  margin-top: 20px;
+  border-top: 1px solid rgba(238,242,237,.08);
+  border-bottom: 1px solid rgba(238,242,237,.08);
+}
+
+.research-discrete-drilldown > summary {
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 2px;
+  color: #8f9992;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.research-discrete-drilldown > summary::-webkit-details-marker { display: none; }
+.research-discrete-drilldown > summary span {
+  min-width: 0;
+  color: #9ca69f;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: .02em;
+}
+.research-discrete-drilldown > summary strong {
+  color: #707a73;
+  font-size: 8px;
+  font-weight: 500;
+  text-align: right;
+}
+.research-discrete-drilldown > summary::after {
+  content: "+";
+  width: 14px;
+  color: #79837c;
+  font-size: 13px;
+  line-height: 1;
+  text-align: center;
+}
+.research-discrete-drilldown[open] > summary::after { content: "−"; }
+.research-discrete-drilldown[open] > summary {
+  border-bottom: 1px solid rgba(238,242,237,.045);
+}
+
+.research-discrete-drilldown > .milestone-table {
+  margin-top: 0;
+  border-top: 0;
+  border-bottom: 0;
+}
+
+@media (max-width:480px) {
+  .research-discrete-drilldown { margin-top: 14px; }
+  .research-discrete-drilldown > summary {
+    min-height: 32px;
+    gap: 7px;
+    padding: 6px 1px;
+  }
+  .research-discrete-drilldown > summary strong {
+    max-width: 180px;
+    font-size: 7.5px;
+  }
+}
