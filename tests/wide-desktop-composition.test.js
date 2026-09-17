@@ -24,6 +24,22 @@ test("wide Analysis rails have explicit readable type floors without adding new 
   assert.doesNotMatch(polish, /content:\s*["'][^"']*(?:tool|mode|preset|range|播放|區間)[^"']*["']/i);
 });
 
+test("wide Analysis readability pass strengthens chrome and fast-ring context without changing geometry", () => {
+  assert.match(
+    polish,
+    /\.instrument-toolbar \.control-button,[\s\S]*?min-height:\s*32px;[\s\S]*?color:\s*#989d9d;[\s\S]*?font-size:\s*11px;/
+  );
+  assert.match(polish, /\.ring-legend\s*\{[\s\S]*?top:\s*46px;[\s\S]*?max-width:\s*1040px;[\s\S]*?gap:\s*10px 18px;/);
+  assert.match(polish, /\.reference-frame-control select\s*\{[\s\S]*?min-height:\s*26px;[\s\S]*?font-size:\s*10px;/);
+  assert.match(polish, /\.ring-legend-row span\s*\{[\s\S]*?color:\s*#999e9e;[\s\S]*?font-size:\s*10px;/);
+  assert.match(polish, /\.analysis-close\s*\{[\s\S]*?top:\s*46px;[\s\S]*?font-size:\s*10px;/);
+  assert.match(polish, /data-scale-window="year"\] #day-track\s*\{\s*--scale-context-opacity:\s*\.72;/s);
+  assert.match(polish, /data-scale-window="year"\] #hour-track\s*\{\s*--scale-context-opacity:\s*\.68;/s);
+  assert.match(polish, /#hour-track \.cycle-label:not\(\.active-cycle-label\)\s*\{[\s\S]*?fill:\s*rgba\(196,202,201,\.46\);[\s\S]*?font-size:\s*9px;/);
+  assert.match(polish, /#day-track \.cycle-label:not\(\.active-cycle-label\)\s*\{[\s\S]*?fill:\s*rgba\(207,212,210,\.52\);[\s\S]*?font-size:\s*9\.5px;/);
+  assert.doesNotMatch(polish, /(?:width|height|viewBox|transform):\s*[^;]*(?:wheel|track)/i);
+});
+
 test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /width:\s*2047px/);
   assert.match(fixture, /height:\s*1038px/);
