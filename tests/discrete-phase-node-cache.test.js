@@ -33,3 +33,22 @@ test("active sector remains live and gates initialization", () => {
   assert.match(refresh, /!activeIndices/);
   assert.match(refresh, /renderPhase\(id, activeIndices\.get\(id\), phases\[id\], peers\.get\(id\)\)/);
 });
+
+
+test("discrete phase reuses refresh scratch collections", () => {
+  assert.match(source, /const EMPTY_SHARED_PEERS = Object\.freeze\(\[\]\);/);
+  assert.match(source, /const activeIndexScratch = new Map\(\);/);
+  assert.match(source, /const sharedPeersScratch = new Map\(RING_IDS\.map\(id => \[id, EMPTY_SHARED_PEERS\]\)\);/);
+
+  const readiness = bodyBetween("function readyActiveIndices", "function clearBoundaryGate");
+  assert.match(readiness, /activeIndexScratch\.clear\(\);/);
+  assert.match(readiness, /activeIndexScratch\.set\(id, index\);/);
+  assert.match(readiness, /return activeIndexScratch;/);
+  assert.doesNotMatch(readiness, /new Map\(/);
+
+  const peers = bodyBetween("function sharedPeersByRing", "function finishInitialization");
+  assert.match(peers, /for \(const id of RING_IDS\) sharedPeersScratch\.set\(id, EMPTY_SHARED_PEERS\);/);
+  assert.match(peers, /sharedPeersScratch\.set\(id, group\.ringIds\.filter\(peer => peer !== id\)\);/);
+  assert.match(peers, /return sharedPeersScratch;/);
+  assert.doesNotMatch(peers, /new Map\(/);
+});

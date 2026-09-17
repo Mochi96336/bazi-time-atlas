@@ -14,7 +14,10 @@ const instrument = document.querySelector("#kinetic-instrument");
 const svg = document.querySelector("#kinetic-wheel");
 let scheduled = false;
 let initializationObserver = null;
+const EMPTY_SHARED_PEERS = Object.freeze([]);
 const phaseNodeCache = new Map();
+const activeIndexScratch = new Map();
+const sharedPeersScratch = new Map(RING_IDS.map(id => [id, EMPTY_SHARED_PEERS]));
 
 function phaseNodes(id) {
   const cached = phaseNodeCache.get(id);
@@ -40,14 +43,14 @@ function activeIndex(group) {
 }
 
 function readyActiveIndices() {
-  const indices = new Map();
+  activeIndexScratch.clear();
   for (const id of RING_IDS) {
     const { group, path, bead, gate, halo } = phaseNodes(id);
     const index = activeIndex(group);
     if (!group || !path || !bead || !gate || !halo || index === null) return null;
-    indices.set(id, index);
+    activeIndexScratch.set(id, index);
   }
-  return indices;
+  return activeIndexScratch;
 }
 
 function clearBoundaryGate(id) {
@@ -94,7 +97,7 @@ function renderBoundaryGate(id, activeIndexValue, phase, sharedWith) {
   const start = pointAt(WHEEL_CENTER, model.innerRadius + 1.5, angle);
   const end = pointAt(WHEEL_CENTER, model.innerRadius + 10.5, angle);
   const center = pointAt(WHEEL_CENTER, model.innerRadius + 6, angle);
-  const peers = Array.isArray(sharedWith) ? sharedWith : [];
+  const peers = Array.isArray(sharedWith) ? sharedWith : EMPTY_SHARED_PEERS;
   const shared = peers.length > 0;
 
   gate.setAttribute("x1", start.x);
@@ -115,7 +118,7 @@ function renderBoundaryGate(id, activeIndexValue, phase, sharedWith) {
   group.dataset.nextBoundarySharedWith = peers.join(",");
 }
 
-function renderPhase(id, activeIndexValue, phase, sharedWith = []) {
+function renderPhase(id, activeIndexValue, phase, sharedWith = EMPTY_SHARED_PEERS) {
   if (!phase || !Number.isInteger(activeIndexValue)) {
     clearPhase(id);
     return;
@@ -155,14 +158,14 @@ function renderPhase(id, activeIndexValue, phase, sharedWith = []) {
 }
 
 function sharedPeersByRing(groups) {
-  const peers = new Map(RING_IDS.map(id => [id, []]));
+  for (const id of RING_IDS) sharedPeersScratch.set(id, EMPTY_SHARED_PEERS);
   for (const group of groups) {
     if (!group.shared) continue;
     for (const id of group.ringIds) {
-      peers.set(id, group.ringIds.filter(peer => peer !== id));
+      sharedPeersScratch.set(id, group.ringIds.filter(peer => peer !== id));
     }
   }
-  return peers;
+  return sharedPeersScratch;
 }
 
 function finishInitialization() {
