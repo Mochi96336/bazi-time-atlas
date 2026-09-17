@@ -85,7 +85,9 @@ export function createRingDragController({
   }
 
   function setHoverRing(ringId) {
-    hoverRingId = ringId ?? null;
+    const nextRingId = ringId ?? null;
+    if (hoverRingId === nextRingId) return;
+    hoverRingId = nextRingId;
     if (hoverRingId) svg.dataset.hoverRing = hoverRingId;
     else delete svg.dataset.hoverRing;
     updatePointerStyle();
