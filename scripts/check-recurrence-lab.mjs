@@ -107,6 +107,26 @@ function expectSignedEvidenceCopy(dom, { year, day }, label, url) {
   }
 }
 
+function expectConsolidatedGlobalPeriod(dom, url) {
+  const preset = dom.match(/<button[^>]*data-delta-years="24000"[^>]*>[^<]*<\/button>/)?.[0] ?? "";
+  if (!preset.includes(">全域 24,000</button>")) {
+    throw new Error(`24000-year preset does not own the global-period label: ${url}`);
+  }
+  if (!preset.includes('aria-label="三層全域閉合 24,000 年"')) {
+    throw new Error(`24000-year preset is missing global-closure aria semantics: ${url}`);
+  }
+  if (!preset.includes('data-research-global-period-preset="1"')) {
+    throw new Error(`24000-year preset is missing presentation ownership marker: ${url}`);
+  }
+  if (/class="global-period"/.test(dom)) {
+    throw new Error(`duplicate static global-period readout is still rendered: ${url}`);
+  }
+  const dock = dom.match(/<section[^>]*class="[^"]*delta-dock[^"]*"[^>]*>/)?.[0] ?? "";
+  if (!dock.includes("research-delta-consolidated")) {
+    throw new Error(`delta dock did not reclaim the removed global-period column: ${url}`);
+  }
+}
+
 const local = expectCase(
   "recurrence.html?date=2026-09-13&delta=1980",
   {
@@ -156,11 +176,12 @@ const global = expectCase(
   "24000-year global recurrence"
 );
 expectFixedGauge(global.dom, global.url);
+expectConsolidatedGlobalPeriod(global.dom, global.url);
 if (!/三層全域閉合/.test(global.dom) || !/26026-09-13/.test(global.dom)) {
   throw new Error(`24000-year global closure explanation missing: ${global.url}`);
 }
 for (const key of ["gregorian", "year", "day"]) expectMarker(global.dom, key, "-90.000", "0", "24000-year global recurrence", global.url);
-console.log(`[recurrence] PASS global closure stacks every discrete marker on the same reference: ${global.url}`);
+console.log(`[recurrence] PASS global closure stacks every discrete marker on the same reference and owns one labeled preset: ${global.url}`);
 
 const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",
