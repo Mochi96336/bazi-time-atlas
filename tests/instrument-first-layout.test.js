@@ -61,10 +61,10 @@ test("mobile reading view removes hero/card chrome without stealing shell scroll
   assert.match(mobile[1], /\.instrument-shell\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
 });
 
-test("mobile ordinary reading flattens exact-time chrome without hiding editing", () => {
+test("mobile ordinary reading flattens exact-time chrome without requiring DOM adjacency", () => {
   assert.match(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(238,242,237,\.08\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(238,242,237,\.08\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
   );
   assert.match(
     css,
@@ -76,22 +76,27 @@ test("mobile ordinary reading flattens exact-time chrome without hiding editing"
   );
   assert.doesNotMatch(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock\s*\{[^}]*display:\s*none;/s
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[^}]*display:\s*none;/s
+  );
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock/,
+    "runtime-inserted Analysis siblings must not disable ordinary mobile flattening"
   );
 });
 
 test("mobile ordinary idle exact-time rail removes duplicate metadata but preserves feedback states", () => {
   assert.match(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock \.mobile-time-heading\s*\{[^}]*justify-content:\s*flex-end;/s
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock \.mobile-time-heading\s*\{[^}]*justify-content:\s*flex-end;/s
   );
   assert.match(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock \.mobile-time-heading strong,[\s\S]*?#mobile-time-status\[data-state="idle"\]\s*\{\s*display:\s*none;/
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock \.mobile-time-heading strong,[\s\S]*?#mobile-time-status\[data-state="idle"\]\s*\{\s*display:\s*none;/
   );
   assert.doesNotMatch(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock #mobile-time-status:not\(\[data-state="idle"\]\)\s*\{[^}]*display:\s*none;/s
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock #mobile-time-status:not\(\[data-state="idle"\]\)\s*\{[^}]*display:\s*none;/s
   );
 });
 

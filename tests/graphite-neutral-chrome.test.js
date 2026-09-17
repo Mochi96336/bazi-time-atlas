@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
 const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
+const instrumentFirst = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 
 function rejectLegacy(source, legacyValues) {
@@ -60,6 +61,25 @@ test("Analysis-only inspector and visible-stem chrome no longer carry moss surfa
   assert.match(inspector, /\.ganzhi-inspector \{[\s\S]*?border:\s*1px solid #34393a;[\s\S]*?background:\s*rgba\(18, 20, 21, \.97\);/);
   assert.match(inspector, /\.ganzhi-inspector-grid > span\.active \{[\s\S]*?background:\s*rgba\(157, 162, 163, \.09\);/);
   assert.match(visibleTenGods, /\.atlas-visible-ten-gods \{[\s\S]*?border:\s*1px solid rgba\(236,239,239,\.10\);[\s\S]*?background:\s*rgba\(12,14,15,\.46\);/);
+});
+
+test("ordinary instrument-first chrome follows neutral Graphite M2", () => {
+  rejectLegacy(instrumentFirst, [
+    "rgba(199, 217, 205, .08)",
+    "#68726b",
+    "#707a73",
+    "#b9c3bc",
+    "#e5ece7",
+    "rgba(199, 217, 205, .68)",
+    "#77817a",
+    "#d7dfd9"
+  ]);
+
+  assert.match(instrumentFirst, /data-analysis-open="true"\]\s*\{[\s\S]*?box-shadow:\s*inset 0 0 0 1px rgba\(236, 239, 239, \.055\);/);
+  assert.match(instrumentFirst, /\.instant-field \{[\s\S]*?color:\s*#6f7475;/);
+  assert.match(instrumentFirst, /\.scale-button \{[\s\S]*?color:\s*#74797a;/);
+  assert.match(instrumentFirst, /\.scale-button\.active \{[\s\S]*?color:\s*#e5e8e7;[\s\S]*?rgba\(236, 239, 239, \.52\);/);
+  assert.match(instrumentFirst, /#now-button \{[\s\S]*?color:\s*#7a7f80;/);
 });
 
 test("neutral chrome does not disturb the matte material or warm semantic channels", () => {
