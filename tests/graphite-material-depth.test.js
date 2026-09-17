@@ -6,6 +6,7 @@ const material = readFileSync(new URL("../graphite-m2-material.css", import.meta
 const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
 const analysisPolish = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
+const radialHierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
 const instrument = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 
@@ -50,8 +51,26 @@ test("desktop Analysis consumes recessed rails and etched edges without floating
   );
 });
 
+test("wheel structure uses etched M2 edges without beveling temporal sectors", () => {
+  assert.match(radialHierarchy, /^@import "\.\/graphite-m2-material\.css";/);
+  assert.match(
+    radialHierarchy,
+    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*var\(--m2-etched-dark-soft\);[\s\S]*?filter:\s*drop-shadow\(0 1px 0 var\(--m2-etched-light\)\);/
+  );
+  assert.match(
+    radialHierarchy,
+    /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke:\s*var\(--m2-etched-dark-soft\);[\s\S]*?filter:\s*drop-shadow\(0 1px 0 var\(--m2-etched-light-soft\)\);/
+  );
+  assert.match(radialHierarchy, /\.cycle-sector\.is-active \{\s*stroke:\s*none;/);
+  assert.match(radialHierarchy, /#solar-track \.term-sector \{[\s\S]*?stroke:\s*none;/);
+  assert.match(
+    radialHierarchy,
+    /#guide-layer \.guide-arc\.annual-subdivide \{[\s\S]*?stroke:\s*color-mix\(in srgb, var\(--solar\) 10%, transparent\);/
+  );
+});
+
 test("material depth stays procedural and does not become visible texture chrome", () => {
-  for (const source of [material, inspector, visibleTenGods, analysisPolish]) {
+  for (const source of [material, inspector, visibleTenGods, analysisPolish, radialHierarchy]) {
     assert.doesNotMatch(source, /feTurbulence|filter:\s*url\(|background(?:-image)?:\s*url\(/i);
     assert.doesNotMatch(source, /repeating-(?:linear|radial)-gradient/i);
   }
