@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
 const mobileLegendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
+const classificationCss = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
 
 test("normal reading view turns the layer legend into fixed ring identity labels", () => {
   assert.match(analysisCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend \{[\s\S]*?inset:\s*0;[\s\S]*?display:\s*block;/);
@@ -74,20 +75,41 @@ test("analysis mode retains the interactive layer legend instead of duplicating 
   );
 });
 
-test("mobile structured legend grid belongs to Analysis only", () => {
+test("mobile Analysis legend is a two-row evidence rail without duplicate values", () => {
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\);/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\);/
+  );
+  for (const [role, column] of [["year", 1], ["month", 2], ["solar", 3], ["day", 4], ["hour", 5]]) {
+    assert.match(
+      mobileLegendCss,
+      new RegExp(`#kinetic-instrument\\[data-analysis-open="true"\\] \\.ring-${role} \\{ grid-column: ${column}; grid-row: 1; \\}`)
+    );
+  }
+  assert.match(
+    mobileLegendCss,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row strong \{\s*display:\s*none;/
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-solar \{\s*grid-column:\s*1 \/ -1;\s*grid-row:\s*2;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control \{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*2;/
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control \{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*3;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{\s*top:\s*78px;/
   );
   assert.doesNotMatch(mobileLegendCss, /^\s*\.ring-legend\s*\{/m);
+});
+
+test("mobile classification evidence is flat instead of another rounded card", () => {
+  const mobile = classificationCss.match(/@media \(max-width: 480px\) \{([\s\S]*)\}\s*$/)?.[1] ?? "";
+  assert.match(
+    mobile,
+    /\.classification-overlay-legend \{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(238,242,237,\.10\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/
+  );
+  assert.match(mobile, /\.classification-keys i \{[\s\S]*?border-radius:\s*2px;/);
+  assert.match(mobile, /\.classification-current \{\s*display:none;/);
+  assert.match(mobile, /margin-bottom:\s*96px;/, "keep the existing no-overlap reservation while flattening chrome");
 });
 
 test("duplicate state strip leaves ordinary reading but remains available in Analysis", () => {
