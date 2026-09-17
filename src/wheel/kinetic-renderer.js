@@ -44,6 +44,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   const lastActiveAnnualIndex = new Map();
   const motionTraceNodes = new Map();
   const worldRotations = new Map();
+  const renderedRotations = new Map();
   const lastRenderedRotation = new Map();
   const motionTimers = new Map();
   let frameFlushQueued = false;
@@ -429,7 +430,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       cursorLayer.setAttribute("transform", rotationTransform(-frameOffset, WHEEL_CENTER));
     }
 
-    const renderedRotations = new Map();
+    renderedRotations.clear();
     RINGS.forEach(ring => {
       const worldRotation = worldRotations.get(ring.id);
       if (!Number.isFinite(worldRotation)) return;
