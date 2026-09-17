@@ -14,6 +14,17 @@ test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.remove\(\)/);
 });
 
+test("global period meaning is attached to the preset instead of a duplicate static readout", () => {
+  assert.match(view, /button\[data-delta-years=\\"24000\\"\]/);
+  assert.match(view, /preset\.textContent = "全域 24,000"/);
+  assert.match(view, /preset\.setAttribute\("aria-label", "三層全域閉合 24,000 年"\)/);
+  assert.match(view, /preset\.dataset\.researchGlobalPeriodPreset = "1"/);
+  assert.match(view, /dock\?\.querySelector\("\.global-period"\)/);
+  assert.match(view, /duplicate\?\.remove\(\)/);
+  assert.match(view, /dock\.classList\.add\("research-delta-consolidated"\)/);
+  assert.match(css, /@media \(min-width:821px\)[\s\S]*?\.delta-dock\.research-delta-consolidated\s*\{[\s\S]*?grid-template-columns:\s*minmax\(130px,180px\) minmax\(0,1fr\)/);
+});
+
 test("local recurrence remains visible while derived closure interpretation is disclosed", () => {
   assert.match(view, /details\.id = "discrete-closure-details"/);
   assert.match(view, /local\.classList\.add\("research-local-recurrence-rail"\)/);
@@ -48,6 +59,14 @@ test("browser contract treats legend as visible phase evidence and closure statu
   assert.doesNotMatch(recurrenceGate, /expectVisibleSignedCopy/);
   assert.match(recurrenceGate, /discrete-closure-details/);
   assert.match(recurrenceGate, /research-local-recurrence-rail/);
+});
+
+test("browser contract verifies the global period preset owns the semantic label", () => {
+  assert.match(recurrenceGate, /function expectConsolidatedGlobalPeriod/);
+  assert.match(recurrenceGate, /data-delta-years="24000"/);
+  assert.match(recurrenceGate, /全域 24,000/);
+  assert.match(recurrenceGate, /三層全域閉合 24,000 年/);
+  assert.match(recurrenceGate, /global-period/);
 });
 
 test("research integration loads the discrete presentation layer", () => {
