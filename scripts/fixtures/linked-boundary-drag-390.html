@@ -70,6 +70,10 @@
       return new Promise(resolve => queueMicrotask(() => queueMicrotask(resolve)));
     }
 
+    function settleRenderFrame(win) {
+      return new Promise(resolve => win.requestAnimationFrame(() => resolve()));
+    }
+
     async function waitFor(predicate, label, timeoutMs = 5000) {
       const started = performance.now();
       while (performance.now() - started < timeoutMs) {
@@ -171,6 +175,9 @@
       const active = snapshot(g, ringId);
 
       g.svg.dispatchEvent(pointerAt(g, radius, END_ANGLE, "pointermove", pointerId));
+      // Production intentionally commits pointer-drag presentation at most once
+      // per display frame. Observe the pose only after that scheduled commit.
+      await settleRenderFrame(g.win);
       await settle();
       const moved = snapshot(g, ringId);
 
