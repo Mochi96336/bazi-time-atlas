@@ -376,8 +376,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     if (!Number.isFinite(previous)) return;
 
     const delta = rotationDegrees - previous;
-    node.dataset.lastDelta = delta.toFixed(4);
     if (node.dataset.layerHidden === "true") {
+      node.dataset.lastDelta = delta.toFixed(4);
       clearMotionTrace(id);
       return;
     }
