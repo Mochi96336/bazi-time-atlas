@@ -1,0 +1,42 @@
+/* Final wide-desktop Tools rail convergence.
+   Presentation only: keep the existing toolbar, layer/reference controls and
+   completion control as separate semantic owners, but give them one shared
+   instrument header geometry instead of three floating caption groups. */
+@media (min-width: 1600px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar,
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    left: clamp(18px, 2vw, 32px);
+    right: clamp(18px, 2vw, 32px);
+    width: auto;
+    max-width: none;
+  }
+
+  /* Primary scale/actions rail. The single etched baseline visually connects
+     the left observation-window group to the right tool/time actions without
+     introducing a panel, pill container or new label. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    top: 8px;
+    min-height: 36px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(236,239,239,.055);
+  }
+
+  /* Secondary reference/layer rail uses the same insets and reserves its far
+     right edge for the existing Done action. It therefore reads as one row even
+     though the controls retain their existing DOM and interaction ownership. */
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    top: 48px;
+    min-height: 30px;
+    padding: 0 64px 4px 0;
+    flex-wrap: nowrap;
+    border-bottom: 1px solid rgba(236,239,239,.05);
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 50px;
+    right: clamp(18px, 2vw, 32px);
+    min-height: 26px;
+    padding: 0 0 0 12px;
+    border-left: 1px solid rgba(236,239,239,.08);
+  }
+}
