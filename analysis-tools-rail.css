@@ -1,3 +1,5 @@
+@import "./graphite-m2-material.css";
+
 /* Final wide-desktop Tools rail convergence.
    Presentation only: keep the existing toolbar, layer/reference controls and
    completion control as separate semantic owners, but give them one shared
@@ -18,7 +20,8 @@
     top: 8px;
     min-height: 36px;
     padding-bottom: 3px;
-    border-bottom: 1px solid rgba(236,239,239,.055);
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
   }
 
   /* Secondary reference/layer rail uses the same insets and reserves its far
@@ -29,7 +32,8 @@
     min-height: 30px;
     padding: 0 64px 4px 0;
     flex-wrap: nowrap;
-    border-bottom: 1px solid rgba(236,239,239,.05);
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
   }
 
   #kinetic-instrument[data-analysis-open="true"] .analysis-close {
@@ -37,6 +41,7 @@
     right: clamp(18px, 2vw, 32px);
     min-height: 26px;
     padding: 0 0 0 12px;
-    border-left: 1px solid rgba(236,239,239,.08);
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
   }
 }
