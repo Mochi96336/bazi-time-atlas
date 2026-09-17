@@ -1,11 +1,37 @@
 .astronomy-panel {
   grid-template-columns:minmax(0,1fr);
   gap:0;
-  padding:10px 0 11px;
+  padding:7px 0 8px;
   border-left:0;
   border-right:0;
   border-radius:0;
   background:transparent;
+}
+
+.research-astronomy-rms-rail {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:baseline;
+  min-width:0;
+  padding:2px 2px 5px;
+  border:0;
+}
+.research-astronomy-rms-rail > span {
+  margin:0;
+  color:#7f8a82;
+  font-size:9px;
+  font-weight:650;
+  letter-spacing:.02em;
+  text-transform:none;
+}
+.research-astronomy-rms-rail #astronomy-rms-residual {
+  margin:0;
+  color:#c7cec9;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.2;
+  text-align:right;
 }
 
 .research-astronomy-drilldown {
@@ -44,7 +70,7 @@
 #astronomy-residual-detail { margin-top:0; }
 .astronomy-detail-meta {
   display:grid;
-  grid-template-columns:minmax(0,1.45fr) minmax(160px,.65fr);
+  grid-template-columns:minmax(110px,.5fr) minmax(0,1.45fr) minmax(140px,.65fr);
   gap:10px 18px;
   padding:9px 2px 4px;
 }
@@ -52,6 +78,7 @@
 .astronomy-detail-meta span { display:block; color:#68736b; font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
 .astronomy-detail-meta strong { display:block; margin-top:3px; color:#a89f92; font-size:11px; }
 .astronomy-detail-meta small { display:block; margin-top:3px; color:#6d7870; font-size:8px; line-height:1.45; }
+.astronomy-detail-meta #astronomy-max-residual { color:#b6aca0; font-size:12px; }
 .astronomy-detail-meta #astronomy-orbit-readout { color:#8f988f; font-size:9px; line-height:1.5; }
 #astronomy-residual-detail .astronomy-term-grid { margin:7px 0 11px; }
 
@@ -91,6 +118,9 @@
 }
 
 @media (max-width:480px) {
+  .astronomy-panel { padding:6px 0 7px; }
+  .research-astronomy-rms-rail > span { font-size:8px; }
+  .research-astronomy-rms-rail #astronomy-rms-residual { font-size:12px; }
   .research-astronomy-drilldown > summary { min-height:32px; font-size:8.5px; }
   .astronomy-detail-meta { padding-top:7px; }
   #month-boundary-detail > p { font-size:7.5px; }

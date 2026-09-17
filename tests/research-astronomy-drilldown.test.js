@@ -14,10 +14,16 @@ test("astronomy progressive disclosure keeps three closed native drilldowns", ()
   assert.doesNotMatch(view, /\.open\s*=|setAttribute\(\s*["']open["']/);
 });
 
-test("headline astronomy metrics stay outside while diagnostics move under detail", () => {
+test("RMS owns the visible astronomy headline while duplicate max residual moves into detail", () => {
+  assert.match(view, /headline\.classList\.add\("research-astronomy-rms-rail"\)/);
+  assert.match(view, /headline\.dataset\.astronomyVisibleMetric = "rms"/);
+  assert.match(view, /headlineLabel\.textContent = "RMS residual"/);
+  assert.match(view, /maxMetric\.dataset\.astronomyDetailMetric = "max-residual"/);
+  assert.match(view, /maxMetric\.append\(maxLabel, maxResidual\)/);
+  assert.match(view, /meta\.appendChild\(maxMetric\)/);
   assert.match(view, /\[\.\.\.panel\.children\]\.slice\(1\)/);
   assert.match(view, /detail\.append\(meta, termGrid\)/);
-  assert.doesNotMatch(view, /panel\.children\]\.slice\(0\)/);
+  assert.doesNotMatch(view, /cloneNode|textContent\s*=\s*maxResidual\.textContent/);
 });
 
 test("month boundary keeps summary stats and moves only prose and deep evidence", () => {
@@ -37,8 +43,11 @@ test("near recurrence summary remains visible while chart and ranking body drill
   assert.doesNotMatch(view, /near-search-head.*appendChild/s);
 });
 
-test("drilldowns render as flat rails rather than new cards", () => {
+test("drilldowns and RMS headline render as flat rails rather than new cards", () => {
   assert.match(css, /\.research-astronomy-drilldown\s*\{[\s\S]*?border\s*:\s*0[\s\S]*?background\s*:\s*transparent/);
   assert.match(css, /\.astronomy-panel\s*\{[\s\S]*?border-radius\s*:\s*0[\s\S]*?background\s*:\s*transparent/);
+  assert.match(css, /\.research-astronomy-rms-rail\s*\{[\s\S]*?grid-template-columns:[^;]+;[\s\S]*?border\s*:\s*0/);
+  assert.match(css, /\.astronomy-detail-meta #astronomy-max-residual/);
   assert.doesNotMatch(css, /\.research-astronomy-drilldown\s*\{[\s\S]*?border-radius\s*:/);
+  assert.doesNotMatch(css, /\.research-astronomy-rms-rail\s*\{[\s\S]*?box-shadow\s*:/);
 });

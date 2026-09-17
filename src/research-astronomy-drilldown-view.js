@@ -24,11 +24,28 @@ function installAstronomyResidualDetail() {
   if (!task || document.querySelector("#astronomy-residual-detail")) return;
   const panel = task.querySelector(".astronomy-panel");
   const termGrid = task.querySelector("#astronomy-term-grid");
-  if (!panel || !termGrid) return;
+  const headline = panel?.firstElementChild;
+  const headlineLabel = headline?.querySelector("span");
+  const maxResidual = headline?.querySelector("#astronomy-max-residual");
+  const rmsResidual = headline?.querySelector("#astronomy-rms-residual");
+  if (!panel || !termGrid || !headline || !headlineLabel || !maxResidual || !rmsResidual) return;
+
+  headline.classList.add("research-astronomy-rms-rail");
+  headline.dataset.astronomyVisibleMetric = "rms";
+  headlineLabel.textContent = "RMS residual";
 
   const detail = makeDetails("astronomy-residual-detail", "十二節殘差與模型參數");
   const meta = document.createElement("div");
   meta.className = "astronomy-detail-meta";
+
+  const maxMetric = document.createElement("div");
+  maxMetric.className = "astronomy-detail-max";
+  maxMetric.dataset.astronomyDetailMetric = "max-residual";
+  const maxLabel = document.createElement("span");
+  maxLabel.textContent = "Max residual";
+  maxMetric.append(maxLabel, maxResidual);
+  meta.appendChild(maxMetric);
+
   [...panel.children].slice(1).forEach(node => meta.appendChild(node));
   detail.append(meta, termGrid);
   panel.insertAdjacentElement("afterend", detail);

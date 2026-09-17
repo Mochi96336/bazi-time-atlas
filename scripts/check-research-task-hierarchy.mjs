@@ -40,6 +40,22 @@ function sectionById(dom, id) {
   return "";
 }
 
+function detailsById(dom, id) {
+  const start = dom.indexOf(`id="${id}"`);
+  if (start < 0) return "";
+  const open = dom.lastIndexOf("<details", start);
+  if (open < 0) return "";
+  const tag = /<\/?details\b[^>]*>/g;
+  tag.lastIndex = open;
+  let depth = 0;
+  let match;
+  while ((match = tag.exec(dom))) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) return dom.slice(open, tag.lastIndex);
+  }
+  return "";
+}
+
 const probe = dump("recurrence.html?delta=24000&targetClock=fixed-zone&targetTime=12%3A00%3A00&ut1Offset=8&dayBoundary=zi-initial-next-day&clockBasis=local-mean-solar&lon=121.5");
 const discrete = sectionById(probe.dom, "research-discrete");
 const astronomy = sectionById(probe.dom, "research-astronomy");
@@ -58,6 +74,19 @@ if (discrete.includes('class="near-search-panel"') || discrete.includes('id="fou
 if (!astronomy.includes('class="astronomy-panel"') || !astronomy.includes('id="month-boundary-exposure"') || !astronomy.includes('class="near-search-panel"')) {
   throw new Error(`astronomy task did not retain residual, month-boundary, and near-recurrence evidence: ${probe.url}`);
 }
+const astronomyDetail = detailsById(probe.dom, "astronomy-residual-detail");
+if (!astronomy.includes('data-astronomy-visible-metric="rms"') || !astronomy.includes('id="astronomy-rms-residual"')) {
+  throw new Error(`astronomy headline is not owned by the visible RMS rail: ${probe.url}`);
+}
+if (!astronomyDetail || !astronomyDetail.includes('data-astronomy-detail-metric="max-residual"') || !astronomyDetail.includes('id="astronomy-max-residual"')) {
+  throw new Error(`duplicate max residual did not move into the astronomy detail: ${probe.url}`);
+}
+if (astronomyDetail.includes('id="astronomy-rms-residual"')) {
+  throw new Error(`RMS headline was incorrectly hidden inside astronomy detail: ${probe.url}`);
+}
+if (/^<details[^>]*\sopen(?:\s|=|>)/.test(astronomyDetail)) {
+  throw new Error(`astronomy residual detail must remain closed by default: ${probe.url}`);
+}
 if (!evidence.includes('id="four-pillar-determinacy"') || !evidence.includes('id="day-hour-proof-chain"') || !evidence.includes('id="seasonal-epoch-source-audit"')) {
   throw new Error(`four-pillar evidence task did not retain its proof chain and source audit: ${probe.url}`);
 }
@@ -68,4 +97,4 @@ if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|�
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 
-console.log(`[research-hierarchy] PASS concise three-section ownership + restored 60-day cycle at 390px: ${probe.url}`);
+console.log(`[research-hierarchy] PASS concise three-section ownership + RMS astronomy headline + restored 60-day cycle at 390px: ${probe.url}`);
