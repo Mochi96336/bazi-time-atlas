@@ -16,10 +16,10 @@
 }
 .state-cell-reference:hover,
 .state-cell-reference:focus-visible,
-.state-cell-reference[aria-expanded="true"] { border-top-color: #7f8e84; outline: none; }
+.state-cell-reference[aria-expanded="true"] { border-top-color: #828889; outline: none; }
 .state-cell-reference:hover strong,
 .state-cell-reference:focus-visible strong,
-.state-cell-reference[aria-expanded="true"] strong { color: #f0f4f1; }
+.state-cell-reference[aria-expanded="true"] strong { color: #f0f2f1; }
 
 .ganzhi-inspector {
   position: fixed;
@@ -29,11 +29,11 @@
   width: min(370px, calc(100vw - 48px));
   max-height: min(72vh, 620px);
   overflow: auto;
-  border: 1px solid #313b34;
+  border: 1px solid #34393a;
   border-radius: 14px;
-  background: rgba(19, 25, 21, .97);
+  background: rgba(18, 20, 21, .97);
   box-shadow: 0 24px 70px rgba(0, 0, 0, .46);
-  color: #dbe1dc;
+  color: #dce0df;
   backdrop-filter: blur(14px);
 }
 .ganzhi-inspector-head {
@@ -45,11 +45,11 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 16px 10px;
-  background: rgba(19, 25, 21, .96);
-  border-bottom: 1px solid #28312b;
+  background: rgba(18, 20, 21, .96);
+  border-bottom: 1px solid #2b3031;
 }
 .ganzhi-inspector-head span {
-  color: #7e8a82;
+  color: #818687;
   font-size: 10px;
   letter-spacing: .11em;
   text-transform: uppercase;
@@ -59,13 +59,13 @@
   border: 0;
   padding: 4px 0;
   background: transparent;
-  color: #87928b;
+  color: #8a9090;
   font: inherit;
   font-size: 12px;
   cursor: pointer;
 }
 .ganzhi-inspector-close:hover,
-.ganzhi-inspector-close:focus-visible { color: #eef3ef; outline: none; }
+.ganzhi-inspector-close:focus-visible { color: #eef1f0; outline: none; }
 
 .ganzhi-inspector-identity {
   display: grid;
@@ -76,7 +76,7 @@
 }
 .ganzhi-inspector-identity small {
   grid-column: 1 / -1;
-  color: #77837b;
+  color: #7a8081;
   font-size: 10px;
   letter-spacing: .08em;
 }
@@ -86,7 +86,7 @@
   letter-spacing: .06em;
 }
 .ganzhi-inspector-identity b {
-  color: #9aa69e;
+  color: #9da2a2;
   font-size: 11px;
   font-weight: 650;
 }
@@ -99,12 +99,12 @@
 }
 .ganzhi-inspector-parts section {
   min-width: 0;
-  border-top: 1px solid #303932;
+  border-top: 1px solid #333839;
   padding-top: 10px;
 }
 .ganzhi-inspector-parts span {
   display: block;
-  color: #758078;
+  color: #787e7f;
   font-size: 9px;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -112,13 +112,13 @@
 .ganzhi-inspector-parts strong {
   display: block;
   margin-top: 4px;
-  color: #e7ece8;
+  color: #e7eae9;
   font-size: 24px;
 }
 .ganzhi-inspector-parts small {
   display: block;
   margin-top: 2px;
-  color: #9aa59e;
+  color: #9da2a2;
   font-size: 10px;
   white-space: nowrap;
 }
@@ -130,17 +130,17 @@
   gap: 10px;
   margin: 0 16px 14px;
   padding: 10px 0;
-  border-top: 1px solid #28312b;
-  border-bottom: 1px solid #28312b;
-  color: #7d8981;
+  border-top: 1px solid #2b3031;
+  border-bottom: 1px solid #2b3031;
+  color: #808687;
   font-size: 11px;
 }
-.ganzhi-inspector-neighbors strong { color: #dfe5e0; font-size: 13px; }
+.ganzhi-inspector-neighbors strong { color: #e0e3e2; font-size: 13px; }
 .ganzhi-inspector-neighbors span:last-child { text-align: right; }
 
 .ganzhi-inspector details { padding: 0 16px 16px; }
 .ganzhi-inspector summary {
-  color: #8e9992;
+  color: #919697;
   font-size: 11px;
   cursor: pointer;
 }
@@ -152,27 +152,27 @@
 }
 .ganzhi-inspector-grid > span {
   min-width: 0;
-  border: 1px solid #263029;
+  border: 1px solid #293031;
   border-radius: 5px;
   padding: 5px 2px;
   text-align: center;
 }
 .ganzhi-inspector-grid small,
 .ganzhi-inspector-grid strong { display: block; }
-.ganzhi-inspector-grid small { color: #626e66; font-size: 7px; }
-.ganzhi-inspector-grid strong { margin-top: 1px; color: #929d96; font-size: 9px; }
+.ganzhi-inspector-grid small { color: #656b6c; font-size: 7px; }
+.ganzhi-inspector-grid strong { margin-top: 1px; color: #959a9a; font-size: 9px; }
 .ganzhi-inspector-grid > span.active {
-  border-color: #87968c;
-  background: rgba(151, 168, 157, .09);
+  border-color: #8a9091;
+  background: rgba(157, 162, 163, .09);
 }
 .ganzhi-inspector-grid > span.active small,
-.ganzhi-inspector-grid > span.active strong { color: #eef3ef; }
+.ganzhi-inspector-grid > span.active strong { color: #eef1f0; }
 
 .ganzhi-inspector[data-mode="pillar"] > .ganzhi-inspector-neighbors,
 .ganzhi-inspector[data-mode="pillar"] > details { display: none; }
 .ganzhi-structure[hidden] { display: none !important; }
 .ganzhi-structure {
-  border-top: 1px solid #28312b;
+  border-top: 1px solid #2b3031;
   padding: 0 16px 16px;
 }
 .ganzhi-structure-tabs {
@@ -184,10 +184,10 @@
 .ganzhi-structure-tab {
   appearance: none;
   border: 0;
-  border-bottom: 1px solid #2b342e;
+  border-bottom: 1px solid #2e3334;
   padding: 7px 4px;
   background: transparent;
-  color: #77837b;
+  color: #7a8081;
   font: inherit;
   font-size: 11px;
   cursor: pointer;
@@ -195,8 +195,8 @@
 .ganzhi-structure-tab:hover,
 .ganzhi-structure-tab:focus-visible,
 .ganzhi-structure-tab.active {
-  border-bottom-color: #8b9b90;
-  color: #eef3ef;
+  border-bottom-color: #8e9596;
+  color: #eef1f0;
   outline: none;
 }
 .ganzhi-structure-panel[hidden] { display: none !important; }
@@ -213,7 +213,7 @@
 .ganzhi-structure-day-master small,
 .ganzhi-structure-hidden > small,
 .ganzhi-relation-family > small {
-  color: #758078;
+  color: #787e7f;
   font-size: 9px;
   letter-spacing: .08em;
 }
@@ -225,13 +225,13 @@
 }
 .ganzhi-structure-pillar {
   min-width: 0;
-  border-top: 1px solid #2b342e;
+  border-top: 1px solid #2e3334;
   padding-top: 7px;
 }
-.ganzhi-structure-pillar[data-selected="true"] { border-top-color: #9eada3; }
+.ganzhi-structure-pillar[data-selected="true"] { border-top-color: #a1a7a8; }
 .ganzhi-structure-pillar small,
 .ganzhi-structure-pillar strong { display: block; }
-.ganzhi-structure-pillar small { color: #6f7a73; font-size: 8px; }
+.ganzhi-structure-pillar small { color: #727879; font-size: 8px; }
 .ganzhi-structure-pillar strong { margin-top: 2px; font-size: 12px; }
 /* Hidden stems are compact data tokens, not controls. Keep the role / stem /
    Ten-God tuple typographic so dense structure inspection does not become a
@@ -247,11 +247,11 @@
   align-items: baseline;
   gap: 3px;
   padding: 0;
-  color: #aeb8b1;
+  color: #b0b5b5;
   font-size: 9px;
 }
-.ganzhi-structure-chip i { color: #68736c; font-style: normal; font-size: 8px; }
-.ganzhi-structure-chip b { color: #e1e7e2; }
+.ganzhi-structure-chip i { color: #6b7172; font-style: normal; font-size: 8px; }
+.ganzhi-structure-chip b { color: #e2e5e4; }
 .ganzhi-structure-chip strong { font-size: 9px; }
 .ganzhi-ten-god-list { display: grid; gap: 8px; }
 .ganzhi-ten-god-row {
@@ -259,13 +259,13 @@
   grid-template-columns: auto auto 1fr;
   gap: 2px 8px;
   align-items: baseline;
-  border-top: 1px solid #2a332d;
+  border-top: 1px solid #2d3233;
   padding-top: 7px;
 }
-.ganzhi-ten-god-row > small { color: #6f7a73; font-size: 8px; }
+.ganzhi-ten-god-row > small { color: #727879; font-size: 8px; }
 .ganzhi-ten-god-row > b { font-size: 11px; }
 .ganzhi-ten-god-row > strong { justify-self: end; font-size: 11px; }
-.ganzhi-ten-god-row > span { grid-column: 1 / -1; color: #7f8b83; font-size: 9px; }
+.ganzhi-ten-god-row > span { grid-column: 1 / -1; color: #828889; font-size: 9px; }
 .ganzhi-ten-god-row .ganzhi-structure-hidden { grid-column: 1 / -1; }
 .ganzhi-ten-god-derivation { padding: 0 !important; }
 .ganzhi-ten-god-map { display: grid; gap: 4px; margin-top: 8px; }
@@ -273,24 +273,24 @@
   display: grid;
   grid-template-columns: 42px 1fr;
   gap: 8px;
-  color: #929d96;
+  color: #959a9a;
   font-size: 9px;
 }
-.ganzhi-ten-god-map-row small { color: #707b74; }
+.ganzhi-ten-god-map-row small { color: #73797a; }
 .ganzhi-relation-family { display: grid; gap: 6px; }
 .ganzhi-relation-list { display: grid; gap: 4px; }
 .ganzhi-relation-item {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 8px;
-  border-top: 1px solid #28312b;
+  border-top: 1px solid #2b3031;
   padding-top: 6px;
   font-size: 10px;
 }
-.ganzhi-relation-item strong { color: #dce3de; }
-.ganzhi-relation-item span { color: #87928b; }
+.ganzhi-relation-item strong { color: #dde1e0; }
+.ganzhi-relation-item span { color: #8a9090; }
 .ganzhi-relation-empty,
-.ganzhi-structure-wait { color: #78837c; font-size: 10px; }
+.ganzhi-structure-wait { color: #7b8182; font-size: 10px; }
 
 @media (max-width: 640px) {
   .ganzhi-inspector {
