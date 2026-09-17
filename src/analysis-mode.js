@@ -1,5 +1,6 @@
 import { installAtlasSolarTimeAnalysis } from "./atlas-solar-time-analysis.js";
 import { installAtlasVisibleTenGods } from "./atlas-visible-ten-gods.js";
+import { installInverseTimeSearch } from "./inverse-time-search-view.js";
 
 const instrument = document.querySelector("#kinetic-instrument");
 const openControl = document.querySelector("#analysis-toggle");
@@ -29,6 +30,15 @@ function installAnalysisFirstScreenPolishStyles() {
   stylesheet.rel = "stylesheet";
   stylesheet.href = "./analysis-first-screen-polish.css";
   stylesheet.dataset.analysisFirstScreenPolish = "1";
+  document.head.append(stylesheet);
+}
+
+function installInverseTimeSearchStyles() {
+  if (document.querySelector("link[data-inverse-time-search]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./inverse-time-search.css";
+  stylesheet.dataset.inverseTimeSearch = "1";
   document.head.append(stylesheet);
 }
 
@@ -70,8 +80,10 @@ function setAnalysisOpen(open, { reset = false } = {}) {
 
 installAnalysisFirstScreenStyles();
 installSolarTimeStyles();
+installInverseTimeSearchStyles();
 installAtlasSolarTimeAnalysis(instrument);
 installAtlasVisibleTenGods(instrument);
+installInverseTimeSearch(instrument);
 // atlas-visible-ten-gods installs its own stylesheet dynamically. Install the
 // final desktop polish afterwards so it can flatten that panel without changing
 // the component's data/lifecycle ownership or compact/mobile CSS.
