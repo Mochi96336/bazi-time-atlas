@@ -119,7 +119,7 @@ test("ordinary reading hides observation-window presets and analysis transport c
   );
 });
 
-test("ordinary time navigation leaves Now in the left cluster", () => {
+test("ordinary time navigation leaves Now as the only toolbar shortcut", () => {
   assert.match(
     css,
     /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-start;[\s\S]*?align-items:\s*center;[\s\S]*?gap:\s*2px;/
