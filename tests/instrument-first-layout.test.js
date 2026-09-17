@@ -61,14 +61,15 @@ test("mobile reading view removes hero/card chrome without stealing shell scroll
   assert.match(mobile[1], /\.instrument-shell\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
 });
 
-test("mobile ordinary reading flattens exact-time chrome without requiring DOM adjacency", () => {
+test("mobile ordinary reading keeps exact-time chrome flat with M2 etched rails", () => {
+  assert.match(css, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(238,242,237,\.08\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*inset 0 1px 0 var\(--m2-etched-light-soft\);/
   );
   assert.match(
     css,
-    /\.mobile-time-dock #mobile-instant-input\s*\{[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/
+    /\.mobile-time-dock #mobile-instant-input\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
   );
   assert.match(
     css,
