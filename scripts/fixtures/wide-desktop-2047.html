@@ -24,6 +24,9 @@
     const rect = node => node?.getBoundingClientRect() ?? null;
     const num = value => Number.parseFloat(value || "0");
     const round = value => String(Math.round(value * 100) / 100);
+    const displayVisibleCount = (win, nodes) => [...nodes]
+      .filter(node => win.getComputedStyle(node).display !== "none")
+      .length;
 
     function settle(win, callback) {
       win.requestAnimationFrame(() => {
@@ -47,6 +50,8 @@
       const toolbarButton = doc.querySelector(".instrument-toolbar button");
       const legendLabel = doc.querySelector(".ring-legend-row span");
       const close = doc.querySelector("#analysis-close");
+      const hourLabels = doc.querySelectorAll("#hour-track .cycle-label");
+      const dayLabels = doc.querySelectorAll("#day-track .cycle-label");
       if (!instrument || !readout || !toolbar || !legend || !evidence || !evidenceValue || !toolbarButton || !legendLabel || !close) return;
 
       const instrumentRect = rect(instrument);
@@ -82,6 +87,8 @@
         legendFont: round(num(legendStyle.fontSize)),
         evidenceValueFont: round(num(evidenceStyle.fontSize)),
         closeFont: round(num(closeStyle.fontSize)),
+        hourVisibleLabels: String(displayVisibleCount(win, hourLabels)),
+        dayVisibleLabels: String(displayVisibleCount(win, dayLabels)),
       });
     }
 

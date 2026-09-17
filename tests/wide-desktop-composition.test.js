@@ -44,10 +44,13 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /width:\s*2047px/);
   assert.match(fixture, /height:\s*1038px/);
   assert.match(fixture, /data-ready="false"/);
+  assert.match(fixture, /hourVisibleLabels:\s*String\(displayVisibleCount\(win, hourLabels\)\)/);
+  assert.match(fixture, /dayVisibleLabels:\s*String\(displayVisibleCount\(win, dayLabels\)\)/);
   assert.match(browserGate, /width !== 2047 \|\| height !== 1038/);
   assert.match(browserGate, /instrumentShare < 0\.80 \|\| instrumentShare > 0\.90/);
   assert.match(browserGate, /readoutBottomGap < 40/);
   assert.match(browserGate, /scrollWidth > width \+ 1/);
+  assert.match(browserGate, /hourVisibleLabels !== 60 \|\| dayVisibleLabels !== 60/);
   assert.match(visualCapture, /annual-wide-2047x1038\.png/);
   assert.match(visualCapture, /annual-tools-wide-2047x1038\.png/);
   assert.match(packageJson.scripts["visual:check"], /check-wide-desktop-composition\.mjs/);
