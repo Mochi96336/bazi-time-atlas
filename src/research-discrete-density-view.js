@@ -13,6 +13,39 @@ function removeDuplicateScopeNote() {
   document.querySelector(".recurrence-intro > .scope-note")?.remove();
 }
 
+function ensureClosureDrilldown() {
+  const grid = researchDiscrete?.querySelector(".closure-grid");
+  if (!grid) return null;
+
+  let details = grid.closest("#discrete-closure-details");
+  const local = researchDiscrete.querySelector(".research-local-recurrence-rail") ?? grid.querySelector(".local-card");
+  if (!local) return details;
+
+  if (!local.classList.contains("research-local-recurrence-rail")) {
+    local.classList.add("research-local-recurrence-rail");
+    const label = local.querySelector("span");
+    const note = local.querySelector("small");
+    if (label) label.textContent = "局部年＋日首次重遇";
+    if (note) note.hidden = true;
+  }
+
+  if (!details) {
+    details = document.createElement("details");
+    details.id = "discrete-closure-details";
+    details.className = "research-discrete-drilldown research-closure-drilldown";
+    details.dataset.researchDrilldown = "discrete-closure";
+
+    const summary = document.createElement("summary");
+    summary.innerHTML = `<span>閉合狀態</span><strong>公曆 / 年序 / 日序</strong>`;
+
+    grid.insertAdjacentElement("beforebegin", local);
+    grid.insertAdjacentElement("beforebegin", details);
+    details.append(summary, grid);
+  }
+
+  return details;
+}
+
 function ensureMilestoneDrilldown() {
   const table = researchDiscrete?.querySelector(".milestone-table");
   if (!table) return null;
@@ -44,6 +77,7 @@ function syncMilestoneMeta(details) {
 function syncDiscretePresentation() {
   if (!researchDiscrete) return;
   removeDuplicateScopeNote();
+  ensureClosureDrilldown();
   const details = ensureMilestoneDrilldown();
   syncMilestoneMeta(details);
 }

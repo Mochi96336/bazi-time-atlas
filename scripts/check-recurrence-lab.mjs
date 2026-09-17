@@ -88,15 +88,22 @@ function expectFixedGauge(dom, url) {
   }
 }
 
-function expectVisibleSignedCopy(dom, { year, day }, label, url) {
+function expectSignedEvidenceCopy(dom, { year, day }, label, url) {
+  if (!dom.includes(`40 / 60 · 最短 ${year}`) || !dom.includes(`57 / 60 · 最短 ${day}`)) {
+    throw new Error(`${label}: visible raw/signed legend provenance is inconsistent: ${url}`);
+  }
   if (!dom.includes(`id="year-status">偏移 ${year}<`)) {
-    throw new Error(`${label}: visible Year status does not match signed gauge ${year}: ${url}`);
+    throw new Error(`${label}: disclosed Year status does not match signed gauge ${year}: ${url}`);
   }
   if (!dom.includes(`id="day-status">偏移 ${day}<`)) {
-    throw new Error(`${label}: visible Day status does not match signed gauge ${day}: ${url}`);
+    throw new Error(`${label}: disclosed Day status does not match signed gauge ${day}: ${url}`);
   }
-  if (!dom.includes(`40 / 60 · 最短 ${year}`) || !dom.includes(`57 / 60 · 最短 ${day}`)) {
-    throw new Error(`${label}: raw/signed legend provenance is inconsistent: ${url}`);
+
+  const details = tagById(dom, "discrete-closure-details");
+  if (!details) throw new Error(`${label}: closure disclosure is missing: ${url}`);
+  if (/\sopen(?:\s|=|>)/.test(details)) throw new Error(`${label}: closure disclosure must be closed by default: ${url}`);
+  if (!dom.includes("research-local-recurrence-rail")) {
+    throw new Error(`${label}: local Year+Day recurrence must remain visible outside the disclosure: ${url}`);
   }
 }
 
@@ -178,9 +185,9 @@ if (!/公曆閏年骨架回原位/.test(gregorian.dom)) {
 expectMarker(gregorian.dom, "gregorian", "-90.000", "0", "400-year Gregorian recurrence", gregorian.url);
 expectMarker(gregorian.dom, "year", "-143.333", "-20", "400-year Gregorian recurrence", gregorian.url);
 expectMarker(gregorian.dom, "day", "-98.000", "-3", "400-year Gregorian recurrence", gregorian.url);
-expectVisibleSignedCopy(gregorian.dom, { year:"−20", day:"−3" }, "400-year Gregorian recurrence", gregorian.url);
+expectSignedEvidenceCopy(gregorian.dom, { year:"−20", day:"−3" }, "400-year Gregorian recurrence", gregorian.url);
 if (!/data-phase-raw="40" data-phase-signed="-20" data-phase-modulus="60">−20<\/span>/.test(gregorian.dom) ||
     !/data-phase-raw="57" data-phase-signed="-3" data-phase-modulus="60">−3<\/span>/.test(gregorian.dom)) {
   throw new Error(`400-year milestone rows do not use signed shortest phase copy: ${gregorian.url}`);
 }
-console.log(`[recurrence] PASS 400-year case keeps Gregorian closed while Year/Day signed offsets stay visible and text-consistent: ${gregorian.url}`);
+console.log(`[recurrence] PASS 400-year case keeps visible signed phase provenance while closure interpretation stays disclosed: ${gregorian.url}`);
