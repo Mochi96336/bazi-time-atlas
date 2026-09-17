@@ -104,26 +104,22 @@ test("ordinary reading keeps long-form notes out of the main path", () => {
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
 });
 
-test("ordinary reading keeps quiet observation-window lenses but hides analysis transport chrome", () => {
-  assert.doesNotMatch(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.toolbar-group\[role="group"\]\[aria-label="時間尺度"\][\s\S]*?display:\s*none;/
-  );
+test("ordinary reading hides observation-window presets and analysis transport chrome", () => {
   assert.match(
     css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #classification-overlay-button,[\s\S]*?#play-button\s*\{\s*display:\s*none;/
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.scale-button,[\s\S]*?#classification-overlay-button,[\s\S]*?#play-button\s*\{\s*display:\s*none;/
   );
-  assert.match(css, /\.scale-button\[data-scale="day"\]::after\s*\{\s*content:\s*"日內";/s);
-  assert.match(css, /\.scale-button\[data-scale="year"\]::after\s*\{\s*content:\s*"年度";/s);
-  assert.match(css, /\.scale-button\[data-scale="cycle"\]::after\s*\{\s*content:\s*"六十年";/s);
-  assert.match(css, /\.scale-button\.active\s*\{[^}]*background:\s*transparent;/s);
+  assert.doesNotMatch(
+    css,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.scale-button\s*\{[^}]*display:\s*none;/s
+  );
   assert.doesNotMatch(
     css,
     /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #now-button\s*\{[^}]*display:\s*none;/s
   );
 });
 
-test("ordinary time navigation keeps observation windows and Now in one left cluster", () => {
+test("ordinary time navigation leaves Now as the only toolbar shortcut", () => {
   assert.match(
     css,
     /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-start;[\s\S]*?align-items:\s*center;[\s\S]*?gap:\s*2px;/
