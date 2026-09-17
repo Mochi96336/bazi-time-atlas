@@ -6,6 +6,7 @@ const material = readFileSync(new URL("../graphite-m2-material.css", import.meta
 const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
 const analysisPolish = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
+const solarAnalysis = readFileSync(new URL("../atlas-solar-time-analysis.css", import.meta.url), "utf8");
 const radialHierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
 const instrument = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
@@ -51,6 +52,28 @@ test("desktop Analysis consumes recessed rails and etched edges without floating
   );
 });
 
+test("solar-time Analysis uses etched M2 structure without becoming another card", () => {
+  assert.match(solarAnalysis, /^@import "\.\/graphite-m2-material\.css";/);
+  assert.match(
+    solarAnalysis,
+    /\.atlas-solar-time-analysis \{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:[\s\S]*?inset 0 1px 0 var\(--m2-etched-light-soft\),[\s\S]*?inset 0 -1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.match(
+    solarAnalysis,
+    /\.atlas-solar-longitude-field input \{[\s\S]*?border:\s*0;[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.match(
+    solarAnalysis,
+    /\.atlas-solar-corrections \{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*inset 0 1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.match(
+    solarAnalysis,
+    /\.atlas-solar-basis-row \{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*inset 0 1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.doesNotMatch(solarAnalysis, /\.atlas-solar-time-analysis \{[^}]*background:/s);
+  assert.doesNotMatch(solarAnalysis, /\.atlas-solar-time-analysis \{[^}]*border-radius:/s);
+});
+
 test("wheel structure uses etched M2 edges without beveling temporal sectors", () => {
   assert.match(radialHierarchy, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(
@@ -70,7 +93,7 @@ test("wheel structure uses etched M2 edges without beveling temporal sectors", (
 });
 
 test("material depth stays procedural and does not become visible texture chrome", () => {
-  for (const source of [material, inspector, visibleTenGods, analysisPolish, radialHierarchy]) {
+  for (const source of [material, inspector, visibleTenGods, analysisPolish, solarAnalysis, radialHierarchy]) {
     assert.doesNotMatch(source, /feTurbulence|filter:\s*url\(|background(?:-image)?:\s*url\(/i);
     assert.doesNotMatch(source, /repeating-(?:linear|radial)-gradient/i);
   }
@@ -84,4 +107,12 @@ test("material hierarchy does not resurrect a card around the wheel", () => {
 test("Graphite hierarchy leaves warm semantic channels untouched", () => {
   assert.match(palette, /--solar:\s*#bc9257;/);
   assert.match(palette, /--cursor:\s*#f4dda0;/);
+  assert.match(
+    solarAnalysis,
+    /\.atlas-solar-longitude-field input:focus \{[\s\S]*?border-bottom-color:\s*color-mix\(in srgb, var\(--solar\) 72%, var\(--ink\)\);/
+  );
+  assert.match(
+    solarAnalysis,
+    /\.atlas-solar-basis-row b\[data-changed="1"\] \{[\s\S]*?color:\s*color-mix\(in srgb, var\(--solar\) 72%, var\(--ink\)\);/
+  );
 });
