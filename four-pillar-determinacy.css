@@ -89,6 +89,7 @@
   background:transparent;
 }
 .proof-chain-stage + .proof-chain-stage { border-left:1px solid rgba(238,242,237,.04); }
+.proof-chain-stage:nth-child(4n+1) { border-left:0; }
 .proof-chain-stage > div {
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
