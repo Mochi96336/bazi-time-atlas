@@ -1,6 +1,7 @@
 import { fourPillarDeterminacy } from "./recurrence/four-pillar-determinacy.js";
 import "./day-hour-proof-chain-view.js";
 import "./research-evidence-drilldown-view.js";
+import "./research-astronomy-drilldown-view.js";
 import "./eot-observed-clearance-diagnostic-view.js";
 
 const instrument = document.querySelector("#recurrence-instrument");
