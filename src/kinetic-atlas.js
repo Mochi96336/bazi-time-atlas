@@ -59,6 +59,30 @@ const playButton = document.querySelector("#play-button");
 const nowButton = document.querySelector("#now-button");
 const scaleButtons = [...document.querySelectorAll("[data-scale]")];
 const timeBasisReadout = document.querySelector(".readout-meta span:last-child strong");
+const trackNodes = new Map([
+  ...RINGS.map(ring => [ring.id, document.getElementById(`${ring.id}-track`)]),
+  ["zodiac", document.getElementById("zodiac-track")]
+]);
+const textNodes = new Map([
+  "instant-readout",
+  "solar-readout",
+  "term-readout",
+  "hour-active",
+  "year-active",
+  "month-active",
+  "day-active",
+  "solar-active",
+  "zodiac-active",
+  "state-year",
+  "state-month",
+  "state-day",
+  "state-hour",
+  "state-zodiac",
+  "state-term",
+  "slider-left",
+  "slider-right",
+  "scale-readout"
+].map(id => [id, document.getElementById(id)]));
 
 const renderer = createKineticRenderer({
   svg,
@@ -152,7 +176,7 @@ function cycleIndexForRing(id, display) {
 }
 
 function setTrackDiagnostics(id) {
-  const track = document.querySelector(`#${id}-track`);
+  const track = trackNodes.get(id) ?? null;
   const pose = ringStates[id];
   if (!track || !pose) return;
   track.dataset.modelRotation = pose.modelRotation.toFixed(4);
@@ -239,7 +263,7 @@ function temporalContextUrl(currentHref, timeContext) {
 }
 
 function setText(id, value) {
-  const node = document.querySelector(`#${id}`);
+  const node = textNodes.get(id) ?? null;
   if (node) node.textContent = value;
 }
 
