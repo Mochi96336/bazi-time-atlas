@@ -14,28 +14,29 @@ test("desktop Analysis installs the final polish after visible-ten-gods ownershi
   assert.match(analysisMode, /stylesheet\.dataset\.analysisFirstScreenPolish = "1";/);
 });
 
-test("visible-stems evidence is a compact desktop rail rather than another card", () => {
+test("visible-stems evidence is a compact recessed desktop rail rather than another card", () => {
   assert.match(css, /@media \(min-width: 821px\)/);
   assert.match(
     css,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.atlas-visible-ten-gods\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*72px;[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;[\s\S]*?backdrop-filter:\s*none;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.atlas-visible-ten-gods\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*72px;[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*var\(--m2-recessed-rail-gradient\);[\s\S]*?box-shadow:\s*var\(--m2-recessed-rail-shadow\);[\s\S]*?backdrop-filter:\s*none;/
   );
   assert.match(
     css,
     /\.atlas-visible-ten-gods-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(58px,\s*1fr\)\);[\s\S]*?border:\s*0;/
   );
   assert.match(css, /\.atlas-visible-ten-gods-head small\s*\{\s*display:\s*none;/);
+  assert.doesNotMatch(css, /\.atlas-visible-ten-gods\s*\{[^}]*box-shadow:\s*0\s+\d/s);
   assert.doesNotMatch(css, /\.atlas-visible-ten-gods\s*\{[^}]*display:\s*none;/s);
 });
 
-test("classification evidence is flattened instead of floating as a dashboard card", () => {
+test("classification evidence is recessed instead of floating as a dashboard card", () => {
   assert.match(classificationCss, /\.classification-keys i\s*\{/,
     "contract must target the real classification key nodes");
   assert.match(classificationCss, /\.classification-current\s*\{/,
     "contract must target the real classification summary");
   assert.match(
     css,
-    /#kinetic-instrument\[data-analysis-open="true"\]\[data-classification-overlay="on"\] \.classification-overlay-legend\s*\{[\s\S]*?top:\s*72px;[\s\S]*?border:\s*0;[\s\S]*?border-left:\s*1px solid rgba\(236,239,239,\.085\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?backdrop-filter:\s*none;[\s\S]*?box-shadow:\s*none;/
+    /#kinetic-instrument\[data-analysis-open="true"\]\[data-classification-overlay="on"\] \.classification-overlay-legend\s*\{[\s\S]*?top:\s*72px;[\s\S]*?border:\s*0;[\s\S]*?border-left:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*var\(--m2-recessed-rail-gradient\);[\s\S]*?backdrop-filter:\s*none;[\s\S]*?box-shadow:\s*var\(--m2-recessed-side-shadow\);/
   );
   assert.match(
     css,

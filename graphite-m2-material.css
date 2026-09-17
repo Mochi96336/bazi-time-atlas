@@ -1,0 +1,49 @@
+:root {
+  /* Graphite M2 material primitives. One virtual light source comes from above:
+     raised surfaces catch the upper edge and cast outward; recessed surfaces
+     darken the upper lip and catch a faint lower reflection; etched separators
+     are always a dark cut paired with a restrained reflected edge. */
+  --m2-base-surface: transparent;
+  --m2-base-shadow: none;
+
+  --m2-raised-surface: #121415;
+  --m2-raised-border: rgba(236,239,239,.13);
+  --m2-raised-gradient:
+    linear-gradient(180deg,
+      rgba(255,255,255,.032) 0%,
+      rgba(255,255,255,.010) 22%,
+      rgba(255,255,255,0) 48%,
+      rgba(0,0,0,.10) 100%);
+  --m2-raised-shadow:
+    0 30px 76px rgba(0,0,0,.42),
+    0 4px 16px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(236,239,239,.055),
+    inset 0 -1px 0 rgba(0,0,0,.42);
+
+  --m2-recessed-surface: rgba(9,11,12,.62);
+  --m2-recessed-border: rgba(236,239,239,.075);
+  --m2-recessed-gradient:
+    linear-gradient(180deg,
+      rgba(0,0,0,.14) 0%,
+      rgba(0,0,0,.045) 38%,
+      rgba(255,255,255,.008) 100%);
+  --m2-recessed-shadow:
+    inset 0 2px 5px rgba(0,0,0,.34),
+    inset 0 -1px 0 rgba(236,239,239,.028);
+  --m2-recessed-rail-gradient:
+    linear-gradient(180deg,
+      rgba(0,0,0,.12) 0%,
+      rgba(0,0,0,.035) 52%,
+      rgba(255,255,255,.006) 100%);
+  --m2-recessed-rail-shadow:
+    inset 0 2px 4px rgba(0,0,0,.30),
+    inset 0 -1px 0 rgba(236,239,239,.022);
+  --m2-recessed-side-shadow:
+    inset 2px 0 4px rgba(0,0,0,.26),
+    inset -1px 0 0 rgba(236,239,239,.018);
+
+  --m2-etched-dark: rgba(0,0,0,.62);
+  --m2-etched-dark-soft: rgba(0,0,0,.52);
+  --m2-etched-light: rgba(236,239,239,.03);
+  --m2-etched-light-soft: rgba(236,239,239,.022);
+}
