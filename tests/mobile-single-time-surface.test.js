@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const mobileCss = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
 const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const solarAnalysis = readFileSync(new URL("../src/atlas-solar-time-analysis.js", import.meta.url), "utf8");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 test("ordinary mobile reading has one textual exact-time surface", () => {
@@ -14,14 +15,24 @@ test("ordinary mobile reading has one textual exact-time surface", () => {
   assert.match(html, /id="mobile-time-dock"[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"/);
 });
 
-test("ordinary rail flattening stays with instrument-first while Analysis keeps the structured mobile dock", () => {
+test("ordinary rail flattening survives Analysis siblings inserted after the instrument", () => {
   assert.match(
     mobileCss,
     /\.mobile-time-dock\s*\{[\s\S]*?border:\s*1px solid var\(--hairline\);[\s\S]*?border-radius:\s*15px;[\s\S]*?background:\s*rgba\(255,255,255,\.022\);/
   );
   assert.match(
+    solarAnalysis,
+    /instrument\.insertAdjacentElement\("afterend",\s*panel\)/,
+    "Analysis is allowed to insert a sibling between the instrument and downstream docks"
+  );
+  assert.match(
     instrumentCss,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
+  );
+  assert.doesNotMatch(
+    instrumentCss,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \+ \.mobile-time-dock/,
+    "ordinary rail styling must not require direct adjacency"
   );
 });
 

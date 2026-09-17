@@ -40,7 +40,7 @@
      elevated card treatment. */
   #kinetic-instrument[data-analysis-open="true"] {
     border-color: transparent;
-    box-shadow: inset 0 0 0 1px rgba(199, 217, 205, .08);
+    box-shadow: inset 0 0 0 1px rgba(236, 239, 239, .055);
   }
 
   .instrument-toolbar { inset: 8px clamp(14px, 2vw, 32px) auto; }
@@ -96,7 +96,7 @@
   }
   #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock .instant-field {
     gap: 2px;
-    color: #68726b;
+    color: #6f7475;
     font-size: 8px;
     letter-spacing: .04em;
     text-transform: none;
@@ -163,7 +163,7 @@
   border: 0;
   border-radius: 0;
   padding: 0 8px;
-  color: #707a73;
+  color: #74797a;
   background: transparent;
   backdrop-filter: none;
   box-shadow: none;
@@ -179,14 +179,14 @@
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button[data-scale="year"]::after { content: "年度"; }
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button[data-scale="cycle"]::after { content: "六十年"; }
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button:hover {
-  color: #b9c3bc;
+  color: #bcc0bf;
   border-color: transparent;
 }
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button.active {
-  color: #e5ece7;
+  color: #e5e8e7;
   background: transparent;
   border-color: transparent;
-  box-shadow: inset 0 -1px rgba(199, 217, 205, .68);
+  box-shadow: inset 0 -1px rgba(236, 239, 239, .52);
 }
 
 /* Now is a reset shortcut, not a peer mode. */
@@ -195,13 +195,13 @@
   margin-left: 0;
   border-color: transparent;
   padding: 0 7px;
-  color: #77817a;
+  color: #7a7f80;
   background: transparent;
   backdrop-filter: none;
   font-size: 9px;
 }
 #kinetic-instrument:not([data-analysis-open="true"]) #now-button:hover {
-  color: #d7dfd9;
+  color: #d9dddc;
   border-color: transparent;
   background: transparent;
 }
@@ -265,8 +265,9 @@
 
   /* Exact editing remains available below the wheel, but ordinary reading does
      not need another rounded dashboard card or a second filled primary CTA.
-     Analysis keeps the structured dock from mobile-time.css. */
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock {
+     Analysis-only siblings may be inserted between the instrument and this dock,
+     so ownership follows the later sibling rather than requiring adjacency. */
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock {
     margin-top: 5px;
     padding: 8px 2px 4px;
     border: 0;
@@ -274,7 +275,7 @@
     border-radius: 0;
     background: transparent;
   }
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock #mobile-instant-input {
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock #mobile-instant-input {
     border: 0;
     border-bottom: 1px solid rgba(238,242,237,.16);
     border-radius: 0;
@@ -282,7 +283,7 @@
     background: transparent;
     box-shadow: none;
   }
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock #mobile-time-apply {
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock #mobile-time-apply {
     min-width: 44px;
     border: 0;
     border-radius: 0;
@@ -295,11 +296,11 @@
   /* The read-head immediately above already states the selected time, zone and
      precision. Keep ordinary idle chrome silent; transient apply/error feedback
      may still surface in the existing status slot. */
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock .mobile-time-heading {
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock .mobile-time-heading {
     justify-content: flex-end;
   }
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock .mobile-time-heading strong,
-  #kinetic-instrument:not([data-analysis-open="true"]) + .mobile-time-dock #mobile-time-status[data-state="idle"] {
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock .mobile-time-heading strong,
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock #mobile-time-status[data-state="idle"] {
     display: none;
   }
 
