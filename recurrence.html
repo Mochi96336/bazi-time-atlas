@@ -151,9 +151,8 @@
       <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
         <div class="near-search-head">
           <div class="near-search-copy">
-            <div class="eyebrow">Exact-discrete candidates · astronomical ranking</div>
-            <h2>離散全閉合後，哪次天文形狀最接近？</h2>
-            <p>只評估 24,000 年整數倍；排序依十二節最大絕對殘差，再以 RMS 打破平手。近似不等於真正週期。</p>
+            <strong>近回歸排名</strong>
+            <small>24,000 年整數倍 · max residual → RMS · 近似 ≠ 真正週期</small>
           </div>
           <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
           <div class="near-stat best"><span>目前最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
@@ -174,11 +173,7 @@
 
       <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">
         <div class="determinacy-head">
-          <div>
-            <div class="eyebrow">Four-pillar determinacy boundary</div>
-            <h2>目前能證到哪裡</h2>
-            <p>矩陣只列模型已有證據的柱位；缺少的 civil-time 證據維持未判定。</p>
-          </div>
+          <strong class="determinacy-label">可判定範圍</strong>
           <div class="determinacy-scope"><span>Strongest supported claim</span><strong id="determinacy-scope-value">等待回歸／天文狀態</strong></div>
         </div>
         <div class="determinacy-grid">

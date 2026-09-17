@@ -2,11 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, taskCss, cycleCss, cycleJs] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
-  readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8")
+  readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
+  readFile(new URL("../near-recurrence.css", import.meta.url), "utf8"),
+  readFile(new URL("../four-pillar-determinacy.css", import.meta.url), "utf8"),
+  readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8"),
+  readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8")
 ]);
 
 const discreteStart = html.indexOf('id="research-discrete"');
@@ -47,17 +51,33 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);
 });
 
-test("astronomy task owns residual detail and astronomical near-recurrence ranking", () => {
+test("astronomy task owns residual detail and keeps near-recurrence ranking terse", () => {
   assert.match(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /id="astronomy-term-grid"/);
   assert.match(astronomy, /class="near-search-panel"/);
+  assert.match(astronomy, /<strong>近回歸排名<\/strong>/);
+  assert.doesNotMatch(astronomy, /離散全閉合後，哪次天文形狀最接近？|只評估 24,000 年整數倍/);
+  assert.match(nearCss, /\.near-search-copy\s*\{[\s\S]*display:flex/);
+  assert.doesNotMatch(nearCss, /near-search-copy h2|near-search-copy p/);
   assert.doesNotMatch(astronomy, /id="four-pillar-determinacy"/);
 });
 
-test("evidence task owns determinacy and the model appendix", () => {
+test("evidence task keeps authority but removes repeated report-style preambles", () => {
   assert.match(evidence, /id="four-pillar-determinacy"/);
+  assert.match(evidence, /class="determinacy-label">可判定範圍/);
   assert.match(evidence, /class="model-boundary research-evidence-appendix"/);
+  assert.doesNotMatch(evidence, /目前能證到哪裡|矩陣只列模型已有證據的柱位/);
   assert.doesNotMatch(evidence, /class="near-search-panel"/);
+  assert.match(determinacyCss, /\.determinacy-panel\s*\{[\s\S]*border-radius:0;[\s\S]*background:transparent;/);
+  assert.match(determinacyCss, /\.proof-chain-head p\s*\{\s*display:none;\s*\}/);
+  assert.match(determinacyCss, /\.epoch-audit-head p\s*\{\s*display:none;\s*\}/);
+});
+
+test("research-only fixed-zone warning stays authoritative without occupying the default page", () => {
+  assert.match(targetClockCss, /\.target-instant-controls > p\s*\{[\s\S]*display:none;/);
+  assert.match(targetClockCss, /\.target-instant-controls\[data-enabled="true"\] > p\s*\{\s*display:block;\s*\}/);
+  assert.match(proofJs, /proleptic Gregorian \+ 固定 UT1 offset/);
+  assert.match(proofJs, /不是西元遠未來 UTC、DST 或政治時區預測/);
 });
 
 test("section chrome stays flat and compact on phone", () => {

@@ -1,9 +1,10 @@
 .target-instant-controls {
-  margin: 12px 0 14px;
-  padding: 11px 12px;
-  border: 1px solid rgba(238,242,237,.11);
-  border-radius: 14px;
-  background: rgba(255,255,255,.018);
+  margin: 10px 0 12px;
+  padding: 10px 0 11px;
+  border-top: 1px solid rgba(238,242,237,.1);
+  border-bottom: 1px solid rgba(238,242,237,.1);
+  border-radius: 0;
+  background: transparent;
 }
 .target-instant-control-head {
   display: flex;
@@ -12,18 +13,12 @@
   gap: 12px;
 }
 .target-instant-control-head > div { min-width: 0; }
-.target-instant-control-head span {
-  display: block;
-  color: #748078;
-  font-size: 9px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
+.target-instant-control-head span { display:none; }
 .target-instant-control-head strong {
   display: block;
-  margin-top: 2px;
-  color: #d8ded9;
-  font-size: 12px;
+  color: #b9c2bc;
+  font-size: 11px;
+  font-weight: 650;
 }
 .target-instant-toggle {
   display: inline-flex;
@@ -40,7 +35,7 @@
   grid-template-columns: minmax(120px,.72fr) minmax(120px,.66fr) minmax(155px,.9fr) minmax(170px,1fr) minmax(135px,.76fr) minmax(220px,1.3fr);
   gap: 9px;
   align-items: end;
-  margin-top: 10px;
+  margin-top: 9px;
 }
 .target-instant-fields label {
   display: grid;
@@ -86,11 +81,14 @@
   border-color: rgba(160,124,115,.7);
 }
 .target-instant-controls > p {
-  margin: 9px 0 0;
+  display:none;
+  margin: 8px 0 0;
+  max-width: 980px;
   color: #737e76;
-  font-size: 9px;
-  line-height: 1.55;
+  font-size: 8px;
+  line-height: 1.5;
 }
+.target-instant-controls[data-enabled="true"] > p { display:block; }
 .eot-observed-clearance-diagnostic {
   margin-top: 9px;
   padding: 9px 10px;
@@ -173,7 +171,7 @@
   .eot-clearance-head { flex-direction: column; gap: 4px; }
 }
 @media (max-width: 480px) {
-  .target-instant-controls { padding: 10px; }
+  .target-instant-controls { padding: 9px 0 10px; }
   .target-instant-fields { grid-template-columns: 1fr; }
   #target-instant-status { grid-column: auto; }
   .eot-clearance-facts { grid-template-columns: 1fr; }
