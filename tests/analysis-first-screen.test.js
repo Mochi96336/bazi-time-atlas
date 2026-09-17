@@ -12,6 +12,7 @@ test("analysis mode installs the dedicated first-screen presentation layer", () 
 });
 
 test("desktop Analysis controls are flattened into instrument chrome", () => {
+  assert.match(css, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(css, /@media \(min-width: 821px\)/);
   assert.match(
     css,
@@ -38,7 +39,7 @@ test("desktop Analysis layer controls become one flat secondary rail", () => {
   );
   assert.match(
     css,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control select\s*\{[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control select\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
   );
 });
 
@@ -52,12 +53,13 @@ test("Analysis has one Selected Instant owner instead of a duplicate cursor capt
 test("desktop Analysis timeline remains a quiet scrub rail", () => {
   assert.match(
     css,
-    /#kinetic-instrument\[data-analysis-open="true"\] ~ \.timeline-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(236,239,239,\.08\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?opacity:\s*\.64;/
+    /#kinetic-instrument\[data-analysis-open="true"\] ~ \.timeline-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*inset 0 1px 0 var\(--m2-etched-light-soft\);[\s\S]*?opacity:\s*\.64;/
   );
   assert.match(
     css,
-    /~ \.timeline-dock \.instant-field input\s*\{[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/
+    /~ \.timeline-dock \.instant-field input\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
   );
+  assert.doesNotMatch(css, /border-(?:top|bottom):\s*1px solid rgba\(236,239,239,\.(?:08|12|16)\)/);
 });
 
 test("desktop Analysis state summary is inline instead of five dashboard cards", () => {
