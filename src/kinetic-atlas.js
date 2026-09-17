@@ -99,6 +99,7 @@ const freePoseCommitQueue = createFrameCommitQueue({
     const ringIds = [...pendingFreePoseRings];
     pendingFreePoseRings.clear();
     ringIds.forEach(renderRingPose);
+    instrument.dataset.lastDraggedRing = ringIds[ringIds.length - 1];
     compareController?.update();
   }
 });
@@ -423,7 +424,6 @@ function installRingDrag() {
       instrument.dataset.dragMode = "free";
     },
     onPoseChange(id, _ringState, _deltaDegrees, detail) {
-      instrument.dataset.lastDraggedRing = id;
       if (detail?.phase === "drag") {
         pendingFreePoseRings.add(id);
         freePoseCommitQueue.schedule();
@@ -434,6 +434,7 @@ function installRingDrag() {
       // stale queued drag frame with the newest authoritative pose immediately.
       freePoseCommitQueue.cancel();
       pendingFreePoseRings.clear();
+      instrument.dataset.lastDraggedRing = id;
       renderRingPose(id);
       compareController?.update();
     },
