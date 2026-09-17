@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wide desktop composition probe</title>
+  <style>
+    html, body { margin: 0; background: #090a0b; }
+    #frame { display: block; width: 2047px; height: 1038px; border: 0; }
+    #probe { display: none; }
+  </style>
+</head>
+<body>
+  <iframe
+    id="frame"
+    title="2047 by 1038 Atlas review frame"
+    src="../../?analysis=1&amp;instant=2026-09-13T23%3A43%3A42.000Z"
+  ></iframe>
+  <div id="probe" data-ready="false"></div>
+  <script type="module">
+    const frame = document.querySelector("#frame");
+    const probe = document.querySelector("#probe");
+
+    const rect = node => node?.getBoundingClientRect() ?? null;
+    const num = value => Number.parseFloat(value || "0");
+    const round = value => String(Math.round(value * 100) / 100);
+
+    function settle(win, callback) {
+      win.requestAnimationFrame(() => {
+        win.requestAnimationFrame(() => {
+          win.setTimeout(callback, 700);
+        });
+      });
+    }
+
+    function snapshot() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      if (!win || !doc) return;
+
+      const instrument = doc.querySelector("#kinetic-instrument");
+      const readout = doc.querySelector(".instrument-readout");
+      const toolbar = doc.querySelector(".instrument-toolbar");
+      const legend = doc.querySelector(".ring-legend");
+      const evidence = doc.querySelector(".atlas-visible-ten-gods");
+      const evidenceValue = doc.querySelector(".atlas-visible-ten-gods-cell strong");
+      const toolbarButton = doc.querySelector(".instrument-toolbar button");
+      const legendLabel = doc.querySelector(".ring-legend-row span");
+      const close = doc.querySelector("#analysis-close");
+      if (!instrument || !readout || !toolbar || !legend || !evidence || !evidenceValue || !toolbarButton || !legendLabel || !close) return;
+
+      const instrumentRect = rect(instrument);
+      const readoutRect = rect(readout);
+      const toolbarRect = rect(toolbar);
+      const legendRect = rect(legend);
+      const evidenceRect = rect(evidence);
+      const evidenceStyle = win.getComputedStyle(evidenceValue);
+      const toolbarStyle = win.getComputedStyle(toolbarButton);
+      const legendStyle = win.getComputedStyle(legendLabel);
+      const closeStyle = win.getComputedStyle(close);
+
+      Object.assign(probe.dataset, {
+        ready: "true",
+        innerWidth: String(win.innerWidth),
+        innerHeight: String(win.innerHeight),
+        scrollWidth: String(Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth)),
+        analysisOpen: instrument.dataset.analysisOpen ?? "",
+        instrumentTop: round(instrumentRect.top),
+        instrumentBottom: round(instrumentRect.bottom),
+        instrumentHeight: round(instrumentRect.height),
+        instrumentBottomGap: round(win.innerHeight - instrumentRect.bottom),
+        readoutTop: round(readoutRect.top),
+        readoutBottom: round(readoutRect.bottom),
+        readoutBottomGap: round(win.innerHeight - readoutRect.bottom),
+        toolbarTop: round(toolbarRect.top),
+        toolbarBottom: round(toolbarRect.bottom),
+        legendTop: round(legendRect.top),
+        legendBottom: round(legendRect.bottom),
+        evidenceTop: round(evidenceRect.top),
+        evidenceBottom: round(evidenceRect.bottom),
+        toolbarFont: round(num(toolbarStyle.fontSize)),
+        legendFont: round(num(legendStyle.fontSize)),
+        evidenceValueFont: round(num(evidenceStyle.fontSize)),
+        closeFont: round(num(closeStyle.fontSize)),
+      });
+    }
+
+    frame.addEventListener("load", () => settle(frame.contentWindow, snapshot), { once: true });
+  </script>
+</body>
+</html>
