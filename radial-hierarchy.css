@@ -122,12 +122,20 @@
 .cycle-sector:not(.is-active),
 .cycle-sector.is-active { stroke: none; }
 
-#hour-track .cycle-sector.is-active,
-#day-track .cycle-sector.is-active {
-  fill: color-mix(in srgb, currentColor 38%, transparent);
+/* Current-sector surfaces locate the interval, but the Selected Instant line
+   and active labels own the datum. Keep the large Month / Year wedges from
+   becoming bright slabs in the graphite reading while leaving classification
+   mode free to apply its categorical fills and outlines. */
+#kinetic-instrument:not([data-classification-overlay="on"]) #hour-track .cycle-sector.is-active,
+#kinetic-instrument:not([data-classification-overlay="on"]) #day-track .cycle-sector.is-active {
+  fill: color-mix(in srgb, currentColor 30%, transparent);
 }
-#month-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 54%, transparent); }
-#year-track .cycle-sector.is-active { fill: color-mix(in srgb, currentColor 62%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #month-track .cycle-sector.is-active {
+  fill: color-mix(in srgb, currentColor 40%, transparent);
+}
+#kinetic-instrument:not([data-classification-overlay="on"]) #year-track .cycle-sector.is-active {
+  fill: color-mix(in srgb, currentColor 46%, transparent);
+}
 
 /* Every six-degree boundary still exists as a short engraved tick, but only each
    fifth boundary reads as structural. Minor marks stay close to the graphite
