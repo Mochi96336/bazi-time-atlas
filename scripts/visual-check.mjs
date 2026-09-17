@@ -49,6 +49,20 @@ captures.push(
     height: 1320,
   },
   {
+    name: "annual-solar-time-analysis-1440x1500.png",
+    page: "annual-solar-time-analysis",
+    path: "?instant=2005-12-23T14%3A55%3A00.000Z&analysis=1&lon=121.5",
+    width: 1440,
+    height: 1500,
+  },
+  {
+    name: "annual-solar-time-analysis-390x3100.png",
+    page: "annual-solar-time-analysis",
+    path: "?instant=2005-12-23T14%3A55%3A00.000Z&analysis=1&lon=121.5",
+    width: 390,
+    height: 3100,
+  },
+  {
     name: "recurrence-search-1440x1750.png",
     page: "recurrence-search",
     path: "recurrence.html?date=2026-09-13&delta=24000",

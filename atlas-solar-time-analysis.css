@@ -1,0 +1,178 @@
+.atlas-solar-time-analysis[hidden] { display: none !important; }
+
+.atlas-solar-time-analysis {
+  width: min(1120px, calc(100% - 36px));
+  margin: 14px auto 4px;
+  border-top: 1px solid color-mix(in srgb, var(--hairline) 100%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
+  padding: 13px 0 14px;
+  color: var(--muted);
+}
+
+.atlas-solar-analysis-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 260px);
+  gap: 18px;
+  align-items: end;
+}
+.atlas-solar-analysis-head > div {
+  display: grid;
+  gap: 3px;
+}
+.atlas-solar-analysis-head > div > small {
+  color: var(--faint);
+  font-size: 8px;
+  letter-spacing: .14em;
+}
+.atlas-solar-analysis-head > div > strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+.atlas-solar-analysis-head > div > span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.atlas-solar-longitude-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 9px;
+}
+.atlas-solar-longitude-field input {
+  min-width: 0;
+  height: 30px;
+  border: 0;
+  border-bottom: 1px solid rgba(235,238,236,.20);
+  border-radius: 0;
+  padding: 0 3px;
+  background: transparent;
+  color: var(--ink);
+  color-scheme: dark;
+  font: inherit;
+  font-size: 11px;
+}
+.atlas-solar-longitude-field input:focus {
+  outline: 0;
+  border-bottom-color: color-mix(in srgb, var(--solar) 72%, var(--ink));
+}
+.atlas-solar-longitude-field input[aria-invalid="true"] {
+  border-bottom-color: color-mix(in srgb, var(--danger) 82%, transparent);
+}
+.atlas-solar-longitude-field small {
+  color: var(--faint);
+  font-size: 8px;
+}
+
+.atlas-solar-analysis-empty {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.atlas-solar-analysis-result {
+  display: grid;
+  gap: 11px;
+  margin-top: 13px;
+}
+.atlas-solar-analysis-result[hidden] { display: none !important; }
+
+.atlas-solar-corrections {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
+  padding-top: 8px;
+}
+.atlas-solar-corrections span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 9px;
+}
+.atlas-solar-corrections b {
+  color: color-mix(in srgb, var(--ink) 84%, var(--muted));
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.atlas-solar-basis-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+.atlas-solar-basis-head span {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .07em;
+}
+.atlas-solar-basis-head strong {
+  color: color-mix(in srgb, var(--ink) 68%, var(--muted));
+  font-size: 10px;
+}
+
+.atlas-solar-basis-rows {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.atlas-solar-basis-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: baseline;
+  border-top: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
+  padding-top: 7px;
+}
+.atlas-solar-basis-row > span {
+  display: grid;
+  gap: 2px;
+  color: color-mix(in srgb, var(--ink) 66%, var(--muted));
+  font-size: 10px;
+}
+.atlas-solar-basis-row > span small {
+  color: var(--faint);
+  font-size: 8px;
+}
+.atlas-solar-basis-row b {
+  color: color-mix(in srgb, var(--ink) 78%, var(--muted));
+  font-size: 10px;
+  font-weight: 690;
+}
+.atlas-solar-basis-row b[data-changed="1"] {
+  color: color-mix(in srgb, var(--solar) 72%, var(--ink));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.atlas-solar-analysis-meta {
+  color: var(--faint);
+  font-size: 8px;
+}
+
+@media (max-width: 640px) {
+  .atlas-solar-time-analysis {
+    width: calc(100% - 24px);
+    margin-top: 10px;
+    padding-block: 11px 12px;
+  }
+  .atlas-solar-analysis-head {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .atlas-solar-longitude-field {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .atlas-solar-corrections,
+  .atlas-solar-basis-rows {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .atlas-solar-basis-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}

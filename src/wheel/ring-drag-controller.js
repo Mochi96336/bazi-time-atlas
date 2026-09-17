@@ -240,6 +240,17 @@ export function createRingDragController({
     onModeChange?.(compareMode);
   }
 
+  function acquirePointerCapture(event) {
+    const synthetic = event.isTrusted === false;
+    try {
+      svg.setPointerCapture(event.pointerId);
+      if (typeof svg.hasPointerCapture === "function" && !svg.hasPointerCapture(event.pointerId)) return synthetic;
+      return true;
+    } catch {
+      return synthetic;
+    }
+  }
+
   function begin(event) {
     if (event.button > 0 || active) return;
     const world = screenToWorld(svg, event.clientX, event.clientY);
@@ -251,7 +262,10 @@ export function createRingDragController({
 
     cancelInertia({ detent:false, reason:"grab" });
     event.preventDefault();
-    try { svg.setPointerCapture(event.pointerId); } catch {}
+    if (!acquirePointerCapture(event)) {
+      setHoverRing(ring.id);
+      return;
+    }
     setHoverRing(ring.id);
     const velocityEstimator = createAngularVelocityEstimator({ windowMs:sampleWindowMs });
     velocityEstimator.reset(eventTimeMs(event));
@@ -349,6 +363,7 @@ export function createRingDragController({
     if (!visibilityTarget?.hidden) return;
     cancelActiveGesture({ detent:true, reason:"document-hidden" });
     cancelInertia({ detent:true, reason:"document-hidden" });
+    setHoverRing(null);
   }
 
   function ringVisibilityChange(event) {
@@ -380,6 +395,7 @@ export function createRingDragController({
     destroy() {
       cancelActiveGesture({ detent:false, reason:"destroy" });
       cancelInertia({ detent:false, reason:"destroy" });
+      setHoverRing(null);
       svg.removeEventListener("pointerdown", begin);
       svg.removeEventListener("pointermove", move);
       svg.removeEventListener("pointerup", pointerUp);
@@ -388,7 +404,6 @@ export function createRingDragController({
       svg.removeEventListener("pointerleave", leave);
       svg.removeEventListener(RING_VISIBILITY_EVENT, ringVisibilityChange);
       visibilityTarget?.removeEventListener?.("visibilitychange", visibilityChange);
-      delete svg.dataset.hoverRing;
       delete svg.dataset.activeRing;
       delete svg.dataset.coastingRing;
       delete svg.dataset.coastingMode;

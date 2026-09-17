@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>solar-time panel review</title>
+  <style>
+    html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#090a0b; }
+    #stage { display:block; border:0; background:#090a0b; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Atlas solar-time panel"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    const reviewParams = new URLSearchParams(location.search);
+    const reviewWidth = Number(reviewParams.get("width") ?? 390);
+    const reviewHeight = Number(reviewParams.get("height") ?? 844);
+    if (!Number.isInteger(reviewWidth) || reviewWidth <= 0 || !Number.isInteger(reviewHeight) || reviewHeight <= 0) {
+      throw new Error("invalid solar-time review viewport");
+    }
+    frame.style.width = `${reviewWidth}px`;
+    frame.style.height = `${reviewHeight}px`;
+    frame.title = `${reviewWidth}x${reviewHeight} Atlas solar-time panel`;
+
+    const target = new URL("../../", location.href);
+    target.search = "?instant=2005-12-23T14%3A55%3A00.000Z&analysis=1&lon=121.5";
+    frame.src = target.href;
+
+    function settle() {
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const panel = doc?.querySelector("#atlas-solar-time-analysis");
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      if (!childWindow || !panel || panel.hidden || panel.dataset.ready !== "true") {
+        setTimeout(settle, 40);
+        return;
+      }
+      panel.scrollIntoView({ block:"start" });
+      setTimeout(() => {
+        const rect = panel.getBoundingClientRect();
+        probe.dataset.ready = "true";
+        probe.dataset.innerWidth = String(childWindow.innerWidth);
+        probe.dataset.innerHeight = String(childWindow.innerHeight);
+        probe.dataset.analysisOpen = instrument?.dataset.analysisOpen ?? "";
+        probe.dataset.longitudeBound = panel.dataset.longitudeBound ?? "";
+        probe.dataset.selectedInstantMs = panel.dataset.selectedInstantMs ?? "";
+        probe.dataset.panelTop = String(rect.top);
+        probe.dataset.panelBottom = String(rect.bottom);
+        probe.dataset.panelHeight = String(rect.height);
+        probe.dataset.panelLeft = String(rect.left);
+        probe.dataset.panelRight = String(rect.right);
+        probe.dataset.panelWidth = String(rect.width);
+      }, 120);
+    }
+
+    frame.addEventListener("load", settle, { once:true });
+  </script>
+</body>
+</html>
