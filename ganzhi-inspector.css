@@ -32,7 +32,12 @@
   border: 1px solid #34393a;
   border-radius: 14px;
   background: rgba(18, 20, 21, .97);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, .46);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.018) 0%, rgba(255,255,255,0) 30%, rgba(0,0,0,.07) 100%);
+  box-shadow:
+    0 28px 72px rgba(0,0,0,.38),
+    0 4px 14px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(236,239,239,.035),
+    inset 0 -1px 0 rgba(0,0,0,.32);
   color: #dce0df;
   backdrop-filter: blur(14px);
 }
