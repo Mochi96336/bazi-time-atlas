@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>find-time review</title>
+  <style>
+    html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#090a0b; }
+    #stage { display:block; border:0; background:#090a0b; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Atlas find-time review"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    const reviewParams = new URLSearchParams(location.search);
+    const reviewWidth = Number(reviewParams.get("width") ?? 390);
+    const reviewHeight = Number(reviewParams.get("height") ?? 844);
+    if (!Number.isInteger(reviewWidth) || reviewWidth <= 0 || !Number.isInteger(reviewHeight) || reviewHeight <= 0) {
+      throw new Error("invalid find-time review viewport");
+    }
+    frame.style.width = `${reviewWidth}px`;
+    frame.style.height = `${reviewHeight}px`;
+    frame.title = `${reviewWidth}x${reviewHeight} Atlas find-time review`;
+
+    const target = new URL("../../", location.href);
+    target.search = "?instant=2026-09-13T23%3A43%3A42.000Z&findTime=1";
+    frame.src = target.href;
+
+    function settle() {
+      const childWindow = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const button = doc?.querySelector("#inverse-time-search-button");
+      const readout = doc?.querySelector("#inverse-time-search-readout");
+      const openControl = doc?.querySelector("#analysis-toggle");
+      const closeControl = doc?.querySelector("#analysis-close");
+      if (!childWindow || !instrument || !button || !readout || instrument.dataset.inverseTimeSearch !== "active") {
+        setTimeout(settle, 40);
+        return;
+      }
+      setTimeout(() => {
+        const rect = readout.getBoundingClientRect();
+        probe.dataset.ready = "true";
+        probe.dataset.innerWidth = String(childWindow.innerWidth);
+        probe.dataset.innerHeight = String(childWindow.innerHeight);
+        probe.dataset.toolsOpen = instrument.dataset.analysisOpen ?? "";
+        probe.dataset.findTime = instrument.dataset.inverseTimeSearch ?? "";
+        probe.dataset.buttonPressed = button.getAttribute("aria-pressed") ?? "";
+        probe.dataset.buttonText = button.textContent ?? "";
+        probe.dataset.openText = openControl?.textContent ?? "";
+        probe.dataset.closeText = closeControl?.textContent ?? "";
+        probe.dataset.readoutHidden = String(readout.hidden);
+        probe.dataset.readoutTop = String(rect.top);
+        probe.dataset.readoutBottom = String(rect.bottom);
+        probe.dataset.readoutLeft = String(rect.left);
+        probe.dataset.readoutRight = String(rect.right);
+        probe.dataset.formControls = String(readout.querySelectorAll("select,input").length);
+        probe.dataset.pageFormControls = String(doc.querySelectorAll("#inverse-time-search-readout select,#inverse-time-search-readout input,#inverse-time-search-panel").length);
+      }, 120);
+    }
+
+    frame.addEventListener("load", settle, { once:true });
+  </script>
+</body>
+</html>

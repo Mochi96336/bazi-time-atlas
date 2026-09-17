@@ -1,0 +1,123 @@
+import { mkdir, stat } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+
+const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
+const outputDir = path.resolve("tmp/visual-check");
+const fixturePath = "scripts/fixtures/find-time-review.html";
+
+function findBrowser() {
+  if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
+  for (const candidate of ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"]) {
+    const probe = spawnSync("sh", ["-lc", `command -v ${candidate}`], { encoding:"utf8" });
+    if (probe.status === 0 && probe.stdout.trim()) return probe.stdout.trim();
+  }
+  throw new Error("No system Chromium/Chrome executable found");
+}
+
+function attr(tag, name) {
+  return tag.match(new RegExp(`${name}="([^"]*)"`))?.[1] ?? null;
+}
+
+function browserArgs(windowWidth, windowHeight) {
+  return [
+    "--headless=new",
+    "--no-sandbox",
+    "--disable-gpu",
+    "--disable-dev-shm-usage",
+    "--hide-scrollbars",
+    "--run-all-compositor-stages-before-draw",
+    "--virtual-time-budget=2600",
+    "--force-device-scale-factor=1",
+    `--window-size=${windowWidth},${windowHeight}`
+  ];
+}
+
+function reviewURL(width, height) {
+  const url = new URL(fixturePath, baseURL);
+  url.searchParams.set("width", String(width));
+  url.searchParams.set("height", String(height));
+  return url.href;
+}
+
+const browser = findBrowser();
+await mkdir(outputDir, { recursive:true });
+
+async function captureReview({ label, width, height, windowWidth, windowHeight, outputName }) {
+  const fixtureURL = reviewURL(width, height);
+  const commonArgs = browserArgs(windowWidth, windowHeight);
+  const outputPath = path.join(outputDir, outputName);
+  const probeResult = spawnSync(browser, [...commonArgs, "--dump-dom", fixtureURL], {
+    encoding:"utf8",
+    maxBuffer:8 * 1024 * 1024
+  });
+  if (probeResult.status !== 0) {
+    process.stderr.write(probeResult.stderr ?? "");
+    throw new Error(`find-time ${label} review fixture failed: ${fixtureURL}`);
+  }
+
+  const probe = probeResult.stdout.match(/<output[^>]+id="probe"[^>]*>/)?.[0] ?? "";
+  const top = Number(attr(probe, "data-readout-top"));
+  const bottom = Number(attr(probe, "data-readout-bottom"));
+  const left = Number(attr(probe, "data-readout-left"));
+  const right = Number(attr(probe, "data-readout-right"));
+  if (
+    attr(probe, "data-ready") !== "true"
+    || attr(probe, "data-inner-width") !== String(width)
+    || attr(probe, "data-inner-height") !== String(height)
+    || attr(probe, "data-tools-open") !== "true"
+    || attr(probe, "data-find-time") !== "active"
+    || attr(probe, "data-button-pressed") !== "true"
+    || attr(probe, "data-button-text") !== "完成找時間"
+    || attr(probe, "data-close-text") !== "完成"
+    || attr(probe, "data-readout-hidden") !== "false"
+    || attr(probe, "data-form-controls") !== "0"
+    || attr(probe, "data-page-form-controls") !== "0"
+    || !Number.isFinite(top)
+    || !Number.isFinite(bottom)
+    || !Number.isFinite(left)
+    || !Number.isFinite(right)
+    || top < -1
+    || bottom > height + 1
+    || left < -1
+    || right > width + 1
+    || bottom <= top
+    || right <= left
+  ) {
+    throw new Error(`find-time ${label} did not settle as a visible wheel-native tool in ${width}x${height}: ${fixtureURL} · ${probe}`);
+  }
+
+  const shot = spawnSync(browser, [...commonArgs, `--screenshot=${outputPath}`, fixtureURL], {
+    encoding:"utf8",
+    timeout:45_000,
+    killSignal:"SIGKILL"
+  });
+  if (shot.status !== 0) {
+    process.stderr.write(shot.stdout ?? "");
+    process.stderr.write(shot.stderr ?? "");
+    throw new Error(`find-time ${label} screenshot failed: ${fixtureURL}`);
+  }
+  const info = await stat(outputPath);
+  if (info.size < 10_000) {
+    throw new Error(`find-time ${label} screenshot is unexpectedly small (${info.size} bytes)`);
+  }
+  console.log(`[visual] ${outputName}: ${info.size} bytes · wheel-native find-time · readout ${left.toFixed(1)}..${right.toFixed(1)} × ${top.toFixed(1)}..${bottom.toFixed(1)}px`);
+}
+
+await captureReview({
+  label:"mobile",
+  width:390,
+  height:844,
+  windowWidth:500,
+  windowHeight:844,
+  outputName:"annual-find-time-390x844.png"
+});
+
+await captureReview({
+  label:"desktop",
+  width:1440,
+  height:900,
+  windowWidth:1440,
+  windowHeight:900,
+  outputName:"annual-find-time-1440x900.png"
+});
