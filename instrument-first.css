@@ -128,19 +128,18 @@
   }
 }
 
-/* Ordinary reading should not advertise engineering observation-window presets
-   as peer navigation modes. Keep their Graphite styling and controls in the DOM
-   for Analysis and research tooling, but remove them from the normal reading
-   path together with transport/classification chrome. */
+/* Ordinary reading keeps the scale machinery available for Analysis/research,
+   but removes the three engineering observation-window presets from the normal
+   reading path together with transport/classification chrome. */
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button,
 #kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button,
 #kinetic-instrument:not([data-analysis-open="true"]) #play-button {
   display: none;
 }
 
-/* Observation-window choice and Now are one time-navigation cluster. Keep the
-   Analysis entry separate as a mode switch instead of scattering time actions
-   across opposite corners of the instrument. */
+/* Now is the only ordinary time-navigation shortcut. Keep the Analysis entry
+   separate as a mode switch instead of scattering time actions across opposite
+   corners of the instrument. */
 #kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar {
   justify-content: flex-start;
   align-items: center;
@@ -160,6 +159,8 @@
   display: none;
 }
 
+/* Preserve the neutral Graphite M2 styling contract even while these controls
+   are dormant in ordinary reading; Analysis still exposes the same scale model. */
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
   min-height: 28px;
   border: 0;
