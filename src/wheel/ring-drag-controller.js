@@ -23,15 +23,10 @@ function screenInverse(svg) {
 
 function screenToWorld(svg, clientX, clientY, inverse = screenInverse(svg)) {
   if (!inverse) return null;
-  if (typeof DOMPoint === "function") {
-    const point = new DOMPoint(clientX, clientY).matrixTransform(inverse);
-    return { x: point.x, y: point.y };
-  }
-  const point = svg.createSVGPoint();
-  point.x = clientX;
-  point.y = clientY;
-  const world = point.matrixTransform(inverse);
-  return { x: world.x, y: world.y };
+  return {
+    x: inverse.a * clientX + inverse.c * clientY + inverse.e,
+    y: inverse.b * clientX + inverse.d * clientY + inverse.f
+  };
 }
 
 export function ringAtWorldPoint(point) {

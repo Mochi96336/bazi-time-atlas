@@ -27,7 +27,7 @@ class FakeSvg {
   }
 
   getScreenCTM() {
-    return { inverse: () => ({}) };
+    return { inverse: () => ({ a:1, b:0, c:0, d:1, e:0, f:0 }) };
   }
 
   createSVGPoint() {

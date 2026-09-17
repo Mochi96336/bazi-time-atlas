@@ -5,10 +5,14 @@ import { WHEEL_CENTER, ringModel } from "../src/wheel/ring-model.js";
 import { createRingDragController } from "../src/wheel/ring-drag-controller.js";
 import { createRingState } from "../src/wheel/ring-state.js";
 
-function forceSvgPointFallback(t) {
+function poisonDomPointApis(t) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, "DOMPoint");
   Object.defineProperty(globalThis, "DOMPoint", {
-    value: undefined,
+    value: class ForbiddenDOMPoint {
+      constructor() {
+        throw new Error("pointer samples must not allocate DOMPoint");
+      }
+    },
     configurable: true,
     writable: true
   });
@@ -32,20 +36,13 @@ class FakeSvg {
     return {
       inverse: () => {
         this.inverseCalls += 1;
-        return {};
+        return { a:1, b:0, c:0, d:1, e:0, f:0 };
       }
     };
   }
 
   createSVGPoint() {
-    const point = {
-      x: 0,
-      y: 0,
-      matrixTransform() {
-        return { x: point.x, y: point.y };
-      }
-    };
-    return point;
+    throw new Error("pointer samples must not allocate SVGPoint");
   }
 
   addEventListener(type, listener) {
@@ -98,8 +95,8 @@ class FakeSvg {
   }
 }
 
-test("coalesced pointer samples share one screen transform per pointer event", t => {
-  forceSvgPointFallback(t);
+test("coalesced pointer samples share one affine screen transform without DOM point allocation", t => {
+  poisonDomPointApis(t);
   const svg = new FakeSvg();
   const deltas = [];
   const controller = createRingDragController({
