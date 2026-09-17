@@ -21,6 +21,7 @@ test("inactive target-clock research controls do not reserve a full form", () =>
 test("four-pillar and proof evidence use flat cells instead of nested cards", () => {
   assert.match(evidenceCss, /\.determinacy-card\s*\{[\s\S]*?min-height\s*:\s*0[\s\S]*?border-radius\s*:\s*0[\s\S]*?background\s*:\s*transparent/);
   assert.match(evidenceCss, /\.proof-chain-stage\s*\{[\s\S]*?min-height\s*:\s*0[\s\S]*?border-radius\s*:\s*0[\s\S]*?background\s*:\s*transparent/);
+  assert.match(evidenceCss, /\.proof-chain-stage:nth-child\(4n\+1\)\s*\{\s*border-left\s*:\s*0/);
   assert.doesNotMatch(evidenceCss, /\.proof-chain-stage\s*\{[\s\S]*?border-radius\s*:\s*10px/);
 });
 
