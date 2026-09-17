@@ -89,6 +89,8 @@ let currentDisplay = null;
 let dragController = null;
 let compareController = null;
 let playbackController = null;
+let linkedWheelRenderPending = false;
+let pendingLinkedDiagnostics = null;
 
 const pendingFreePoseRings = new Set();
 const freePoseCommitQueue = createFrameCommitQueue({
@@ -101,11 +103,44 @@ const freePoseCommitQueue = createFrameCommitQueue({
   }
 });
 const linkedWheelCommitQueue = createFrameCommitQueue({
-  commit() {
-    setSliderForScale();
-    updateWheel();
-  }
+  commit: commitLinkedWheelFrame
 });
+
+function queueLinkedDiagnostics(next) {
+  pendingLinkedDiagnostics = {
+    ...(pendingLinkedDiagnostics ?? {}),
+    ...next
+  };
+}
+
+function commitLinkedDiagnostics() {
+  const diagnostics = pendingLinkedDiagnostics;
+  pendingLinkedDiagnostics = null;
+  if (!diagnostics) return;
+  if (Object.hasOwn(diagnostics, "boundaries")) {
+    instrument.dataset.linkedScrubBoundaries = String(diagnostics.boundaries);
+  }
+  if (Object.hasOwn(diagnostics, "lastRing")) {
+    instrument.dataset.lastLinkedScrubRing = diagnostics.lastRing;
+  }
+  if (Object.hasOwn(diagnostics, "deltaMs")) {
+    instrument.dataset.lastLinkedScrubDeltaMs = String(diagnostics.deltaMs);
+  }
+}
+
+function commitLinkedWheelFrame() {
+  commitLinkedDiagnostics();
+  if (!linkedWheelRenderPending) return;
+  linkedWheelRenderPending = false;
+  setSliderForScale();
+  updateWheel();
+}
+
+function resetLinkedWheelFrame() {
+  linkedWheelCommitQueue.cancel();
+  linkedWheelRenderPending = false;
+  pendingLinkedDiagnostics = null;
+}
 
 function cycleIndexForRing(id, display) {
   if (id === "hour") return display.hourIndex;
@@ -351,28 +386,29 @@ function applyLinkedDragToTime(id, deltaDegrees) {
     deltaDegrees,
     longitudeAtMs: instantMs => solarLongitudeAtInstant(instantMs, state.timeContext)
   });
-  instrument.dataset.linkedScrubMode = "continuous";
-  instrument.dataset.linkedScrubBoundaries = String(result.crossedBoundaries ?? 0);
-  if (result.instantMs === beforeMs) return;
+  queueLinkedDiagnostics({ boundaries:result.crossedBoundaries ?? 0 });
 
-  state.selectedMs = result.instantMs;
-  state.anchorMs = result.instantMs;
+  if (result.instantMs !== beforeMs) {
+    state.selectedMs = result.instantMs;
+    state.anchorMs = result.instantMs;
+    linkedWheelRenderPending = true;
+    queueLinkedDiagnostics({
+      lastRing:id,
+      deltaMs:Math.round(result.instantMs - beforeMs)
+    });
+  }
 
   // Pointer devices can deliver several coalesced samples inside one display
-  // frame. Keep every semantic time step, but collapse slider/readout/SVG work
-  // to one animation-frame commit. Inertia is already requestAnimationFrame-
-  // bounded by the drag controller, so render it immediately without adding a
-  // second frame of visual latency.
+  // frame. Keep every semantic time step, but collapse slider/readout/SVG and
+  // diagnostic DOM writes to one animation-frame commit. Inertia is already
+  // requestAnimationFrame-bounded by the drag controller, so commit it
+  // immediately without adding a second frame of visual latency.
   if (dragController?.isCoasting) {
     linkedWheelCommitQueue.cancel();
-    setSliderForScale();
-    updateWheel();
+    commitLinkedWheelFrame();
   } else {
     linkedWheelCommitQueue.schedule();
   }
-
-  instrument.dataset.lastLinkedScrubRing = id;
-  instrument.dataset.lastLinkedScrubDeltaMs = String(Math.round(result.instantMs - beforeMs));
 }
 
 function installRingDrag() {
@@ -410,7 +446,7 @@ function installRingDrag() {
     },
     onLinkedDragStart(id) {
       stopPlayback();
-      linkedWheelCommitQueue.cancel();
+      resetLinkedWheelFrame();
       if (state.legacyProjection) {
         clearLegacyProjection();
         updateWheel();
