@@ -33,6 +33,15 @@ function installAnalysisFirstScreenPolishStyles() {
   document.head.append(stylesheet);
 }
 
+function installAnalysisToolsRailStyles() {
+  if (document.querySelector("link[data-analysis-tools-rail]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./analysis-tools-rail.css";
+  stylesheet.dataset.analysisToolsRail = "1";
+  document.head.append(stylesheet);
+}
+
 function installInverseTimeSearchStyles() {
   if (document.querySelector("link[data-inverse-time-search]")) return;
   const stylesheet = document.createElement("link");
@@ -88,6 +97,9 @@ const inverseTimeSearch = installInverseTimeSearch(instrument);
 // final desktop polish afterwards so it can flatten that panel without changing
 // the component's data/lifecycle ownership or compact/mobile CSS.
 installAnalysisFirstScreenPolishStyles();
+// Keep the geometry-only Tools header convergence last so it can align the two
+// existing chrome rows without changing any component's semantic ownership.
+installAnalysisToolsRailStyles();
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false, { reset:true }));
 
