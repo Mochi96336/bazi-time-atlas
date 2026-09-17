@@ -13,6 +13,19 @@ function removeDuplicateScopeNote() {
   document.querySelector(".recurrence-intro > .scope-note")?.remove();
 }
 
+function consolidateGlobalPeriod() {
+  const dock = researchDiscrete?.querySelector(".delta-dock");
+  const preset = researchDiscrete?.querySelector('#candidate-buttons button[data-delta-years="24000"]');
+  const duplicate = dock?.querySelector(".global-period");
+  if (!dock || !preset) return;
+
+  preset.textContent = "全域 24,000";
+  preset.setAttribute("aria-label", "三層全域閉合 24,000 年");
+  preset.dataset.researchGlobalPeriodPreset = "1";
+  duplicate?.remove();
+  dock.classList.add("research-delta-consolidated");
+}
+
 function ensureClosureDrilldown() {
   const grid = researchDiscrete?.querySelector(".closure-grid");
   if (!grid) return null;
@@ -77,6 +90,7 @@ function syncMilestoneMeta(details) {
 function syncDiscretePresentation() {
   if (!researchDiscrete) return;
   removeDuplicateScopeNote();
+  consolidateGlobalPeriod();
   ensureClosureDrilldown();
   const details = ensureMilestoneDrilldown();
   syncMilestoneMeta(details);
