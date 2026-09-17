@@ -128,9 +128,11 @@
   }
 }
 
-/* Ordinary reading keeps observation-window choice, but not transport or
-   classification chrome. The scale presets are lenses over one fixed wheel,
-   so hiding them would remove a primary reading affordance rather than noise. */
+/* Ordinary reading should not advertise engineering observation-window presets
+   as peer navigation modes. Keep their Graphite styling and controls in the DOM
+   for Analysis and research tooling, but remove them from the normal reading
+   path together with transport/classification chrome. */
+#kinetic-instrument:not([data-analysis-open="true"]) .scale-button,
 #kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button,
 #kinetic-instrument:not([data-analysis-open="true"]) #play-button {
   display: none;
