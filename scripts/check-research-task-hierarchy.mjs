@@ -45,11 +45,12 @@ const discrete = sectionById(probe.dom, "research-discrete");
 const astronomy = sectionById(probe.dom, "research-astronomy");
 const evidence = sectionById(probe.dom, "research-evidence");
 
-if (!discrete || !astronomy || !evidence) {
-  throw new Error(`three Research task sections were not rendered: ${probe.url}`);
+if (!discrete || !astronomy || !evidence) throw new Error(`three Research ownership sections were not rendered: ${probe.url}`);
+if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="closure-grid"') || !discrete.includes('id="research-sexagenary-cycle"')) {
+  throw new Error(`discrete task lost instrument, closure evidence, or 60-day cycle: ${probe.url}`);
 }
-if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="closure-grid"')) {
-  throw new Error(`discrete task lost instrument or closure evidence: ${probe.url}`);
+if (!discrete.includes('id="research-cycle-title">甲子</') || !discrete.includes('id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</')) {
+  throw new Error(`60-day Ganzhi cycle did not initialize at 甲子 / 01: ${probe.url}`);
 }
 if (discrete.includes('class="near-search-panel"') || discrete.includes('id="four-pillar-determinacy"')) {
   throw new Error(`discrete task still owns downstream astronomy/evidence UI: ${probe.url}`);
@@ -63,8 +64,8 @@ if (!evidence.includes('id="four-pillar-determinacy"') || !evidence.includes('id
 if (!evidence.includes('class="model-boundary research-evidence-appendix"')) {
   throw new Error(`model boundary is no longer attached to the evidence task: ${probe.url}`);
 }
-if (!probe.dom.includes('class="research-task-nav"')) {
-  throw new Error(`Research task navigation missing: ${probe.url}`);
+if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/.test(probe.dom)) {
+  throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 
-console.log(`[research-hierarchy] PASS three-task Research ownership survives 390px runtime rendering: ${probe.url}`);
+console.log(`[research-hierarchy] PASS concise three-section ownership + restored 60-day cycle at 390px: ${probe.url}`);

@@ -85,19 +85,18 @@ for (const id of ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarym
 }
 requireEqual(attr(probe, "data-sexagenarydesktop-width"), "1200", "sexagenary desktop fixture width drifted", url);
 
-requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile long lede returned above the task flow", url);
-requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note returned above the task flow", url);
-requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "true", "Recurrence mobile research task map disappeared", url);
-requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce task 01 before the instrument", url);
+requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile lede must stay out of the first-screen instrument flow", url);
+requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
+requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
+requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
 
-const taskNavTop = Number(attr(probe, "data-recurrence-task-nav-top"));
 const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
 const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
 const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
-if (![taskNavTop, taskHeadTop, recurrenceTop].every(Number.isFinite) || !(taskNavTop < taskHeadTop && taskHeadTop < recurrenceTop)) {
-  throw new Error(`Recurrence mobile task flow must read task map → task 01 → instrument (${taskNavTop}, ${taskHeadTop}, ${recurrenceTop}): ${url}`);
+if (![taskHeadTop, recurrenceTop].every(Number.isFinite) || !(taskHeadTop < recurrenceTop)) {
+  throw new Error(`Recurrence mobile section 01 must precede the instrument (${taskHeadTop}, ${recurrenceTop}): ${url}`);
 }
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
   throw new Error(`Recurrence mobile instrument became too shallow (${recurrenceHeight}px): ${url}`);
@@ -156,4 +155,4 @@ requireEqual(attr(probe, "data-sex-desktop-reference-stem-name"), "甲", "bare l
 requireEqual(attr(probe, "data-sex-desktop-reference-branch-name"), "子", "bare legacy Sexagenary default branch drifted", url);
 requireEqual(attr(probe, "data-sex-desktop-reference-grid-count"), "60", "bare legacy Sexagenary default lost the full 60-item disclosure", url);
 
-console.log(`[view-shells] PASS two-destination nav + all legacy Sexagenary shells route into Atlas references + task-first Research: ${url}`);
+console.log(`[view-shells] PASS two-destination nav + legacy Ganzhi routing + concise first-screen Research: ${url}`);
