@@ -49,7 +49,11 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   let frameFlushQueued = false;
   let resetTraceBaselineBeforeFlush = false;
 
-  const groupFor = id => svg.querySelector(`#${ringModel(id).groupId}`);
+  const ringGroups = new Map([
+    ...RINGS.map(ring => [ring.id, svg.querySelector(`#${ring.groupId}`)]),
+    ["zodiac", svg.querySelector(`#${ringModel("zodiac").groupId}`)]
+  ]);
+  const groupFor = id => ringGroups.get(id) ?? null;
   const guides = svg.querySelector("#guide-layer");
   const cursorLayer = svg.querySelector("#cursor-layer");
   const solarTrack = groupFor("solar");
