@@ -1,69 +1,92 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { formatInverseMatchPillars } from "../src/inverse-time-search-view.js";
+import {
+  formatInverseMatchPillars,
+  inverseWheelConstraints,
+  inverseWheelPillarForOffset
+} from "../src/inverse-time-search-view.js";
 
 const view = readFileSync(new URL("../src/inverse-time-search-view.js", import.meta.url), "utf8");
 const analysis = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
 
-test("Atlas exposes reverse search as a real four-pillar action", () => {
+test("find-time is wheel-native instead of a second form UI", () => {
   assert.match(view, /button\.textContent = "找時間"/);
-  assert.match(view, /searchInversePillarIntervals/);
-  assert.match(view, /data-inverse-pillar="\$\{id\}"/);
-  for (const id of ["year", "month", "day", "hour"]) {
-    assert.match(view, new RegExp(`${id}:instrument\\.dataset\\.${id}Pillar`));
-  }
-  assert.match(view, /至少鎖定一柱/);
+  assert.match(view, /直接轉動年、月、日、時環/);
+  assert.match(view, /MutationObserver\(scheduleSearch\)/);
+  assert.doesNotMatch(view, /createPanel|data-inverse-pillar|data-inverse-range|SEARCH_RANGES/);
+  assert.doesNotMatch(view, /createElement\("select"\)|<select|<input/);
 });
 
-test("search results jump Atlas to a real Selected Instant", () => {
-  assert.match(view, /SELECTED_INSTANT_COMMAND/);
-  assert.match(view, /source:"inverse-time-search"/);
-  assert.match(view, /Math\.round\(match\.startMs/);
-  assert.doesNotMatch(view, /manualOffset|compareMode|setModelRotation/);
+test("one snapped wheel tooth maps to the pillar now under the fixed cursor", () => {
+  assert.equal(inverseWheelPillarForOffset({ currentPillar:"乙丑", offsetDegrees:6 }), "甲子");
+  assert.equal(inverseWheelPillarForOffset({ currentPillar:"乙丑", offsetDegrees:-6 }), "丙寅");
+  assert.equal(inverseWheelPillarForOffset({ currentPillar:"甲子", offsetDegrees:360 }), "甲子");
 });
 
-test("wildcard results describe only the pillars the solver actually claims", () => {
-  assert.equal(formatInverseMatchPillars({ day:{ name:"甲子" } }), "日 甲子");
+test("only moved sexagenary rings become inverse-search constraints", () => {
+  const constraints = inverseWheelConstraints({
+    pillars:{ year:"丙午", month:"丁酉", day:"甲子", hour:"乙丑" },
+    offsets:{ year:0, month:6, day:-12, hour:0 }
+  });
+  assert.deepEqual(constraints, {
+    year:null,
+    month:"丙申",
+    day:"丙寅",
+    hour:null
+  });
+});
+
+test("wheel query copy describes only the constraints the user actually moved", () => {
+  assert.equal(formatInverseMatchPillars({ day:"甲子" }), "日 甲子");
   assert.equal(
-    formatInverseMatchPillars({ year:{ name:"丙午" }, hour:{ name:"甲辰" } }),
+    formatInverseMatchPillars({ year:"丙午", hour:{ name:"甲辰" } }),
     "年 丙午 · 時 甲辰"
   );
-  assert.doesNotMatch(view, /match\.pillars\.year\.name/);
 });
 
-test("inverse search fails closed instead of inventing time authority", () => {
-  assert.match(view, /Selected Instant is unavailable/);
-  assert.doesNotMatch(view, /Date\.now\(\)/);
-  assert.doesNotMatch(view, /DEFAULT_ATLAS_TIME_CONTEXT/);
-  assert.match(view, /時間基準已變更，請重新搜尋/);
-});
-
-test("inverse search range changes candidate bounds rather than wheel emphasis", () => {
-  assert.match(view, /month:Object\.freeze\(\{ label:"前後 30 日"/);
-  assert.match(view, /year:Object\.freeze\(\{ label:"前後 1 年"/);
-  assert.match(view, /fiveYear:Object\.freeze\(\{ label:"前後 5 年"/);
-  assert.match(view, /startMs:selectedMs - range\.spanMs/);
-  assert.match(view, /endMs:selectedMs \+ range\.spanMs/);
-});
-
-test("find-time replaces Free Compare as the product entry without deleting its engine", () => {
+test("find-time reuses Free Compare drag mechanics without restoring Compare as product chrome", () => {
   assert.match(view, /querySelector\("#compare-rings-button"\)/);
   assert.match(view, /compareButton\.hidden = true/);
   assert.match(view, /compareButton\.dataset\.productEntry = "retired"/);
-  assert.doesNotMatch(view, /remove\(\).*compare-rings-button/s);
+  assert.match(view, /compareButton\.click\(\)/);
+  assert.match(css, /#ring-compare-status,[\s\S]*?#reset-rings-button[\s\S]*?display:\s*none\s*!important/);
 });
 
-test("Analysis bootstrap installs the inverse search without adding static page chrome", () => {
+test("inverse search refines slow clocks before fast clocks instead of scanning decades hour-by-hour", () => {
+  assert.match(view, /const PILLAR_IDS = Object\.freeze\(\["year", "month", "day", "hour"\]\)/);
+  assert.match(view, /for \(const id of activeIds\)/);
+  assert.match(view, /constraints:\{ \[id\]:constraints\[id\] \}/);
+  assert.match(view, /SEARCH_STAGE_MAX_RESULTS/);
+});
+
+test("search result applies one real Selected Instant and leaves authority fail-closed", () => {
+  assert.match(view, /SELECTED_INSTANT_COMMAND/);
+  assert.match(view, /source:"inverse-wheel-search"/);
+  assert.match(view, /Selected Instant is unavailable/);
+  assert.doesNotMatch(view, /Date\.now\(\)/);
+  assert.doesNotMatch(view, /DEFAULT_ATLAS_TIME_CONTEXT/);
+  assert.match(view, /時間基準已變更/);
+});
+
+test("solar band stays context rather than becoming a fake fifth inverse constraint", () => {
+  assert.match(view, /找時間只轉年、月、日、時四個干支環/);
+  assert.match(view, /isSolarBandPointer/);
+  assert.doesNotMatch(view, /constraints[^\n]*solar/);
+});
+
+test("Analysis bootstrap still installs find-time, but the visible disclosure is relabeled Tools", () => {
   assert.match(analysis, /installInverseTimeSearch/);
   assert.match(analysis, /inverse-time-search\.css/);
-  assert.match(analysis, /installInverseTimeSearch\(instrument\)/);
+  assert.match(view, /open\.textContent = "工具"/);
+  assert.match(view, /close\.textContent = "完成"/);
+  assert.match(css, /content:\s*"工具 · "/);
 });
 
-test("inverse search presentation stays a flat rail instead of another card", () => {
-  assert.match(css, /\.inverse-time-search-panel \{[\s\S]*?border-top:/);
-  assert.doesNotMatch(css, /\.inverse-time-search-panel \{[^}]*border-radius:/s);
-  assert.doesNotMatch(css, /\.inverse-time-search-panel \{[^}]*background:/s);
-  assert.match(css, /\.inverse-search-result \{[\s\S]*?background:\s*transparent;/);
+test("ordinary reading never shows the find-time entry", () => {
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #inverse-time-search-button\s*\{[\s\S]*?display:\s*none\s*!important/
+  );
 });
