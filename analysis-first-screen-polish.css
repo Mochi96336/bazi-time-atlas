@@ -167,3 +167,121 @@
     opacity: .72;
   }
 }
+
+/* First-screen height must budget for the product header, shell padding and the
+   gap above the instrument. The former 52px subtraction only budgeted the
+   header itself, so the Selected Instant rail fell below the viewport even on
+   otherwise ordinary desktop heights. Keep the wheel dominant while reserving
+   a real lower safe area for the read-head. */
+@media (min-width: 821px) {
+  .instrument-shell {
+    height: max(720px, calc(100dvh - 92px));
+  }
+}
+
+@media (min-width: 1100px) {
+  .instrument-shell {
+    height: max(760px, calc(100dvh - 92px));
+  }
+}
+
+/* Wide desktop is not a request to inflate every instrument detail. At the
+   2047x1038 review shape, cap vertical growth by the available width/height
+   relationship, keep the controls in a compact readable hierarchy, and give
+   the Selected Instant a deliberate bottom buffer. Taller monitors still grow
+   naturally because 44vw quickly stops being the limiting term. */
+@media (min-width: 1600px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button,
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button {
+    min-height: 30px;
+    padding-inline: 8px;
+    font-size: 10px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    right: auto;
+    max-width: 960px;
+    gap: 8px 14px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    font-size: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 24px;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    min-height: 24px;
+    font-size: 9px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    top: 80px;
+    right: clamp(340px, 22vw, 420px);
+    padding-top: 6px;
+    gap: 10px 16px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
+    font-size: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
+    font-size: 8.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell {
+    gap: 3px 5px;
+    padding-inline: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
+    font-size: 7.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
+    font-size: 10.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
+    font-size: 7.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-note {
+    font-size: 7px;
+    line-height: 1.35;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
+    top: 80px;
+    width: min(300px, calc(100% - 40px));
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header span {
+    font-size: 7.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header small {
+    font-size: 6.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-keys i {
+    min-width: 17px;
+    width: 17px;
+    height: 17px;
+    font-size: 7px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-current {
+    font-size: 7.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-warning {
+    font-size: 7px;
+  }
+
+  .instrument-readout {
+    bottom: 20px;
+  }
+}
+
+@media (min-width: 1800px) and (min-aspect-ratio: 17/9) {
+  .instrument-shell {
+    height: clamp(760px, calc(100dvh - 92px), 44vw);
+  }
+
+  .instrument-readout {
+    bottom: 26px;
+  }
+}
