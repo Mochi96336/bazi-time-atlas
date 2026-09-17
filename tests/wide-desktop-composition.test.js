@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const polish = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
+const toolsRail = readFileSync(new URL("../analysis-tools-rail.css", import.meta.url), "utf8");
+const analysisMode = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const fixture = readFileSync(new URL("../scripts/fixtures/wide-desktop-2047.html", import.meta.url), "utf8");
 const browserGate = readFileSync(new URL("../scripts/check-wide-desktop-composition.mjs", import.meta.url), "utf8");
@@ -40,16 +42,37 @@ test("wide Analysis readability pass strengthens chrome and fast-ring context wi
   assert.doesNotMatch(polish, /(?:width|height|viewBox|transform):\s*[^;]*(?:wheel|track)/i);
 });
 
+test("wide Tools rows share one instrument header frame", () => {
+  assert.match(analysisMode, /installAnalysisFirstScreenPolishStyles\(\);[\s\S]*?installAnalysisToolsRailStyles\(\);/);
+  assert.match(toolsRail, /@media \(min-width: 1600px\)/);
+  assert.match(
+    toolsRail,
+    /\.instrument-toolbar,[\s\S]*?\.ring-legend\s*\{[\s\S]*?left:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?max-width:\s*none;/
+  );
+  assert.match(toolsRail, /\.instrument-toolbar\s*\{[\s\S]*?min-height:\s*36px;[\s\S]*?border-bottom:\s*1px solid/);
+  assert.match(toolsRail, /\.ring-legend\s*\{[\s\S]*?top:\s*48px;[\s\S]*?padding:\s*0 64px 4px 0;[\s\S]*?flex-wrap:\s*nowrap;[\s\S]*?border-bottom:\s*1px solid/);
+  assert.match(toolsRail, /\.analysis-close\s*\{[\s\S]*?top:\s*50px;[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?border-left:\s*1px solid/);
+  assert.doesNotMatch(toolsRail, /(?:viewBox|#kinetic-wheel|#(?:year|month|day|hour|solar)-track)/);
+});
+
 test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /width:\s*2047px/);
   assert.match(fixture, /height:\s*1038px/);
   assert.match(fixture, /data-ready="false"/);
+  assert.match(fixture, /toolbarLeft:\s*round\(toolbarRect\.left\)/);
+  assert.match(fixture, /legendRight:\s*round\(legendRect\.right\)/);
+  assert.match(fixture, /closeRight:\s*round\(closeRect\.right\)/);
+  assert.match(fixture, /toolbarBaseline:\s*round\(num\(toolbarFrameStyle\.borderBottomWidth\)\)/);
+  assert.match(fixture, /legendBaseline:\s*round\(num\(legendFrameStyle\.borderBottomWidth\)\)/);
   assert.match(fixture, /hourVisibleLabels:\s*String\(displayVisibleCount\(win, hourLabels\)\)/);
   assert.match(fixture, /dayVisibleLabels:\s*String\(displayVisibleCount\(win, dayLabels\)\)/);
   assert.match(browserGate, /width !== 2047 \|\| height !== 1038/);
   assert.match(browserGate, /instrumentShare < 0\.80 \|\| instrumentShare > 0\.90/);
   assert.match(browserGate, /readoutBottomGap < 40/);
   assert.match(browserGate, /scrollWidth > width \+ 1/);
+  assert.match(browserGate, /Math\.abs\(toolbarLeft - legendLeft\) > railTolerance/);
+  assert.match(browserGate, /Math\.abs\(closeRight - legendRight\) > railTolerance/);
+  assert.match(browserGate, /toolbarBaseline < 0\.9 \|\| legendBaseline < 0\.9/);
   assert.match(browserGate, /hourVisibleLabels !== 60 \|\| dayVisibleLabels !== 60/);
   assert.match(visualCapture, /annual-wide-2047x1038\.png/);
   assert.match(visualCapture, /annual-tools-wide-2047x1038\.png/);
