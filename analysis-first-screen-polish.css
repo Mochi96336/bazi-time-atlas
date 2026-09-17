@@ -285,3 +285,86 @@
     bottom: 26px;
   }
 }
+
+/* On wide monitors the two Analysis chrome rows should read as one instrument
+   hierarchy, not as scattered debug captions. Raise type and neutral contrast
+   without adding pills, cards or new controls. The fast inner clocks receive a
+   modest context lift only while Analysis is open; annual priority and the
+   Selected-Instant read-head remain stronger. */
+@media (min-width: 1600px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group {
+    gap: 5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button,
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button {
+    min-height: 32px;
+    padding-inline: 9px;
+    color: #989d9d;
+    font-size: 11px;
+    letter-spacing: .015em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button.active,
+  #kinetic-instrument[data-analysis-open="true"] #compare-rings-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #play-button[aria-pressed="true"] {
+    color: #e5e7e6;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    top: 46px;
+    max-width: 1040px;
+    gap: 10px 18px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    color: #8f9494;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 26px;
+    color: #bcc0bf;
+    font-size: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    color: #999e9e;
+    font-size: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 46px;
+    min-height: 26px;
+    color: #9da1a2;
+    font-size: 10px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods,
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
+    top: 86px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="year"] #day-track {
+    --scale-context-opacity: .72;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="year"] #hour-track {
+    --scale-context-opacity: .68;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="cycle"] #day-track {
+    --scale-context-opacity: .68;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="cycle"] #hour-track {
+    --scale-context-opacity: .64;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] #hour-track .cycle-label:not(.active-cycle-label) {
+    fill: rgba(196,202,201,.46);
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #hour-track .cycle-label.major:not(.active-cycle-label) {
+    fill: rgba(196,202,201,.60);
+  }
+  #kinetic-instrument[data-analysis-open="true"] #day-track .cycle-label:not(.active-cycle-label) {
+    fill: rgba(207,212,210,.52);
+    font-size: 9.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #day-track .cycle-label.major:not(.active-cycle-label) {
+    fill: rgba(207,212,210,.66);
+  }
+}
