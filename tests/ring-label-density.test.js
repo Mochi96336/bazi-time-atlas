@@ -11,8 +11,20 @@ test("every sexagenary sector owns a static identity label", () => {
   assert.match(renderer, /class:\s*`cycle-label\$\{index % 5 === 0 \? " major" : ""\}`/);
 });
 
-test("label thinning follows radial information capacity instead of renderer sampling", () => {
-  assert.match(hierarchy, /#hour-track \.cycle-label:nth-of-type\(2n\),\s*#day-track \.cycle-label:nth-of-type\(2n\)\s*\{\s*display:\s*none;/s);
+test("desktop keeps complete Day and Hour identities while compact cameras may thin presentation", () => {
+  const compact = hierarchy.match(/@media \(max-width:\s*920px\)\s*\{([\s\S]*?)\n\}/);
+  assert.ok(compact, "fast-ring thinning must be owned by the compact camera breakpoint");
+  assert.match(
+    compact[1],
+    /#hour-track \.cycle-label:nth-of-type\(2n\),\s*#day-track \.cycle-label:nth-of-type\(2n\)\s*\{\s*display:\s*none;/s
+  );
+
+  const beforeCompact = hierarchy.slice(0, hierarchy.indexOf(compact[0]));
+  assert.doesNotMatch(
+    beforeCompact,
+    /#hour-track \.cycle-label:nth-of-type\(2n\),\s*#day-track \.cycle-label:nth-of-type\(2n\)\s*\{\s*display:\s*none;/s,
+    "desktop must not globally hide alternating Day / Hour identities"
+  );
   assert.doesNotMatch(hierarchy, /#(?:month|year)-track \.cycle-label:nth-of-type/);
   assert.match(hierarchy, /#year-track \.cycle-label\.major/);
   assert.match(hierarchy, /#month-track \.cycle-label\.major/);
