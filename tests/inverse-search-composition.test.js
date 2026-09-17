@@ -11,13 +11,18 @@ test("find-time has no detached form panel or range picker", () => {
   assert.doesNotMatch(view, /<select|<input/);
 });
 
-test("the wheel-native result is one compact instrument readout", () => {
+test("the wheel-native result is one compact recessed M2 instrument readout", () => {
+  assert.match(css, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(
     css,
     /\.inverse-time-search-readout\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?width:\s*min\(620px, calc\(100% - 32px\)\);[\s\S]*?grid-template-columns:/
   );
+  assert.match(
+    css,
+    /\.inverse-time-search-readout\s*\{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-light-soft\);[\s\S]*?background:\s*var\(--m2-recessed-surface\);[\s\S]*?background-image:\s*var\(--m2-recessed-rail-gradient\);[\s\S]*?box-shadow:\s*var\(--m2-recessed-rail-shadow\);[\s\S]*?backdrop-filter:\s*none;/
+  );
   assert.doesNotMatch(css, /\.inverse-time-search-readout\s*\{[^}]*border-radius:/s);
-  assert.doesNotMatch(css, /\.inverse-time-search-readout\s*\{[^}]*box-shadow:/s);
+  assert.doesNotMatch(css, /\.inverse-time-search-readout\s*\{[^}]*backdrop-filter:\s*blur\(/s);
 });
 
 test("390px find-time stays a compact two-row overlay rather than a control wall", () => {

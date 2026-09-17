@@ -1,3 +1,5 @@
+@import "./graphite-m2-material.css";
+
 /* Wheel-native inverse search. There is no form panel: the wheel itself is the
    query surface and this layer only presents mode/status/result chrome. */
 
@@ -35,11 +37,13 @@
   align-items: baseline;
   gap: 8px 14px;
   padding: 8px 10px;
-  border-top: 1px solid rgba(238,242,237,.10);
-  border-bottom: 1px solid rgba(238,242,237,.06);
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  border-bottom: 1px solid var(--m2-etched-light-soft);
   color: #858d89;
-  background: rgba(10,12,13,.54);
-  backdrop-filter: blur(8px);
+  background: var(--m2-recessed-surface);
+  background-image: var(--m2-recessed-rail-gradient);
+  box-shadow: var(--m2-recessed-rail-shadow);
+  backdrop-filter: none;
 }
 .inverse-time-search-readout[hidden] { display: none !important; }
 .inverse-time-search-readout strong {
