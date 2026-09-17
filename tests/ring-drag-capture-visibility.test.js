@@ -21,8 +21,24 @@ function forceSvgPointFallback(t) {
 class FakeSvg {
   constructor({ capture = "ok" } = {}) {
     this.capture = capture;
-    this.dataset = {};
-    this.style = {};
+    this.hoverRingWrites = 0;
+    this.cursorWrites = 0;
+    this.touchActionWrites = 0;
+    this.dataset = new Proxy({}, {
+      set:(target, key, value) => {
+        if (key === "hoverRing") this.hoverRingWrites += 1;
+        target[key] = value;
+        return true;
+      }
+    });
+    this.style = new Proxy({}, {
+      set:(target, key, value) => {
+        if (key === "cursor") this.cursorWrites += 1;
+        if (key === "touchAction") this.touchActionWrites += 1;
+        target[key] = value;
+        return true;
+      }
+    });
     this.listeners = new Map();
     this.capturedPointerId = null;
   }
@@ -198,6 +214,28 @@ test("document hidden clears hover ownership together with an active gesture", t
   assert.equal(svg.dataset.hoverRing, undefined);
   assert.deepEqual(events.at(-1), ["end", "day", "document-hidden"]);
   assert.equal(events.filter(event => event[0] === "end").length, 1);
+});
+
+test("stable passive hover does not repeat DOM ownership writes", t => {
+  forceSvgPointFallback(t);
+  const { svg, controller } = setup();
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointermove", "day", -90, 11, 0, true);
+  assert.equal(controller.hoverRingId, "day");
+  assert.equal(svg.dataset.hoverRing, "day");
+  const hoverWrites = svg.hoverRingWrites;
+  const cursorWrites = svg.cursorWrites;
+  const touchActionWrites = svg.touchActionWrites;
+
+  svg.dispatchAt("pointermove", "day", -89, 11, 16, true);
+  svg.dispatchAt("pointermove", "day", -88, 11, 32, true);
+
+  assert.equal(svg.hoverRingWrites, hoverWrites);
+  assert.equal(svg.cursorWrites, cursorWrites);
+  assert.equal(svg.touchActionWrites, touchActionWrites);
+  assert.equal(controller.hoverRingId, "day");
+  assert.equal(svg.dataset.hoverRing, "day");
 });
 
 test("destroy clears passive hover ownership from both internal state and dataset", t => {
