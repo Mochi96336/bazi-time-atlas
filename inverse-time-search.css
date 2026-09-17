@@ -1,28 +1,40 @@
 .inverse-time-search-panel {
-  width: min(1180px, calc(100% - 28px));
-  margin: 10px auto 0;
-  padding: 12px 0 4px;
-  border-top: 1px solid rgba(238,242,237,.12);
+  width: min(960px, calc(100% - 40px));
+  margin: 26px auto 12px;
+  padding: 20px 0 8px;
+  border-top: 1px solid rgba(238,242,237,.11);
   color: var(--ink);
 }
 .inverse-time-search-panel[hidden] { display: none; }
 
-.inverse-search-head,
-.inverse-search-actions {
+.inverse-search-head {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
 }
-.inverse-search-head { justify-content: space-between; }
-.inverse-search-head > div { display: grid; gap: 2px; }
-.inverse-search-head strong { font-size: 12px; font-weight: 780; letter-spacing: .04em; }
+.inverse-search-head > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.inverse-search-head strong {
+  font-size: 13px;
+  font-weight: 780;
+  letter-spacing: .04em;
+}
 .inverse-search-head small,
-.inverse-search-status { color: #727a76; font-size: 8px; line-height: 1.45; }
+.inverse-search-status {
+  color: #727a76;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
 .inverse-search-close,
 .inverse-search-actions button,
 .inverse-search-actions select,
 .inverse-search-constraints select {
-  min-height: 30px;
+  min-height: 34px;
   border: 0;
   border-bottom: 1px solid rgba(238,242,237,.14);
   border-radius: 0;
@@ -30,7 +42,14 @@
   background: transparent;
 }
 .inverse-search-close,
-.inverse-search-actions button { padding: 0 6px; cursor: pointer; }
+.inverse-search-actions button {
+  padding: 0 7px;
+  cursor: pointer;
+}
+.inverse-search-close {
+  flex: 0 0 auto;
+  color: #777f7b;
+}
 .inverse-search-actions [data-inverse-run] {
   color: var(--cursor);
   border-bottom-color: color-mix(in srgb, var(--cursor) 42%, transparent);
@@ -40,14 +59,14 @@
 .inverse-search-constraints {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px 12px;
-  margin-top: 11px;
+  gap: 14px 20px;
+  margin-top: 20px;
 }
 .inverse-search-constraints label,
 .inverse-search-range {
   min-width: 0;
   display: grid;
-  gap: 3px;
+  gap: 5px;
 }
 .inverse-search-constraints label > span,
 .inverse-search-range > span {
@@ -59,35 +78,41 @@
 .inverse-search-constraints select,
 .inverse-search-range select {
   width: 100%;
-  padding: 0 3px;
+  padding: 0 4px;
   color-scheme: dark;
 }
 
 .inverse-search-actions {
-  margin-top: 9px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto minmax(150px, 1fr) auto;
+  align-items: end;
+  gap: 10px 18px;
+  margin-top: 18px;
 }
 .inverse-search-range {
-  width: 132px;
-  margin-left: auto;
+  width: 160px;
+  justify-self: end;
 }
-.inverse-search-status { margin: 8px 0 0; }
+.inverse-search-status {
+  margin: 14px 0 0;
+  min-height: 1.55em;
+}
 
 .inverse-search-results {
   display: grid;
   gap: 0;
-  margin-top: 7px;
-  max-height: 250px;
+  margin-top: 12px;
+  max-height: 320px;
   overflow: auto;
   border-top: 1px solid rgba(238,242,237,.06);
 }
 .inverse-search-result {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr) auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.45fr) minmax(0, .9fr);
+  gap: 14px;
   align-items: baseline;
-  padding: 7px 2px;
+  padding: 11px 4px;
   border: 0;
   border-bottom: 1px solid rgba(238,242,237,.06);
   color: #8d9591;
@@ -96,31 +121,73 @@
   cursor: pointer;
 }
 .inverse-search-result:hover { background: rgba(255,255,255,.018); }
-.inverse-search-result strong { color: #d8ddda; font-size: 9px; font-weight: 700; }
-.inverse-search-result span { font-size: 8px; }
-.inverse-search-result small { color: #737c77; font-size: 8px; white-space: nowrap; }
+.inverse-search-result strong {
+  color: #d8ddda;
+  font-size: 9px;
+  font-weight: 700;
+}
+.inverse-search-result span,
+.inverse-search-result small { font-size: 8px; }
+.inverse-search-result small {
+  color: #737c77;
+  white-space: normal;
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .inverse-time-search-panel {
+    width: calc(100% - 28px);
+  }
+  .inverse-search-constraints {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
 @media (max-width: 480px) {
   .inverse-time-search-panel {
-    width: calc(100% - 18px);
-    margin-top: 8px;
-    padding-top: 9px;
+    width: calc(100% - 24px);
+    margin-top: 18px;
+    padding-top: 16px;
   }
-  .inverse-search-head small { max-width: 245px; }
+  .inverse-search-head {
+    gap: 12px;
+  }
+  .inverse-search-head small {
+    max-width: 235px;
+  }
   .inverse-search-constraints {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 7px 10px;
+    gap: 12px 14px;
+    margin-top: 16px;
   }
-  .inverse-search-actions { gap: 5px 8px; }
+  .inverse-search-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+    margin-top: 16px;
+  }
+  .inverse-search-actions [data-inverse-current] { grid-column: 1; }
+  .inverse-search-actions [data-inverse-clear] { grid-column: 2; }
   .inverse-search-range {
-    width: 122px;
-    margin-left: 0;
+    grid-column: 1;
+    width: 100%;
+    justify-self: stretch;
   }
-  .inverse-search-actions [data-inverse-run] { margin-left: auto; }
+  .inverse-search-actions [data-inverse-run] {
+    grid-column: 2;
+    min-width: 76px;
+  }
+  .inverse-search-status {
+    margin-top: 12px;
+  }
+  .inverse-search-results {
+    margin-top: 10px;
+    max-height: 42dvh;
+  }
   .inverse-search-result {
     grid-template-columns: 1fr;
-    gap: 2px;
-    padding: 8px 2px;
+    gap: 3px;
+    padding: 10px 3px;
   }
-  .inverse-search-result small { white-space: normal; }
+  .inverse-search-result small {
+    text-align: left;
+  }
 }

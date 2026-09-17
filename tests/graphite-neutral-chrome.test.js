@@ -6,6 +6,7 @@ const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta
 const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
 const instrumentFirst = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const analysisFirst = readFileSync(new URL("../analysis-first-screen.css", import.meta.url), "utf8");
 const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 
 function rejectLegacy(source, legacyValues) {
@@ -63,7 +64,7 @@ test("Analysis-only inspector and visible-stem chrome no longer carry moss surfa
   assert.match(visibleTenGods, /\.atlas-visible-ten-gods \{[\s\S]*?border:\s*1px solid rgba\(236,239,239,\.10\);[\s\S]*?background:\s*rgba\(12,14,15,\.46\);/);
 });
 
-test("ordinary instrument-first chrome follows neutral Graphite M2", () => {
+test("instrument-first and Analysis controls keep neutral Graphite M2 chrome", () => {
   rejectLegacy(instrumentFirst, [
     "rgba(199, 217, 205, .08)",
     "#68726b",
@@ -77,8 +78,18 @@ test("ordinary instrument-first chrome follows neutral Graphite M2", () => {
 
   assert.match(instrumentFirst, /data-analysis-open="true"\]\s*\{[\s\S]*?box-shadow:\s*inset 0 0 0 1px rgba\(236, 239, 239, \.055\);/);
   assert.match(instrumentFirst, /\.instant-field \{[\s\S]*?color:\s*#6f7475;/);
-  assert.match(instrumentFirst, /\.scale-button \{[\s\S]*?color:\s*#74797a;/);
-  assert.match(instrumentFirst, /\.scale-button\.active \{[\s\S]*?color:\s*#e5e8e7;[\s\S]*?rgba\(236, 239, 239, \.52\);/);
+  assert.match(
+    instrumentFirst,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.scale-button,[\s\S]*?display:\s*none;/
+  );
+  assert.match(
+    analysisFirst,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.control-button,[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\] \.scale-button\s*\{[\s\S]*?color:\s*#85898a;[\s\S]*?background:\s*transparent;/
+  );
+  assert.match(
+    analysisFirst,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.scale-button\.active,[\s\S]*?color:\s*#e2e4e3;[\s\S]*?box-shadow:\s*inset 0 -1px rgba\(235,238,236,\.48\);/
+  );
   assert.match(instrumentFirst, /#now-button \{[\s\S]*?color:\s*#7a7f80;/);
 });
 
