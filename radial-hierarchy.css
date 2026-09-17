@@ -30,13 +30,11 @@
 .ring-day strong,
 .ring-hour strong { color: #9ca19f; font-weight: 660; }
 
-/* The giant-disk geometry has enough arc length to render every sexagenary
-   identity. Slow outer shells therefore keep all 60 labels. Fast inner clocks
-   thin that complete label set by one half (30 visible identities) so the small
-   portrait camera does not become a text wall. Five-step labels remain a mild
-   typographic cadence aligned with the major ticks rather than the only labels. */
-#hour-track .cycle-label:nth-of-type(2n),
-#day-track .cycle-label:nth-of-type(2n) { display: none; }
+/* Every sexagenary sector owns its identity label. Desktop has enough radial arc
+   length to show the full 60-step Day / Hour sequence without an artificial
+   alternating comb. Compact cameras thin only those two fast inner rings below;
+   Month and Year always keep the complete identity sequence. Five-step labels
+   remain a mild typographic cadence aligned with the major ticks. */
 #hour-track .cycle-label {
   fill: rgba(188,194,193,.36);
   font-size: 8.5px;
@@ -259,6 +257,14 @@
 #kinetic-wheel[data-active-ring="solar"] #zodiac-track .zodiac-sector {
   stroke: color-mix(in srgb, var(--cursor) 54%, transparent);
   stroke-width: 1.65;
+}
+
+/* Compact camera still needs density relief. Keep the renderer complete and
+   thin only presentation below the desktop camera breakpoint so large screens
+   never read Day / Hour as alternating missing sectors. */
+@media (max-width: 920px) {
+  #hour-track .cycle-label:nth-of-type(2n),
+  #day-track .cycle-label:nth-of-type(2n) { display: none; }
 }
 
 @media (max-width: 820px) {

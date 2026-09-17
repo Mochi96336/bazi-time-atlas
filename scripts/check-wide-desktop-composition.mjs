@@ -79,6 +79,8 @@ const toolbarFont = numberAttr(probe, "data-toolbar-font", page.url);
 const legendFont = numberAttr(probe, "data-legend-font", page.url);
 const evidenceValueFont = numberAttr(probe, "data-evidence-value-font", page.url);
 const closeFont = numberAttr(probe, "data-close-font", page.url);
+const hourVisibleLabels = numberAttr(probe, "data-hour-visible-labels", page.url);
+const dayVisibleLabels = numberAttr(probe, "data-day-visible-labels", page.url);
 
 if (width !== 2047 || height !== 1038) {
   throw new Error(`wide desktop: fixture is not an exact 2047x1038 CSS viewport (${width}x${height}): ${page.url}`);
@@ -118,8 +120,16 @@ if (toolbarFont < 10 || legendFont < 9 || evidenceValueFont < 10 || closeFont < 
   );
 }
 
+if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
+  throw new Error(
+    `wide desktop: Day / Hour labels were thinned into an alternating comb ` +
+    `(hour=${hourVisibleLabels}, day=${dayVisibleLabels}; expected 60/60): ${page.url}`
+  );
+}
+
 console.log(
   `[wide-desktop] PASS 2047x1038 composition; ` +
   `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, ` +
-  `fonts=${toolbarFont}/${legendFont}/${evidenceValueFont}/${closeFont}: ${page.url}`
+  `fonts=${toolbarFont}/${legendFont}/${evidenceValueFont}/${closeFont}, ` +
+  `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );
