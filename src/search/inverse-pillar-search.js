@@ -70,14 +70,14 @@ function nextRelevantBoundary(instantMs, ringIds, timeContext) {
   return next;
 }
 
-function samePillarState(a, b) {
-  return PILLAR_IDS.every(id => a[id]?.name === b[id]?.name);
+function constrainedPillarSnapshot(pillars, ringIds) {
+  return Object.freeze(Object.fromEntries(
+    ringIds.map(id => [id, Object.freeze({ ...pillars[id] })])
+  ));
 }
 
-function freezePillars(pillars) {
-  return Object.freeze(Object.fromEntries(
-    PILLAR_IDS.map(id => [id, Object.freeze({ ...pillars[id] })])
-  ));
+function sameConstrainedState(a, b, ringIds) {
+  return ringIds.every(id => a[id]?.name === b[id]?.name);
 }
 
 /**
@@ -89,8 +89,9 @@ function freezePillars(pillars) {
  * constrained pillars participate, so a Day-only search jumps day-by-day while
  * an Hour-constrained search follows the two-hour boundaries.
  *
- * Returned intervals are half-open [startMs, endMs). Each result therefore
- * represents real instants for which every requested pillar constraint holds.
+ * Returned intervals are half-open [startMs, endMs). `pillars` contains only
+ * constrained rings, because wildcard pillar identities may legitimately change
+ * inside one returned interval and are not part of the search claim.
  */
 export function searchInversePillarIntervals({
   constraints,
@@ -119,18 +120,19 @@ export function searchInversePillarIntervals({
     boundarySteps += 1;
 
     if (matchesConstraints(pillars, normalizedConstraints)) {
+      const snapshot = constrainedPillarSnapshot(pillars, ringIds);
       const previous = matches[matches.length - 1];
       if (
         previous
         && previous.endMs === cursorMs
-        && samePillarState(previous.pillars, pillars)
+        && sameConstrainedState(previous.pillars, snapshot, ringIds)
       ) {
         previous.endMs = segmentEndMs;
       } else {
         matches.push({
           startMs: cursorMs,
           endMs: segmentEndMs,
-          pillars: freezePillars(pillars)
+          pillars: snapshot
         });
       }
       if (matches.length >= maxResults && segmentEndMs < endMs) {
