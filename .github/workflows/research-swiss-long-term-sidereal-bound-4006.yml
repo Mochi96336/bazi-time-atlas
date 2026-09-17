@@ -1,0 +1,199 @@
+name: Research Swiss long-term sidereal bound 4006
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-swiss-long-term-sidereal-bound-4006.yml"
+      - "scripts/research-swiss-long-term-sidereal-samples-4006.c"
+      - "scripts/compose-swiss-long-term-sidereal-bound-4006.mjs"
+      - "src/astronomy/equation-of-time-4006-swiss-vondrak-precession-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-nutation-ra-evidence.js"
+      - "src/astronomy/equation-of-time-4006-swiss-derivative-component-evidence.js"
+      - "src/astronomy/equation-of-time-4006-production-derivative-certificate.js"
+      - "src/astronomy/equation-of-time-4006-swiss-long-term-sidereal-evidence.js"
+      - "tests/equation-of-time-4006-swiss-long-term-sidereal-evidence.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  long-term-sidereal-bound:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+
+      - name: Audit pinned long-term sidereal and public EoT source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          lib = Path("tmp/swisseph/swephlib.c").read_text()
+          main = Path("tmp/swisseph/sweph.c").read_text()
+          hdr = Path("tmp/swisseph/swephexp.h").read_text()
+
+          required_header = [
+              "#define SEMOD_SIDT_DEFAULT          SEMOD_SIDT_LONGTERM",
+              "#define SEMOD_DELTAT_DEFAULT   SEMOD_DELTAT_STEPHENSON_ETC_2016",
+              "#define SEMOD_NUT_DEFAULT           SEMOD_NUT_IAU_2000B",
+          ]
+          required_lib = [
+              "#define SIDT_LTERM_T0  2396758.5",
+              "#define SIDT_LTERM_T1  2469807.5",
+              "#define SIDT_LTERM_OFS1   (0.001385646 / 15.0)",
+              "if (sidt_model == SEMOD_SIDT_LONGTERM)",
+              "gmst = sidtime_long_term(tjd, eps, nut);",
+              "tjd_et = tjd_ut + swe_deltat_ex(tjd_ut, -1, NULL);",
+              "t = (tjd_et - J2000) / 365250.0;",
+              "dlon = 100.46645683 + (1295977422.83429 * t - 2.04411 * t2 - 0.00523 * t3) / 3600.0;",
+              "swi_precess(xs, tjd_et, 0, -1);",
+              "xobl[1] = swi_epsiln(tjd_et, 0) * RADTODEG;",
+              "swi_nutation(tjd_et, 0, nutlo);",
+              "xs[0] += nut * cos(eps * DEGTORAD);",
+              "dhour = fmod(tjd_ut - 0.5, 1) * 360;",
+              "B = 0.01 * (Y - 2000);",
+              "ans = B * B * 32.5 + 42.5;",
+          ]
+          required_main = [
+              "double sidt = swe_sidtime(tjd_ut);",
+              "dt = swe_degnorm(sidt - x[0] - 180);",
+              "if (dt > 180)",
+              "dt -= 360;",
+              "dt *= 4;",
+              "*E = dt / 1440.0;",
+          ]
+          for fragment in required_header:
+              assert fragment in hdr, fragment
+          for fragment in required_lib:
+              assert fragment in lib, fragment
+          for fragment in required_main:
+              assert fragment in main, fragment
+          PY
+
+      - name: Download pinned Swiss long-range ephemerides
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/sweph
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          for file in sepl_36.se1 semo_36.se1; do
+            curl -fsSL --retry 3 --retry-delay 2 \
+              "https://raw.githubusercontent.com/aloistr/swisseph/${SWISS_COMMIT}/ephe/${file}" \
+              -o "tmp/sweph/${file}"
+          done
+          cat <<'EOF' | sha256sum -c -
+          3faeadb0f2c04d455ce8c5a853d007e9b445e1dc7b65a43389fc3d746b7b9bd0  tmp/sweph/sepl_36.se1
+          f4e89fb3f69a337249ccff96d3f565baa8986a7c15e44cba5676d5dbdf00dfaa  tmp/sweph/semo_36.se1
+          EOF
+
+      - name: Build pinned Swiss library and sidereal sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          mkdir -p tmp/swiss-long-term-sidereal-bound-4006
+          cc -O2 -std=gnu11 \
+            -I tmp/swisseph \
+            scripts/research-swiss-long-term-sidereal-samples-4006.c \
+            tmp/swisseph/libswe.a -lm \
+            -o tmp/swiss-long-term-sidereal-bound-4006/sample
+
+      - name: Capture exact pinned long-term sidereal and public EoT samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp/swiss-long-term-sidereal-bound-4006/sample tmp/sweph \
+            | tee tmp/swiss-long-term-sidereal-bound-4006/raw.json
+          python -m json.tool tmp/swiss-long-term-sidereal-bound-4006/raw.json >/dev/null
+
+      - name: Compose continuous long-term sidereal certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/compose-swiss-long-term-sidereal-bound-4006.mjs
+          python -m json.tool tmp/swiss-long-term-sidereal-bound-4006/manifest.json >/dev/null
+
+      - name: Verify proof scope and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          raw = json.loads(Path("tmp/swiss-long-term-sidereal-bound-4006/raw.json").read_text())
+          m = json.loads(Path("tmp/swiss-long-term-sidereal-bound-4006/manifest.json").read_text())
+
+          assert raw["targetYear"] == 4006
+          assert 0 < raw["sampleStepUtDays"] <= 0.25
+          assert raw["sampleCoverRadiusUtDays"] <= 0.125
+          assert raw["minSampledPreEqeqEclipticXy"] > 0
+          assert raw["maxSampledAbsDpsiRad"] > 0
+          assert 0 < raw["maxSampledAbsPublicEotAngleDeg"] < 30
+          assert raw["maxAbsReconstructedVsPublicSidtimeHours"] < 1e-10
+          ri = raw["interpretation"]
+          assert ri["longTermSiderealBranchReconstructed"] is True
+          assert ri["post2050AlignmentOffsetApplied"] is True
+          assert ri["publicTimeEquSampled"] is True
+          assert ri["gridMinimumIsContinuousLowerBound"] is False
+          assert ri["sampledDpsiMaximumIsContinuousUpperBound"] is False
+          assert ri["sampledEotMaximumIsContinuousUpperBound"] is False
+          assert ri["sampledParityIsAuthority"] is False
+          assert ri["continuousSiderealCurvatureCertified"] is False
+          assert ri["publicTimeEquWrapBranchCertified"] is False
+          assert ri["recurrenceAuthorityGranted"] is False
+
+          wrap = m["publicTimeEquWrapHardBounds"]
+          assert 0 < wrap["sampledAbsEotAngleDeg"] <= wrap["continuousAbsEotAngleUpperDeg"] < wrap["principalWrapBoundaryDeg"] == 180
+          assert wrap["eotContinuousLiftFirstDerivativeBoundDegPerUtDay"] > 0
+
+          d = m["derivedHardBounds"]
+          assert 0 < d["longTermSiderealSecondDerivativeBoundDegPerUtDaySquared"] < 98.8325513362534
+          assert 0 < d["swissEotSecondDerivativeBoundDegPerUtDaySquared"] < 104.94059155911904
+          assert 0 < d["swissEotDerivativeBoundSolarSecondsPerUtDay"] < d["independentSwissDerivativeBudgetSolarSecondsPerUtDay"]
+          assert 0 < d["analyticResidualDerivativeBoundSolarSecondsPerUtDay"] < d["analyticResidualPlanningBudgetSolarSecondsPerUtDay"]
+
+          i = m["interpretation"]
+          assert i["sourceDerivedContinuousBound"] is True
+          assert i["defaultLongTermSiderealModelSourceAudited"] is True
+          assert i["futureDeltaTBranchSourceAudited"] is True
+          assert i["publicTimeEquWrapSourceAudited"] is True
+          assert i["betweenSampleEclipticSeparationCertified"] is True
+          assert i["equationOfEquinoxesSecondDerivativeCertified"] is True
+          assert i["publicTimeEquWrapBranchCertified"] is True
+          assert i["longTermSiderealSecondDerivativeCertified"] is True
+          assert i["swissEotSecondDerivativeCertified"] is True
+          assert i["swissEotDerivativeCertified"] is True
+          assert i["independentSwissDerivativeCertified"] is True
+          assert i["analyticResidualDerivativeEnvelopeWithinBudget"] is True
+          assert i["productionRuntimeFloatingPointContinuityCertified"] is False
+          assert i["continuousResidualUpperBound"] is False
+          assert i["deterministicMembership"] is False
+          assert i["recurrenceAuthorityGranted"] is False
+          PY
+
+      - name: Upload successful source-derived sidereal evidence
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swiss-long-term-sidereal-bound-4006
+          path: |
+            tmp/swiss-long-term-sidereal-bound-4006/raw.json
+            tmp/swiss-long-term-sidereal-bound-4006/manifest.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
