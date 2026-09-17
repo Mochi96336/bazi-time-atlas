@@ -71,14 +71,23 @@ const readoutBottom = numberAttr(probe, "data-readout-bottom", page.url);
 const readoutBottomGap = numberAttr(probe, "data-readout-bottom-gap", page.url);
 const toolbarTop = numberAttr(probe, "data-toolbar-top", page.url);
 const toolbarBottom = numberAttr(probe, "data-toolbar-bottom", page.url);
+const toolbarLeft = numberAttr(probe, "data-toolbar-left", page.url);
+const toolbarRight = numberAttr(probe, "data-toolbar-right", page.url);
 const legendTop = numberAttr(probe, "data-legend-top", page.url);
 const legendBottom = numberAttr(probe, "data-legend-bottom", page.url);
+const legendLeft = numberAttr(probe, "data-legend-left", page.url);
+const legendRight = numberAttr(probe, "data-legend-right", page.url);
+const closeTop = numberAttr(probe, "data-close-top", page.url);
+const closeBottom = numberAttr(probe, "data-close-bottom", page.url);
+const closeRight = numberAttr(probe, "data-close-right", page.url);
 const evidenceTop = numberAttr(probe, "data-evidence-top", page.url);
 const evidenceBottom = numberAttr(probe, "data-evidence-bottom", page.url);
 const toolbarFont = numberAttr(probe, "data-toolbar-font", page.url);
 const legendFont = numberAttr(probe, "data-legend-font", page.url);
 const evidenceValueFont = numberAttr(probe, "data-evidence-value-font", page.url);
 const closeFont = numberAttr(probe, "data-close-font", page.url);
+const toolbarBaseline = numberAttr(probe, "data-toolbar-baseline", page.url);
+const legendBaseline = numberAttr(probe, "data-legend-baseline", page.url);
 const hourVisibleLabels = numberAttr(probe, "data-hour-visible-labels", page.url);
 const dayVisibleLabels = numberAttr(probe, "data-day-visible-labels", page.url);
 
@@ -113,6 +122,26 @@ if (evidenceBottom >= readoutTop) {
   throw new Error(`wide desktop: evidence rail intrudes into the Selected Instant region (${evidenceBottom} >= ${readoutTop}): ${page.url}`);
 }
 
+const railTolerance = 1.5;
+if (Math.abs(toolbarLeft - legendLeft) > railTolerance || Math.abs(toolbarRight - legendRight) > railTolerance) {
+  throw new Error(
+    `wide desktop: Tools rows do not share one horizontal instrument frame ` +
+    `(toolbar=${toolbarLeft}-${toolbarRight}, legend=${legendLeft}-${legendRight}): ${page.url}`
+  );
+}
+if (closeTop < legendTop - railTolerance || closeBottom > legendBottom + railTolerance || Math.abs(closeRight - legendRight) > railTolerance) {
+  throw new Error(
+    `wide desktop: Done action is detached from the secondary Tools rail ` +
+    `(close=${closeTop}-${closeBottom}@${closeRight}, legend=${legendTop}-${legendBottom}@${legendRight}): ${page.url}`
+  );
+}
+if (toolbarBaseline < 0.9 || legendBaseline < 0.9) {
+  throw new Error(
+    `wide desktop: Tools rows lost their etched visual baselines ` +
+    `(toolbar=${toolbarBaseline}, legend=${legendBaseline}): ${page.url}`
+  );
+}
+
 if (toolbarFont < 10 || legendFont < 9 || evidenceValueFont < 10 || closeFont < 9) {
   throw new Error(
     `wide desktop: control/evidence type fell below readable floor ` +
@@ -130,6 +159,7 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 console.log(
   `[wide-desktop] PASS 2047x1038 composition; ` +
   `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, ` +
+  `rails=${toolbarLeft}-${toolbarRight}/${legendLeft}-${legendRight}, ` +
   `fonts=${toolbarFont}/${legendFont}/${evidenceValueFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );
