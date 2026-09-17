@@ -16,10 +16,13 @@ import { RING_VISIBILITY_EVENT, ringIsVisible } from "./ring-visibility.js";
 
 const DETENT_EPSILON = 1e-9;
 
-function screenToWorld(svg, clientX, clientY) {
+function screenInverse(svg) {
   const matrix = svg.getScreenCTM();
-  if (!matrix) return null;
-  const inverse = matrix.inverse();
+  return matrix ? matrix.inverse() : null;
+}
+
+function screenToWorld(svg, clientX, clientY, inverse = screenInverse(svg)) {
+  if (!inverse) return null;
   if (typeof DOMPoint === "function") {
     const point = new DOMPoint(clientX, clientY).matrixTransform(inverse);
     return { x: point.x, y: point.y };
@@ -283,8 +286,8 @@ export function createRingDragController({
     updatePointerStyle();
   }
 
-  function applyPointerSample(sample) {
-    const world = screenToWorld(svg, sample.clientX, sample.clientY);
+  function applyPointerSample(sample, inverse) {
+    const world = screenToWorld(svg, sample.clientX, sample.clientY, inverse);
     if (!world || !active) return;
     const nextAngle = angleAt(WHEEL_CENTER, world);
     const delta = shortestAngleDelta(nextAngle, active.lastAngle);
@@ -306,6 +309,12 @@ export function createRingDragController({
     applyGestureDelta(active, deltaToApply, "drag");
   }
 
+  function applyPointerEventSamples(event) {
+    const inverse = screenInverse(svg);
+    if (!inverse) return;
+    for (const sample of pointerSamples(event)) applyPointerSample(sample, inverse);
+  }
+
   function move(event) {
     if (!active) {
       updateHover(event);
@@ -313,14 +322,12 @@ export function createRingDragController({
     }
     if (event.pointerId !== active.pointerId) return;
     event.preventDefault();
-    for (const sample of pointerSamples(event)) applyPointerSample(sample);
+    applyPointerEventSamples(event);
   }
 
   function finish(event, { allowInertia = true } = {}) {
     if (!active || event.pointerId !== active.pointerId) return;
-    if (allowInertia) {
-      for (const sample of pointerSamples(event)) applyPointerSample(sample);
-    }
+    if (allowInertia) applyPointerEventSamples(event);
     const gesture = active;
     active = null;
     delete svg.dataset.activeRing;
