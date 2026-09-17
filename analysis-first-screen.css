@@ -1,3 +1,5 @@
+@import "./graphite-m2-material.css";
+
 /* Desktop Analysis is a lens over the same radial instrument, not a second
    dashboard around it. Keep all capabilities reachable while flattening the
    persistent chrome that competes with the wheel. Mobile keeps its dedicated
@@ -78,11 +80,12 @@
   #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
     min-height: 22px;
     border: 0;
-    border-bottom: 1px solid rgba(236,239,239,.16);
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
     border-radius: 0;
     padding: 0 16px 0 4px;
     color: #aeb2b2;
     background: transparent;
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
     backdrop-filter: none;
   }
   #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
@@ -151,10 +154,11 @@
     grid-template-columns: minmax(160px, 200px) 1fr auto;
     gap: 10px;
     border: 0;
-    border-top: 1px solid rgba(236,239,239,.08);
+    border-top: 1px solid var(--m2-etched-dark-soft);
     border-radius: 0;
     padding: 7px 0 0;
     background: transparent;
+    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
     opacity: .64;
   }
   #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock:hover,
@@ -169,11 +173,11 @@
   }
   #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field input {
     border: 0;
-    border-bottom: 1px solid rgba(236,239,239,.12);
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
     border-radius: 0;
     padding: 5px 3px;
     background: transparent;
-    box-shadow: none;
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
     font-size: 9px;
   }
   #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-wrap {
