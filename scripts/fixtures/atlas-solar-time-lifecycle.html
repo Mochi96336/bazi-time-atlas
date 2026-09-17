@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atlas solar-time longitude lifecycle harness</title>
+  <style>
+    html, body { margin:0; width:390px; background:#0b0f0c; }
+    #stage { display:block; width:390px; height:1200px; border:0; opacity:0; pointer-events:none; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Atlas solar-time lifecycle production harness"></iframe>
+  <output id="probe" data-ready="false"></output>
+
+  <script type="module">
+    const INSTANT = "2005-12-23T14:55:00.000Z";
+    const EXPECTED_SELECTED_MS = String(Date.parse(INSTANT));
+    const EXPECTED_PILLARS = "乙酉|戊子|辛巳|己亥";
+    const probe = document.querySelector("#probe");
+    const frame = document.querySelector("#stage");
+
+    function appUrl() {
+      const url = new URL("../../", location.href);
+      url.searchParams.set("instant", INSTANT);
+      url.searchParams.set("analysis", "1");
+      url.searchParams.set("lon", "121.5");
+      return url.href;
+    }
+
+    function settle() {
+      return new Promise(resolve => setTimeout(resolve, 120));
+    }
+
+    async function waitFor(predicate, label, timeoutMs = 5000) {
+      const started = performance.now();
+      while (performance.now() - started < timeoutMs) {
+        if (predicate()) return;
+        await new Promise(resolve => setTimeout(resolve, 25));
+      }
+      throw new Error(`timeout waiting for ${label}`);
+    }
+
+    function production() {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const panel = doc?.querySelector("#atlas-solar-time-analysis");
+      const input = doc?.querySelector("#atlas-solar-longitude");
+      const playButton = doc?.querySelector("#play-button");
+      if (!win || !doc || !instrument || !panel || !input || !playButton) return null;
+      return { win, doc, instrument, panel, input, playButton };
+    }
+
+    function pillarSignature(doc) {
+      return ["state-year", "state-month", "state-day", "state-hour"]
+        .map(id => doc.querySelector(`#${id}`)?.textContent?.trim() ?? "")
+        .join("|");
+    }
+
+    function snapshot(p) {
+      return {
+        selectedMs:p.instrument.dataset.selectedInstantMs ?? "",
+        scale:p.instrument.dataset.scaleWindow ?? "",
+        playback:p.playButton.getAttribute("aria-pressed") ?? "",
+        pillars:pillarSignature(p.doc),
+        urlLon:new URL(p.win.location.href).searchParams.get("lon") ?? "",
+        bound:p.panel.dataset.longitudeBound ?? "",
+        longitude:p.panel.dataset.longitude ?? "",
+        invalid:p.input.getAttribute("aria-invalid") ?? "false"
+      };
+    }
+
+    function writeSnapshot(prefix, value) {
+      for (const [field, raw] of Object.entries(value)) {
+        probe.dataset[`${prefix}${field[0].toUpperCase()}${field.slice(1)}`] = String(raw);
+      }
+    }
+
+    function dispatchEdit(p, value) {
+      p.input.value = value;
+      p.input.dispatchEvent(new p.win.Event("input", { bubbles:true }));
+      p.input.dispatchEvent(new p.win.Event("change", { bubbles:true }));
+    }
+
+    function assertAuthorityInvariant(label, value, baseline) {
+      if (value.selectedMs !== EXPECTED_SELECTED_MS || value.selectedMs !== baseline.selectedMs) {
+        throw new Error(`${label} changed Selected Instant: ${JSON.stringify(value)}`);
+      }
+      if (value.scale !== baseline.scale || value.playback !== baseline.playback) {
+        throw new Error(`${label} changed scale/playback authority: ${JSON.stringify(value)}`);
+      }
+      if (value.pillars !== EXPECTED_PILLARS || value.pillars !== baseline.pillars) {
+        throw new Error(`${label} changed canonical pillars: ${JSON.stringify(value)}`);
+      }
+    }
+
+    try {
+      const loaded = new Promise(resolve => frame.addEventListener("load", resolve, { once:true }));
+      frame.src = appUrl();
+      await loaded;
+      await waitFor(() => {
+        const p = production();
+        return p &&
+          p.instrument.dataset.selectedInstantMs === EXPECTED_SELECTED_MS &&
+          p.panel.dataset.ready === "true" &&
+          p.panel.dataset.longitudeBound === "true" &&
+          p.panel.dataset.longitude === "121.5000";
+      }, "initial explicit-longitude analysis state");
+      await settle();
+
+      const p = production();
+      if (!p) throw new Error("production solar-time analysis unavailable");
+      const before = snapshot(p);
+      if (before.urlLon !== "121.5" || before.invalid !== "false") {
+        throw new Error(`initial explicit longitude was not shareable: ${JSON.stringify(before)}`);
+      }
+      assertAuthorityInvariant("baseline", before, before);
+
+      dispatchEdit(p, "999");
+      await waitFor(() => p.panel.dataset.longitudeBound === "false" && p.input.getAttribute("aria-invalid") === "true", "invalid longitude fail-closed state");
+      await settle();
+      const invalid = snapshot(p);
+      if (invalid.urlLon !== "121.5" || invalid.bound !== "false" || invalid.invalid !== "true") {
+        throw new Error(`invalid edit changed URL authority or failed open: ${JSON.stringify(invalid)}`);
+      }
+      assertAuthorityInvariant("invalid edit", invalid, before);
+
+      dispatchEdit(p, "120");
+      await waitFor(() => p.panel.dataset.longitudeBound === "true" && p.panel.dataset.longitude === "120.0000" && new URL(p.win.location.href).searchParams.get("lon") === "120", "valid longitude persistence");
+      await settle();
+      const valid = snapshot(p);
+      if (valid.urlLon !== "120" || valid.bound !== "true" || valid.invalid !== "false") {
+        throw new Error(`valid edit did not persist/share cleanly: ${JSON.stringify(valid)}`);
+      }
+      assertAuthorityInvariant("valid edit", valid, before);
+
+      dispatchEdit(p, "");
+      await waitFor(() => p.panel.dataset.longitudeBound === "false" && !new URL(p.win.location.href).searchParams.has("lon"), "explicit longitude clear");
+      await settle();
+      const cleared = snapshot(p);
+      if (cleared.urlLon !== "" || cleared.bound !== "false" || cleared.invalid !== "false") {
+        throw new Error(`explicit clear did not return to unbound state: ${JSON.stringify(cleared)}`);
+      }
+      assertAuthorityInvariant("explicit clear", cleared, before);
+
+      writeSnapshot("before", before);
+      writeSnapshot("invalid", invalid);
+      writeSnapshot("valid", valid);
+      writeSnapshot("cleared", cleared);
+      probe.dataset.ready = "true";
+    } catch (error) {
+      probe.dataset.error = error?.stack ?? String(error);
+      probe.dataset.ready = "error";
+    }
+  </script>
+</body>
+</html>
