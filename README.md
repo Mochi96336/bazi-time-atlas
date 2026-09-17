@@ -11,7 +11,7 @@ The current landing page is not an annual horoscope dashboard. It is a large kin
 The main instrument uses one shared SVG-world center and one Selected Instant. Its five primary time rings are ordered from faster/smaller scale on the inside to slower/larger scale on the outside:
 
 1. **Hour** — 60-state pillar wheel; double-hour boundaries.
-2. **Day** — 60-state pillar wheel; current atlas uses the Zi-initial 23:00 day-boundary convention.
+2. **Day** — 60-state pillar wheel; default Atlas context uses the Zi-initial 23:00 day-boundary convention.
 3. **Solar annual band** — continuous apparent solar longitude; 24 solar terms plus the tropical-zodiac classification sub-band.
 4. **Month** — 60-state pillar wheel; changes only at exact **jie** boundaries.
 5. **Year** — 60-state pillar wheel; changes at exact Li Chun.
@@ -28,8 +28,10 @@ The instrument currently supports:
 - scale-dependent visual emphasis;
 - primary-layer visibility isolation;
 - separate BaZi Five-Phase and Western zodiac element/modality classification overlays;
+- one explicit fixed-offset/day-boundary temporal context, with UTC+08:00 + Zi-initial 23:00 as the production default and explicit supported overrides persisted canonically in Atlas URLs;
+- explicit-longitude civil / local-mean-solar / local-apparent-solar Day-Hour sensitivity analysis that never infers longitude from UTC offset;
 - true 390 px mobile composition plus desktop framing;
-- reproducible deep links for selected instants and legacy annual projections.
+- reproducible deep links for selected instants, temporal context and legacy annual projections.
 
 ### Birth
 
@@ -56,17 +58,19 @@ It contains Gregorian/sexagenary recurrence work, astronomical residuals, near-r
 The repository treats these as hard boundaries:
 
 - one Selected Instant is authoritative for the kinetic atlas;
+- temporal context may reinterpret that same instant but must not silently move it;
+- UTC offset is not geographic longitude;
 - Year changes at exact Li Chun;
 - Month changes at exact **jie**;
-- Day follows the configured day-boundary convention;
-- Hour follows its double-hour boundary rule;
+- Day follows the configured canonical day-boundary convention;
+- Hour follows its double-hour boundary rule under the selected fixed-offset civil context;
 - continuous solar phase never fabricates intermediate discrete Ganzhi identities;
 - shared-boundary highlighting requires identical resolved timestamps, not visual collinearity;
 - Zodiac is a classification over Solar longitude, not an independent time coordinate;
 - Chinese Five Phases and Western four-element/modality classifications remain distinct systems;
 - deep-time model coverage must not be stretched past the declared source or transformation coverage.
 
-See [`docs/current-status.md`](docs/current-status.md) for the current normative implementation checkpoint.
+See [`docs/current-status.md`](docs/current-status.md) for the current product/implementation checkpoint and [`docs/architecture-contracts.md`](docs/architecture-contracts.md) for the normative cross-cutting contracts.
 
 ## Architecture
 
@@ -125,16 +129,21 @@ Core GitHub-maintained checkout/setup/artifact actions are on their Node-24 acti
 
 ## Deep-time boundary
 
-The repository now contains an app-owned seasonal-crossing solver core over injected absolute Earth/Sun states, but that is not the same thing as having a production DE441 pipeline. Production deep-time seasonal epochs remain fail-closed until a real state adapter plus the required apparent-direction and mean-ecliptic-of-date transformation chain are integrated and validated for the target era.
+The repository contains an app-owned absolute-state seasonal-crossing proof chain and a bounded production seasonal-event data path, but those two authorities remain deliberately distinct.
+
+For catalogue year **4006**, the independently validated DE441/Horizons-backed crossing proof resolves all 24 canonical 15° events inside the declared two-second promotion budget. Production publishes that reviewed target-year result through the direct-event provider `jpl-de441-seasonal-events-v1`, with TT time basis and coverage limited to year 4006.
+
+That bounded runtime slice is **not** a general DE441 state adapter and does not authorize the full DE441 source ephemeris range. Generic on-demand absolute-state runtime coverage remains fail-closed unless a separately reviewed adapter, bundled source data and declared runtime coverage are introduced.
 
 Pinned independent evidence also prevents the direct ShouXing path from being silently widened to year 4006: the research pipeline works, but the target-year error exceeds the promotion budget.
 
-An absolute seasonal epoch alone is still insufficient to prove deep-time Day/Hour pillars; Earth rotation / TT↔UT / ΔT, civil-zone policy, day-boundary convention and clock-basis rules remain separate proof stages.
+An absolute seasonal epoch alone is still insufficient to prove deep-time Day/Hour pillars; Earth rotation / TT↔UT1 / ΔT, local-zone policy, day-boundary convention, selected clock basis and longitude when required remain separate proof stages.
 
 ## Documentation roles
 
-- [`docs/current-status.md`](docs/current-status.md) — current normative implementation and regression boundary.
+- [`docs/current-status.md`](docs/current-status.md) — current product/implementation checkpoint and release frontier.
+- [`docs/architecture-contracts.md`](docs/architecture-contracts.md) — normative cross-cutting architecture and authority contracts.
 - [`docs/camera-ownership.md`](docs/camera-ownership.md) — current camera/world ownership contract.
 - [`docs/kinetic-atlas-plan.md`](docs/kinetic-atlas-plan.md) — historical redesign plan retained for design rationale; superseded details are not normative.
 
-When documentation and implementation disagree, update the normative checkpoint together with the code rather than treating an old roadmap as current behavior.
+When documentation and implementation disagree, reconcile the responsible current document with production behavior and regression evidence rather than allowing an older statement to become a competing authority.
