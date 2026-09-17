@@ -1,12 +1,17 @@
+@import "./graphite-m2-material.css";
+
 .atlas-solar-time-analysis[hidden] { display: none !important; }
 
 .atlas-solar-time-analysis {
   width: min(1120px, calc(100% - 36px));
   margin: 14px auto 4px;
-  border-top: 1px solid color-mix(in srgb, var(--hairline) 100%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  border-bottom: 1px solid var(--m2-etched-dark-soft);
   padding: 13px 0 14px;
   color: var(--muted);
+  box-shadow:
+    inset 0 1px 0 var(--m2-etched-light-soft),
+    inset 0 -1px 0 var(--m2-etched-light-soft);
 }
 
 .atlas-solar-analysis-head {
@@ -45,10 +50,11 @@
   min-width: 0;
   height: 30px;
   border: 0;
-  border-bottom: 1px solid rgba(235,238,236,.20);
+  border-bottom: 1px solid var(--m2-etched-dark-soft);
   border-radius: 0;
   padding: 0 3px;
   background: transparent;
+  box-shadow: 0 1px 0 var(--m2-etched-light-soft);
   color: var(--ink);
   color-scheme: dark;
   font: inherit;
@@ -83,8 +89,9 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
+  border-top: 1px solid var(--m2-etched-dark-soft);
   padding-top: 8px;
+  box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
 }
 .atlas-solar-corrections span {
   display: flex;
@@ -125,8 +132,9 @@
   grid-template-columns: 1fr auto auto;
   gap: 8px;
   align-items: baseline;
-  border-top: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
+  border-top: 1px solid var(--m2-etched-dark-soft);
   padding-top: 7px;
+  box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
 }
 .atlas-solar-basis-row > span {
   display: grid;
