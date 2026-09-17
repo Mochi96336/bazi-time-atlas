@@ -25,6 +25,7 @@
     const SECOND_MS = 1_000;
     const DRAG_DEGREES = 0.25;
     const START_ANGLE = -90;
+    const MID_ANGLE = START_ANGLE + DRAG_DEGREES / 2;
     const END_ANGLE = START_ANGLE + DRAG_DEGREES;
     const probe = document.querySelector("#probe");
 
@@ -174,6 +175,10 @@
       await settle();
       const active = snapshot(g, ringId);
 
+      // Two semantic pointer steps land before one display commit. The final
+      // state must include both deltas even though presentation/diagnostics are
+      // frame-batched.
+      g.svg.dispatchEvent(pointerAt(g, radius, MID_ANGLE, "pointermove", pointerId));
       g.svg.dispatchEvent(pointerAt(g, radius, END_ANGLE, "pointermove", pointerId));
       // Production intentionally commits pointer-drag presentation at most once
       // per display frame. Observe the pose only after that scheduled commit.
