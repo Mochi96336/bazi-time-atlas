@@ -173,7 +173,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
     const previousIndex = lastActiveCycleIndex.get(id);
     const staticLabels = cycleStaticLabels.get(id);
-    if (Number.isInteger(previousIndex) && previousIndex !== activeIndex) {
+    const indexChanged = previousIndex !== activeIndex;
+    if (Number.isInteger(previousIndex) && indexChanged) {
       staticLabels?.get(previousIndex)?.classList.remove("is-active-shadowed");
     }
 
@@ -202,13 +203,17 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     node.setAttribute("x", String(point.x));
     node.setAttribute("y", String(point.y));
     node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
-    node.setAttribute("data-cycle-index", String(activeIndex));
-    node.setAttribute("data-cycle-label", label);
+    if (indexChanged) {
+      node.setAttribute("data-cycle-index", String(activeIndex));
+      node.setAttribute("data-cycle-label", label);
+    }
     node.setAttribute("data-cycle-coordinate", coordinate.toFixed(6));
-    node.setAttribute("visibility", "visible");
-    node.textContent = label;
-    staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
-    lastActiveCycleIndex.set(id, activeIndex);
+    if (indexChanged) {
+      node.setAttribute("visibility", "visible");
+      node.textContent = label;
+      staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
+      lastActiveCycleIndex.set(id, activeIndex);
+    }
   }
 
   function updateActiveAnnualLabel(kind, activeIndex, coordinate) {
@@ -217,7 +222,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     if (!node) return;
 
     const previousIndex = lastActiveAnnualIndex.get(kind);
-    if (Number.isInteger(previousIndex) && previousIndex !== activeIndex) {
+    const indexChanged = previousIndex !== activeIndex;
+    if (Number.isInteger(previousIndex) && indexChanged) {
       staticLabels[previousIndex]?.removeAttribute("visibility");
     }
 
@@ -240,13 +246,17 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     node.setAttribute("x", String(point.x));
     node.setAttribute("y", String(point.y));
     node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
-    node.setAttribute("data-annual-index", String(activeIndex));
-    node.setAttribute("data-annual-label", label);
+    if (indexChanged) {
+      node.setAttribute("data-annual-index", String(activeIndex));
+      node.setAttribute("data-annual-label", label);
+    }
     node.setAttribute("data-annual-coordinate", coordinate.toFixed(6));
-    node.setAttribute("visibility", "visible");
-    node.textContent = label;
-    staticLabels[activeIndex]?.setAttribute("visibility", "hidden");
-    lastActiveAnnualIndex.set(kind, activeIndex);
+    if (indexChanged) {
+      node.setAttribute("visibility", "visible");
+      node.textContent = label;
+      staticLabels[activeIndex]?.setAttribute("visibility", "hidden");
+      lastActiveAnnualIndex.set(kind, activeIndex);
+    }
   }
 
   function renderSolarRing() {
