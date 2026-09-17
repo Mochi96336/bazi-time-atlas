@@ -83,7 +83,7 @@ installSolarTimeStyles();
 installInverseTimeSearchStyles();
 installAtlasSolarTimeAnalysis(instrument);
 installAtlasVisibleTenGods(instrument);
-installInverseTimeSearch(instrument);
+const inverseTimeSearch = installInverseTimeSearch(instrument);
 // atlas-visible-ten-gods installs its own stylesheet dynamically. Install the
 // final desktop polish afterwards so it can flatten that panel without changing
 // the component's data/lifecycle ownership or compact/mobile CSS.
@@ -101,4 +101,9 @@ document.addEventListener("keydown", event => {
 });
 
 const params = new URLSearchParams(location.search);
-setAnalysisOpen(params.get("analysis") === "1" || params.get("classification") === "1");
+const toolsRequested = params.get("tools") === "1"
+  || params.get("analysis") === "1"
+  || params.get("classification") === "1"
+  || params.get("findTime") === "1";
+setAnalysisOpen(toolsRequested);
+if (params.get("findTime") === "1") inverseTimeSearch?.enterMode();
