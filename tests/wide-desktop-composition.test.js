@@ -44,14 +44,26 @@ test("wide Analysis readability pass strengthens chrome and fast-ring context wi
 
 test("wide Tools rows share one instrument header frame", () => {
   assert.match(analysisMode, /installAnalysisFirstScreenPolishStyles\(\);[\s\S]*?installAnalysisToolsRailStyles\(\);/);
+  assert.match(toolsRail, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(toolsRail, /@media \(min-width: 1600px\)/);
   assert.match(
     toolsRail,
     /\.instrument-toolbar,[\s\S]*?\.ring-legend\s*\{[\s\S]*?left:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?max-width:\s*none;/
   );
-  assert.match(toolsRail, /\.instrument-toolbar\s*\{[\s\S]*?min-height:\s*36px;[\s\S]*?border-bottom:\s*1px solid/);
-  assert.match(toolsRail, /\.ring-legend\s*\{[\s\S]*?top:\s*48px;[\s\S]*?padding:\s*0 64px 4px 0;[\s\S]*?flex-wrap:\s*nowrap;[\s\S]*?border-bottom:\s*1px solid/);
-  assert.match(toolsRail, /\.analysis-close\s*\{[\s\S]*?top:\s*50px;[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?border-left:\s*1px solid/);
+  assert.match(
+    toolsRail,
+    /\.instrument-toolbar\s*\{[\s\S]*?min-height:\s*36px;[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.match(
+    toolsRail,
+    /\.ring-legend\s*\{[\s\S]*?top:\s*48px;[\s\S]*?padding:\s*0 64px 4px 0;[\s\S]*?flex-wrap:\s*nowrap;[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.match(
+    toolsRail,
+    /\.analysis-close\s*\{[\s\S]*?top:\s*50px;[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?border-left:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*inset 1px 0 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.doesNotMatch(toolsRail, /border-(?:bottom|left):\s*1px solid rgba\(/);
+  assert.doesNotMatch(toolsRail, /(?:background|border-radius):\s*[^;]+;/);
   assert.doesNotMatch(toolsRail, /(?:viewBox|#kinetic-wheel|#(?:year|month|day|hour|solar)-track)/);
 });
 
