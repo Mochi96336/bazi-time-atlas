@@ -15,7 +15,7 @@ test("discrete presentation removes duplicate top scope copy", () => {
 });
 
 test("global period meaning is attached to the preset instead of a duplicate static readout", () => {
-  assert.match(view, /button\[data-delta-years=\\"24000\\"\]/);
+  assert.match(view, /button\[data-delta-years="24000"\]/);
   assert.match(view, /preset\.textContent = "全域 24,000"/);
   assert.match(view, /preset\.setAttribute\("aria-label", "三層全域閉合 24,000 年"\)/);
   assert.match(view, /preset\.dataset\.researchGlobalPeriodPreset = "1"/);
