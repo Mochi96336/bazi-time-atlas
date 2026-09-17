@@ -62,7 +62,16 @@ test("year hierarchy no longer borrows the warm Solar or Selected-Instant channe
   assert.doesNotMatch(hierarchy, /#fff2c9/);
   assert.doesNotMatch(hierarchy, /rgba\(244,236,207/);
   assert.match(hierarchy, /#year-track \.active-cycle-label \{[\s\S]*?fill:\s*#f2f3f2;/);
-  assert.match(hierarchy, /#year-track \.ring-tick\.major \{ stroke: rgba\(235,238,236,.44\);/);
+  assert.match(
+    hierarchy,
+    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*var\(--m2-etched-dark-soft\);/
+  );
+  assert.match(hierarchy, /#year-track \.ring-tick\.major \{ stroke-width: 1\.35; \}/);
+  assert.doesNotMatch(
+    hierarchy,
+    /#(?:hour|day|month|year)-track \.ring-tick\.major \{[^}]*opacity:/,
+    "M2 major-tick styling must not steal scale-emphasis opacity ownership"
+  );
   assert.match(atlas, /--cursor:\s*#f4dda0;/);
 });
 

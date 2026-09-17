@@ -1,3 +1,5 @@
+@import "./graphite-m2-material.css";
+
 /* Radial hierarchy: short cycles inside, long cycles outside.
    This sheet changes presentation only. Ring geometry, motion and boundary
    semantics remain owned by the wheel model and renderer. */
@@ -131,16 +133,34 @@
 
 /* Every six-degree boundary still exists as a short engraved tick, but only each
    fifth boundary reads as structural. Minor marks stay close to the graphite
-   surface; major marks catch a little more light, approximating a shallow etched
-   edge without introducing bevel filters or texture noise. */
+   surface. Major marks are the actual machined edge: a dark cut plus a one-pixel
+   lower reflection from the same top-lit M2 model used by recessed rails. Only
+   these sparse structural marks receive the offset edge; data sectors stay flat.
+   Scale emphasis remains the sole owner of structural opacity. */
 #hour-track .ring-tick { stroke: rgba(235,238,236,.045); }
 #day-track .ring-tick { stroke: rgba(235,238,236,.060); }
 #month-track .ring-tick { stroke: rgba(235,238,236,.085); }
 #year-track .ring-tick { stroke: rgba(235,238,236,.105); }
-#hour-track .ring-tick.major { stroke: rgba(235,238,236,.20); stroke-width: 1.05; }
-#day-track .ring-tick.major { stroke: rgba(235,238,236,.24); stroke-width: 1.1; }
-#month-track .ring-tick.major { stroke: rgba(235,238,236,.34); stroke-width: 1.2; }
-#year-track .ring-tick.major { stroke: rgba(235,238,236,.44); stroke-width: 1.35; }
+#hour-track .ring-tick.major,
+#day-track .ring-tick.major,
+#month-track .ring-tick.major,
+#year-track .ring-tick.major {
+  stroke: var(--m2-etched-dark-soft);
+  filter: drop-shadow(0 1px 0 var(--m2-etched-light));
+}
+#hour-track .ring-tick.major { stroke-width: 1.05; }
+#day-track .ring-tick.major { stroke-width: 1.1; }
+#month-track .ring-tick.major { stroke-width: 1.2; }
+#year-track .ring-tick.major { stroke-width: 1.35; }
+
+/* The concentric guide radii are instrument structure rather than temporal data.
+   Give only those neutral guides the same shallow cut/lower-reflection pair.
+   The annual Solar subdivision remains a semantic brass guide and is excluded. */
+#guide-layer .guide-arc:not(.annual-subdivide) {
+  stroke: var(--m2-etched-dark-soft);
+  stroke-width: 1;
+  filter: drop-shadow(0 1px 0 var(--m2-etched-light-soft));
+}
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
    not two more peer clocks. Matte brass stays warmer than the graphite but does

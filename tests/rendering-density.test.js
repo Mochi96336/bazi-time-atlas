@@ -27,7 +27,14 @@ test("sixty-step structure uses short minor ticks and longer five-step anchors",
 
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.match(hierarchy, new RegExp(`#${ring}-track \\.ring-tick \\{ stroke: rgba\\(`));
-    assert.match(hierarchy, new RegExp(`#${ring}-track \\.ring-tick\\.major \\{ stroke: rgba\\(`));
+  }
+
+  assert.match(
+    hierarchy,
+    /#hour-track \.ring-tick\.major,\s*\n#day-track \.ring-tick\.major,\s*\n#month-track \.ring-tick\.major,\s*\n#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*var\(--m2-etched-dark-soft\);/
+  );
+  for (const ring of ["hour", "day", "month", "year"]) {
+    assert.match(hierarchy, new RegExp(`#${ring}-track \\.ring-tick\\.major \\{ stroke-width:`));
   }
 });
 
