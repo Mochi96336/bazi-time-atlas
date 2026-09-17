@@ -59,9 +59,12 @@
       const toolbarRect = rect(toolbar);
       const legendRect = rect(legend);
       const evidenceRect = rect(evidence);
+      const closeRect = rect(close);
       const evidenceStyle = win.getComputedStyle(evidenceValue);
       const toolbarStyle = win.getComputedStyle(toolbarButton);
+      const toolbarFrameStyle = win.getComputedStyle(toolbar);
       const legendStyle = win.getComputedStyle(legendLabel);
+      const legendFrameStyle = win.getComputedStyle(legend);
       const closeStyle = win.getComputedStyle(close);
 
       Object.assign(probe.dataset, {
@@ -79,14 +82,23 @@
         readoutBottomGap: round(win.innerHeight - readoutRect.bottom),
         toolbarTop: round(toolbarRect.top),
         toolbarBottom: round(toolbarRect.bottom),
+        toolbarLeft: round(toolbarRect.left),
+        toolbarRight: round(toolbarRect.right),
         legendTop: round(legendRect.top),
         legendBottom: round(legendRect.bottom),
+        legendLeft: round(legendRect.left),
+        legendRight: round(legendRect.right),
+        closeTop: round(closeRect.top),
+        closeBottom: round(closeRect.bottom),
+        closeRight: round(closeRect.right),
         evidenceTop: round(evidenceRect.top),
         evidenceBottom: round(evidenceRect.bottom),
         toolbarFont: round(num(toolbarStyle.fontSize)),
         legendFont: round(num(legendStyle.fontSize)),
         evidenceValueFont: round(num(evidenceStyle.fontSize)),
         closeFont: round(num(closeStyle.fontSize)),
+        toolbarBaseline: round(num(toolbarFrameStyle.borderBottomWidth)),
+        legendBaseline: round(num(legendFrameStyle.borderBottomWidth)),
         hourVisibleLabels: String(displayVisibleCount(win, hourLabels)),
         dayVisibleLabels: String(displayVisibleCount(win, dayLabels)),
       });
