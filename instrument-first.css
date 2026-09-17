@@ -128,17 +128,19 @@
   }
 }
 
-/* Ordinary reading keeps observation-window choice, but not transport or
-   classification chrome. The scale presets are lenses over one fixed wheel,
-   so hiding them would remove a primary reading affordance rather than noise. */
+/* Ordinary reading should not advertise engineering observation-window presets
+   as three peer navigation modes. Keep the underlying scale controls in the DOM
+   for Analysis and research tooling, but remove them from the normal reading
+   path together with transport/classification chrome. */
+#kinetic-instrument:not([data-analysis-open="true"]) .scale-button,
 #kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button,
 #kinetic-instrument:not([data-analysis-open="true"]) #play-button {
   display: none;
 }
 
-/* Observation-window choice and Now are one time-navigation cluster. Keep the
-   Analysis entry separate as a mode switch instead of scattering time actions
-   across opposite corners of the instrument. */
+/* Now remains the only ordinary time-navigation shortcut. Analysis keeps the
+   complete scale/transport controls when deliberate time-window exploration is
+   useful. */
 #kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar {
   justify-content: flex-start;
   align-items: center;
@@ -156,37 +158,6 @@
    measurement reference is useful, instead of repeating it on the main view. */
 #kinetic-instrument:not([data-analysis-open="true"]) #cursor-layer .cursor-note {
   display: none;
-}
-
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
-  min-height: 28px;
-  border: 0;
-  border-radius: 0;
-  padding: 0 8px;
-  color: #74797a;
-  background: transparent;
-  backdrop-filter: none;
-  box-shadow: none;
-  font-size: 0;
-}
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button::after {
-  font-size: 10px;
-  font-weight: 720;
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button[data-scale="day"]::after { content: "日內"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button[data-scale="year"]::after { content: "年度"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button[data-scale="cycle"]::after { content: "六十年"; }
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button:hover {
-  color: #bcc0bf;
-  border-color: transparent;
-}
-#kinetic-instrument:not([data-analysis-open="true"]) .scale-button.active {
-  color: #e5e8e7;
-  background: transparent;
-  border-color: transparent;
-  box-shadow: inset 0 -1px rgba(236, 239, 239, .52);
 }
 
 /* Now is a reset shortcut, not a peer mode. */
@@ -304,13 +275,6 @@
     display: none;
   }
 
-  #kinetic-instrument:not([data-analysis-open="true"]) .scale-button {
-    min-height: 26px;
-    padding-inline: 6px;
-  }
-  #kinetic-instrument:not([data-analysis-open="true"]) .scale-button::after {
-    font-size: 9px;
-  }
   #kinetic-instrument:not([data-analysis-open="true"]) #now-button {
     min-height: 26px;
     padding-inline: 5px;
