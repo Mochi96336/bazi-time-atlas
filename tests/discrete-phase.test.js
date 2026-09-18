@@ -150,3 +150,32 @@ test("phase marker sweeps only inside one six-degree active tooth", () => {
   assert.equal(phaseAngleWithinTooth(-1, 0.5), null);
   assert.equal(phaseAngleWithinTooth(60, 0.5), null);
 });
+
+
+test("composite phase windows reuse local civil fields without changing custom-context semantics", () => {
+  const instantMs = Date.parse("2027-03-15T15:30:00.000Z");
+  const context = {
+    utcOffsetHours: 9,
+    dayBoundary: DAY_BOUNDARY.CIVIL_MIDNIGHT
+  };
+  const phases = discretePhaseWindows(instantMs, context);
+  assert.deepEqual(phases.hour, hourPhaseWindow(instantMs, context));
+  assert.deepEqual(phases.day, dayPhaseWindow(instantMs, context));
+});
+
+test("composite phase windows share one normalized local-fields extraction", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(new URL("../src/wheel/discrete-phase.js", import.meta.url), "utf8");
+  const start = source.indexOf("export function discretePhaseWindows");
+  const end = source.indexOf("// Exact concurrence", start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const body = source.slice(start, end);
+
+  assert.match(body, /const context = normalizeAtlasTimeContext\(timeContext\);/);
+  assert.match(body, /const fields = localFieldsAt\(instantMs, context\);/);
+  assert.match(body, /hour: hourPhaseWindowFromFields\(instantMs, context, fields\)/);
+  assert.match(body, /day: dayPhaseWindowFromFields\(instantMs, context, fields\)/);
+  assert.doesNotMatch(body, /hourPhaseWindow\(instantMs, timeContext\)/);
+  assert.doesNotMatch(body, /dayPhaseWindow\(instantMs, timeContext\)/);
+});
