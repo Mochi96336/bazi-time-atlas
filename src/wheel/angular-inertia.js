@@ -2,13 +2,15 @@ export const ANGULAR_INERTIA_DEFAULTS = Object.freeze({
   sampleWindowMs: 100,
   maxSampleAgeMs: 50,
   launchSpeedDegPerMs: 0.025,
-  stopSpeedDegPerMs: 0.0035,
+  stopSpeedDegPerMs: 0.0005,
   timeConstantMs: 280,
   adaptiveLowSpeedDegPerMs: 0.04,
   adaptiveHighSpeedDegPerMs: 0.15,
   adaptiveLowTimeConstantMs: 200,
   adaptiveHighTimeConstantMs: 480,
-  maxTravelDegrees: 120,
+  releaseSoftLimitStartDegPerMs: 0.2,
+  releaseSoftLimitMaxDegPerMs: 0.4,
+  maxTravelDegrees: 240,
   maxFrameGapMs: 120
 });
 
@@ -274,6 +276,31 @@ export function stepAngularInertia({
     deltaDegrees: velocityDegPerMs * timeConstantMs * (1 - decay),
     velocityDegPerMs: velocityDegPerMs * decay
   });
+}
+
+
+export function softLimitAngularReleaseVelocity(
+  velocityDegPerMs,
+  {
+    startDegPerMs = ANGULAR_INERTIA_DEFAULTS.releaseSoftLimitStartDegPerMs,
+    maxDegPerMs = ANGULAR_INERTIA_DEFAULTS.releaseSoftLimitMaxDegPerMs
+  } = {}
+) {
+  if (!Number.isFinite(velocityDegPerMs)) return 0;
+  positiveFinite(startDegPerMs, "startDegPerMs");
+  positiveFinite(maxDegPerMs, "maxDegPerMs");
+  if (maxDegPerMs <= startDegPerMs) {
+    throw new RangeError("maxDegPerMs must exceed startDegPerMs");
+  }
+
+  const direction = Math.sign(velocityDegPerMs);
+  const speed = Math.abs(velocityDegPerMs);
+  if (speed <= startDegPerMs) return velocityDegPerMs;
+
+  const span = maxDegPerMs - startDegPerMs;
+  const softened = startDegPerMs
+    + span * Math.tanh((speed - startDegPerMs) / span);
+  return direction * softened;
 }
 
 export function shouldLaunchAngularInertia(
