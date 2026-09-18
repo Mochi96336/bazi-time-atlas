@@ -127,7 +127,8 @@
   #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row + .classification-row {
     margin-top: 4px;
     padding-top: 4px;
-    border-top-color: rgba(236,239,239,.055);
+    border-top-color: var(--m2-etched-dark-soft);
+    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
   }
   #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header {
     gap: 5px;
