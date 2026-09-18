@@ -125,12 +125,24 @@ test("coalesced pointer samples share one affine screen transform without DOM po
   assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 2) < 1e-9);
 
   svg.resetTransformCounters();
-  svg.dispatchCoalesced("pointerup", -87, 1, 80, [
-    { angle:-87.5, at:60 },
-    { angle:-87, at:80 }
-  ]);
+  svg.dispatchAt("pointermove", -87.5, 1, 60);
+  assert.equal(svg.ctmCalls, 1);
+  assert.equal(svg.inverseCalls, 1);
+  assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 2.5) < 1e-9);
 
+  svg.resetTransformCounters();
+  svg.dispatchCoalesced("pointermove", -87, 1, 80, []);
   assert.equal(svg.ctmCalls, 1);
   assert.equal(svg.inverseCalls, 1);
   assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 3) < 1e-9);
+
+  svg.resetTransformCounters();
+  svg.dispatchCoalesced("pointerup", -86, 1, 120, [
+    { angle:-86.5, at:100 },
+    { angle:-86, at:120 }
+  ]);
+  assert.equal(svg.ctmCalls, 1);
+  assert.equal(svg.inverseCalls, 1);
+  assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 4) < 1e-9);
 });
+
