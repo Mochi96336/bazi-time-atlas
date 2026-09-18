@@ -42,6 +42,15 @@ function installAnalysisToolsRailStyles() {
   document.head.append(stylesheet);
 }
 
+function installDesktopToolsWorkspaceStyles() {
+  if (document.querySelector("link[data-desktop-tools-workspace]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./desktop-tools-workspace.css";
+  stylesheet.dataset.desktopToolsWorkspace = "1";
+  document.head.append(stylesheet);
+}
+
 function installInverseTimeSearchStyles() {
   if (document.querySelector("link[data-inverse-time-search]")) return;
   const stylesheet = document.createElement("link");
@@ -100,6 +109,9 @@ installAnalysisFirstScreenPolishStyles();
 // Keep the geometry-only Tools header convergence last so it can align the two
 // existing chrome rows without changing any component's semantic ownership.
 installAnalysisToolsRailStyles();
+// Desktop edge-workspace geometry must load after component/tool styles so it
+// can relocate existing UI without changing any component's semantic ownership.
+installDesktopToolsWorkspaceStyles();
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false, { reset:true }));
 
