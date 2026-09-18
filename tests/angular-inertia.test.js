@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  ANGULAR_INERTIA_DEFAULTS,
   createAngularVelocityEstimator,
   shouldLaunchAngularInertia,
   stepAngularInertia
@@ -43,7 +44,11 @@ test("exponential integration is frame-rate independent", () => {
     let elapsed = 0;
     while (elapsed < 500) {
       const deltaTimeMs = Math.min(stepMs, 500 - elapsed);
-      const step = stepAngularInertia({ velocityDegPerMs, deltaTimeMs, timeConstantMs:220 });
+      const step = stepAngularInertia({
+        velocityDegPerMs,
+        deltaTimeMs,
+        timeConstantMs:ANGULAR_INERTIA_DEFAULTS.timeConstantMs
+      });
       degrees += step.deltaDegrees;
       velocityDegPerMs = step.velocityDegPerMs;
       elapsed += deltaTimeMs;
@@ -61,4 +66,18 @@ test("launch threshold and reduced motion suppress unwanted coasting", () => {
   assert.equal(shouldLaunchAngularInertia(0.024), false);
   assert.equal(shouldLaunchAngularInertia(0.025), true);
   assert.equal(shouldLaunchAngularInertia(-0.1, { reducedMotion:true }), false);
+});
+
+
+test("default inertia tail is softer while remaining instrument-bounded", () => {
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.launchSpeedDegPerMs, 0.025);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.stopSpeedDegPerMs, 0.0035);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.timeConstantMs, 280);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees, 40);
+
+  const releaseSpeedDegPerMs = 0.05;
+  const uncappedTravel = ANGULAR_INERTIA_DEFAULTS.timeConstantMs
+    * (releaseSpeedDegPerMs - ANGULAR_INERTIA_DEFAULTS.stopSpeedDegPerMs);
+  assert.ok(uncappedTravel > 12 && uncappedTravel < 14);
+  assert.ok(uncappedTravel < ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees);
 });
