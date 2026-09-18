@@ -6,6 +6,7 @@ import {
   adaptiveAngularTimeConstant,
   createAngularVelocityEstimator,
   shouldLaunchAngularInertia,
+  softLimitAngularReleaseVelocity,
   stepAdaptiveAngularInertia,
   stepAngularInertia
 } from "../src/wheel/angular-inertia.js";
@@ -132,13 +133,42 @@ test("release speed maps progressively to coast distance before the emergency fe
   assert.ok(fastFlick < ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees);
 });
 
-test("adaptive inertia defaults reserve max travel for runaway protection", () => {
+test("release velocity stays exact at normal speed and saturates smoothly at extremes", () => {
+  assert.equal(softLimitAngularReleaseVelocity(0.18), 0.18);
+  assert.equal(softLimitAngularReleaseVelocity(-0.18), -0.18);
+
+  const at25 = softLimitAngularReleaseVelocity(0.25);
+  const at40 = softLimitAngularReleaseVelocity(0.4);
+  const atHuge = softLimitAngularReleaseVelocity(10);
+
+  assert.ok(at25 > 0.248 && at25 < 0.25);
+  assert.ok(at40 > 0.35 && at40 < 0.353);
+  assert.ok(atHuge > 0.399 && atHuge <= 0.4);
+  assert.ok(at25 < at40 && at40 < atHuge);
+});
+
+test("adaptive inertia defaults reserve max travel for unreachable runaway protection", () => {
   assert.equal(ANGULAR_INERTIA_DEFAULTS.launchSpeedDegPerMs, 0.025);
-  assert.equal(ANGULAR_INERTIA_DEFAULTS.stopSpeedDegPerMs, 0.0035);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.stopSpeedDegPerMs, 0.0005);
   assert.equal(ANGULAR_INERTIA_DEFAULTS.timeConstantMs, 280);
   assert.equal(ANGULAR_INERTIA_DEFAULTS.adaptiveLowSpeedDegPerMs, 0.04);
   assert.equal(ANGULAR_INERTIA_DEFAULTS.adaptiveHighSpeedDegPerMs, 0.15);
   assert.equal(ANGULAR_INERTIA_DEFAULTS.adaptiveLowTimeConstantMs, 200);
   assert.equal(ANGULAR_INERTIA_DEFAULTS.adaptiveHighTimeConstantMs, 480);
-  assert.equal(ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees, 120);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.releaseSoftLimitStartDegPerMs, 0.2);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.releaseSoftLimitMaxDegPerMs, 0.4);
+  assert.equal(ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees, 240);
+});
+
+test("even an extreme raw flick settles naturally before the travel fence", () => {
+  let velocityDegPerMs = softLimitAngularReleaseVelocity(100);
+  let degrees = 0;
+  while (Math.abs(velocityDegPerMs) > ANGULAR_INERTIA_DEFAULTS.stopSpeedDegPerMs) {
+    const step = stepAdaptiveAngularInertia({ velocityDegPerMs, deltaTimeMs:1 });
+    degrees += Math.abs(step.deltaDegrees);
+    velocityDegPerMs = step.velocityDegPerMs;
+  }
+
+  assert.ok(degrees > 164 && degrees < 166);
+  assert.ok(degrees < ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees - 70);
 });
