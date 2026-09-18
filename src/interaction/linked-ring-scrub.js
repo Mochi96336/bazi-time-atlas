@@ -95,13 +95,15 @@ export function stepLinkedDiscreteInstant(ringId, instantMs, timeDirection) {
  * the current tooth and then continues through the adjacent real interval; no
  * six-degree detent or fixed 30d/365d approximation is involved.
  */
-export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees, timeContext }) {
+function solveLinkedTemporalDragInto(target, ringId, instantMs, dragDeltaDegrees, timeContext) {
   if (!isDiscreteRing(ringId)) throw new RangeError(`ring ${ringId} is not a temporal linked scrub ring`);
   if (!Number.isFinite(instantMs) || !Number.isFinite(dragDeltaDegrees)) {
     throw new RangeError("instantMs and dragDeltaDegrees must be finite");
   }
   if (Math.abs(dragDeltaDegrees) < ANGLE_EPSILON) {
-    return Object.freeze({ instantMs, crossedBoundaries:0 });
+    target.instantMs = instantMs;
+    target.crossedBoundaries = 0;
+    return target;
   }
 
   const timeDirection = dragDeltaDegrees > 0 ? -1 : 1;
@@ -124,10 +126,9 @@ export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees, t
       const nextProgress = Math.max(0, Math.min(1,
         progress + timeDirection * remainingDegrees / TOOTH_DEGREES
       ));
-      return Object.freeze({
-        instantMs: window.startMs + nextProgress * durationMs,
-        crossedBoundaries
-      });
+      target.instantMs = window.startMs + nextProgress * durationMs;
+      target.crossedBoundaries = crossedBoundaries;
+      return target;
     }
 
     remainingDegrees -= availableDegrees;
@@ -150,6 +151,14 @@ export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees, t
   }
 
   throw new RangeError(`linked ${ringId} drag crossed too many temporal boundaries`);
+}
+
+export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees, timeContext }) {
+  const result = solveLinkedTemporalDragInto({}, ringId, instantMs, dragDeltaDegrees, timeContext);
+  return Object.freeze({
+    instantMs:result.instantMs,
+    crossedBoundaries:result.crossedBoundaries
+  });
 }
 
 function localSolarRate(longitudeAtMs, instantMs, probeMs = SOLAR_RATE_PROBE_MS) {
@@ -196,6 +205,38 @@ export function solveLinkedLongitudeDrag({
   return candidateMs;
 }
 
+export function applyLinkedRingDragInto(
+  target,
+  ringId,
+  instantMs,
+  deltaDegrees,
+  timeContext,
+  longitudeAtMs
+) {
+  if (!target || typeof target !== "object") throw new TypeError("target must be an object");
+
+  if (ringId === "solar" || ringId === "zodiac") {
+    target.instantMs = solveLinkedLongitudeDrag({
+      instantMs,
+      dragDeltaDegrees:deltaDegrees,
+      longitudeAtMs
+    });
+    target.remainderDegrees = 0;
+    target.appliedSteps = 0;
+    target.crossedBoundaries = 0;
+    return target;
+  }
+
+  if (isDiscreteRing(ringId)) {
+    solveLinkedTemporalDragInto(target, ringId, instantMs, deltaDegrees, timeContext);
+    target.remainderDegrees = 0;
+    target.appliedSteps = 0;
+    return target;
+  }
+
+  throw new RangeError(`unknown linked scrub ring: ${ringId}`);
+}
+
 export function applyLinkedRingDrag({
   ringId,
   instantMs,
@@ -204,32 +245,16 @@ export function applyLinkedRingDrag({
   longitudeAtMs,
   timeContext
 }) {
-  if (ringId === "solar" || ringId === "zodiac") {
-    return Object.freeze({
-      instantMs: solveLinkedLongitudeDrag({ instantMs, dragDeltaDegrees: deltaDegrees, longitudeAtMs }),
-      remainderDegrees: 0,
-      appliedSteps: 0,
-      crossedBoundaries: 0
-    });
+  if (isDiscreteRing(ringId) && !Number.isFinite(remainderDegrees)) {
+    throw new RangeError("remainderDegrees must be finite");
   }
-
-  if (isDiscreteRing(ringId)) {
-    if (!Number.isFinite(remainderDegrees)) throw new RangeError("remainderDegrees must be finite");
-    const solved = solveLinkedTemporalDrag({
-      ringId,
-      instantMs,
-      dragDeltaDegrees:deltaDegrees,
-      timeContext
-    });
-    return Object.freeze({
-      instantMs: solved.instantMs,
-      remainderDegrees: 0,
-      appliedSteps: 0,
-      crossedBoundaries: solved.crossedBoundaries
-    });
-  }
-
-  throw new RangeError(`unknown linked scrub ring: ${ringId}`);
+  const result = applyLinkedRingDragInto({}, ringId, instantMs, deltaDegrees, timeContext, longitudeAtMs);
+  return Object.freeze({
+    instantMs:result.instantMs,
+    remainderDegrees:result.remainderDegrees,
+    appliedSteps:result.appliedSteps,
+    crossedBoundaries:result.crossedBoundaries
+  });
 }
 
 export const LINKED_SCRUB_CONSTANTS = Object.freeze({

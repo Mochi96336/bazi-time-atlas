@@ -15,6 +15,7 @@ import { shortestAngleDelta } from "../src/wheel/polar-geometry.js";
 import {
   LINKED_SCRUB_CONSTANTS,
   applyLinkedRingDrag,
+  applyLinkedRingDragInto,
   consumeDiscreteDrag,
   solveLinkedLongitudeDrag,
   solveLinkedTemporalDrag,
@@ -252,4 +253,20 @@ test("solar and zodiac linked drag solve the underlying apparent solar longitude
     assert.equal(result.appliedSteps, 0);
     assert.equal(result.crossedBoundaries, 0);
   }
+});
+
+
+test("runtime linked drag can reuse caller-owned result state without changing semantics", () => {
+  const start = Date.UTC(2026, 8, 15, 12, 0, 0);
+  const scratch = { instantMs:0, remainderDegrees:99, appliedSteps:99, crossedBoundaries:99 };
+
+  const first = applyLinkedRingDragInto(scratch, "hour", start, 0.5);
+  const expectedFirst = applyLinkedRingDrag({ ringId:"hour", instantMs:start, deltaDegrees:0.5 });
+  assert.equal(first, scratch);
+  assert.deepEqual(first, expectedFirst);
+
+  const second = applyLinkedRingDragInto(scratch, "day", first.instantMs, -0.25);
+  const expectedSecond = applyLinkedRingDrag({ ringId:"day", instantMs:expectedFirst.instantMs, deltaDegrees:-0.25 });
+  assert.equal(second, scratch);
+  assert.deepEqual(second, expectedSecond);
 });
