@@ -16,3 +16,16 @@ test("annual read-heads keep using the shared clearance rule", () => {
   assert.match(renderer, /class:\s*"term-label active-cycle-label active-annual-label"/);
   assert.match(renderer, /class:\s*"zodiac-label active-cycle-label active-annual-label"/);
 });
+
+
+test("solar-term static labels share the annual read-head radius", () => {
+  assert.match(
+    renderer,
+    /const labelRadius = \(model\.innerRadius \+ RADII\.solarTermOuter\) \/ 2;/
+  );
+  assert.match(renderer, /const labelPoint = polar\(labelRadius, term\.longitude \+ 7\.5\);/);
+  assert.doesNotMatch(
+    renderer,
+    /term\.kind === "jie" \? RADII\.solarTermOuter - 32 : RADII\.solarTermOuter - 44/
+  );
+});
