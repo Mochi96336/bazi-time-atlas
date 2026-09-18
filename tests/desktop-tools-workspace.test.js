@@ -28,7 +28,7 @@ test("desktop Tools converges global chrome to one focused top row", () => {
 });
 
 test("desktop left edge owns a non-overlapping reference / exact-time / Solar-Time stack", () => {
-  assert.match(css, /\.ring-legend \{[\s\S]*position: fixed;[\s\S]*top: 52px;[\s\S]*width: 286px;/);
+  assert.match(css, /\.ring-legend \{[\s\S]*position: fixed;[\s\S]*top: 52px;[\s\S]*width: 286px;[\s\S]*min-height: 0;[\s\S]*padding: 0;[\s\S]*border: 0;[\s\S]*box-shadow: none;/);
   assert.match(css, /~ \.timeline-dock \{[\s\S]*top: 84px;[\s\S]*width: 286px;/);
   assert.match(css, /\.atlas-solar-time-analysis \{[\s\S]*top: 132px;[\s\S]*width: 340px;/);
 });
