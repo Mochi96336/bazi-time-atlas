@@ -118,10 +118,13 @@
    The gradient lives on four fixed, non-rotating material beds in guide-layer;
    temporal sectors remain translucent data paint sliding over that body. This
    keeps light physically attached to the instrument instead of to each state. */
-#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .105; --m2-mid-alpha: .055; --m2-dark-alpha: .018; }
-#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .115; --m2-mid-alpha: .060; --m2-dark-alpha: .020; }
-#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .135; --m2-mid-alpha: .072; --m2-dark-alpha: .024; }
-#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .155; --m2-mid-alpha: .084; --m2-dark-alpha: .028; }
+/* This pass is intentionally visible at normal viewing distance. The previous
+   10–15% light amplitudes were technically present but perceptually negligible;
+   these values establish a real anodized face before the translucent data paint. */
+#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .24; --m2-mid-alpha: .12; --m2-dark-alpha: .045; }
+#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .27; --m2-mid-alpha: .14; --m2-dark-alpha: .052; }
+#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .31; --m2-mid-alpha: .17; --m2-dark-alpha: .060; }
+#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .36; --m2-mid-alpha: .20; --m2-dark-alpha: .072; }
 
 .m2-ring-gradient .m2-light {
   stop-color: color-mix(in srgb, var(--m2-ring-color) 84%, #dfe3e1);
@@ -136,11 +139,20 @@
   stop-opacity: var(--m2-dark-alpha);
 }
 
-.m2-ring-bed { stroke: none; pointer-events: none; }
+.m2-ring-bed, .m2-ring-sheen { stroke: none; pointer-events: none; }
 .m2-hour-bed { fill: url(#m2-hour-surface); }
 .m2-day-bed { fill: url(#m2-day-surface); }
 .m2-month-bed { fill: url(#m2-month-surface); }
 .m2-year-bed { fill: url(#m2-year-surface); }
+
+/* One non-repeating machining sweep crosses the entire instrument instead of
+   restarting in every sector. Outer/slow rings catch slightly more of it, so
+   material scale remains legible without introducing decorative texture. */
+.m2-ring-sheen { fill: url(#m2-surface-sheen); }
+.m2-hour-sheen { opacity: .56; }
+.m2-day-sheen { opacity: .64; }
+.m2-month-sheen { opacity: .72; }
+.m2-year-sheen { opacity: .82; }
 
 #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 14%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 17%, transparent); }
@@ -179,8 +191,8 @@
 #day-track .ring-tick.major,
 #month-track .ring-tick.major,
 #year-track .ring-tick.major {
-  stroke: var(--m2-etched-dark-soft);
-  filter: drop-shadow(0 1px 0 var(--m2-etched-light));
+  stroke: rgba(0,0,0,.66);
+  filter: drop-shadow(0 1px 0 rgba(236,239,239,.075));
 }
 #hour-track .ring-tick.major { stroke-width: 1.05; }
 #day-track .ring-tick.major { stroke-width: 1.1; }
@@ -191,9 +203,9 @@
    Give only those neutral guides the same shallow cut/lower-reflection pair.
    The annual Solar subdivision remains a semantic brass guide and is excluded. */
 #guide-layer .guide-arc:not(.annual-subdivide) {
-  stroke: var(--m2-etched-dark-soft);
-  stroke-width: 1.25;
-  filter: drop-shadow(0 1px 0 var(--m2-etched-light-soft));
+  stroke: url(#m2-groove-stroke);
+  stroke-width: 2.1;
+  filter: drop-shadow(0 1.35px 0 rgba(236,239,239,.085));
 }
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
