@@ -75,6 +75,7 @@
 
       const instrumentRect = rect(instrument);
       const topbarRect = rect(topbar);
+      const siteNavRect = rect(siteNav);
       const readoutRect = rect(readout);
       const toolbarRect = rect(toolbar);
       const legendRect = rect(legend);
@@ -101,6 +102,7 @@
         topbarTop: round(topbarRect.top),
         topbarBottom: round(topbarRect.bottom),
         siteNavDisplay: display(win, siteNav),
+        siteNavRight: round(siteNavRect.right),
         instrumentHeight: round(instrumentRect.height),
         instrumentBottomGap: round(win.innerHeight - instrumentRect.bottom),
         readoutTop: round(readoutRect.top),
