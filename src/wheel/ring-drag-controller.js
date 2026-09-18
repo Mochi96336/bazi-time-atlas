@@ -5,6 +5,7 @@ import {
   ANGULAR_INERTIA_DEFAULTS,
   createAngularVelocityEstimator,
   shouldLaunchAngularInertia,
+  softLimitAngularReleaseVelocity,
   stepAdaptiveAngularInertia,
   stepAngularInertia
 } from "./angular-inertia.js";
@@ -68,6 +69,8 @@ export function createRingDragController({
     adaptiveHighSpeedDegPerMs = ANGULAR_INERTIA_DEFAULTS.adaptiveHighSpeedDegPerMs,
     adaptiveLowTimeConstantMs = ANGULAR_INERTIA_DEFAULTS.adaptiveLowTimeConstantMs,
     adaptiveHighTimeConstantMs = ANGULAR_INERTIA_DEFAULTS.adaptiveHighTimeConstantMs,
+    releaseSoftLimitStartDegPerMs = ANGULAR_INERTIA_DEFAULTS.releaseSoftLimitStartDegPerMs,
+    releaseSoftLimitMaxDegPerMs = ANGULAR_INERTIA_DEFAULTS.releaseSoftLimitMaxDegPerMs,
     maxTravelDegrees = ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees,
     maxFrameGapMs = ANGULAR_INERTIA_DEFAULTS.maxFrameGapMs
   } = inertiaOptions;
@@ -213,8 +216,11 @@ export function createRingDragController({
     current.velocityDegPerMs = step.velocityDegPerMs;
     current.lastTimestamp = timestamp;
 
-    if (current.travelDegrees + DETENT_EPSILON >= maxTravelDegrees
-      || Math.abs(current.velocityDegPerMs) <= stopSpeedDegPerMs) {
+    if (current.travelDegrees + DETENT_EPSILON >= maxTravelDegrees) {
+      cancelInertia({ detent:true, reason:"inertia-travel-fence" });
+      return;
+    }
+    if (Math.abs(current.velocityDegPerMs) <= stopSpeedDegPerMs) {
       cancelInertia({ detent:true, reason:"inertia-settled" });
       return;
     }
@@ -229,10 +235,15 @@ export function createRingDragController({
     if (typeof requestFrame !== "function" || !Number.isFinite(releaseTimeMs)) return false;
     if (!shouldLaunchAngularInertia(velocityDegPerMs, { launchSpeedDegPerMs, reducedMotion })) return false;
 
+    const releaseVelocityDegPerMs = softLimitAngularReleaseVelocity(velocityDegPerMs, {
+      startDegPerMs:releaseSoftLimitStartDegPerMs,
+      maxDegPerMs:releaseSoftLimitMaxDegPerMs
+    });
+
     coasting = {
       ringId: gesture.ringId,
       mode: gesture.mode,
-      velocityDegPerMs,
+      velocityDegPerMs:releaseVelocityDegPerMs,
       travelDegrees: 0,
       lastTimestamp: releaseTimeMs,
       frameId: null
