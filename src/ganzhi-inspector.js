@@ -8,6 +8,7 @@ import {
 } from "./ganzhi-inspector-model.js";
 
 const inspector = document.querySelector("#ganzhi-inspector");
+const instrument = document.querySelector("#kinetic-instrument");
 
 if (inspector) {
   const triggers = [...document.querySelectorAll("[data-ganzhi-reference]")];
@@ -371,6 +372,7 @@ if (inspector) {
     if (trigger) lastTrigger = trigger;
     inspector.hidden = false;
     inspector.dataset.open = "true";
+    if (instrument) instrument.dataset.ganzhiInspectorOpen = "true";
     renderActive();
     updateTriggerState();
     if (syncUrl) syncSearch();
@@ -386,6 +388,7 @@ if (inspector) {
     lastTrigger = null;
     inspector.hidden = false;
     inspector.dataset.open = "true";
+    if (instrument) instrument.dataset.ganzhiInspectorOpen = "true";
     renderActive();
     updateTriggerState();
     if (syncUrl) syncSearch();
@@ -396,6 +399,7 @@ if (inspector) {
     if (inspector.hidden) return;
     inspector.hidden = true;
     inspector.dataset.open = "false";
+    if (instrument) instrument.dataset.ganzhiInspectorOpen = "false";
     const focusTarget = restoreFocus ? lastTrigger : null;
     activePillar = null;
     activeReference = null;
@@ -443,6 +447,12 @@ if (inspector) {
       }
       openInspector(pillar, { trigger });
     });
+  });
+
+  document.addEventListener("atlas-ganzhi-inspect", event => {
+    const pillar = event?.detail?.pillar;
+    if (!pillar) return;
+    openInspector(pillar, { trigger:null });
   });
 
   closeButton?.addEventListener("click", () => closeInspector({ restoreFocus: true }));
