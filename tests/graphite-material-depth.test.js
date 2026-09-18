@@ -120,6 +120,12 @@ test("wheel surface depth comes from one light field and fixed material beds", (
     assert.doesNotMatch(atlasHtml, new RegExp(`id="m2-${ring}-active"`));
   }
   assert.match(renderer, /class: `m2-ring-sheen m2-\$\{id\}-sheen`/);
+  assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-light m2-\$\{id\}-rim-light`/);
+  assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-shadow m2-\$\{id\}-rim-shadow`/);
+  assert.match(atlasHtml, /id="m2-rim-light-stroke"[\s\S]*?stop-opacity="\.24"[\s\S]*?stop-opacity="\.025"/);
+  assert.match(atlasHtml, /id="m2-rim-shadow-stroke"[\s\S]*?stop-opacity="\.86"/);
+  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke-width:\s*1\.55;/);
+  assert.match(radialHierarchy, /\.m2-ring-rim-shadow \{[\s\S]*?stroke-width:\s*2\.35;/);
   assert.match(atlasHtml, /id="m2-surface-sheen"[\s\S]*?stop-opacity="\.16"[\s\S]*?stop-opacity="\.20"/);
   assert.match(atlasHtml, /id="m2-groove-stroke"[\s\S]*?stop-opacity="\.92"/);
   assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.24;/);
