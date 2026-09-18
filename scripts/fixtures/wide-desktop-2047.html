@@ -29,9 +29,13 @@
       .length;
 
     function settle(win, callback) {
+      const retry = attemptsLeft => {
+        if (callback() || attemptsLeft <= 0) return;
+        win.setTimeout(() => retry(attemptsLeft - 1), 250);
+      };
       win.requestAnimationFrame(() => {
         win.requestAnimationFrame(() => {
-          win.setTimeout(callback, 700);
+          win.setTimeout(() => retry(12), 700);
         });
       });
     }
@@ -39,7 +43,7 @@
     function snapshot() {
       const win = frame.contentWindow;
       const doc = frame.contentDocument;
-      if (!win || !doc) return;
+      if (!win || !doc) return false;
 
       const instrument = doc.querySelector("#kinetic-instrument");
       const readout = doc.querySelector(".instrument-readout");
@@ -52,7 +56,7 @@
       const close = doc.querySelector("#analysis-close");
       const hourLabels = doc.querySelectorAll("#hour-track .cycle-label");
       const dayLabels = doc.querySelectorAll("#day-track .cycle-label");
-      if (!instrument || !readout || !toolbar || !legend || !evidence || !evidenceValue || !toolbarButton || !legendLabel || !close) return;
+      if (!instrument || !readout || !toolbar || !legend || !evidence || !evidenceValue || !toolbarButton || !legendLabel || !close) return false;
 
       const instrumentRect = rect(instrument);
       const readoutRect = rect(readout);
@@ -102,6 +106,7 @@
         hourVisibleLabels: String(displayVisibleCount(win, hourLabels)),
         dayVisibleLabels: String(displayVisibleCount(win, dayLabels)),
       });
+      return true;
     }
 
     frame.addEventListener("load", () => settle(frame.contentWindow, snapshot), { once: true });
