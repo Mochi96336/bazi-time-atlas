@@ -288,7 +288,12 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         class: `term-mark ${term.kind}`
       }, solarTrack);
 
-      const labelPoint = polar(term.kind === "jie" ? RADII.solarTermOuter - 32 : RADII.solarTermOuter - 44, term.longitude + 7.5);
+      // Keep all 24 Solar-term identities on one instrument radius. Jie/Qi
+      // hierarchy is already carried by tick length and typography; staggering
+      // the glyph radius makes the annual scale read as a visual zig-zag and
+      // also causes Jie labels to jump inward when they become the read-head.
+      const labelRadius = (model.innerRadius + RADII.solarTermOuter) / 2;
+      const labelPoint = polar(labelRadius, term.longitude + 7.5);
       const label = el("text", {
         x: labelPoint.x,
         y: labelPoint.y,
