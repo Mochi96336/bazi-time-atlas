@@ -5,6 +5,7 @@ import {
   ANGULAR_INERTIA_DEFAULTS,
   createAngularVelocityEstimator,
   shouldLaunchAngularInertia,
+  stepAdaptiveAngularInertia,
   stepAngularInertia
 } from "./angular-inertia.js";
 import {
@@ -63,9 +64,15 @@ export function createRingDragController({
     launchSpeedDegPerMs = ANGULAR_INERTIA_DEFAULTS.launchSpeedDegPerMs,
     stopSpeedDegPerMs = ANGULAR_INERTIA_DEFAULTS.stopSpeedDegPerMs,
     timeConstantMs = ANGULAR_INERTIA_DEFAULTS.timeConstantMs,
+    adaptiveLowSpeedDegPerMs = ANGULAR_INERTIA_DEFAULTS.adaptiveLowSpeedDegPerMs,
+    adaptiveHighSpeedDegPerMs = ANGULAR_INERTIA_DEFAULTS.adaptiveHighSpeedDegPerMs,
+    adaptiveLowTimeConstantMs = ANGULAR_INERTIA_DEFAULTS.adaptiveLowTimeConstantMs,
+    adaptiveHighTimeConstantMs = ANGULAR_INERTIA_DEFAULTS.adaptiveHighTimeConstantMs,
     maxTravelDegrees = ANGULAR_INERTIA_DEFAULTS.maxTravelDegrees,
     maxFrameGapMs = ANGULAR_INERTIA_DEFAULTS.maxFrameGapMs
   } = inertiaOptions;
+
+  const fixedTimeConstantOverride = Object.prototype.hasOwnProperty.call(inertiaOptions, "timeConstantMs");
 
   let compareMode = false;
   let active = null;
@@ -185,11 +192,20 @@ export function createRingDragController({
       return;
     }
 
-    const step = stepAngularInertia({
-      velocityDegPerMs: current.velocityDegPerMs,
-      deltaTimeMs,
-      timeConstantMs
-    });
+    const step = fixedTimeConstantOverride
+      ? stepAngularInertia({
+          velocityDegPerMs: current.velocityDegPerMs,
+          deltaTimeMs,
+          timeConstantMs
+        })
+      : stepAdaptiveAngularInertia({
+          velocityDegPerMs: current.velocityDegPerMs,
+          deltaTimeMs,
+          lowSpeedDegPerMs:adaptiveLowSpeedDegPerMs,
+          highSpeedDegPerMs:adaptiveHighSpeedDegPerMs,
+          lowTimeConstantMs:adaptiveLowTimeConstantMs,
+          highTimeConstantMs:adaptiveHighTimeConstantMs
+        });
     const remainingDegrees = Math.max(0, maxTravelDegrees - current.travelDegrees);
     const deltaDegrees = Math.sign(step.deltaDegrees) * Math.min(Math.abs(step.deltaDegrees), remainingDegrees);
     applyGestureDelta(current, deltaDegrees, "inertia");
