@@ -43,7 +43,7 @@ test("the annual solar band is visually demoted while four pillar rings stay dir
 });
 
 
-test("390px find-time owns the mobile tool surface instead of inheriting Tools chrome", () => {
+test("find-time owns one task surface instead of inheriting Tools chrome", () => {
   assert.match(
     css,
     /data-inverse-time-search="active"\] \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-end;/
@@ -69,6 +69,17 @@ test("390px find-time owns the mobile tool surface instead of inheriting Tools c
   );
   assert.match(
     css,
-    /data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*42px;/
+    /data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*54px;/
+  );
+});
+
+test("390px find-time tightens the shared single-task surface", () => {
+  assert.match(
+    css,
+    /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] #inverse-time-search-button\s*\{[\s\S]*?min-height:\s*27px;[\s\S]*?padding-inline:\s*6px;/
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*42px;/
   );
 });
