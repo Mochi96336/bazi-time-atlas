@@ -10,6 +10,8 @@ const solarAnalysis = readFileSync(new URL("../atlas-solar-time-analysis.css", i
 const radialHierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
 const instrument = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
+const atlasHtml = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
 
 test("Graphite M2 exposes one semantic material hierarchy", () => {
   assert.match(material, /--m2-base-surface:\s*transparent;/);
@@ -103,6 +105,22 @@ test("material hierarchy does not resurrect a card around the wheel", () => {
   assert.match(instrument, /\.instrument-shell\s*\{[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
   assert.doesNotMatch(instrument, /#kinetic-wheel\s*\{[^}]*box-shadow:/s);
 });
+test("wheel surface depth comes from one light field and fixed material beds", () => {
+  assert.match(
+    instrument,
+    /\.instrument-shell::before \{[\s\S]*?radial-gradient\(circle at 34% 12%, rgba\(236,239,239,\.035\), transparent 31rem\)[\s\S]*?linear-gradient\(145deg,[\s\S]*?rgba\(0,0,0,\.09\) 100%\);/
+  );
+  assert.match(instrument, /#kinetic-wheel \{ z-index:\s*1; \}/);
+  assert.match(renderer, /function renderMaterialBeds\(\) \{[\s\S]*?SEXAGENARY_RING_IDS\.forEach\(id => \{[\s\S]*?annularSectorPath\(WHEEL_CENTER, model\.innerRadius, model\.outerRadius, FAN\.start, FAN\.end\)[\s\S]*?class: `m2-ring-bed m2-\$\{id\}-bed`/);
+  assert.match(renderer, /function renderStatic\(\) \{\s*renderMaterialBeds\(\);\s*renderGuides\(\);/);
+  for (const ring of ["hour", "day", "month", "year"]) {
+    assert.match(radialHierarchy, new RegExp(`\\.m2-${ring}-bed \\{ fill: url\\(#m2-${ring}-surface\\); \\}`));
+    assert.match(atlasHtml, new RegExp(`id="m2-${ring}-surface"[^>]*gradientUnits="userSpaceOnUse"`));
+    assert.doesNotMatch(atlasHtml, new RegExp(`id="m2-${ring}-active"`));
+  }
+  assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*1\.25;/);
+});
+
 
 test("Graphite hierarchy leaves warm semantic channels untouched", () => {
   assert.match(palette, /--solar:\s*#bc9257;/);

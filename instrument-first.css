@@ -3,6 +3,24 @@
 /* Phase 1: make the atlas read as one instrument, not a dashboard card.
    This layer is deliberately presentation-only: wheel geometry, time semantics,
    interaction state and analysis tooling remain owned by their existing modules. */
+/* M2 perceptual surface pass: keep the instrument full-bleed, but let the
+   translucent wheel sit in one low-frequency material field. This is not a card
+   shadow: there is no edge, radius, border, or floating rectangle. The light is
+   shared with the etched language—slightly brighter upper-left, denser lower-right. */
+.instrument-shell::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 34% 12%, rgba(236,239,239,.035), transparent 31rem),
+    radial-gradient(circle at 66% 88%, rgba(0,0,0,.18), transparent 45rem),
+    linear-gradient(145deg, rgba(236,239,239,.018) 0%, transparent 43%, rgba(0,0,0,.09) 100%);
+}
+
+#kinetic-wheel { z-index: 1; }
+
 
 @media (min-width: 481px) {
   /* Desktop is a viewport instrument, not a centered document column. Keep the
