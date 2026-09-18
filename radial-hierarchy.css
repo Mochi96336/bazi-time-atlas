@@ -114,6 +114,34 @@
    surfaces. Material depth comes from restrained luminance separation and an
    engraved tick cadence, not per-sector gradients, noise, or expensive SVG
    filters. Resting sectors stay borderless so the wheel reads as one instrument. */
+/* A single upper-left material light now runs through every graphite band.
+   The gradient lives on four fixed, non-rotating material beds in guide-layer;
+   temporal sectors remain translucent data paint sliding over that body. This
+   keeps light physically attached to the instrument instead of to each state. */
+#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .105; --m2-mid-alpha: .055; --m2-dark-alpha: .018; }
+#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .115; --m2-mid-alpha: .060; --m2-dark-alpha: .020; }
+#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .135; --m2-mid-alpha: .072; --m2-dark-alpha: .024; }
+#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .155; --m2-mid-alpha: .084; --m2-dark-alpha: .028; }
+
+.m2-ring-gradient .m2-light {
+  stop-color: color-mix(in srgb, var(--m2-ring-color) 84%, #dfe3e1);
+  stop-opacity: var(--m2-light-alpha);
+}
+.m2-ring-gradient .m2-mid {
+  stop-color: var(--m2-ring-color);
+  stop-opacity: var(--m2-mid-alpha);
+}
+.m2-ring-gradient .m2-dark {
+  stop-color: color-mix(in srgb, var(--m2-ring-color) 88%, #050607);
+  stop-opacity: var(--m2-dark-alpha);
+}
+
+.m2-ring-bed { stroke: none; pointer-events: none; }
+.m2-hour-bed { fill: url(#m2-hour-surface); }
+.m2-day-bed { fill: url(#m2-day-surface); }
+.m2-month-bed { fill: url(#m2-month-surface); }
+.m2-year-bed { fill: url(#m2-year-surface); }
+
 #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 14%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 17%, transparent); }
 #month-track .month-sector { fill: color-mix(in srgb, var(--month) 26%, transparent); }
@@ -164,7 +192,7 @@
    The annual Solar subdivision remains a semantic brass guide and is excluded. */
 #guide-layer .guide-arc:not(.annual-subdivide) {
   stroke: var(--m2-etched-dark-soft);
-  stroke-width: 1;
+  stroke-width: 1.25;
   filter: drop-shadow(0 1px 0 var(--m2-etched-light-soft));
 }
 

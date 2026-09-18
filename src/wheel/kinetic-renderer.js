@@ -69,6 +69,18 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     if (cursorLayer) svg.insertBefore(motionLayer, cursorLayer);
   }
 
+  function renderMaterialBeds() {
+    SEXAGENARY_RING_IDS.forEach(id => {
+      const model = ringModel(id);
+      el("path", {
+        d: annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, FAN.start, FAN.end),
+        class: `m2-ring-bed m2-${id}-bed`,
+        "data-material-ring": id,
+        "aria-hidden": "true"
+      }, guides);
+    });
+  }
+
   function renderGuides() {
     GUIDE_RADII.forEach(radius => {
       el("path", {
@@ -501,6 +513,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   }
 
   function renderStatic() {
+    renderMaterialBeds();
     renderGuides();
     SEXAGENARY_RING_IDS.forEach(renderCycleRing);
     renderSolarRing();
