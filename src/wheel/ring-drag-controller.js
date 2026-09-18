@@ -38,12 +38,6 @@ function eventTimeMs(event) {
   return Number.isFinite(event?.timeStamp) ? event.timeStamp : null;
 }
 
-function pointerSamples(event) {
-  if (typeof event.getCoalescedEvents !== "function") return [event];
-  const samples = event.getCoalescedEvents();
-  return samples?.length ? samples : [event];
-}
-
 export function createRingDragController({
   svg,
   ringStates,
@@ -309,7 +303,14 @@ export function createRingDragController({
   function applyPointerEventSamples(event) {
     const inverse = screenInverse(svg);
     if (!inverse) return;
-    for (const sample of pointerSamples(event)) applyPointerSample(sample, inverse);
+    const samples = typeof event.getCoalescedEvents === "function"
+      ? event.getCoalescedEvents()
+      : null;
+    if (!samples?.length) {
+      applyPointerSample(event, inverse);
+      return;
+    }
+    for (const sample of samples) applyPointerSample(sample, inverse);
   }
 
   function move(event) {
