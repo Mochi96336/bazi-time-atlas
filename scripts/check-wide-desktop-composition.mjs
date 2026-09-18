@@ -62,8 +62,11 @@ if (requireAttr(probe, "data-ready", page.url) !== "true") {
 const width = numberAttr(probe, "data-inner-width", page.url);
 const height = numberAttr(probe, "data-inner-height", page.url);
 const scrollWidth = numberAttr(probe, "data-scroll-width", page.url);
+const scrollHeight = numberAttr(probe, "data-scroll-height", page.url);
 const instrumentTop = numberAttr(probe, "data-instrument-top", page.url);
 const instrumentBottom = numberAttr(probe, "data-instrument-bottom", page.url);
+const topbarTop = numberAttr(probe, "data-topbar-top", page.url);
+const topbarBottom = numberAttr(probe, "data-topbar-bottom", page.url);
 const instrumentHeight = numberAttr(probe, "data-instrument-height", page.url);
 const instrumentBottomGap = numberAttr(probe, "data-instrument-bottom-gap", page.url);
 const readoutTop = numberAttr(probe, "data-readout-top", page.url);
@@ -71,23 +74,30 @@ const readoutBottom = numberAttr(probe, "data-readout-bottom", page.url);
 const readoutBottomGap = numberAttr(probe, "data-readout-bottom-gap", page.url);
 const toolbarTop = numberAttr(probe, "data-toolbar-top", page.url);
 const toolbarBottom = numberAttr(probe, "data-toolbar-bottom", page.url);
-const toolbarLeft = numberAttr(probe, "data-toolbar-left", page.url);
-const toolbarRight = numberAttr(probe, "data-toolbar-right", page.url);
 const legendTop = numberAttr(probe, "data-legend-top", page.url);
 const legendBottom = numberAttr(probe, "data-legend-bottom", page.url);
-const legendLeft = numberAttr(probe, "data-legend-left", page.url);
-const legendRight = numberAttr(probe, "data-legend-right", page.url);
+const timelineTop = numberAttr(probe, "data-timeline-top", page.url);
+const timelineBottom = numberAttr(probe, "data-timeline-bottom", page.url);
+const timelineLeft = numberAttr(probe, "data-timeline-left", page.url);
+const timelineRight = numberAttr(probe, "data-timeline-right", page.url);
+const solarTop = numberAttr(probe, "data-solar-top", page.url);
+const solarBottom = numberAttr(probe, "data-solar-bottom", page.url);
+const solarLeft = numberAttr(probe, "data-solar-left", page.url);
+const solarRight = numberAttr(probe, "data-solar-right", page.url);
+const evidenceTop = numberAttr(probe, "data-evidence-top", page.url);
+const evidenceBottom = numberAttr(probe, "data-evidence-bottom", page.url);
+const evidenceLeft = numberAttr(probe, "data-evidence-left", page.url);
+const evidenceRight = numberAttr(probe, "data-evidence-right", page.url);
+const evidenceGridWidth = numberAttr(probe, "data-evidence-grid-width", page.url);
 const closeTop = numberAttr(probe, "data-close-top", page.url);
 const closeBottom = numberAttr(probe, "data-close-bottom", page.url);
 const closeRight = numberAttr(probe, "data-close-right", page.url);
-const evidenceTop = numberAttr(probe, "data-evidence-top", page.url);
-const evidenceBottom = numberAttr(probe, "data-evidence-bottom", page.url);
 const toolbarFont = numberAttr(probe, "data-toolbar-font", page.url);
-const legendFont = numberAttr(probe, "data-legend-font", page.url);
+const referenceFont = numberAttr(probe, "data-reference-font", page.url);
 const evidenceValueFont = numberAttr(probe, "data-evidence-value-font", page.url);
 const closeFont = numberAttr(probe, "data-close-font", page.url);
-const toolbarBaseline = numberAttr(probe, "data-toolbar-baseline", page.url);
-const legendBaseline = numberAttr(probe, "data-legend-baseline", page.url);
+const scaleVisible = numberAttr(probe, "data-scale-visible", page.url);
+const ringToggleVisible = numberAttr(probe, "data-ring-toggle-visible", page.url);
 const hourVisibleLabels = numberAttr(probe, "data-hour-visible-labels", page.url);
 const dayVisibleLabels = numberAttr(probe, "data-day-visible-labels", page.url);
 
@@ -95,7 +105,7 @@ if (width !== 2047 || height !== 1038) {
   throw new Error(`wide desktop: fixture is not an exact 2047x1038 CSS viewport (${width}x${height}): ${page.url}`);
 }
 if (requireAttr(probe, "data-analysis-open", page.url) !== "true") {
-  throw new Error(`wide desktop: Analysis did not open in the review frame: ${page.url}`);
+  throw new Error(`wide desktop: Tools did not open in the review frame: ${page.url}`);
 }
 if (scrollWidth > width + 1) {
   throw new Error(`wide desktop: horizontal overflow returned (${scrollWidth} > ${width}): ${page.url}`);
@@ -112,43 +122,52 @@ if (readoutTop < instrumentTop || readoutBottom > instrumentBottom || readoutBot
   throw new Error(`wide desktop: Selected Instant is clipped or too close to the viewport edge (top=${readoutTop}, bottom=${readoutBottom}, gap=${readoutBottomGap}): ${page.url}`);
 }
 
-if (toolbarTop < instrumentTop || toolbarBottom > legendTop + 1) {
-  throw new Error(`wide desktop: primary toolbar collides with the secondary rail (${toolbarTop}-${toolbarBottom} vs legendTop=${legendTop}): ${page.url}`);
+/* Tools must remain edge-assist chrome over the existing instrument rather than
+   reopening the retired bottom dashboard. A small shell/footer allowance is
+   acceptable, but tool content itself must be fixed/absolute and viewport-bound. */
+if (scrollHeight > height + 90) {
+  throw new Error(`wide desktop: Tools grew the document instead of staying in the viewport (scrollHeight=${scrollHeight}, viewport=${height}): ${page.url}`);
 }
-if (legendBottom > evidenceTop - 4) {
-  throw new Error(`wide desktop: layer/reference rail collides with evidence rail (${legendBottom} vs ${evidenceTop}): ${page.url}`);
+if (requireAttr(probe, "data-site-nav-display", page.url) !== "none") {
+  throw new Error(`wide desktop: global Research nav still competes with focused Tools actions: ${page.url}`);
 }
-if (evidenceBottom >= readoutTop) {
-  throw new Error(`wide desktop: evidence rail intrudes into the Selected Instant region (${evidenceBottom} >= ${readoutTop}): ${page.url}`);
+if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
+  throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
+}
+if (legendTop < topbarBottom - 2 || legendBottom > timelineTop + 1) {
+  throw new Error(`wide desktop: reference control is not stacked between top chrome and exact time (legend=${legendTop}-${legendBottom}, topbarBottom=${topbarBottom}, timelineTop=${timelineTop}): ${page.url}`);
+}
+if (timelineLeft < 0 || timelineLeft > 40 || timelineRight > 360 || timelineTop < 65 || timelineBottom > solarTop + 4) {
+  throw new Error(`wide desktop: exact-time editor is not a compact left-edge control (timeline=${timelineLeft}-${timelineRight}@${timelineTop}-${timelineBottom}, solarTop=${solarTop}): ${page.url}`);
+}
+if (solarLeft < -1 || solarRight > 390 || solarTop < 120 || solarBottom > height + 1) {
+  throw new Error(`wide desktop: Solar Time is not viewport-bound to the left edge (solar=${solarLeft}-${solarRight}@${solarTop}-${solarBottom}): ${page.url}`);
+}
+if (evidenceRight < width - 2 || evidenceRight > width + 1 || evidenceLeft < width - 430 || evidenceTop < 75 || evidenceBottom >= readoutTop) {
+  throw new Error(`wide desktop: Four Pillars evidence is not a right-edge inspector (evidence=${evidenceLeft}-${evidenceRight}@${evidenceTop}-${evidenceBottom}, readoutTop=${readoutTop}): ${page.url}`);
+}
+if (evidenceGridWidth < 240) {
+  throw new Error(`wide desktop: Four Pillars summary is squeezed inside the right rail (gridWidth=${evidenceGridWidth}): ${page.url}`);
+}
+if (Math.abs(closeTop - toolbarTop) > 2 || Math.abs(closeBottom - toolbarBottom) > 3 || closeRight < width - 60) {
+  throw new Error(`wide desktop: Done action is not integrated into the primary action row (toolbar=${toolbarTop}-${toolbarBottom}, close=${closeTop}-${closeBottom}@${closeRight}): ${page.url}`);
 }
 
-const railTolerance = 1.5;
-if (Math.abs(toolbarLeft - legendLeft) > railTolerance || Math.abs(toolbarRight - legendRight) > railTolerance) {
-  throw new Error(
-    `wide desktop: Tools rows do not share one horizontal instrument frame ` +
-    `(toolbar=${toolbarLeft}-${toolbarRight}, legend=${legendLeft}-${legendRight}): ${page.url}`
-  );
+if (scaleVisible !== 0 || requireAttr(probe, "data-play-display", page.url) !== "none" || ringToggleVisible !== 0) {
+  throw new Error(`wide desktop: retired desktop Tools chrome resurfaced (scale=${scaleVisible}, play=${requireAttr(probe, "data-play-display", page.url)}, ringToggles=${ringToggleVisible}): ${page.url}`);
 }
-if (closeTop < legendTop - railTolerance || closeBottom > legendBottom + railTolerance || Math.abs(closeRight - legendRight) > railTolerance) {
-  throw new Error(
-    `wide desktop: Done action is detached from the secondary Tools rail ` +
-    `(close=${closeTop}-${closeBottom}@${closeRight}, legend=${legendTop}-${legendBottom}@${legendRight}): ${page.url}`
-  );
-}
-if (toolbarBaseline < 0.9 || legendBaseline < 0.9) {
-  throw new Error(
-    `wide desktop: Tools rows lost their etched visual baselines ` +
-    `(toolbar=${toolbarBaseline}, legend=${legendBaseline}): ${page.url}`
-  );
+for (const name of ["state-strip", "notes", "sources"]) {
+  if (requireAttr(probe, `data-${name}-display`, page.url) !== "none") {
+    throw new Error(`wide desktop: ${name} still extends the Tools workspace below the wheel: ${page.url}`);
+  }
 }
 
-if (toolbarFont < 10 || legendFont < 9 || evidenceValueFont < 10 || closeFont < 9) {
+if (toolbarFont < 9 || referenceFont < 7 || evidenceValueFont < 10 || closeFont < 8) {
   throw new Error(
     `wide desktop: control/evidence type fell below readable floor ` +
-    `(toolbar=${toolbarFont}, legend=${legendFont}, evidence=${evidenceValueFont}, close=${closeFont}): ${page.url}`
+    `(toolbar=${toolbarFont}, reference=${referenceFont}, evidence=${evidenceValueFont}, close=${closeFont}): ${page.url}`
   );
 }
-
 if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
   throw new Error(
     `wide desktop: Day / Hour labels were thinned into an alternating comb ` +
@@ -157,9 +176,9 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 }
 
 console.log(
-  `[wide-desktop] PASS 2047x1038 composition; ` +
-  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, ` +
-  `rails=${toolbarLeft}-${toolbarRight}/${legendLeft}-${legendRight}, ` +
-  `fonts=${toolbarFont}/${legendFont}/${evidenceValueFont}/${closeFont}, ` +
+  `[wide-desktop] PASS 2047x1038 edge Tools; ` +
+  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, ` +
+  `left=${timelineLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
+  `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );
