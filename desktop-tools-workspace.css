@@ -8,11 +8,15 @@
   body:has(#kinetic-instrument[data-analysis-open="true"]) .kinetic-topbar {
     position: relative;
     z-index: 30;
+    justify-content: flex-start;
+    gap: 18px;
+    padding-right: 280px;
     border-bottom: 1px solid var(--m2-etched-dark-soft);
     box-shadow: 0 1px 0 var(--m2-etched-light-soft);
   }
   body:has(#kinetic-instrument[data-analysis-open="true"]) .kinetic-topbar .site-nav {
-    display: none;
+    display: flex;
+    margin: 0;
   }
 
   /* Observation-window presets and transport are implementation/research aids,
