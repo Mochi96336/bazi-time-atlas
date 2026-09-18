@@ -80,11 +80,11 @@ test("wheel structure uses etched M2 edges without beveling temporal sectors", (
   assert.match(radialHierarchy, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(
     radialHierarchy,
-    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*var\(--m2-etched-dark-soft\);[\s\S]*?filter:\s*drop-shadow\(0 1px 0 var\(--m2-etched-light\)\);/
+    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*rgba\(0,0,0,\.66\);[\s\S]*?filter:\s*drop-shadow\(0 1px 0 rgba\(236,239,239,\.075\)\);/
   );
   assert.match(
     radialHierarchy,
-    /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke:\s*var\(--m2-etched-dark-soft\);[\s\S]*?filter:\s*drop-shadow\(0 1px 0 var\(--m2-etched-light-soft\)\);/
+    /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke:\s*url\(#m2-groove-stroke\);[\s\S]*?stroke-width:\s*2\.1;[\s\S]*?filter:\s*drop-shadow\(0 1\.35px 0 rgba\(236,239,239,\.085\)\);/
   );
   assert.match(radialHierarchy, /\.cycle-sector\.is-active \{\s*stroke:\s*none;/);
   assert.match(radialHierarchy, /#solar-track \.term-sector \{[\s\S]*?stroke:\s*none;/);
@@ -115,10 +115,16 @@ test("wheel surface depth comes from one light field and fixed material beds", (
   assert.match(renderer, /function renderStatic\(\) \{\s*renderMaterialBeds\(\);\s*renderGuides\(\);/);
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.match(radialHierarchy, new RegExp(`\\.m2-${ring}-bed \\{ fill: url\\(#m2-${ring}-surface\\); \\}`));
+    assert.match(radialHierarchy, new RegExp(`\\.m2-${ring}-sheen \\{ opacity: \\.[0-9]+; \\}`));
     assert.match(atlasHtml, new RegExp(`id="m2-${ring}-surface"[^>]*gradientUnits="userSpaceOnUse"`));
     assert.doesNotMatch(atlasHtml, new RegExp(`id="m2-${ring}-active"`));
   }
-  assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*1\.25;/);
+  assert.match(renderer, /class: `m2-ring-sheen m2-\$\{id\}-sheen`/);
+  assert.match(atlasHtml, /id="m2-surface-sheen"[\s\S]*?stop-opacity="\.16"[\s\S]*?stop-opacity="\.20"/);
+  assert.match(atlasHtml, /id="m2-groove-stroke"[\s\S]*?stop-opacity="\.92"/);
+  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.24;/);
+  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-light-alpha:\s*\.36;/);
+  assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*2\.1;/);
 });
 
 
