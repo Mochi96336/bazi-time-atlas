@@ -47,11 +47,21 @@
     inset 0 -1px 0 var(--m2-etched-light-soft);
 }
 .atlas-visible-ten-gods-cell {
+  appearance: none;
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: auto auto;
   align-items: baseline;
   gap: 3px 7px;
+  border: 0;
+  border-radius: 0;
   padding: 8px 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 .atlas-visible-ten-gods-cell + .atlas-visible-ten-gods-cell {
   border-left: 1px solid rgba(236,239,239,.065);
