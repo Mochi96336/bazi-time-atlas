@@ -21,7 +21,7 @@ function dump(path, width, height) {
     "--hide-scrollbars",
     "--force-device-scale-factor=1",
     "--run-all-compositor-stages-before-draw",
-    "--virtual-time-budget=3200",
+    "--virtual-time-budget=6000",
     `--window-size=${width},${height}`,
     "--dump-dom",
     url,
