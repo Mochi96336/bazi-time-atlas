@@ -25,6 +25,14 @@ test("visible-stems evidence is a compact recessed desktop rail rather than anot
     /\.atlas-visible-ten-gods-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(58px,\s*1fr\)\);[\s\S]*?border:\s*0;/
   );
   assert.match(css, /\.atlas-visible-ten-gods-head small\s*\{\s*display:\s*none;/);
+  assert.match(
+    css,
+    /\.atlas-visible-ten-gods-cell:not\(:first-child\)\s*\{[\s\S]*?border-left:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*inset 1px 0 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.doesNotMatch(
+    css,
+    /\.atlas-visible-ten-gods-cell\s*\{[^}]*border-left:\s*1px solid rgba\(236,239,239,\.065\);/s
+  );
   assert.doesNotMatch(css, /\.atlas-visible-ten-gods\s*\{[^}]*box-shadow:\s*0\s+\d/s);
   assert.doesNotMatch(css, /\.atlas-visible-ten-gods\s*\{[^}]*display:\s*none;/s);
 });
