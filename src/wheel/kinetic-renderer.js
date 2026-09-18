@@ -72,10 +72,17 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   function renderMaterialBeds() {
     SEXAGENARY_RING_IDS.forEach(id => {
       const model = ringModel(id);
+      const d = annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, FAN.start, FAN.end);
       el("path", {
-        d: annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, FAN.start, FAN.end),
+        d,
         class: `m2-ring-bed m2-${id}-bed`,
         "data-material-ring": id,
+        "aria-hidden": "true"
+      }, guides);
+      el("path", {
+        d,
+        class: `m2-ring-sheen m2-${id}-sheen`,
+        "data-material-sheen-ring": id,
         "aria-hidden": "true"
       }, guides);
     });
