@@ -43,7 +43,18 @@
         return;
       }
       setTimeout(() => {
+        const isVisible = node => {
+          if (!node || node.hidden) return false;
+          const style = childWindow.getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== "none"
+            && style.visibility !== "hidden"
+            && rect.width > 0
+            && rect.height > 0;
+        };
         const rect = readout.getBoundingClientRect();
+        const instrumentRect = instrument.getBoundingClientRect();
+        const visibleToolbarButtons = [...doc.querySelectorAll(".instrument-toolbar button")].filter(isVisible).length;
         probe.dataset.ready = "true";
         probe.dataset.innerWidth = String(childWindow.innerWidth);
         probe.dataset.innerHeight = String(childWindow.innerHeight);
@@ -60,6 +71,12 @@
         probe.dataset.readoutRight = String(rect.right);
         probe.dataset.formControls = String(readout.querySelectorAll("select,input").length);
         probe.dataset.pageFormControls = String(doc.querySelectorAll("#inverse-time-search-readout select,#inverse-time-search-readout input,#inverse-time-search-panel").length);
+        probe.dataset.visibleToolbarButtons = String(visibleToolbarButtons);
+        probe.dataset.legendVisible = String(isVisible(doc.querySelector(".ring-legend")));
+        probe.dataset.closeVisible = String(isVisible(closeControl));
+        probe.dataset.classificationLegendVisible = String(isVisible(doc.querySelector("#classification-overlay-legend")));
+        probe.dataset.tenGodsVisible = String(isVisible(doc.querySelector("#atlas-visible-ten-gods")));
+        probe.dataset.readoutInstrumentTop = String(rect.top - instrumentRect.top);
       }, 120);
     }
 
