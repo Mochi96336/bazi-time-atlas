@@ -74,6 +74,8 @@ const readoutBottom = numberAttr(probe, "data-readout-bottom", page.url);
 const readoutBottomGap = numberAttr(probe, "data-readout-bottom-gap", page.url);
 const toolbarTop = numberAttr(probe, "data-toolbar-top", page.url);
 const toolbarBottom = numberAttr(probe, "data-toolbar-bottom", page.url);
+const toolbarLeft = numberAttr(probe, "data-toolbar-left", page.url);
+const siteNavRight = numberAttr(probe, "data-site-nav-right", page.url);
 const legendTop = numberAttr(probe, "data-legend-top", page.url);
 const legendBottom = numberAttr(probe, "data-legend-bottom", page.url);
 const timelineTop = numberAttr(probe, "data-timeline-top", page.url);
@@ -128,8 +130,11 @@ if (readoutTop < instrumentTop || readoutBottom > instrumentBottom || readoutBot
 if (scrollHeight > height + 90) {
   throw new Error(`wide desktop: Tools grew the document instead of staying in the viewport (scrollHeight=${scrollHeight}, viewport=${height}): ${page.url}`);
 }
-if (requireAttr(probe, "data-site-nav-display", page.url) !== "none") {
-  throw new Error(`wide desktop: global Research nav still competes with focused Tools actions: ${page.url}`);
+if (requireAttr(probe, "data-site-nav-display", page.url) === "none") {
+  throw new Error(`wide desktop: global Research exit disappeared in focused Tools mode: ${page.url}`);
+}
+if (siteNavRight > toolbarLeft - 24) {
+  throw new Error(`wide desktop: global Research exit collides with Tools actions (navRight=${siteNavRight}, toolbarLeft=${toolbarLeft}): ${page.url}`);
 }
 if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
   throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
