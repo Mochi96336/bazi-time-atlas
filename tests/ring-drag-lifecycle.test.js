@@ -212,6 +212,32 @@ test("linked release coasts through the same delta callback and delays end", t =
   assert.equal(events.filter(event => event[0] === "end").length, 1);
 });
 
+test("travel fence reports a distinct emergency stop reason", t => {
+  forceSvgPointFallback(t);
+  const frames = new FakeFrames();
+  const events = [];
+  const { svg, controller } = setupController({
+    onLinkedDragStart: id => events.push(["start", id]),
+    onLinkedDragDelta: (id, delta) => events.push(["delta", id, delta]),
+    onLinkedDragEnd: (id, _state, detail) => events.push(["end", id, detail.reason])
+  }, {
+    requestFrame:frames.request,
+    cancelFrame:frames.cancel,
+    prefersReducedMotion:() => false,
+    maxTravelDegrees:0.2
+  });
+  t.after(() => controller.destroy());
+
+  svg.dispatchAt("pointerdown", "day", -90, 1, 0);
+  svg.dispatchAt("pointermove", "day", -85, 1, 20);
+  svg.dispatchAt("pointerup", "day", -85, 1, 22);
+  assert.equal(controller.isCoasting, true);
+
+  frames.run(38);
+  assert.equal(controller.isCoasting, false);
+  assert.deepEqual(events.at(-1), ["end", "day", "inertia-travel-fence"]);
+});
+
 test("pointercancel never launches inertia", t => {
   forceSvgPointFallback(t);
   const frames = new FakeFrames();
