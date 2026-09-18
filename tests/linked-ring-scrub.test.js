@@ -62,6 +62,50 @@ test("legacy six-degree consumer remains available only as a compatibility helpe
   assert.deepEqual(consumeDiscreteDrag(0, -6.1), { steps:-1, remainderDegrees:-0.09999999999999964 });
 });
 
+test("linked hour drag honors a non-default fixed offset", () => {
+  const start = Date.parse("2026-09-15T20:14:37.000Z");
+  const timeContext = {
+    utcOffsetHours:9,
+    dayBoundary:DAY_BOUNDARY.CIVIL_MIDNIGHT
+  };
+  const phaseStart = Date.parse("2026-09-15T20:00:00.000Z");
+  const phaseEnd = Date.parse("2026-09-15T22:00:00.000Z");
+  const progress = (start - phaseStart) / (phaseEnd - phaseStart);
+  const delta = progress * 3;
+  const result = solveLinkedTemporalDrag({
+    ringId:"hour",
+    instantMs:start,
+    dragDeltaDegrees:delta,
+    timeContext
+  });
+  const expected = phaseStart + progress * 0.5 * (phaseEnd - phaseStart);
+
+  assertNear(result.instantMs, expected, 1e-6);
+  assert.equal(result.crossedBoundaries, 0);
+});
+
+test("linked day drag honors civil-midnight ownership", () => {
+  const start = Date.parse("2026-09-15T20:14:37.000Z");
+  const timeContext = {
+    utcOffsetHours:9,
+    dayBoundary:DAY_BOUNDARY.CIVIL_MIDNIGHT
+  };
+  const phaseStart = Date.parse("2026-09-15T15:00:00.000Z");
+  const phaseEnd = Date.parse("2026-09-16T15:00:00.000Z");
+  const progress = (start - phaseStart) / (phaseEnd - phaseStart);
+  const delta = progress * 3;
+  const result = applyLinkedRingDrag({
+    ringId:"day",
+    instantMs:start,
+    deltaDegrees:delta,
+    timeContext
+  });
+  const expected = phaseStart + progress * 0.5 * (phaseEnd - phaseStart);
+
+  assertNear(result.instantMs, expected, 1e-6);
+  assert.equal(result.crossedBoundaries, 0);
+});
+
 test("sub-tooth hour drag changes master time immediately instead of waiting for six degrees", () => {
   const start = Date.parse("2027-03-15T13:20:09.000Z");
   const delta = 0.5;

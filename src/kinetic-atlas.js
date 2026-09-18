@@ -409,6 +409,7 @@ function applyLinkedDragToTime(id, deltaDegrees) {
     ringId: id,
     instantMs: beforeMs,
     deltaDegrees,
+    timeContext: state.timeContext,
     longitudeAtMs: instantMs => solarLongitudeAtInstant(instantMs, state.timeContext)
   });
   queueLinkedDiagnostics({ boundaries:result.crossedBoundaries ?? 0 });

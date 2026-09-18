@@ -95,7 +95,7 @@ export function stepLinkedDiscreteInstant(ringId, instantMs, timeDirection) {
  * the current tooth and then continues through the adjacent real interval; no
  * six-degree detent or fixed 30d/365d approximation is involved.
  */
-export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees }) {
+export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees, timeContext }) {
   if (!isDiscreteRing(ringId)) throw new RangeError(`ring ${ringId} is not a temporal linked scrub ring`);
   if (!Number.isFinite(instantMs) || !Number.isFinite(dragDeltaDegrees)) {
     throw new RangeError("instantMs and dragDeltaDegrees must be finite");
@@ -107,7 +107,7 @@ export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees })
   const timeDirection = dragDeltaDegrees > 0 ? -1 : 1;
   let remainingDegrees = Math.abs(dragDeltaDegrees);
   let cursorMs = instantMs;
-  let window = discretePhaseWindowForRing(ringId, cursorMs);
+  let window = discretePhaseWindowForRing(ringId, cursorMs, timeContext);
   let progress = window?.progress;
   let crossedBoundaries = 0;
 
@@ -135,14 +135,14 @@ export function solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees })
 
     if (timeDirection > 0) {
       cursorMs = window.endMs;
-      window = discretePhaseWindowForRing(ringId, cursorMs);
+      window = discretePhaseWindowForRing(ringId, cursorMs, timeContext);
       progress = 0;
     } else {
       cursorMs = window.startMs;
       // Phase windows are half-open [start,end). Sampling one millisecond before
       // the boundary identifies the adjacent earlier interval, while progress=1
       // keeps the mathematical cursor exactly on the shared boundary.
-      window = discretePhaseWindowForRing(ringId, cursorMs - BOUNDARY_SAMPLE_EPSILON_MS);
+      window = discretePhaseWindowForRing(ringId, cursorMs - BOUNDARY_SAMPLE_EPSILON_MS, timeContext);
       progress = 1;
     }
 
@@ -201,7 +201,8 @@ export function applyLinkedRingDrag({
   instantMs,
   deltaDegrees,
   remainderDegrees = 0,
-  longitudeAtMs
+  longitudeAtMs,
+  timeContext
 }) {
   if (ringId === "solar" || ringId === "zodiac") {
     return Object.freeze({
@@ -214,7 +215,12 @@ export function applyLinkedRingDrag({
 
   if (isDiscreteRing(ringId)) {
     if (!Number.isFinite(remainderDegrees)) throw new RangeError("remainderDegrees must be finite");
-    const solved = solveLinkedTemporalDrag({ ringId, instantMs, dragDeltaDegrees:deltaDegrees });
+    const solved = solveLinkedTemporalDrag({
+      ringId,
+      instantMs,
+      dragDeltaDegrees:deltaDegrees,
+      timeContext
+    });
     return Object.freeze({
       instantMs: solved.instantMs,
       remainderDegrees: 0,
