@@ -41,3 +41,34 @@ test("the annual solar band is visually demoted while four pillar rings stay dir
   }
   assert.match(css, /cursor:\s*grab/);
 });
+
+
+test("390px find-time owns the mobile tool surface instead of inheriting Tools chrome", () => {
+  assert.match(
+    css,
+    /data-inverse-time-search="active"\] \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-end;/
+  );
+  for (const selector of [
+    ".instrument-toolbar > .toolbar-group:first-child",
+    "#classification-overlay-button",
+    "#now-button",
+    "#play-button",
+    ".ring-legend",
+    ".classification-overlay-legend",
+    ".atlas-visible-ten-gods",
+    ".analysis-close"
+  ]) {
+    assert.match(
+      css,
+      new RegExp(`#kinetic-instrument\\[data-inverse-time-search="active"\\] ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}`)
+    );
+  }
+  assert.match(
+    css,
+    /data-inverse-time-search="active"\] \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*auto;/
+  );
+  assert.match(
+    css,
+    /data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*42px;/
+  );
+});
