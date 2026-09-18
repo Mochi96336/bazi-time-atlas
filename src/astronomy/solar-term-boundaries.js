@@ -34,6 +34,7 @@ const TYME_NAMES = Object.freeze({
 
 const eventCache = new Map();
 const yearCache = new Map();
+let lastDefaultJieInterval = null;
 
 function validateYear(year) {
   if (!Number.isInteger(year) || year < -9999 || year > 9999) {
@@ -158,8 +159,23 @@ export function solarTermNamedEventsBetween(startMs, endMs, names) {
 
 export function jieBoundaryContext(instantMs, options = {}) {
   if (!Number.isFinite(instantMs)) throw new RangeError("instantMs must be finite");
+  const customSpan = options.searchSpanDays !== undefined;
   const span = options.searchSpanDays ?? 370;
   if (!Number.isFinite(span) || span <= 0) throw new RangeError("searchSpanDays must be positive");
+
+  if (
+    !customSpan &&
+    lastDefaultJieInterval?.previous &&
+    lastDefaultJieInterval?.next &&
+    instantMs >= lastDefaultJieInterval.previous.instantMs &&
+    instantMs < lastDefaultJieInterval.next.instantMs
+  ) {
+    return {
+      previous: lastDefaultJieInterval.previous,
+      next: lastDefaultJieInterval.next
+    };
+  }
+
   const events = solarTermEventsBetween(
     instantMs - span * DAY_MS,
     instantMs + span * DAY_MS
@@ -173,6 +189,10 @@ export function jieBoundaryContext(instantMs, options = {}) {
       next = event;
       break;
     }
+  }
+
+  if (!customSpan && previous && next) {
+    lastDefaultJieInterval = { previous, next };
   }
   return { previous, next };
 }

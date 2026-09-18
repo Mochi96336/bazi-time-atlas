@@ -63,3 +63,36 @@ test("named range query can build a multi-decade Li Chun rail without expanding 
   assert.equal(events[0].referenceFields.year, 2020);
   assert.equal(events.at(-1).referenceFields.year, 2030);
 });
+
+
+test("default jie context reuses the same interval without changing boundary ownership", () => {
+  const events = solarTermEventsForCivilYear(2024).filter(event => event.kind === "jie");
+  const previous = events[3];
+  const next = events[4];
+  const firstMs = previous.instantMs + Math.floor((next.instantMs - previous.instantMs) / 3);
+  const secondMs = previous.instantMs + Math.floor((next.instantMs - previous.instantMs) * 2 / 3);
+
+  const first = jieBoundaryContext(firstMs);
+  const second = jieBoundaryContext(secondMs);
+
+  assert.equal(first.previous, previous);
+  assert.equal(first.next, next);
+  assert.equal(second.previous, previous);
+  assert.equal(second.next, next);
+  assert.notEqual(first, second);
+});
+
+test("explicit search span bypasses the default jie interval cache", () => {
+  const events = solarTermEventsForCivilYear(2024).filter(event => event.kind === "jie");
+  const previous = events[5];
+  const next = events[6];
+  const middleMs = previous.instantMs + Math.floor((next.instantMs - previous.instantMs) / 2);
+
+  const seeded = jieBoundaryContext(middleMs);
+  assert.equal(seeded.previous, previous);
+  assert.equal(seeded.next, next);
+
+  const narrow = jieBoundaryContext(middleMs, { searchSpanDays:1 });
+  assert.equal(narrow.previous, null);
+  assert.equal(narrow.next, null);
+});
