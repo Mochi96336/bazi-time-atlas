@@ -88,20 +88,19 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
     throw new Error(`find-time ${label} did not settle as a visible wheel-native tool in ${width}x${height}: ${fixtureURL} · ${probe}`);
   }
 
+  const taskTopMin = width <= 480 ? 38 : 48;
+  const taskTopMax = width <= 480 ? 50 : 66;
   if (
-    width <= 480
-    && (
-      attr(probe, "data-visible-toolbar-buttons") !== "1"
-      || attr(probe, "data-legend-visible") !== "false"
-      || attr(probe, "data-close-visible") !== "false"
-      || attr(probe, "data-classification-legend-visible") !== "false"
-      || attr(probe, "data-ten-gods-visible") !== "false"
-      || !Number.isFinite(readoutInstrumentTop)
-      || readoutInstrumentTop < 38
-      || readoutInstrumentTop > 50
-    )
+    attr(probe, "data-visible-toolbar-buttons") !== "1"
+    || attr(probe, "data-legend-visible") !== "false"
+    || attr(probe, "data-close-visible") !== "false"
+    || attr(probe, "data-classification-legend-visible") !== "false"
+    || attr(probe, "data-ten-gods-visible") !== "false"
+    || !Number.isFinite(readoutInstrumentTop)
+    || readoutInstrumentTop < taskTopMin
+    || readoutInstrumentTop > taskTopMax
   ) {
-    throw new Error(`find-time ${label} leaked unrelated Tools chrome into the mobile task surface: ${fixtureURL} · ${probe}`);
+    throw new Error(`find-time ${label} leaked unrelated Tools chrome into the single-task surface: ${fixtureURL} · ${probe}`);
   }
 
   const shot = spawnSync(browser, [...commonArgs, `--screenshot=${outputPath}`, fixtureURL], {
