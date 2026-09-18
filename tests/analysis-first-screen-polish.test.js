@@ -51,6 +51,14 @@ test("classification evidence is recessed instead of floating as a dashboard car
     /\.classification-keys i\s*\{[\s\S]*?min-width:\s*15px;[\s\S]*?width:\s*15px;[\s\S]*?height:\s*15px;[\s\S]*?border-radius:\s*2px;/
   );
   assert.match(css, /\.classification-current\s*\{[\s\S]*?font-size:\s*6\.5px;/);
+  assert.match(
+    css,
+    /\.classification-row \+ \.classification-row\s*\{[\s\S]*?border-top-color:\s*var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*inset 0 1px 0 var\(--m2-etched-light-soft\);/
+  );
+  assert.doesNotMatch(
+    css,
+    /\.classification-row \+ \.classification-row\s*\{[^}]*border-top-color:\s*rgba\(236,239,239,\.055\);/s
+  );
   assert.match(css, /\.classification-warning\s*\{[\s\S]*?font-size:\s*6px;/);
   assert.doesNotMatch(css, /\.classification-overlay-legend\s*\{[^}]*display:\s*none;/s);
 });
