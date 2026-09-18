@@ -27,7 +27,9 @@
       const apply = doc?.querySelector("#time-context-apply");
       const timeline = doc?.querySelector(".timeline-dock");
       const readout = doc?.querySelector("#instant-readout");
-      if (!win || !instrument || !trigger || !panel || !utc || !boundary || !apply || !timeline || !readout) return;
+      const hourTrack = doc?.querySelector("#hour-track");
+      const dayTrack = doc?.querySelector("#day-track");
+      if (!win || !instrument || !trigger || !panel || !utc || !boundary || !apply || !timeline || !readout || !hourTrack || !dayTrack) return;
 
       const selectedBefore = instrument.dataset.selectedInstantMs ?? "";
       const timelineTopBefore = timeline.getBoundingClientRect().top;
@@ -61,6 +63,9 @@
         probe.dataset.urlHashCustom = customUrl.hash;
         probe.dataset.panelHiddenAfterApply = String(panel.hidden);
         probe.dataset.documentContinuity = String(win.__timeContextContinuity === "alive");
+        probe.dataset.hourPhaseStartCustom = hourTrack.dataset.phaseStartMs ?? "";
+        probe.dataset.hourPhaseEndCustom = hourTrack.dataset.phaseEndMs ?? "";
+        probe.dataset.dayPhaseSourceCustom = dayTrack.dataset.phaseSource ?? "";
 
         trigger.click();
         utc.value = "8";
@@ -76,6 +81,9 @@
           probe.dataset.resetInstant = resetUrl.searchParams.get("instant") ?? "";
           probe.dataset.resetKeep = resetUrl.searchParams.get("keep") ?? "";
           probe.dataset.resetHash = resetUrl.hash;
+          probe.dataset.hourPhaseStartReset = hourTrack.dataset.phaseStartMs ?? "";
+          probe.dataset.hourPhaseEndReset = hourTrack.dataset.phaseEndMs ?? "";
+          probe.dataset.dayPhaseSourceReset = dayTrack.dataset.phaseSource ?? "";
           probe.dataset.ready = "true";
         }, 100);
       }, 100);

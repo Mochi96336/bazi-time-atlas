@@ -72,6 +72,13 @@ if (
 if (attr(probe, "data-panel-hidden-after-apply") !== "true" || attr(probe, "data-document-continuity") !== "true") {
   throw new Error(`context apply rebuilt the document or left the popover open: ${url}`);
 }
+if (
+  attr(probe, "data-hour-phase-start-custom") !== String(Date.parse("2026-09-15T20:00:00.000Z"))
+  || attr(probe, "data-hour-phase-end-custom") !== String(Date.parse("2026-09-15T22:00:00.000Z"))
+  || attr(probe, "data-day-phase-source-custom") !== "civil-midnight"
+) {
+  throw new Error(`custom temporal context did not propagate into discrete phase ownership: ${url}`);
+}
 
 if (attr(probe, "data-selected-reset") !== expectedMs || attr(probe, "data-trigger-text-reset") !== "UTC+08:00") {
   throw new Error(`resetting context changed Selected Instant or default readout: ${url}`);
@@ -86,5 +93,12 @@ if (
 ) {
   throw new Error(`context reset discarded unrelated URL state: ${url}`);
 }
+if (
+  attr(probe, "data-hour-phase-start-reset") !== String(Date.parse("2026-09-15T19:00:00.000Z"))
+  || attr(probe, "data-hour-phase-end-reset") !== String(Date.parse("2026-09-15T21:00:00.000Z"))
+  || attr(probe, "data-day-phase-source-reset") !== "zi-initial"
+) {
+  throw new Error(`reset temporal context did not refresh discrete phase ownership: ${url}`);
+}
 
-console.log(`[time-context] PASS overlay control preserves physical instant + document flow: ${url}`);
+console.log(`[time-context] PASS overlay control preserves physical instant + discrete phase context: ${url}`);
