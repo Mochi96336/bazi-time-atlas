@@ -21,12 +21,11 @@ function screenInverse(svg) {
   return matrix ? matrix.inverse() : null;
 }
 
-function screenToWorld(svg, clientX, clientY, inverse = screenInverse(svg)) {
-  if (!inverse) return null;
-  return {
-    x: inverse.a * clientX + inverse.c * clientY + inverse.e,
-    y: inverse.b * clientX + inverse.d * clientY + inverse.f
-  };
+function screenToWorld(svg, clientX, clientY, target, inverse = screenInverse(svg)) {
+  if (!inverse) return false;
+  target.x = inverse.a * clientX + inverse.c * clientY + inverse.e;
+  target.y = inverse.b * clientX + inverse.d * clientY + inverse.f;
+  return true;
 }
 
 export function ringAtWorldPoint(point) {
@@ -72,6 +71,7 @@ export function createRingDragController({
   let active = null;
   let coasting = null;
   let hoverRingId = null;
+  const pointerWorld = { x:0, y:0 };
 
   function updatePointerStyle() {
     svg.style.touchAction = "none";
@@ -89,12 +89,11 @@ export function createRingDragController({
 
   function updateHover(event) {
     if (active) return;
-    const world = screenToWorld(svg, event.clientX, event.clientY);
-    if (!world) {
+    if (!screenToWorld(svg, event.clientX, event.clientY, pointerWorld)) {
       setHoverRing(null);
       return;
     }
-    const ring = ringAtWorldPoint(world);
+    const ring = ringAtWorldPoint(pointerWorld);
     setHoverRing(ring?.draggable && ringIsVisible(svg, ring.id) ? ring.id : null);
   }
 
@@ -247,9 +246,8 @@ export function createRingDragController({
 
   function begin(event) {
     if (event.button > 0 || active) return;
-    const world = screenToWorld(svg, event.clientX, event.clientY);
-    if (!world) return;
-    const ring = ringAtWorldPoint(world);
+    if (!screenToWorld(svg, event.clientX, event.clientY, pointerWorld)) return;
+    const ring = ringAtWorldPoint(pointerWorld);
     if (!ring?.draggable || !ringIsVisible(svg, ring.id)) return;
     const state = ringStates[ring.id];
     if (!state) return;
@@ -267,7 +265,7 @@ export function createRingDragController({
       pointerId: event.pointerId,
       ringId: ring.id,
       mode: compareMode ? "free" : "linked",
-      lastAngle: angleAt(WHEEL_CENTER, world),
+      lastAngle: angleAt(WHEEL_CENTER, pointerWorld),
       dragActivated: false,
       pendingDelta: 0,
       velocityEstimator,
@@ -278,9 +276,8 @@ export function createRingDragController({
   }
 
   function applyPointerSample(sample, inverse) {
-    const world = screenToWorld(svg, sample.clientX, sample.clientY, inverse);
-    if (!world || !active) return;
-    const nextAngle = angleAt(WHEEL_CENTER, world);
+    if (!screenToWorld(svg, sample.clientX, sample.clientY, pointerWorld, inverse) || !active) return;
+    const nextAngle = angleAt(WHEEL_CENTER, pointerWorld);
     const delta = shortestAngleDelta(nextAngle, active.lastAngle);
     active.lastAngle = nextAngle;
     if (Math.abs(delta) < DETENT_EPSILON) return;
