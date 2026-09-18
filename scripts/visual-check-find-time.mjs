@@ -61,6 +61,7 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   const bottom = Number(attr(probe, "data-readout-bottom"));
   const left = Number(attr(probe, "data-readout-left"));
   const right = Number(attr(probe, "data-readout-right"));
+  const readoutInstrumentTop = Number(attr(probe, "data-readout-instrument-top"));
   if (
     attr(probe, "data-ready") !== "true"
     || attr(probe, "data-inner-width") !== String(width)
@@ -85,6 +86,22 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
     || right <= left
   ) {
     throw new Error(`find-time ${label} did not settle as a visible wheel-native tool in ${width}x${height}: ${fixtureURL} · ${probe}`);
+  }
+
+  if (
+    width <= 480
+    && (
+      attr(probe, "data-visible-toolbar-buttons") !== "1"
+      || attr(probe, "data-legend-visible") !== "false"
+      || attr(probe, "data-close-visible") !== "false"
+      || attr(probe, "data-classification-legend-visible") !== "false"
+      || attr(probe, "data-ten-gods-visible") !== "false"
+      || !Number.isFinite(readoutInstrumentTop)
+      || readoutInstrumentTop < 38
+      || readoutInstrumentTop > 50
+    )
+  ) {
+    throw new Error(`find-time ${label} leaked unrelated Tools chrome into the mobile task surface: ${fixtureURL} · ${probe}`);
   }
 
   const shot = spawnSync(browser, [...commonArgs, `--screenshot=${outputPath}`, fixtureURL], {
