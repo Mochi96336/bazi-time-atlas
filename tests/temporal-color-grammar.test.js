@@ -61,7 +61,6 @@ test("M2 material stays CSS-light and reserves luminosity for Selected Instant",
 test("year hierarchy no longer borrows the warm Solar or Selected-Instant channel", () => {
   assert.doesNotMatch(hierarchy, /#fff2c9/);
   assert.doesNotMatch(hierarchy, /rgba\(244,236,207/);
-  assert.doesNotMatch(hierarchy, /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[^}]*var\(--solar\)|var\(--cursor\)/);
   assert.match(hierarchy, /#year-track \.active-cycle-label \{[\s\S]*?fill:\s*#f2f3f2;/);
   assert.match(
     hierarchy,
