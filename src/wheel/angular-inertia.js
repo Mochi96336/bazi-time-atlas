@@ -159,7 +159,7 @@ function middlePolynomialCoefficients({
   const c3 = -2 * deltaTimeConstant * invWidth ** 3;
   const c2 = deltaTimeConstant * (3 * invWidth ** 2 + 6 * l * invWidth ** 3);
   const c1 = deltaTimeConstant * (-6 * l * invWidth ** 2 - 6 * l ** 2 * invWidth ** 3);
-  const c0 = lowTimeConstant
+  const c0 = lowTimeConstantMs
     + deltaTimeConstant * (3 * l ** 2 * invWidth ** 2 + 2 * l ** 3 * invWidth ** 3);
   return { c0, c1, c2, c3 };
 }
