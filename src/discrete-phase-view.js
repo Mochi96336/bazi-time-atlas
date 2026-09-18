@@ -4,6 +4,10 @@ import {
   phaseAngleWithinTooth
 } from "./wheel/discrete-phase.js";
 import { WHEEL_CENTER, ringModel } from "./wheel/ring-model.js";
+import {
+  DEFAULT_ATLAS_TIME_CONTEXT,
+  normalizeAtlasTimeContext
+} from "./wheel/atlas-time-context.js";
 import { arcPath, pointAt } from "./wheel/polar-geometry.js";
 
 const RING_IDS = Object.freeze(["hour", "year", "month", "day"]);
@@ -174,6 +178,22 @@ function finishInitialization() {
   if (instrument) instrument.dataset.discretePhaseInit = "ready";
 }
 
+function currentTimeContext() {
+  if (!instrument) return DEFAULT_ATLAS_TIME_CONTEXT;
+  const rawUtc = instrument.dataset.utcOffsetHours;
+  const rawBoundary = instrument.dataset.dayBoundary;
+  if (rawUtc === undefined && rawBoundary === undefined) return DEFAULT_ATLAS_TIME_CONTEXT;
+
+  try {
+    return normalizeAtlasTimeContext({
+      utcOffsetHours: rawUtc === undefined ? DEFAULT_ATLAS_TIME_CONTEXT.utcOffsetHours : Number(rawUtc),
+      dayBoundary: rawBoundary ?? DEFAULT_ATLAS_TIME_CONTEXT.dayBoundary
+    });
+  } catch {
+    return DEFAULT_ATLAS_TIME_CONTEXT;
+  }
+}
+
 function refresh() {
   scheduled = false;
   if (!instrument || !svg) return;
@@ -184,7 +204,7 @@ function refresh() {
     return;
   }
 
-  const phases = { ...discretePhaseWindows(instantMs) };
+  const phases = { ...discretePhaseWindows(instantMs, currentTimeContext()) };
   // Legacy annual links can override the displayed month branch/longitude without
   // representing a complete physical instant. Do not attach a real-time month
   // progress bar or future boundary gate to that projected month identity.
@@ -213,7 +233,12 @@ function scheduleRefresh() {
 if (instrument && svg) {
   new MutationObserver(scheduleRefresh).observe(instrument, {
     attributes:true,
-    attributeFilter:["data-selected-instant-ms", "data-projection-mode"]
+    attributeFilter:[
+      "data-selected-instant-ms",
+      "data-projection-mode",
+      "data-utc-offset-hours",
+      "data-day-boundary"
+    ]
   });
 
   // The view can be evaluated before the wheel renderer has appended all SVG
