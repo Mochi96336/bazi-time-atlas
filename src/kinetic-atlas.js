@@ -32,7 +32,7 @@ import {
 } from "./wheel/atlas-time-context.js";
 import { createFrameCommitQueue } from "./interaction/frame-commit-queue.js";
 import { createFreeCompareController } from "./interaction/free-compare-controller.js";
-import { applyLinkedRingDrag } from "./interaction/linked-ring-scrub.js";
+import { applyLinkedRingDragInto } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
 import {
   SELECTED_INSTANT_COMMAND,
@@ -115,6 +115,13 @@ let compareController = null;
 let playbackController = null;
 let linkedWheelRenderPending = false;
 let pendingLinkedDiagnostics = null;
+const linkedDragResult = {
+  instantMs:0,
+  remainderDegrees:0,
+  appliedSteps:0,
+  crossedBoundaries:0
+};
+const linkedLongitudeAtMs = instantMs => solarLongitudeAtInstant(instantMs, state.timeContext);
 
 const pendingFreePoseRings = new Set();
 const freePoseCommitQueue = createFrameCommitQueue({
@@ -405,13 +412,14 @@ function installPlayback() {
 
 function applyLinkedDragToTime(id, deltaDegrees) {
   const beforeMs = state.selectedMs;
-  const result = applyLinkedRingDrag({
-    ringId: id,
-    instantMs: beforeMs,
+  const result = applyLinkedRingDragInto(
+    linkedDragResult,
+    id,
+    beforeMs,
     deltaDegrees,
-    timeContext: state.timeContext,
-    longitudeAtMs: instantMs => solarLongitudeAtInstant(instantMs, state.timeContext)
-  });
+    state.timeContext,
+    linkedLongitudeAtMs
+  );
   queueLinkedDiagnostics({ boundaries:result.crossedBoundaries ?? 0 });
 
   if (result.instantMs !== beforeMs) {
