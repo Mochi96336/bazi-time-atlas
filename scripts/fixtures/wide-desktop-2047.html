@@ -24,8 +24,12 @@
     const rect = node => node?.getBoundingClientRect() ?? null;
     const num = value => Number.parseFloat(value || "0");
     const round = value => String(Math.round(value * 100) / 100);
+    const display = (win, node) => node ? win.getComputedStyle(node).display : "missing";
     const displayVisibleCount = (win, nodes) => [...nodes]
       .filter(node => win.getComputedStyle(node).display !== "none")
+      .length;
+    const renderedVisibleCount = (win, nodes) => [...nodes]
+      .filter(node => win.getComputedStyle(node).display !== "none" && node.getClientRects().length > 0)
       .length;
 
     function settle(win, callback) {
@@ -46,29 +50,43 @@
       if (!win || !doc) return false;
 
       const instrument = doc.querySelector("#kinetic-instrument");
+      const topbar = doc.querySelector(".kinetic-topbar");
+      const siteNav = doc.querySelector(".kinetic-topbar .site-nav");
       const readout = doc.querySelector(".instrument-readout");
       const toolbar = doc.querySelector(".instrument-toolbar");
       const legend = doc.querySelector(".ring-legend");
+      const reference = doc.querySelector(".reference-frame-control");
+      const timeline = doc.querySelector(".timeline-dock");
+      const solar = doc.querySelector(".atlas-solar-time-analysis");
       const evidence = doc.querySelector(".atlas-visible-ten-gods");
+      const evidenceGrid = doc.querySelector(".atlas-visible-ten-gods-grid");
       const evidenceValue = doc.querySelector(".atlas-visible-ten-gods-cell strong");
-      const toolbarButton = doc.querySelector(".instrument-toolbar button");
-      const legendLabel = doc.querySelector(".ring-legend-row span");
+      const toolbarButton = doc.querySelector("#classification-overlay-button");
       const close = doc.querySelector("#analysis-close");
+      const play = doc.querySelector("#play-button");
+      const stateStrip = doc.querySelector(".state-strip");
+      const notes = doc.querySelector(".atlas-notes");
+      const sources = doc.querySelector(".sources-panel");
+      const scaleButtons = doc.querySelectorAll(".scale-button");
+      const ringToggles = doc.querySelectorAll(".ring-legend-row[data-ring-toggle]");
       const hourLabels = doc.querySelectorAll("#hour-track .cycle-label");
       const dayLabels = doc.querySelectorAll("#day-track .cycle-label");
-      if (!instrument || !readout || !toolbar || !legend || !evidence || !evidenceValue || !toolbarButton || !legendLabel || !close) return false;
+      if (!instrument || !topbar || !siteNav || !readout || !toolbar || !legend || !reference || !timeline || !solar || !evidence || !evidenceGrid || !evidenceValue || !toolbarButton || !close || !play || !stateStrip || !notes || !sources) return false;
 
       const instrumentRect = rect(instrument);
+      const topbarRect = rect(topbar);
       const readoutRect = rect(readout);
       const toolbarRect = rect(toolbar);
       const legendRect = rect(legend);
+      const referenceRect = rect(reference);
+      const timelineRect = rect(timeline);
+      const solarRect = rect(solar);
       const evidenceRect = rect(evidence);
+      const evidenceGridRect = rect(evidenceGrid);
       const closeRect = rect(close);
       const evidenceStyle = win.getComputedStyle(evidenceValue);
       const toolbarStyle = win.getComputedStyle(toolbarButton);
-      const toolbarFrameStyle = win.getComputedStyle(toolbar);
-      const legendStyle = win.getComputedStyle(legendLabel);
-      const legendFrameStyle = win.getComputedStyle(legend);
+      const referenceStyle = win.getComputedStyle(reference);
       const closeStyle = win.getComputedStyle(close);
 
       Object.assign(probe.dataset, {
@@ -76,9 +94,13 @@
         innerWidth: String(win.innerWidth),
         innerHeight: String(win.innerHeight),
         scrollWidth: String(Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth)),
+        scrollHeight: String(Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight)),
         analysisOpen: instrument.dataset.analysisOpen ?? "",
         instrumentTop: round(instrumentRect.top),
         instrumentBottom: round(instrumentRect.bottom),
+        topbarTop: round(topbarRect.top),
+        topbarBottom: round(topbarRect.bottom),
+        siteNavDisplay: display(win, siteNav),
         instrumentHeight: round(instrumentRect.height),
         instrumentBottomGap: round(win.innerHeight - instrumentRect.bottom),
         readoutTop: round(readoutRect.top),
@@ -92,19 +114,36 @@
         legendBottom: round(legendRect.bottom),
         legendLeft: round(legendRect.left),
         legendRight: round(legendRect.right),
+        referenceTop: round(referenceRect.top),
+        referenceBottom: round(referenceRect.bottom),
+        timelineTop: round(timelineRect.top),
+        timelineBottom: round(timelineRect.bottom),
+        timelineLeft: round(timelineRect.left),
+        timelineRight: round(timelineRect.right),
+        solarTop: round(solarRect.top),
+        solarBottom: round(solarRect.bottom),
+        solarLeft: round(solarRect.left),
+        solarRight: round(solarRect.right),
+        evidenceTop: round(evidenceRect.top),
+        evidenceBottom: round(evidenceRect.bottom),
+        evidenceLeft: round(evidenceRect.left),
+        evidenceRight: round(evidenceRect.right),
+        evidenceGridWidth: round(evidenceGridRect.width),
         closeTop: round(closeRect.top),
         closeBottom: round(closeRect.bottom),
         closeRight: round(closeRect.right),
-        evidenceTop: round(evidenceRect.top),
-        evidenceBottom: round(evidenceRect.bottom),
         toolbarFont: round(num(toolbarStyle.fontSize)),
-        legendFont: round(num(legendStyle.fontSize)),
+        referenceFont: round(num(referenceStyle.fontSize)),
         evidenceValueFont: round(num(evidenceStyle.fontSize)),
         closeFont: round(num(closeStyle.fontSize)),
-        toolbarBaseline: round(num(toolbarFrameStyle.borderBottomWidth)),
-        legendBaseline: round(num(legendFrameStyle.borderBottomWidth)),
+        scaleVisible: String(renderedVisibleCount(win, scaleButtons)),
+        ringToggleVisible: String(renderedVisibleCount(win, ringToggles)),
         hourVisibleLabels: String(displayVisibleCount(win, hourLabels)),
         dayVisibleLabels: String(displayVisibleCount(win, dayLabels)),
+        playDisplay: display(win, play),
+        stateStripDisplay: display(win, stateStrip),
+        notesDisplay: display(win, notes),
+        sourcesDisplay: display(win, sources),
       });
       return true;
     }
