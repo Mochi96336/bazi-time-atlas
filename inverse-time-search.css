@@ -99,6 +99,28 @@
   content: "工具 · ";
 }
 
+/* Find Time is a task, not another Tools dashboard. Once active, the wheel and
+   its single mode-exit own the surface at every viewport. */
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar {
+  justify-content: flex-end;
+}
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:first-child,
+#kinetic-instrument[data-inverse-time-search="active"] #classification-overlay-button,
+#kinetic-instrument[data-inverse-time-search="active"] #now-button,
+#kinetic-instrument[data-inverse-time-search="active"] #play-button,
+#kinetic-instrument[data-inverse-time-search="active"] .ring-legend,
+#kinetic-instrument[data-inverse-time-search="active"] .classification-overlay-legend,
+#kinetic-instrument[data-inverse-time-search="active"] .atlas-visible-ten-gods,
+#kinetic-instrument[data-inverse-time-search="active"] .analysis-close {
+  display: none !important;
+}
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:last-child {
+  margin-left: auto;
+}
+#kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
+  top: 54px;
+}
+
 @media (max-width: 480px) {
   .inverse-time-search-readout {
     top: 111px;
@@ -120,24 +142,6 @@
     font-size: 8px;
   }
 
-  /* Find Time becomes the sole mobile task while active. The wheel is the
-     query surface, so inherited Tools chrome must not compete with it. */
-  #kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar {
-    justify-content: flex-end;
-  }
-  #kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:first-child,
-  #kinetic-instrument[data-inverse-time-search="active"] #classification-overlay-button,
-  #kinetic-instrument[data-inverse-time-search="active"] #now-button,
-  #kinetic-instrument[data-inverse-time-search="active"] #play-button,
-  #kinetic-instrument[data-inverse-time-search="active"] .ring-legend,
-  #kinetic-instrument[data-inverse-time-search="active"] .classification-overlay-legend,
-  #kinetic-instrument[data-inverse-time-search="active"] .atlas-visible-ten-gods,
-  #kinetic-instrument[data-inverse-time-search="active"] .analysis-close {
-    display: none !important;
-  }
-  #kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:last-child {
-    margin-left: auto;
-  }
   #kinetic-instrument[data-inverse-time-search="active"] #inverse-time-search-button {
     min-height: 27px;
     padding-inline: 6px;
