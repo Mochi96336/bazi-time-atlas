@@ -21,8 +21,8 @@ test("desktop Tools removes transport and layer chrome from the product surface"
 });
 
 test("desktop Tools converges global chrome to one focused top row", () => {
-  assert.match(css, /body:has\(#kinetic-instrument\[data-analysis-open="true"\]\) \.kinetic-topbar[\s\S]*border-bottom:/);
-  assert.match(css, /body:has\(#kinetic-instrument\[data-analysis-open="true"\]\) \.kinetic-topbar \.site-nav[\s\S]*display: none;/);
+  assert.match(css, /body:has\(#kinetic-instrument\[data-analysis-open="true"\]\) \.kinetic-topbar[\s\S]*justify-content: flex-start;[\s\S]*padding-right: 280px;[\s\S]*border-bottom:/);
+  assert.match(css, /body:has\(#kinetic-instrument\[data-analysis-open="true"\]\) \.kinetic-topbar \.site-nav[\s\S]*display: flex;[\s\S]*margin: 0;/);
   assert.match(css, /\.instrument-toolbar \{[\s\S]*position: fixed;[\s\S]*top: 12px;[\s\S]*right: 18px;[\s\S]*padding: 0 62px 0 0;[\s\S]*border: 0;/);
   assert.match(css, /\.analysis-close \{[\s\S]*position: fixed;[\s\S]*top: 12px;[\s\S]*right: 18px;[\s\S]*min-height: 32px;/);
 });
