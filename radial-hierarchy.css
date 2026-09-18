@@ -153,6 +153,22 @@
 .m2-day-sheen { opacity: .64; }
 .m2-month-sheen { opacity: .72; }
 .m2-year-sheen { opacity: .82; }
+/* Bevel the fixed material body itself: a narrow outer reflected lip and a
+   darker inner falloff turn each band into a machined ring rather than a flat
+   gray strip. These rims live under temporal data and never rotate with it. */
+.m2-ring-rim { fill: none; pointer-events: none; }
+.m2-ring-rim-light {
+  stroke: url(#m2-rim-light-stroke);
+  stroke-width: 1.55;
+}
+.m2-ring-rim-shadow {
+  stroke: url(#m2-rim-shadow-stroke);
+  stroke-width: 2.35;
+}
+.m2-hour-rim-light, .m2-hour-rim-shadow { opacity: .66; }
+.m2-day-rim-light, .m2-day-rim-shadow { opacity: .74; }
+.m2-month-rim-light, .m2-month-rim-shadow { opacity: .82; }
+.m2-year-rim-light, .m2-year-rim-shadow { opacity: .90; }
 
 #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 14%, transparent); }
 #day-track .day-sector { fill: color-mix(in srgb, var(--day) 17%, transparent); }
