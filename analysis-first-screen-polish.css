@@ -72,12 +72,12 @@
     align-items: baseline;
     gap: 2px 4px;
     border: 0;
-    border-left: 1px solid rgba(236,239,239,.065);
     padding: 0 8px;
     background: transparent;
   }
-  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:first-child {
-    border-left: 0;
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:not(:first-child) {
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
     color: #666b6c;
