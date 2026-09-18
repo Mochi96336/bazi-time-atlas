@@ -57,7 +57,11 @@
     right: auto;
     top: 52px;
     width: 286px;
+    min-height: 0;
     display: block;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
     pointer-events: none;
   }
   #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
