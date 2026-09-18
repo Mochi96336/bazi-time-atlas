@@ -1,6 +1,6 @@
 import { RINGS, WHEEL_CENTER } from "./ring-model.js";
 import { angleAt, shortestAngleDelta } from "./polar-geometry.js";
-import { resolveDragActivation } from "./drag-activation.js";
+import { resolveDragActivationInto } from "./drag-activation.js";
 import {
   ANGULAR_INERTIA_DEFAULTS,
   createAngularVelocityEstimator,
@@ -72,6 +72,11 @@ export function createRingDragController({
   let coasting = null;
   let hoverRingId = null;
   const pointerWorld = { x:0, y:0 };
+  const activationScratch = {
+    dragActivated:false,
+    pendingDelta:0,
+    deltaToApply:0
+  };
 
   function updatePointerStyle() {
     svg.style.touchAction = "none";
@@ -284,7 +289,7 @@ export function createRingDragController({
     active.velocityEstimator.add(delta, eventTimeMs(sample));
 
     const wasActivated = active.dragActivated;
-    const activation = resolveDragActivation(active, delta);
+    const activation = resolveDragActivationInto(activationScratch, active, delta);
     active.dragActivated = activation.dragActivated;
     active.pendingDelta = activation.pendingDelta;
     const deltaToApply = activation.deltaToApply;

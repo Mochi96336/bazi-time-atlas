@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 
 import {
   DRAG_ACTIVATION_DEGREES,
-  resolveDragActivation
+  resolveDragActivation,
+  resolveDragActivationInto
 } from "../src/wheel/drag-activation.js";
 
 function step(state, delta) {
@@ -74,4 +75,30 @@ test("invalid drag activation inputs fail closed", () => {
     () => resolveDragActivation({ dragActivated:false, pendingDelta:0 }, 0.1, 0),
     /threshold must be a positive finite number/
   );
+});
+
+
+test("runtime activation can reuse caller-owned result state without changing semantics", () => {
+  const scratch = { dragActivated:true, pendingDelta:99, deltaToApply:99 };
+
+  const stateA = { dragActivated:false, pendingDelta:0.05 };
+  const first = resolveDragActivationInto(scratch, stateA, 0.04);
+  const expectedFirst = resolveDragActivation(stateA, 0.04);
+  assert.equal(first, scratch);
+  assert.deepEqual(first, expectedFirst);
+
+  const stateB = {
+    dragActivated:first.dragActivated,
+    pendingDelta:first.pendingDelta
+  };
+  const second = resolveDragActivationInto(scratch, stateB, 0.12);
+  const expectedSecond = resolveDragActivation(stateB, 0.12);
+  assert.equal(second, scratch);
+  assert.deepEqual(second, expectedSecond);
+
+  const active = { dragActivated:true, pendingDelta:0 };
+  const third = resolveDragActivationInto(scratch, active, -0.3);
+  const expectedThird = resolveDragActivation(active, -0.3);
+  assert.equal(third, scratch);
+  assert.deepEqual(third, expectedThird);
 });
