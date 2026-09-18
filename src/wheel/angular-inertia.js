@@ -2,9 +2,9 @@ export const ANGULAR_INERTIA_DEFAULTS = Object.freeze({
   sampleWindowMs: 100,
   maxSampleAgeMs: 50,
   launchSpeedDegPerMs: 0.025,
-  stopSpeedDegPerMs: 0.005,
-  timeConstantMs: 220,
-  maxTravelDegrees: 30,
+  stopSpeedDegPerMs: 0.0035,
+  timeConstantMs: 280,
+  maxTravelDegrees: 40,
   maxFrameGapMs: 120
 });
 
