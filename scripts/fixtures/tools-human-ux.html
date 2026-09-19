@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tools human UX probe</title>
+  <style>
+    html, body { margin:0; background:#090a0b; }
+    #stage { display:block; width:1440px; height:900px; border:0; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Tools human UX probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    const scenario = new URLSearchParams(location.search).get("scenario") ?? "find-time";
+
+    const target = new URL("../../", location.href);
+    const base = new URLSearchParams({ instant:"2026-09-13T23:43:42.000Z" });
+    if (scenario === "find-time") base.set("findTime", "1");
+    else if (scenario === "inspector") {
+      base.set("analysis", "1");
+      base.set("inspect", "year");
+    } else if (scenario === "preserve") {
+      base.set("analysis", "1");
+    } else {
+      throw new Error("unknown Tools human UX scenario");
+    }
+    target.search = "?" + base.toString();
+    frame.src = target.href;
+
+    const later = (fn, delay = 90) => setTimeout(fn, delay);
+    const escape = (win, doc) => {
+      doc.dispatchEvent(new win.KeyboardEvent("keydown", {
+        key:"Escape",
+        bubbles:true,
+        cancelable:true
+      }));
+    };
+
+    function settle(attempts = 80) {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      if (!win || !doc || !instrument) {
+        if (attempts > 0) later(() => settle(attempts - 1), 40);
+        return;
+      }
+
+      if (scenario === "find-time") {
+        const button = doc.querySelector("#inverse-time-search-button");
+        if (!button || instrument.dataset.inverseTimeSearch !== "active") {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+        escape(win, doc);
+        later(() => {
+          probe.dataset.firstToolsOpen = instrument.dataset.analysisOpen ?? "";
+          probe.dataset.firstFindTime = instrument.dataset.inverseTimeSearch ?? "";
+          probe.dataset.firstFindPressed = button.getAttribute("aria-pressed") ?? "";
+          escape(win, doc);
+          later(() => {
+            probe.dataset.secondToolsOpen = instrument.dataset.analysisOpen ?? "";
+            probe.dataset.ready = "true";
+          });
+        });
+        return;
+      }
+
+      if (scenario === "inspector") {
+        const inspector = doc.querySelector("#ganzhi-inspector");
+        if (!inspector || inspector.hidden || instrument.dataset.ganzhiInspectorOpen !== "true") {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+        escape(win, doc);
+        later(() => {
+          probe.dataset.firstToolsOpen = instrument.dataset.analysisOpen ?? "";
+          probe.dataset.firstInspectorOpen = instrument.dataset.ganzhiInspectorOpen ?? "";
+          probe.dataset.firstInspectorHidden = String(inspector.hidden);
+          escape(win, doc);
+          later(() => {
+            probe.dataset.secondToolsOpen = instrument.dataset.analysisOpen ?? "";
+            probe.dataset.ready = "true";
+          });
+        });
+        return;
+      }
+
+      const classification = doc.querySelector("#classification-overlay-button");
+      const reference = doc.querySelector("#reference-frame-select");
+      const close = doc.querySelector("#analysis-close");
+      const open = doc.querySelector("#analysis-toggle");
+      if (!classification || !reference || !close || !open || instrument.dataset.analysisOpen !== "true") {
+        if (attempts > 0) later(() => settle(attempts - 1), 40);
+        return;
+      }
+
+      reference.value = "day";
+      reference.dispatchEvent(new Event("change", { bubbles:true }));
+      classification.click();
+      later(() => {
+        probe.dataset.beforeReference = instrument.dataset.referenceFrame ?? "";
+        probe.dataset.beforeClassification = instrument.dataset.classificationOverlay ?? "";
+        close.click();
+        later(() => {
+          probe.dataset.closedToolsOpen = instrument.dataset.analysisOpen ?? "";
+          probe.dataset.closedReference = instrument.dataset.referenceFrame ?? "";
+          probe.dataset.closedClassification = instrument.dataset.classificationOverlay ?? "";
+          open.click();
+          later(() => {
+            probe.dataset.reopenedToolsOpen = instrument.dataset.analysisOpen ?? "";
+            probe.dataset.reopenedReference = instrument.dataset.referenceFrame ?? "";
+            probe.dataset.reopenedClassification = instrument.dataset.classificationOverlay ?? "";
+            probe.dataset.ready = "true";
+          });
+        });
+      });
+    }
+
+    frame.addEventListener("load", () => settle(), { once:true });
+  </script>
+</body>
+</html>
