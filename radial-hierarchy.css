@@ -145,9 +145,8 @@
 .m2-year-bed { fill: url(#m2-year-surface); }
 
 .m2-ring-material-face {
-  fill: #808482;
+  fill: url(#m2-rotating-micrograin);
   opacity: .16;
-  filter: url(#m2-rotating-micrograin);
   mix-blend-mode: soft-light;
   pointer-events: none;
 }
