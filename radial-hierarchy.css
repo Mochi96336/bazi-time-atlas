@@ -146,14 +146,13 @@
 
 .m2-ring-material-face {
   fill: url(#m2-rotating-micrograin);
-  opacity: .16;
-  mix-blend-mode: soft-light;
+  opacity: .10;
   pointer-events: none;
 }
-.m2-hour-material-face { opacity: .13; }
-.m2-day-material-face { opacity: .14; }
-.m2-month-material-face { opacity: .15; }
-.m2-year-material-face { opacity: .16; }
+.m2-hour-material-face { opacity: .075; }
+.m2-day-material-face { opacity: .082; }
+.m2-month-material-face { opacity: .090; }
+.m2-year-material-face { opacity: .10; }
 
 /* The body no longer carries a broad diagonal sheen. A narrow directional rim
    is enough to imply machining while the four bands still read as one object. */
