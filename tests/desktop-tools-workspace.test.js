@@ -33,6 +33,12 @@ test("desktop left edge owns a non-overlapping reference / exact-time / Solar-Ti
   assert.match(css, /\.atlas-solar-time-analysis \{[\s\S]*top: 132px;[\s\S]*width: 340px;/);
 });
 
+test("desktop Solar Time stays compact until a real longitude binds it", () => {
+  assert.match(css, /\.atlas-solar-time-analysis\[data-longitude-bound="false"\] \{[\s\S]*bottom: auto;[\s\S]*max-height: none;[\s\S]*padding-bottom: 10px;/);
+  assert.match(css, /data-longitude-bound="false"\] \.atlas-solar-analysis-head > div > small[\s\S]*display: none;/);
+  assert.match(css, /data-longitude-bound="false"\] \.atlas-solar-analysis-empty[\s\S]*max-width: 250px;[\s\S]*font-size: 7px;/);
+});
+
 test("desktop Classification replaces Solar Time on the left instead of colliding with the right inspector", () => {
   assert.match(css, /data-classification-overlay="on"\] ~ \.atlas-solar-time-analysis[\s\S]*display: none !important;/);
   assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*position: fixed;[\s\S]*top: 132px;[\s\S]*right: auto;[\s\S]*left: 0;[\s\S]*width: 340px;[\s\S]*linear-gradient\(to right,/);

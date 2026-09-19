@@ -160,6 +160,35 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
+  /* Before a longitude is bound, Solar Time is only a prompt—not a full
+     inspector. Keep the title and input reachable, but collapse the idle copy
+     so opening Tools does not fill the left edge with explanation. */
+  .atlas-solar-time-analysis[data-longitude-bound="false"] {
+    bottom: auto;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 10px;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-head {
+    gap: 6px;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-head > div > small {
+    display: none;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-head > div > span {
+    max-width: 250px;
+    color: #5f6565;
+    font-size: 7px;
+    line-height: 1.35;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-empty {
+    max-width: 250px;
+    margin-top: 5px;
+    color: #555b5b;
+    font-size: 7px;
+    line-height: 1.35;
+  }
+
   /* Classification is a viewing lens, not a second right-side inspector.
      While active, it replaces Solar Time in the same left-edge tool zone so
      the Four Pillars rail on the right remains unobstructed. */
