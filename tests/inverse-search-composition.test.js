@@ -60,26 +60,13 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
   ]) {
     assert.match(
       css,
-      new RegExp(`#kinetic-instrument\\[data-inverse-time-search="active"\\] ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}`)
+      new RegExp(`#kinetic-instrument\\\\[data-inverse-time-search="active"\\\\] ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}`)
     );
   }
-  for (const selector of [
-    ".mobile-time-dock",
-    ".timeline-dock",
-    ".atlas-solar-time-analysis",
-    ".state-strip",
-    ".atlas-notes",
-    ".sources-panel"
-  ]) {
-    assert.match(
-      css,
-      new RegExp(`#kinetic-instrument\\[data-inverse-time-search="active"\\] ~ ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\  assert.match(
+  assert.match(
     css,
-    /data-inverse-time-search="active"\] \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*auto;/
+    /data-inverse-time-search="active"\] ~ \.mobile-time-dock,[\s\S]*?~ \.timeline-dock,[\s\S]*?~ \.atlas-solar-time-analysis,[\s\S]*?~ \.state-strip,[\s\S]*?~ \.atlas-notes,[\s\S]*?~ \.sources-panel[\s\S]*?display:\s*none\s*!important;/
   );
-")}`)
-    );
-  }
   assert.match(
     css,
     /data-inverse-time-search="active"\] \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*auto;/
