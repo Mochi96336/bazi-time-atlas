@@ -160,6 +160,40 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
+  /* Classification is a viewing lens, not a second right-side inspector.
+     While active, it replaces Solar Time in the same left-edge tool zone so
+     the Four Pillars rail on the right remains unobstructed. */
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] ~ .atlas-solar-time-analysis {
+    display: none !important;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
+    position: fixed;
+    z-index: 9;
+    top: 132px;
+    right: auto;
+    bottom: auto;
+    left: 0;
+    width: 340px;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 14px 58px 16px 18px;
+    background: linear-gradient(to right,
+      rgba(9,10,11,.97) 0%,
+      rgba(9,10,11,.90) 70%,
+      rgba(9,10,11,0) 100%);
+    backdrop-filter: none;
+    box-shadow: none;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row + .classification-row {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
+  }
+
   /* Existing visible-stem output becomes the first right-edge inspector.
      It remains a projection of Selected Instant; it does not gain time
      authority or become a modal card. */
