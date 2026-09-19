@@ -45,13 +45,14 @@ test("annual coordinate colors are token-owned and do not reintroduce literal le
   assert.doesNotMatch(hierarchy, /rgba\(153,139,180/);
 });
 
-test("M2 material stays CSS-light and reserves luminosity for Selected Instant", () => {
+test("M2 microtexture stays isolated from semantic sectors and luminosity channels", () => {
   assert.match(hierarchy, /M2 anodized-graphite material/);
-  assert.doesNotMatch(hierarchy, /feTurbulence|filter:\s*url\(|background-image:\s*url\(/);
+  assert.match(hierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*url\(#m2-rotating-micrograin\);/);
+  assert.doesNotMatch(hierarchy, /background-image:\s*url\(/);
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.doesNotMatch(
       hierarchy,
-      new RegExp(`#${ring}-track \\.${ring}-sector \\{[^}]*drop-shadow`)
+      new RegExp(`#${ring}-track \\.${ring}-sector \\{[^}]*(?:drop-shadow|filter:\\s*url|fill:\\s*url)`)
     );
   }
   assert.match(hierarchy, /#cursor-layer \.cursor-line \{[\s\S]*?drop-shadow/);

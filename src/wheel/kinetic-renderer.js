@@ -110,6 +110,16 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const staticLabels = new Map();
     group.classList.add("ring-track", `${id}-track`);
 
+    // Material micrograin belongs to the physical ring face, so it lives inside
+    // the same rotating group as the ring rather than on the fixed guide bed.
+    // The fixed bed below still carries only low-frequency ring-local light.
+    el("path", {
+      d: annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, FAN.start, FAN.end),
+      class: `m2-ring-material-face m2-${id}-material-face`,
+      "data-material-face-ring": id,
+      "aria-hidden": "true"
+    }, group);
+
     sexagenary.forEach((label, index) => {
       // Sectors tile the full coordinate continuously. Discrete boundaries are
       // expressed by short ticks and active/boundary evidence, not by cutting a

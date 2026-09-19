@@ -94,25 +94,34 @@ test("wheel structure uses etched M2 edges without beveling temporal sectors", (
   );
 });
 
-test("material depth stays procedural and does not become visible texture chrome", () => {
-  for (const source of [material, inspector, visibleTenGods, analysisPolish, solarAnalysis, radialHierarchy]) {
-    assert.doesNotMatch(source, /feTurbulence|filter:\s*url\(|background(?:-image)?:\s*url\(/i);
+test("material depth stays procedural without external texture chrome", () => {
+  for (const source of [material, inspector, visibleTenGods, analysisPolish, solarAnalysis]) {
+    assert.doesNotMatch(source, /filter:\s*url\(|background(?:-image)?:\s*url\(/i);
     assert.doesNotMatch(source, /repeating-(?:linear|radial)-gradient/i);
   }
+  assert.match(radialHierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*url\(#m2-rotating-micrograin\);[\s\S]*?opacity:\s*\.10;/);
+  assert.doesNotMatch(radialHierarchy, /mix-blend-mode:/);
+  assert.doesNotMatch(radialHierarchy, /background(?:-image)?:\s*url\(/i);
+  assert.doesNotMatch(radialHierarchy, /repeating-(?:linear|radial)-gradient/i);
+  assert.doesNotMatch(atlasHtml, /<image\b[^>]*(?:href|xlink:href)=["'](?:data:|https?:|\/)/i);
+  assert.match(atlasHtml, /<pattern id="m2-rotating-micrograin"[^>]*width="43"[^>]*height="37"[^>]*patternUnits="userSpaceOnUse">[\s\S]*?<circle[^>]*r="\.46"[\s\S]*?<circle[^>]*r="\.25"/);
+  assert.doesNotMatch(atlasHtml, /<feTurbulence\b|<filter\b|<fe(?:Diffuse|Specular)Lighting\b/);
 });
 
 test("material hierarchy does not resurrect a card around the wheel", () => {
   assert.match(instrument, /\.instrument-shell\s*\{[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
   assert.doesNotMatch(instrument, /#kinetic-wheel\s*\{[^}]*box-shadow:/s);
 });
-test("wheel surface depth comes from one light field and fixed material beds", () => {
-  assert.match(
-    instrument,
-    /\.instrument-shell::before \{[\s\S]*?radial-gradient\(circle at 34% 12%, rgba\(236,239,239,\.035\), transparent 31rem\)[\s\S]*?linear-gradient\(145deg,[\s\S]*?rgba\(0,0,0,\.09\) 100%\);/
-  );
+test("wheel surface depth stays ring-local while micrograin rotates with each ring", () => {
+  assert.doesNotMatch(instrument, /\.instrument-shell::before\s*\{/);
+  assert.doesNotMatch(instrument, /radial-gradient\(circle at 34% 12%/);
   assert.match(instrument, /#kinetic-wheel \{ z-index:\s*1; \}/);
   assert.match(renderer, /function renderMaterialBeds\(\) \{[\s\S]*?SEXAGENARY_RING_IDS\.forEach\(id => \{[\s\S]*?annularSectorPath\(WHEEL_CENTER, model\.innerRadius, model\.outerRadius, FAN\.start, FAN\.end\)[\s\S]*?class: `m2-ring-bed m2-\$\{id\}-bed`/);
   assert.match(renderer, /function renderStatic\(\) \{\s*renderMaterialBeds\(\);\s*renderGuides\(\);/);
+  assert.match(
+    renderer,
+    /function renderCycleRing\(id\) \{[\s\S]*?group\.classList\.add\("ring-track", `\$\{id\}-track`\);[\s\S]*?class: `m2-ring-material-face m2-\$\{id\}-material-face`[\s\S]*?"data-material-face-ring": id[\s\S]*?sexagenary\.forEach/
+  );
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.match(radialHierarchy, new RegExp(`\\.m2-${ring}-bed \\{ fill: url\\(#m2-${ring}-surface\\); \\}`));
     assert.match(atlasHtml, new RegExp(`id="m2-${ring}-surface"[^>]*gradientUnits="userSpaceOnUse"`));
