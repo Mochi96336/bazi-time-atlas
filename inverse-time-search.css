@@ -93,12 +93,6 @@
   cursor: grab;
 }
 
-/* The product surface is called Tools; the internal data-analysis-open contract
-   remains untouched because it is still the established disclosure state. */
-#kinetic-instrument[data-analysis-open="true"] .reference-frame-control::before {
-  content: "工具 · ";
-}
-
 /* Find Time is a task, not another Tools dashboard. Once active, the wheel and
    its single mode-exit own the surface at every viewport. */
 #kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar {
