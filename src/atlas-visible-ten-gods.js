@@ -85,10 +85,17 @@ function createPanel() {
   const grid = document.createElement("div");
   grid.className = "atlas-visible-ten-gods-grid";
   for (const key of PILLAR_KEYS) {
-    const cell = document.createElement("div");
+    const cell = document.createElement("button");
+    cell.type = "button";
     cell.className = "atlas-visible-ten-gods-cell";
     cell.dataset.pillar = key;
+    cell.setAttribute("aria-label", `查看${PILLAR_LABELS[key]}結構`);
     cell.innerHTML = `<span>${PILLAR_LABELS[key]}</span><strong>—</strong><small>—</small>`;
+    cell.addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("atlas-ganzhi-inspect", {
+        detail:{ pillar:key, source:"tools-right-rail" }
+      }));
+    });
     grid.append(cell);
   }
 

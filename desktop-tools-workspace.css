@@ -1,0 +1,285 @@
+@import "./graphite-m2-material.css";
+
+/* Desktop Tools is an edge-assist workspace over the same instrument.
+   Opening Tools must not create a second document below the wheel: controls
+   live at the edges, the wheel remains the visual authority, and existing
+   semantic components keep their current data/lifecycle ownership. */
+@media (min-width: 821px) {
+  body:has(#kinetic-instrument[data-analysis-open="true"]) .kinetic-topbar {
+    position: relative;
+    z-index: 30;
+    justify-content: flex-start;
+    gap: 18px;
+    padding-right: 280px;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+  }
+  body:has(#kinetic-instrument[data-analysis-open="true"]) .kinetic-topbar .site-nav {
+    display: flex;
+    margin: 0;
+  }
+
+  /* Observation-window presets and transport are implementation/research aids,
+     not primary Tools actions. Keep them in the DOM for existing runtime/tests
+     while removing them from the product surface. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    position: fixed;
+    z-index: 31;
+    top: 12px;
+    right: 18px;
+    left: auto;
+    width: auto;
+    max-width: calc(100vw - 220px);
+    min-height: 32px;
+    justify-content: flex-end;
+    padding: 0 62px 0 0;
+    border: 0;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    position: fixed;
+    z-index: 32;
+    top: 12px;
+    right: 18px;
+    min-height: 32px;
+    padding: 0 0 0 12px;
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child,
+  #kinetic-instrument[data-analysis-open="true"] #play-button {
+    display: none !important;
+  }
+
+  /* Layer visibility is not a desktop task. Preserve the established ring
+     controls underneath for regression/debug ownership, but expose only the
+     reference-frame control on the left edge. */
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    position: fixed;
+    z-index: 10;
+    left: 18px;
+    right: auto;
+    top: 52px;
+    width: 286px;
+    min-height: 0;
+    display: block;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+    display: none !important;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    width: max-content;
+    max-width: 260px;
+    pointer-events: auto;
+  }
+
+  /* Exact-time editing remains reachable, but the second full-width timeline
+     no longer competes with the radial time navigator. It becomes a small
+     left-edge input and is removed from document flow. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
+    position: fixed;
+    z-index: 10;
+    top: 84px;
+    left: 18px;
+    width: 286px;
+    margin: 0;
+    display: block;
+    border: 0;
+    padding: 0 52px 10px 0;
+    background: linear-gradient(to right,
+      rgba(9,10,11,.94) 0%,
+      rgba(9,10,11,.82) 72%,
+      rgba(9,10,11,0) 100%);
+    box-shadow: none;
+    opacity: 1;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-wrap,
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status {
+    display: none !important;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field {
+    gap: 2px;
+    color: #6f7475;
+    font-size: 7px;
+    letter-spacing: .05em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field input {
+    width: 220px;
+    border: 0;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 5px 2px;
+    background: transparent;
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+    font-size: 9px;
+  }
+
+  /* Solar-time comparison is an input/measurement tool, so it lives on the
+     left edge instead of extending the page below the instrument. The dark
+     backing fades toward the wheel rather than forming another card. */
+  .atlas-solar-time-analysis {
+    position: fixed;
+    z-index: 9;
+    top: 132px;
+    bottom: 16px;
+    left: 0;
+    width: 340px;
+    max-height: calc(100dvh - 148px);
+    margin: 0;
+    overflow: auto;
+    border: 0;
+    padding: 14px 58px 18px 18px;
+    background: linear-gradient(to right,
+      rgba(9,10,11,.97) 0%,
+      rgba(9,10,11,.90) 70%,
+      rgba(9,10,11,0) 100%);
+    box-shadow: none;
+    scrollbar-width: thin;
+  }
+  .atlas-solar-analysis-head {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .atlas-solar-longitude-field {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .atlas-solar-longitude-field small {
+    grid-column: 2;
+  }
+  .atlas-solar-corrections,
+  .atlas-solar-basis-rows {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .atlas-solar-basis-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  /* Existing visible-stem output becomes the first right-edge inspector.
+     It remains a projection of Selected Instant; it does not gain time
+     authority or become a modal card. */
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    position: absolute;
+    z-index: 8;
+    top: 92px;
+    right: 0;
+    left: auto;
+    width: clamp(320px, 22vw, 370px);
+    margin: 0;
+    display: block;
+    border: 0;
+    border-radius: 0;
+    padding: 16px 18px 18px 56px;
+    background: linear-gradient(to left,
+      rgba(9,10,11,.96) 0%,
+      rgba(9,10,11,.88) 70%,
+      rgba(9,10,11,0) 100%);
+    box-shadow: none;
+    pointer-events: auto;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head {
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
+    color: #8f9494;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
+    color: #b7bbba;
+    font-size: 9.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-grid {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:nth-child(4) {
+    border-top: 1px solid var(--m2-etched-dark-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-note {
+    display: none;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell {
+    appearance: none;
+    width: 100%;
+    min-height: 42px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 8px;
+    border: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 8px 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
+    color: #777d7d;
+    font-size: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
+    justify-self: end;
+    color: #d9dcdb;
+    font-size: 13px;
+    line-height: 1;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
+    grid-column: 1 / -1;
+    color: #8e9393;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:hover,
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:focus-visible {
+    background: rgba(236,239,239,.025);
+    outline: none;
+  }
+
+  /* A detailed Ganzhi request replaces the summary in the same right-edge
+     authority zone. The inspector remains non-modal and fades into the wheel. */
+  #kinetic-instrument[data-analysis-open="true"][data-ganzhi-inspector-open="true"] .atlas-visible-ten-gods {
+    visibility: hidden;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector {
+    top: 92px;
+    right: 0;
+    bottom: 16px;
+    left: auto;
+    width: 380px;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    padding-left: 38px;
+    background: linear-gradient(to left,
+      rgba(9,10,11,.98) 0%,
+      rgba(9,10,11,.92) 72%,
+      rgba(9,10,11,0) 100%);
+    background-image: none;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector .ganzhi-inspector-head {
+    background: rgba(9,10,11,.9);
+  }
+
+  /* These rows duplicate the wheel/read-head or long-form documentation. They
+     must not reappear merely because Tools is open. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip,
+  #kinetic-instrument[data-analysis-open="true"] ~ .atlas-notes,
+  #kinetic-instrument[data-analysis-open="true"] ~ .sources-panel {
+    display: none !important;
+  }
+}
