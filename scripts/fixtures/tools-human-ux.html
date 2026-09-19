@@ -26,6 +26,9 @@
       base.set("inspect", "year");
     } else if (scenario === "preserve") {
       base.set("analysis", "1");
+    } else if (scenario === "handoff") {
+      base.set("analysis", "1");
+      base.set("inspect", "year");
     } else {
       throw new Error("unknown Tools human UX scenario");
     }
@@ -86,6 +89,24 @@
             probe.dataset.secondToolsOpen = instrument.dataset.analysisOpen ?? "";
             probe.dataset.ready = "true";
           });
+        });
+        return;
+      }
+
+      if (scenario === "handoff") {
+        const inspector = doc.querySelector("#ganzhi-inspector");
+        const findButton = doc.querySelector("#inverse-time-search-button");
+        if (!inspector || inspector.hidden || !findButton || instrument.dataset.ganzhiInspectorOpen !== "true") {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+        findButton.click();
+        later(() => {
+          probe.dataset.toolsOpen = instrument.dataset.analysisOpen ?? "";
+          probe.dataset.findTime = instrument.dataset.inverseTimeSearch ?? "";
+          probe.dataset.inspectorOpen = instrument.dataset.ganzhiInspectorOpen ?? "";
+          probe.dataset.inspectorHidden = String(inspector.hidden);
+          probe.dataset.ready = "true";
         });
         return;
       }
