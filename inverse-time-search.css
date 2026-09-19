@@ -108,6 +108,14 @@
 #kinetic-instrument[data-inverse-time-search="active"] .analysis-close {
   display: none !important;
 }
+#kinetic-instrument[data-inverse-time-search="active"] ~ .mobile-time-dock,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .timeline-dock,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .atlas-solar-time-analysis,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .state-strip,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .atlas-notes,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .sources-panel {
+  display: none !important;
+}
 #kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:last-child {
   margin-left: auto;
 }
