@@ -1,6 +1,7 @@
 import { resetManualOffset } from "../wheel/ring-state.js";
 
 export const FREE_COMPARE_OFFSET_EPSILON = 0.001;
+export const FREE_COMPARE_RESET_RING_EVENT = "atlas-free-compare-reset-ring";
 
 const DEFAULT_RING_LABELS = Object.freeze({
   hour: "時",
@@ -94,6 +95,18 @@ export function createFreeCompareController({
     return view;
   }
 
+  function resetRingOffset(ringId) {
+    const ring = rings.find(candidate => candidate.id === ringId);
+    const state = ring ? ringStates[ring.id] : null;
+    if (!ring || !state) return false;
+    dragController.cancelActiveGesture?.({ detent:false, reason:"free-compare-ring-reset" });
+    dragController.cancelInertia?.({ detent:false, reason:"free-compare-ring-reset" });
+    resetManualOffset(state);
+    renderAllRingPoses();
+    update();
+    return true;
+  }
+
   function resetAllOffsets() {
     dragController.cancelActiveGesture?.({ detent:false, reason:"free-compare-reset" });
     dragController.cancelInertia?.({ detent:false, reason:"free-compare-reset" });
@@ -119,11 +132,15 @@ export function createFreeCompareController({
 
   compareButton.addEventListener("click", () => setMode(!dragController.compareMode));
   resetRingsButton.addEventListener("click", resetAllOffsets);
+  instrument.addEventListener(FREE_COMPARE_RESET_RING_EVENT, event => {
+    resetRingOffset(event?.detail?.ringId);
+  });
   update();
 
   return Object.freeze({
     update,
     setMode,
+    resetRingOffset,
     resetAllOffsets,
     get compareMode() { return dragController.compareMode; }
   });
