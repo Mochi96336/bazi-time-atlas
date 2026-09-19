@@ -63,6 +63,23 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
       new RegExp(`#kinetic-instrument\\[data-inverse-time-search="active"\\] ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}`)
     );
   }
+  for (const selector of [
+    ".mobile-time-dock",
+    ".timeline-dock",
+    ".atlas-solar-time-analysis",
+    ".state-strip",
+    ".atlas-notes",
+    ".sources-panel"
+  ]) {
+    assert.match(
+      css,
+      new RegExp(`#kinetic-instrument\\[data-inverse-time-search="active"\\] ~ ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\  assert.match(
+    css,
+    /data-inverse-time-search="active"\] \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*auto;/
+  );
+")}`)
+    );
+  }
   assert.match(
     css,
     /data-inverse-time-search="active"\] \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*auto;/
