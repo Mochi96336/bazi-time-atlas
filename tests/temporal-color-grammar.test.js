@@ -47,12 +47,12 @@ test("annual coordinate colors are token-owned and do not reintroduce literal le
 
 test("M2 microtexture stays isolated from semantic sectors and luminosity channels", () => {
   assert.match(hierarchy, /M2 anodized-graphite material/);
-  assert.match(hierarchy, /\.m2-ring-material-face \{[\s\S]*?filter:\s*url\(#m2-rotating-micrograin\);/);
+  assert.match(hierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*url\(#m2-rotating-micrograin\);/);
   assert.doesNotMatch(hierarchy, /background-image:\s*url\(/);
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.doesNotMatch(
       hierarchy,
-      new RegExp(`#${ring}-track \\.${ring}-sector \\{[^}]*(?:drop-shadow|filter:\\s*url)`)
+      new RegExp(`#${ring}-track \\.${ring}-sector \\{[^}]*(?:drop-shadow|filter:\\s*url|fill:\\s*url)`)
     );
   }
   assert.match(hierarchy, /#cursor-layer \.cursor-line \{[\s\S]*?drop-shadow/);
