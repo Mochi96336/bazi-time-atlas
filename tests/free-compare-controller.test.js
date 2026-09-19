@@ -103,6 +103,41 @@ test("Free Compare status preserves fixed-time ownership and signed one-decimal 
   assert.equal(view.statusText, "時間固定 · 日 +1.2° · 節氣 −2.0°");
 });
 
+test("single-ring reset clears only the requested Find Time constraint", () => {
+  const states = ringStates({ year:6, month:-12 });
+  const order = [];
+  const instrument = fakeNode();
+  const controlGroup = fakeNode();
+  const insertBefore = fakeNode();
+  const dragController = {
+    compareMode:true,
+    cancelActiveGesture(options) { order.push(["active", options]); },
+    cancelInertia(options) { order.push(["coast", options]); },
+    setCompareMode(enabled) { this.compareMode = Boolean(enabled); }
+  };
+  const controller = createFreeCompareController({
+    instrument,
+    controlGroup,
+    insertBefore,
+    rings:RINGS,
+    ringStates:states,
+    dragController,
+    renderAllRingPoses:() => order.push(["render", states.year.manualOffset, states.month.manualOffset]),
+    stopPlayback:() => {},
+    documentRef:{ createElement:() => fakeNode() }
+  });
+
+  assert.equal(controller.resetRingOffset("year"), true);
+  assert.equal(states.year.manualOffset, 0);
+  assert.equal(states.year.linked, true);
+  assert.equal(states.month.manualOffset, -12);
+  assert.equal(states.month.linked, undefined);
+  assert.deepEqual(order[0], ["active", { detent:false, reason:"free-compare-ring-reset" }]);
+  assert.deepEqual(order[1], ["coast", { detent:false, reason:"free-compare-ring-reset" }]);
+  assert.deepEqual(order[2], ["render", 0, -12]);
+  assert.equal(controller.resetRingOffset("zodiac"), false);
+});
+
 test("reset cancels active drag and coast before clearing Free Compare offsets", () => {
   const states = ringStates({ day:4.5, zodiac:7 });
   const order = [];

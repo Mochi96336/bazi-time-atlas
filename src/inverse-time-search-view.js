@@ -6,6 +6,7 @@ import {
   formatAtlasCivil
 } from "./wheel/atlas-display-model.js";
 import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
+import { FREE_COMPARE_RESET_RING_EVENT } from "./interaction/free-compare-controller.js";
 
 const PILLAR_IDS = Object.freeze(["year", "month", "day", "hour"]);
 const PILLAR_LABELS = Object.freeze({
@@ -209,7 +210,7 @@ function relabelToolMode(documentRef) {
   }
   if (close) {
     close.textContent = "完成";
-    close.title = "收起工具並回到標準時間視圖";
+    close.title = "收起工具；目前設定會保留";
   }
 
   const tenGodTitle = documentRef.querySelector("#atlas-visible-ten-gods .atlas-visible-ten-gods-head strong");
@@ -218,7 +219,7 @@ function relabelToolMode(documentRef) {
   for (const item of documentRef.querySelectorAll(".atlas-notes li")) {
     const strong = item.querySelector("strong");
     if (strong?.textContent?.trim() !== "分析") continue;
-    item.innerHTML = "<strong>工具</strong>：需要找時間、分類、參考系或太陽時間比較時再展開；收起後回到標準時間視圖。";
+    item.innerHTML = "<strong>工具</strong>：需要找時間、分類、參考系或太陽時間比較時再展開；收起只隱藏工具，設定會保留。";
   }
 }
 
@@ -230,7 +231,8 @@ function createReadout(documentRef) {
   readout.setAttribute("aria-live", "polite");
   readout.innerHTML = `
     <strong data-inverse-wheel-query>找時間</strong>
-    <span data-inverse-wheel-status>拖動年／月／日／時環設定條件。</span>
+    <div class="inverse-time-search-constraints" data-inverse-wheel-constraints hidden></div>
+    <span data-inverse-wheel-status>轉動年／月／日／時其中一環開始。</span>
     <button type="button" data-inverse-wheel-apply hidden>前往</button>
   `;
   return readout;
@@ -303,6 +305,7 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
   const readout = createReadout(documentRef);
   instrument.append(readout);
   const query = readout.querySelector("[data-inverse-wheel-query]");
+  const constraintsHost = readout.querySelector("[data-inverse-wheel-constraints]");
   const status = readout.querySelector("[data-inverse-wheel-status]");
   const apply = readout.querySelector("[data-inverse-wheel-apply]");
   const observedTracks = PILLAR_IDS
@@ -319,9 +322,32 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
     searchTimer = null;
   };
 
+  const renderConstraintControls = constraints => {
+    const activeIds = constraints ? activeConstraintIds(constraints) : [];
+    constraintsHost.replaceChildren();
+    constraintsHost.hidden = activeIds.length === 0;
+    for (const id of activeIds) {
+      const name = constraints[id];
+      const chip = documentRef.createElement("button");
+      chip.type = "button";
+      chip.className = "inverse-time-search-constraint";
+      chip.dataset.inverseConstraint = id;
+      chip.textContent = `${PILLAR_LABELS[id]} ${name} ×`;
+      chip.setAttribute("aria-label", `取消${PILLAR_LABELS[id]}柱 ${name} 條件`);
+      chip.addEventListener("click", () => {
+        instrument.dispatchEvent(new CustomEvent(FREE_COMPARE_RESET_RING_EVENT, {
+          bubbles:true,
+          detail:{ ringId:id, source:"inverse-wheel-search" }
+        }));
+      });
+      constraintsHost.append(chip);
+    }
+  };
+
   const setIdleSearchCopy = () => {
     query.textContent = "找時間";
-    status.textContent = "拖動年／月／日／時環設定條件。";
+    renderConstraintControls(null);
+    status.textContent = "轉動年／月／日／時其中一環開始。";
     apply.hidden = true;
     candidate = null;
     candidateContext = null;
@@ -366,7 +392,8 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
       setIdleSearchCopy();
       return;
     }
-    query.textContent = description;
+    query.textContent = "找時間";
+    renderConstraintControls(constraints);
     status.textContent = "正在比對真實時間…";
     apply.hidden = true;
 
@@ -401,8 +428,9 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
     })();
     if (constraints) {
       const description = formatInverseMatchPillars(constraints);
-      query.textContent = description || "找時間";
-      status.textContent = description ? "正在比對真實時間…" : "拖動年／月／日／時環設定條件。";
+      query.textContent = "找時間";
+      renderConstraintControls(constraints);
+      status.textContent = description ? "正在比對真實時間…" : "轉動年／月／日／時其中一環開始。";
       apply.hidden = true;
     }
     searchTimer = setTimeout(runSearch, SEARCH_DEBOUNCE_MS);
@@ -410,6 +438,10 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
 
   const enterMode = () => {
     if (active) return;
+    instrument.dispatchEvent(new CustomEvent("atlas-find-time-entering", {
+      bubbles:true,
+      detail:{ source:"inverse-wheel-search" }
+    }));
     active = true;
     instrument.dataset.inverseTimeSearch = "active";
     button.setAttribute("aria-pressed", "true");
@@ -464,8 +496,14 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
   });
   compareObserver.observe(compareButton, { attributes:true, attributeFilter:["aria-pressed"] });
 
+  instrument.addEventListener("atlas-tools-closing", () => exitMode());
+
   documentRef.addEventListener("keydown", event => {
-    if (event.key === "Escape" && active) exitMode();
+    if (event.key !== "Escape" || !active) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    exitMode();
+    button.focus?.();
   });
 
   instrument.dataset.inverseTimeSearch = "available";

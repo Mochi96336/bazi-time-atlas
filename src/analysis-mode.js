@@ -70,30 +70,20 @@ function activate(control, handler) {
   });
 }
 
-function resetAnalysisLenses() {
-  const compare = document.querySelector("#compare-rings-button");
-  if (compare?.getAttribute("aria-pressed") === "true") compare.click();
-
-  const classification = document.querySelector("#classification-overlay-button");
-  if (classification?.getAttribute("aria-pressed") === "true") classification.click();
-
-  const reference = document.querySelector("#reference-frame-select");
-  if (reference && reference.value !== "world") {
-    reference.value = "world";
-    reference.dispatchEvent(new Event("change", { bubbles:true }));
-  }
-
-  document.querySelectorAll(".ring-legend-row[data-ring-toggle][aria-pressed=\"false\"]")
-    .forEach(row => row.click());
-}
-
-function setAnalysisOpen(open, { reset = false } = {}) {
+function setAnalysisOpen(open) {
   if (!instrument || !openControl || !closeControl) return;
-  if (!open && reset) resetAnalysisLenses();
-  instrument.dataset.analysisOpen = String(Boolean(open));
-  openControl.setAttribute("aria-expanded", String(Boolean(open)));
-  openControl.hidden = Boolean(open);
-  closeControl.hidden = !open;
+  const nextOpen = Boolean(open);
+  const wasOpen = instrument.dataset.analysisOpen === "true";
+  if (!nextOpen && wasOpen) {
+    instrument.dispatchEvent(new CustomEvent("atlas-tools-closing", {
+      bubbles:true,
+      detail:{ reason:"tools-close" }
+    }));
+  }
+  instrument.dataset.analysisOpen = String(nextOpen);
+  openControl.setAttribute("aria-expanded", String(nextOpen));
+  openControl.hidden = nextOpen;
+  closeControl.hidden = !nextOpen;
 }
 
 installAnalysisFirstScreenStyles();
@@ -113,15 +103,18 @@ installAnalysisToolsRailStyles();
 // can relocate existing UI without changing any component's semantic ownership.
 installDesktopToolsWorkspaceStyles();
 activate(openControl, () => setAnalysisOpen(true));
-activate(closeControl, () => setAnalysisOpen(false, { reset:true }));
+activate(closeControl, () => setAnalysisOpen(false));
 
 instrument?.addEventListener("atlas-analysis-request", () => setAnalysisOpen(true));
 
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && instrument?.dataset.analysisOpen === "true") {
-    setAnalysisOpen(false, { reset:true });
-    openControl?.focus();
-  }
+  if (event.key !== "Escape" || instrument?.dataset.analysisOpen !== "true") return;
+  if (event.defaultPrevented) return;
+  if (instrument.dataset.inverseTimeSearch === "active") return;
+  if (instrument.dataset.ganzhiInspectorOpen === "true") return;
+  event.preventDefault();
+  setAnalysisOpen(false);
+  openControl?.focus();
 });
 
 const params = new URLSearchParams(location.search);

@@ -25,3 +25,10 @@ test("desktop detailed inspector replaces the summary in the same faded right ra
   assert.match(workspace, /~ #ganzhi-inspector \{[\s\S]*?right: 0;[\s\S]*?width: 380px;[\s\S]*?linear-gradient\(to left,/);
   assert.match(workspace, /~ #ganzhi-inspector \.ganzhi-inspector-head/);
 });
+
+test("inspector Escape closes only the inspector layer", () => {
+  assert.match(inspector, /event\.key === "Escape" && !inspector\.hidden/);
+  assert.match(inspector, /event\.preventDefault\(\);[\s\S]*event\.stopImmediatePropagation\(\);[\s\S]*closeInspector/);
+  assert.match(inspector, /document\.addEventListener\("atlas-tools-closing"/);
+  assert.match(inspector, /document\.addEventListener\("atlas-find-time-entering"/);
+});
