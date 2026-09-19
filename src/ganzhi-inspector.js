@@ -459,6 +459,9 @@ if (inspector) {
   document.addEventListener("atlas-tools-closing", () => {
     closeInspector({ restoreFocus: false });
   });
+  document.addEventListener("atlas-find-time-entering", () => {
+    closeInspector({ restoreFocus: false });
+  });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !inspector.hidden) {
       event.preventDefault();
