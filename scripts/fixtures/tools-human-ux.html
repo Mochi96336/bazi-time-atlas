@@ -20,7 +20,7 @@
 
     const target = new URL("../../", location.href);
     const base = new URLSearchParams({ instant:"2026-09-13T23:43:42.000Z" });
-    if (scenario === "find-time") base.set("findTime", "1");
+    if (scenario === "find-time" || scenario === "constraints") base.set("findTime", "1");
     else if (scenario === "inspector") {
       base.set("analysis", "1");
       base.set("inspect", "year");
@@ -36,6 +36,53 @@
     frame.src = target.href;
 
     const later = (fn, delay = 90) => setTimeout(fn, delay);
+    const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
+
+    function findTimeGeometry(win, doc, instrument) {
+      const svg = doc.querySelector("#kinetic-wheel");
+      const ctm = svg?.getScreenCTM();
+      const center = instrument.dataset.geometryCenter?.split(",").map(Number);
+      const radii = [...doc.querySelectorAll("#guide-layer .guide-arc")]
+        .map(path => {
+          const point = path.getPointAtLength(0);
+          return center ? Math.hypot(point.x - center[0], point.y - center[1]) : Number.NaN;
+        })
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (!svg || !ctm || !center || center.length !== 2 || center.some(value => !Number.isFinite(value)) || radii.length !== 7) return null;
+      return { win, doc, instrument, svg, ctm, center, radii };
+    }
+
+    function pointerAt(g, radius, angleDegrees, type, pointerId) {
+      const angle = angleDegrees * Math.PI / 180;
+      const world = new g.win.DOMPoint(
+        g.center[0] + Math.cos(angle) * radius,
+        g.center[1] + Math.sin(angle) * radius
+      );
+      const screen = world.matrixTransform(g.ctm);
+      return new g.win.PointerEvent(type, {
+        bubbles:true,
+        cancelable:true,
+        pointerId,
+        pointerType:"mouse",
+        isPrimary:true,
+        button:0,
+        buttons:type === "pointerup" ? 0 : 1,
+        clientX:screen.x,
+        clientY:screen.y
+      });
+    }
+
+    async function dragRing(g, innerGuide, outerGuide, pointerId) {
+      const radius = (g.radii[innerGuide] + g.radii[outerGuide]) / 2;
+      g.svg.dispatchEvent(pointerAt(g, radius, -90, "pointerdown", pointerId));
+      await wait(24);
+      g.svg.dispatchEvent(pointerAt(g, radius, -84, "pointermove", pointerId));
+      await wait(24);
+      g.svg.dispatchEvent(pointerAt(g, radius, -84, "pointerup", pointerId));
+      await wait(140);
+    }
+
     const escape = (win, doc) => {
       doc.dispatchEvent(new win.KeyboardEvent("keydown", {
         key:"Escape",
@@ -50,6 +97,35 @@
       const instrument = doc?.querySelector("#kinetic-instrument");
       if (!win || !doc || !instrument) {
         if (attempts > 0) later(() => settle(attempts - 1), 40);
+        return;
+      }
+
+      if (scenario === "constraints") {
+        const button = doc.querySelector("#inverse-time-search-button");
+        const g = findTimeGeometry(win, doc, instrument);
+        if (!button || instrument.dataset.inverseTimeSearch !== "active" || !g) {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+        void (async () => {
+          await dragRing(g, 5, 6, 71);
+          await dragRing(g, 4, 5, 72);
+          const before = [...doc.querySelectorAll("[data-inverse-constraint]")];
+          const yearChip = before.find(node => node.dataset.inverseConstraint === "year");
+          const yearTrack = doc.querySelector("#year-track");
+          const monthTrack = doc.querySelector("#month-track");
+          probe.dataset.beforeConstraintCount = String(before.length);
+          probe.dataset.beforeYearOffset = yearTrack?.dataset.manualOffset ?? "";
+          probe.dataset.beforeMonthOffset = monthTrack?.dataset.manualOffset ?? "";
+          yearChip?.click();
+          await wait(160);
+          const after = [...doc.querySelectorAll("[data-inverse-constraint]")];
+          probe.dataset.afterConstraintCount = String(after.length);
+          probe.dataset.afterConstraintIds = after.map(node => node.dataset.inverseConstraint).join(",");
+          probe.dataset.afterYearOffset = yearTrack?.dataset.manualOffset ?? "";
+          probe.dataset.afterMonthOffset = monthTrack?.dataset.manualOffset ?? "";
+          probe.dataset.ready = "true";
+        })();
         return;
       }
 
