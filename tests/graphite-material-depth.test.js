@@ -80,11 +80,11 @@ test("wheel structure uses etched M2 edges without beveling temporal sectors", (
   assert.match(radialHierarchy, /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(
     radialHierarchy,
-    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*rgba\(0,0,0,\.66\);[\s\S]*?filter:\s*drop-shadow\(0 1px 0 rgba\(236,239,239,\.075\)\);/
+    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*rgba\(0,0,0,\.50\);[\s\S]*?filter:\s*drop-shadow\(0 \.75px 0 rgba\(236,239,239,\.040\)\);/
   );
   assert.match(
     radialHierarchy,
-    /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke:\s*url\(#m2-groove-stroke\);[\s\S]*?stroke-width:\s*2\.1;[\s\S]*?filter:\s*drop-shadow\(0 1\.35px 0 rgba\(236,239,239,\.085\)\);/
+    /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke:\s*url\(#m2-groove-stroke\);[\s\S]*?stroke-width:\s*1\.35;[\s\S]*?filter:\s*drop-shadow\(0 \.75px 0 rgba\(236,239,239,\.045\)\);/
   );
   assert.match(radialHierarchy, /\.cycle-sector\.is-active \{\s*stroke:\s*none;/);
   assert.match(radialHierarchy, /#solar-track \.term-sector \{[\s\S]*?stroke:\s*none;/);
@@ -115,22 +115,23 @@ test("wheel surface depth comes from one light field and fixed material beds", (
   assert.match(renderer, /function renderStatic\(\) \{\s*renderMaterialBeds\(\);\s*renderGuides\(\);/);
   for (const ring of ["hour", "day", "month", "year"]) {
     assert.match(radialHierarchy, new RegExp(`\\.m2-${ring}-bed \\{ fill: url\\(#m2-${ring}-surface\\); \\}`));
-    assert.match(radialHierarchy, new RegExp(`\\.m2-${ring}-sheen \\{ opacity: \\.[0-9]+; \\}`));
     assert.match(atlasHtml, new RegExp(`id="m2-${ring}-surface"[^>]*gradientUnits="userSpaceOnUse"`));
     assert.doesNotMatch(atlasHtml, new RegExp(`id="m2-${ring}-active"`));
   }
-  assert.match(renderer, /class: `m2-ring-sheen m2-\$\{id\}-sheen`/);
   assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-light m2-\$\{id\}-rim-light`/);
   assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-shadow m2-\$\{id\}-rim-shadow`/);
-  assert.match(atlasHtml, /id="m2-rim-light-stroke"[\s\S]*?stop-opacity="\.24"[\s\S]*?stop-opacity="\.025"/);
-  assert.match(atlasHtml, /id="m2-rim-shadow-stroke"[\s\S]*?stop-opacity="\.86"/);
-  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke-width:\s*1\.55;/);
-  assert.match(radialHierarchy, /\.m2-ring-rim-shadow \{[\s\S]*?stroke-width:\s*2\.35;/);
-  assert.match(atlasHtml, /id="m2-surface-sheen"[\s\S]*?stop-opacity="\.16"[\s\S]*?stop-opacity="\.20"/);
-  assert.match(atlasHtml, /id="m2-groove-stroke"[\s\S]*?stop-opacity="\.92"/);
-  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.24;/);
-  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-light-alpha:\s*\.36;/);
-  assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*2\.1;/);
+  assert.match(atlasHtml, /id="m2-rim-light-stroke"[\s\S]*?stop-opacity="\.12"[\s\S]*?stop-opacity="\.015"/);
+  assert.match(atlasHtml, /id="m2-rim-shadow-stroke"[\s\S]*?stop-opacity="\.58"/);
+  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke-width:\s*\.85;/);
+  assert.match(radialHierarchy, /\.m2-ring-rim-shadow \{[\s\S]*?stroke-width:\s*1\.25;/);
+  assert.doesNotMatch(atlasHtml, /id="m2-surface-sheen"/);
+  assert.doesNotMatch(renderer, /m2-ring-sheen|data-material-sheen-ring/);
+  assert.match(atlasHtml, /id="m2-groove-stroke"[\s\S]*?stop-opacity="\.68"/);
+  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.16;/);
+  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-light-alpha:\s*\.21;/);
+  assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*1\.35;/);
+  assert.match(radialHierarchy, /#month-track \.cycle-sector\.is-active \{[\s\S]*?currentColor 26%, transparent/);
+  assert.match(radialHierarchy, /#year-track \.cycle-sector\.is-active \{[\s\S]*?currentColor 30%, transparent/);
 });
 
 
