@@ -30,4 +30,5 @@ test("inspector Escape closes only the inspector layer", () => {
   assert.match(inspector, /event\.key === "Escape" && !inspector\.hidden/);
   assert.match(inspector, /event\.preventDefault\(\);[\s\S]*event\.stopImmediatePropagation\(\);[\s\S]*closeInspector/);
   assert.match(inspector, /document\.addEventListener\("atlas-tools-closing"/);
+  assert.match(inspector, /document\.addEventListener\("atlas-find-time-entering"/);
 });
