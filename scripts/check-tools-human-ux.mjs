@@ -69,6 +69,25 @@ function runScenario(scenario) {
 }
 
 {
+  const { url, probe } = runScenario("constraints");
+  const beforeYear = Number(attr(probe, "data-before-year-offset"));
+  const beforeMonth = Number(attr(probe, "data-before-month-offset"));
+  const afterYear = Number(attr(probe, "data-after-year-offset"));
+  const afterMonth = Number(attr(probe, "data-after-month-offset"));
+  if (
+    attr(probe, "data-before-constraint-count") !== "2"
+    || !Number.isFinite(beforeYear) || Math.abs(beforeYear) < 0.001
+    || !Number.isFinite(beforeMonth) || Math.abs(beforeMonth) < 0.001
+    || attr(probe, "data-after-constraint-count") !== "1"
+    || attr(probe, "data-after-constraint-ids") !== "month"
+    || Math.abs(afterYear) > 0.001
+    || Math.abs(afterMonth) < 0.001
+  ) {
+    throw new Error(`Find Time constraint removal did not clear only the requested ring: ${url} · ${probe}`);
+  }
+}
+
+{
   const { url, probe } = runScenario("handoff");
   if (
     attr(probe, "data-tools-open") !== "true"
@@ -96,4 +115,4 @@ function runScenario(scenario) {
   }
 }
 
-console.log("[tools-human-ux] PASS one-layer Escape + task handoff + preserved observation settings");
+console.log("[tools-human-ux] PASS one-layer Escape + reversible constraints + task handoff + preserved observation settings");
