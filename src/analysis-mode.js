@@ -116,7 +116,7 @@ installDesktopToolsWorkspaceStyles();
 // component CSS loads after the workspace so the existing wheel/read-head keeps
 // geometry ownership while the retired edge input can disappear.
 installSelectedInstantEditorStyles();
-const selectedInstantEditor = installSelectedInstantEditor(instrument);
+installSelectedInstantEditor(instrument);
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false));
 
