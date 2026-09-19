@@ -17,6 +17,10 @@
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     const scenario = new URLSearchParams(location.search).get("scenario") ?? "find-time";
+    if (scenario === "editor-mobile") {
+      frame.style.width = "390px";
+      frame.style.height = "844px";
+    }
 
     const target = new URL("../../", location.href);
     const base = new URLSearchParams({ instant:"2026-09-13T23:43:42.000Z" });
@@ -24,7 +28,7 @@
     else if (scenario === "inspector") {
       base.set("analysis", "1");
       base.set("inspect", "year");
-    } else if (scenario === "preserve") {
+    } else if (scenario === "preserve" || scenario === "editor" || scenario === "editor-mobile") {
       base.set("analysis", "1");
     } else if (scenario === "handoff") {
       base.set("analysis", "1");
@@ -97,6 +101,67 @@
       const instrument = doc?.querySelector("#kinetic-instrument");
       if (!win || !doc || !instrument) {
         if (attempts > 0) later(() => settle(attempts - 1), 40);
+        return;
+      }
+
+      if (scenario === "editor-mobile") {
+        const readout = doc.querySelector("#instant-readout");
+        const editor = doc.querySelector("#selected-instant-editor");
+        if (!readout || !editor || instrument.dataset.analysisOpen !== "true") {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+        probe.dataset.innerWidth = String(win.innerWidth);
+        probe.dataset.available = doc.querySelector(".instrument-readout")?.dataset.instantEditorAvailable ?? "";
+        probe.dataset.readoutRole = readout.getAttribute("role") ?? "";
+        probe.dataset.editorHidden = String(editor.hidden);
+        probe.dataset.ready = "true";
+        return;
+      }
+
+      if (scenario === "editor") {
+        const readout = doc.querySelector("#instant-readout");
+        const shell = doc.querySelector(".instrument-readout");
+        const editor = doc.querySelector("#selected-instant-editor");
+        const input = editor?.querySelector("[data-selected-instant-editor-input]");
+        const apply = editor?.querySelector("[data-selected-instant-editor-apply]");
+        const timeline = doc.querySelector(".timeline-dock");
+        if (!readout || !shell || !editor || !input || !apply || !timeline
+          || instrument.dataset.analysisOpen !== "true"
+          || shell.dataset.instantEditorAvailable !== "true") {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+
+        const selectedBefore = instrument.dataset.selectedInstantMs ?? "";
+        readout.click();
+        later(() => {
+          probe.dataset.openState = instrument.dataset.instantEditorOpen ?? "";
+          probe.dataset.openHidden = String(editor.hidden);
+          probe.dataset.openInput = input.value;
+          probe.dataset.timelineDisplay = win.getComputedStyle(timeline).display;
+          input.value = "2026-09-14T08:15:30";
+          apply.click();
+          later(() => {
+            probe.dataset.appliedState = instrument.dataset.instantEditorOpen ?? "";
+            probe.dataset.appliedSelected = instrument.dataset.selectedInstantMs ?? "";
+            probe.dataset.appliedSource = instrument.dataset.lastSelectedInstantSource ?? "";
+            probe.dataset.appliedUrlInstant = new URL(win.location.href).searchParams.get("instant") ?? "";
+            probe.dataset.appliedReadout = readout.textContent ?? "";
+            readout.click();
+            later(() => {
+              input.value = "2026-09-15T09:16:31";
+              escape(win, doc);
+              later(() => {
+                probe.dataset.escapeToolsOpen = instrument.dataset.analysisOpen ?? "";
+                probe.dataset.escapeEditorOpen = instrument.dataset.instantEditorOpen ?? "";
+                probe.dataset.escapeSelected = instrument.dataset.selectedInstantMs ?? "";
+                probe.dataset.selectedBefore = selectedBefore;
+                probe.dataset.ready = "true";
+              });
+            });
+          });
+        });
         return;
       }
 
