@@ -48,7 +48,7 @@ test("wheel query copy describes only the constraints the user actually moved", 
 
 test("active Find Time constraints are visible and individually reversible", () => {
   assert.match(view, /data-inverse-wheel-constraints/);
-  assert.match(view, /data-inverse-constraint/);
+  assert.match(view, /chip\.dataset\.inverseConstraint = id/);
   assert.match(view, /FREE_COMPARE_RESET_RING_EVENT/);
   assert.match(view, /取消\$\{PILLAR_LABELS\[id\]\}柱/);
   assert.match(view, /detail:\{ ringId:id, source:"inverse-wheel-search" \}/);
