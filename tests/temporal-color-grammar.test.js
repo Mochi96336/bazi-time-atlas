@@ -64,7 +64,7 @@ test("year hierarchy no longer borrows the warm Solar or Selected-Instant channe
   assert.match(hierarchy, /#year-track \.active-cycle-label \{[\s\S]*?fill:\s*#f2f3f2;/);
   assert.match(
     hierarchy,
-    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*rgba\(0,0,0,\.66\);/
+    /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*rgba\(0,0,0,\.50\);/
   );
   assert.match(hierarchy, /#year-track \.ring-tick\.major \{ stroke-width: 1\.35; \}/);
   assert.doesNotMatch(

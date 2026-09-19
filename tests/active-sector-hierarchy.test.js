@@ -6,9 +6,9 @@ const radial = readFileSync(new URL("../radial-hierarchy.css", import.meta.url),
 const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
 
 test("graphite active sectors remain subordinate to the Selected Instant datum", () => {
-  assert.match(radial, /data-classification-overlay="on"\]\) #hour-track \.cycle-sector\.is-active,[\s\S]*?#day-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 30%/);
-  assert.match(radial, /data-classification-overlay="on"\]\) #month-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 40%/);
-  assert.match(radial, /data-classification-overlay="on"\]\) #year-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 46%/);
+  assert.match(radial, /data-classification-overlay="on"\]\) #hour-track \.cycle-sector\.is-active,[\s\S]*?#day-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 20%/);
+  assert.match(radial, /data-classification-overlay="on"\]\) #month-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 26%/);
+  assert.match(radial, /data-classification-overlay="on"\]\) #year-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 30%/);
 
   assert.match(radial, /#cursor-layer \.cursor-line\s*\{[\s\S]*?opacity:\s*\.90;/);
   assert.match(radial, /#year-track \.active-cycle-label\s*\{[\s\S]*?fill:\s*#f2f3f2;/);

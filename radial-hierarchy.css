@@ -118,13 +118,13 @@
    The gradient lives on four fixed, non-rotating material beds in guide-layer;
    temporal sectors remain translucent data paint sliding over that body. This
    keeps light physically attached to the instrument instead of to each state. */
-/* This pass is intentionally visible at normal viewing distance. The previous
-   10–15% light amplitudes were technically present but perceptually negligible;
-   these values establish a real anodized face before the translucent data paint. */
-#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .24; --m2-mid-alpha: .12; --m2-dark-alpha: .045; }
-#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .27; --m2-mid-alpha: .14; --m2-dark-alpha: .052; }
-#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .31; --m2-mid-alpha: .17; --m2-dark-alpha: .060; }
-#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .36; --m2-mid-alpha: .20; --m2-dark-alpha: .072; }
+/* Keep the body dark enough to read as one graphite instrument. Scale is
+   carried by a narrow luminance ladder; depth should come from the machined
+   edges, not from broad gray slabs. */
+#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .16; --m2-mid-alpha: .080; --m2-dark-alpha: .030; }
+#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .17; --m2-mid-alpha: .085; --m2-dark-alpha: .032; }
+#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .19; --m2-mid-alpha: .095; --m2-dark-alpha: .035; }
+#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .21; --m2-mid-alpha: .105; --m2-dark-alpha: .038; }
 
 .m2-ring-gradient .m2-light {
   stop-color: color-mix(in srgb, var(--m2-ring-color) 84%, #dfe3e1);
@@ -139,41 +139,32 @@
   stop-opacity: var(--m2-dark-alpha);
 }
 
-.m2-ring-bed, .m2-ring-sheen { stroke: none; pointer-events: none; }
+.m2-ring-bed { stroke: none; pointer-events: none; }
 .m2-hour-bed { fill: url(#m2-hour-surface); }
 .m2-day-bed { fill: url(#m2-day-surface); }
 .m2-month-bed { fill: url(#m2-month-surface); }
 .m2-year-bed { fill: url(#m2-year-surface); }
 
-/* One non-repeating machining sweep crosses the entire instrument instead of
-   restarting in every sector. Outer/slow rings catch slightly more of it, so
-   material scale remains legible without introducing decorative texture. */
-.m2-ring-sheen { fill: url(#m2-surface-sheen); }
-.m2-hour-sheen { opacity: .56; }
-.m2-day-sheen { opacity: .64; }
-.m2-month-sheen { opacity: .72; }
-.m2-year-sheen { opacity: .82; }
-/* Bevel the fixed material body itself: a narrow outer reflected lip and a
-   darker inner falloff turn each band into a machined ring rather than a flat
-   gray strip. These rims live under temporal data and never rotate with it. */
+/* The body no longer carries a broad diagonal sheen. A narrow directional rim
+   is enough to imply machining while the four bands still read as one object. */
 .m2-ring-rim { fill: none; pointer-events: none; }
 .m2-ring-rim-light {
   stroke: url(#m2-rim-light-stroke);
-  stroke-width: 1.55;
+  stroke-width: .85;
 }
 .m2-ring-rim-shadow {
   stroke: url(#m2-rim-shadow-stroke);
-  stroke-width: 2.35;
+  stroke-width: 1.25;
 }
-.m2-hour-rim-light, .m2-hour-rim-shadow { opacity: .66; }
-.m2-day-rim-light, .m2-day-rim-shadow { opacity: .74; }
-.m2-month-rim-light, .m2-month-rim-shadow { opacity: .82; }
-.m2-year-rim-light, .m2-year-rim-shadow { opacity: .90; }
+.m2-hour-rim-light, .m2-hour-rim-shadow { opacity: .42; }
+.m2-day-rim-light, .m2-day-rim-shadow { opacity: .48; }
+.m2-month-rim-light, .m2-month-rim-shadow { opacity: .54; }
+.m2-year-rim-light, .m2-year-rim-shadow { opacity: .60; }
 
-#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 14%, transparent); }
-#day-track .day-sector { fill: color-mix(in srgb, var(--day) 17%, transparent); }
-#month-track .month-sector { fill: color-mix(in srgb, var(--month) 26%, transparent); }
-#year-track .year-sector { fill: color-mix(in srgb, var(--year) 34%, transparent); }
+#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 12%, transparent); }
+#day-track .day-sector { fill: color-mix(in srgb, var(--day) 14%, transparent); }
+#month-track .month-sector { fill: color-mix(in srgb, var(--month) 20%, transparent); }
+#year-track .year-sector { fill: color-mix(in srgb, var(--year) 24%, transparent); }
 
 .cycle-sector:not(.is-active),
 .cycle-sector.is-active { stroke: none; }
@@ -184,13 +175,13 @@
    mode free to apply its categorical fills and outlines. */
 #kinetic-instrument:not([data-classification-overlay="on"]) #hour-track .cycle-sector.is-active,
 #kinetic-instrument:not([data-classification-overlay="on"]) #day-track .cycle-sector.is-active {
-  fill: color-mix(in srgb, currentColor 30%, transparent);
+  fill: color-mix(in srgb, currentColor 20%, transparent);
 }
 #kinetic-instrument:not([data-classification-overlay="on"]) #month-track .cycle-sector.is-active {
-  fill: color-mix(in srgb, currentColor 40%, transparent);
+  fill: color-mix(in srgb, currentColor 26%, transparent);
 }
 #kinetic-instrument:not([data-classification-overlay="on"]) #year-track .cycle-sector.is-active {
-  fill: color-mix(in srgb, currentColor 46%, transparent);
+  fill: color-mix(in srgb, currentColor 30%, transparent);
 }
 
 /* Every six-degree boundary still exists as a short engraved tick, but only each
@@ -207,8 +198,8 @@
 #day-track .ring-tick.major,
 #month-track .ring-tick.major,
 #year-track .ring-tick.major {
-  stroke: rgba(0,0,0,.66);
-  filter: drop-shadow(0 1px 0 rgba(236,239,239,.075));
+  stroke: rgba(0,0,0,.50);
+  filter: drop-shadow(0 .75px 0 rgba(236,239,239,.040));
 }
 #hour-track .ring-tick.major { stroke-width: 1.05; }
 #day-track .ring-tick.major { stroke-width: 1.1; }
@@ -220,8 +211,8 @@
    The annual Solar subdivision remains a semantic brass guide and is excluded. */
 #guide-layer .guide-arc:not(.annual-subdivide) {
   stroke: url(#m2-groove-stroke);
-  stroke-width: 2.1;
-  filter: drop-shadow(0 1.35px 0 rgba(236,239,239,.085));
+  stroke-width: 1.35;
+  filter: drop-shadow(0 .75px 0 rgba(236,239,239,.045));
 }
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
