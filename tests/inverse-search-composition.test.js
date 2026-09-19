@@ -58,9 +58,9 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
     ".atlas-visible-ten-gods",
     ".analysis-close"
   ]) {
-    assert.match(
-      css,
-      new RegExp(`#kinetic-instrument\\\\[data-inverse-time-search="active"\\\\] ${selector.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}`)
+    assert.ok(
+      css.includes(`#kinetic-instrument[data-inverse-time-search="active"] ${selector}`),
+      `missing active Find Time suppression for ${selector}`
     );
   }
   assert.match(
