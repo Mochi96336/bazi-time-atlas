@@ -42,7 +42,7 @@ test("desktop Solar Time stays compact until a real longitude binds it", () => {
 
 test("desktop Classification replaces Solar Time on the left instead of colliding with the right inspector", () => {
   assert.match(css, /data-classification-overlay="on"\] ~ \.atlas-solar-time-analysis[\s\S]*display: none !important;/);
-  assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*position: fixed;[\s\S]*top: 132px;[\s\S]*right: auto;[\s\S]*left: 0;[\s\S]*width: 340px;[\s\S]*linear-gradient\(to right,/);
+  assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*position: fixed;[\s\S]*top: 84px;[\s\S]*right: auto;[\s\S]*left: 0;[\s\S]*width: 340px;[\s\S]*linear-gradient\(to right,/);
   assert.doesNotMatch(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[^}]*right:\s*0;/s);
 });
 
