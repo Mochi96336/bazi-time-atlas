@@ -99,12 +99,12 @@ test("material depth stays procedural without external texture chrome", () => {
     assert.doesNotMatch(source, /filter:\s*url\(|background(?:-image)?:\s*url\(/i);
     assert.doesNotMatch(source, /repeating-(?:linear|radial)-gradient/i);
   }
-  assert.match(radialHierarchy, /\.m2-ring-material-face \{[\s\S]*?filter:\s*url\(#m2-rotating-micrograin\);[\s\S]*?mix-blend-mode:\s*soft-light;/);
+  assert.match(radialHierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*url\(#m2-rotating-micrograin\);[\s\S]*?mix-blend-mode:\s*soft-light;/);
   assert.doesNotMatch(radialHierarchy, /background(?:-image)?:\s*url\(/i);
   assert.doesNotMatch(radialHierarchy, /repeating-(?:linear|radial)-gradient/i);
   assert.doesNotMatch(atlasHtml, /<image\b[^>]*(?:href|xlink:href)=["'](?:data:|https?:|\/)/i);
-  assert.match(atlasHtml, /<filter id="m2-rotating-micrograin"[\s\S]*?<feTurbulence[^>]*type="fractalNoise"[^>]*baseFrequency="\.72"[^>]*numOctaves="1"[^>]*seed="11"[^>]*stitchTiles="stitch"/);
-  assert.doesNotMatch(atlasHtml, /<fe(?:Diffuse|Specular)Lighting\b/);
+  assert.match(atlasHtml, /<pattern id="m2-rotating-micrograin"[^>]*width="19"[^>]*height="17"[^>]*patternUnits="userSpaceOnUse">[\s\S]*?<circle[^>]*r="\.42"[\s\S]*?<circle[^>]*r="\.24"/);
+  assert.doesNotMatch(atlasHtml, /<feTurbulence\b|<filter\b|<fe(?:Diffuse|Specular)Lighting\b/);
 });
 
 test("material hierarchy does not resurrect a card around the wheel", () => {
