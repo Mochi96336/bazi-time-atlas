@@ -48,6 +48,7 @@
 }
 .atlas-visible-ten-gods-cell {
   appearance: none;
+  position: relative;
   display: grid;
   width: 100%;
   min-width: 0;
@@ -56,12 +57,36 @@
   gap: 3px 7px;
   border: 0;
   border-radius: 0;
-  padding: 8px 10px;
+  padding: 8px 20px 8px 10px;
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+.atlas-visible-ten-gods-cell::after {
+  content: "›";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  color: #8d9392;
+  opacity: 0;
+  transform: translateX(-2px);
+  transition: opacity 120ms ease, transform 120ms ease;
+  pointer-events: none;
+}
+.atlas-visible-ten-gods-cell:hover,
+.atlas-visible-ten-gods-cell:focus-visible {
+  background: rgba(255,255,255,.018);
+  outline: none;
+}
+.atlas-visible-ten-gods-cell:hover::after,
+.atlas-visible-ten-gods-cell:focus-visible::after {
+  opacity: .72;
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-visible-ten-gods-cell::after { transition: none; }
 }
 .atlas-visible-ten-gods-cell + .atlas-visible-ten-gods-cell {
   border-left: 1px solid rgba(236,239,239,.065);
