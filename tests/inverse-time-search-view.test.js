@@ -76,12 +76,15 @@ test("solar band stays context rather than becoming a fake fifth inverse constra
   assert.doesNotMatch(view, /constraints[^\n]*solar/);
 });
 
-test("Analysis bootstrap still installs find-time, but the visible disclosure is relabeled Tools", () => {
+test("Tools disclosure uses current product capabilities without duplicating a Tools prefix in the edge rail", () => {
   assert.match(analysis, /installInverseTimeSearch/);
   assert.match(analysis, /inverse-time-search\.css/);
   assert.match(view, /open\.textContent = "工具"/);
   assert.match(view, /close\.textContent = "完成"/);
-  assert.match(css, /content:\s*"工具 · "/);
+  assert.match(view, /顯示找時間、分類、參考系與太陽時間等工具/);
+  assert.match(view, /需要找時間、分類、參考系或太陽時間比較時再展開/);
+  assert.doesNotMatch(css, /content:\s*"工具 · "/);
+  assert.doesNotMatch(view, /尺度、圖層|圖層顯示/);
 });
 
 test("ordinary reading never shows the find-time entry", () => {
