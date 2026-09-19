@@ -69,6 +69,18 @@ function runScenario(scenario) {
 }
 
 {
+  const { url, probe } = runScenario("handoff");
+  if (
+    attr(probe, "data-tools-open") !== "true"
+    || attr(probe, "data-find-time") !== "active"
+    || attr(probe, "data-inspector-open") !== "false"
+    || attr(probe, "data-inspector-hidden") !== "true"
+  ) {
+    throw new Error(`Find Time did not take clean task ownership from the inspector: ${url} · ${probe}`);
+  }
+}
+
+{
   const { url, probe } = runScenario("preserve");
   if (
     attr(probe, "data-before-reference") !== "day"
@@ -84,4 +96,4 @@ function runScenario(scenario) {
   }
 }
 
-console.log("[tools-human-ux] PASS one-layer Escape + preserved observation settings");
+console.log("[tools-human-ux] PASS one-layer Escape + task handoff + preserved observation settings");
