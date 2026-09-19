@@ -33,6 +33,12 @@ test("desktop left edge owns a non-overlapping reference / exact-time / Solar-Ti
   assert.match(css, /\.atlas-solar-time-analysis \{[\s\S]*top: 132px;[\s\S]*width: 340px;/);
 });
 
+test("desktop Classification replaces Solar Time on the left instead of colliding with the right inspector", () => {
+  assert.match(css, /data-classification-overlay="on"\] ~ \.atlas-solar-time-analysis[\s\S]*display: none !important;/);
+  assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*position: fixed;[\s\S]*top: 132px;[\s\S]*right: auto;[\s\S]*left: 0;[\s\S]*width: 340px;[\s\S]*linear-gradient\(to right,/);
+  assert.doesNotMatch(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[^}]*right:\s*0;/s);
+});
+
 test("desktop Four Pillars summary uses the full right rail instead of a squeezed legacy grid column", () => {
   assert.match(css, /\.atlas-visible-ten-gods \{[\s\S]*width: clamp\(320px, 22vw, 370px\);[\s\S]*display: block;[\s\S]*pointer-events: auto;/);
   assert.match(css, /\.atlas-visible-ten-gods-grid \{[\s\S]*width: 100%;[\s\S]*repeat\(2, minmax\(0, 1fr\)\)/);
