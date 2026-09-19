@@ -82,16 +82,16 @@
           <linearGradient id="m2-day-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
           <linearGradient id="m2-month-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
           <linearGradient id="m2-year-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
-          <filter id="m2-rotating-micrograin" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="1" seed="11" stitchTiles="stitch" result="m2-noise"></feTurbulence>
-            <feComponentTransfer in="m2-noise" result="m2-compressed-grain">
-              <feFuncR type="linear" slope=".16" intercept=".42"></feFuncR>
-              <feFuncG type="linear" slope=".16" intercept=".42"></feFuncG>
-              <feFuncB type="linear" slope=".16" intercept=".42"></feFuncB>
-              <feFuncA type="linear" slope="0" intercept="1"></feFuncA>
-            </feComponentTransfer>
-            <feComposite in="m2-compressed-grain" in2="SourceAlpha" operator="in"></feComposite>
-          </filter>
+          <pattern id="m2-rotating-micrograin" width="19" height="17" patternUnits="userSpaceOnUse">
+            <circle cx="1.8" cy="3.2" r=".42" fill="#eef0ef" fill-opacity=".30"></circle>
+            <circle cx="7.4" cy="1.6" r=".31" fill="#030404" fill-opacity=".34"></circle>
+            <circle cx="13.7" cy="4.8" r=".38" fill="#d9dcda" fill-opacity=".24"></circle>
+            <circle cx="17.1" cy="9.4" r=".27" fill="#020303" fill-opacity=".30"></circle>
+            <circle cx="4.9" cy="11.8" r=".36" fill="#e7e9e8" fill-opacity=".22"></circle>
+            <circle cx="10.8" cy="14.9" r=".29" fill="#040505" fill-opacity=".28"></circle>
+            <circle cx="15.2" cy="15.8" r=".34" fill="#dfe2e0" fill-opacity=".20"></circle>
+            <circle cx="2.6" cy="15.1" r=".24" fill="#050606" fill-opacity=".26"></circle>
+          </pattern>
           <linearGradient id="m2-groove-stroke" gradientUnits="userSpaceOnUse" x1="220" y1="300" x2="1080" y2="1160">
             <stop offset="0" stop-color="#111415" stop-opacity=".34"></stop>
             <stop offset=".46" stop-color="#050607" stop-opacity=".52"></stop>
