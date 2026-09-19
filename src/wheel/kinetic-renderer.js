@@ -80,12 +80,6 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         "aria-hidden": "true"
       }, guides);
       el("path", {
-        d,
-        class: `m2-ring-sheen m2-${id}-sheen`,
-        "data-material-sheen-ring": id,
-        "aria-hidden": "true"
-      }, guides);
-      el("path", {
         d: arcPath(WHEEL_CENTER, model.outerRadius - 1, FAN.start, FAN.end),
         class: `m2-ring-rim m2-ring-rim-light m2-${id}-rim-light`,
         "data-material-rim-light": id,
