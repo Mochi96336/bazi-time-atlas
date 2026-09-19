@@ -456,9 +456,16 @@ if (inspector) {
   });
 
   closeButton?.addEventListener("click", () => closeInspector({ restoreFocus: true }));
+  document.addEventListener("atlas-tools-closing", () => {
+    closeInspector({ restoreFocus: false });
+  });
+  document.addEventListener("atlas-find-time-entering", () => {
+    closeInspector({ restoreFocus: false });
+  });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !inspector.hidden) {
       event.preventDefault();
+      event.stopImmediatePropagation();
       closeInspector({ restoreFocus: true });
     }
   });

@@ -31,7 +31,9 @@ test("390px find-time stays a compact two-row overlay rather than a control wall
     css,
     /@media \(max-width: 480px\) \{[\s\S]*?\.inverse-time-search-readout\s*\{[\s\S]*?width:\s*calc\(100% - 20px\);[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto;/
   );
-  assert.match(css, /\.inverse-time-search-readout strong\s*\{[\s\S]*?grid-column:\s*1 \/ -1;/);
+  assert.match(css, /\.inverse-time-search-readout strong\s*\{[\s\S]*?grid-column:\s*1;[\s\S]*?grid-row:\s*1;/);
+  assert.match(css, /\.inverse-time-search-constraints\s*\{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*2;/);
+  assert.match(css, /\.inverse-time-search-readout span\s*\{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*3;/);
 });
 
 test("the annual solar band is visually demoted while four pillar rings stay direct-manipulation targets", () => {

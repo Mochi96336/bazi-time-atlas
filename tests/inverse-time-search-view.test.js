@@ -46,6 +46,21 @@ test("wheel query copy describes only the constraints the user actually moved", 
   );
 });
 
+test("active Find Time constraints are visible and individually reversible", () => {
+  assert.match(view, /data-inverse-wheel-constraints/);
+  assert.match(view, /chip\.dataset\.inverseConstraint = id/);
+  assert.match(view, /FREE_COMPARE_RESET_RING_EVENT/);
+  assert.match(view, /取消\$\{PILLAR_LABELS\[id\]\}柱/);
+  assert.match(view, /detail:\{ ringId:id, source:"inverse-wheel-search" \}/);
+  assert.match(css, /\.inverse-time-search-constraint[\s\S]*?cursor:\s*pointer/);
+});
+
+test("Find Time owns the first Escape and returns to Tools instead of closing both layers", () => {
+  assert.match(view, /event\.key !== "Escape" \|\| !active/);
+  assert.match(view, /event\.preventDefault\(\);[\s\S]*event\.stopImmediatePropagation\(\);[\s\S]*exitMode\(\)/);
+  assert.match(view, /atlas-tools-closing/);
+});
+
 test("find-time reuses Free Compare drag mechanics without restoring Compare as product chrome", () => {
   assert.match(view, /querySelector\("#compare-rings-button"\)/);
   assert.match(view, /compareButton\.hidden = true/);
@@ -83,6 +98,7 @@ test("Tools disclosure uses current product capabilities without duplicating a T
   assert.match(view, /close\.textContent = "完成"/);
   assert.match(view, /顯示找時間、分類、參考系與太陽時間等工具/);
   assert.match(view, /需要找時間、分類、參考系或太陽時間比較時再展開/);
+  assert.match(view, /收起工具；目前設定會保留/);
   assert.doesNotMatch(css, /content:\s*"工具 · "/);
   assert.doesNotMatch(view, /尺度、圖層|圖層顯示/);
 });
