@@ -20,6 +20,7 @@ if (inspector) {
   let activeStructureTab = "basic";
   let lastTrigger = null;
 
+  const pillarKeys = Object.freeze(["year", "month", "day", "hour"]);
   const pillarLabels = Object.freeze({
     year: "年柱",
     month: "月柱",
@@ -32,6 +33,26 @@ if (inspector) {
     if (className) element.className = className;
     if (text !== null) element.textContent = text;
     return element;
+  }
+
+  function createPillarSwitcher() {
+    const switcher = node("nav", "ganzhi-inspector-pillar-switcher");
+    switcher.hidden = true;
+    switcher.setAttribute("aria-label", "切換四柱");
+    for (const key of pillarKeys) {
+      const button = node("button", "ganzhi-inspector-pillar-switch");
+      button.type = "button";
+      button.dataset.pillarSwitch = key;
+      button.setAttribute("aria-pressed", "false");
+      button.tabIndex = -1;
+      button.append(
+        node("span", null, pillarLabels[key].replace("柱", "")),
+        node("strong", null, "—")
+      );
+      switcher.append(button);
+    }
+    inspector.querySelector(".ganzhi-inspector-identity")?.before(switcher);
+    return switcher;
   }
 
   function createStructureShell() {
@@ -73,6 +94,8 @@ if (inspector) {
     return shell;
   }
 
+  const pillarSwitcher = createPillarSwitcher();
+  const pillarSwitchButtons = [...pillarSwitcher.querySelectorAll("[data-pillar-switch]")];
   const structureShell = createStructureShell();
   const structureTabs = [...structureShell.querySelectorAll("[data-structure-tab]")];
 
@@ -88,6 +111,21 @@ if (inspector) {
       dayPillar: document.querySelector("#state-day")?.textContent?.trim() ?? "",
       hourPillar: document.querySelector("#state-hour")?.textContent?.trim() ?? ""
     };
+  }
+
+  function syncPillarSwitcher() {
+    const current = pillarInput();
+    const visible = Boolean(activePillar && activeReference === null);
+    pillarSwitcher.hidden = !visible;
+    for (const button of pillarSwitchButtons) {
+      const key = button.dataset.pillarSwitch;
+      const selected = visible && key === activePillar;
+      button.classList.toggle("active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+      button.tabIndex = selected ? 0 : -1;
+      const value = button.querySelector("strong");
+      if (value) value.textContent = current[`${key}Pillar`] || "—";
+    }
   }
 
   function syncStructureTabs() {
@@ -324,6 +362,7 @@ if (inspector) {
     inspector.dataset.pillar = activePillar ?? "";
     inspector.dataset.ganzhi = model?.name ?? "";
     inspector.dataset.ready = String(Boolean(model));
+    syncPillarSwitcher();
     if (headerKicker) headerKicker.textContent = config ? "四柱結構" : "六十甲子 reference";
     setText("ganzhi-inspector-pillar", config?.label ?? "六十甲子 reference");
 
@@ -404,6 +443,7 @@ if (inspector) {
     activePillar = null;
     activeReference = null;
     activeStructureTab = "basic";
+    syncPillarSwitcher();
     renderStructure();
     if (syncUrl) syncSearch();
     updateTriggerState();
@@ -420,6 +460,25 @@ if (inspector) {
     });
     grid.replaceChildren(fragment);
   }
+
+  pillarSwitchButtons.forEach((button, index) => {
+    button.addEventListener("click", () => {
+      openInspector(button.dataset.pillarSwitch, { trigger:null });
+    });
+    button.addEventListener("keydown", event => {
+      if (!activePillar) return;
+      let targetIndex = null;
+      if (event.key === "ArrowRight") targetIndex = (index + 1) % pillarSwitchButtons.length;
+      else if (event.key === "ArrowLeft") targetIndex = (index - 1 + pillarSwitchButtons.length) % pillarSwitchButtons.length;
+      else if (event.key === "Home") targetIndex = 0;
+      else if (event.key === "End") targetIndex = pillarSwitchButtons.length - 1;
+      if (targetIndex === null) return;
+      event.preventDefault();
+      const target = pillarSwitchButtons[targetIndex];
+      openInspector(target.dataset.pillarSwitch, { trigger:null });
+      target.focus();
+    });
+  });
 
   structureTabs.forEach((tab, index) => {
     tab.addEventListener("click", () => {
