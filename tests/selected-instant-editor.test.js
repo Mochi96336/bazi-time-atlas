@@ -9,7 +9,7 @@ const workspace = readFileSync(new URL("../desktop-tools-workspace.css", import.
 
 test("desktop Tools edits Selected Instant at the authoritative read-head", () => {
   assert.match(editor, /querySelector\("#instant-readout"\)/);
-  assert.match(editor, /data\.instantEditorAvailable = String\(enabled\)/);
+  assert.match(editor, /readoutShell\.dataset\.instantEditorAvailable = String\(enabled\)/);
   assert.match(editor, /instrument\.dataset\.analysisOpen === "true"/);
   assert.match(editor, /instrument\.dataset\.inverseTimeSearch !== "active"/);
   assert.match(editorCss, /@media \(min-width: 821px\)/);
