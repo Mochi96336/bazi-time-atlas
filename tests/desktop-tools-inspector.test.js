@@ -38,7 +38,7 @@ test("inspector Escape closes only the inspector layer", () => {
 test("pillar inspector keeps all four current pillars directly switchable", () => {
   assert.match(inspector, /const pillarKeys = Object\.freeze\(\["year", "month", "day", "hour"\]\)/);
   assert.match(inspector, /ganzhi-inspector-pillar-switcher/);
-  assert.match(inspector, /data\.pillarSwitch = key/);
+  assert.match(inspector, /button\.dataset\.pillarSwitch = key/);
   assert.match(inspector, /openInspector\(button\.dataset\.pillarSwitch, \{ trigger:null \}\)/);
   assert.match(inspector, /event\.key === "ArrowRight"/);
   assert.match(inspector, /event\.key === "ArrowLeft"/);
