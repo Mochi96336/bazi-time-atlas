@@ -77,45 +77,11 @@
     pointer-events: auto;
   }
 
-  /* Exact-time editing remains reachable, but the second full-width timeline
-     no longer competes with the radial time navigator. It becomes a small
-     left-edge input and is removed from document flow. */
+  /* Selected Instant now edits where it is read: at the central read-head.
+     Keep the legacy timeline DOM/runtime intact for ordinary reading and
+     regression ownership, but do not duplicate exact-time controls in Tools. */
   #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
-    position: fixed;
-    z-index: 10;
-    top: 84px;
-    left: 18px;
-    width: 286px;
-    margin: 0;
-    display: block;
-    border: 0;
-    padding: 0 52px 10px 0;
-    background: linear-gradient(to right,
-      rgba(9,10,11,.94) 0%,
-      rgba(9,10,11,.82) 72%,
-      rgba(9,10,11,0) 100%);
-    box-shadow: none;
-    opacity: 1;
-  }
-  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-wrap,
-  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status {
     display: none !important;
-  }
-  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field {
-    gap: 2px;
-    color: #6f7475;
-    font-size: 7px;
-    letter-spacing: .05em;
-  }
-  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field input {
-    width: 220px;
-    border: 0;
-    border-bottom: 1px solid var(--m2-etched-dark-soft);
-    border-radius: 0;
-    padding: 5px 2px;
-    background: transparent;
-    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
-    font-size: 9px;
   }
 
   /* Solar-time comparison is an input/measurement tool, so it lives on the
@@ -124,11 +90,11 @@
   .atlas-solar-time-analysis {
     position: fixed;
     z-index: 9;
-    top: 132px;
+    top: 84px;
     bottom: 16px;
     left: 0;
     width: 340px;
-    max-height: calc(100dvh - 148px);
+    max-height: calc(100dvh - 100px);
     margin: 0;
     overflow: auto;
     border: 0;
@@ -198,7 +164,7 @@
   #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
     position: fixed;
     z-index: 9;
-    top: 132px;
+    top: 84px;
     right: auto;
     bottom: auto;
     left: 0;
