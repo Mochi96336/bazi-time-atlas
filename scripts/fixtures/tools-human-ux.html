@@ -28,7 +28,7 @@
     else if (scenario === "inspector") {
       base.set("analysis", "1");
       base.set("inspect", "year");
-    } else if (scenario === "preserve" || scenario === "editor" || scenario === "editor-mobile") {
+    } else if (scenario === "preserve" || scenario === "editor" || scenario === "editor-mobile" || scenario === "editor-visual") {
       base.set("analysis", "1");
     } else if (scenario === "handoff") {
       base.set("analysis", "1");
@@ -116,6 +116,25 @@
         probe.dataset.readoutRole = readout.getAttribute("role") ?? "";
         probe.dataset.editorHidden = String(editor.hidden);
         probe.dataset.ready = "true";
+        return;
+      }
+
+      if (scenario === "editor-visual") {
+        const readout = doc.querySelector("#instant-readout");
+        const shell = doc.querySelector(".instrument-readout");
+        const editor = doc.querySelector("#selected-instant-editor");
+        if (!readout || !shell || !editor
+          || instrument.dataset.analysisOpen !== "true"
+          || shell.dataset.instantEditorAvailable !== "true") {
+          if (attempts > 0) later(() => settle(attempts - 1), 40);
+          return;
+        }
+        readout.click();
+        later(() => {
+          probe.dataset.editorOpen = instrument.dataset.instantEditorOpen ?? "";
+          probe.dataset.editorHidden = String(editor.hidden);
+          probe.dataset.ready = "true";
+        });
         return;
       }
 
