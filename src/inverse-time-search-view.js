@@ -438,6 +438,10 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
 
   const enterMode = () => {
     if (active) return;
+    instrument.dispatchEvent(new CustomEvent("atlas-find-time-entering", {
+      bubbles:true,
+      detail:{ source:"inverse-wheel-search" }
+    }));
     active = true;
     instrument.dataset.inverseTimeSearch = "active";
     button.setAttribute("aria-pressed", "true");
