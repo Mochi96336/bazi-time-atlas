@@ -72,16 +72,16 @@ function installControl() {
   control.htmlFor = "reference-frame-select";
 
   const caption = document.createElement("span");
-  caption.textContent = "參考系";
+  caption.textContent = "固定視角";
 
   select = document.createElement("select");
   select.id = "reference-frame-select";
-  select.setAttribute("aria-label", "相對參考系");
-  select.title = "固定一層作為旋轉參考，其他圓環顯示相對漂移；不改變選定時間或真實相位";
+  select.setAttribute("aria-label", "固定哪一圈作為觀看基準");
+  select.title = "固定一圈作為觀看基準，其他圓環會顯示相對移動；不會改變目前時間";
 
   const world = document.createElement("option");
   world.value = "world";
-  world.textContent = "世界";
+  world.textContent = "不固定";
   select.appendChild(world);
 
   REFERENCE_RING_IDS.forEach(id => {
