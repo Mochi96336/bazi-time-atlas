@@ -84,7 +84,11 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
 
   assert.match(html, /<canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"><\/canvas>/);
   assert.match(css, /\.material-wheel-layer\s*\{[\s\S]*?pointer-events:\s*none;/);
+  assert.match(css, /data-material-prototype="roughness"\] \.m2-ring-bed,[\s\S]*?data-material-prototype="roughness-normal"\] \.m2-ring-material-face[\s\S]*?opacity:\s*0;/);
   assert.match(renderer, /materialPrototype\.updateFrame\(renderedRotations\)/);
+  assert.match(material, /localPoint = rotation\(-ringRotation\) \* point/);
+  assert.match(material, /screenGradient = rotation\(ringRotation\) \* localGradient/);
+  assert.match(material, /lightDirection = normalize\(vec3\(-0\.42, -0\.56, 0\.714\)\)/);
   assert.doesNotMatch(material, /selectedMs|Selected Instant|solarLongitude|temporalCycleRotation|setModelRotation|effectiveRotation/);
   assert.doesNotMatch(material, /<img|https?:\/\/|feTurbulence|repeating-(?:linear|radial)-gradient/i);
 });
