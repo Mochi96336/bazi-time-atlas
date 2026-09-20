@@ -113,6 +113,7 @@ test("reference-frame control explains the viewing action instead of exposing co
 });
 
 test("desktop Find Time keeps product copy above the readable type floor without widening the rail", () => {
+  assert.match(css, /@media \(min-width: 481px\)[\s\S]*?#kinetic-instrument\[data-inverse-time-search="active"\] #inverse-time-search-button \{[\s\S]*?font-size:\s*11px/);
   assert.match(css, /@media \(min-width: 481px\)[\s\S]*?\.inverse-time-search-readout strong \{[\s\S]*?font-size:\s*11px/);
   assert.match(css, /@media \(min-width: 481px\)[\s\S]*?\.inverse-time-search-constraint \{[\s\S]*?font-size:\s*10px/);
   assert.match(css, /@media \(min-width: 481px\)[\s\S]*?\.inverse-time-search-readout span \{[\s\S]*?font-size:\s*10px[\s\S]*?line-height:\s*1\.55/);
