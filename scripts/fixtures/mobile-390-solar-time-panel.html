@@ -35,13 +35,29 @@
       const doc = frame.contentDocument;
       const panel = doc?.querySelector("#atlas-solar-time-analysis");
       const instrument = doc?.querySelector("#kinetic-instrument");
-      if (!childWindow || !panel || panel.hidden || panel.dataset.ready !== "true") {
+      const verdict = doc?.querySelector(".atlas-solar-verdict");
+      const basisRows = doc?.querySelector("#atlas-solar-basis-rows");
+      const corrections = doc?.querySelector(".atlas-solar-corrections");
+      if (!childWindow || !panel || !verdict || !basisRows || !corrections || panel.hidden || panel.dataset.ready !== "true") {
         setTimeout(settle, 40);
         return;
       }
       panel.scrollIntoView({ block:"start" });
       setTimeout(() => {
         const rect = panel.getBoundingClientRect();
+        const verdictRect = verdict.getBoundingClientRect();
+        const basisRect = basisRows.getBoundingClientRect();
+        const correctionRect = corrections.getBoundingClientRect();
+        const textNodes = [
+          doc.querySelector(".atlas-solar-verdict > strong"),
+          doc.querySelector(".atlas-solar-basis-row > span"),
+          doc.querySelector(".atlas-solar-basis-row > span small"),
+          doc.querySelector(".atlas-solar-basis-row b"),
+          doc.querySelector(".atlas-solar-calculation-head span"),
+          doc.querySelector(".atlas-solar-corrections span"),
+          doc.querySelector(".atlas-solar-analysis-meta")
+        ].filter(Boolean);
+        const fontSizes = textNodes.map(node => Number.parseFloat(childWindow.getComputedStyle(node).fontSize)).filter(Number.isFinite);
         probe.dataset.ready = "true";
         probe.dataset.innerWidth = String(childWindow.innerWidth);
         probe.dataset.innerHeight = String(childWindow.innerHeight);
@@ -54,6 +70,10 @@
         probe.dataset.panelLeft = String(rect.left);
         probe.dataset.panelRight = String(rect.right);
         probe.dataset.panelWidth = String(rect.width);
+        probe.dataset.verdictTop = String(verdictRect.top);
+        probe.dataset.basisTop = String(basisRect.top);
+        probe.dataset.correctionsTop = String(correctionRect.top);
+        probe.dataset.minInfoFont = String(Math.min(...fontSizes));
       }, 120);
     }
 
