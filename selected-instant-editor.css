@@ -3,7 +3,7 @@
 .selected-instant-editor[hidden] { display: none !important; }
 
 @media (min-width: 821px) {
-  #kinetic-instrument[data-analysis-open="true"]:not([data-inverse-time-search="active"])
+  #kinetic-instrument:not([data-inverse-time-search="active"])
     .instrument-readout[data-instant-editor-available="true"] {
     pointer-events: auto;
   }

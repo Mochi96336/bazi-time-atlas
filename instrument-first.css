@@ -290,6 +290,16 @@
   }
 }
 
+
+/* Human UX E1: on full desktop the central Selected Instant is the single exact-
+   time surface in both ordinary reading and Tools. Keep the legacy timeline DOM
+   alive for compact/tablet ownership, but never render a duplicate desktop input. */
+@media (min-width: 821px) {
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .timeline-dock {
+    display: none;
+  }
+}
+
 @media (min-width: 1100px) {
   .instrument-shell {
     height: max(760px, calc(100dvh - 52px));

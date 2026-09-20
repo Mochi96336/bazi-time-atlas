@@ -150,10 +150,12 @@ test("ordinary reading retires the duplicate Selected Instant caption", () => {
   );
 });
 
-test("ordinary reading preserves exact datetime entry but removes duplicate range and diagnostics", () => {
-  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{[\s\S]*?grid-template-columns:\s*minmax\(190px, 230px\);[\s\S]*?opacity:\s*\.52;/);
-  assert.match(css, /~ \.timeline-dock \.slider-wrap,[\s\S]*?~ \.timeline-dock \.timeline-status\s*\{\s*display:\s*none;/);
+test("wide desktop ordinary reading makes the read-head the sole exact-time surface", () => {
+  assert.match(
+    css,
+    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.timeline-dock\s*\{\s*display:\s*none;/,
+    "ordinary desktop must not render a second exact-time input below the read-head"
+  );
   assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.readout-meta,[\s\S]*?\.boundary-meta\s*\{\s*display:\s*none;/);
   assert.match(css, /#kinetic-instrument\[data-analysis-open="true"\] ~ \.timeline-dock\s*\{\s*opacity:\s*1;/);
-  assert.match(css, /\.timeline-dock:focus-within\s*\{\s*opacity:\s*1;/);
 });

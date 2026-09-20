@@ -7,12 +7,13 @@ const editorCss = readFileSync(new URL("../selected-instant-editor.css", import.
 const analysis = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
 const workspace = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
 
-test("desktop Tools edits Selected Instant at the authoritative read-head", () => {
+test("desktop ordinary reading and Tools edit Selected Instant at the authoritative read-head", () => {
   assert.match(editor, /querySelector\("#instant-readout"\)/);
   assert.match(editor, /readoutShell\.dataset\.instantEditorAvailable = String\(enabled\)/);
-  assert.match(editor, /instrument\.dataset\.analysisOpen === "true"/);
+  assert.doesNotMatch(editor, /instrument\.dataset\.analysisOpen === "true"/);
   assert.match(editor, /instrument\.dataset\.inverseTimeSearch !== "active"/);
   assert.match(editorCss, /@media \(min-width: 821px\)/);
+  assert.match(editorCss, /#kinetic-instrument:not\(\[data-inverse-time-search="active"\]\)[\s\S]*\.instrument-readout\[data-instant-editor-available="true"\][\s\S]*pointer-events:\s*auto/);
   assert.match(editorCss, /#instant-readout[\s\S]*cursor:\s*pointer/);
   assert.match(workspace, /~ \.timeline-dock \{[\s\S]*display:\s*none\s*!important/);
 });

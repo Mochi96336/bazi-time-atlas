@@ -90,7 +90,6 @@ export function installSelectedInstantEditor(
   function available() {
     const desktop = media ? media.matches : true;
     return desktop
-      && instrument.dataset.analysisOpen === "true"
       && instrument.dataset.inverseTimeSearch !== "active";
   }
 
