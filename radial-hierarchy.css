@@ -111,13 +111,12 @@
 }
 
 /* M2 anodized-graphite material: the temporal rings remain continuous matte
-   surfaces. Material depth comes from restrained luminance separation and an
-   engraved tick cadence, not per-sector gradients, noise, or expensive SVG
-   filters. Resting sectors stay borderless so the wheel reads as one instrument. */
-/* A single upper-left material light now runs through every graphite band.
-   The gradient lives on four fixed, non-rotating material beds in guide-layer;
-   temporal sectors remain translucent data paint sliding over that body. This
-   keeps light physically attached to the instrument instead of to each state. */
+   surfaces. Low-frequency depth stays on fixed ring-only beds; a single
+   procedural micrograin layer lives inside each rotating sexagenary track.
+   There is no page/background light field and no per-sector texture. */
+/* The fixed bed carries broad directional material response while the micrograin
+   follows the physical ring pose. This separates illumination from surface
+   identity: the page stays unlit, but the material itself moves with the ring. */
 /* Keep the body dark enough to read as one graphite instrument. Scale is
    carried by a narrow luminance ladder; depth should come from the machined
    edges, not from broad gray slabs. */
@@ -144,6 +143,16 @@
 .m2-day-bed { fill: url(#m2-day-surface); }
 .m2-month-bed { fill: url(#m2-month-surface); }
 .m2-year-bed { fill: url(#m2-year-surface); }
+
+.m2-ring-material-face {
+  fill: url(#m2-rotating-micrograin);
+  opacity: .16;
+  pointer-events: none;
+}
+.m2-hour-material-face { opacity: .115; }
+.m2-day-material-face { opacity: .128; }
+.m2-month-material-face { opacity: .144; }
+.m2-year-material-face { opacity: .16; }
 
 /* The body no longer carries a broad diagonal sheen. A narrow directional rim
    is enough to imply machining while the four bands still read as one object. */
