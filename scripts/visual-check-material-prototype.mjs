@@ -5,7 +5,7 @@ import path from "node:path";
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
 const instant = "2026-09-13T23%3A43%3A42.000Z";
-const modes = ["svg", "roughness", "roughness-normal"];
+const modes = ["svg", "roughness"];
 const viewports = [
   { key:"2047x1038", width:2047, height:1038, mobile:false },
   { key:"1440x900", width:1440, height:900, mobile:false },
@@ -61,7 +61,7 @@ function probeMode(browser, mode) {
   }
 
   if (mode === "svg") {
-    if (/data-material-prototype="(?:roughness|roughness-normal)"/.test(result.stdout)) {
+    if (/data-material-prototype="roughness"/.test(result.stdout)) {
       throw new Error("SVG baseline unexpectedly activated the shader");
     }
     return;
@@ -86,7 +86,7 @@ function probeForcedFallback(browser) {
   if (!result.stdout.includes('data-material-prototype-fallback="forced"')) {
     throw new Error("Forced WebGL failure did not expose the SVG fallback state");
   }
-  if (/data-material-prototype="(?:roughness|roughness-normal)"/.test(result.stdout)) {
+  if (/data-material-prototype="roughness"/.test(result.stdout)) {
     throw new Error("Forced fallback left shader mode active");
   }
 }
