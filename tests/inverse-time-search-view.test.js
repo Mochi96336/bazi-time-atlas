@@ -112,6 +112,15 @@ test("reference-frame control explains the viewing action instead of exposing co
   assert.doesNotMatch(referenceControls, /textContent = "參考系"|textContent = "世界"/);
 });
 
+test("desktop Find Time keeps product copy above the readable type floor without widening the rail", () => {
+  assert.match(css, /@media \(min-width: 481px\)[\s\S]*?\.inverse-time-search-readout strong \{[\s\S]*?font-size:\s*11px/);
+  assert.match(css, /@media \(min-width: 481px\)[\s\S]*?\.inverse-time-search-constraint \{[\s\S]*?font-size:\s*10px/);
+  assert.match(css, /@media \(min-width: 481px\)[\s\S]*?\.inverse-time-search-readout span \{[\s\S]*?font-size:\s*10px[\s\S]*?line-height:\s*1\.55/);
+  assert.match(css, /@media \(min-width: 481px\)[\s\S]*?button\[data-inverse-wheel-apply\] \{[\s\S]*?font-size:\s*10px/);
+  assert.match(css, /:has\(button\[data-inverse-wheel-apply\]:not\(\[hidden\]\)\)[\s\S]*?color:\s*#b8bfbb/);
+  assert.match(css, /width:\s*min\(620px, calc\(100% - 32px\)\)/);
+});
+
 test("ordinary reading never shows the find-time entry", () => {
   assert.match(
     css,
