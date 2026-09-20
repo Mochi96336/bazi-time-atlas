@@ -65,6 +65,7 @@
         probe.dataset.findTime = instrument.dataset.inverseTimeSearch ?? "";
         probe.dataset.buttonPressed = button.getAttribute("aria-pressed") ?? "";
         probe.dataset.buttonText = button.textContent ?? "";
+        probe.dataset.buttonFont = String(parseFloat(childWindow.getComputedStyle(button).fontSize));
         probe.dataset.openText = openControl?.textContent ?? "";
         probe.dataset.closeText = closeControl?.textContent ?? "";
         probe.dataset.readoutHidden = String(readout.hidden);
