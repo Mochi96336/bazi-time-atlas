@@ -91,6 +91,9 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /lightDirection = normalize\(vec3\(-0\.42, -0\.56, 0\.714\)\)/);
   assert.match(material, /svg\.getScreenCTM\?\.\(\)/);
   assert.match(material, /screenToSvg = screenCtm\.inverse\(\)/);
+  assert.match(material, /uniform vec2 u_fan_degrees/);
+  assert.match(material, /gl\.uniform2f\(uniforms\.fanDegrees, FAN\.start, FAN\.end\)/);
+  assert.match(material, /angleDegrees < u_fan_degrees\.x \|\| angleDegrees > u_fan_degrees\.y/);
   assert.doesNotMatch(material, /viewWidth|viewHeight|contentOrigin|u_svg_scale/);
   assert.doesNotMatch(material, /selectedMs|Selected Instant|solarLongitude|temporalCycleRotation|setModelRotation|effectiveRotation/);
   assert.doesNotMatch(material, /<img|https?:\/\/|feTurbulence|repeating-(?:linear|radial)-gradient/i);
