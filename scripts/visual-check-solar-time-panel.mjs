@@ -65,6 +65,10 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   const panelLeft = Number(attr(probe, "data-panel-left"));
   const panelRight = Number(attr(probe, "data-panel-right"));
   const panelWidth = Number(attr(probe, "data-panel-width"));
+  const verdictTop = Number(attr(probe, "data-verdict-top"));
+  const basisTop = Number(attr(probe, "data-basis-top"));
+  const correctionsTop = Number(attr(probe, "data-corrections-top"));
+  const minInfoFont = Number(attr(probe, "data-min-info-font"));
   if (
     attr(probe, "data-ready") !== "true"
     || attr(probe, "data-inner-width") !== String(width)
@@ -78,6 +82,10 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
     || !Number.isFinite(panelLeft)
     || !Number.isFinite(panelRight)
     || !Number.isFinite(panelWidth)
+    || !Number.isFinite(verdictTop)
+    || !Number.isFinite(basisTop)
+    || !Number.isFinite(correctionsTop)
+    || !Number.isFinite(minInfoFont)
     || panelHeight <= 0
     || panelWidth <= 0
     || panelTop < -1
@@ -86,6 +94,8 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
     || panelLeft < -1
     || panelRight > width + 1
     || panelRight <= panelLeft
+    || !(verdictTop < basisTop && basisTop < correctionsTop)
+    || minInfoFont < 9
   ) {
     throw new Error(`solar-time ${label} review fixture did not settle with the full rail inside the true ${width}x${height} viewport: ${fixtureURL} · ${probe}`);
   }
@@ -104,7 +114,7 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   if (info.size < 10_000) {
     throw new Error(`solar-time ${label} panel screenshot is unexpectedly small (${info.size} bytes)`);
   }
-  console.log(`[visual] ${outputName}: ${info.size} bytes · true ${width}x${height} panel-scrolled review · rail ${panelLeft.toFixed(1)}..${panelRight.toFixed(1)} × ${panelTop.toFixed(1)}..${panelBottom.toFixed(1)}px`);
+  console.log(`[visual] ${outputName}: ${info.size} bytes · true ${width}x${height} result-first review · result ${verdictTop.toFixed(1)} < bases ${basisTop.toFixed(1)} < corrections ${correctionsTop.toFixed(1)} · min info type ${minInfoFont}px`);
 }
 
 await captureReview({
