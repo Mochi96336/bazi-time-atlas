@@ -32,8 +32,9 @@ const FRAGMENT_SHADER = [
   "#version 300 es",
   "precision highp float;",
   "uniform vec2 u_resolution;",
-  "uniform vec2 u_content_origin;",
-  "uniform float u_svg_scale;",
+  "uniform vec2 u_device_scale;",
+  "uniform vec4 u_canvas_to_svg;",
+  "uniform vec2 u_canvas_to_svg_offset;",
   "uniform vec2 u_center;",
   "uniform vec4 u_inner_radii;",
   "uniform vec4 u_outer_radii;",
@@ -72,8 +73,11 @@ const FRAGMENT_SHADER = [
   "}",
   "",
   "void main() {",
-  "  vec2 canvasPoint = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y);",
-  "  vec2 svgPoint = (canvasPoint - u_content_origin) / u_svg_scale;",
+  "  vec2 canvasPoint = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y) / u_device_scale;",
+  "  vec2 svgPoint = vec2(",
+  "    u_canvas_to_svg.x * canvasPoint.x + u_canvas_to_svg.z * canvasPoint.y + u_canvas_to_svg_offset.x,",
+  "    u_canvas_to_svg.y * canvasPoint.x + u_canvas_to_svg.w * canvasPoint.y + u_canvas_to_svg_offset.y",
+  "  );",
   "  vec2 point = svgPoint - u_center;",
   "  float radius = length(point);",
   "  int index = ringIndex(radius);",
@@ -247,8 +251,9 @@ function createProgram(gl) {
 function uniformLocations(gl, program) {
   return Object.freeze({
     resolution: gl.getUniformLocation(program, "u_resolution"),
-    contentOrigin: gl.getUniformLocation(program, "u_content_origin"),
-    svgScale: gl.getUniformLocation(program, "u_svg_scale"),
+    deviceScale: gl.getUniformLocation(program, "u_device_scale"),
+    canvasToSvg: gl.getUniformLocation(program, "u_canvas_to_svg"),
+    canvasToSvgOffset: gl.getUniformLocation(program, "u_canvas_to_svg_offset"),
     center: gl.getUniformLocation(program, "u_center"),
     innerRadii: gl.getUniformLocation(program, "u_inner_radii"),
     outerRadii: gl.getUniformLocation(program, "u_outer_radii"),
@@ -344,17 +349,36 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     resizeCanvas();
     if (!(canvas.width > 1 && canvas.height > 1)) return;
 
-    const viewBox = svg.viewBox?.baseVal;
-    const viewWidth = viewBox?.width || 1200;
-    const viewHeight = viewBox?.height || 760;
-    const scale = Math.min(canvas.width / viewWidth, canvas.height / viewHeight);
-    const contentOriginX = (canvas.width - viewWidth * scale) / 2;
-    const contentOriginY = (canvas.height - viewHeight * scale) / 2;
+    const canvasRect = canvas.getBoundingClientRect();
+    const screenCtm = svg.getScreenCTM?.();
+    if (!screenCtm || !(canvasRect.width > 0 && canvasRect.height > 0)) return;
+    let screenToSvg;
+    try {
+      screenToSvg = screenCtm.inverse();
+    } catch {
+      return;
+    }
+
+    const deviceScaleX = canvas.width / canvasRect.width;
+    const deviceScaleY = canvas.height / canvasRect.height;
+    const offsetX = screenToSvg.a * canvasRect.left
+      + screenToSvg.c * canvasRect.top
+      + screenToSvg.e;
+    const offsetY = screenToSvg.b * canvasRect.left
+      + screenToSvg.d * canvasRect.top
+      + screenToSvg.f;
 
     gl.useProgram(program);
     gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
-    gl.uniform2f(uniforms.contentOrigin, contentOriginX, contentOriginY);
-    gl.uniform1f(uniforms.svgScale, scale);
+    gl.uniform2f(uniforms.deviceScale, deviceScaleX, deviceScaleY);
+    gl.uniform4f(
+      uniforms.canvasToSvg,
+      screenToSvg.a,
+      screenToSvg.b,
+      screenToSvg.c,
+      screenToSvg.d
+    );
+    gl.uniform2f(uniforms.canvasToSvgOffset, offsetX, offsetY);
     gl.uniform2f(uniforms.center, WHEEL_CENTER.x, WHEEL_CENTER.y);
     gl.uniform4fv(uniforms.innerRadii, innerRadii);
     gl.uniform4fv(uniforms.outerRadii, outerRadii);
