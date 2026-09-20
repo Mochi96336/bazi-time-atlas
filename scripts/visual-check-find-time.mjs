@@ -62,6 +62,7 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   const left = Number(attr(probe, "data-readout-left"));
   const right = Number(attr(probe, "data-readout-right"));
   const readoutInstrumentTop = Number(attr(probe, "data-readout-instrument-top"));
+  const buttonFont = Number(attr(probe, "data-button-font"));
   const queryFont = Number(attr(probe, "data-query-font"));
   const statusFont = Number(attr(probe, "data-status-font"));
   const applyFont = Number(attr(probe, "data-apply-font"));
@@ -94,9 +95,11 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   if (
     width > 480
     && (
-      !Number.isFinite(queryFont)
+      !Number.isFinite(buttonFont)
+      || !Number.isFinite(queryFont)
       || !Number.isFinite(statusFont)
       || !Number.isFinite(applyFont)
+      || buttonFont < 11
       || queryFont < 11
       || statusFont < 10
       || applyFont < 10
@@ -104,7 +107,7 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   ) {
     throw new Error(
       `find-time ${label} readability fell below the desktop floor ` +
-      `(query=${queryFont}, status=${statusFont}, apply=${applyFont}): ${fixtureURL} · ${probe}`
+      `(mode=${buttonFont}, query=${queryFont}, status=${statusFont}, apply=${applyFont}): ${fixtureURL} · ${probe}`
     );
   }
 
