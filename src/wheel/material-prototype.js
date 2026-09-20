@@ -1,4 +1,5 @@
 import {
+  FAN,
   SEXAGENARY_RING_IDS,
   WHEEL_CENTER,
   ringModel
@@ -36,6 +37,7 @@ const FRAGMENT_SHADER = [
   "uniform vec4 u_canvas_to_svg;",
   "uniform vec2 u_canvas_to_svg_offset;",
   "uniform vec2 u_center;",
+  "uniform vec2 u_fan_degrees;",
   "uniform vec4 u_inner_radii;",
   "uniform vec4 u_outer_radii;",
   "uniform vec4 u_rotations;",
@@ -80,6 +82,8 @@ const FRAGMENT_SHADER = [
   "  );",
   "  vec2 point = svgPoint - u_center;",
   "  float radius = length(point);",
+  "  float angleDegrees = atan(point.y, point.x) * 180.0 / PI;",
+  "  if (angleDegrees < u_fan_degrees.x || angleDegrees > u_fan_degrees.y) discard;",
   "  int index = ringIndex(radius);",
   "  if (index < 0) discard;",
   "",
@@ -255,6 +259,7 @@ function uniformLocations(gl, program) {
     canvasToSvg: gl.getUniformLocation(program, "u_canvas_to_svg"),
     canvasToSvgOffset: gl.getUniformLocation(program, "u_canvas_to_svg_offset"),
     center: gl.getUniformLocation(program, "u_center"),
+    fanDegrees: gl.getUniformLocation(program, "u_fan_degrees"),
     innerRadii: gl.getUniformLocation(program, "u_inner_radii"),
     outerRadii: gl.getUniformLocation(program, "u_outer_radii"),
     rotations: gl.getUniformLocation(program, "u_rotations"),
@@ -380,6 +385,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     );
     gl.uniform2f(uniforms.canvasToSvgOffset, offsetX, offsetY);
     gl.uniform2f(uniforms.center, WHEEL_CENTER.x, WHEEL_CENTER.y);
+    gl.uniform2f(uniforms.fanDegrees, FAN.start, FAN.end);
     gl.uniform4fv(uniforms.innerRadii, innerRadii);
     gl.uniform4fv(uniforms.outerRadii, outerRadii);
     gl.uniform4fv(uniforms.rotations, rotations);
