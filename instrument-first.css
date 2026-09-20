@@ -17,15 +17,12 @@
   opacity: 0;
 }
 
-#kinetic-instrument[data-material-prototype="roughness"] .material-wheel-layer,
-#kinetic-instrument[data-material-prototype="roughness-normal"] .material-wheel-layer {
+#kinetic-instrument[data-material-prototype="roughness"] .material-wheel-layer {
   opacity: 1;
 }
 
 #kinetic-instrument[data-material-prototype="roughness"] .m2-ring-bed,
-#kinetic-instrument[data-material-prototype="roughness-normal"] .m2-ring-bed,
-#kinetic-instrument[data-material-prototype="roughness"] .m2-ring-material-face,
-#kinetic-instrument[data-material-prototype="roughness-normal"] .m2-ring-material-face {
+#kinetic-instrument[data-material-prototype="roughness"] .m2-ring-material-face {
   opacity: 0;
 }
 
