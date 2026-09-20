@@ -61,6 +61,12 @@
       const evidence = doc.querySelector(".atlas-visible-ten-gods");
       const evidenceGrid = doc.querySelector(".atlas-visible-ten-gods-grid");
       const evidenceValue = doc.querySelector(".atlas-visible-ten-gods-cell strong");
+      const evidenceInfo = [
+        doc.querySelector(".atlas-visible-ten-gods-head strong"),
+        doc.querySelector(".atlas-visible-ten-gods-master"),
+        ...doc.querySelectorAll(".atlas-visible-ten-gods-cell span"),
+        ...doc.querySelectorAll(".atlas-visible-ten-gods-cell small")
+      ].filter(Boolean);
       const toolbarButton = doc.querySelector("#classification-overlay-button");
       const close = doc.querySelector("#analysis-close");
       const play = doc.querySelector("#play-button");
@@ -86,6 +92,9 @@
       const evidenceGridRect = rect(evidenceGrid);
       const closeRect = rect(close);
       const evidenceStyle = win.getComputedStyle(evidenceValue);
+      const evidenceInfoFonts = evidenceInfo
+        .map(node => num(win.getComputedStyle(node).fontSize))
+        .filter(Number.isFinite);
       const toolbarStyle = win.getComputedStyle(toolbarButton);
       const referenceStyle = win.getComputedStyle(reference);
       const closeStyle = win.getComputedStyle(close);
@@ -138,6 +147,7 @@
         toolbarFont: round(num(toolbarStyle.fontSize)),
         referenceFont: round(num(referenceStyle.fontSize)),
         evidenceValueFont: round(num(evidenceStyle.fontSize)),
+        evidenceInfoMinFont: round(Math.min(...evidenceInfoFonts)),
         closeFont: round(num(closeStyle.fontSize)),
         scaleVisible: String(renderedVisibleCount(win, scaleButtons)),
         ringToggleVisible: String(renderedVisibleCount(win, ringToggles)),
