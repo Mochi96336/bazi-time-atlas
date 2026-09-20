@@ -54,6 +54,9 @@
         };
         const rect = readout.getBoundingClientRect();
         const instrumentRect = instrument.getBoundingClientRect();
+        const query = readout.querySelector("[data-inverse-wheel-query]");
+        const status = readout.querySelector("[data-inverse-wheel-status]");
+        const apply = readout.querySelector("[data-inverse-wheel-apply]");
         const visibleToolbarButtons = [...doc.querySelectorAll(".instrument-toolbar button")].filter(isVisible).length;
         probe.dataset.ready = "true";
         probe.dataset.innerWidth = String(childWindow.innerWidth);
@@ -62,6 +65,7 @@
         probe.dataset.findTime = instrument.dataset.inverseTimeSearch ?? "";
         probe.dataset.buttonPressed = button.getAttribute("aria-pressed") ?? "";
         probe.dataset.buttonText = button.textContent ?? "";
+        probe.dataset.buttonFont = String(parseFloat(childWindow.getComputedStyle(button).fontSize));
         probe.dataset.openText = openControl?.textContent ?? "";
         probe.dataset.closeText = closeControl?.textContent ?? "";
         probe.dataset.readoutHidden = String(readout.hidden);
@@ -77,6 +81,10 @@
         probe.dataset.classificationLegendVisible = String(isVisible(doc.querySelector("#classification-overlay-legend")));
         probe.dataset.tenGodsVisible = String(isVisible(doc.querySelector("#atlas-visible-ten-gods")));
         probe.dataset.readoutInstrumentTop = String(rect.top - instrumentRect.top);
+        probe.dataset.queryFont = String(parseFloat(childWindow.getComputedStyle(query).fontSize));
+        probe.dataset.statusFont = String(parseFloat(childWindow.getComputedStyle(status).fontSize));
+        probe.dataset.applyFont = String(parseFloat(childWindow.getComputedStyle(apply).fontSize));
+        probe.dataset.statusLineHeight = childWindow.getComputedStyle(status).lineHeight;
       }, 120);
     }
 

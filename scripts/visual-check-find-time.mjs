@@ -62,6 +62,10 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   const left = Number(attr(probe, "data-readout-left"));
   const right = Number(attr(probe, "data-readout-right"));
   const readoutInstrumentTop = Number(attr(probe, "data-readout-instrument-top"));
+  const buttonFont = Number(attr(probe, "data-button-font"));
+  const queryFont = Number(attr(probe, "data-query-font"));
+  const statusFont = Number(attr(probe, "data-status-font"));
+  const applyFont = Number(attr(probe, "data-apply-font"));
   if (
     attr(probe, "data-ready") !== "true"
     || attr(probe, "data-inner-width") !== String(width)
@@ -86,6 +90,25 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
     || right <= left
   ) {
     throw new Error(`find-time ${label} did not settle as a visible wheel-native tool in ${width}x${height}: ${fixtureURL} · ${probe}`);
+  }
+
+  if (
+    width > 480
+    && (
+      !Number.isFinite(buttonFont)
+      || !Number.isFinite(queryFont)
+      || !Number.isFinite(statusFont)
+      || !Number.isFinite(applyFont)
+      || buttonFont < 11
+      || queryFont < 11
+      || statusFont < 10
+      || applyFont < 10
+    )
+  ) {
+    throw new Error(
+      `find-time ${label} readability fell below the desktop floor ` +
+      `(mode=${buttonFont}, query=${queryFont}, status=${statusFont}, apply=${applyFont}): ${fixtureURL} · ${probe}`
+    );
   }
 
   const taskTopMin = width <= 480 ? 38 : 48;
@@ -136,4 +159,13 @@ await captureReview({
   windowWidth:1440,
   windowHeight:900,
   outputName:"annual-find-time-1440x900.png"
+});
+
+await captureReview({
+  label:"wide desktop",
+  width:2047,
+  height:1038,
+  windowWidth:2047,
+  windowHeight:1038,
+  outputName:"annual-find-time-2047x1038.png"
 });
