@@ -233,12 +233,12 @@
     margin-bottom: 10px;
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
-    color: #8f9494;
-    font-size: 9px;
+    color: #9ca2a1;
+    font-size: 10px;
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
-    color: #b7bbba;
-    font-size: 9.5px;
+    color: #c3c7c6;
+    font-size: 10px;
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-grid {
     width: 100%;
@@ -273,8 +273,8 @@
     pointer-events: auto;
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
-    color: #777d7d;
-    font-size: 8px;
+    color: #858b8a;
+    font-size: 9px;
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
     justify-self: end;
@@ -284,9 +284,9 @@
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
     grid-column: 1 / -1;
-    color: #8e9393;
-    font-size: 8px;
-    line-height: 1.2;
+    color: #989e9d;
+    font-size: 9px;
+    line-height: 1.25;
   }
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:hover,
   #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:focus-visible {
@@ -319,6 +319,16 @@
   }
   #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector .ganzhi-inspector-head {
     background: rgba(9,10,11,.9);
+  }
+
+  /* Four Pillars is the persistent evidence rail in Tools, so its labels must
+     remain readable without zooming. Keep the dense structure but enforce a
+     9px informational floor in the current-pillar inspector. */
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-inspector-pillar-switch span,
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-structure-pillar small,
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-structure-chip i,
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-ten-god-row > small {
+    font-size: 9px;
   }
 
   /* These rows duplicate the wheel/read-head or long-form documentation. They
