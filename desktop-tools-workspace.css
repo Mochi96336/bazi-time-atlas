@@ -75,6 +75,10 @@
     width: max-content;
     max-width: 260px;
     pointer-events: auto;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    font-size: 10px;
   }
 
   /* Selected Instant now edits where it is read: at the central read-head.
