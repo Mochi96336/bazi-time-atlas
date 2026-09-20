@@ -32,7 +32,9 @@
     function visible(win, node) {
       if (!node) return false;
       const style = win.getComputedStyle(node);
-      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || 1) > 0;
+      if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity || 1) <= 0) return false;
+      const rect = node.getBoundingClientRect();
+      return node.getClientRects().length > 0 && rect.width > 0 && rect.height > 0;
     }
 
     function snapshot() {
