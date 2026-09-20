@@ -62,6 +62,17 @@ function atlasBasisRow(dom, basis) {
   return dom.match(new RegExp(`<div[^>]*class="atlas-solar-basis-row"[^>]*data-time-basis="${basis}"[^>]*>`))?.[0] ?? "";
 }
 
+function atlasResultIsResultFirst(dom) {
+  const verdict = dom.indexOf('class="atlas-solar-verdict"');
+  const rows = dom.indexOf('id="atlas-solar-basis-rows"');
+  const calculation = dom.indexOf('class="atlas-solar-calculation-head"');
+  const corrections = dom.indexOf('class="atlas-solar-corrections"');
+  return verdict >= 0
+    && verdict < rows
+    && rows < calculation
+    && calculation < corrections;
+}
+
 const cases = [
   {
     path:"birth.html",
@@ -201,6 +212,7 @@ const selectedMs = String(Date.parse(instant));
     mean.includes('data-hour-pillar="庚子"') &&
     apparent.includes('data-day-pillar="壬午"') &&
     apparent.includes('data-hour-pillar="庚子"') &&
+    atlasResultIsResultFirst(dom) &&
     /id="atlas-solar-sensitivity-summary"[^>]*>已跨 日界 \+ 時辰界 · 僅比較<\/strong>/.test(dom);
   if (!ok) {
     throw new Error(`Atlas solar-time Analysis did not match Birth sensitivity semantics: ${url}`);
