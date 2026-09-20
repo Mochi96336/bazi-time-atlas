@@ -52,6 +52,13 @@ test("desktop Classification replaces Solar Time on the left instead of collidin
   assert.doesNotMatch(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[^}]*right:\s*0;/s);
 });
 
+test("desktop Classification keeps a 9px information floor without widening its rail", () => {
+  assert.match(css, /data-classification-overlay="on"\] \.classification-row header span \{[\s\S]*font-size: 10px;/);
+  assert.match(css, /data-classification-overlay="on"\] \.classification-row header small,[\s\S]*\.classification-warning \{[\s\S]*font-size: 9px;/);
+  assert.match(css, /data-classification-overlay="on"\] \.classification-keys i \{[\s\S]*min-width: 20px;[\s\S]*width: 20px;[\s\S]*height: 20px;[\s\S]*font-size: 9px;/);
+  assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*width: 340px;/);
+});
+
 test("desktop Four Pillars summary uses the full right rail instead of a squeezed legacy grid column", () => {
   assert.match(css, /\.atlas-visible-ten-gods \{[\s\S]*width: clamp\(320px, 22vw, 370px\);[\s\S]*display: block;[\s\S]*pointer-events: auto;/);
   assert.match(css, /\.atlas-visible-ten-gods-grid \{[\s\S]*width: 100%;[\s\S]*repeat\(2, minmax\(0, 1fr\)\)/);
