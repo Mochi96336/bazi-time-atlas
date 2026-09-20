@@ -6,6 +6,27 @@
 /* M2 material light is confined to the wheel itself. Do not lift or shade
    the full instrument background: graphite depth belongs to the rotating/fixed
    ring surfaces, while the page remains an unlit reference field. */
+.material-wheel-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#kinetic-instrument[data-material-prototype="roughness"] .material-wheel-layer,
+#kinetic-instrument[data-material-prototype="roughness-normal"] .material-wheel-layer {
+  opacity: 1;
+}
+
+#kinetic-instrument[data-material-prototype="roughness"] .m2-ring-material-face,
+#kinetic-instrument[data-material-prototype="roughness-normal"] .m2-ring-material-face {
+  opacity: 0;
+}
+
 #kinetic-wheel { z-index: 1; }
 
 
