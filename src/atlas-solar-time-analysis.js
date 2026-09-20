@@ -96,9 +96,9 @@ export function installAtlasSolarTimeAnalysis(
   panel.innerHTML = `
     <header class="atlas-solar-analysis-head">
       <div>
-        <small>TIME BASIS</small>
-        <strong>太陽時比較</strong>
-        <span>只比較 Day / Hour 邊界；不改 Selected Instant。</span>
+        <small>SOLAR TIME</small>
+        <strong>太陽時</strong>
+        <span>輸入經度，檢查日柱／時柱是否因時計基準跨界。</span>
       </div>
       <label class="atlas-solar-longitude-field">
         <span>實際經度</span>
@@ -110,16 +110,20 @@ export function installAtlasSolarTimeAnalysis(
       輸入實際經度後，才比較民用、平太陽與視太陽時計時。UTC offset 不會被當成地理經度。
     </div>
     <div id="atlas-solar-analysis-result" class="atlas-solar-analysis-result" hidden>
+      <div class="atlas-solar-verdict" aria-label="柱位結果">
+        <span>柱位結果</span>
+        <strong id="atlas-solar-sensitivity-summary">—</strong>
+      </div>
+      <div id="atlas-solar-basis-rows" class="atlas-solar-basis-rows"></div>
+      <div class="atlas-solar-calculation-head" aria-hidden="true">
+        <span>校正值</span>
+        <small>計算檢查</small>
+      </div>
       <div class="atlas-solar-corrections" aria-label="太陽時校正">
         <span>經度校正 <b id="atlas-solar-longitude-correction">—</b></span>
         <span>均時差 EoT <b id="atlas-solar-eot">—</b></span>
         <span>總校正 <b id="atlas-solar-total-correction">—</b></span>
       </div>
-      <div class="atlas-solar-basis-head">
-        <span>柱位敏感度</span>
-        <strong id="atlas-solar-sensitivity-summary">—</strong>
-      </div>
-      <div id="atlas-solar-basis-rows" class="atlas-solar-basis-rows"></div>
       <small id="atlas-solar-analysis-meta" class="atlas-solar-analysis-meta">—</small>
     </div>
   `;
