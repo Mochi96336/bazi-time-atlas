@@ -24,6 +24,7 @@ import {
   validReferenceRing
 } from "./reference-frame.js";
 import { addTitle, setActiveSector, svgElement } from "./svg-renderer.js";
+import { createWheelMaterialPrototype } from "./material-prototype.js";
 
 const MOTION_TRACE_TTL_MS = 420;
 const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
@@ -59,6 +60,10 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   const cursorLayer = svg.querySelector("#cursor-layer");
   const solarTrack = groupFor("solar");
   const zodiacTrack = groupFor("zodiac");
+  const materialPrototype = createWheelMaterialPrototype({
+    canvas: svg.parentElement?.querySelector("#material-wheel-layer") ?? null,
+    svg
+  });
 
   const el = (tag, attrs = {}, parent = svg) => svgElement(tag, attrs, parent);
   const polar = (radius, angle) => pointAt(WHEEL_CENTER, radius, angle);
@@ -494,6 +499,11 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       zodiacTrack.dataset.derivedFrom = "solar";
     }
 
+    // The material pass consumes the same final rendered pose that the SVG
+    // groups use. It never derives time/phase and therefore cannot become a
+    // second ring-rotation authority. Lighting remains screen-space fixed.
+    materialPrototype.updateFrame(renderedRotations);
+
     // setTrackDiagnostics() runs synchronously after each renderer pose update,
     // before this microtask flush. Its model rotation is therefore the canonical
     // Selected Instant coordinate even when Free Compare adds a manual offset to
@@ -543,6 +553,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     renderZodiacRing();
     renderMotionTraces();
     renderCursor();
+    materialPrototype.initialize();
   }
 
   function setCyclePose(id, rotationDegrees, activeIndex) {
