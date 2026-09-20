@@ -1,6 +1,7 @@
 import { installAtlasSolarTimeAnalysis } from "./atlas-solar-time-analysis.js";
 import { installAtlasVisibleTenGods } from "./atlas-visible-ten-gods.js";
 import { installInverseTimeSearch } from "./inverse-time-search-view.js";
+import { installSelectedInstantEditor } from "./selected-instant-editor.js";
 
 const instrument = document.querySelector("#kinetic-instrument");
 const openControl = document.querySelector("#analysis-toggle");
@@ -60,6 +61,15 @@ function installInverseTimeSearchStyles() {
   document.head.append(stylesheet);
 }
 
+function installSelectedInstantEditorStyles() {
+  if (document.querySelector("link[data-selected-instant-editor]")) return;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "./selected-instant-editor.css";
+  stylesheet.dataset.selectedInstantEditor = "1";
+  document.head.append(stylesheet);
+}
+
 function activate(control, handler) {
   if (!control) return;
   control.addEventListener("click", handler);
@@ -102,6 +112,11 @@ installAnalysisToolsRailStyles();
 // Desktop edge-workspace geometry must load after component/tool styles so it
 // can relocate existing UI without changing any component's semantic ownership.
 installDesktopToolsWorkspaceStyles();
+// Direct Selected Instant editing is the final desktop interaction layer. Its
+// component CSS loads after the workspace so the existing wheel/read-head keeps
+// geometry ownership while the retired edge input can disappear.
+installSelectedInstantEditorStyles();
+installSelectedInstantEditor(instrument);
 activate(openControl, () => setAnalysisOpen(true));
 activate(closeControl, () => setAnalysisOpen(false));
 
@@ -111,6 +126,7 @@ document.addEventListener("keydown", event => {
   if (event.key !== "Escape" || instrument?.dataset.analysisOpen !== "true") return;
   if (event.defaultPrevented) return;
   if (instrument.dataset.inverseTimeSearch === "active") return;
+  if (instrument.dataset.instantEditorOpen === "true") return;
   if (instrument.dataset.ganzhiInspectorOpen === "true") return;
   event.preventDefault();
   setAnalysisOpen(false);

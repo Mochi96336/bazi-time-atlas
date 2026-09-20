@@ -45,6 +45,41 @@ function runScenario(scenario) {
 }
 
 {
+  const { url, probe } = runScenario("editor");
+  const appliedSelected = Number(attr(probe, "data-applied-selected"));
+  const escapeSelected = Number(attr(probe, "data-escape-selected"));
+  const expected = Date.parse("2026-09-14T00:15:30.000Z");
+  if (
+    attr(probe, "data-open-state") !== "true"
+    || attr(probe, "data-open-hidden") !== "false"
+    || attr(probe, "data-open-input") !== "2026-09-14T07:43:42"
+    || attr(probe, "data-timeline-display") !== "none"
+    || appliedSelected !== expected
+    || attr(probe, "data-applied-state") !== "false"
+    || attr(probe, "data-applied-source") !== "readout-inline"
+    || attr(probe, "data-applied-url-instant") !== "2026-09-14T00:15:30.000Z"
+    || !String(attr(probe, "data-applied-readout") ?? "").includes("2026-09-14")
+    || attr(probe, "data-escape-tools-open") !== "true"
+    || attr(probe, "data-escape-editor-open") !== "false"
+    || escapeSelected !== expected
+  ) {
+    throw new Error(`Selected Instant read-head editor contract failed: ${url} · ${probe}`);
+  }
+}
+
+{
+  const { url, probe } = runScenario("editor-mobile");
+  if (
+    attr(probe, "data-inner-width") !== "390"
+    || attr(probe, "data-available") !== "false"
+    || attr(probe, "data-readout-role") !== ""
+    || attr(probe, "data-editor-hidden") !== "true"
+  ) {
+    throw new Error(`Selected Instant read-head editor leaked into mobile Tools: ${url} · ${probe}`);
+  }
+}
+
+{
   const { url, probe } = runScenario("find-time");
   if (
     attr(probe, "data-first-tools-open") !== "true"
@@ -115,4 +150,4 @@ function runScenario(scenario) {
   }
 }
 
-console.log("[tools-human-ux] PASS one-layer Escape + reversible constraints + task handoff + preserved observation settings");
+console.log("[tools-human-ux] PASS direct Selected Instant editing + one-layer Escape + reversible constraints + task handoff + preserved observation settings");

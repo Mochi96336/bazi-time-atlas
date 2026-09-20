@@ -139,13 +139,13 @@ if (siteNavRight > toolbarLeft - 24) {
 if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
   throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
 }
-if (legendTop < topbarBottom - 2 || legendBottom > timelineTop + 1) {
-  throw new Error(`wide desktop: reference control is not stacked between top chrome and exact time (legend=${legendTop}-${legendBottom}, topbarBottom=${topbarBottom}, timelineTop=${timelineTop}): ${page.url}`);
+if (legendTop < topbarBottom - 2 || legendBottom > solarTop + 1) {
+  throw new Error(`wide desktop: reference control is not stacked between top chrome and Solar Time (legend=${legendTop}-${legendBottom}, topbarBottom=${topbarBottom}, solarTop=${solarTop}): ${page.url}`);
 }
-if (timelineLeft < 0 || timelineLeft > 40 || timelineRight > 360 || timelineTop < 65 || timelineBottom > solarTop + 4) {
-  throw new Error(`wide desktop: exact-time editor is not a compact left-edge control (timeline=${timelineLeft}-${timelineRight}@${timelineTop}-${timelineBottom}, solarTop=${solarTop}): ${page.url}`);
+if (requireAttr(probe, "data-timeline-display", page.url) !== "none") {
+  throw new Error(`wide desktop: duplicate edge exact-time rail resurfaced: ${page.url}`);
 }
-if (solarLeft < -1 || solarRight > 390 || solarTop < 120 || solarBottom > height + 1) {
+if (solarLeft < -1 || solarRight > 390 || solarTop < 80 || solarBottom > height + 1) {
   throw new Error(`wide desktop: Solar Time is not viewport-bound to the left edge (solar=${solarLeft}-${solarRight}@${solarTop}-${solarBottom}): ${page.url}`);
 }
 if (evidenceRight < width - 2 || evidenceRight > width + 1 || evidenceLeft < width - 430 || evidenceTop < 75 || evidenceBottom >= readoutTop) {
@@ -183,7 +183,7 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 console.log(
   `[wide-desktop] PASS 2047x1038 edge Tools; ` +
   `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, ` +
-  `left=${timelineLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
+  `left=${solarLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
   `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );

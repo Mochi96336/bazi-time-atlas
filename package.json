@@ -8,7 +8,7 @@
     "test": "npm run vendor:prepare && node --test",
     "check:syntax": "node scripts/check-js-syntax.mjs",
     "check": "npm run test && npm run check:syntax",
-    "visual:check": "node scripts/check-tools-human-ux.mjs && node scripts/check-wide-desktop-composition.mjs && node scripts/visual-check.mjs && node scripts/visual-check-wide-desktop.mjs && node scripts/visual-check-scale-windows.mjs && node scripts/visual-check-solar-time-panel.mjs && node scripts/visual-check-find-time.mjs"
+    "visual:check": "node scripts/check-tools-human-ux.mjs && node scripts/check-wide-desktop-composition.mjs && node scripts/visual-check.mjs && node scripts/visual-check-wide-desktop.mjs && node scripts/visual-check-selected-instant-editor.mjs && node scripts/visual-check-scale-windows.mjs && node scripts/visual-check-solar-time-panel.mjs && node scripts/visual-check-find-time.mjs"
   },
   "dependencies": {
     "tyme4ts": "1.5.2"
