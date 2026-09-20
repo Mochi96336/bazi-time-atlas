@@ -84,6 +84,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /solarRight:\s*round\(solarRect\.right\)/);
   assert.match(fixture, /evidenceLeft:\s*round\(evidenceRect\.left\)/);
   assert.match(fixture, /evidenceGridWidth:\s*round\(evidenceGridRect\.width\)/);
+  assert.match(fixture, /evidenceInfoMinFont:\s*round\(Math\.min\(\.\.\.evidenceInfoFonts\)\)/);
   assert.match(fixture, /closeRight:\s*round\(closeRect\.right\)/);
   assert.match(fixture, /scaleVisible:\s*String\(renderedVisibleCount\(win, scaleButtons\)\)/);
   assert.match(fixture, /ringToggleVisible:\s*String\(renderedVisibleCount\(win, ringToggles\)\)/);
@@ -103,6 +104,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /solarRight > 390/);
   assert.match(browserGate, /evidenceLeft < width - 430/);
   assert.match(browserGate, /evidenceGridWidth < 240/);
+  assert.match(browserGate, /evidenceInfoMinFont < 9/);
   assert.match(browserGate, /Math\.abs\(closeTop - toolbarTop\) > 2/);
   assert.match(browserGate, /scaleVisible !== 0/);
   assert.match(browserGate, /ringToggleVisible !== 0/);
