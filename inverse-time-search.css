@@ -162,6 +162,10 @@
 @media (min-width: 481px) {
   /* Find Time is an active desktop tool, not footnote chrome. Keep the same
      narrow task rail while enforcing a readable information hierarchy. */
+  #kinetic-instrument[data-inverse-time-search="active"] #inverse-time-search-button {
+    font-size: 11px;
+    line-height: 1.35;
+  }
   .inverse-time-search-readout {
     gap: 6px 10px;
     padding-block: 9px;
