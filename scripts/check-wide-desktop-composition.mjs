@@ -168,7 +168,7 @@ for (const name of ["state-strip", "notes", "sources"]) {
   }
 }
 
-if (toolbarFont < 9 || referenceFont < 7 || evidenceValueFont < 10 || evidenceInfoMinFont < 9 || closeFont < 8) {
+if (toolbarFont < 9 || referenceFont < 9 || evidenceValueFont < 10 || evidenceInfoMinFont < 9 || closeFont < 8) {
   throw new Error(
     `wide desktop: control/evidence type fell below readable floor ` +
     `(toolbar=${toolbarFont}, reference=${referenceFont}, evidence=${evidenceValueFont}, evidenceInfoMin=${evidenceInfoMinFont}, close=${closeFont}): ${page.url}`
