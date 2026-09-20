@@ -7,8 +7,7 @@ import {
 
 export const MATERIAL_MODES = Object.freeze({
   SVG: "svg",
-  ROUGHNESS: "roughness",
-  ROUGHNESS_NORMAL: "roughness-normal"
+  ROUGHNESS: "roughness"
 });
 
 export const MATERIAL_RING_IDS = Object.freeze([...SEXAGENARY_RING_IDS]);
@@ -16,10 +15,7 @@ export const FIXED_LIGHT_DIRECTION = Object.freeze([-0.42, -0.56, 0.714]);
 export const ROUGHNESS_FIELD_SIZE = 128;
 export const ROUGHNESS_FIELD_SEED = 0x6d32616c;
 
-const SHADER_MODES = new Set([
-  MATERIAL_MODES.ROUGHNESS,
-  MATERIAL_MODES.ROUGHNESS_NORMAL
-]);
+const SHADER_MODES = new Set([MATERIAL_MODES.ROUGHNESS]);
 
 const VERTEX_SHADER = [
   "#version 300 es",
@@ -42,7 +38,6 @@ const FRAGMENT_SHADER = [
   "uniform vec4 u_outer_radii;",
   "uniform vec4 u_rotations;",
   "uniform sampler2D u_roughness_field;",
-  "uniform int u_material_mode;",
   "out vec4 out_color;",
   "",
   "const float PI = 3.141592653589793;",
@@ -96,18 +91,7 @@ const FRAGMENT_SHADER = [
   "  vec2 broadSlope = radial * 0.180;",
   "  vec2 surfaceSlope = broadSlope;",
   "",
-  "  if (u_material_mode == 2) {",
-  "    vec2 texel = vec2(1.0 / 128.0, 1.0 / 128.0);",
-  "    vec2 uv = localPoint / FIELD_PERIOD;",
-  "    float left = texture(u_roughness_field, uv - vec2(texel.x, 0.0)).r;",
-  "    float right = texture(u_roughness_field, uv + vec2(texel.x, 0.0)).r;",
-  "    float up = texture(u_roughness_field, uv - vec2(0.0, texel.y)).r;",
-  "    float down = texture(u_roughness_field, uv + vec2(0.0, texel.y)).r;",
-  "    vec2 localGradient = vec2(right - left, down - up);",
-  "    vec2 screenGradient = rotation(ringRotation) * localGradient;",
-  "    surfaceSlope += screenGradient * 0.080;",
-  "  }",
-  "",
+
   "  vec3 normal = normalize(vec3(surfaceSlope, 1.0));",
   "  vec3 lightDirection = normalize(vec3(-0.42, -0.56, 0.714));",
   "  vec3 viewDirection = vec3(0.0, 0.0, 1.0);",
@@ -263,8 +247,7 @@ function uniformLocations(gl, program) {
     innerRadii: gl.getUniformLocation(program, "u_inner_radii"),
     outerRadii: gl.getUniformLocation(program, "u_outer_radii"),
     rotations: gl.getUniformLocation(program, "u_rotations"),
-    field: gl.getUniformLocation(program, "u_roughness_field"),
-    mode: gl.getUniformLocation(program, "u_material_mode")
+    field: gl.getUniformLocation(program, "u_roughness_field")
   });
 }
 
@@ -390,7 +373,6 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.uniform4fv(uniforms.outerRadii, outerRadii);
     gl.uniform4fv(uniforms.rotations, rotations);
     gl.uniform1i(uniforms.field, 0);
-    gl.uniform1i(uniforms.mode, requestedMode === MATERIAL_MODES.ROUGHNESS_NORMAL ? 2 : 1);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
