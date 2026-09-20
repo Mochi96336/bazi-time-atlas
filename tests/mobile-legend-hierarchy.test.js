@@ -26,17 +26,12 @@ test("mobile legend keeps per-ring hierarchy ink instead of flattening every val
   assert.doesNotMatch(strongRule[1], /\bfont-weight\s*:/, "mobile rule must not erase per-ring weight hierarchy");
 });
 
-test("mobile structured legend grid belongs to Analysis while reading view uses direct identities", () => {
+test("mobile Tools observation rail retires layer toggles while reading view keeps direct identities", () => {
   const mobile = mobile480Block(layoutCss);
   const analysis = "#kinetic-instrument\\[data-analysis-open=\\\"true\\\"\\]";
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend \\{[^}]*display:\\s*grid;[^}]*grid-template-columns:\\s*repeat\\(5,\\s*minmax\\(0,\\s*1fr\\)\\);`, "s"));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-year \\{\\s*grid-column:\\s*1;\\s*grid-row:\\s*1;\\s*\\}`));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-month \\{\\s*grid-column:\\s*2;\\s*grid-row:\\s*1;\\s*\\}`));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-solar \\{\\s*grid-column:\\s*3;\\s*grid-row:\\s*1;\\s*\\}`));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-day \\{\\s*grid-column:\\s*4;\\s*grid-row:\\s*1;\\s*\\}`));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-hour \\{\\s*grid-column:\\s*5;\\s*grid-row:\\s*1;\\s*\\}`));
-  assert.match(mobile, new RegExp(`${analysis} \\.reference-frame-control \\{[^}]*grid-column:\\s*1\\s*\\/\\s*-1;[^}]*grid-row:\\s*2;`, "s"));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend-row strong \\{\\s*display:\\s*none;`));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend-row(?:,|\\[data-ring-toggle\\])[^\\{]*\\{[^}]*margin:\\s*0;[^}]*padding:\\s*0;`, "s"));
+  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend \\{[^}]*top:\\s*48px;[^}]*display:\\s*block;`, "s"));
+  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend-row\\[data-ring-toggle\\] \\{\\s*display:\\s*none\\s*!important;`));
+  assert.match(mobile, new RegExp(`${analysis} \\.reference-frame-control \\{[^}]*display:\\s*flex;[^}]*pointer-events:\\s*auto;`, "s"));
+  assert.match(mobile, new RegExp(`${analysis} \\.analysis-close \\{[^}]*top:\\s*48px;[^}]*right:\\s*9px;`, "s"));
   assert.doesNotMatch(mobile, /^\s*\.ring-legend\s*\{/m, "mobile layout must not own normal reading legend geometry");
 });
