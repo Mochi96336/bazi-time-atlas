@@ -97,6 +97,7 @@ const closeRight = numberAttr(probe, "data-close-right", page.url);
 const toolbarFont = numberAttr(probe, "data-toolbar-font", page.url);
 const referenceFont = numberAttr(probe, "data-reference-font", page.url);
 const evidenceValueFont = numberAttr(probe, "data-evidence-value-font", page.url);
+const evidenceInfoMinFont = numberAttr(probe, "data-evidence-info-min-font", page.url);
 const closeFont = numberAttr(probe, "data-close-font", page.url);
 const scaleVisible = numberAttr(probe, "data-scale-visible", page.url);
 const ringToggleVisible = numberAttr(probe, "data-ring-toggle-visible", page.url);
@@ -167,10 +168,10 @@ for (const name of ["state-strip", "notes", "sources"]) {
   }
 }
 
-if (toolbarFont < 9 || referenceFont < 7 || evidenceValueFont < 10 || closeFont < 8) {
+if (toolbarFont < 9 || referenceFont < 7 || evidenceValueFont < 10 || evidenceInfoMinFont < 9 || closeFont < 8) {
   throw new Error(
     `wide desktop: control/evidence type fell below readable floor ` +
-    `(toolbar=${toolbarFont}, reference=${referenceFont}, evidence=${evidenceValueFont}, close=${closeFont}): ${page.url}`
+    `(toolbar=${toolbarFont}, reference=${referenceFont}, evidence=${evidenceValueFont}, evidenceInfoMin=${evidenceInfoMinFont}, close=${closeFont}): ${page.url}`
   );
 }
 if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
@@ -184,6 +185,6 @@ console.log(
   `[wide-desktop] PASS 2047x1038 edge Tools; ` +
   `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, ` +
   `left=${solarLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
-  `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${closeFont}, ` +
+  `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${evidenceInfoMinFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );
