@@ -101,8 +101,11 @@ test("mobile ordinary idle exact-time rail removes duplicate metadata but preser
   );
 });
 
-test("ordinary reading keeps long-form notes out of the main path", () => {
-  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes\s*\{\s*display:\s*none;/);
+test("ordinary reading keeps long-form notes and provenance footer out of the main path", () => {
+  assert.match(
+    css,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.atlas-notes,[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.sources-panel\s*\{\s*display:\s*none;/
+  );
 });
 
 test("ordinary reading hides observation-window presets and analysis transport chrome", () => {
