@@ -158,6 +158,43 @@
   top: 54px;
 }
 
+
+@media (min-width: 481px) {
+  /* Find Time is an active desktop tool, not footnote chrome. Keep the same
+     narrow task rail while enforcing a readable information hierarchy. */
+  .inverse-time-search-readout {
+    gap: 6px 10px;
+    padding-block: 9px;
+  }
+  .inverse-time-search-readout strong {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .inverse-time-search-constraints {
+    gap: 5px;
+  }
+  .inverse-time-search-constraint {
+    min-height: 24px;
+    padding-inline: 5px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .inverse-time-search-readout span {
+    color: #929a96;
+    font-size: 10px;
+    line-height: 1.55;
+  }
+  .inverse-time-search-readout:has(button[data-inverse-wheel-apply]:not([hidden])) span {
+    color: #b8bfbb;
+  }
+  .inverse-time-search-readout button[data-inverse-wheel-apply] {
+    min-height: 28px;
+    padding-inline: 6px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+}
+
 @media (max-width: 480px) {
   .inverse-time-search-readout {
     top: 111px;
