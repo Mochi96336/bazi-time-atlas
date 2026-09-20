@@ -58,6 +58,15 @@ test("desktop Four Pillars summary uses the full right rail instead of a squeeze
   assert.match(css, /\.atlas-visible-ten-gods-cell \{[\s\S]*min-height: 42px;[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/);
 });
 
+test("desktop Four Pillars evidence keeps a 9px information floor", () => {
+  assert.match(css, /\.atlas-visible-ten-gods-head strong \{[\s\S]*font-size: 10px;/);
+  assert.match(css, /\.atlas-visible-ten-gods-master \{[\s\S]*font-size: 10px;/);
+  assert.match(css, /\.atlas-visible-ten-gods-cell span \{[\s\S]*font-size: 9px;/);
+  assert.match(css, /\.atlas-visible-ten-gods-cell small \{[\s\S]*font-size: 9px;/);
+  assert.match(css, /#ganzhi-inspector\[data-mode="pillar"\] \.ganzhi-inspector-pillar-switch span,[\s\S]*?font-size: 9px;/);
+  assert.match(css, /#ganzhi-inspector\[data-mode="pillar"\] \.ganzhi-structure-pillar small,[\s\S]*?font-size: 9px;/);
+});
+
 test("desktop Tools uses edge assists instead of growing a bottom workspace", () => {
   assert.match(css, /~ \.timeline-dock \{[\s\S]*display: none !important;/);
   assert.match(css, /\.atlas-solar-time-analysis \{[\s\S]*position: fixed;[\s\S]*left: 0;[\s\S]*linear-gradient\(to right,/);
