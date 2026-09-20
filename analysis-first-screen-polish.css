@@ -175,13 +175,13 @@
    otherwise ordinary desktop heights. Keep the wheel dominant while reserving
    a real lower safe area for the read-head. */
 @media (min-width: 821px) {
-  .instrument-shell {
+  #kinetic-instrument[data-analysis-open="true"] {
     height: max(720px, calc(100dvh - 92px));
   }
 }
 
 @media (min-width: 1100px) {
-  .instrument-shell {
+  #kinetic-instrument[data-analysis-open="true"] {
     height: max(760px, calc(100dvh - 92px));
   }
 }
@@ -272,17 +272,17 @@
     font-size: 7px;
   }
 
-  .instrument-readout {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-readout {
     bottom: 20px;
   }
 }
 
 @media (min-width: 1800px) and (min-aspect-ratio: 17/9) {
-  .instrument-shell {
+  #kinetic-instrument[data-analysis-open="true"] {
     height: clamp(760px, calc(100dvh - 92px), 44vw);
   }
 
-  .instrument-readout {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-readout {
     bottom: 26px;
   }
 }

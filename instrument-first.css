@@ -122,16 +122,12 @@
   .timeline-dock:hover,
   .timeline-dock:focus-within { opacity: 1; }
 
-  /* Long-form teaching copy is not part of the ordinary reading path. Analysis
-     can still reveal it while the collapsed source boundary remains available. */
-  #kinetic-instrument:not([data-analysis-open="true"]) ~ .atlas-notes {
-    display: none;
-  }
+  /* Long-form teaching/provenance copy is not part of the ordinary reading
+     path. Keep the source boundary in DOM ownership for research/debug routes,
+     but remove both blocks from the normal desktop document flow. */
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .atlas-notes,
   #kinetic-instrument:not([data-analysis-open="true"]) ~ .sources-panel {
-    margin-top: 8px;
-    border-top: 0;
-    padding-top: 0;
-    opacity: .55;
+    display: none;
   }
 }
 

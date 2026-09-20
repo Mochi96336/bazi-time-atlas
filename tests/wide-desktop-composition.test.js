@@ -10,11 +10,22 @@ const fixture = readFileSync(new URL("../scripts/fixtures/wide-desktop-2047.html
 const browserGate = readFileSync(new URL("../scripts/check-wide-desktop-composition.mjs", import.meta.url), "utf8");
 const visualCapture = readFileSync(new URL("../scripts/visual-check-wide-desktop.mjs", import.meta.url), "utf8");
 
-test("wide desktop budgets the whole first screen instead of clipping the read-head", () => {
-  assert.match(polish, /height:\s*max\(720px,\s*calc\(100dvh - 92px\)\)/);
+test("wide Analysis budgets the first screen without leaking viewport geometry into ordinary reading", () => {
+  assert.match(
+    polish,
+    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 92px\)\);/
+  );
   assert.match(polish, /@media \(min-width: 1800px\) and \(min-aspect-ratio: 17\/9\)/);
-  assert.match(polish, /height:\s*clamp\(760px,\s*calc\(100dvh - 92px\),\s*44vw\)/);
-  assert.match(polish, /\.instrument-readout\s*\{\s*bottom:\s*26px;/s);
+  assert.match(
+    polish,
+    /#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*clamp\(760px,\s*calc\(100dvh - 92px\),\s*44vw\);/
+  );
+  assert.match(
+    polish,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-readout\s*\{\s*bottom:\s*26px;/
+  );
+  assert.doesNotMatch(polish, /(?:^|\n)\s*\.instrument-shell\s*\{/);
+  assert.doesNotMatch(polish, /(?:^|\n)\s*\.instrument-readout\s*\{/);
 });
 
 test("wide Analysis rails have explicit readable type floors without adding new controls", () => {
