@@ -206,7 +206,7 @@ function relabelToolMode(documentRef) {
   const close = documentRef.querySelector("#analysis-close");
   if (open) {
     open.textContent = "工具";
-    open.title = "顯示找時間、分類、參考系與太陽時間等工具";
+    open.title = "顯示找時間、分類、固定視角與太陽時間等工具";
   }
   if (close) {
     close.textContent = "完成";
@@ -219,7 +219,7 @@ function relabelToolMode(documentRef) {
   for (const item of documentRef.querySelectorAll(".atlas-notes li")) {
     const strong = item.querySelector("strong");
     if (strong?.textContent?.trim() !== "分析") continue;
-    item.innerHTML = "<strong>工具</strong>：需要找時間、分類、參考系或太陽時間比較時再展開；收起只隱藏工具，設定會保留。";
+    item.innerHTML = "<strong>工具</strong>：需要找時間、分類、固定視角或太陽時間比較時再展開；收起只隱藏工具，設定會保留。";
   }
 }
 
