@@ -19,6 +19,10 @@ const captures = [
     name: "annual-tools-inspector-wide-2047x1038.png",
     path: "?analysis=1&inspect=year&instant=2026-09-13T23%3A43%3A42.000Z",
   },
+  {
+    name: "annual-tools-classification-wide-2047x1038.png",
+    path: "?analysis=1&classification=1&instant=2026-09-13T23%3A43%3A42.000Z",
+  },
 ];
 
 function findBrowser() {
