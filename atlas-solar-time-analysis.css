@@ -26,16 +26,17 @@
 }
 .atlas-solar-analysis-head > div > small {
   color: var(--faint);
-  font-size: 8px;
-  letter-spacing: .14em;
+  font-size: 9px;
+  letter-spacing: .12em;
 }
 .atlas-solar-analysis-head > div > strong {
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
 }
 .atlas-solar-analysis-head > div > span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .atlas-solar-longitude-field {
@@ -44,7 +45,7 @@
   gap: 7px;
   align-items: center;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 .atlas-solar-longitude-field input {
   min-width: 0;
@@ -69,13 +70,14 @@
 }
 .atlas-solar-longitude-field small {
   color: var(--faint);
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .atlas-solar-analysis-empty {
   margin-top: 12px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 .atlas-solar-analysis-result {
@@ -98,28 +100,47 @@
   justify-content: space-between;
   gap: 8px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 .atlas-solar-corrections b {
   color: color-mix(in srgb, var(--ink) 84%, var(--muted));
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
-.atlas-solar-basis-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: baseline;
+.atlas-solar-verdict {
+  display: grid;
+  gap: 3px;
 }
-.atlas-solar-basis-head span {
+.atlas-solar-verdict > span {
   color: var(--muted);
   font-size: 9px;
-  letter-spacing: .07em;
+  letter-spacing: .08em;
 }
-.atlas-solar-basis-head strong {
-  color: color-mix(in srgb, var(--ink) 68%, var(--muted));
-  font-size: 10px;
+.atlas-solar-verdict > strong {
+  color: color-mix(in srgb, var(--ink) 84%, var(--muted));
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 720;
+}
+.atlas-solar-time-analysis[data-time-basis-sensitive="1"] .atlas-solar-verdict > strong {
+  color: color-mix(in srgb, var(--solar) 72%, var(--ink));
+}
+.atlas-solar-calculation-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+.atlas-solar-calculation-head span {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.atlas-solar-calculation-head small {
+  color: var(--faint);
+  font-size: 9px;
 }
 
 .atlas-solar-basis-rows {
@@ -140,15 +161,15 @@
   display: grid;
   gap: 2px;
   color: color-mix(in srgb, var(--ink) 66%, var(--muted));
-  font-size: 10px;
+  font-size: 11px;
 }
 .atlas-solar-basis-row > span small {
   color: var(--faint);
-  font-size: 8px;
+  font-size: 9px;
 }
 .atlas-solar-basis-row b {
   color: color-mix(in srgb, var(--ink) 78%, var(--muted));
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 690;
 }
 .atlas-solar-basis-row b[data-changed="1"] {
@@ -159,7 +180,8 @@
 }
 .atlas-solar-analysis-meta {
   color: var(--faint);
-  font-size: 8px;
+  font-size: 9px;
+  line-height: 1.4;
 }
 
 @media (max-width: 640px) {
