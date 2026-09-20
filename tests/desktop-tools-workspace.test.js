@@ -37,7 +37,13 @@ test("desktop left edge keeps reference and Solar Time without a duplicate exact
 test("desktop Solar Time stays compact until a real longitude binds it", () => {
   assert.match(css, /\.atlas-solar-time-analysis\[data-longitude-bound="false"\] \{[\s\S]*bottom: auto;[\s\S]*max-height: none;[\s\S]*padding-bottom: 10px;/);
   assert.match(css, /data-longitude-bound="false"\] \.atlas-solar-analysis-head > div > small[\s\S]*display: none;/);
-  assert.match(css, /data-longitude-bound="false"\] \.atlas-solar-analysis-empty[\s\S]*max-width: 250px;[\s\S]*font-size: 7px;/);
+  assert.match(css, /data-longitude-bound="false"\] \.atlas-solar-analysis-empty[\s\S]*max-width: 260px;[\s\S]*font-size: 9px;/);
+});
+
+test("desktop Solar Time separates result from secondary calculation detail", () => {
+  assert.match(css, /\.atlas-solar-verdict \{[\s\S]*padding-top: 2px;/);
+  assert.match(css, /\.atlas-solar-calculation-head \{[\s\S]*margin-top: 5px;[\s\S]*border-top: 1px solid var\(--m2-etched-dark-soft\);/);
+  assert.match(css, /\.atlas-solar-corrections \{[\s\S]*border-top: 0;[\s\S]*box-shadow: none;/);
 });
 
 test("desktop Classification replaces Solar Time on the left instead of colliding with the right inspector", () => {
