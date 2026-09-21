@@ -112,6 +112,11 @@ function validateNormal(run, probe) {
 function validateAnalysis(run, probe) {
   const toolbar = rect(probe, "toolbar", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
+  const actionBoxes = ["find-time", "classification", "solar-time", "now"].map(name => ({
+    name,
+    box:rect(probe, name, "analysis", run.url),
+    fontSize:Number.parseFloat(requireAttr(probe, `data-${name}-font-size`, "analysis", run.url))
+  }));
   const fourPillars = rect(probe, "four-pillars", "analysis", run.url);
   const fourPillarCells = Array.from({ length:4 }, (_, index) =>
     rect(probe, `four-pillar-cell${index}`, "analysis", run.url)
@@ -146,13 +151,22 @@ function validateAnalysis(run, probe) {
   if (
     Math.abs(close.top - toolbar.top) > 2
     || Math.abs(close.bottom - toolbar.bottom) > 3
-    || close.height < 28
+    || close.height < 40
   ) {
     throw new Error(
       "analysis: Done did not return to the primary mobile action row " +
       "(toolbar=" + toolbar.top.toFixed(1) + ".." + toolbar.bottom.toFixed(1) +
       ", close=" + close.top.toFixed(1) + ".." + close.bottom.toFixed(1) + "): " + run.url
     );
+  }
+
+  for (const action of actionBoxes) {
+    if (action.box.height < 40 || !Number.isFinite(action.fontSize) || action.fontSize < 9.5) {
+      throw new Error(
+        "analysis: primary Tools action is still visually/tactually undersized (" +
+        action.name + "=" + action.box.height.toFixed(1) + "px/" + action.fontSize.toFixed(1) + "px font): " + run.url
+      );
+    }
   }
 
   if (
@@ -179,7 +193,7 @@ function validateAnalysis(run, probe) {
   }
 
   console.log(
-    "[mobile-legend] PASS Tools product rail; actions=find-time/classification/solar-time/now/done, " +
+    "[mobile-legend] PASS Tools product rail; readable >=40px actions=find-time/classification/solar-time/now/done, " +
     "Four Pillars=" + fourPillars.height.toFixed(1) + "px one-row rail, reference-frame hidden, retired scale/play/layers hidden: " + run.url
   );
 }
