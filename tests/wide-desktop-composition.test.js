@@ -10,16 +10,13 @@ const fixture = readFileSync(new URL("../scripts/fixtures/wide-desktop-2047.html
 const browserGate = readFileSync(new URL("../scripts/check-wide-desktop-composition.mjs", import.meta.url), "utf8");
 const visualCapture = readFileSync(new URL("../scripts/visual-check-wide-desktop.mjs", import.meta.url), "utf8");
 
-test("wide Analysis budgets the first screen without leaking viewport geometry into ordinary reading", () => {
+test("wide Analysis fills the desktop viewport without leaking geometry into ordinary reading", () => {
   assert.match(
     polish,
-    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 92px\)\);/
+    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);/
   );
   assert.match(polish, /@media \(min-width: 1800px\) and \(min-aspect-ratio: 17\/9\)/);
-  assert.match(
-    polish,
-    /#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*clamp\(760px,\s*calc\(100dvh - 92px\),\s*44vw\);/
-  );
+  assert.doesNotMatch(polish, /44vw|100dvh - 92px/);
   assert.match(
     polish,
     /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-readout\s*\{\s*bottom:\s*26px;/
@@ -103,8 +100,8 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /hourVisibleLabels:\s*String\(displayVisibleCount\(win, hourLabels\)\)/);
   assert.match(fixture, /dayVisibleLabels:\s*String\(displayVisibleCount\(win, dayLabels\)\)/);
   assert.match(browserGate, /width !== 2047 \|\| height !== 1038/);
-  assert.match(browserGate, /instrumentShare < 0\.80 \|\| instrumentShare > 0\.90/);
-  assert.match(browserGate, /readoutBottomGap < 40/);
+  assert.match(browserGate, /instrumentShare < 0\.92 \|\| instrumentShare > 0\.97/);
+  assert.match(browserGate, /readoutBottomGap < 24/);
   assert.match(browserGate, /scrollWidth > width \+ 1/);
   assert.match(browserGate, /scrollHeight > height \+ 90/);
   assert.match(browserGate, /data-site-nav-display/);
