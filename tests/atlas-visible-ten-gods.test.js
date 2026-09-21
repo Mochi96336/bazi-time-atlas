@@ -65,7 +65,7 @@ test("visible stem analysis is installed by Analysis mode and hidden outside it"
 test("mobile Tools keeps Four Pillars as one compact inspector rail", () => {
   assert.match(
     css,
-    /@media \(max-width: 480px\) \{[\s\S]*?\.atlas-visible-ten-gods \{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*48px;[\s\S]*?left:\s*9px;[\s\S]*?right:\s*9px;/
+    /@media \(max-width: 480px\) \{[\s\S]*?\.atlas-visible-ten-gods \{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*58px;[\s\S]*?left:\s*9px;[\s\S]*?right:\s*9px;/
   );
   assert.match(
     css,

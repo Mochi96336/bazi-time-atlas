@@ -31,7 +31,11 @@ test("mobile Tools keeps one primary row after retiring the reference-frame rail
   );
   assert.match(
     legendCss,
-    /\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*30px;/
+    /\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*42px;/
+  );
+  assert.match(
+    analysisCss,
+    /\.toolbar-group:last-child \.control-button\s*\{[\s\S]*?min-height:\s*42px;[\s\S]*?font-size:\s*10px;/
   );
 });
 

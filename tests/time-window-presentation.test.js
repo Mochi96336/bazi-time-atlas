@@ -23,6 +23,6 @@ test("mobile Tools removes observation-window and transport chrome from the prod
   );
   assert.match(
     analysisCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar > \.toolbar-group:last-child \.control-button\s*\{[\s\S]*?min-height:\s*30px;[\s\S]*?font-size:\s*8\.5px;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar > \.toolbar-group:last-child \.control-button\s*\{[\s\S]*?min-height:\s*42px;[\s\S]*?font-size:\s*10px;/
   );
 });
