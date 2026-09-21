@@ -361,11 +361,23 @@
     max-height: 68vh;
     border-radius: 12px;
   }
+  .ganzhi-inspector-head { padding: 6px 14px; }
+  .ganzhi-inspector-close {
+    min-height: 36px;
+    padding: 0 4px;
+  }
   .ganzhi-inspector-pillar-switcher { margin: 8px 14px 0; }
-  .ganzhi-inspector-pillar-switch { padding-inline: 3px; }
+  .ganzhi-inspector-pillar-switch {
+    min-height: 38px;
+    padding-inline: 3px;
+  }
   .ganzhi-inspector-identity { padding: 14px; }
   .ganzhi-inspector-parts { padding: 0 14px 10px; }
   .ganzhi-inspector-neighbors { margin: 0 14px 12px; }
   .ganzhi-inspector > details { padding: 0 14px 14px; }
   .ganzhi-structure { padding: 0 14px 14px; }
+  .ganzhi-structure-tab {
+    min-height: 38px;
+    padding-block: 8px;
+  }
 }

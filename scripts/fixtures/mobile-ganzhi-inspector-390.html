@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>390px Ganzhi inspector geometry</title>
+  <style>
+    html,body{margin:0;width:500px;min-height:844px;overflow:hidden;background:#090a0b}
+    #stage{display:block;width:390px;height:844px;border:0;background:#090a0b}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="390px Ganzhi inspector"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const frame=document.querySelector("#stage");
+    const probe=document.querySelector("#probe");
+    frame.src=new URL("../../?instant=2026-09-13T23%3A43%3A42.000Z&inspect=year",location.href).href;
+
+    const visible=(win,node)=>{
+      if(!node)return false;
+      const style=win.getComputedStyle(node),rect=node.getBoundingClientRect();
+      return !node.hidden&&style.display!=="none"&&style.visibility!=="hidden"&&rect.width>0&&rect.height>0;
+    };
+    const rect=(node)=>node?.getBoundingClientRect();
+
+    function settle(attempt=0){
+      const win=frame.contentWindow,doc=frame.contentDocument;
+      const inspector=doc?.querySelector("#ganzhi-inspector");
+      const structure=doc?.querySelector("#ganzhi-structure");
+      if(!win||!doc||!inspector||!structure||inspector.dataset.ready!=="true"||structure.dataset.ready!=="true"||!visible(win,inspector)){
+        if(attempt<40)setTimeout(()=>settle(attempt+1),100);
+        return;
+      }
+      const close=doc.querySelector("#ganzhi-inspector-close");
+      const tabs=[...doc.querySelectorAll("#ganzhi-structure [data-structure-tab]")];
+      const switches=[...doc.querySelectorAll("[data-pillar-switch]")];
+      const header=doc.querySelector(".ganzhi-inspector-head");
+      const inspectorRect=rect(inspector),closeRect=rect(close),headerRect=rect(header);
+      const tabHeights=tabs.map(node=>rect(node)?.height??0);
+      const switchHeights=switches.map(node=>rect(node)?.height??0);
+
+      probe.dataset.innerWidth=String(win.innerWidth);
+      probe.dataset.innerHeight=String(win.innerHeight);
+      probe.dataset.inspectorVisible=String(visible(win,inspector));
+      probe.dataset.inspectorLeft=String(inspectorRect?.left??NaN);
+      probe.dataset.inspectorRight=String(inspectorRect?.right??NaN);
+      probe.dataset.inspectorBottom=String(inspectorRect?.bottom??NaN);
+      probe.dataset.headerHeight=String(headerRect?.height??NaN);
+      probe.dataset.closeHeight=String(closeRect?.height??NaN);
+      probe.dataset.closeFont=close?win.getComputedStyle(close).fontSize:"";
+      probe.dataset.tabCount=String(tabs.length);
+      probe.dataset.tabMinHeight=String(Math.min(...tabHeights));
+      probe.dataset.switchCount=String(switches.length);
+      probe.dataset.switchMinHeight=String(Math.min(...switchHeights));
+      probe.dataset.ready="true";
+    }
+    frame.addEventListener("load",()=>settle());
+  </script>
+</body>
+</html>
