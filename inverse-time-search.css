@@ -204,6 +204,7 @@
      put its status/result rail on the left edge instead of competing with the
      center datum. Mobile keeps the compact centered task rail below. */
   #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
+    position: fixed;
     top: 84px;
     left: 0;
     transform: none;
