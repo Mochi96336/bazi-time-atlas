@@ -31,6 +31,6 @@ test("mobile Tools retires reference-frame and layer chrome while reading view k
   const analysis = "#kinetic-instrument\\[data-analysis-open=\\\"true\\\"\\]";
   assert.match(mobile, new RegExp(`${analysis} \\.ring-legend-row\\[data-ring-toggle\\],[^}]*${analysis} \\.reference-frame-control \\{\\s*display:\\s*none\\s*!important;`, "s"));
   assert.match(mobile, new RegExp(`${analysis} \\.instrument-toolbar \\{\\s*right:\\s*56px;`));
-  assert.match(mobile, new RegExp(`${analysis} \\.analysis-close \\{[^}]*top:\\s*10px;[^}]*right:\\s*9px;[^}]*min-height:\\s*30px;`, "s"));
+  assert.match(mobile, new RegExp(`${analysis} \\.analysis-close \\{[^}]*top:\\s*10px;[^}]*right:\\s*9px;[^}]*min-height:\\s*42px;`, "s"));
   assert.doesNotMatch(mobile, /^\s*\.ring-legend\s*\{/m, "mobile layout must not own normal reading legend geometry");
 });
