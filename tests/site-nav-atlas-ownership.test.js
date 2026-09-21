@@ -12,8 +12,8 @@ test("desktop atlas header has one current-view owner", () => {
   );
   assert.match(
     css,
-    /\.kinetic-topbar \.site-nav a\.research-link\[data-nav-role="research"\]\s*\{[\s\S]*?margin-left:\s*0;[\s\S]*?padding-left:\s*0;/,
-    "Research should remain as the single quiet desktop exit without orphaned separator spacing"
+    /\.kinetic-topbar \.site-nav a\.research-link\[data-nav-role="research"\]\s*\{[\s\S]*?display:\s*inline-flex;[\s\S]*?align-items:\s*center;[\s\S]*?justify-content:\s*center;[\s\S]*?min-height:\s*28px;[\s\S]*?padding:\s*0 2px;[\s\S]*?line-height:\s*1;/,
+    "Research should keep one centered text/hitbox owner instead of a drifting baseline"
   );
   assert.match(
     css,
