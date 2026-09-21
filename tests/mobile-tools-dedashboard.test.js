@@ -16,6 +16,13 @@ test("mobile Tools retires dashboard-era presets, transport and layer toggles", 
   );
 });
 
+test("ordinary mobile Tools entry is readable and shares the first action row", () => {
+  assert.match(
+    analysisCss,
+    /@media \(max-width: 480px\)[\s\S]*?\.analysis-toggle,[\s\S]*?\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?min-height:\s*32px;[\s\S]*?font-size:\s*9px;/
+  );
+});
+
 test("mobile Tools keeps one primary row after retiring the reference-frame rail", () => {
   assert.match(
     analysisCss,
