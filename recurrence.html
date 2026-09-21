@@ -51,7 +51,6 @@
             <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
             <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
           </div>
-          <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="回歸候選"></div>
         </div>
 
         <div class="recurrence-legend" aria-hidden="true">
@@ -81,11 +80,12 @@
         </div>
       </section>
 
-      <section class="delta-dock" aria-label="時間差控制">
+      <section class="delta-dock" aria-label="時間位移控制">
         <label>位移年數
           <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
           <small id="delta-range-note">0–24,000 年；深時間候選可由下方排名跳轉。</small>
         </label>
+        <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="回歸候選"></div>
         <div class="delta-slider-wrap">
           <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0" aria-label="位移年數 0 到 24000 年的細部尺度" aria-describedby="delta-range-note">
           <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
