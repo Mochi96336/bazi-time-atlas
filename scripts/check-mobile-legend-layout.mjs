@@ -134,6 +134,53 @@ function validateNormal(run, probe, { edited = false } = {}) {
   console.log(`[mobile-legend] PASS normal direct radial identities; ${labels.map(({id, box}) => `${id}=${((box.top + box.bottom) / 2).toFixed(1)}`).join(", ")}: ${run.url}`);
 }
 
+function validateClassification(run, probe) {
+  const instrument = rect(probe, "instrument", "classification", run.url);
+  const legend = rect(probe, "classification-legend", "classification", run.url);
+  const heading = Number.parseFloat(requireAttr(probe, "data-classification-heading-font", "classification", run.url));
+  const hint = Number.parseFloat(requireAttr(probe, "data-classification-hint-font", "classification", run.url));
+  const key = Number.parseFloat(requireAttr(probe, "data-classification-key-font", "classification", run.url));
+  const keyHeight = Number.parseFloat(requireAttr(probe, "data-classification-key-height", "classification", run.url));
+  const warning = Number.parseFloat(requireAttr(probe, "data-classification-warning-font", "classification", run.url));
+
+  if (requireAttr(probe, "data-classification-legend-visible", "classification", run.url) !== "true") {
+    throw new Error("classification: evidence legend is not visible: " + run.url);
+  }
+  if (
+    !Number.isFinite(heading) || heading < 8
+    || !Number.isFinite(hint) || hint < 6
+    || !Number.isFinite(key) || key < 7
+    || !Number.isFinite(keyHeight) || keyHeight < 16
+    || !Number.isFinite(warning) || warning < 6.5
+  ) {
+    throw new Error(
+      "classification: mobile legend fell below readable type floor " +
+      "(heading=" + heading + ", hint=" + hint + ", key=" + key + "/h" + keyHeight +
+      ", warning=" + warning + "): " + run.url
+    );
+  }
+  if (
+    legend.top < instrument.bottom + 5
+    || legend.left < instrument.left - 1
+    || legend.right > instrument.right + 1
+    || legend.height > 110
+  ) {
+    throw new Error(
+      "classification: legend escaped its reserved evidence band " +
+      "(instrumentBottom=" + instrument.bottom.toFixed(1) +
+      ", legend=" + legend.left.toFixed(1) + ".." + legend.right.toFixed(1) +
+      " × " + legend.top.toFixed(1) + ".." + legend.bottom.toFixed(1) +
+      "/h" + legend.height.toFixed(1) + "): " + run.url
+    );
+  }
+
+  console.log(
+    "[mobile-legend] PASS classification evidence readability; heading=" + heading +
+    "px, hint=" + hint + "px, key=" + key + "px/" + keyHeight +
+    "px, warning=" + warning + "px: " + run.url
+  );
+}
+
 function validateAnalysis(run, probe) {
   const toolbar = rect(probe, "toolbar", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
@@ -230,7 +277,7 @@ function validateAnalysis(run, probe) {
   );
 }
 
-function validate(run, { analysis, edited = false }) {
+function validate(run, { analysis, edited = false, classification = false }) {
   const probe = tagById(run.dom, "probe");
   if (requireAttr(probe, "data-ready", "legend", run.url) !== "true") {
     throw new Error(`legend: fixture did not settle: ${run.url}`);
@@ -238,10 +285,12 @@ function validate(run, { analysis, edited = false }) {
   if (Number(requireAttr(probe, "data-inner-width", "legend", run.url)) !== 390) {
     throw new Error(`legend: fixture is not a true 390px viewport: ${run.url}`);
   }
-  if (analysis) validateAnalysis(run, probe);
+  if (classification) validateClassification(run, probe);
+  else if (analysis) validateAnalysis(run, probe);
   else validateNormal(run, probe, { edited });
 }
 
 validate(dump("scripts/fixtures/mobile-legend-390.html"), { analysis:false, edited:false });
 validate(dump("scripts/fixtures/mobile-legend-390.html?edit=1"), { analysis:false, edited:true });
 validate(dump("scripts/fixtures/mobile-legend-390.html?analysis=1"), { analysis:true });
+validate(dump("scripts/fixtures/mobile-legend-390.html?classification=1"), { classification:true });
