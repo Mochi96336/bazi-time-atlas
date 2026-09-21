@@ -9,6 +9,16 @@ const [view, css, host, recurrenceGate] = await Promise.all([
   readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8")
 ]);
 
+function functionSlice(source, name, nextName) {
+  const start = source.indexOf(`function ${name}(`);
+  const end = source.indexOf(`function ${nextName}(`, start + 1);
+  assert.ok(start >= 0 && end > start, `missing function slice ${name} → ${nextName}`);
+  return source.slice(start, end);
+}
+
+const closureView = functionSlice(view, "ensureClosureDrilldown", "hashTargetsCycle");
+const milestoneView = functionSlice(view, "ensureMilestoneDrilldown", "syncMilestoneMeta");
+
 test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.recurrence-intro > \.scope-note/);
   assert.match(view, /\.remove\(\)/);
@@ -32,10 +42,7 @@ test("local recurrence remains visible while derived closure interpretation is d
   assert.match(view, /note\.hidden = true/);
   assert.match(view, /grid\.insertAdjacentElement\("beforebegin", local\)/);
   assert.match(view, /details\.append\(summary, grid\)/);
-  assert.doesNotMatch(
-    view,
-    /function ensureClosureDrilldown\(\)[\s\S]*?details\.open\s*=\s*true[\s\S]*?return details;/
-  );
+  assert.doesNotMatch(closureView, /details\.open\s*=\s*true/);
 });
 
 test("60-day cycle is supporting evidence behind a closed native drilldown", () => {
@@ -56,10 +63,7 @@ test("milestone table is progressively disclosed without deleting its rows", () 
   assert.match(view, /details\.id = "discrete-milestone-details"/);
   assert.match(view, /details\.append\(summary, table\)/);
   assert.match(view, /#milestone-rows > \.milestone-row/);
-  assert.doesNotMatch(
-    view,
-    /function ensureMilestoneDrilldown\(\)[\s\S]*?details\.open\s*=\s*true[\s\S]*?return details;/
-  );
+  assert.doesNotMatch(milestoneView, /details\.open\s*=\s*true/);
 });
 
 test("discrete drilldowns stay flat rather than becoming cards", () => {
