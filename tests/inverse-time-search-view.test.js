@@ -121,6 +121,14 @@ test("desktop Find Time keeps product copy above the readable type floor without
   assert.match(css, /width:\s*min\(620px, calc\(100% - 32px\)\)/);
 });
 
+test("mobile Find Time keeps task copy readable without becoming a form panel", () => {
+  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.inverse-time-search-readout strong \{[\s\S]*?font-size:\s*11px;[\s\S]*?line-height:\s*1\.35;/);
+  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.inverse-time-search-constraint \{[\s\S]*?min-height:\s*30px;[\s\S]*?font-size:\s*9\.5px;/);
+  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.inverse-time-search-readout span \{[\s\S]*?font-size:\s*9\.5px;[\s\S]*?line-height:\s*1\.5;/);
+  assert.match(css, /#kinetic-instrument\[data-inverse-time-search="active"\] #inverse-time-search-button \{[\s\S]*?min-height:\s*40px;[\s\S]*?font-size:\s*10\.5px;/);
+  assert.match(css, /#kinetic-instrument\[data-inverse-time-search="active"\] \.inverse-time-search-readout \{\s*top:\s*58px;/);
+});
+
 test("ordinary reading never shows the find-time entry", () => {
   assert.match(
     css,

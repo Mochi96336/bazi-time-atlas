@@ -63,6 +63,7 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   const right = Number(attr(probe, "data-readout-right"));
   const readoutInstrumentTop = Number(attr(probe, "data-readout-instrument-top"));
   const buttonFont = Number(attr(probe, "data-button-font"));
+  const buttonHeight = Number(attr(probe, "data-button-height"));
   const queryFont = Number(attr(probe, "data-query-font"));
   const statusFont = Number(attr(probe, "data-status-font"));
   const applyFont = Number(attr(probe, "data-apply-font"));
@@ -93,6 +94,27 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
   }
 
   if (
+    width <= 480
+    && (
+      !Number.isFinite(buttonFont)
+      || !Number.isFinite(buttonHeight)
+      || !Number.isFinite(queryFont)
+      || !Number.isFinite(statusFont)
+      || !Number.isFinite(applyFont)
+      || buttonFont < 10
+      || buttonHeight < 38
+      || queryFont < 10.5
+      || statusFont < 9
+      || applyFont < 9
+    )
+  ) {
+    throw new Error(
+      `find-time ${label} readability fell below the mobile floor ` +
+      `(mode=${buttonFont}/h${buttonHeight}, query=${queryFont}, status=${statusFont}, apply=${applyFont}): ${fixtureURL} · ${probe}`
+    );
+  }
+
+  if (
     width > 480
     && (
       !Number.isFinite(buttonFont)
@@ -113,8 +135,8 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
 
   const mobileTaskTop = width <= 480
     && Number.isFinite(readoutInstrumentTop)
-    && readoutInstrumentTop >= 38
-    && readoutInstrumentTop <= 50;
+    && readoutInstrumentTop >= 54
+    && readoutInstrumentTop <= 66;
   const desktopEdgeRail = width > 480
     && left >= -1
     && left <= 1
