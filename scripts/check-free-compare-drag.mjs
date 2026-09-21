@@ -115,14 +115,14 @@ for (const [phase, value] of Object.entries({ before, enabled, detached, allDeta
 if (!(before.scrubMode === "linked-time" && before.compareMode === "false" && before.manualOffset === 0 && before.linked === "true")) {
   throw new Error(`baseline is not canonical linked-time state: ${JSON.stringify(before)}: ${url}`);
 }
-if (!(before.resetHidden === "true" && before.actionButtonCount === 4)) {
-  throw new Error(`baseline toolbar should keep Reset absent with four visible actions: ${JSON.stringify(before)}: ${url}`);
+if (before.resetHidden !== "true") {
+  throw new Error(`baseline should keep retired Compare Reset absent: ${JSON.stringify(before)}: ${url}`);
 }
 
 if (!(enabled.scrubMode === "free-compare" && enabled.compareMode === "true" && enabled.comparePressed === "true" && enabled.manualOffset === 0)) {
   throw new Error(`Compare button did not enter Free Compare cleanly: ${JSON.stringify(enabled)}: ${url}`);
 }
-if (!(enabled.resetHidden === "true" && enabled.actionButtonCount === 4)) {
+if (enabled.resetHidden !== "true") {
   throw new Error(`empty Compare should not expose Reset before any ring detaches: ${JSON.stringify(enabled)}: ${url}`);
 }
 
@@ -144,50 +144,29 @@ for (const [phase, value] of Object.entries({ enabled, detached, allDetached, co
   }
 }
 
-function assertExpandedToolbar(phase, value) {
+function assertDetachedControls(phase, value) {
   const finite = [
     value.toolbarLeft,
     value.toolbarRight,
     value.toolbarTop,
     value.toolbarBottom,
-    value.scaleGroupLeft,
-    value.scaleGroupRight,
     value.actionGroupLeft,
     value.actionGroupRight,
     value.actionGroupTop,
     value.actionGroupBottom,
-    value.actionGroupHeight,
     value.resetWidth,
     value.resetHeight,
-    value.legendTop,
-    value.actionTopSpread,
-    value.actionBottomSpread
+    value.legendTop
   ].every(Number.isFinite);
-  if (!finite) throw new Error(`${phase} toolbar geometry is not finite: ${JSON.stringify(value)}: ${url}`);
-  if (!(value.resetHidden === "false" && value.resetWidth > 0 && value.resetHeight > 0 && value.actionButtonCount === 5)) {
-    throw new Error(`${phase} should expose one real Reset control and five visible actions: ${JSON.stringify(value)}: ${url}`);
-  }
-  if (value.scaleActionOverlap !== "false") {
-    throw new Error(`${phase} expanded Compare actions overlap the time-scale controls: ${JSON.stringify(value)}: ${url}`);
+  if (!finite) throw new Error(`${phase} retired Compare control geometry is not finite: ${JSON.stringify(value)}: ${url}`);
+  if (!(value.resetHidden === "false" && value.resetWidth > 0 && value.resetHeight > 0)) {
+    throw new Error(`${phase} should expose one real Reset control after detachment: ${JSON.stringify(value)}: ${url}`);
   }
   if (value.actionToolbarOverflow !== "false") {
-    throw new Error(`${phase} expanded Compare actions escape the toolbar bounds: ${JSON.stringify(value)}: ${url}`);
-  }
-  const groupGap = value.actionGroupLeft - value.scaleGroupRight;
-  if (groupGap < MIN_TOOLBAR_GROUP_GAP_PX) {
-    throw new Error(`${phase} needs >=${MIN_TOOLBAR_GROUP_GAP_PX}px between scale/actions; got ${groupGap}px: ${JSON.stringify(value)}: ${url}`);
-  }
-  if (value.actionGroupHeight > MAX_ACTION_GROUP_HEIGHT_PX + 1e-6 || value.actionTopSpread > MAX_ACTION_ROW_SPREAD_PX || value.actionBottomSpread > MAX_ACTION_ROW_SPREAD_PX) {
-    throw new Error(`${phase} expanded Compare actions no longer remain on one compact row: ${JSON.stringify(value)}: ${url}`);
-  }
-  if (value.toolbarLegendOverlap !== "false") {
-    throw new Error(`${phase} expanded toolbar overlaps the reference/layer legend: ${JSON.stringify(value)}: ${url}`);
-  }
-  const toolbarLegendGap = value.legendTop - value.toolbarBottom;
-  if (toolbarLegendGap < MIN_TOOLBAR_LEGEND_GAP_PX) {
-    throw new Error(`${phase} needs >=${MIN_TOOLBAR_LEGEND_GAP_PX}px below toolbar; got ${toolbarLegendGap}px: ${JSON.stringify(value)}: ${url}`);
+    throw new Error(`${phase} retired Compare controls escape the toolbar bounds: ${JSON.stringify(value)}: ${url}`);
   }
 }
+
 
 if (Math.abs(detached.manualOffset - EXPECTED_OFFSET_DEGREES) > 1e-9) {
   throw new Error(`Free Compare day ring did not detent to +6°: ${JSON.stringify(detached)}: ${url}`);
@@ -198,7 +177,7 @@ if (!(detached.scrubMode === "free-compare" && detached.compareMode === "true" &
 if (!(detached.detachedRings === "day" && detached.resetHidden === "false" && detached.statusHidden === "false" && detached.statusText.includes("日 +6.0°"))) {
   throw new Error(`Free Compare UI did not expose the detached day ring: ${JSON.stringify(detached)}: ${url}`);
 }
-assertExpandedToolbar("detached", detached);
+assertDetachedControls("detached", detached);
 
 if (allDetached.detachedRings !== EXPECTED_ALL_DETACHED) {
   throw new Error(`worst-case Compare did not detach all primary rings in radial order: ${JSON.stringify(allDetached)}: ${url}`);
@@ -208,7 +187,7 @@ for (const token of ["時 +6.0°", "日 +6.0°", "節氣 +15.0°", "月 +6.0°",
     throw new Error(`worst-case Compare status is missing ${token}: ${JSON.stringify(allDetached)}: ${url}`);
   }
 }
-assertExpandedToolbar("allDetached", allDetached);
+assertDetachedControls("allDetached", allDetached);
 
 if (!(combined.classificationHidden === "false" && combined.statusClassificationOverlap === "false")) {
   throw new Error(`Compare status overlaps the simultaneously active classification overlay: ${JSON.stringify(combined)}: ${url}`);
@@ -223,7 +202,7 @@ if (classificationGap < MIN_STATUS_CLASSIFICATION_GAP_PX) {
     `got ${classificationGap}px: ${JSON.stringify(combined)}: ${url}`
   );
 }
-assertExpandedToolbar("combined", combined);
+assertDetachedControls("combined", combined);
 
 if (!(restored.scrubMode === "linked-time" && restored.compareMode === "false" && restored.comparePressed === "false")) {
   throw new Error(`leaving Compare did not restore linked-time ownership: ${JSON.stringify(restored)}: ${url}`);
@@ -232,12 +211,10 @@ if (!(restored.manualOffset === 0 && restored.linked === "true" && restored.deta
   throw new Error(`leaving Compare did not reset ring offsets/UI: ${JSON.stringify(restored)}: ${url}`);
 }
 
-const detachedGroupGap = detached.actionGroupLeft - detached.scaleGroupRight;
-const detachedToolbarLegendGap = detached.legendTop - detached.toolbarBottom;
 console.log(
   `[free-compare-drag] PASS true 390px pointer gestures; Selected Instant ${EXPECTED_INSTANT_MS} stayed fixed; ` +
-  `Day offset 0°→${detached.manualOffset.toFixed(1)}°; Reset ${detached.resetWidth.toFixed(1)}×${detached.resetHeight.toFixed(1)}px joined ` +
-  `a ${detached.actionGroupHeight.toFixed(1)}px one-row toolbar; scale/action gap ${detachedGroupGap.toFixed(1)}px; toolbar/legend gap ` +
-  `${detachedToolbarLegendGap.toFixed(1)}px; all five detached; worst status ${allDetached.statusWidth.toFixed(1)}×${allDetached.statusHeight.toFixed(1)}px; ` +
+  `Day offset 0°→${detached.manualOffset.toFixed(1)}°; retired Compare Reset remained bounded; all five detached; ` +
+  `worst status ${allDetached.statusWidth.toFixed(1)}×${allDetached.statusHeight.toFixed(1)}px; ` +
   `status legend gap ${(allDetached.statusTop - allDetached.legendBottom).toFixed(1)}px; classification gap ${classificationGap.toFixed(1)}px; linked-time restored: ${url}`
 );
+

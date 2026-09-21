@@ -32,7 +32,9 @@
     function visible(win, node) {
       if (!node) return false;
       const style = win.getComputedStyle(node);
-      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || 1) > 0;
+      if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity || 1) <= 0) return false;
+      const rect = node.getBoundingClientRect();
+      return node.getClientRects().length > 0 && rect.width > 0 && rect.height > 0;
     }
 
     function snapshot() {
@@ -61,6 +63,14 @@
       const open = doc.querySelector("#analysis-toggle");
       const close = doc.querySelector("#analysis-close");
       const stateStrip = doc.querySelector(".state-strip");
+      const classification = doc.querySelector("#classification-overlay-button");
+      const findTime = doc.querySelector("#inverse-time-search-button");
+      const now = doc.querySelector("#now-button");
+      const play = doc.querySelector("#play-button");
+      const cursorNote = doc.querySelector("#cursor-layer .cursor-note");
+      const scaleButtons = [...doc.querySelectorAll(".scale-button")];
+      const ringToggles = [...doc.querySelectorAll(".ring-legend-row[data-ring-toggle]")];
+      const visibleCount = nodes => nodes.filter(node => visible(win, node)).length;
       writeRect("reference", reference?.getBoundingClientRect());
       writeRect("open", open?.getBoundingClientRect());
       writeRect("close", close?.getBoundingClientRect());
@@ -69,6 +79,13 @@
       probe.dataset.openVisible = String(visible(win, open));
       probe.dataset.closeVisible = String(visible(win, close));
       probe.dataset.stateStripVisible = String(visible(win, stateStrip));
+      probe.dataset.classificationVisible = String(visible(win, classification));
+      probe.dataset.findTimeVisible = String(visible(win, findTime));
+      probe.dataset.nowVisible = String(visible(win, now));
+      probe.dataset.playVisible = String(visible(win, play));
+      probe.dataset.cursorNoteVisible = String(visible(win, cursorNote));
+      probe.dataset.scaleVisible = String(visibleCount(scaleButtons));
+      probe.dataset.ringToggleVisible = String(visibleCount(ringToggles));
       probe.dataset.analysisOpen = instrument.dataset.analysisOpen ?? "";
       probe.dataset.innerWidth = String(win.innerWidth);
       probe.dataset.ready = "true";

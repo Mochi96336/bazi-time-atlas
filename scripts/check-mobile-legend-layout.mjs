@@ -111,53 +111,51 @@ function validateNormal(run, probe) {
 
 function validateAnalysis(run, probe) {
   const legend = rect(probe, "legend", "analysis", run.url);
-  const rows = ["year", "month", "solar", "day", "hour"].map(id => ({ id, box:rect(probe, id, "analysis", run.url) }));
-  const rowTop = rows[0].box.top;
-  const rowBottom = Math.max(...rows.map(row => row.box.bottom));
-
-  /* Analysis exposes five layer toggles in one compact evidence row. The exact
-     current values belong to the Selected Instant read-head and must not be
-     repeated here. */
-  for (const row of rows) {
-    if (Math.abs(row.box.top - rowTop) > EPS) {
-      throw new Error(`analysis: ${row.id} escaped compact first row (${row.box.top} vs ${rowTop}): ${run.url}`);
-    }
-    if (row.box.left < legend.left - EPS || row.box.right > legend.right + EPS) {
-      throw new Error(`analysis: ${row.id} overflowed legend bounds: ${run.url}`);
-    }
-    const dotVisible = requireAttr(probe, `data-${row.id}-dot-visible`, "analysis", run.url);
-    const valueVisible = requireAttr(probe, `data-${row.id}-value-visible`, "analysis", run.url);
-    if (dotVisible !== "true" || valueVisible !== "false") {
-      throw new Error(`analysis: ${row.id} evidence ownership drifted (dot=${dotVisible}, duplicateValue=${valueVisible}): ${run.url}`);
-    }
-  }
-  for (let i = 1; i < rows.length; i += 1) {
-    if (rows[i - 1].box.left >= rows[i].box.left || rows[i - 1].box.right > rows[i].box.left + EPS) {
-      throw new Error(`analysis: compact ring row is not ordered/non-overlapping at ${rows[i - 1].id}->${rows[i].id}: ${run.url}`);
-    }
-  }
-
-  if (requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true" ||
-      requireAttr(probe, "data-reference-visible", "analysis", run.url) !== "true" ||
-      requireAttr(probe, "data-open-visible", "analysis", run.url) !== "false" ||
-      requireAttr(probe, "data-close-visible", "analysis", run.url) !== "true" ||
-      requireAttr(probe, "data-state-strip-visible", "analysis", run.url) !== "true") {
-    throw new Error(`analysis: progressive-disclosure visibility contract failed: ${run.url}`);
-  }
-
   const reference = rect(probe, "reference", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
-  if (reference.top <= rowBottom - EPS) {
-    throw new Error(`analysis: reference frame did not get the second row (${reference.top} <= ${rowBottom}): ${run.url}`);
-  }
-  if (reference.left < legend.left - EPS || reference.right > legend.right + EPS || reference.width < legend.width * 0.90) {
-    throw new Error(`analysis: reference row does not span the legend: ${run.url}`);
-  }
-  if (overlaps(reference, close) || close.top < reference.bottom - EPS) {
-    throw new Error(`analysis: Analysis close overlaps compact reference row (reference bottom=${reference.bottom}, close top=${close.top}): ${run.url}`);
+
+  if (
+    requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true"
+    || requireAttr(probe, "data-reference-visible", "analysis", run.url) !== "true"
+    || requireAttr(probe, "data-open-visible", "analysis", run.url) !== "false"
+    || requireAttr(probe, "data-close-visible", "analysis", run.url) !== "true"
+  ) {
+    throw new Error("analysis: progressive-disclosure visibility contract failed: " + run.url);
   }
 
-  console.log(`[mobile-legend] PASS Analysis compact evidence rail; rings=${rowTop.toFixed(1)}, reference=${reference.top.toFixed(1)}, close=${close.top.toFixed(1)}: ${run.url}`);
+  if (
+    requireAttr(probe, "data-scale-visible", "analysis", run.url) !== "0"
+    || requireAttr(probe, "data-play-visible", "analysis", run.url) !== "false"
+    || requireAttr(probe, "data-ring-toggle-visible", "analysis", run.url) !== "0"
+  ) {
+    throw new Error("analysis: retired mobile dashboard controls resurfaced: " + run.url);
+  }
+
+  for (const name of ["classification", "find-time", "now"]) {
+    if (requireAttr(probe, `data-${name}-visible`, "analysis", run.url) !== "true") {
+      throw new Error("analysis: primary mobile Tools action disappeared (" + name + "): " + run.url);
+    }
+  }
+  if (requireAttr(probe, "data-cursor-note-visible", "analysis", run.url) !== "false") {
+    throw new Error("analysis: duplicate Selected Instant caption resurfaced: " + run.url);
+  }
+
+  if (reference.left < legend.left - EPS || reference.right > legend.right + EPS) {
+    throw new Error("analysis: reference frame escaped compact observation rail: " + run.url);
+  }
+  if (Math.abs(reference.top - close.top) > 3 || overlaps(reference, close)) {
+    throw new Error(
+      "analysis: reference frame and Done do not share one non-overlapping secondary row " +
+      "(reference=" + reference.top.toFixed(1) + ".." + reference.right.toFixed(1) +
+      ", close=" + close.top.toFixed(1) + ".." + close.left.toFixed(1) + "): " + run.url
+    );
+  }
+
+  console.log(
+    "[mobile-legend] PASS Tools de-dashboard; actions=classification/find-time/now, " +
+    "reference=" + reference.top.toFixed(1) + ", close=" + close.top.toFixed(1) +
+    ", retired scale/play/layers hidden: " + run.url
+  );
 }
 
 function validate(run, { analysis }) {

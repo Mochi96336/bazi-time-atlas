@@ -1,68 +1,49 @@
-/* Mobile legend composition owns the Analysis control rail only. Normal reading
-   identity labels are positioned directly on the radial stack by ux-analysis.css.
-   Wheel geometry, time state, classification flow and layer semantics stay in
+/* Mobile Tools composition owns the compact observation rail only. Normal
+   reading identities remain positioned directly on the radial stack by
+   ux-analysis.css. Wheel geometry, time state and reference semantics stay in
    their existing owners. */
 @media (max-width: 480px) {
-  /* Analysis needs layer visibility, not five duplicate current-value readouts.
-     Keep every ring toggle reachable in one compact row, then give reference
-     frame selection its own second row. */
+  /* Layer visibility is not a product task on mobile, matching the desktop
+     workspace. Keep the underlying toggle DOM for regression/debug ownership,
+     but expose only the reference-frame control. */
   #kinetic-instrument[data-analysis-open="true"] .ring-legend {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    align-items: center;
-    gap: 2px 3px;
+    top: 48px;
+    left: 9px;
+    right: 64px;
+    display: block;
+    width: auto;
+    pointer-events: none;
   }
 
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row,
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle],
-  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
-    order: initial;
-  }
-
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row,
   #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+    display: none !important;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
     display: flex;
+    width: max-content;
+    max-width: 100%;
     min-width: 0;
     margin: 0;
-    padding: 0;
-    gap: 3px;
+    gap: 5px;
     align-items: center;
-    justify-content: center;
-    white-space: nowrap;
+    pointer-events: auto;
+    font-size: 7.5px;
   }
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row i {
-    width: 4px;
-    height: 4px;
-    flex: 0 0 auto;
-  }
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
-    font-size: 6.5px;
-    letter-spacing: .035em;
-  }
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row strong {
-    display: none;
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 28px;
+    max-width: 170px;
+    font-size: 9px;
   }
 
-  #kinetic-instrument[data-analysis-open="true"] .ring-year { grid-column: 1; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-month { grid-column: 2; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-solar { grid-column: 3; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-day { grid-column: 4; grid-row: 1; }
-  #kinetic-instrument[data-analysis-open="true"] .ring-hour { grid-column: 5; grid-row: 1; }
-
-  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    width: 100%;
-    min-width: 0;
-  }
-
-  /* With duplicate values removed, Analysis chrome is two rows instead of
-     three. Keep exit / compare status below that rail without consuming the
-     wheel's upper reading field. */
+  /* Reference frame and Done share one quiet secondary row rather than stacking
+     five layer toggles plus a third exit row over the wheel. */
   #kinetic-instrument[data-analysis-open="true"] .analysis-close {
-    top: 78px;
+    top: 48px;
+    left: auto;
+    right: 9px;
   }
   #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
-    top: 78px;
+    top: 82px;
   }
 }

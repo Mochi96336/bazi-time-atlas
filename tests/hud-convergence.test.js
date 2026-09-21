@@ -75,28 +75,22 @@ test("analysis mode retains the interactive layer legend instead of duplicating 
   );
 });
 
-test("mobile Analysis legend is a two-row evidence rail without duplicate values", () => {
+test("mobile Tools retires layer toggles and keeps one observation rail", () => {
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\);/
-  );
-  for (const [role, column] of [["year", 1], ["month", 2], ["solar", 3], ["day", 4], ["hour", 5]]) {
-    assert.match(
-      mobileLegendCss,
-      new RegExp(`#kinetic-instrument\\[data-analysis-open="true"\\] \\.ring-${role} \\{ grid-column: ${column}; grid-row: 1; \\}`)
-    );
-  }
-  assert.match(
-    mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row strong \{\s*display:\s*none;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend \{[\s\S]*?top:\s*48px;[\s\S]*?display:\s*block;/
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control \{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*2;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\] \{\s*display:\s*none\s*!important;/
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{\s*top:\s*78px;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control \{[\s\S]*?display:\s*flex;[\s\S]*?pointer-events:\s*auto;/
+  );
+  assert.match(
+    mobileLegendCss,
+    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{[\s\S]*?top:\s*48px;[\s\S]*?right:\s*9px;/
   );
   assert.doesNotMatch(mobileLegendCss, /^\s*\.ring-legend\s*\{/m);
 });
