@@ -135,6 +135,7 @@
 }
 #kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:first-child,
 #kinetic-instrument[data-inverse-time-search="active"] #classification-overlay-button,
+#kinetic-instrument[data-inverse-time-search="active"] #solar-time-tool-button,
 #kinetic-instrument[data-inverse-time-search="active"] #now-button,
 #kinetic-instrument[data-inverse-time-search="active"] #play-button,
 #kinetic-instrument[data-inverse-time-search="active"] .ring-legend,

@@ -53,6 +53,7 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
   for (const selector of [
     ".instrument-toolbar > .toolbar-group:first-child",
     "#classification-overlay-button",
+    "#solar-time-tool-button",
     "#now-button",
     "#play-button",
     ".ring-legend",
@@ -94,4 +95,9 @@ test("390px find-time tightens the shared single-task surface", () => {
     css,
     /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*42px;/
   );
+});
+
+
+test("Solar Time entry closes an active Find Time task", () => {
+  assert.match(view, /instrument\.addEventListener\("atlas-solar-time-entering", \(\) => exitMode\(\)\)/);
 });

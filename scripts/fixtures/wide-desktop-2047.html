@@ -59,6 +59,7 @@
       const reference = doc.querySelector(".reference-frame-control");
       const timeline = doc.querySelector(".timeline-dock");
       const solar = doc.querySelector(".atlas-solar-time-analysis");
+      const solarButton = doc.querySelector("#solar-time-tool-button");
       const evidence = doc.querySelector(".atlas-visible-ten-gods");
       const evidenceGrid = doc.querySelector(".atlas-visible-ten-gods-grid");
       const evidenceValue = doc.querySelector(".atlas-visible-ten-gods-cell strong");
@@ -141,6 +142,9 @@
         timelineBottom: round(timelineRect.bottom),
         timelineLeft: round(timelineRect.left),
         timelineRight: round(timelineRect.right),
+        solarDisplay: display(win, solar),
+        solarButtonDisplay: display(win, solarButton),
+        solarButtonPressed: solarButton?.getAttribute("aria-pressed") ?? "missing",
         solarTop: round(solarRect.top),
         solarBottom: round(solarRect.bottom),
         solarLeft: round(solarRect.left),

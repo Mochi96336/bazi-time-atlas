@@ -92,7 +92,9 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /legendDisplay:\s*display\(win, legend\)/);
   assert.match(fixture, /referenceDisplay:\s*display\(win, reference\)/);
   assert.match(fixture, /timelineDisplay:\s*display\(win, timeline\)/);
-  assert.match(fixture, /solarRight:\s*round\(solarRect\.right\)/);
+  assert.match(fixture, /solarDisplay:\s*display\(win, solar\)/);
+  assert.match(fixture, /solarButtonDisplay:\s*display\(win, solarButton\)/);
+  assert.match(fixture, /solarButtonPressed:\s*solarButton\?\.getAttribute\("aria-pressed"\)/);
   assert.match(fixture, /evidenceLeft:\s*round\(evidenceRect\.left\)/);
   assert.match(fixture, /evidenceGridWidth:\s*round\(evidenceGridRect\.width\)/);
   assert.match(fixture, /evidenceInfoMinFont:\s*round\(Math\.min\(\.\.\.evidenceInfoFonts\)\)/);
@@ -115,7 +117,9 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /data-legend-display/);
   assert.match(browserGate, /data-reference-display/);
   assert.match(browserGate, /data-timeline-display/);
-  assert.match(browserGate, /solarRight > 390/);
+  assert.match(browserGate, /data-solar-display/);
+  assert.match(browserGate, /data-solar-button-display/);
+  assert.match(browserGate, /data-solar-button-pressed/);
   assert.match(browserGate, /evidenceLeft < width - 430/);
   assert.match(browserGate, /evidenceGridWidth < 240/);
   assert.match(browserGate, /evidenceInfoMinFont < 9/);

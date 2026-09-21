@@ -163,16 +163,17 @@ const selectedMs = String(Date.parse(instant));
 {
   const { url, dom } = dumpDom(`?instant=${encodeURIComponent(instant)}&analysis=1`);
   const panel = dom.match(/<section[^>]*id="atlas-solar-time-analysis"[^>]*>/)?.[0] ?? "";
-  if (panel.includes("hidden") || !panel.includes('data-ready="true"') || !panel.includes('data-longitude-bound="false"')) {
-    throw new Error(`Atlas Analysis did not fail closed without explicit longitude: ${url}`);
+  const button = dom.match(/<button[^>]*id="solar-time-tool-button"[^>]*>/)?.[0] ?? "";
+  if (!panel.includes("hidden") || !panel.includes('data-longitude-bound="false"')) {
+    throw new Error(`Atlas Tools auto-opened Solar Time without user intent: ${url}`);
   }
-  if (!dom.includes("UTC offset 不會被當成地理經度")) {
-    throw new Error(`Atlas Analysis did not explain the unbound longitude state: ${url}`);
+  if (!button || !button.includes('aria-pressed="false"')) {
+    throw new Error(`Atlas Tools did not expose an idle Solar Time action: ${url}`);
   }
   if (!dom.includes(`data-selected-instant-ms="${selectedMs}"`)) {
-    throw new Error(`unbound Atlas solar-time analysis changed Selected Instant: ${url}`);
+    throw new Error(`idle Atlas solar-time tool changed Selected Instant: ${url}`);
   }
-  console.log(`[solar-time] PASS Atlas Analysis requires explicit longitude: ${url}`);
+  console.log(`[solar-time] PASS Atlas Tools keeps Solar Time on demand until explicit longitude/user entry: ${url}`);
 }
 
 {

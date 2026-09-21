@@ -45,3 +45,15 @@ test("mobile Tools has one Selected Instant caption owner and larger invisible t
     /\.analysis-toggle::before,[\s\S]*?\.analysis-close::before\s*\{[\s\S]*?inset:\s*-8px -6px;/
   );
 });
+
+
+test("mobile Tools exposes Solar Time as a first-row action instead of an automatic panel", () => {
+  assert.match(
+    analysisCss,
+    /#solar-time-tool-button\[aria-pressed="true"\],[\s\S]*?#inverse-time-search-button\[aria-pressed="true"\][\s\S]*?box-shadow:\s*inset 0 -1px/
+  );
+  assert.match(
+    analysisCss,
+    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #solar-time-tool-button,[\s\S]*?display:\s*none\s*!important/
+  );
+});

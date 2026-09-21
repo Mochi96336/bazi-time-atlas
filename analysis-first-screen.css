@@ -41,6 +41,7 @@
   #kinetic-instrument[data-analysis-open="true"] .scale-button.active,
   #kinetic-instrument[data-analysis-open="true"] #compare-rings-button[aria-pressed="true"],
   #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #solar-time-tool-button[aria-pressed="true"],
   #kinetic-instrument[data-analysis-open="true"] #play-button[aria-pressed="true"] {
     color: #e2e4e3;
     background: transparent;

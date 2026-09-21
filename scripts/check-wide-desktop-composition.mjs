@@ -157,8 +157,12 @@ if (
 if (requireAttr(probe, "data-timeline-display", page.url) !== "none") {
   throw new Error(`wide desktop: duplicate edge exact-time rail resurfaced: ${page.url}`);
 }
-if (solarLeft < -1 || solarRight > 390 || solarTop < 80 || solarBottom > height + 1) {
-  throw new Error(`wide desktop: Solar Time is not viewport-bound to the left edge (solar=${solarLeft}-${solarRight}@${solarTop}-${solarBottom}): ${page.url}`);
+if (
+  requireAttr(probe, "data-solar-display", page.url) !== "none"
+  || requireAttr(probe, "data-solar-button-display", page.url) === "none"
+  || requireAttr(probe, "data-solar-button-pressed", page.url) !== "false"
+) {
+  throw new Error(`wide desktop: Solar Time must be an idle action, not default Tools chrome: ${page.url}`);
 }
 if (evidenceRight < width - 2 || evidenceRight > width + 1 || evidenceLeft < width - 430 || evidenceTop < 75 || evidenceBottom >= readoutTop) {
   throw new Error(`wide desktop: Four Pillars evidence is not a right-edge inspector (evidence=${evidenceLeft}-${evidenceRight}@${evidenceTop}-${evidenceBottom}, readoutTop=${readoutTop}): ${page.url}`);
@@ -195,7 +199,7 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 console.log(
   `[wide-desktop] PASS 2047x1038 edge Tools; ` +
   `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, research=${researchTop}-${researchBottom}, ` +
-  `left=${solarLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
+  `solar=idle-action, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
   `fonts=${toolbarFont}/${evidenceValueFont}/${evidenceInfoMinFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );

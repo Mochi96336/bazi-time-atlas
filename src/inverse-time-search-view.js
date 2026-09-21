@@ -498,6 +498,7 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
   compareObserver.observe(compareButton, { attributes:true, attributeFilter:["aria-pressed"] });
 
   instrument.addEventListener("atlas-tools-closing", () => exitMode());
+  instrument.addEventListener("atlas-solar-time-entering", () => exitMode());
 
   documentRef.addEventListener("keydown", event => {
     if (event.key !== "Escape" || !active) return;

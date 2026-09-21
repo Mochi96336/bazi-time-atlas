@@ -66,6 +66,7 @@
       const stateStrip = doc.querySelector(".state-strip");
       const classification = doc.querySelector("#classification-overlay-button");
       const findTime = doc.querySelector("#inverse-time-search-button");
+      const solarTime = doc.querySelector("#solar-time-tool-button");
       const now = doc.querySelector("#now-button");
       const play = doc.querySelector("#play-button");
       const cursorNote = doc.querySelector("#cursor-layer .cursor-note");
@@ -83,6 +84,7 @@
       probe.dataset.stateStripVisible = String(visible(win, stateStrip));
       probe.dataset.classificationVisible = String(visible(win, classification));
       probe.dataset.findTimeVisible = String(visible(win, findTime));
+      probe.dataset.solarTimeVisible = String(visible(win, solarTime));
       probe.dataset.nowVisible = String(visible(win, now));
       probe.dataset.playVisible = String(visible(win, play));
       probe.dataset.cursorNoteVisible = String(visible(win, cursorNote));
