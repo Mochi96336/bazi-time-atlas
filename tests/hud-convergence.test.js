@@ -86,7 +86,7 @@ test("mobile Tools retires reference-frame and layer chrome into one product row
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*30px;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*42px;/
   );
   assert.doesNotMatch(mobileLegendCss, /^\s*\.ring-legend\s*\{/m);
 });
