@@ -56,7 +56,8 @@ function numberAttr(tag, name, url) {
 const page = dump("scripts/fixtures/wide-desktop-2047.html", 2100, 1100);
 const probe = tagById(page.dom, "probe");
 if (requireAttr(probe, "data-ready", page.url) !== "true") {
-  throw new Error(`wide desktop: composition probe did not settle: ${page.url}`);
+  const waitingFor = attr(probe, "data-waiting-for") ?? "unknown";
+  throw new Error(`wide desktop: composition probe did not settle (waitingFor=${waitingFor}): ${page.url}`);
 }
 
 const width = numberAttr(probe, "data-inner-width", page.url);
