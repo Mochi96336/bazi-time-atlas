@@ -27,8 +27,8 @@ test("desktop Tools converges global chrome to one focused top row", () => {
   assert.match(css, /\.analysis-close \{[\s\S]*position: fixed;[\s\S]*top: 12px;[\s\S]*right: 18px;[\s\S]*min-height: 32px;/);
 });
 
-test("desktop left edge keeps reference and Solar Time without a duplicate exact-time rail", () => {
-  assert.match(css, /\.ring-legend \{[\s\S]*position: fixed;[\s\S]*top: 52px;[\s\S]*width: 286px;[\s\S]*min-height: 0;[\s\S]*padding: 0;[\s\S]*border: 0;[\s\S]*box-shadow: none;/);
+test("desktop Tools keeps reference in the top chrome and edge tools off the document flow", () => {
+  assert.match(css, /\.ring-legend \{[\s\S]*position: fixed;[\s\S]*top: 8px;[\s\S]*left: clamp\(190px, 18vw, 280px\);[\s\S]*min-height: 32px;[\s\S]*display: flex;[\s\S]*align-items: center;/);
   assert.match(css, /~ \.timeline-dock \{[\s\S]*display: none !important;/);
   assert.match(css, /\.atlas-solar-time-analysis \{[\s\S]*top: 84px;[\s\S]*width: 340px;/);
   assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*top: 84px;/);
