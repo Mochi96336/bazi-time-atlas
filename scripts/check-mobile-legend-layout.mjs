@@ -130,7 +130,7 @@ function validateAnalysis(run, probe) {
     throw new Error("analysis: retired mobile dashboard controls resurfaced: " + run.url);
   }
 
-  for (const name of ["classification", "find-time", "now"]) {
+  for (const name of ["find-time", "classification", "solar-time", "now"]) {
     if (requireAttr(probe, `data-${name}-visible`, "analysis", run.url) !== "true") {
       throw new Error("analysis: primary mobile Tools action disappeared (" + name + "): " + run.url);
     }
@@ -152,7 +152,7 @@ function validateAnalysis(run, probe) {
   }
 
   console.log(
-    "[mobile-legend] PASS Tools product rail; actions=classification/find-time/now/done, " +
+    "[mobile-legend] PASS Tools product rail; actions=find-time/classification/solar-time/now/done, " +
     "reference-frame hidden, retired scale/play/layers hidden: " + run.url
   );
 }
