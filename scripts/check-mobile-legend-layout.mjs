@@ -110,6 +110,7 @@ function validateNormal(run, probe) {
 }
 
 function validateAnalysis(run, probe) {
+  const toolbar = rect(probe, "toolbar", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
 
   if (
@@ -138,10 +139,15 @@ function validateAnalysis(run, probe) {
     throw new Error("analysis: duplicate Selected Instant caption resurfaced: " + run.url);
   }
 
-  if (close.top < 8 || close.top > 13 || close.height < 28) {
+  if (
+    Math.abs(close.top - toolbar.top) > 2
+    || Math.abs(close.bottom - toolbar.bottom) > 3
+    || close.height < 28
+  ) {
     throw new Error(
       "analysis: Done did not return to the primary mobile action row " +
-      "(top=" + close.top.toFixed(1) + ", height=" + close.height.toFixed(1) + "): " + run.url
+      "(toolbar=" + toolbar.top.toFixed(1) + ".." + toolbar.bottom.toFixed(1) +
+      ", close=" + close.top.toFixed(1) + ".." + close.bottom.toFixed(1) + "): " + run.url
     );
   }
 
