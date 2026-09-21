@@ -60,6 +60,7 @@
       }
 
       const reference = doc.querySelector(".reference-frame-control");
+      const toolbar = doc.querySelector(".instrument-toolbar");
       const open = doc.querySelector("#analysis-toggle");
       const close = doc.querySelector("#analysis-close");
       const stateStrip = doc.querySelector(".state-strip");
@@ -72,6 +73,7 @@
       const ringToggles = [...doc.querySelectorAll(".ring-legend-row[data-ring-toggle]")];
       const visibleCount = nodes => nodes.filter(node => visible(win, node)).length;
       writeRect("reference", reference?.getBoundingClientRect());
+      writeRect("toolbar", toolbar?.getBoundingClientRect());
       writeRect("open", open?.getBoundingClientRect());
       writeRect("close", close?.getBoundingClientRect());
 
