@@ -16,8 +16,8 @@
     top: 10px;
     left: auto;
     right: 9px;
-    min-height: 30px;
-    padding-inline: 6px;
+    min-height: 42px;
+    padding-inline: 8px;
   }
   #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
     top: 48px;
