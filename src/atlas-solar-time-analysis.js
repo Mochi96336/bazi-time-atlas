@@ -86,6 +86,19 @@ export function installAtlasSolarTimeAnalysis(
   const existing = document.querySelector("#atlas-solar-time-analysis");
   if (existing) return existing;
 
+  const nowButton = document.querySelector("#now-button");
+  const classificationButton = document.querySelector("#classification-overlay-button");
+  const actionGroup = nowButton?.parentElement ?? null;
+  const toolButton = document.createElement("button");
+  toolButton.id = "solar-time-tool-button";
+  toolButton.className = "control-button";
+  toolButton.type = "button";
+  toolButton.textContent = "太陽時";
+  toolButton.title = "輸入實際經度，比較民用、平太陽與視太陽時計時";
+  toolButton.setAttribute("aria-pressed", "false");
+  toolButton.setAttribute("aria-controls", "atlas-solar-time-analysis");
+  actionGroup?.insertBefore(toolButton, nowButton ?? null);
+
   const panel = document.createElement("section");
   panel.id = "atlas-solar-time-analysis";
   panel.className = "atlas-solar-time-analysis";
@@ -143,6 +156,7 @@ export function installAtlasSolarTimeAnalysis(
   let renderTimer = null;
 
   const initial = queryLongitude();
+  let toolActive = initial.raw.trim() !== "";
   longitudeInput.value = initial.raw;
   longitudeValid = initial.valid;
   if (initial.valid) longitude = initial.value;
@@ -164,8 +178,8 @@ export function installAtlasSolarTimeAnalysis(
   function render() {
     renderTimer = null;
     const analysisOpen = instrument.dataset.analysisOpen === "true";
-    panel.hidden = !analysisOpen;
-    if (!analysisOpen) return;
+    panel.hidden = !(analysisOpen && toolActive);
+    if (panel.hidden) return;
 
     const selectedMs = Number(instrument.dataset.selectedInstantMs);
     if (!Number.isFinite(selectedMs)) {
@@ -238,10 +252,33 @@ export function installAtlasSolarTimeAnalysis(
     meta.textContent = `${hemisphere}${Math.abs(state.longitudeDegrees).toFixed(4)}° · ${formatAtlasUtcOffset(state.timeContext.utcOffsetHours)} · 年／月固定同一物理瞬間；日／時套用目前換日規則。`;
   }
 
+  function setToolActive(enabled, { announce = false } = {}) {
+    toolActive = Boolean(enabled);
+    instrument.dataset.solarTimeTool = toolActive ? "active" : "available";
+    toolButton.setAttribute("aria-pressed", String(toolActive));
+    toolButton.classList.toggle("active", toolActive);
+    if (toolActive && announce) {
+      instrument.dispatchEvent(new CustomEvent("atlas-solar-time-entering", {
+        bubbles:true,
+        detail:{ source:"solar-time-tool" }
+      }));
+    }
+    scheduleRender();
+  }
+
   function scheduleRender() {
     if (renderTimer !== null) clearTimeout(renderTimer);
     renderTimer = setTimeout(render, 80);
   }
+
+  toolButton.addEventListener("click", () => {
+    if (toolActive) {
+      setToolActive(false);
+      return;
+    }
+    setToolActive(true, { announce:true });
+    if (classificationButton?.getAttribute("aria-pressed") === "true") classificationButton.click();
+  });
 
   longitudeInput.addEventListener("input", () => {
     if (longitudeInput.validity.badInput) {
@@ -289,6 +326,19 @@ export function installAtlasSolarTimeAnalysis(
     ]
   });
 
-  scheduleRender();
+  if (classificationButton) {
+    const classificationObserver = new MutationObserver(() => {
+      if (classificationButton.getAttribute("aria-pressed") === "true" && toolActive) {
+        setToolActive(false);
+      }
+    });
+    classificationObserver.observe(classificationButton, {
+      attributes:true,
+      attributeFilter:["aria-pressed"]
+    });
+  }
+  instrument.addEventListener("atlas-find-time-entering", () => setToolActive(false));
+
+  setToolActive(toolActive);
   return panel;
 }
