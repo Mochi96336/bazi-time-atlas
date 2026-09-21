@@ -110,13 +110,11 @@ function validateNormal(run, probe) {
 }
 
 function validateAnalysis(run, probe) {
-  const legend = rect(probe, "legend", "analysis", run.url);
-  const reference = rect(probe, "reference", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
 
   if (
     requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true"
-    || requireAttr(probe, "data-reference-visible", "analysis", run.url) !== "true"
+    || requireAttr(probe, "data-reference-visible", "analysis", run.url) !== "false"
     || requireAttr(probe, "data-open-visible", "analysis", run.url) !== "false"
     || requireAttr(probe, "data-close-visible", "analysis", run.url) !== "true"
   ) {
@@ -140,21 +138,16 @@ function validateAnalysis(run, probe) {
     throw new Error("analysis: duplicate Selected Instant caption resurfaced: " + run.url);
   }
 
-  if (reference.left < legend.left - EPS || reference.right > legend.right + EPS) {
-    throw new Error("analysis: reference frame escaped compact observation rail: " + run.url);
-  }
-  if (Math.abs(reference.top - close.top) > 3 || overlaps(reference, close)) {
+  if (close.top < 8 || close.top > 13 || close.height < 28) {
     throw new Error(
-      "analysis: reference frame and Done do not share one non-overlapping secondary row " +
-      "(reference=" + reference.top.toFixed(1) + ".." + reference.right.toFixed(1) +
-      ", close=" + close.top.toFixed(1) + ".." + close.left.toFixed(1) + "): " + run.url
+      "analysis: Done did not return to the primary mobile action row " +
+      "(top=" + close.top.toFixed(1) + ", height=" + close.height.toFixed(1) + "): " + run.url
     );
   }
 
   console.log(
-    "[mobile-legend] PASS Tools de-dashboard; actions=classification/find-time/now, " +
-    "reference=" + reference.top.toFixed(1) + ", close=" + close.top.toFixed(1) +
-    ", retired scale/play/layers hidden: " + run.url
+    "[mobile-legend] PASS Tools product rail; actions=classification/find-time/now/done, " +
+    "reference-frame hidden, retired scale/play/layers hidden: " + run.url
   );
 }
 
