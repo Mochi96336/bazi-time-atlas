@@ -77,6 +77,8 @@ function validateNormal(run, probe, { edited = false } = {}) {
   const toolbar = rect(probe, "toolbar", "normal", run.url);
   const open = rect(probe, "open", "normal", run.url);
   const openFontSize = Number.parseFloat(requireAttr(probe, "data-open-font-size", "normal", run.url));
+  const now = rect(probe, "now", "normal", run.url);
+  const nowFontSize = Number.parseFloat(requireAttr(probe, "data-now-font-size", "normal", run.url));
   const labels = DIRECT_LABELS.map(([id, expected]) => ({ id, expected, box:rect(probe, id, "normal", run.url) }));
 
   if (Math.abs(legend.left - instrument.left) > EPS || Math.abs(legend.top - instrument.top) > EPS || legend.width < instrument.width * 0.98 || legend.height < instrument.height * 0.98) {
@@ -139,6 +141,20 @@ function validateNormal(run, probe, { edited = false } = {}) {
       "(toolbarTop=" + toolbar.top.toFixed(1) +
       ", open=" + open.top.toFixed(1) + ".." + open.bottom.toFixed(1) +
       ", font=" + openFontSize + "): " + run.url
+    );
+  }
+  if (
+    Math.abs(now.top - open.top) > 2
+    || Math.abs(now.bottom - open.bottom) > 2
+    || now.height < 30
+    || !Number.isFinite(nowFontSize)
+    || nowFontSize < 8.5
+  ) {
+    throw new Error(
+      "normal: Now and Tools no longer share one readable action row " +
+      "(now=" + now.top.toFixed(1) + ".." + now.bottom.toFixed(1) + "/" + nowFontSize +
+      "px, tools=" + open.top.toFixed(1) + ".." + open.bottom.toFixed(1) + "/" + openFontSize +
+      "px): " + run.url
     );
   }
 
