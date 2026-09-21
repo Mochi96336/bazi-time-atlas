@@ -32,7 +32,7 @@ function installAstronomyResidualDetail() {
 
   headline.classList.add("research-astronomy-rms-rail");
   headline.dataset.astronomyVisibleMetric = "rms";
-  headlineLabel.textContent = "RMS residual";
+  headlineLabel.textContent = "RMS 殘差";
 
   const detail = makeDetails("astronomy-residual-detail", "十二節殘差與模型參數");
   const meta = document.createElement("div");
@@ -42,7 +42,7 @@ function installAstronomyResidualDetail() {
   maxMetric.className = "astronomy-detail-max";
   maxMetric.dataset.astronomyDetailMetric = "max-residual";
   const maxLabel = document.createElement("span");
-  maxLabel.textContent = "Max residual";
+  maxLabel.textContent = "最大殘差";
   maxMetric.append(maxLabel, maxResidual);
   meta.appendChild(maxMetric);
 
