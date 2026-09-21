@@ -79,7 +79,7 @@
       const ringToggles = doc.querySelectorAll(".ring-legend-row[data-ring-toggle]");
       const hourLabels = doc.querySelectorAll("#hour-track .cycle-label");
       const dayLabels = doc.querySelectorAll("#day-track .cycle-label");
-      if (!instrument || !topbar || !siteNav || !research || !readout || !toolbar || !legend || !reference || !timeline || !solar || !solarButton || !evidence || !evidenceGrid || !evidenceValue || !toolbarButton || !close || !play || !stateStrip || !notes || !sources) return false;
+      if (!instrument || !topbar || !siteNav || !research || !readout || !toolbar || !legend || !reference || !timeline || !solar || !evidence || !evidenceGrid || !evidenceValue || !toolbarButton || !close || !play || !stateStrip || !notes || !sources) return false;
 
       const instrumentRect = rect(instrument);
       const topbarRect = rect(topbar);
@@ -144,7 +144,7 @@
         timelineRight: round(timelineRect.right),
         solarDisplay: display(win, solar),
         solarButtonDisplay: display(win, solarButton),
-        solarButtonPressed: solarButton.getAttribute("aria-pressed") ?? "",
+        solarButtonPressed: solarButton?.getAttribute("aria-pressed") ?? "missing",
         solarTop: round(solarRect.top),
         solarBottom: round(solarRect.bottom),
         solarLeft: round(solarRect.left),
