@@ -12,7 +12,11 @@ test("ordinary mobile reading has one textual exact-time surface", () => {
     mobileCss,
     /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-readout\s*\{\s*display:\s*none;/
   );
-  assert.match(html, /id="mobile-time-dock"[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"/);
+  assert.match(html, /id="mobile-time-dock"[^>]*data-dirty="false"[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"/);
+  assert.match(
+    instrumentCss,
+    /\.mobile-time-dock\[data-dirty="false"\]\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\);[\s\S]*?\.mobile-time-dock\[data-dirty="false"\] #mobile-time-apply\s*\{\s*display:\s*none;/
+  );
 });
 
 test("ordinary rail flattening survives Analysis siblings inserted after the instrument", () => {
