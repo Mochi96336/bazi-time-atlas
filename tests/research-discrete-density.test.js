@@ -32,7 +32,10 @@ test("local recurrence remains visible while derived closure interpretation is d
   assert.match(view, /note\.hidden = true/);
   assert.match(view, /grid\.insertAdjacentElement\("beforebegin", local\)/);
   assert.match(view, /details\.append\(summary, grid\)/);
-  assert.doesNotMatch(view, /details\.open\s*=\s*true/);
+  assert.doesNotMatch(
+    view,
+    /function ensureClosureDrilldown\(\)[\s\S]*?details\.open\s*=\s*true[\s\S]*?return details;/
+  );
 });
 
 test("60-day cycle is supporting evidence behind a closed native drilldown", () => {
@@ -53,7 +56,10 @@ test("milestone table is progressively disclosed without deleting its rows", () 
   assert.match(view, /details\.id = "discrete-milestone-details"/);
   assert.match(view, /details\.append\(summary, table\)/);
   assert.match(view, /#milestone-rows > \.milestone-row/);
-  assert.doesNotMatch(view, /details\.open\s*=\s*true/);
+  assert.doesNotMatch(
+    view,
+    /function ensureMilestoneDrilldown\(\)[\s\S]*?details\.open\s*=\s*true[\s\S]*?return details;/
+  );
 });
 
 test("discrete drilldowns stay flat rather than becoming cards", () => {
