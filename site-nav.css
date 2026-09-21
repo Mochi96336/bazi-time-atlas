@@ -84,9 +84,18 @@
     display: none;
   }
 
+  .kinetic-topbar .site-nav {
+    align-items: center;
+  }
+
   .kinetic-topbar .site-nav a.research-link[data-nav-role="research"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
     margin-left: 0;
-    padding-left: 0;
+    padding: 0 2px;
+    line-height: 1;
   }
 
   .kinetic-topbar .site-nav a.research-link[data-nav-role="research"]::before {
