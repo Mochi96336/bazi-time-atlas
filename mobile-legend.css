@@ -1,49 +1,25 @@
-/* Mobile Tools composition owns the compact observation rail only. Normal
-   reading identities remain positioned directly on the radial stack by
-   ux-analysis.css. Wheel geometry, time state and reference semantics stay in
-   their existing owners. */
+/* Mobile Tools keeps only product-level actions visible. Ring layer toggles
+   and relative reference-frame controls remain in DOM/runtime ownership for
+   regression and research, but are not user-facing chrome. */
 @media (max-width: 480px) {
-  /* Layer visibility is not a product task on mobile, matching the desktop
-     workspace. Keep the underlying toggle DOM for regression/debug ownership,
-     but expose only the reference-frame control. */
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
-    top: 48px;
-    left: 9px;
-    right: 64px;
-    display: block;
-    width: auto;
-    pointer-events: none;
-  }
-
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle],
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
     display: none !important;
   }
 
-  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
-    display: flex;
-    width: max-content;
-    max-width: 100%;
-    min-width: 0;
-    margin: 0;
-    gap: 5px;
-    align-items: center;
-    pointer-events: auto;
-    font-size: 7.5px;
+  /* With the observation row retired, Done returns to the primary action row.
+     Reserve its width in the toolbar so it never overlaps Now / Find Time. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    right: 56px;
   }
-  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
-    min-height: 28px;
-    max-width: 170px;
-    font-size: 9px;
-  }
-
-  /* Reference frame and Done share one quiet secondary row rather than stacking
-     five layer toggles plus a third exit row over the wheel. */
   #kinetic-instrument[data-analysis-open="true"] .analysis-close {
-    top: 48px;
+    top: 10px;
     left: auto;
     right: 9px;
+    min-height: 30px;
+    padding-inline: 6px;
   }
   #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
-    top: 82px;
+    top: 48px;
   }
 }
