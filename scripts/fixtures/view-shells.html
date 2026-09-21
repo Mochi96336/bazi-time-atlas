@@ -107,6 +107,11 @@
 
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
+      const recurrenceToolbar = recurrenceDoc.querySelector(".recurrence-toolbar");
+      const deltaDock = recurrenceDoc.querySelector(".delta-dock");
+      const candidateButtons = recurrenceDoc.querySelector("#candidate-buttons");
+      const deltaNumber = recurrenceDoc.querySelector("#delta-number");
+      const deltaSlider = recurrenceDoc.querySelector("#delta-slider");
       const recurrenceOutline = recurrenceDoc.querySelector(".research-outline");
       const recurrenceOutlineLinks = [...recurrenceDoc.querySelectorAll(".research-outline a")];
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
@@ -116,6 +121,7 @@
       const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
       const discreteTaskHead = recurrenceDoc.querySelector("#research-discrete > .research-task-head");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
+      const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
       const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
       const astronomyTaskHeadRect = astronomyTaskHead?.getBoundingClientRect();
@@ -144,6 +150,15 @@
       probe.dataset.recurrenceInstrumentVisibleHeight = String(Math.round(visibleInstrumentHeight));
       probe.dataset.recurrenceInstrumentStartsInFirstViewport = String(Boolean(
         recurrenceRect && recurrenceRect.top >= 0 && recurrenceRect.top < viewportHeight * .55
+      ));
+      probe.dataset.recurrenceCandidateInDeltaDock = String(Boolean(candidateButtons && deltaDock?.contains(candidateButtons)));
+      probe.dataset.recurrenceCandidateInToolbar = String(Boolean(candidateButtons && recurrenceToolbar?.contains(candidateButtons)));
+      probe.dataset.recurrenceDeltaNumberInDock = String(Boolean(deltaNumber && deltaDock?.contains(deltaNumber)));
+      probe.dataset.recurrenceDeltaSliderInDock = String(Boolean(deltaSlider && deltaDock?.contains(deltaSlider)));
+      probe.dataset.recurrenceCandidateCount = String(candidateButtons?.querySelectorAll("button").length ?? -1);
+      probe.dataset.recurrenceDeltaDockTop = String(Math.round(deltaDockRect?.top ?? -1));
+      probe.dataset.recurrenceDeltaDockGap = String(Math.round(
+        recurrenceRect && deltaDockRect ? deltaDockRect.top - recurrenceRect.bottom : -1
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];
