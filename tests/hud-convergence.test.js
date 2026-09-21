@@ -99,7 +99,11 @@ test("mobile classification evidence is flat instead of another rounded card", (
   );
   assert.match(mobile, /\.classification-keys i \{[\s\S]*?border-radius:\s*2px;/);
   assert.match(mobile, /\.classification-current \{\s*display:none;/);
-  assert.match(mobile, /margin-bottom:\s*96px;/, "keep the existing no-overlap reservation while flattening chrome");
+  assert.match(mobile, /\.classification-row header span \{[^}]*font-size:\s*8\.5px;/);
+  assert.match(mobile, /\.classification-row header small \{[^}]*font-size:\s*6\.5px;/);
+  assert.match(mobile, /\.classification-keys i \{[\s\S]*?height:\s*17px;[\s\S]*?font-size:\s*7\.5px;/);
+  assert.match(mobile, /\.classification-warning \{[\s\S]*?font-size:\s*7px;/);
+  assert.match(mobile, /margin-bottom:\s*108px;/, "reserve enough scroll band for readable classification evidence");
 });
 
 test("duplicate state strip leaves ordinary reading but remains available in Analysis", () => {
