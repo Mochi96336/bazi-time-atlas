@@ -68,6 +68,13 @@ if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('clas
 if (!discrete.includes('id="research-cycle-title">甲子</') || !discrete.includes('id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</')) {
   throw new Error(`60-day Ganzhi cycle did not initialize at 甲子 / 01: ${probe.url}`);
 }
+const sexagenaryDetail = detailsById(probe.dom, "discrete-sexagenary-details");
+if (!sexagenaryDetail || !sexagenaryDetail.includes('data-research-drilldown="discrete-sexagenary"')) {
+  throw new Error(`60-day cycle did not move behind its supporting-evidence disclosure: ${probe.url}`);
+}
+if (/^<details[^>]*\sopen(?:\s|=|>)/.test(sexagenaryDetail)) {
+  throw new Error(`60-day supporting evidence must remain closed by default: ${probe.url}`);
+}
 if (discrete.includes('class="near-search-panel"') || discrete.includes('id="four-pillar-determinacy"')) {
   throw new Error(`discrete task still owns downstream astronomy/evidence UI: ${probe.url}`);
 }
@@ -97,4 +104,13 @@ if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|�
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 
-console.log(`[research-hierarchy] PASS concise three-section ownership + RMS astronomy headline + restored 60-day cycle at 390px: ${probe.url}`);
+const cycleDeepLink = dump("recurrence.html#research-sexagenary-cycle");
+const cycleDeepLinkDetail = detailsById(cycleDeepLink.dom, "discrete-sexagenary-details");
+if (!cycleDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(cycleDeepLinkDetail)) {
+  throw new Error(`direct 60-day cycle hash did not auto-open supporting evidence: ${cycleDeepLink.url}`);
+}
+if (!cycleDeepLinkDetail.includes('id="research-sexagenary-cycle"')) {
+  throw new Error(`direct 60-day cycle hash lost its original section owner: ${cycleDeepLink.url}`);
+}
+
+console.log(`[research-hierarchy] PASS concise three-section ownership + closed-by-default 60-day support + deep-link reveal + RMS astronomy headline at 390px: ${probe.url}`);
