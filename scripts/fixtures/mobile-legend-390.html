@@ -17,10 +17,12 @@
     const params = new URLSearchParams(location.search);
     const analysis = params.get("analysis") === "1";
     const edit = params.get("edit") === "1";
+    const classificationMode = params.get("classification") === "1";
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     const query = new URLSearchParams({ instant:"2027-03-15T13:20:09.000Z" });
     if (analysis) query.set("analysis", "1");
+    if (classificationMode) query.set("classification", "1");
     frame.src = new URL(`../../?${query}`, location.href).href;
 
     function writeRect(name, rect) {
@@ -66,6 +68,11 @@
       const close = doc.querySelector("#analysis-close");
       const stateStrip = doc.querySelector(".state-strip");
       const classification = doc.querySelector("#classification-overlay-button");
+      const classificationLegend = doc.querySelector("#classification-overlay-legend");
+      const classificationHeading = classificationLegend?.querySelector(".classification-row header span") ?? null;
+      const classificationHint = classificationLegend?.querySelector(".classification-row header small") ?? null;
+      const classificationKey = classificationLegend?.querySelector(".classification-keys i") ?? null;
+      const classificationWarning = classificationLegend?.querySelector(".classification-warning") ?? null;
       const findTime = doc.querySelector("#inverse-time-search-button");
       const solarTime = doc.querySelector("#solar-time-tool-button");
       const now = doc.querySelector("#now-button");
@@ -90,6 +97,7 @@
       writeRect("close", close?.getBoundingClientRect());
       writeRect("findTime", findTime?.getBoundingClientRect());
       writeRect("classification", classification?.getBoundingClientRect());
+      writeRect("classificationLegend", classificationLegend?.getBoundingClientRect());
       writeRect("solarTime", solarTime?.getBoundingClientRect());
       writeRect("now", now?.getBoundingClientRect());
       writeRect("fourPillars", fourPillars?.getBoundingClientRect());
@@ -101,6 +109,12 @@
       probe.dataset.closeVisible = String(visible(win, close));
       probe.dataset.stateStripVisible = String(visible(win, stateStrip));
       probe.dataset.classificationVisible = String(visible(win, classification));
+      probe.dataset.classificationLegendVisible = String(visible(win, classificationLegend));
+      probe.dataset.classificationHeadingFont = classificationHeading ? win.getComputedStyle(classificationHeading).fontSize : "";
+      probe.dataset.classificationHintFont = classificationHint ? win.getComputedStyle(classificationHint).fontSize : "";
+      probe.dataset.classificationKeyFont = classificationKey ? win.getComputedStyle(classificationKey).fontSize : "";
+      probe.dataset.classificationKeyHeight = classificationKey ? classificationKey.getBoundingClientRect().height.toFixed(2) : "NaN";
+      probe.dataset.classificationWarningFont = classificationWarning ? win.getComputedStyle(classificationWarning).fontSize : "";
       probe.dataset.findTimeVisible = String(visible(win, findTime));
       probe.dataset.solarTimeVisible = String(visible(win, solarTime));
       probe.dataset.nowVisible = String(visible(win, now));
