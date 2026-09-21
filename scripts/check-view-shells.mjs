@@ -93,6 +93,11 @@ requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "6
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
+requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
+requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
+requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
+requireEqual(attr(probe, "data-recurrence-delta-slider-in-dock"), "true", "Recurrence slider left the unified dock", url);
+requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
 
 const outlineTop = Number(attr(probe, "data-recurrence-outline-top"));
 const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
@@ -103,6 +108,8 @@ const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height")
 const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
 const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"));
+const deltaDockTop = Number(attr(probe, "data-recurrence-delta-dock-top"));
+const deltaDockGap = Number(attr(probe, "data-recurrence-delta-dock-gap"));
 if (
   ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, recurrenceTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < recurrenceTop)
@@ -118,6 +125,18 @@ if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
 }
 if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) {
   throw new Error(`Recurrence mobile first viewport must still expose a substantial instrument area (${recurrenceVisibleHeight}px): ${url}`);
+}
+if (
+  !Number.isFinite(deltaDockTop)
+  || !Number.isFinite(deltaDockGap)
+  || deltaDockTop <= recurrenceTop
+  || deltaDockGap < 8
+  || deltaDockGap > 20
+) {
+  throw new Error(
+    "Recurrence displacement dock must stay directly attached below the instrument " +
+    "(top=" + deltaDockTop + ", gap=" + deltaDockGap + "): " + url
+  );
 }
 if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
   throw new Error(`60-day supporting evidence must collapse to one compact rail by default (${sexagenaryDetailsHeight}px): ${url}`);
