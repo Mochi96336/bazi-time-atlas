@@ -56,13 +56,15 @@
      reference-frame control on the left edge. */
   #kinetic-instrument[data-analysis-open="true"] .ring-legend {
     position: fixed;
-    z-index: 10;
-    left: 18px;
+    z-index: 31;
+    top: 8px;
+    left: clamp(190px, 18vw, 280px);
     right: auto;
-    top: 52px;
-    width: 286px;
-    min-height: 0;
-    display: block;
+    width: max-content;
+    max-width: 260px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
     padding: 0;
     border: 0;
     box-shadow: none;
