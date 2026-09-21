@@ -111,10 +111,14 @@
       const recurrenceOutlineLinks = [...recurrenceDoc.querySelectorAll(".research-outline a")];
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
+      const sexagenaryDetails = recurrenceDoc.querySelector("#discrete-sexagenary-details");
+      const astronomyTaskHead = recurrenceDoc.querySelector("#research-astronomy > .research-task-head");
       const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
       const discreteTaskHead = recurrenceDoc.querySelector("#research-discrete > .research-task-head");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
+      const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
+      const astronomyTaskHeadRect = astronomyTaskHead?.getBoundingClientRect();
       const taskNavRect = researchTaskNav?.getBoundingClientRect();
       const taskHeadRect = discreteTaskHead?.getBoundingClientRect();
       const viewportHeight = recurrenceWin.innerHeight;
@@ -128,6 +132,9 @@
       probe.dataset.recurrenceOutlineTop = String(Math.round(outlineRect?.top ?? -1));
       probe.dataset.recurrenceOutlineBottom = String(Math.round(outlineRect?.bottom ?? -1));
       probe.dataset.recurrenceOutlineHeight = String(Math.round(outlineRect?.height ?? -1));
+      probe.dataset.recurrenceSexagenaryDetailsOpen = String(Boolean(sexagenaryDetails?.open));
+      probe.dataset.recurrenceSexagenaryDetailsHeight = String(Math.round(sexagenaryDetailsRect?.height ?? -1));
+      probe.dataset.recurrenceAstronomyTaskTop = String(Math.round(astronomyTaskHeadRect?.top ?? -1));
       probe.dataset.recurrenceTaskNavVisible = String(Boolean(researchTaskNav && !hidden(recurrenceWin, researchTaskNav)));
       probe.dataset.recurrenceTaskNavTop = String(Math.round(taskNavRect?.top ?? -1));
       probe.dataset.recurrenceTaskHeadTop = String(Math.round(taskHeadRect?.top ?? -1));
