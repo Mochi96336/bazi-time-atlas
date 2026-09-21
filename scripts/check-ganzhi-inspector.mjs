@@ -144,6 +144,10 @@ const mobileCloseHeight = Number(attr(mobileProbe, "data-close-height"));
 const mobileTabHeight = Number(attr(mobileProbe, "data-tab-min-height"));
 const mobileSwitchHeight = Number(attr(mobileProbe, "data-switch-min-height"));
 const mobileHeaderHeight = Number(attr(mobileProbe, "data-header-height"));
+const mobilePillarMetaFont = Number.parseFloat(attr(mobileProbe, "data-pillar-meta-font") ?? "");
+const mobileStructureMetaFont = Number.parseFloat(attr(mobileProbe, "data-structure-meta-font") ?? "");
+const mobileHiddenStemRoleFont = Number.parseFloat(attr(mobileProbe, "data-hidden-stem-role-font") ?? "");
+const mobileTenGodMetaFont = Number.parseFloat(attr(mobileProbe, "data-ten-god-meta-font") ?? "");
 const mobileLeft = Number(attr(mobileProbe, "data-inspector-left"));
 const mobileRight = Number(attr(mobileProbe, "data-inspector-right"));
 const mobileBottom = Number(attr(mobileProbe, "data-inspector-bottom"));
@@ -156,6 +160,17 @@ if (
   throw new Error(
     `Mobile Ganzhi inspector touch geometry failed ` +
     `(close=${mobileCloseHeight}, tab=${mobileTabHeight}, switch=${mobileSwitchHeight}, header=${mobileHeaderHeight}): ${mobileFixture.url}`
+  );
+}
+if (
+  !Number.isFinite(mobilePillarMetaFont) || mobilePillarMetaFont < 8.5
+  || !Number.isFinite(mobileStructureMetaFont) || mobileStructureMetaFont < 8.5
+  || !Number.isFinite(mobileHiddenStemRoleFont) || mobileHiddenStemRoleFont < 8.5
+  || !Number.isFinite(mobileTenGodMetaFont) || mobileTenGodMetaFont < 8.5
+) {
+  throw new Error(
+    `Mobile Ganzhi inspector metadata fell below the readable floor ` +
+    `(pillar=${mobilePillarMetaFont}, structure=${mobileStructureMetaFont}, hidden=${mobileHiddenStemRoleFont}, tenGod=${mobileTenGodMetaFont}): ${mobileFixture.url}`
   );
 }
 if (
