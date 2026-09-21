@@ -371,6 +371,12 @@
     min-height: 38px;
     padding-inline: 3px;
   }
+  .ganzhi-inspector-pillar-switch span,
+  .ganzhi-structure-pillar small,
+  .ganzhi-structure-chip i,
+  .ganzhi-ten-god-row > small {
+    font-size: 9px;
+  }
   .ganzhi-inspector-identity { padding: 14px; }
   .ganzhi-inspector-parts { padding: 0 14px 10px; }
   .ganzhi-inspector-neighbors { margin: 0 14px 12px; }
