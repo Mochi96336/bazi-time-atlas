@@ -14,8 +14,8 @@ import {
 } from "../src/wheel/material-prototype.js";
 import { ringModel } from "../src/wheel/ring-model.js";
 
-test("material prototype modes are query-only and fail closed to SVG", () => {
-  assert.equal(resolveMaterialMode(""), MATERIAL_MODES.SVG);
+test("roughness is the production default while explicit invalid modes fail closed to SVG", () => {
+  assert.equal(resolveMaterialMode(""), MATERIAL_MODES.ROUGHNESS);
   assert.equal(resolveMaterialMode("?material=svg"), MATERIAL_MODES.SVG);
   assert.equal(resolveMaterialMode("?material=roughness"), MATERIAL_MODES.ROUGHNESS);
   assert.equal(resolveMaterialMode("?material=roughness-normal"), MATERIAL_MODES.SVG);
@@ -84,12 +84,27 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
 
   assert.match(html, /<canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"><\/canvas>/);
   assert.match(css, /\.material-wheel-layer\s*\{[\s\S]*?pointer-events:\s*none;/);
-  assert.match(css, /data-material-prototype="roughness"\] \.m2-ring-bed,[\s\S]*?data-material-prototype="roughness"\] \.m2-ring-material-face[\s\S]*?opacity:\s*0;/);
+  assert.match(css, /data-material-prototype="roughness"\] \.material-wheel-layer\s*\{[\s\S]*?opacity:\s*1;/);
+  assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
+  assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-material-face/);
   assert.match(renderer, /materialPrototype\.updateFrame\(renderedRotations\)/);
   assert.match(material, /localPoint = rotation\(-ringRotation\) \* point/);
-  assert.match(material, /broadSlope = radial \* 0\.180/);
-  assert.doesNotMatch(material, /localGradient|screenGradient|u_material_mode/);
+  assert.match(material, /const float FIELD_PERIOD = 24\.0/);
+  assert.match(material, /roughness = clamp\(0\.82 \+ fieldCentered \* 0\.04, 0\.80, 0\.84\)/);
+  assert.match(material, /specularPower = mix\(22\.0, 10\.0, roughness\)/);
+  assert.match(material, /surfaceSheen = 1\.0 \+ fieldCentered \* 0\.10/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specular \* 1\.35, 0\.0, 0\.055\)/);
+  assert.match(material, /out_color = vec4\(reflectionTint \* overlayAlpha, overlayAlpha\)/);
+  assert.doesNotMatch(material, /vec3 base =|bodyResponse/);
+  assert.match(material, /\* \(0\.032 \+ \(1\.0 - roughness\) \* 0\.26\) \* surfaceSheen/);
+  assert.match(material, /vec3 normal = vec3\(0\.0, 0\.0, 1\.0\)/);
+  assert.doesNotMatch(material, /fieldDx|fieldDy|microSlope/);
+  assert.doesNotMatch(material, /crownSlope|float diffuse|lightAlignment|broadSheen/);
+  assert.doesNotMatch(material, /scatterEnergy|outerCatch|innerCatch|bevelEnergy|microSheen/);
   assert.match(material, /lightDirection = normalize\(vec3\(-0\.42, -0\.56, 0\.714\)\)/);
+  assert.match(material, /materialWasExplicit = new URLSearchParams\(search\)\.has\("material"\)/);
+  assert.match(material, /requestIdleCallback\(activate, \{ timeout: 1800 \}\)/);
+  assert.match(material, /globalThis\.addEventListener\?\.\("load", scheduleIdleActivation, \{ once:true \}\)/);
   assert.match(material, /svg\.getScreenCTM\?\.\(\)/);
   assert.match(material, /screenToSvg = screenCtm\.inverse\(\)/);
   assert.match(material, /uniform vec2 u_fan_degrees/);
