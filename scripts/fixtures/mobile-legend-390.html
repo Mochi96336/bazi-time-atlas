@@ -70,6 +70,9 @@
       const now = doc.querySelector("#now-button");
       const play = doc.querySelector("#play-button");
       const cursorNote = doc.querySelector("#cursor-layer .cursor-note");
+      const fourPillars = doc.querySelector("#atlas-visible-ten-gods");
+      const fourPillarCells = [...doc.querySelectorAll(".atlas-visible-ten-gods-cell")];
+      const fourPillarsNote = doc.querySelector(".atlas-visible-ten-gods-note");
       const scaleButtons = [...doc.querySelectorAll(".scale-button")];
       const ringToggles = [...doc.querySelectorAll(".ring-legend-row[data-ring-toggle]")];
       const visibleCount = nodes => nodes.filter(node => visible(win, node)).length;
@@ -77,6 +80,8 @@
       writeRect("toolbar", toolbar?.getBoundingClientRect());
       writeRect("open", open?.getBoundingClientRect());
       writeRect("close", close?.getBoundingClientRect());
+      writeRect("fourPillars", fourPillars?.getBoundingClientRect());
+      fourPillarCells.forEach((cell, index) => writeRect(`fourPillarCell${index}`, cell.getBoundingClientRect()));
 
       probe.dataset.referenceVisible = String(visible(win, reference));
       probe.dataset.openVisible = String(visible(win, open));
@@ -88,6 +93,9 @@
       probe.dataset.nowVisible = String(visible(win, now));
       probe.dataset.playVisible = String(visible(win, play));
       probe.dataset.cursorNoteVisible = String(visible(win, cursorNote));
+      probe.dataset.fourPillarsVisible = String(visible(win, fourPillars));
+      probe.dataset.fourPillarsCellCount = String(fourPillarCells.length);
+      probe.dataset.fourPillarsNoteVisible = String(visible(win, fourPillarsNote));
       probe.dataset.scaleVisible = String(visibleCount(scaleButtons));
       probe.dataset.ringToggleVisible = String(visibleCount(ringToggles));
       probe.dataset.analysisOpen = instrument.dataset.analysisOpen ?? "";
