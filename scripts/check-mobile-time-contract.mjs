@@ -45,7 +45,10 @@ if (attr(probe, "data-mobile-initial-utc") !== "9" || attr(probe, "data-mobile-i
 if (!["auto", "scroll"].includes(attr(probe, "data-shell-overflow-y"))) throw new Error(`mobile shell cannot scroll vertically when overflow is needed: ${url}`);
 if (attr(probe, "data-dock-reachable") !== "true") throw new Error(`mobile exact-time dock is not reachable in the shell viewport or its scroll range: ${url}`);
 if (attr(probe, "data-dock-after-instrument") !== "true") throw new Error(`exact-time dock does not follow the instrument in reading order: ${url}`);
-if (attr(probe, "data-apply-visible") !== "true") throw new Error(`exact-time apply action is not visible: ${url}`);
+if (attr(probe, "data-apply-visible") !== "false") throw new Error(`idle ordinary exact-time Apply should stay hidden: ${url}`);
+if (attr(probe, "data-apply-visible-after-edit") !== "true" || attr(probe, "data-dirty-after-edit") !== "true") {
+  throw new Error(`edited ordinary exact-time rail did not reveal Apply with dirty state: ${url}`);
+}
 const share = Number(attr(probe, "data-instrument-share"));
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`instrument no longer owns the first mobile viewport (share=${share}): ${url}`);
 
