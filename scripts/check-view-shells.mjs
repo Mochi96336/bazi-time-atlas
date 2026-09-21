@@ -87,16 +87,28 @@ requireEqual(attr(probe, "data-sexagenarydesktop-width"), "1200", "sexagenary de
 
 requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile lede must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
+requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
+requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
 
+const outlineTop = Number(attr(probe, "data-recurrence-outline-top"));
+const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
+const outlineHeight = Number(attr(probe, "data-recurrence-outline-height"));
 const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
 const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
 const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
-if (![taskHeadTop, recurrenceTop].every(Number.isFinite) || !(taskHeadTop < recurrenceTop)) {
-  throw new Error(`Recurrence mobile section 01 must precede the instrument (${taskHeadTop}, ${recurrenceTop}): ${url}`);
+if (
+  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, recurrenceTop].every(Number.isFinite)
+  || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < recurrenceTop)
+  || outlineHeight > 42
+) {
+  throw new Error(
+    `Recurrence mobile outline must stay compact and precede section 01 ` +
+    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}, instrument=${recurrenceTop}): ${url}`
+  );
 }
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
   throw new Error(`Recurrence mobile instrument became too shallow (${recurrenceHeight}px): ${url}`);
