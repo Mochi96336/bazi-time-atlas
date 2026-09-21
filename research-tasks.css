@@ -1,3 +1,39 @@
+.research-outline {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0;
+  margin:0 2px 16px;
+  border-top:1px solid rgba(238,242,237,.09);
+  border-bottom:1px solid rgba(238,242,237,.07);
+}
+.research-outline a {
+  min-width:0;
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  min-height:34px;
+  padding:8px 4px 7px;
+  color:#7f8982;
+  text-decoration:none;
+}
+.research-outline a + a { border-left:1px solid rgba(238,242,237,.045); }
+.research-outline span {
+  flex:0 0 auto;
+  color:#58635c;
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.1em;
+}
+.research-outline strong {
+  min-width:0;
+  color:#aeb7b1;
+  font-size:10px;
+  font-weight:650;
+  white-space:nowrap;
+}
+.research-outline a:hover strong,
+.research-outline a:focus-visible strong { color:#eef2ed; }
+
 .research-task {
   scroll-margin-top:18px;
   margin-top:50px;
