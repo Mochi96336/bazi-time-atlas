@@ -9,6 +9,16 @@ const [view, css, host, recurrenceGate] = await Promise.all([
   readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8")
 ]);
 
+function functionSlice(source, name, nextName) {
+  const start = source.indexOf(`function ${name}(`);
+  const end = source.indexOf(`function ${nextName}(`, start + 1);
+  assert.ok(start >= 0 && end > start, `missing function slice ${name} → ${nextName}`);
+  return source.slice(start, end);
+}
+
+const closureView = functionSlice(view, "ensureClosureDrilldown", "hashTargetsCycle");
+const milestoneView = functionSlice(view, "ensureMilestoneDrilldown", "syncMilestoneMeta");
+
 test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.recurrence-intro > \.scope-note/);
   assert.match(view, /\.remove\(\)/);
@@ -32,7 +42,20 @@ test("local recurrence remains visible while derived closure interpretation is d
   assert.match(view, /note\.hidden = true/);
   assert.match(view, /grid\.insertAdjacentElement\("beforebegin", local\)/);
   assert.match(view, /details\.append\(summary, grid\)/);
-  assert.doesNotMatch(view, /details\.open\s*=\s*true/);
+  assert.doesNotMatch(closureView, /details\.open\s*=\s*true/);
+});
+
+test("60-day cycle is supporting evidence behind a closed native drilldown", () => {
+  assert.match(view, /details\.id = "discrete-sexagenary-details"/);
+  assert.match(view, /details\.dataset\.researchDrilldown = "discrete-sexagenary"/);
+  assert.match(view, /六十日干支循環/);
+  assert.match(view, /60 日後配對重新重合/);
+  assert.match(view, /details\.append\(summary, cycle\)/);
+  assert.doesNotMatch(view, /discrete-sexagenary-details[\s\S]*?\.open\s*=\s*true/);
+  assert.match(view, /hashTargetsCycle\(cycle\)/);
+  assert.match(view, /details\.open = true/);
+  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?margin-top:\s*0;[\s\S]*?border-top:\s*0;/);
+  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle \.research-cycle-head\s*\{\s*display:\s*none;/);
 });
 
 test("milestone table is progressively disclosed without deleting its rows", () => {
@@ -40,7 +63,7 @@ test("milestone table is progressively disclosed without deleting its rows", () 
   assert.match(view, /details\.id = "discrete-milestone-details"/);
   assert.match(view, /details\.append\(summary, table\)/);
   assert.match(view, /#milestone-rows > \.milestone-row/);
-  assert.doesNotMatch(view, /details\.open\s*=\s*true/);
+  assert.doesNotMatch(milestoneView, /details\.open\s*=\s*true/);
 });
 
 test("discrete drilldowns stay flat rather than becoming cards", () => {

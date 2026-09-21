@@ -63,6 +63,20 @@ captures.push(
     height: 3100,
   },
   {
+    name: "recurrence-sexagenary-1440x1700.png",
+    page: "recurrence-sexagenary",
+    path: "recurrence.html#research-sexagenary-cycle",
+    width: 1440,
+    height: 1700,
+  },
+  {
+    name: "recurrence-sexagenary-390x1900.png",
+    page: "recurrence-sexagenary",
+    path: "recurrence.html#research-sexagenary-cycle",
+    width: 390,
+    height: 1900,
+  },
+  {
     name: "recurrence-search-1440x1750.png",
     page: "recurrence-search",
     path: "recurrence.html?date=2026-09-13&delta=24000",

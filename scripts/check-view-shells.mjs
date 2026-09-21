@@ -89,6 +89,7 @@ requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mob
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
+requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
@@ -100,6 +101,8 @@ const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
 const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
 const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
+const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
+const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"));
 if (
   ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, recurrenceTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < recurrenceTop)
@@ -115,6 +118,12 @@ if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
 }
 if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) {
   throw new Error(`Recurrence mobile first viewport must still expose a substantial instrument area (${recurrenceVisibleHeight}px): ${url}`);
+}
+if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
+  throw new Error(`60-day supporting evidence must collapse to one compact rail by default (${sexagenaryDetailsHeight}px): ${url}`);
+}
+if (!Number.isFinite(astronomyTaskTop) || astronomyTaskTop <= recurrenceTop + recurrenceHeight) {
+  throw new Error(`Research section 02 must remain after the primary recurrence instrument (${astronomyTaskTop}px): ${url}`);
 }
 
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);

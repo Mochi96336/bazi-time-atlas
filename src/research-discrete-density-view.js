@@ -59,6 +59,44 @@ function ensureClosureDrilldown() {
   return details;
 }
 
+function hashTargetsCycle(cycle) {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (!id) return false;
+  const target = document.getElementById(id);
+  return Boolean(target && (target === cycle || cycle.contains(target)));
+}
+
+function revealCycleHash(details, cycle) {
+  if (!details || !cycle || !hashTargetsCycle(cycle)) return;
+  details.open = true;
+  requestAnimationFrame(() => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    document.getElementById(id)?.scrollIntoView({ block:"start" });
+  });
+}
+
+function ensureSexagenaryDrilldown() {
+  const cycle = researchDiscrete?.querySelector("#research-sexagenary-cycle");
+  if (!cycle) return null;
+
+  let details = cycle.closest("#discrete-sexagenary-details");
+  if (!details) {
+    details = document.createElement("details");
+    details.id = "discrete-sexagenary-details";
+    details.className = "research-discrete-drilldown research-sexagenary-drilldown";
+    details.dataset.researchDrilldown = "discrete-sexagenary";
+
+    const summary = document.createElement("summary");
+    summary.innerHTML = "<span>六十日干支循環</span><strong>60 日後配對重新重合</strong>";
+
+    cycle.insertAdjacentElement("beforebegin", details);
+    details.append(summary, cycle);
+  }
+
+  revealCycleHash(details, cycle);
+  return details;
+}
+
 function ensureMilestoneDrilldown() {
   const table = researchDiscrete?.querySelector(".milestone-table");
   if (!table) return null;
@@ -92,6 +130,7 @@ function syncDiscretePresentation() {
   removeDuplicateScopeNote();
   consolidateGlobalPeriod();
   ensureClosureDrilldown();
+  ensureSexagenaryDrilldown();
   const details = ensureMilestoneDrilldown();
   syncMilestoneMeta(details);
 }
@@ -100,5 +139,10 @@ if (researchDiscrete) {
   ensureStyles();
   const rows = researchDiscrete.querySelector("#milestone-rows");
   if (rows) new MutationObserver(syncDiscretePresentation).observe(rows, { childList:true });
+  window.addEventListener("hashchange", () => {
+    const cycle = researchDiscrete.querySelector("#research-sexagenary-cycle");
+    const details = cycle?.closest("#discrete-sexagenary-details");
+    revealCycleHash(details, cycle);
+  });
   syncDiscretePresentation();
 }
