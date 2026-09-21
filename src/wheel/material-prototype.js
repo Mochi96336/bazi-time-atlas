@@ -41,7 +41,7 @@ const FRAGMENT_SHADER = [
   "out vec4 out_color;",
   "",
   "const float PI = 3.141592653589793;",
-  "const float FIELD_PERIOD = 256.0;",
+  "const float FIELD_PERIOD = 24.0;",
   "",
   "mat2 rotation(float radians) {",
   "  float c = cos(radians);",
@@ -85,36 +85,32 @@ const FRAGMENT_SHADER = [
   "  float ringRotation = componentAt(u_rotations, index) * PI / 180.0;",
   "  vec2 localPoint = rotation(-ringRotation) * point;",
   "  float field = fieldAt(localPoint);",
-  "  float roughness = clamp(0.86 + (field - 0.5) * 0.07, 0.82, 0.90);",
+  "  float fieldCentered = field - 0.5;",
+  "  float roughness = clamp(0.82 + fieldCentered * 0.04, 0.80, 0.84);",
   "",
-  "  vec2 radial = radius > 0.0 ? point / radius : vec2(0.0, -1.0);",
-  "  vec2 broadSlope = radial * 0.180;",
-  "  vec2 surfaceSlope = broadSlope;",
-  "",
-
-  "  vec3 normal = normalize(vec3(surfaceSlope, 1.0));",
   "  vec3 lightDirection = normalize(vec3(-0.42, -0.56, 0.714));",
   "  vec3 viewDirection = vec3(0.0, 0.0, 1.0);",
   "  vec3 halfVector = normalize(lightDirection + viewDirection);",
-  "  float diffuse = max(dot(normal, lightDirection), 0.0);",
-  "  float specularPower = mix(44.0, 7.0, roughness);",
+  "  vec3 normal = vec3(0.0, 0.0, 1.0);",
+  "  float specularPower = mix(22.0, 10.0, roughness);",
+  "  float surfaceSheen = 1.0 + fieldCentered * 0.10;",
   "  float specular = pow(max(dot(normal, halfVector), 0.0), specularPower)",
-  "    * (1.0 - roughness) * 0.16;",
-  "",
-  "  float ringStep = float(index) * 0.004;",
-  "  vec3 base = vec3(0.055 + ringStep, 0.061 + ringStep, 0.063 + ringStep);",
-  "  float broadResponse = 0.91 + diffuse * 0.090;",
-  "  vec3 color = base * broadResponse + vec3(specular);",
+  "    * (0.032 + (1.0 - roughness) * 0.26) * surfaceSheen;",
   "",
   "  float innerRadius = componentAt(u_inner_radii, index);",
   "  float outerRadius = componentAt(u_outer_radii, index);",
   "  float edgeDistance = min(radius - innerRadius, outerRadius - radius);",
-  "  float alpha = smoothstep(0.0, 1.25, edgeDistance);",
-  "  out_color = vec4(color, alpha);",
+  "",
+  "  vec3 reflectionTint = vec3(0.92, 0.97, 1.00);",
+  "  float edgeMask = smoothstep(0.0, 1.25, edgeDistance);",
+  "  float overlayAlpha = edgeMask * clamp(specular * 1.35, 0.0, 0.055);",
+  "  out_color = vec4(reflectionTint * overlayAlpha, overlayAlpha);",
   "}"
 ].join("\n");
 
 function normalizeMode(value) {
+  if (value === null || value === "") return MATERIAL_MODES.ROUGHNESS;
+  if (value === MATERIAL_MODES.SVG) return MATERIAL_MODES.SVG;
   return SHADER_MODES.has(value) ? value : MATERIAL_MODES.SVG;
 }
 
@@ -294,6 +290,12 @@ function setupRoughnessTexture(gl) {
 
 export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.location?.search ?? "" }) {
   const requestedMode = resolveMaterialMode(search);
+  let materialWasExplicit = false;
+  try {
+    materialWasExplicit = new URLSearchParams(search).has("material");
+  } catch {
+    materialWasExplicit = false;
+  }
   const shell = svg?.closest?.("#kinetic-instrument") ?? null;
   const geometry = materialGeometry();
   const innerRadii = new Float32Array(geometry.map(item => item.innerRadius));
@@ -378,8 +380,8 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
 
-  function initialize() {
-    if (!canvas || !svg || !SHADER_MODES.has(requestedMode)) return false;
+  function activateShader() {
+    if (active || !canvas || !svg || !SHADER_MODES.has(requestedMode)) return active;
 
     try {
       if (new URLSearchParams(search).get("materialWebgl") === "off") {
@@ -432,6 +434,28 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       fallBack(error?.message === "forced WebGL fallback" ? "forced" : "webgl-unavailable");
       return false;
     }
+  }
+
+  function initialize() {
+    if (!canvas || !svg || !SHADER_MODES.has(requestedMode)) return false;
+
+    if (materialWasExplicit) return activateShader();
+
+    const scheduleIdleActivation = () => {
+      const activate = () => activateShader();
+      if (typeof globalThis.requestIdleCallback === "function") {
+        globalThis.requestIdleCallback(activate, { timeout: 1800 });
+      } else {
+        globalThis.setTimeout?.(activate, 900);
+      }
+    };
+
+    if (globalThis.document?.readyState === "complete") {
+      globalThis.setTimeout?.(scheduleIdleActivation, 0);
+    } else {
+      globalThis.addEventListener?.("load", scheduleIdleActivation, { once:true });
+    }
+    return true;
   }
 
   function updateFrame(renderedRotations) {

@@ -73,6 +73,21 @@ function probeMode(browser, mode) {
   }
 }
 
+function probeDefaultProduction(browser) {
+  const url = new URL("?instant=" + instant, baseURL).href;
+  const result = spawnSync(browser, [
+    ...chromiumBaseArgs(),
+    "--window-size=1440,900",
+    "--dump-dom",
+    url
+  ], { encoding:"utf8", timeout:45_000, killSignal:"SIGKILL" });
+
+  if (result.status !== 0) throw new Error("Default material production probe failed");
+  if (!result.stdout.includes('data-material-prototype="roughness"')) {
+    throw new Error("Default production material did not activate roughness after idle");
+  }
+}
+
 function probeForcedFallback(browser) {
   const url = new URL("?material=roughness&materialWebgl=off&instant=" + instant, baseURL).href;
   const result = spawnSync(browser, [
@@ -94,6 +109,7 @@ function probeForcedFallback(browser) {
 await mkdir(outputDir, { recursive:true });
 const browser = findBrowser();
 for (const mode of modes) probeMode(browser, mode);
+probeDefaultProduction(browser);
 probeForcedFallback(browser);
 
 const evidence = [];
