@@ -29,6 +29,7 @@
 @media (min-width:821px) {
   .delta-dock.research-delta-consolidated {
     grid-template-columns: minmax(130px,180px) minmax(0,1fr);
+    grid-template-areas: "number presets" "slider slider";
   }
 }
 
