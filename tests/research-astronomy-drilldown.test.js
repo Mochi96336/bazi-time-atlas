@@ -17,7 +17,7 @@ test("astronomy progressive disclosure keeps three closed native drilldowns", ()
 test("RMS owns the visible astronomy headline while duplicate max residual moves into detail", () => {
   assert.match(view, /headline\.classList\.add\("research-astronomy-rms-rail"\)/);
   assert.match(view, /headline\.dataset\.astronomyVisibleMetric = "rms"/);
-  assert.match(view, /headlineLabel\.textContent = "RMS residual"/);
+  assert.match(view, /headlineLabel\.textContent = "RMS 殘差"/);
   assert.match(view, /maxMetric\.dataset\.astronomyDetailMetric = "max-residual"/);
   assert.match(view, /maxMetric\.append\(maxLabel, maxResidual\)/);
   assert.match(view, /meta\.appendChild\(maxMetric\)/);
