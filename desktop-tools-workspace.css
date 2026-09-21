@@ -57,7 +57,7 @@
   #kinetic-instrument[data-analysis-open="true"] .ring-legend {
     position: fixed;
     z-index: 31;
-    top: 8px;
+    top: 12px;
     left: clamp(190px, 18vw, 280px);
     right: auto;
     width: max-content;
