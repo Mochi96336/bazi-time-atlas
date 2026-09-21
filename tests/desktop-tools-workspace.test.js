@@ -14,10 +14,10 @@ test("desktop Tools installs the edge-workspace layer last", () => {
   );
 });
 
-test("desktop Tools removes transport and layer chrome from the product surface", () => {
+test("desktop Tools removes transport, layer and reference-frame chrome from the product surface", () => {
   assert.match(css, /@media \(min-width: 821px\)/);
   assert.match(css, /\.instrument-toolbar > \.toolbar-group:first-child,[\s\S]*#play-button[\s\S]*display: none !important;/);
-  assert.match(css, /\.ring-legend-row\[data-ring-toggle\][\s\S]*display: none !important;/);
+  assert.match(css, /\.ring-legend \{\s*display: none !important;/);
 });
 
 test("desktop Tools converges global chrome to one focused top row", () => {
