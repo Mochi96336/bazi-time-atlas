@@ -97,6 +97,7 @@
 
       probe.dataset.referenceVisible = String(visible(win, reference));
       probe.dataset.openVisible = String(visible(win, open));
+      probe.dataset.openFontSize = open ? win.getComputedStyle(open).fontSize : "";
       probe.dataset.closeVisible = String(visible(win, close));
       probe.dataset.stateStripVisible = String(visible(win, stateStrip));
       probe.dataset.classificationVisible = String(visible(win, classification));

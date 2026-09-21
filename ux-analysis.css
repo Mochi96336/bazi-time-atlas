@@ -184,16 +184,17 @@
 @media (max-width: 480px) {
   .analysis-toggle,
   .analysis-close {
-    top: 82px;
-    min-height: 21px;
-    padding-inline: 7px;
-    font-size: 7px;
+    top: 10px;
+    min-height: 32px;
+    padding-inline: 8px;
+    font-size: 9px;
+    line-height: 1;
   }
   .analysis-toggle { right: 9px; }
   .analysis-close { left: 9px; }
 
-  /* Keep the quiet 21px visual chrome, but enlarge its real touch target without
-     turning Tools into another pill/button row. */
+  /* Mobile mode entry/exit belongs to the first action row. Keep the visual
+     chrome quiet, while the pseudo-element preserves a comfortable touch halo. */
   .analysis-toggle::before,
   .analysis-close::before {
     content: "";

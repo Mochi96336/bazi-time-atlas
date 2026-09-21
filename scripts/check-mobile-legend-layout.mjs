@@ -69,6 +69,9 @@ function inside(inner, outer) {
 function validateNormal(run, probe, { edited = false } = {}) {
   const instrument = rect(probe, "instrument", "normal", run.url);
   const legend = rect(probe, "legend", "normal", run.url);
+  const toolbar = rect(probe, "toolbar", "normal", run.url);
+  const open = rect(probe, "open", "normal", run.url);
+  const openFontSize = Number.parseFloat(requireAttr(probe, "data-open-font-size", "normal", run.url));
   const labels = DIRECT_LABELS.map(([id, expected]) => ({ id, expected, box:rect(probe, id, "normal", run.url) }));
 
   if (Math.abs(legend.left - instrument.left) > EPS || Math.abs(legend.top - instrument.top) > EPS || legend.width < instrument.width * 0.98 || legend.height < instrument.height * 0.98) {
@@ -96,6 +99,20 @@ function validateNormal(run, probe, { edited = false } = {}) {
     if (dotVisible !== "false" || valueVisible !== "false" || position !== "absolute") {
       throw new Error(`normal: ${id} still behaves like a live HUD row (dot=${dotVisible}, value=${valueVisible}, position=${position}): ${run.url}`);
     }
+  }
+
+  if (
+    Math.abs(open.top - toolbar.top) > 3
+    || open.height < 30
+    || !Number.isFinite(openFontSize)
+    || openFontSize < 8.5
+  ) {
+    throw new Error(
+      "normal: Tools entry fell out of the primary mobile action row " +
+      "(toolbarTop=" + toolbar.top.toFixed(1) +
+      ", open=" + open.top.toFixed(1) + ".." + open.bottom.toFixed(1) +
+      ", font=" + openFontSize + "): " + run.url
+    );
   }
 
   const expectedDirty = String(edited);
