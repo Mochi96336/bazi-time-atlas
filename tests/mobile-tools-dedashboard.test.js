@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
 const legendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
+const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 
 test("mobile Tools retires dashboard-era presets, transport and layer toggles", () => {
   assert.match(
@@ -20,6 +21,13 @@ test("ordinary mobile Tools entry is readable and shares the first action row", 
   assert.match(
     analysisCss,
     /@media \(max-width: 480px\)[\s\S]*?\.analysis-toggle,[\s\S]*?\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?min-height:\s*32px;[\s\S]*?font-size:\s*9px;/
+  );
+});
+
+test("ordinary mobile Now matches the Tools entry action row", () => {
+  assert.match(
+    instrumentCss,
+    /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #now-button\s*\{[\s\S]*?min-height:\s*32px;[\s\S]*?font-size:\s*9px;[\s\S]*?line-height:\s*1;/
   );
 });
 
