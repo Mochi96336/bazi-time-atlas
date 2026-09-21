@@ -99,6 +99,9 @@
 .research-sexagenary-drilldown > .research-cycle .research-cycle-head {
   display: none;
 }
+.research-sexagenary-drilldown > summary strong {
+  font-size: 9px;
+}
 
 
 @media (max-width:480px) {
