@@ -12,22 +12,26 @@ test("mobile Tools retires dashboard-era presets, transport and layer toggles", 
   );
   assert.match(
     legendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\]\s*\{\s*display:\s*none\s*!important;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\],[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control\s*\{\s*display:\s*none\s*!important;/
   );
 });
 
-test("mobile Tools keeps one quiet primary action rail and one observation rail", () => {
+test("mobile Tools keeps one primary row after retiring the reference-frame rail", () => {
   assert.match(
     analysisCss,
     /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar\s*\{[\s\S]*?display:\s*flex;[\s\S]*?justify-content:\s*flex-end;/
   );
   assert.match(
     legendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend\s*\{[\s\S]*?top:\s*48px;[\s\S]*?right:\s*64px;[\s\S]*?display:\s*block;/
+    /\.ring-legend-row\[data-ring-toggle\],[\s\S]*?\.reference-frame-control\s*\{\s*display:\s*none\s*!important;/
   );
   assert.match(
     legendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close\s*\{[\s\S]*?top:\s*48px;[\s\S]*?left:\s*auto;[\s\S]*?right:\s*9px;/
+    /\.instrument-toolbar\s*\{\s*right:\s*56px;/
+  );
+  assert.match(
+    legendCss,
+    /\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*30px;/
   );
 });
 

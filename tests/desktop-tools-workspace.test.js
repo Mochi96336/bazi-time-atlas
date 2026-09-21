@@ -14,10 +14,10 @@ test("desktop Tools installs the edge-workspace layer last", () => {
   );
 });
 
-test("desktop Tools removes transport and layer chrome from the product surface", () => {
+test("desktop Tools removes transport, layer and reference-frame chrome from the product surface", () => {
   assert.match(css, /@media \(min-width: 821px\)/);
   assert.match(css, /\.instrument-toolbar > \.toolbar-group:first-child,[\s\S]*#play-button[\s\S]*display: none !important;/);
-  assert.match(css, /\.ring-legend-row\[data-ring-toggle\][\s\S]*display: none !important;/);
+  assert.match(css, /\.ring-legend \{\s*display: none !important;/);
 });
 
 test("desktop Tools converges global chrome to one focused top row", () => {
@@ -27,8 +27,8 @@ test("desktop Tools converges global chrome to one focused top row", () => {
   assert.match(css, /\.analysis-close \{[\s\S]*position: fixed;[\s\S]*top: 12px;[\s\S]*right: 18px;[\s\S]*min-height: 32px;/);
 });
 
-test("desktop Tools keeps reference in the top chrome and edge tools off the document flow", () => {
-  assert.match(css, /\.ring-legend \{[\s\S]*position: fixed;[\s\S]*top: 12px;[\s\S]*left: clamp\(190px, 18vw, 280px\);[\s\S]*min-height: 32px;[\s\S]*display: flex;[\s\S]*align-items: center;/);
+test("desktop Tools retires reference/layer chrome and keeps edge tools off document flow", () => {
+  assert.match(css, /\.ring-legend \{\s*display: none !important;/);
   assert.match(css, /~ \.timeline-dock \{[\s\S]*display: none !important;/);
   assert.match(css, /\.atlas-solar-time-analysis \{[\s\S]*top: 84px;[\s\S]*width: 340px;/);
   assert.match(css, /data-classification-overlay="on"\] \.classification-overlay-legend \{[\s\S]*top: 84px;/);

@@ -137,6 +137,13 @@
   pointer-events: auto;
 }
 
+/* Relative reference frames remain an engine/research capability, but they are
+   no longer a product control in Tools. Keep the DOM installed so browser and
+   correctness fixtures can drive it directly without exposing it to users. */
+#kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+  display: none !important;
+}
+
 /* The five-cell strip repeats active state already represented at the datum.
    Retire it from ordinary reading; Analysis can still expose the diagnostic
    summary without creating a second owner for Selected Instant. */
@@ -154,11 +161,6 @@
   border-color: rgba(200,204,203,.22);
   box-shadow: 0 34px 100px rgba(0,0,0,.28), inset 0 0 0 1px rgba(200,204,203,.035);
 }
-#kinetic-instrument[data-analysis-open="true"] .reference-frame-control::before {
-  content: "分析 · ";
-  color: #9fa4a5;
-}
-
 /* Free Compare must never look like ordinary time scrubbing. */
 #kinetic-instrument[data-compare-mode="true"] #ring-compare-status {
   font-weight: 780;

@@ -75,22 +75,18 @@ test("analysis mode retains the interactive layer legend instead of duplicating 
   );
 });
 
-test("mobile Tools retires layer toggles and keeps one observation rail", () => {
+test("mobile Tools retires reference-frame and layer chrome into one product row", () => {
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend \{[\s\S]*?top:\s*48px;[\s\S]*?display:\s*block;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\],[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control \{\s*display:\s*none\s*!important;/
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\] \{\s*display:\s*none\s*!important;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar \{\s*right:\s*56px;/
   );
   assert.match(
     mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control \{[\s\S]*?display:\s*flex;[\s\S]*?pointer-events:\s*auto;/
-  );
-  assert.match(
-    mobileLegendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{[\s\S]*?top:\s*48px;[\s\S]*?right:\s*9px;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.analysis-close \{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*30px;/
   );
   assert.doesNotMatch(mobileLegendCss, /^\s*\.ring-legend\s*\{/m);
 });

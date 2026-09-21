@@ -79,8 +79,6 @@ const siteNavRight = numberAttr(probe, "data-site-nav-right", page.url);
 const researchTop = numberAttr(probe, "data-research-top", page.url);
 const researchBottom = numberAttr(probe, "data-research-bottom", page.url);
 const researchHeight = numberAttr(probe, "data-research-height", page.url);
-const legendTop = numberAttr(probe, "data-legend-top", page.url);
-const legendBottom = numberAttr(probe, "data-legend-bottom", page.url);
 const timelineTop = numberAttr(probe, "data-timeline-top", page.url);
 const timelineBottom = numberAttr(probe, "data-timeline-bottom", page.url);
 const timelineLeft = numberAttr(probe, "data-timeline-left", page.url);
@@ -98,7 +96,6 @@ const closeTop = numberAttr(probe, "data-close-top", page.url);
 const closeBottom = numberAttr(probe, "data-close-bottom", page.url);
 const closeRight = numberAttr(probe, "data-close-right", page.url);
 const toolbarFont = numberAttr(probe, "data-toolbar-font", page.url);
-const referenceFont = numberAttr(probe, "data-reference-font", page.url);
 const evidenceValueFont = numberAttr(probe, "data-evidence-value-font", page.url);
 const evidenceInfoMinFont = numberAttr(probe, "data-evidence-info-min-font", page.url);
 const closeFont = numberAttr(probe, "data-close-font", page.url);
@@ -151,8 +148,11 @@ if (researchHeight < 28 || Math.abs(researchCenter - topbarCenter) > 2) {
 if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
   throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
 }
-if (legendTop < topbarTop - 1 || legendBottom > topbarBottom + 2) {
-  throw new Error(`wide desktop: reference control did not converge into the global top row (legend=${legendTop}-${legendBottom}, topbar=${topbarTop}-${topbarBottom}): ${page.url}`);
+if (
+  requireAttr(probe, "data-legend-display", page.url) !== "none"
+  || requireAttr(probe, "data-reference-display", page.url) !== "none"
+) {
+  throw new Error(`wide desktop: retired reference/layer chrome resurfaced in Tools: ${page.url}`);
 }
 if (requireAttr(probe, "data-timeline-display", page.url) !== "none") {
   throw new Error(`wide desktop: duplicate edge exact-time rail resurfaced: ${page.url}`);
@@ -179,10 +179,10 @@ for (const name of ["state-strip", "notes", "sources"]) {
   }
 }
 
-if (toolbarFont < 9 || referenceFont < 9 || evidenceValueFont < 10 || evidenceInfoMinFont < 9 || closeFont < 8) {
+if (toolbarFont < 9 || evidenceValueFont < 10 || evidenceInfoMinFont < 9 || closeFont < 8) {
   throw new Error(
     `wide desktop: control/evidence type fell below readable floor ` +
-    `(toolbar=${toolbarFont}, reference=${referenceFont}, evidence=${evidenceValueFont}, evidenceInfoMin=${evidenceInfoMinFont}, close=${closeFont}): ${page.url}`
+    `(toolbar=${toolbarFont}, evidence=${evidenceValueFont}, evidenceInfoMin=${evidenceInfoMinFont}, close=${closeFont}): ${page.url}`
   );
 }
 if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
@@ -194,8 +194,8 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 
 console.log(
   `[wide-desktop] PASS 2047x1038 edge Tools; ` +
-  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, research=${researchTop}-${researchBottom}, reference=${legendTop}-${legendBottom}, ` +
+  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, research=${researchTop}-${researchBottom}, ` +
   `left=${solarLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
-  `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${evidenceInfoMinFont}/${closeFont}, ` +
+  `fonts=${toolbarFont}/${evidenceValueFont}/${evidenceInfoMinFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
 );

@@ -26,12 +26,11 @@ test("mobile legend keeps per-ring hierarchy ink instead of flattening every val
   assert.doesNotMatch(strongRule[1], /\bfont-weight\s*:/, "mobile rule must not erase per-ring weight hierarchy");
 });
 
-test("mobile Tools observation rail retires layer toggles while reading view keeps direct identities", () => {
+test("mobile Tools retires reference-frame and layer chrome while reading view keeps direct identities", () => {
   const mobile = mobile480Block(layoutCss);
   const analysis = "#kinetic-instrument\\[data-analysis-open=\\\"true\\\"\\]";
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend \\{[^}]*top:\\s*48px;[^}]*display:\\s*block;`, "s"));
-  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend-row\\[data-ring-toggle\\] \\{\\s*display:\\s*none\\s*!important;`));
-  assert.match(mobile, new RegExp(`${analysis} \\.reference-frame-control \\{[^}]*display:\\s*flex;[^}]*pointer-events:\\s*auto;`, "s"));
-  assert.match(mobile, new RegExp(`${analysis} \\.analysis-close \\{[^}]*top:\\s*48px;[^}]*right:\\s*9px;`, "s"));
+  assert.match(mobile, new RegExp(`${analysis} \\.ring-legend-row\\[data-ring-toggle\\],[^}]*${analysis} \\.reference-frame-control \\{\\s*display:\\s*none\\s*!important;`, "s"));
+  assert.match(mobile, new RegExp(`${analysis} \\.instrument-toolbar \\{\\s*right:\\s*56px;`));
+  assert.match(mobile, new RegExp(`${analysis} \\.analysis-close \\{[^}]*top:\\s*10px;[^}]*right:\\s*9px;[^}]*min-height:\\s*30px;`, "s"));
   assert.doesNotMatch(mobile, /^\s*\.ring-legend\s*\{/m, "mobile layout must not own normal reading legend geometry");
 });
