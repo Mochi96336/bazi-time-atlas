@@ -86,14 +86,14 @@ test("desktop Find Time leads the action row instead of sitting between Classifi
   assert.match(view, /insertBefore\(button, classificationButton \?\? nowButton\)/);
 });
 
-test("390px find-time tightens the shared single-task surface", () => {
+test("390px find-time keeps one readable single-task surface", () => {
   assert.match(
     css,
-    /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] #inverse-time-search-button\s*\{[\s\S]*?min-height:\s*27px;[\s\S]*?padding-inline:\s*6px;/
+    /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] #inverse-time-search-button\s*\{[\s\S]*?min-height:\s*40px;[\s\S]*?padding-inline:\s*8px;/
   );
   assert.match(
     css,
-    /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*42px;/
+    /@media \(max-width: 480px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*58px;/
   );
 });
 
