@@ -130,6 +130,45 @@ requireEqual(attr(probe, "data-deep-ready"), "true", "deep-linked inspector fail
 requireEqual(attr(probe, "data-deep-structure-ready"), "true", "?inspect=day did not resolve Structure data", fixture.url);
 requireEqual(attr(probe, "data-deep-structure-tab"), "basic", "deep-linked pillar inspector did not start on Basic", fixture.url);
 
+const mobileFixture = dumpDom("scripts/fixtures/mobile-ganzhi-inspector-390.html", 5000);
+const mobileProbe = tagById(mobileFixture.dom, "probe");
+if (!mobileProbe || attr(mobileProbe, "data-ready") !== "true") {
+  throw new Error(`Mobile Ganzhi inspector fixture did not settle: ${mobileFixture.url}`);
+}
+requireEqual(attr(mobileProbe, "data-inner-width"), "390", "mobile inspector fixture did not produce a 390px child viewport", mobileFixture.url);
+requireEqual(attr(mobileProbe, "data-inspector-visible"), "true", "mobile inspector deep link did not open", mobileFixture.url);
+requireEqual(attr(mobileProbe, "data-tab-count"), "3", "mobile inspector lost Structure tabs", mobileFixture.url);
+requireEqual(attr(mobileProbe, "data-switch-count"), "4", "mobile inspector lost pillar switches", mobileFixture.url);
+
+const mobileCloseHeight = Number(attr(mobileProbe, "data-close-height"));
+const mobileTabHeight = Number(attr(mobileProbe, "data-tab-min-height"));
+const mobileSwitchHeight = Number(attr(mobileProbe, "data-switch-min-height"));
+const mobileHeaderHeight = Number(attr(mobileProbe, "data-header-height"));
+const mobileLeft = Number(attr(mobileProbe, "data-inspector-left"));
+const mobileRight = Number(attr(mobileProbe, "data-inspector-right"));
+const mobileBottom = Number(attr(mobileProbe, "data-inspector-bottom"));
+if (
+  !Number.isFinite(mobileCloseHeight) || mobileCloseHeight < 35
+  || !Number.isFinite(mobileTabHeight) || mobileTabHeight < 37
+  || !Number.isFinite(mobileSwitchHeight) || mobileSwitchHeight < 37
+  || !Number.isFinite(mobileHeaderHeight) || mobileHeaderHeight > 52
+) {
+  throw new Error(
+    `Mobile Ganzhi inspector touch geometry failed ` +
+    `(close=${mobileCloseHeight}, tab=${mobileTabHeight}, switch=${mobileSwitchHeight}, header=${mobileHeaderHeight}): ${mobileFixture.url}`
+  );
+}
+if (
+  !Number.isFinite(mobileLeft) || mobileLeft < 10
+  || !Number.isFinite(mobileRight) || mobileRight > 380
+  || !Number.isFinite(mobileBottom) || mobileBottom > 834
+) {
+  throw new Error(
+    `Mobile Ganzhi inspector escaped viewport bounds ` +
+    `(left=${mobileLeft}, right=${mobileRight}, bottom=${mobileBottom}): ${mobileFixture.url}`
+  );
+}
+
 const instant = "2026-09-13T23:43:42.000Z";
 const standalone = dumpDom(`?instant=${encodeURIComponent(instant)}&reference=${encodeURIComponent("乙酉")}`, 3000);
 const standaloneInspector = tagById(standalone.dom, "ganzhi-inspector");
