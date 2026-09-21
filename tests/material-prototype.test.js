@@ -102,10 +102,10 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /environmentLift = clamp\(0\.82 \+ dot\(point \/ vec2\(600\.0, 380\.0\), vec2\(-0\.16, -0\.10\)\), 0\.58, 1\.08\)/);
   assert.match(material, /overlayAlpha = edgeMask \* clamp\(specular \* environmentLift \* 1\.65, 0\.0, 0\.065\)/);
   assert.match(material, /out_color = vec4\(reflectionTint \* overlayAlpha, overlayAlpha\)/);
-  assert.match(radial, /\.m2-hour-material-face \{ opacity: \.24; \}/);
-  assert.match(radial, /\.m2-day-material-face \{ opacity: \.26; \}/);
-  assert.match(radial, /\.m2-month-material-face \{ opacity: \.28; \}/);
-  assert.match(radial, /\.m2-year-material-face \{ opacity: \.30; \}/);
+  assert.match(radial, /\.m2-hour-material-face \{ opacity: \.34; \}/);
+  assert.match(radial, /\.m2-day-material-face \{ opacity: \.36; \}/);
+  assert.match(radial, /\.m2-month-material-face \{ opacity: \.38; \}/);
+  assert.match(radial, /\.m2-year-material-face \{ opacity: \.40; \}/);
   assert.doesNotMatch(material, /vec3 base =|bodyResponse/);
   assert.match(material, /\* \(0\.032 \+ \(1\.0 - roughness\) \* 0\.26\) \* surfaceSheen/);
   assert.match(material, /vec3 normal = vec3\(0\.0, 0\.0, 1\.0\)/);

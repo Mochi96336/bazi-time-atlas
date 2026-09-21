@@ -104,7 +104,11 @@ test("material depth stays procedural without external texture chrome", () => {
   assert.doesNotMatch(radialHierarchy, /background(?:-image)?:\s*url\(/i);
   assert.doesNotMatch(radialHierarchy, /repeating-(?:linear|radial)-gradient/i);
   assert.doesNotMatch(atlasHtml, /<image\b[^>]*(?:href|xlink:href)=["'](?:data:|https?:|\/)/i);
-  assert.match(atlasHtml, /<pattern id="m2-rotating-micrograin"[^>]*width="43"[^>]*height="37"[^>]*patternUnits="userSpaceOnUse">[\s\S]*?<circle[^>]*r="\.46"[\s\S]*?<circle[^>]*r="\.25"/);
+  const grainPattern = atlasHtml.match(/<pattern id="m2-rotating-micrograin"[\s\S]*?<\/pattern>/)?.[0] ?? "";
+  assert.match(grainPattern, /width="67" height="59" patternUnits="userSpaceOnUse"/);
+  assert.equal((grainPattern.match(/<circle /g) ?? []).length, 64);
+  assert.match(grainPattern, /fill="#eef1ef" fill-opacity="\.28"/);
+  assert.match(grainPattern, /fill="#020303" fill-opacity="\.30"/);
   assert.doesNotMatch(atlasHtml, /<feTurbulence\b|<filter\b|<fe(?:Diffuse|Specular)Lighting\b/);
 });
 
