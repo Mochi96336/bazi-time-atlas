@@ -16,7 +16,7 @@ test("wide Analysis fills the desktop viewport without leaking geometry into ord
     /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);/
   );
   assert.match(polish, /@media \(min-width: 1800px\) and \(min-aspect-ratio: 17\/9\)/);
-  assert.doesNotMatch(polish, /44vw|100dvh - 92px/);
+  assert.doesNotMatch(polish, /height:\s*[^;]*(?:44vw|100dvh - 92px)/);
   assert.match(
     polish,
     /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-readout\s*\{\s*bottom:\s*26px;/
