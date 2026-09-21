@@ -137,6 +137,14 @@ if (requireAttr(probe, "data-site-nav-display", page.url) === "none") {
 if (siteNavRight > toolbarLeft - 24) {
   throw new Error(`wide desktop: global Research exit collides with Tools actions (navRight=${siteNavRight}, toolbarLeft=${toolbarLeft}): ${page.url}`);
 }
+const topbarCenter = (topbarTop + topbarBottom) / 2;
+const researchCenter = (researchTop + researchBottom) / 2;
+if (researchHeight < 28 || Math.abs(researchCenter - topbarCenter) > 2) {
+  throw new Error(
+    `wide desktop: Research text/hitbox is not centered in the global top row ` +
+    `(research=${researchTop}-${researchBottom}/h${researchHeight}, topbar=${topbarTop}-${topbarBottom}): ${page.url}`
+  );
+}
 if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
   throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
 }
@@ -183,7 +191,7 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 
 console.log(
   `[wide-desktop] PASS 2047x1038 edge Tools; ` +
-  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, reference=${legendTop}-${legendBottom}, ` +
+  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, research=${researchTop}-${researchBottom}, reference=${legendTop}-${legendBottom}, ` +
   `left=${solarLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
   `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${evidenceInfoMinFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`
