@@ -66,7 +66,7 @@ function inside(inner, outer) {
   return inner.left >= outer.left - EPS && inner.right <= outer.right + EPS && inner.top >= outer.top - EPS && inner.bottom <= outer.bottom + EPS;
 }
 
-function validateNormal(run, probe) {
+function validateNormal(run, probe, { edited = false } = {}) {
   const instrument = rect(probe, "instrument", "normal", run.url);
   const legend = rect(probe, "legend", "normal", run.url);
   const labels = DIRECT_LABELS.map(([id, expected]) => ({ id, expected, box:rect(probe, id, "normal", run.url) }));
@@ -98,6 +98,14 @@ function validateNormal(run, probe) {
     }
   }
 
+  const expectedDirty = String(edited);
+  if (
+    requireAttr(probe, "data-mobile-time-dirty", "normal", run.url) !== expectedDirty
+    || requireAttr(probe, "data-mobile-time-apply-visible", "normal", run.url) !== expectedDirty
+  ) {
+    throw new Error(`normal: exact-time Apply disclosure disagrees with dirty state (edited=${edited}): ${run.url}`);
+  }
+
   if (requireAttr(probe, "data-reference-visible", "normal", run.url) !== "false" ||
       requireAttr(probe, "data-open-visible", "normal", run.url) !== "true" ||
       requireAttr(probe, "data-close-visible", "normal", run.url) !== "false" ||
@@ -121,6 +129,13 @@ function validateAnalysis(run, probe) {
   const fourPillarCells = Array.from({ length:4 }, (_, index) =>
     rect(probe, `four-pillar-cell${index}`, "analysis", run.url)
   );
+
+  if (
+    requireAttr(probe, "data-mobile-time-dirty", "analysis", run.url) !== "false"
+    || requireAttr(probe, "data-mobile-time-apply-visible", "analysis", run.url) !== "true"
+  ) {
+    throw new Error("analysis: exact-time Apply was incorrectly hidden by ordinary-reading progressive disclosure: " + run.url);
+  }
 
   if (
     requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true"
@@ -198,7 +213,7 @@ function validateAnalysis(run, probe) {
   );
 }
 
-function validate(run, { analysis }) {
+function validate(run, { analysis, edited = false }) {
   const probe = tagById(run.dom, "probe");
   if (requireAttr(probe, "data-ready", "legend", run.url) !== "true") {
     throw new Error(`legend: fixture did not settle: ${run.url}`);
@@ -207,8 +222,9 @@ function validate(run, { analysis }) {
     throw new Error(`legend: fixture is not a true 390px viewport: ${run.url}`);
   }
   if (analysis) validateAnalysis(run, probe);
-  else validateNormal(run, probe);
+  else validateNormal(run, probe, { edited });
 }
 
-validate(dump("scripts/fixtures/mobile-legend-390.html"), { analysis:false });
+validate(dump("scripts/fixtures/mobile-legend-390.html"), { analysis:false, edited:false });
+validate(dump("scripts/fixtures/mobile-legend-390.html?edit=1"), { analysis:false, edited:true });
 validate(dump("scripts/fixtures/mobile-legend-390.html?analysis=1"), { analysis:true });
