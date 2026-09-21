@@ -91,6 +91,16 @@
   border-bottom: 0;
 }
 
+.research-sexagenary-drilldown > .research-cycle {
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 0;
+}
+.research-sexagenary-drilldown > .research-cycle .research-cycle-head {
+  display: none;
+}
+
+
 @media (max-width:480px) {
   .research-local-recurrence-rail {
     margin-top: 8px;
