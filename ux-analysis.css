@@ -220,15 +220,16 @@
     flex-wrap: nowrap;
   }
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child .control-button {
-    min-height: 30px;
+    min-height: 42px;
     border: 0;
     border-radius: 0;
-    padding: 0 6px;
+    padding: 0 7px;
     color: #8f9493;
     background: transparent;
     backdrop-filter: none;
     box-shadow: none;
-    font-size: 8.5px;
+    font-size: 10px;
+    line-height: 1;
   }
   #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button.active,
   #kinetic-instrument[data-analysis-open="true"] #solar-time-tool-button[aria-pressed="true"],
