@@ -75,26 +75,37 @@ test("rendered rotation bridge reuses caller storage and does not derive another
 });
 
 test("canvas stays pointer-inert and renderer owns the only runtime pose bridge", async () => {
-  const [html, css, renderer, material] = await Promise.all([
+  const [html, css, renderer, material, radial] = await Promise.all([
     readFile(new URL("../index.html", import.meta.url), "utf8"),
     readFile(new URL("../instrument-first.css", import.meta.url), "utf8"),
     readFile(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8"),
-    readFile(new URL("../src/wheel/material-prototype.js", import.meta.url), "utf8")
+    readFile(new URL("../src/wheel/material-prototype.js", import.meta.url), "utf8"),
+    readFile(new URL("../radial-hierarchy.css", import.meta.url), "utf8")
   ]);
 
   assert.match(html, /<canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"><\/canvas>/);
+  const grainPattern = html.match(/<pattern id="m2-rotating-micrograin"[\s\S]*?<\/pattern>/)?.[0] ?? "";
+  assert.match(grainPattern, /width="67" height="59"/);
+  assert.equal((grainPattern.match(/<circle /g) ?? []).length, 64);
+  assert.match(grainPattern, /fill="#eef1ef" fill-opacity="\.28"/);
+  assert.match(grainPattern, /fill="#020303" fill-opacity="\.30"/);
   assert.match(css, /\.material-wheel-layer\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /data-material-prototype="roughness"\] \.material-wheel-layer\s*\{[\s\S]*?opacity:\s*1;/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-material-face/);
   assert.match(renderer, /materialPrototype\.updateFrame\(renderedRotations\)/);
   assert.match(material, /localPoint = rotation\(-ringRotation\) \* point/);
-  assert.match(material, /const float FIELD_PERIOD = 24\.0/);
-  assert.match(material, /roughness = clamp\(0\.82 \+ fieldCentered \* 0\.04, 0\.80, 0\.84\)/);
+  assert.match(material, /const float FIELD_PERIOD = 96\.0/);
+  assert.match(material, /roughness = clamp\(0\.80 \+ fieldCentered \* 0\.14, 0\.73, 0\.87\)/);
   assert.match(material, /specularPower = mix\(22\.0, 10\.0, roughness\)/);
-  assert.match(material, /surfaceSheen = 1\.0 \+ fieldCentered \* 0\.10/);
-  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specular \* 1\.35, 0\.0, 0\.055\)/);
+  assert.match(material, /surfaceSheen = 1\.0 \+ fieldCentered \* 0\.45/);
+  assert.match(material, /environmentLift = clamp\(0\.82 \+ dot\(point \/ vec2\(600\.0, 380\.0\), vec2\(-0\.16, -0\.10\)\), 0\.58, 1\.08\)/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specular \* environmentLift \* 1\.65, 0\.0, 0\.065\)/);
   assert.match(material, /out_color = vec4\(reflectionTint \* overlayAlpha, overlayAlpha\)/);
+  assert.match(radial, /\.m2-hour-material-face \{ opacity: \.24; \}/);
+  assert.match(radial, /\.m2-day-material-face \{ opacity: \.26; \}/);
+  assert.match(radial, /\.m2-month-material-face \{ opacity: \.28; \}/);
+  assert.match(radial, /\.m2-year-material-face \{ opacity: \.30; \}/);
   assert.doesNotMatch(material, /vec3 base =|bodyResponse/);
   assert.match(material, /\* \(0\.032 \+ \(1\.0 - roughness\) \* 0\.26\) \* surfaceSheen/);
   assert.match(material, /vec3 normal = vec3\(0\.0, 0\.0, 1\.0\)/);
