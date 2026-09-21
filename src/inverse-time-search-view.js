@@ -289,6 +289,7 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
 
   if (documentRef.querySelector("#inverse-time-search-button")) return null;
   const nowButton = documentRef.querySelector("#now-button");
+  const classificationButton = documentRef.querySelector("#classification-overlay-button");
   const actionGroup = nowButton?.parentElement;
   const svg = documentRef.querySelector("#kinetic-wheel");
   if (!actionGroup || !svg) return null;
@@ -300,7 +301,7 @@ export function installInverseTimeSearch(instrument, documentRef = document) {
   button.textContent = "找時間";
   button.title = "直接轉動年、月、日、時環，反查真正成立的時間";
   button.setAttribute("aria-pressed", "false");
-  actionGroup.insertBefore(button, nowButton);
+  actionGroup.insertBefore(button, classificationButton ?? nowButton);
 
   const readout = createReadout(documentRef);
   instrument.append(readout);
