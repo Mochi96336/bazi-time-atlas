@@ -40,6 +40,10 @@ function setStatus(message, state = "idle") {
   status.dataset.state = state;
 }
 
+function setDirty(dirty) {
+  dock?.setAttribute("data-dirty", dirty ? "true" : "false");
+}
+
 function configureMobileInput() {
   if (!input) return;
   input.type = "text";
@@ -70,7 +74,10 @@ function syncFromInstrument() {
 
   const selectedMs = Number(instrument.dataset.selectedInstantMs);
   const value = formatMobileAtlasInput(selectedMs, context);
-  if (value) input.value = value;
+  if (value) {
+    input.value = value;
+    setDirty(false);
+  }
   dock?.setAttribute("data-selected-instant-ms", Number.isFinite(selectedMs) ? String(selectedMs) : "");
 }
 
@@ -96,6 +103,7 @@ function applyExactTime() {
   }
 
   syncFromInstrument();
+  setDirty(false);
   setStatus(`已套用 · ${formatAtlasUtcOffset(context.utcOffsetHours)}`, "success");
 }
 
@@ -108,6 +116,7 @@ input?.addEventListener("keydown", event => {
 });
 input?.addEventListener("input", () => {
   input.removeAttribute("aria-invalid");
+  setDirty(true);
   const context = currentTimeContext();
   setStatus(`${formatAtlasUtcOffset(context.utcOffsetHours)} · 秒級`, "idle");
 });

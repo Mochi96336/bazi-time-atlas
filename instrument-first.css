@@ -287,6 +287,12 @@
     background: transparent;
     box-shadow: none;
   }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock[data-dirty="false"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock[data-dirty="false"] #mobile-time-apply {
+    display: none;
+  }
 
   /* The read-head immediately above already states the selected time, zone and
      precision. Keep ordinary idle chrome silent; transient apply/error feedback

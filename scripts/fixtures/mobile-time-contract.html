@@ -106,6 +106,8 @@
         mobileWin.__exactTimeContinuity = "alive";
         input.value = "2026-09-16 05:15:09";
         input.dispatchEvent(new Event("input", { bubbles:true }));
+        probe.dataset.applyVisibleAfterEdit = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
+        probe.dataset.dirtyAfterEdit = dock.dataset.dirty ?? "";
         apply.click();
         setTimeout(snapshot, 150);
         return;
