@@ -45,6 +45,16 @@ test("mobile atlas keeps one typographic current-page owner without pill chrome"
     /a\[aria-current="page"\][^}]*display:\s*none;/s,
     "mobile must retain its current-page owner because the compact brand is hidden"
   );
+  assert.match(
+    mobile[1],
+    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{[\s\S]*?display:\s*inline-flex;[\s\S]*?align-items:\s*center;[\s\S]*?min-height:\s*28px;[\s\S]*?font-size:\s*10px;[\s\S]*?line-height:\s*1;/,
+    "mobile current view should own a centered 28px text hitbox at the primary type size"
+  );
+  assert.match(
+    mobile[1],
+    /\.kinetic-topbar \.site-nav a\.research-link\[data-nav-role="research"\]\s*\{[\s\S]*?display:\s*inline-flex;[\s\S]*?align-items:\s*center;[\s\S]*?min-height:\s*28px;[\s\S]*?font-size:\s*9px;[\s\S]*?line-height:\s*1;/,
+    "mobile Research should remain secondary but readable and vertically centered"
+  );
   assert.doesNotMatch(
     mobile[1],
     /#d7e0da|#334c46/i,
