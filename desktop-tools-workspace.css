@@ -51,36 +51,11 @@
     display: none !important;
   }
 
-  /* Layer visibility is not a desktop task. Preserve the established ring
-     controls underneath for regression/debug ownership, but expose only the
-     reference-frame control on the left edge. */
+  /* Layer visibility and relative reference frames are engine/research aids,
+     not desktop product tasks. Keep their DOM/runtime ownership intact, but
+     remove the legacy legend shell entirely from visible Tools chrome. */
   #kinetic-instrument[data-analysis-open="true"] .ring-legend {
-    position: fixed;
-    z-index: 31;
-    top: 12px;
-    left: clamp(190px, 18vw, 280px);
-    right: auto;
-    width: max-content;
-    max-width: 260px;
-    min-height: 32px;
-    display: flex;
-    align-items: center;
-    padding: 0;
-    border: 0;
-    box-shadow: none;
-    pointer-events: none;
-  }
-  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
     display: none !important;
-  }
-  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
-    width: max-content;
-    max-width: 260px;
-    pointer-events: auto;
-    font-size: 9px;
-  }
-  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
-    font-size: 10px;
   }
 
   /* Selected Instant now edits where it is read: at the central read-head.
