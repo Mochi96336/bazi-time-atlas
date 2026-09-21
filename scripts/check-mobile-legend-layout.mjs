@@ -112,6 +112,10 @@ function validateNormal(run, probe) {
 function validateAnalysis(run, probe) {
   const toolbar = rect(probe, "toolbar", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
+  const fourPillars = rect(probe, "four-pillars", "analysis", run.url);
+  const fourPillarCells = Array.from({ length:4 }, (_, index) =>
+    rect(probe, `four-pillar-cell${index}`, "analysis", run.url)
+  );
 
   if (
     requireAttr(probe, "data-analysis-open", "analysis", run.url) !== "true"
@@ -151,9 +155,32 @@ function validateAnalysis(run, probe) {
     );
   }
 
+  if (
+    requireAttr(probe, "data-four-pillars-visible", "analysis", run.url) !== "true"
+    || requireAttr(probe, "data-four-pillars-cell-count", "analysis", run.url) !== "4"
+    || requireAttr(probe, "data-four-pillars-note-visible", "analysis", run.url) !== "false"
+  ) {
+    throw new Error("analysis: compact Four Pillars inspector rail lost its product ownership: " + run.url);
+  }
+  if (fourPillars.height > 78 || fourPillars.top < toolbar.bottom + 3) {
+    throw new Error(
+      "analysis: Four Pillars rail is too tall or collides with the action row " +
+      "(rail=" + fourPillars.top.toFixed(1) + ".." + fourPillars.bottom.toFixed(1) +
+      "/h" + fourPillars.height.toFixed(1) + ", toolbarBottom=" + toolbar.bottom.toFixed(1) + "): " + run.url
+    );
+  }
+  const cellTop = Math.min(...fourPillarCells.map(cell => cell.top));
+  const cellBottom = Math.max(...fourPillarCells.map(cell => cell.bottom));
+  if (
+    fourPillarCells.some(cell => Math.abs(cell.top - cellTop) > 2 || Math.abs(cell.bottom - cellBottom) > 2)
+    || fourPillarCells.some(cell => cell.width < 70 || cell.height < 38)
+  ) {
+    throw new Error("analysis: Four Pillars fell back to a stacked dashboard instead of one touch row: " + run.url);
+  }
+
   console.log(
     "[mobile-legend] PASS Tools product rail; actions=find-time/classification/solar-time/now/done, " +
-    "reference-frame hidden, retired scale/play/layers hidden: " + run.url
+    "Four Pillars=" + fourPillars.height.toFixed(1) + "px one-row rail, reference-frame hidden, retired scale/play/layers hidden: " + run.url
   );
 }
 
