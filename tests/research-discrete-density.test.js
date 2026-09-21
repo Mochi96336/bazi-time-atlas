@@ -2,11 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [view, css, host, recurrenceGate] = await Promise.all([
+const [view, css, host, recurrenceGate, recurrenceHtml, recurrenceCss] = await Promise.all([
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
   readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8")
+  readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
+  readFile(new URL("../recurrence.css", import.meta.url), "utf8")
 ]);
 
 function functionSlice(source, name, nextName) {
@@ -22,6 +24,30 @@ const milestoneView = functionSlice(view, "ensureMilestoneDrilldown", "syncMiles
 test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.recurrence-intro > \.scope-note/);
   assert.match(view, /\.remove\(\)/);
+});
+
+test("time displacement has one control owner below the recurrence instrument", () => {
+  const toolbarStart = recurrenceHtml.indexOf('<div class="recurrence-toolbar">');
+  const instrumentEnd = recurrenceHtml.indexOf("</section>", recurrenceHtml.indexOf('id="recurrence-instrument"'));
+  const dockStart = recurrenceHtml.indexOf('<section class="delta-dock"');
+  const candidateStart = recurrenceHtml.indexOf('id="candidate-buttons"');
+  assert.ok(toolbarStart >= 0 && instrumentEnd > toolbarStart && dockStart > instrumentEnd && candidateStart > dockStart);
+  assert.doesNotMatch(
+    recurrenceHtml.slice(toolbarStart, instrumentEnd),
+    /id="candidate-buttons"/
+  );
+  assert.match(
+    recurrenceHtml.slice(dockStart),
+    /id="delta-number"[\s\S]*?id="candidate-buttons"[\s\S]*?id="delta-slider"/
+  );
+  assert.match(
+    recurrenceCss,
+    /\.delta-dock\s*\{[\s\S]*?grid-template-areas:"number presets presets" "slider slider global";/
+  );
+  assert.match(
+    recurrenceCss,
+    /@media \(max-width:820px\)[\s\S]*?grid-template-areas:"number" "presets" "slider" "global";/
+  );
 });
 
 test("global period meaning is attached to the preset instead of a duplicate static readout", () => {
