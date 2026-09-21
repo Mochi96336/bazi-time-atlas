@@ -109,7 +109,7 @@ function refresh() {
     result.identity
       ? "同一比較狀態 · 4 / 4 相同"
       : resolvedCount === 2
-        ? "Year + Month 可隔離 · Day + Hour 未解"
+        ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
         : resolvedCount === 0
           ? "沒有完整四柱可作純交界歸因"
           : `${resolvedCount} / 4 柱可由此層解析`
