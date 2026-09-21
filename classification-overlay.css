@@ -102,7 +102,7 @@
      existing reserved band / overlap contract, but flatten its presentation. */
   #kinetic-instrument[data-classification-overlay="on"] {
     overflow: visible;
-    margin-bottom: 96px;
+    margin-bottom: 108px;
   }
 
   .classification-overlay-legend {
@@ -129,15 +129,16 @@
     border-top: 0;
   }
   .classification-row header { gap: 4px; }
-  .classification-row header span { font-size:7px; }
-  .classification-row header small { font-size:5px; white-space:nowrap; }
+  .classification-row header span { font-size:8.5px; line-height:1.2; }
+  .classification-row header small { font-size:6.5px; line-height:1.25; white-space:nowrap; }
   .classification-keys { gap:3px; margin-top:3px; flex-wrap:nowrap; }
   .classification-keys + .classification-keys { margin-top:3px; }
   .classification-keys i {
-    min-width:15px;
-    height:14px;
+    min-width:17px;
+    height:17px;
     border-radius:2px;
-    font-size:5.5px;
+    font-size:7.5px;
+    line-height:1;
   }
   .classification-current { display:none; }
   .classification-warning {
@@ -145,7 +146,7 @@
     margin-top: 0;
     padding-top: 4px;
     border-top: 1px solid rgba(238,242,237,.08);
-    font-size:5.5px;
-    line-height:1.25;
+    font-size:7px;
+    line-height:1.35;
   }
 }
