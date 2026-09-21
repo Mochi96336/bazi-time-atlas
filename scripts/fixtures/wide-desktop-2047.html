@@ -33,15 +33,32 @@
       .length;
 
     function settle(win, callback) {
-      const retry = attemptsLeft => {
-        if (callback() || attemptsLeft <= 0) return;
-        win.setTimeout(() => retry(attemptsLeft - 1), 250);
+      const doc = win.document;
+      let settled = false;
+      let observer = null;
+
+      const attempt = () => {
+        if (settled) return;
+        if (!callback()) return;
+        settled = true;
+        observer?.disconnect();
       };
-      win.requestAnimationFrame(() => {
+
+      const scheduleAttempt = () => {
         win.requestAnimationFrame(() => {
-          win.setTimeout(() => retry(12), 700);
+          win.requestAnimationFrame(attempt);
         });
+      };
+
+      observer = new win.MutationObserver(scheduleAttempt);
+      observer.observe(doc.documentElement, {
+        subtree: true,
+        childList: true,
+        attributes: true
       });
+
+      scheduleAttempt();
+      doc.fonts?.ready?.then(scheduleAttempt);
     }
 
     function snapshot() {
@@ -79,7 +96,33 @@
       const ringToggles = doc.querySelectorAll(".ring-legend-row[data-ring-toggle]");
       const hourLabels = doc.querySelectorAll("#hour-track .cycle-label");
       const dayLabels = doc.querySelectorAll("#day-track .cycle-label");
-      if (!instrument || !topbar || !siteNav || !research || !readout || !toolbar || !legend || !reference || !timeline || !solar || !evidence || !evidenceGrid || !evidenceValue || !toolbarButton || !close || !play || !stateStrip || !notes || !sources) return false;
+      const requiredNodes = {
+        instrument,
+        topbar,
+        siteNav,
+        research,
+        readout,
+        toolbar,
+        legend,
+        reference,
+        timeline,
+        solar,
+        evidence,
+        evidenceGrid,
+        evidenceValue,
+        toolbarButton,
+        close,
+        play,
+        stateStrip,
+        notes,
+        sources
+      };
+      const missing = Object.entries(requiredNodes)
+        .filter(([, node]) => !node)
+        .map(([name]) => name);
+      probe.dataset.waitingFor = missing.join(",");
+      if (missing.length > 0) return false;
+      delete probe.dataset.waitingFor;
 
       const instrumentRect = rect(instrument);
       const topbarRect = rect(topbar);
