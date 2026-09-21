@@ -109,7 +109,7 @@ function ensureMilestoneDrilldown() {
     details.dataset.researchDrilldown = "discrete-milestones";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = `<span>候選閉合明細</span><strong id="discrete-milestone-meta">典型候選 · 展開看 phase</strong>`;
+    summary.innerHTML = `<span>候選閉合明細</span><strong id="discrete-milestone-meta">典型候選 · 展開看相位</strong>`;
 
     table.insertAdjacentElement("beforebegin", details);
     details.append(summary, table);
@@ -121,7 +121,7 @@ function syncMilestoneMeta(details) {
   const rows = details?.querySelectorAll("#milestone-rows > .milestone-row").length ?? 0;
   const meta = details?.querySelector("#discrete-milestone-meta");
   if (!meta) return;
-  const next = `${rows || 6} candidates · 公曆 / 年序 / 日序`;
+  const next = `${rows || 6} 個候選 · 公曆 / 年序 / 日序`;
   if (meta.textContent !== next) meta.textContent = next;
 }
 
