@@ -25,6 +25,10 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.ok(astronomyStart > discreteStart);
   assert.ok(evidenceStart > astronomyStart);
   assert.doesNotMatch(html, /class="research-task-nav"/);
+  assert.match(html, /class="research-outline"[^>]*aria-label="研究項目"/);
+  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?離散閉合/);
+  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?天文差異/);
+  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?四柱證據/);
   assert.match(html, />離散閉合</);
   assert.match(html, />天文差異</);
   assert.match(html, />四柱證據</);
@@ -82,6 +86,9 @@ test("research-only fixed-zone warning stays authoritative without occupying the
 
 test("section chrome stays flat and compact on phone", () => {
   assert.doesNotMatch(taskCss, /research-task-nav/);
+  assert.match(taskCss, /\.research-outline\s*\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(taskCss, /\.research-outline a\s*\{[\s\S]*min-height:34px/);
+  assert.doesNotMatch(taskCss, /\.research-outline[^}]*border-radius/);
   assert.match(taskCss, /\.research-task-head\s*\{[\s\S]*display:flex/);
   assert.match(taskCss, /\.research-task-head \.eyebrow,[\s\S]*display:none/);
   assert.doesNotMatch(taskCss, /border-radius/);
