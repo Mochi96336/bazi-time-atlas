@@ -88,6 +88,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /topbarTop:\s*round\(topbarRect\.top\)/);
   assert.match(fixture, /siteNavDisplay:\s*display\(win, siteNav\)/);
   assert.match(fixture, /siteNavRight:\s*round\(siteNavRect\.right\)/);
+  assert.match(fixture, /researchHeight:\s*round\(researchRect\.height\)/);
   assert.match(fixture, /timelineDisplay:\s*display\(win, timeline\)/);
   assert.match(fixture, /solarRight:\s*round\(solarRect\.right\)/);
   assert.match(fixture, /evidenceLeft:\s*round\(evidenceRect\.left\)/);
@@ -106,6 +107,8 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /scrollHeight > height \+ 90/);
   assert.match(browserGate, /data-site-nav-display/);
   assert.match(browserGate, /siteNavRight > toolbarLeft - 24/);
+  assert.match(browserGate, /researchHeight < 28/);
+  assert.match(browserGate, /Math\.abs\(researchCenter - topbarCenter\) > 2/);
   assert.match(browserGate, /toolbarBottom > topbarBottom \+ 2/);
   assert.match(browserGate, /legendBottom > topbarBottom \+ 2/);
   assert.match(browserGate, /data-timeline-display/);
