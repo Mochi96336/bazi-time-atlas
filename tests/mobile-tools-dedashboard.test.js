@@ -12,7 +12,7 @@ test("mobile Tools retires dashboard-era presets, transport and layer toggles", 
   );
   assert.match(
     legendCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\]\s*\{\s*display:\s*none\s*!important;/
+    /#kinetic-instrument\[data-analysis-open="true"\] \.ring-legend-row\[data-ring-toggle\],[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\] \.reference-frame-control\s*\{\s*display:\s*none\s*!important;/
   );
 });
 
