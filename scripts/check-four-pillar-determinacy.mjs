@@ -111,7 +111,7 @@ const global = expectState(24000, {
   "data-four-pillar-absolute-civil-phase-preserved":"false",
   "data-four-pillar-local-clock-modeled":"false"
 }, "24000-year exact discrete closure");
-if (!global.dom.includes("Year + Month 可隔離 · Day + Hour 未解")) {
+if (!global.dom.includes("年柱＋月柱可隔離 · 日柱＋時柱未解")) {
   throw new Error(`24000-year exact discrete closure: strongest-claim summary missing: ${global.url}`);
 }
 if (!global.dom.includes("即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論")) {
