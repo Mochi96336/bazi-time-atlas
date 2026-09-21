@@ -107,7 +107,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /data-site-nav-display/);
   assert.match(browserGate, /siteNavRight > toolbarLeft - 24/);
   assert.match(browserGate, /toolbarBottom > topbarBottom \+ 2/);
-  assert.match(browserGate, /legendBottom > solarTop \+ 1/);
+  assert.match(browserGate, /legendBottom > topbarBottom \+ 2/);
   assert.match(browserGate, /data-timeline-display/);
   assert.match(browserGate, /solarRight > 390/);
   assert.match(browserGate, /evidenceLeft < width - 430/);
