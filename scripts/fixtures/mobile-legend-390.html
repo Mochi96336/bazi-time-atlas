@@ -16,6 +16,7 @@
   <script>
     const params = new URLSearchParams(location.search);
     const analysis = params.get("analysis") === "1";
+    const edit = params.get("edit") === "1";
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     const query = new URLSearchParams({ instant:"2027-03-15T13:20:09.000Z" });
@@ -70,6 +71,13 @@
       const now = doc.querySelector("#now-button");
       const play = doc.querySelector("#play-button");
       const cursorNote = doc.querySelector("#cursor-layer .cursor-note");
+      const mobileTimeDock = doc.querySelector("#mobile-time-dock");
+      const mobileTimeInput = doc.querySelector("#mobile-instant-input");
+      const mobileTimeApply = doc.querySelector("#mobile-time-apply");
+      if (edit && mobileTimeDock?.dataset.dirty !== "true" && mobileTimeInput) {
+        mobileTimeInput.value = "2027-03-15 21:21:10";
+        mobileTimeInput.dispatchEvent(new Event("input", { bubbles:true }));
+      }
       const fourPillars = doc.querySelector("#atlas-visible-ten-gods");
       const fourPillarCells = [...doc.querySelectorAll(".atlas-visible-ten-gods-cell")];
       const fourPillarsNote = doc.querySelector(".atlas-visible-ten-gods-note");
@@ -97,6 +105,8 @@
       probe.dataset.nowVisible = String(visible(win, now));
       probe.dataset.playVisible = String(visible(win, play));
       probe.dataset.cursorNoteVisible = String(visible(win, cursorNote));
+      probe.dataset.mobileTimeDirty = mobileTimeDock?.dataset.dirty ?? "";
+      probe.dataset.mobileTimeApplyVisible = String(visible(win, mobileTimeApply));
       probe.dataset.fourPillarsVisible = String(visible(win, fourPillars));
       probe.dataset.fourPillarsCellCount = String(fourPillarCells.length);
       probe.dataset.fourPillarsNoteVisible = String(visible(win, fourPillarsNote));
