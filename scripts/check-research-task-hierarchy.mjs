@@ -103,6 +103,33 @@ if (!evidence.includes('class="model-boundary research-evidence-appendix"')) {
 if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/.test(probe.dom)) {
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
+for (const expected of [
+  "時間位移",
+  "公曆骨架",
+  "干支年序",
+  "干支日序",
+  "RMS 殘差",
+  "目前可支持的最強結論",
+  "年柱＋月柱可隔離 · 日柱＋時柱未解"
+]) {
+  if (!probe.dom.includes(expected)) {
+    throw new Error(`localized Research terminology missing "${expected}": ${probe.url}`);
+  }
+}
+for (const stale of [
+  "Time displacement",
+  "Gregorian frame",
+  "Year sequence",
+  "Day sequence",
+  "RMS residual",
+  "Strongest supported claim",
+  "Year + Month 可隔離 · Day + Hour 未解",
+  "model unavailable"
+]) {
+  if (probe.dom.includes(stale)) {
+    throw new Error(`prototype Research copy returned "${stale}": ${probe.url}`);
+  }
+}
 
 const cycleDeepLink = dump("recurrence.html#research-sexagenary-cycle");
 const cycleDeepLinkDetail = detailsById(cycleDeepLink.dom, "discrete-sexagenary-details");
