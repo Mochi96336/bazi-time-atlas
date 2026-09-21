@@ -60,7 +60,7 @@
           <div><i class="astronomy-dot"></i><span>十二節形狀</span><strong id="astronomy-legend-readout">—</strong></div>
         </div>
         <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
-          <span>Deep exact candidate</span>
+          <span>深時間 exact 候選</span>
           <strong id="deep-time-badge-value">—</strong>
         </div>
 
@@ -74,7 +74,7 @@
         </svg>
 
         <div class="recurrence-readout" aria-live="polite">
-          <div class="readout-kicker">Time displacement</div>
+          <div class="readout-kicker">時間位移</div>
           <div><strong id="delta-readout">0 年</strong> <span>→</span> <strong id="target-date-readout">2026-09-13</strong></div>
           <p id="closure-summary">基準點：三層都在 0 相位。</p>
         </div>
@@ -94,10 +94,10 @@
       </section>
 
       <section class="closure-grid" aria-label="目前閉合狀態">
-        <article data-closure="gregorian"><span>Gregorian frame</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
-        <article data-closure="year"><span>Year sequence</span><strong id="year-status">—</strong><small>60 年干支年序</small></article>
-        <article data-closure="day"><span>Day sequence</span><strong id="day-status">—</strong><small>60 日日序</small></article>
-        <article class="local-card"><span>First local Year + Day</span><strong id="local-recurrence">—</strong><small>此日期的年序＋日序重遇</small></article>
+        <article data-closure="gregorian"><span>公曆骨架</span><strong id="gregorian-status">—</strong><small>400 年閏年模式</small></article>
+        <article data-closure="year"><span>干支年序</span><strong id="year-status">—</strong><small>60 年干支年序</small></article>
+        <article data-closure="day"><span>干支日序</span><strong id="day-status">—</strong><small>60 日日序</small></article>
+        <article class="local-card"><span>年＋日首次重遇</span><strong id="local-recurrence">—</strong><small>此日期的年序＋日序重遇</small></article>
       </section>
 
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
@@ -148,9 +148,9 @@
       </header>
 
       <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
-        <div><span>Solar-term shape residual</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
-        <div><span>Orbital parameters</span><div id="astronomy-orbit-readout">—</div><small>目標年節氣偏移 − 基準年同一偏移。</small></div>
-        <div><span>Visual scale</span><strong id="astronomy-scale-readout">—</strong><small>正值向外，負值向內。</small></div>
+        <div><span>十二節形狀殘差</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
+        <div><span>軌道參數</span><div id="astronomy-orbit-readout">—</div><small>目標年節氣偏移 − 基準年同一偏移。</small></div>
+        <div><span>視覺尺度</span><strong id="astronomy-scale-readout">—</strong><small>正值向外，負值向內。</small></div>
       </section>
       <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
@@ -158,11 +158,11 @@
         <div class="near-search-head">
           <div class="near-search-copy">
             <strong>近回歸排名</strong>
-            <small>24,000 年整數倍 · max residual → RMS · 近似 ≠ 真正週期</small>
+            <small>24,000 年整數倍 · 最大殘差 → RMS · 近似 ≠ 真正週期</small>
           </div>
           <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
           <div class="near-stat best"><span>目前最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
-          <div class="near-stat"><span>最佳殘差</span><strong id="near-best-residual">—</strong><small>max absolute / RMS</small></div>
+          <div class="near-stat"><span>最佳殘差</span><strong id="near-best-residual">—</strong><small>最大絕對值 / RMS</small></div>
         </div>
         <div class="near-search-body">
           <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
@@ -180,7 +180,7 @@
       <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">
         <div class="determinacy-head">
           <strong class="determinacy-label">可判定範圍</strong>
-          <div class="determinacy-scope"><span>Strongest supported claim</span><strong id="determinacy-scope-value">等待回歸／天文狀態</strong></div>
+          <div class="determinacy-scope"><span>目前可支持的最強結論</span><strong id="determinacy-scope-value">等待回歸／天文狀態</strong></div>
         </div>
         <div class="determinacy-grid">
           <article class="determinacy-card" data-determinacy-pillar="year" data-status="pending" data-resolved="false"><header><span>Year</span><strong>年柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
