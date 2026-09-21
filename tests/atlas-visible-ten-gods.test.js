@@ -58,5 +58,22 @@ test("visible stem analysis is installed by Analysis mode and hidden outside it"
   assert.match(source, /stylesheet\.href = "\.\/atlas-visible-ten-gods\.css"/);
   assert.match(source, /panel\.hidden = !analysisOpen \|\| state === null/);
   assert.match(css, /\.atlas-visible-ten-gods\[hidden\]\s*\{[^}]*display:\s*none\s*!important/s);
-  assert.match(css, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /\.atlas-visible-ten-gods-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
+});
+
+
+test("mobile Tools keeps Four Pillars as one compact inspector rail", () => {
+  assert.match(
+    css,
+    /@media \(max-width: 480px\) \{[\s\S]*?\.atlas-visible-ten-gods \{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*48px;[\s\S]*?left:\s*9px;[\s\S]*?right:\s*9px;/
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 480px\) \{[\s\S]*?\.atlas-visible-ten-gods-grid \{[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\);/
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 480px\) \{[\s\S]*?\.atlas-visible-ten-gods-cell \{[\s\S]*?min-height:\s*42px;[\s\S]*?grid-template-columns:\s*1fr;/
+  );
+  assert.match(css, /\.atlas-visible-ten-gods-note \{\s*display:\s*none;/);
 });

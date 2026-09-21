@@ -114,18 +114,84 @@
 }
 
 @media (max-width: 480px) {
+  /* Mobile Tools already has a primary action row. Keep Four Pillars available
+     as an inspector launcher without stacking a second 2×2 dashboard over the
+     wheel. The rail sits below the actions and keeps all four pillars in one
+     touchable row. */
   .atlas-visible-ten-gods {
-    margin: 0 9px 12px;
-    padding: 10px;
+    position: absolute;
+    z-index: 5;
+    top: 48px;
+    left: 9px;
+    right: 9px;
+    width: auto;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 5px 0 6px;
+    background: transparent;
+    box-shadow:
+      inset 0 1px 0 var(--m2-etched-light-soft),
+      inset 0 -1px 0 var(--m2-etched-light-soft);
+  }
+  .atlas-visible-ten-gods-head {
+    align-items: baseline;
+    margin: 0 6px 4px;
+  }
+  .atlas-visible-ten-gods-head small {
+    display: none;
+  }
+  .atlas-visible-ten-gods-head strong {
+    color: #989e9d;
+    font-size: 9px;
+  }
+  .atlas-visible-ten-gods-master {
+    color: #c3c7c6;
+    font-size: 9px;
   }
   .atlas-visible-ten-gods-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 0;
+    box-shadow: none;
   }
-  .atlas-visible-ten-gods-cell:nth-child(3) {
-    border-left: 0;
-    border-top: 1px solid rgba(236,239,239,.065);
+  .atlas-visible-ten-gods-cell {
+    width: 100%;
+    min-height: 42px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: center;
+    gap: 2px;
+    border: 0;
+    padding: 4px 3px;
+    text-align: center;
   }
+  .atlas-visible-ten-gods-cell + .atlas-visible-ten-gods-cell,
+  .atlas-visible-ten-gods-cell:nth-child(3),
   .atlas-visible-ten-gods-cell:nth-child(4) {
-    border-top: 1px solid rgba(236,239,239,.065);
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    border-top: 0;
+  }
+  .atlas-visible-ten-gods-cell::after {
+    display: none;
+  }
+  .atlas-visible-ten-gods-cell span {
+    font-size: 8px;
+    line-height: 1;
+  }
+  .atlas-visible-ten-gods-cell strong {
+    justify-self: center;
+    font-size: 11px;
+    line-height: 1;
+  }
+  .atlas-visible-ten-gods-cell small {
+    grid-column: auto;
+    font-size: 8px;
+    line-height: 1;
+  }
+  .atlas-visible-ten-gods-note {
+    display: none;
   }
 }
