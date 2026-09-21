@@ -31,3 +31,14 @@ test("Solar Time header asks the user-facing question instead of leading with im
   assert.match(view, /輸入經度，檢查日柱／時柱是否因時計基準跨界。/);
   assert.doesNotMatch(view, /<strong>太陽時比較<\/strong>/);
 });
+
+
+test("Solar Time is an explicit Tools action while explicit lon remains shareable intent", () => {
+  assert.match(view, /toolButton\.id = "solar-time-tool-button"/);
+  assert.match(view, /toolButton\.textContent = "太陽時"/);
+  assert.match(view, /let toolActive = initial\.raw\.trim\(\) !== ""/);
+  assert.match(view, /panel\.hidden = !\(analysisOpen && toolActive\)/);
+  assert.match(view, /atlas-solar-time-entering/);
+  assert.match(view, /classificationButton\?\.getAttribute\("aria-pressed"\) === "true"/);
+  assert.match(view, /atlas-find-time-entering/);
+});
