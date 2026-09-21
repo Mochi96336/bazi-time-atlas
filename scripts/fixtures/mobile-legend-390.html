@@ -80,6 +80,10 @@
       writeRect("toolbar", toolbar?.getBoundingClientRect());
       writeRect("open", open?.getBoundingClientRect());
       writeRect("close", close?.getBoundingClientRect());
+      writeRect("findTime", findTime?.getBoundingClientRect());
+      writeRect("classification", classification?.getBoundingClientRect());
+      writeRect("solarTime", solarTime?.getBoundingClientRect());
+      writeRect("now", now?.getBoundingClientRect());
       writeRect("fourPillars", fourPillars?.getBoundingClientRect());
       fourPillarCells.forEach((cell, index) => writeRect(`fourPillarCell${index}`, cell.getBoundingClientRect()));
 
@@ -96,6 +100,9 @@
       probe.dataset.fourPillarsVisible = String(visible(win, fourPillars));
       probe.dataset.fourPillarsCellCount = String(fourPillarCells.length);
       probe.dataset.fourPillarsNoteVisible = String(visible(win, fourPillarsNote));
+      for (const [name, node] of [["findTime", findTime], ["classification", classification], ["solarTime", solarTime], ["now", now]]) {
+        probe.dataset[`${name}FontSize`] = node ? win.getComputedStyle(node).fontSize : "";
+      }
       probe.dataset.scaleVisible = String(visibleCount(scaleButtons));
       probe.dataset.ringToggleVisible = String(visibleCount(ringToggles));
       probe.dataset.analysisOpen = instrument.dataset.analysisOpen ?? "";
