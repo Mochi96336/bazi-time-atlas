@@ -58,7 +58,7 @@ test("visible stem analysis is installed by Analysis mode and hidden outside it"
   assert.match(source, /stylesheet\.href = "\.\/atlas-visible-ten-gods\.css"/);
   assert.match(source, /panel\.hidden = !analysisOpen \|\| state === null/);
   assert.match(css, /\.atlas-visible-ten-gods\[hidden\]\s*\{[^}]*display:\s*none\s*!important/s);
-  assert.match(css, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /\.atlas-visible-ten-gods-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
 
