@@ -35,6 +35,19 @@ test("local recurrence remains visible while derived closure interpretation is d
   assert.doesNotMatch(view, /details\.open\s*=\s*true/);
 });
 
+test("60-day cycle is supporting evidence behind a closed native drilldown", () => {
+  assert.match(view, /details\.id = "discrete-sexagenary-details"/);
+  assert.match(view, /details\.dataset\.researchDrilldown = "discrete-sexagenary"/);
+  assert.match(view, /六十日干支循環/);
+  assert.match(view, /60 日後配對重新重合/);
+  assert.match(view, /details\.append\(summary, cycle\)/);
+  assert.doesNotMatch(view, /discrete-sexagenary-details[\s\S]*?\.open\s*=\s*true/);
+  assert.match(view, /hashTargetsCycle\(cycle\)/);
+  assert.match(view, /details\.open = true/);
+  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?margin-top:\s*0;[\s\S]*?border-top:\s*0;/);
+  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle \.research-cycle-head\s*\{\s*display:\s*none;/);
+});
+
 test("milestone table is progressively disclosed without deleting its rows", () => {
   assert.match(view, /document\.createElement\("details"\)/);
   assert.match(view, /details\.id = "discrete-milestone-details"/);
