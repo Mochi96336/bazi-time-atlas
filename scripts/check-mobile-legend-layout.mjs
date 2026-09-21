@@ -69,6 +69,11 @@ function inside(inner, outer) {
 function validateNormal(run, probe, { edited = false } = {}) {
   const instrument = rect(probe, "instrument", "normal", run.url);
   const legend = rect(probe, "legend", "normal", run.url);
+  const topbar = rect(probe, "topbar", "normal", run.url);
+  const currentNav = rect(probe, "current-nav", "normal", run.url);
+  const researchNav = rect(probe, "research-nav", "normal", run.url);
+  const currentNavFont = Number.parseFloat(requireAttr(probe, "data-current-nav-font-size", "normal", run.url));
+  const researchNavFont = Number.parseFloat(requireAttr(probe, "data-research-nav-font-size", "normal", run.url));
   const toolbar = rect(probe, "toolbar", "normal", run.url);
   const open = rect(probe, "open", "normal", run.url);
   const openFontSize = Number.parseFloat(requireAttr(probe, "data-open-font-size", "normal", run.url));
@@ -99,6 +104,28 @@ function validateNormal(run, probe, { edited = false } = {}) {
     if (dotVisible !== "false" || valueVisible !== "false" || position !== "absolute") {
       throw new Error(`normal: ${id} still behaves like a live HUD row (dot=${dotVisible}, value=${valueVisible}, position=${position}): ${run.url}`);
     }
+  }
+
+  const currentCenter = (currentNav.top + currentNav.bottom) / 2;
+  const researchCenter = (researchNav.top + researchNav.bottom) / 2;
+  const topbarCenter = (topbar.top + topbar.bottom) / 2;
+  if (
+    requireAttr(probe, "data-current-nav-visible", "normal", run.url) !== "true"
+    || requireAttr(probe, "data-research-nav-visible", "normal", run.url) !== "true"
+    || currentNav.height < 27
+    || researchNav.height < 27
+    || !Number.isFinite(currentNavFont) || currentNavFont < 9.5
+    || !Number.isFinite(researchNavFont) || researchNavFont < 8.5
+    || Math.abs(currentCenter - researchCenter) > 1.5
+    || Math.abs(currentCenter - topbarCenter) > 2.5
+  ) {
+    throw new Error(
+      "normal: compact topbar navigation lost readable centered ownership " +
+      "(current=" + currentNav.height.toFixed(1) + "px/" + currentNavFont +
+      "px, research=" + researchNav.height.toFixed(1) + "px/" + researchNavFont +
+      "px, centers=" + currentCenter.toFixed(1) + "/" + researchCenter.toFixed(1) +
+      "/" + topbarCenter.toFixed(1) + "): " + run.url
+    );
   }
 
   if (
