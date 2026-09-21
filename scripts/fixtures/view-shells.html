@@ -107,11 +107,14 @@
 
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
+      const recurrenceOutline = recurrenceDoc.querySelector(".research-outline");
+      const recurrenceOutlineLinks = [...recurrenceDoc.querySelectorAll(".research-outline a")];
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
       const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
       const discreteTaskHead = recurrenceDoc.querySelector("#research-discrete > .research-task-head");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
+      const outlineRect = recurrenceOutline?.getBoundingClientRect();
       const taskNavRect = researchTaskNav?.getBoundingClientRect();
       const taskHeadRect = discreteTaskHead?.getBoundingClientRect();
       const viewportHeight = recurrenceWin.innerHeight;
@@ -120,6 +123,11 @@
         : -1;
       probe.dataset.recurrenceLedeHidden = String(hidden(recurrenceWin, recurrenceLede));
       probe.dataset.recurrenceScopeHidden = String(hidden(recurrenceWin, recurrenceScope));
+      probe.dataset.recurrenceOutlineVisible = String(Boolean(recurrenceOutline && !hidden(recurrenceWin, recurrenceOutline)));
+      probe.dataset.recurrenceOutlineCount = String(recurrenceOutlineLinks.length);
+      probe.dataset.recurrenceOutlineTop = String(Math.round(outlineRect?.top ?? -1));
+      probe.dataset.recurrenceOutlineBottom = String(Math.round(outlineRect?.bottom ?? -1));
+      probe.dataset.recurrenceOutlineHeight = String(Math.round(outlineRect?.height ?? -1));
       probe.dataset.recurrenceTaskNavVisible = String(Boolean(researchTaskNav && !hidden(recurrenceWin, researchTaskNav)));
       probe.dataset.recurrenceTaskNavTop = String(Math.round(taskNavRect?.top ?? -1));
       probe.dataset.recurrenceTaskHeadTop = String(Math.round(taskHeadRect?.top ?? -1));
