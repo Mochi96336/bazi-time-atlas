@@ -94,7 +94,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /timelineDisplay:\s*display\(win, timeline\)/);
   assert.match(fixture, /solarDisplay:\s*display\(win, solar\)/);
   assert.match(fixture, /solarButtonDisplay:\s*display\(win, solarButton\)/);
-  assert.match(fixture, /solarButtonPressed:\s*solarButton\.getAttribute\("aria-pressed"\)/);
+  assert.match(fixture, /solarButtonPressed:\s*solarButton\?\.getAttribute\("aria-pressed"\)/);
   assert.match(fixture, /evidenceLeft:\s*round\(evidenceRect\.left\)/);
   assert.match(fixture, /evidenceGridWidth:\s*round\(evidenceGridRect\.width\)/);
   assert.match(fixture, /evidenceInfoMinFont:\s*round\(Math\.min\(\.\.\.evidenceInfoFonts\)\)/);
