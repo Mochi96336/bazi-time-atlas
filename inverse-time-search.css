@@ -199,6 +199,47 @@
   }
 }
 
+@media (min-width: 821px) {
+  /* Desktop has real edge space: keep Find Time as a wheel-native task, but
+     put its status/result rail on the left edge instead of competing with the
+     center datum. Mobile keeps the compact centered task rail below. */
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
+    position: fixed;
+    top: 84px;
+    left: 0;
+    transform: none;
+    width: 340px;
+    max-width: 340px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 10px;
+    padding: 14px 58px 16px 18px;
+    border: 0;
+    background: linear-gradient(to right,
+      rgba(9,10,11,.97) 0%,
+      rgba(9,10,11,.90) 70%,
+      rgba(9,10,11,0) 100%);
+    background-image: none;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout strong {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-constraints {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout span {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    max-width: 250px;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout button[data-inverse-wheel-apply] {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
 @media (max-width: 480px) {
   .inverse-time-search-readout {
     top: 111px;

@@ -76,6 +76,9 @@ const toolbarTop = numberAttr(probe, "data-toolbar-top", page.url);
 const toolbarBottom = numberAttr(probe, "data-toolbar-bottom", page.url);
 const toolbarLeft = numberAttr(probe, "data-toolbar-left", page.url);
 const siteNavRight = numberAttr(probe, "data-site-nav-right", page.url);
+const researchTop = numberAttr(probe, "data-research-top", page.url);
+const researchBottom = numberAttr(probe, "data-research-bottom", page.url);
+const researchHeight = numberAttr(probe, "data-research-height", page.url);
 const legendTop = numberAttr(probe, "data-legend-top", page.url);
 const legendBottom = numberAttr(probe, "data-legend-bottom", page.url);
 const timelineTop = numberAttr(probe, "data-timeline-top", page.url);
@@ -115,13 +118,13 @@ if (scrollWidth > width + 1) {
 }
 
 const instrumentShare = instrumentHeight / height;
-if (instrumentTop < 0 || instrumentBottom > height - 24 || instrumentBottomGap < 24) {
-  throw new Error(`wide desktop: instrument is not contained in the first viewport (top=${instrumentTop}, bottom=${instrumentBottom}, gap=${instrumentBottomGap}): ${page.url}`);
+if (instrumentTop < 0 || instrumentBottom > height + 1 || instrumentBottomGap < -1 || instrumentBottomGap > 16) {
+  throw new Error(`wide desktop: Tools left a dead footer band or escaped the first viewport (top=${instrumentTop}, bottom=${instrumentBottom}, gap=${instrumentBottomGap}): ${page.url}`);
 }
-if (instrumentShare < 0.80 || instrumentShare > 0.90) {
-  throw new Error(`wide desktop: wheel lost its intended first-screen share (${instrumentShare.toFixed(3)}): ${page.url}`);
+if (instrumentShare < 0.92 || instrumentShare > 0.97) {
+  throw new Error(`wide desktop: wheel lost its full-height Tools share (${instrumentShare.toFixed(3)}): ${page.url}`);
 }
-if (readoutTop < instrumentTop || readoutBottom > instrumentBottom || readoutBottomGap < 40) {
+if (readoutTop < instrumentTop || readoutBottom > instrumentBottom || readoutBottomGap < 24) {
   throw new Error(`wide desktop: Selected Instant is clipped or too close to the viewport edge (top=${readoutTop}, bottom=${readoutBottom}, gap=${readoutBottomGap}): ${page.url}`);
 }
 
@@ -137,11 +140,19 @@ if (requireAttr(probe, "data-site-nav-display", page.url) === "none") {
 if (siteNavRight > toolbarLeft - 24) {
   throw new Error(`wide desktop: global Research exit collides with Tools actions (navRight=${siteNavRight}, toolbarLeft=${toolbarLeft}): ${page.url}`);
 }
+const topbarCenter = (topbarTop + topbarBottom) / 2;
+const researchCenter = (researchTop + researchBottom) / 2;
+if (researchHeight < 28 || Math.abs(researchCenter - topbarCenter) > 2) {
+  throw new Error(
+    `wide desktop: Research text/hitbox is not centered in the global top row ` +
+    `(research=${researchTop}-${researchBottom}/h${researchHeight}, topbar=${topbarTop}-${topbarBottom}): ${page.url}`
+  );
+}
 if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
   throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
 }
-if (legendTop < topbarBottom - 2 || legendBottom > solarTop + 1) {
-  throw new Error(`wide desktop: reference control is not stacked between top chrome and Solar Time (legend=${legendTop}-${legendBottom}, topbarBottom=${topbarBottom}, solarTop=${solarTop}): ${page.url}`);
+if (legendTop < topbarTop - 1 || legendBottom > topbarBottom + 2) {
+  throw new Error(`wide desktop: reference control did not converge into the global top row (legend=${legendTop}-${legendBottom}, topbar=${topbarTop}-${topbarBottom}): ${page.url}`);
 }
 if (requireAttr(probe, "data-timeline-display", page.url) !== "none") {
   throw new Error(`wide desktop: duplicate edge exact-time rail resurfaced: ${page.url}`);
@@ -183,7 +194,7 @@ if (hourVisibleLabels !== 60 || dayVisibleLabels !== 60) {
 
 console.log(
   `[wide-desktop] PASS 2047x1038 edge Tools; ` +
-  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, ` +
+  `instrumentShare=${instrumentShare.toFixed(3)}, viewportGap=${instrumentBottomGap}px, readoutGap=${readoutBottomGap}px, topbar=${topbarTop}-${topbarBottom}, research=${researchTop}-${researchBottom}, reference=${legendTop}-${legendBottom}, ` +
   `left=${solarLeft}-${solarRight}, right=${evidenceLeft}-${evidenceRight}/grid=${evidenceGridWidth}, scrollHeight=${scrollHeight}, ` +
   `fonts=${toolbarFont}/${referenceFont}/${evidenceValueFont}/${evidenceInfoMinFont}/${closeFont}, ` +
   `fastLabels=${hourVisibleLabels}/${dayVisibleLabels}: ${page.url}`

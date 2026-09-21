@@ -111,19 +111,27 @@ async function captureReview({ label, width, height, windowWidth, windowHeight, 
     );
   }
 
-  const taskTopMin = width <= 480 ? 38 : 48;
-  const taskTopMax = width <= 480 ? 50 : 66;
+  const mobileTaskTop = width <= 480
+    && Number.isFinite(readoutInstrumentTop)
+    && readoutInstrumentTop >= 38
+    && readoutInstrumentTop <= 50;
+  const desktopEdgeRail = width > 480
+    && left >= -1
+    && left <= 1
+    && right >= 335
+    && right <= 345
+    && Number.isFinite(readoutInstrumentTop)
+    && readoutInstrumentTop >= 24
+    && readoutInstrumentTop <= 70;
   if (
     attr(probe, "data-visible-toolbar-buttons") !== "1"
     || attr(probe, "data-legend-visible") !== "false"
     || attr(probe, "data-close-visible") !== "false"
     || attr(probe, "data-classification-legend-visible") !== "false"
     || attr(probe, "data-ten-gods-visible") !== "false"
-    || !Number.isFinite(readoutInstrumentTop)
-    || readoutInstrumentTop < taskTopMin
-    || readoutInstrumentTop > taskTopMax
+    || !(width <= 480 ? mobileTaskTop : desktopEdgeRail)
   ) {
-    throw new Error(`find-time ${label} leaked unrelated Tools chrome into the single-task surface: ${fixtureURL} · ${probe}`);
+    throw new Error(`find-time ${label} leaked unrelated Tools chrome or lost its viewport owner: ${fixtureURL} · ${probe}`);
   }
 
   const shot = spawnSync(browser, [...commonArgs, `--screenshot=${outputPath}`, fixtureURL], {

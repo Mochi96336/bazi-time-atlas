@@ -75,8 +75,14 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
   );
   assert.match(
     css,
-    /data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*54px;/
+    /@media \(min-width: 821px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?top:\s*84px;[\s\S]*?left:\s*0;[\s\S]*?transform:\s*none;[\s\S]*?width:\s*340px;/
   );
+});
+
+
+test("desktop Find Time leads the action row instead of sitting between Classification and Now", () => {
+  assert.match(view, /querySelector\("#classification-overlay-button"\)/);
+  assert.match(view, /insertBefore\(button, classificationButton \?\? nowButton\)/);
 });
 
 test("390px find-time tightens the shared single-task surface", () => {

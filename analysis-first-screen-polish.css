@@ -169,28 +169,25 @@
   }
 }
 
-/* First-screen height must budget for the product header, shell padding and the
-   gap above the instrument. The former 52px subtraction only budgeted the
-   header itself, so the Selected Instant rail fell below the viewport even on
-   otherwise ordinary desktop heights. Keep the wheel dominant while reserving
-   a real lower safe area for the read-head. */
+/* Tools is an overlay workspace over the same instrument, so opening it must
+   not shorten the desktop canvas or create a dead footer band. Use the same
+   viewport ownership as ordinary reading; the read-head safety comes from its
+   internal bottom inset, not from removing height from the instrument. */
 @media (min-width: 821px) {
   #kinetic-instrument[data-analysis-open="true"] {
-    height: max(720px, calc(100dvh - 92px));
+    height: max(720px, calc(100dvh - 52px));
   }
 }
 
 @media (min-width: 1100px) {
   #kinetic-instrument[data-analysis-open="true"] {
-    height: max(760px, calc(100dvh - 92px));
+    height: max(760px, calc(100dvh - 52px));
   }
 }
 
-/* Wide desktop is not a request to inflate every instrument detail. At the
-   2047x1038 review shape, cap vertical growth by the available width/height
-   relationship, keep the controls in a compact readable hierarchy, and give
-   the Selected Instant a deliberate bottom buffer. Taller monitors still grow
-   naturally because 44vw quickly stops being the limiting term. */
+/* Wide desktop is not a request to inflate every instrument detail. Keep the
+   controls compact, but do not cap the instrument itself by width: the old
+   44vw ceiling created an obvious dead strip beneath Tools on ultrawide views. */
 @media (min-width: 1600px) {
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button,
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button {
@@ -278,10 +275,6 @@
 }
 
 @media (min-width: 1800px) and (min-aspect-ratio: 17/9) {
-  #kinetic-instrument[data-analysis-open="true"] {
-    height: clamp(760px, calc(100dvh - 92px), 44vw);
-  }
-
   #kinetic-instrument[data-analysis-open="true"] .instrument-readout {
     bottom: 26px;
   }
