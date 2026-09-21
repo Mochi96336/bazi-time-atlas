@@ -75,7 +75,7 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
   );
   assert.match(
     css,
-    /@media \(min-width: 821px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?top:\s*84px;[\s\S]*?left:\s*0;[\s\S]*?transform:\s*none;[\s\S]*?width:\s*340px;/
+    /@media \(min-width: 821px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?top:\s*84px;[\s\S]*?left:\s*0;[\s\S]*?transform:\s*none;[\s\S]*?width:\s*340px;/
   );
 });
 
