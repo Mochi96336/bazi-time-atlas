@@ -37,6 +37,10 @@
       const tabs=[...doc.querySelectorAll("#ganzhi-structure [data-structure-tab]")];
       const switches=[...doc.querySelectorAll("[data-pillar-switch]")];
       const header=doc.querySelector(".ganzhi-inspector-head");
+      const pillarMeta=doc.querySelector(".ganzhi-inspector-pillar-switch span");
+      const structureMeta=doc.querySelector(".ganzhi-structure-pillar small");
+      const hiddenStemRole=doc.querySelector(".ganzhi-structure-chip i");
+      const tenGodMeta=doc.querySelector(".ganzhi-ten-god-row > small");
       const inspectorRect=rect(inspector),closeRect=rect(close),headerRect=rect(header);
       const tabHeights=tabs.map(node=>rect(node)?.height??0);
       const switchHeights=switches.map(node=>rect(node)?.height??0);
@@ -54,6 +58,10 @@
       probe.dataset.tabMinHeight=String(Math.min(...tabHeights));
       probe.dataset.switchCount=String(switches.length);
       probe.dataset.switchMinHeight=String(Math.min(...switchHeights));
+      probe.dataset.pillarMetaFont=pillarMeta?win.getComputedStyle(pillarMeta).fontSize:"";
+      probe.dataset.structureMetaFont=structureMeta?win.getComputedStyle(structureMeta).fontSize:"";
+      probe.dataset.hiddenStemRoleFont=hiddenStemRole?win.getComputedStyle(hiddenStemRole).fontSize:"";
+      probe.dataset.tenGodMetaFont=tenGodMeta?win.getComputedStyle(tenGodMeta).fontSize:"";
       probe.dataset.ready="true";
     }
     frame.addEventListener("load",()=>settle());
