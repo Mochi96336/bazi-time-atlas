@@ -132,5 +132,5 @@ test("visible derivation explains why 24000 years is the discrete candidate befo
   const milestoneStart = recurrenceHtml.indexOf('class="milestone-table"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   assert.ok(derivationStart >= 0 && milestoneStart > derivationStart && cycleStart > milestoneStart);
-  assert.match(recurrenceCss, /\.phase-gauge-caption[\s\S]*0 =/);
+  assert.match(recurrenceHtml, /class="phase-gauge-caption"[\s\S]*0 = 閉合/);
 });
