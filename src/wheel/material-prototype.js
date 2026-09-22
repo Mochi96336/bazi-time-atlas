@@ -105,7 +105,9 @@ const FRAGMENT_SHADER = [
   "",
   "  vec3 reflectionTint = vec3(0.92, 0.97, 1.00);",
   "  float edgeMask = smoothstep(0.0, 1.25, edgeDistance);",
-  "  float overlayAlpha = edgeMask * clamp(specular * environmentLift * 1.65, 0.0, 0.065);",
+  "  float fineGrain = fieldCentered * 0.030;",
+  "  float directionalSheen = specular * environmentLift * 1.45;",
+  "  float overlayAlpha = edgeMask * clamp(directionalSheen + fineGrain, 0.006, 0.070);",
   "  out_color = vec4(reflectionTint * overlayAlpha, overlayAlpha);",
   "}"
 ].join("\n");
