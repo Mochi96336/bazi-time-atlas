@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, astronomyCss, residualCss] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
@@ -12,7 +12,10 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8"),
   readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8")
+  readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8"),
+  readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
+  readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
+  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8")
 ]);
 
 const discreteStart = html.indexOf('id="research-discrete"');
@@ -105,7 +108,7 @@ test("evidence defaults to outcome-first disclosure while research links can rev
 
   assert.match(evidenceCss, /\.research-evidence-support\s*,[\s\S]*\.research-evidence-drilldown\s*\{/);
   assert.match(evidenceCss, /\.research-evidence-support > \.proof-chain-panel,[\s\S]*margin-top:\s*0;[\s\S]*border-top:\s*0;/);
-  assert.match(evidenceCss, /@media \(max-width:480px\)[\s\S]*\.research-evidence-support,[\s\S]*min-height:\s*32px/);
+  assert.match(evidenceCss, /@media \(max-width:480px\)[\s\S]*\.research-evidence-support,[\s\S]*min-height:\s*42px/);
 });
 
 test("section chrome stays flat and compact on phone", () => {
@@ -116,4 +119,27 @@ test("section chrome stays flat and compact on phone", () => {
   assert.match(taskCss, /\.research-task-head\s*\{[\s\S]*display:flex/);
   assert.match(taskCss, /\.research-task-head \.eyebrow,[\s\S]*display:none/);
   assert.doesNotMatch(taskCss, /border-radius/);
+});
+
+test("mobile Research outcomes keep a readable interaction floor without inflating hidden evidence", () => {
+  assert.match(
+    discreteCss,
+    /@media \(max-width:480px\)[\s\S]*\.research-discrete-drilldown > summary\s*\{[\s\S]*min-height:\s*42px;[\s\S]*padding:\s*8px 1px;[\s\S]*\.research-discrete-drilldown > summary strong\s*\{[\s\S]*font-size:\s*8\.5px;/
+  );
+  assert.match(
+    astronomyCss,
+    /@media \(max-width:480px\)[\s\S]*\.research-astronomy-rms-rail > span\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.research-astronomy-drilldown > summary\s*\{\s*min-height:\s*42px;\s*font-size:\s*9px;\s*\}/
+  );
+  assert.match(
+    evidenceCss,
+    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*8\.5px;/
+  );
+  assert.match(
+    determinacyCss,
+    /@media \(max-width:480px\)[\s\S]*\.determinacy-card p\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.determinacy-foot\s*\{\s*font-size:\s*9px;\s*\}/
+  );
+  assert.match(
+    residualCss,
+    /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*8\.5px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*8\.5px;\s*\}/
+  );
 });
