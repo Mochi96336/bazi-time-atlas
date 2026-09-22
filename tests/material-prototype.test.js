@@ -102,7 +102,9 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /specularPower = mix\(22\.0, 10\.0, roughness\)/);
   assert.match(material, /surfaceSheen = 1\.0 \+ fieldCentered \* 0\.45/);
   assert.match(material, /environmentLift = clamp\(0\.82 \+ dot\(point \/ vec2\(600\.0, 380\.0\), vec2\(-0\.16, -0\.10\)\), 0\.58, 1\.08\)/);
-  assert.match(material, /fineGrain = fieldCentered \* 0\.030/);\n  assert.match(material, /directionalSheen = specular \* environmentLift \* 1\.45/);\n  assert.match(material, /overlayAlpha = edgeMask \* clamp\(directionalSheen \+ fineGrain, 0\.006, 0\.070\)/);
+  assert.match(material, /fineGrain = fieldCentered \* 0\.030/);
+  assert.match(material, /directionalSheen = specular \* environmentLift \* 1\.45/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(directionalSheen \+ fineGrain, 0\.006, 0\.070\)/);
   assert.match(material, /out_color = vec4\(reflectionTint \* overlayAlpha, overlayAlpha\)/);
   assert.match(radial, /\.m2-hour-material-face \{ opacity: \.34; \}/);
   assert.match(radial, /\.m2-day-material-face \{ opacity: \.36; \}/);
