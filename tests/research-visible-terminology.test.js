@@ -56,10 +56,8 @@ test("Research presentation layers do not reintroduce prototype English copy", (
   assert.match(nearView, /模型不可用/);
   assert.doesNotMatch(nearView, /model unavailable/);
 
-  assert.match(residualView, /標準化年 \$\{exposure\.yearPercent/);
-  assert.match(residualView, /模型不可用/);
-  assert.doesNotMatch(residualView, /model unavailable|% of normalized year/);
-
+  assert.match(residualView, /相位窗口 \\$\\{exposure\\.yearPercent.*非人口機率/);\n  assert.match(residualView, /模型不可用/);
+  assert.match(residualView, /年／月柱邊界/);\n  assert.match(residualView, /僅月柱 · 11 節/);\n  assert.match(residualView, /年柱＋月柱 · 立春/);\n  assert.match(residualView, /astronomy-rms-residual", `\\$\\{result\\.rmsHours\\.toFixed\\(2\\)\\} h`/);\n  assert.doesNotMatch(residualView, /BaZi pillar-boundary exposure|Month only ·|Year \\+ Month ·|h RMS|model unavailable|% of normalized year/);\n
   assert.match(determinacyView, /年柱＋月柱可隔離 · 日柱＋時柱未解/);
   assert.doesNotMatch(determinacyView, /Year \+ Month 可隔離 · Day \+ Hour 未解/);
 });
