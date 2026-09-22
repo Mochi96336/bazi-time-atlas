@@ -42,6 +42,27 @@ const captures = pages.flatMap(page =>
 // giving lower panels enough vertical room to be inspected without scroll automation.
 captures.push(
   {
+    name: "recurrence-year-strip-before-390x1450.png",
+    page: "recurrence-year-strip-before",
+    path: "recurrence.html?date=2024-02-01&delta=0",
+    width: 390,
+    height: 1450,
+  },
+  {
+    name: "recurrence-year-strip-after-1440x1300.png",
+    page: "recurrence-year-strip-after",
+    path: "recurrence.html?date=2024-02-10&delta=0",
+    width: 1440,
+    height: 1300,
+  },
+  {
+    name: "recurrence-year-strip-2047x1300.png",
+    page: "recurrence-year-strip-wide",
+    path: "recurrence.html?date=2026-09-13&delta=1980",
+    width: 2047,
+    height: 1300,
+  },
+  {
     name: "annual-hidden-inspector-390x1320.png",
     page: "annual-hidden-inspector",
     path: "?lambda=271.25&yearStem=%E4%B9%99&hidden=1",
