@@ -76,6 +76,7 @@
   .research-task-primary { margin-top:0; padding-top:0; }
 }
 @media (max-width:480px) {
+  .research-outline a { min-height:42px; }
   .research-task { margin-top:28px; padding-top:15px; }
   .research-task-primary { margin-top:0; padding-top:0; }
   .research-task-head { margin-bottom:9px; }
