@@ -152,11 +152,11 @@
 .boundary-shift-row.aligned .boundary-shift-target { background:#94a097 !important; }
 .boundary-shift-window {
   position:absolute;
-  z-index:1;
-  top:3px;
-  bottom:3px;
-  left:calc(26px + 6px + (100% - 32px) * var(--boundary-window-left) / 100%);
-  width:calc((100% - 32px) * var(--boundary-window-width) / 100%);
+  z-index:0;
+  top:-4px;
+  height:9px;
+  left:var(--boundary-window-left);
+  width:var(--boundary-window-width);
   min-width:0;
   background:rgba(197,154,110,.15);
   border-left:1px solid rgba(197,154,110,.26);
