@@ -119,9 +119,9 @@
 
 @media (max-width:480px) {
   .astronomy-panel { padding:6px 0 7px; }
-  .research-astronomy-rms-rail > span { font-size:8px; }
+  .research-astronomy-rms-rail > span { font-size:9px; }
   .research-astronomy-rms-rail #astronomy-rms-residual { font-size:12px; }
-  .research-astronomy-drilldown > summary { min-height:32px; font-size:8.5px; }
+  .research-astronomy-drilldown > summary { min-height:42px; font-size:9px; }
   .astronomy-detail-meta { padding-top:7px; }
   #month-boundary-detail > p { font-size:7.5px; }
   #near-recurrence-detail .near-search-body { padding-bottom:8px; }
