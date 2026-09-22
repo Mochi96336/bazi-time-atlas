@@ -92,6 +92,8 @@ requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence rese
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
+requireEqual(attr(probe, "data-recurrence-delta-dock-before-instrument"), "true", "Recurrence displacement controls must precede the result instrument", url);
+requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Recurrence displacement controls must stay fully usable in the first viewport", url);
 requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
@@ -103,21 +105,23 @@ const outlineTop = Number(attr(probe, "data-recurrence-outline-top"));
 const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
 const outlineHeight = Number(attr(probe, "data-recurrence-outline-height"));
 const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
+const taskHeadBottom = Number(attr(probe, "data-recurrence-task-head-bottom"));
 const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
 const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
 const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
 const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"));
 const deltaDockTop = Number(attr(probe, "data-recurrence-delta-dock-top"));
+const deltaDockBottom = Number(attr(probe, "data-recurrence-delta-dock-bottom"));
 const deltaDockGap = Number(attr(probe, "data-recurrence-delta-dock-gap"));
 if (
-  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, recurrenceTop].every(Number.isFinite)
-  || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < recurrenceTop)
+  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, deltaDockTop, deltaDockBottom, recurrenceTop].every(Number.isFinite)
+  || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom && taskHeadBottom <= deltaDockTop && deltaDockTop < deltaDockBottom && deltaDockBottom < recurrenceTop)
   || outlineHeight > 42
 ) {
   throw new Error(
     `Recurrence mobile outline must stay compact and precede section 01 ` +
-    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}, instrument=${recurrenceTop}): ${url}`
+    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, instrument=${recurrenceTop}): ${url}`
   );
 }
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
@@ -128,14 +132,16 @@ if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) 
 }
 if (
   !Number.isFinite(deltaDockTop)
+  || !Number.isFinite(deltaDockBottom)
   || !Number.isFinite(deltaDockGap)
-  || deltaDockTop <= recurrenceTop
+  || deltaDockTop <= taskHeadBottom
+  || deltaDockBottom >= recurrenceTop
   || deltaDockGap < 8
   || deltaDockGap > 20
 ) {
   throw new Error(
-    "Recurrence displacement dock must stay directly attached below the instrument " +
-    "(top=" + deltaDockTop + ", gap=" + deltaDockGap + "): " + url
+    "Recurrence displacement dock must stay directly before the instrument " +
+    "(top=" + deltaDockTop + ", bottom=" + deltaDockBottom + ", gap=" + deltaDockGap + "): " + url
   );
 }
 if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
