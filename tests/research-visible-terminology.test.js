@@ -16,7 +16,7 @@ const [html, discreteView, astronomyView, nearView, residualView, determinacyVie
 test("Research product labels use Chinese while canonical research terms stay recognizable", () => {
   for (const text of [
     "時間位移",
-    "深時間 exact 候選",
+    "超出滑桿範圍",
     "公曆骨架",
     "干支年序",
     "干支日序",
@@ -25,12 +25,15 @@ test("Research product labels use Chinese while canonical research terms stay re
     "視覺尺度",
     "目前可支持的最強結論",
     "最大殘差 → RMS",
-    "最大絕對值 / RMS"
+    "最大絕對值 / RMS",
+    "搜尋最佳",
+    "搜尋最佳殘差"
   ]) assert.ok(html.includes(text), `missing visible Research label: ${text}`);
 
   for (const stale of [
     "Time displacement",
     "Deep exact candidate",
+    "深時間 exact 候選",
     "Gregorian frame",
     "Year sequence",
     "Day sequence",
