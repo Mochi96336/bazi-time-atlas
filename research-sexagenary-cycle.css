@@ -49,7 +49,7 @@
   height: auto;
   margin: 0 auto;
   overflow: visible;
-  touch-action: manipulation;
+  touch-action: none;
 }
 .research-cycle-guide {
   fill: none;
@@ -155,16 +155,6 @@
 .research-cycle-phase strong { color: #dce2dd; font-size: 20px; }
 .research-cycle-phase small { margin-left: 6px; color: #78837b; font-size: 10px; }
 .research-cycle-phase em { color: #68736c; font-size: 9px; font-style: normal; font-variant-numeric: tabular-nums; }
-.research-cycle-stepper { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-.research-cycle-stepper button {
-  min-height: 36px;
-  border: 1px solid var(--hairline);
-  border-radius: 999px;
-  background: transparent;
-  color: #919b94;
-  cursor: pointer;
-}
-.research-cycle-stepper button:hover { border-color: rgba(238,242,237,.28); color: #e5e9e5; }
 @media (max-width: 900px) {
   .research-cycle-layout { grid-template-columns: 1fr; gap: 8px; }
   .research-cycle-inspector { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--hairline); }
