@@ -115,7 +115,7 @@ test("browser contract verifies the global period preset owns the semantic label
   assert.match(recurrenceGate, /function expectConsolidatedGlobalPeriod/);
   assert.match(recurrenceGate, /data-delta-years="24000"/);
   assert.match(recurrenceGate, /全域 24,000/);
-  assert.match(recurrenceGate, /三層全域閉合 24,000 年/);
+  assert.match(recurrenceGate, /三個離散相位同時歸零 24,000 年/);
   assert.match(recurrenceGate, /global-period/);
 });
 
