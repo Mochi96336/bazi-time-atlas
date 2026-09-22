@@ -21,7 +21,7 @@ function freezePillar(value) {
 export function fourPillarDeterminacy({
   deltaYears,
   yearSequenceAligned,
-  discreteYearClosed,
+  discreteYearSequenceClosed,
   discreteDayClosed,
   astronomyWithinRange = true
 }) {
@@ -29,7 +29,7 @@ export function fourPillarDeterminacy({
     throw new RangeError("deltaYears must be a non-negative integer");
   }
   assertBoolean(yearSequenceAligned, "yearSequenceAligned");
-  assertBoolean(discreteYearClosed, "discreteYearClosed");
+  assertBoolean(discreteYearSequenceClosed, "discreteYearSequenceClosed");
   assertBoolean(discreteDayClosed, "discreteDayClosed");
   assertBoolean(astronomyWithinRange, "astronomyWithinRange");
 
@@ -119,7 +119,7 @@ export function fourPillarDeterminacy({
     resolved:false,
     pureBoundaryAttribution:false,
     summary:"需要絕對地方時與已解析的日干，外圈形狀比較沒有保留這些量",
-    discreteYearPhaseClosed:discreteYearClosed,
+    discreteYearSequencePhaseClosed:discreteYearSequenceClosed,
     discreteDayPhaseClosed:discreteDayClosed,
     missingInputs:[
       "absolute-local-clock-phase",
