@@ -141,7 +141,13 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   .recurrence-intro { margin:12px 0 10px; }
   .recurrence-intro .eyebrow { font-size:7px; letter-spacing:.13em; }
   h1 { margin:4px 0 0; font-size:clamp(28px,8.2vw,34px); line-height:1; }
-  .recurrence-intro .lede,
+  .recurrence-intro .lede {
+    display:block;
+    max-width:340px;
+    margin-top:3px;
+    font-size:10.5px;
+    line-height:1.35;
+  }
   .scope-note { display:none; }
   .recurrence-instrument { min-height:610px; }
   .base-date input { width:58px; min-height:42px; }
