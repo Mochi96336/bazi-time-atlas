@@ -56,6 +56,8 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     ["zodiac", svg.querySelector(`#${ringModel("zodiac").groupId}`)]
   ]);
   const groupFor = id => ringGroups.get(id) ?? null;
+  const materialBaseLayer = svg.querySelector("#material-base-layer");
+  const materialReflectionLayer = svg.querySelector("#material-reflection-layer");
   const guides = svg.querySelector("#guide-layer");
   const cursorLayer = svg.querySelector("#cursor-layer");
   const solarTrack = groupFor("solar");
@@ -75,6 +77,13 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   }
 
   function renderMaterialBeds() {
+    // Material G surface order is explicit:
+    //   base body -> fixed-world reflection/rim -> guide marks -> rotating semantics.
+    // The WebGL roughness canvas remains a low-energy support below SVG; the first
+    // readable metal cue now lives on the visible surface stack itself.
+    const baseLayer = materialBaseLayer ?? guides;
+    const surfaceLayer = materialReflectionLayer ?? guides;
+
     SEXAGENARY_RING_IDS.forEach(id => {
       const model = ringModel(id);
       const d = annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, FAN.start, FAN.end);
@@ -83,19 +92,25 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         class: `m2-ring-bed m2-${id}-bed`,
         "data-material-ring": id,
         "aria-hidden": "true"
-      }, guides);
+      }, baseLayer);
+      el("path", {
+        d,
+        class: `m2-ring-reflection m2-${id}-reflection`,
+        "data-material-reflection-ring": id,
+        "aria-hidden": "true"
+      }, surfaceLayer);
       el("path", {
         d: arcPath(WHEEL_CENTER, model.outerRadius - 1, FAN.start, FAN.end),
         class: `m2-ring-rim m2-ring-rim-light m2-${id}-rim-light`,
         "data-material-rim-light": id,
         "aria-hidden": "true"
-      }, guides);
+      }, surfaceLayer);
       el("path", {
         d: arcPath(WHEEL_CENTER, model.innerRadius + 1, FAN.start, FAN.end),
         class: `m2-ring-rim m2-ring-rim-shadow m2-${id}-rim-shadow`,
         "data-material-rim-shadow": id,
         "aria-hidden": "true"
-      }, guides);
+      }, surfaceLayer);
     });
   }
 
@@ -115,9 +130,9 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const staticLabels = new Map();
     group.classList.add("ring-track", `${id}-track`);
 
-    // Material micrograin belongs to the physical ring face, so it lives inside
-    // the same rotating group as the ring rather than on the fixed guide bed.
-    // The fixed bed below still carries only low-frequency ring-local light.
+    // Keep the legacy SVG material-face slot visually inert. Unresolved
+    // roughness is rendered by the low-energy WebGL support; the readable broad
+    // reflection now belongs to the fixed-world surface layer below semantics.
     el("path", {
       d: annularSectorPath(WHEEL_CENTER, model.innerRadius, model.outerRadius, FAN.start, FAN.end),
       class: `m2-ring-material-face m2-${id}-material-face`,
