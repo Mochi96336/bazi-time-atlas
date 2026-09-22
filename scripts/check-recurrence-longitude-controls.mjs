@@ -95,7 +95,7 @@ if (
 }
 expectStage(meanSolar.dom, "longitude", "satisfied", "bound mean solar", meanSolar.url);
 expectStage(meanSolar.dom, "equation-of-time", "not-required", "bound mean solar", meanSolar.url);
-if (textById(meanSolar.dom, "proof-chain-hour-blockers") !== "無 blocker") {
+if (textById(meanSolar.dom, "proof-chain-hour-blockers") !== "無阻塞") {
   throw new Error(`bound mean-solar Hour should resolve without Equation of Time: ${meanSolar.url}`);
 }
 if (!meanSolar.dom.includes("E121.5°") || !meanSolar.dom.includes("east-positive")) {

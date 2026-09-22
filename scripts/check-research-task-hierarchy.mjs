@@ -131,6 +131,40 @@ for (const stale of [
   }
 }
 
+for (const expected of [
+  "目標時刻 / 日界 / 計時基準 / 經度 · 研究約定",
+  "固定 UT1 時差",
+  "目標地方鐘面",
+  "相對 UT1 固定時差",
+  "日界規則",
+  "地方時計時基準",
+  "經度 · 東＋ / 西−",
+  "第一個硬阻塞",
+  "日柱證明",
+  "時柱證明",
+  "目標年 / 結論",
+  "個來源 · 展開看能力邊界"
+]) {
+  if (!probe.dom.includes(expected)) {
+    throw new Error(`localized Research evidence copy missing "${expected}": ${probe.url}`);
+  }
+}
+for (const stale of [
+  "Target / Day boundary / Clock basis / Longitude · research conventions",
+  "Target local clock",
+  "Fixed offset from UT1",
+  "First hard blocker",
+  ">Day proof<",
+  ">Hour proof<",
+  "Target / verdict",
+  "sources ·",
+  "展開看 coverage"
+]) {
+  if (probe.dom.includes(stale)) {
+    throw new Error(`prototype Research evidence copy returned "${stale}": ${probe.url}`);
+  }
+}
+
 const cycleDeepLink = dump("recurrence.html#research-sexagenary-cycle");
 const cycleDeepLinkDetail = detailsById(cycleDeepLink.dom, "discrete-sexagenary-details");
 if (!cycleDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(cycleDeepLinkDetail)) {

@@ -35,7 +35,7 @@ function ensureProofDrilldown() {
   }
 
   const count = stages.querySelectorAll(".proof-chain-stage").length;
-  setTextIfChanged(details.querySelector("#proof-chain-drilldown-meta"), `${count || 11} stages · 展開看逐層證據`);
+  setTextIfChanged(details.querySelector("#proof-chain-drilldown-meta"), `${count || 11} 層 · 展開看逐層證據`);
 }
 
 function ensureEpochAuditDrilldown() {
@@ -55,10 +55,9 @@ function ensureEpochAuditDrilldown() {
   }
 
   const count = sources.querySelectorAll(".epoch-audit-source").length;
-  const verdict = panel.dataset.auditStatus;
   setTextIfChanged(
     details.querySelector("#epoch-audit-drilldown-meta"),
-    verdict ? `${count} sources · ${verdict}` : `${count} sources · 展開看 coverage`
+    `${count} 個來源 · 展開看能力邊界`
   );
 }
 

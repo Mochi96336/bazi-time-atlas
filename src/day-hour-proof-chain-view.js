@@ -31,14 +31,14 @@ const STATUS_LABELS = Object.freeze({
 });
 
 const AUDIT_STATUS_LABELS = Object.freeze({
-  "identity-bypass":"同一狀態 · 不需跨 epoch",
-  resolved:"已有 seasonal TT anchors runtime",
-  "qualified-direct-event-provider-not-integrated":"direct seasonal event 有 · 尚未整合",
-  "qualified-ephemeris-basis-not-integrated":"absolute state coverage 有 · solver 尚未整合",
-  "state-adapter-runtime-coverage-undeclared":"state adapter 已註冊 · runtime coverage 未宣告",
-  "state-adapter-runtime-coverage-gap":"state adapter runtime coverage gap",
-  "deep-time-seasonal-epoch-solver-incomplete":"absolute state 有 · seasonal solver 未完成",
-  "absolute-state-coverage-gap":"absolute-state ephemeris coverage gap"
+  "identity-bypass":"同一狀態 · 不需跨時代",
+  resolved:"已有可用的節氣 TT 錨點",
+  "qualified-direct-event-provider-not-integrated":"有直接節氣事件資料 · 尚未整合",
+  "qualified-ephemeris-basis-not-integrated":"有絕對狀態資料 · 求解器尚未整合",
+  "state-adapter-runtime-coverage-undeclared":"狀態轉接器已註冊 · 可用年份未宣告",
+  "state-adapter-runtime-coverage-gap":"狀態轉接器的可用年份不足",
+  "deep-time-seasonal-epoch-solver-incomplete":"有絕對狀態資料 · 節氣求解尚未完成",
+  "absolute-state-coverage-gap":"絕對狀態星曆範圍不足"
 });
 
 function setText(id, value) {
@@ -186,27 +186,27 @@ function ensureTargetClockControls(panel) {
   root.innerHTML = `
     <div class="target-instant-control-head">
       <div>
-        <span>Target / Day boundary / Clock basis / Longitude · research conventions</span>
-        <strong>日內時刻、日界、clock basis 與太陽時經度都必須明示</strong>
+        <span>目標時刻 / 日界 / 計時基準 / 經度 · 研究約定</span>
+        <strong>日內時刻、日界、計時基準與太陽時經度都必須明示</strong>
       </div>
-      <label class="target-instant-toggle"><input id="target-instant-enabled" type="checkbox"> <span>fixed-zone-from-UT1</span></label>
+      <label class="target-instant-toggle"><input id="target-instant-enabled" type="checkbox"> <span>固定 UT1 時差</span></label>
     </div>
     <div class="target-instant-fields">
-      <label>Target local clock<input id="target-instant-time" type="time" step="1" value="${DEFAULT_TARGET_TIME}"></label>
-      <label>Fixed offset from UT1<input id="target-instant-offset" type="number" min="-14" max="14" step="0.25" value="${DEFAULT_UT1_OFFSET_HOURS}"></label>
-      <label>Day boundary<select id="day-boundary-convention">
-        <option value="">Not selected</option>
+      <label>目標地方鐘面<input id="target-instant-time" type="time" step="1" value="${DEFAULT_TARGET_TIME}"></label>
+      <label>相對 UT1 固定時差<input id="target-instant-offset" type="number" min="-14" max="14" step="0.25" value="${DEFAULT_UT1_OFFSET_HOURS}"></label>
+      <label>日界規則<select id="day-boundary-convention">
+        <option value="">尚未選擇</option>
         <option value="${DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY}">子初 23:00 → 次日</option>
         <option value="${DAY_BOUNDARY.CIVIL_MIDNIGHT}">民用午夜 00:00</option>
       </select></label>
-      <label>Local clock basis<select id="clock-basis-convention">
-        <option value="">Not selected</option>
-        <option value="${DAY_HOUR_TIME_BASIS.CIVIL}">Civil / zone clock</option>
-        <option value="${DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR}">Local mean solar</option>
-        <option value="${DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR}">Local apparent solar</option>
+      <label>地方時計時基準<select id="clock-basis-convention">
+        <option value="">尚未選擇</option>
+        <option value="${DAY_HOUR_TIME_BASIS.CIVIL}">民用／區域鐘面</option>
+        <option value="${DAY_HOUR_TIME_BASIS.LOCAL_MEAN_SOLAR}">地方平太陽時</option>
+        <option value="${DAY_HOUR_TIME_BASIS.LOCAL_APPARENT_SOLAR}">地方真太陽時</option>
       </select></label>
-      <label>Longitude · E+ / W−<input id="longitude-degrees" type="number" min="-180" max="180" step="0.0001" inputmode="decimal" placeholder="unbound"></label>
-      <output id="target-instant-status" aria-live="polite">date-only · 未建立日內 target instant</output>
+      <label>經度 · 東＋ / 西−<input id="longitude-degrees" type="number" min="-180" max="180" step="0.0001" inputmode="decimal" placeholder="未綁定"></label>
+      <output id="target-instant-status" aria-live="polite">僅日期 · 尚未建立日內目標時刻</output>
     </div>
     <p>fixed-zone-from-UT1 是 proleptic Gregorian + 固定 UT1 offset 的研究座標，不是西元遠未來 UTC、DST 或政治時區預測。Day boundary、local clock basis 與經度彼此獨立；太陽時經度沿用 Birth 的 <code>lon</code> 語意，東經為正、西經為負，不會從 UTC offset 猜位置。</p>
   `;
@@ -292,7 +292,7 @@ function targetInstantForCurrentState(deltaYears) {
     if (controls) {
       controls.root.dataset.valid = "true";
       controls.root.dataset.basis = "date-only";
-      controls.status.textContent = "date-only · 未建立日內 target instant";
+      controls.status.textContent = "僅日期 · 尚未建立日內目標時刻";
     }
     return null;
   }
@@ -336,15 +336,15 @@ function ensurePanel() {
         <p>這裡把 seasonal TT anchors、target instant reference basis、Earth rotation，以及 Day / Hour 的 local clock convention 分開。4006 有節氣 anchors，不代表 recurrence 已經有可投影的 TT / UT1 target instant。</p>
       </div>
       <div class="proof-chain-blocker">
-        <span>First hard blocker</span>
+        <span>第一個硬阻塞</span>
         <strong id="proof-chain-first-blocker">—</strong>
         <small id="proof-chain-resolution-summary">—</small>
       </div>
     </div>
     <div id="proof-chain-stages" class="proof-chain-stages"></div>
     <div class="proof-chain-foot">
-      <div><span>Day proof</span><strong id="proof-chain-day-status">—</strong><small id="proof-chain-day-blockers">—</small></div>
-      <div><span>Hour proof</span><strong id="proof-chain-hour-status">—</strong><small id="proof-chain-hour-blockers">—</small></div>
+      <div><span>日柱證明</span><strong id="proof-chain-day-status">—</strong><small id="proof-chain-day-blockers">—</small></div>
+      <div><span>時柱證明</span><strong id="proof-chain-hour-status">—</strong><small id="proof-chain-hour-blockers">—</small></div>
     </div>
   `;
   determinacyPanel.insertAdjacentElement("afterend", panel);
@@ -369,7 +369,7 @@ function ensureEpochAuditPanel() {
         <p>這裡只稽核 source/provider 能否提供 absolute seasonal anchors。direct-event runtime 的 canonical crossings 與 recurrence 的 typed target-instant reference basis 是不同能力；後者必須由 target-instant contract 明示，不從 anchors 推定。</p>
       </div>
       <div class="epoch-audit-summary">
-        <span>Target / verdict</span>
+        <span>目標年 / 結論</span>
         <strong id="epoch-audit-target">—</strong>
         <small id="epoch-audit-verdict">—</small>
       </div>
@@ -389,16 +389,16 @@ function statusLabel(status) {
 function readableBlocker(name) {
   const labels = {
     relativeTermGeometry:"相對節氣幾何",
-    absoluteSeasonalEpoch:"絕對 seasonal anchors",
-    targetInstantBound:"target instant reference basis",
+    absoluteSeasonalEpoch:"絕對節氣錨點",
+    targetInstantBound:"目標時刻參照基準",
     earthRotationBridge:"TT↔UT1 / ΔT",
-    localZoneBound:"地方鐘面／zone convention",
+    localZoneBound:"地方鐘面／時區約定",
     dayBoundaryBound:"日界規則",
     sexagenaryDayArithmetic:"干支日序算術",
     resolvedDayPillar:"已解析日柱",
-    clockBasisBound:"local clock basis",
+    clockBasisBound:"地方時計時基準",
     longitudeBound:"經度",
-    equationOfTimeModel:"Equation of Time",
+    equationOfTimeModel:"均時差（Equation of Time）",
     hourBranchRule:"時支規則",
     fiveRatsRule:"五鼠遁"
   };
@@ -437,22 +437,22 @@ function renderEpochSource(item) {
   const coverage = `${formatYear(item.coverage.minYear)} → ${formatYear(item.coverage.maxYear)}`;
   const inApp = item.implementedAsBasis || item.implementedDirectProvider;
   const verdict = item.usableNow
-    ? "anchors runtime 可用"
+    ? "節氣錨點可用"
     : item.qualifiedCoverage && item.directSeasonalEpoch
-      ? "direct event ✓ · 尚未整合"
+      ? "直接節氣事件 ✓ · 尚未整合"
       : item.qualifiedCoverage
-        ? "absolute state ✓ · solver 尚未整合"
+        ? "絕對狀態 ✓ · 求解器尚未整合"
         : item.coversTarget
-          ? "coverage ✓ · 無 absolute epoch"
-          : "超出 coverage";
+          ? "範圍符合 ✓ · 無絕對時代"
+          : "超出資料範圍";
 
   article.innerHTML = `
     <header><div><span>${item.authority}</span><strong>${item.label}</strong></div><b>${verdict}</b></header>
     <div class="epoch-audit-facts">
-      <span><em>Coverage</em><strong>${coverage}</strong></span>
-      <span><em>Absolute state</em><strong>${item.ephemerisBasisCapable ? "yes" : "no"}</strong></span>
-      <span><em>Direct event</em><strong>${item.directSeasonalEpoch ? "yes" : "no"}</strong></span>
-      <span><em>In app</em><strong>${inApp ? "yes" : "no"}</strong></span>
+      <span><em>資料範圍</em><strong>${coverage}</strong></span>
+      <span><em>絕對狀態</em><strong>${item.ephemerisBasisCapable ? "是" : "否"}</strong></span>
+      <span><em>直接事件</em><strong>${item.directSeasonalEpoch ? "是" : "否"}</strong></span>
+      <span><em>已整合</em><strong>${inApp ? "是" : "否"}</strong></span>
     </div>
     <p>${item.note}</p>
   `;
@@ -465,21 +465,21 @@ function renderEpochAudit(baseYear, targetYear, audit) {
   panel.querySelector("#epoch-audit-sources")?.replaceChildren(...audit.evaluations.map(renderEpochSource));
   setText("epoch-audit-target", `${targetYear} · ${AUDIT_STATUS_LABELS[audit.status] ?? audit.status}`);
   setText("epoch-audit-verdict", audit.identity
-    ? "Δ=0 不需要跨 epoch source。"
+    ? "Δ=0 不需要跨時代資料來源。"
     : audit.status === "resolved"
-      ? `已由 ${audit.usableSourceIds.join(" · ")} 提供可呼叫的 seasonal TT anchors；這不會自動綁定 recurrence target instant。`
+      ? `已由 ${audit.usableSourceIds.join(" · ")} 提供可呼叫的節氣 TT 錨點；這不會自動綁定回歸的目標時刻。`
       : audit.status === "qualified-ephemeris-basis-not-integrated"
-        ? "DE441 涵蓋目標年的 absolute Earth/Sun state；仍須整合 source adapter、黃經-of-date transform 與 crossing root solve。"
+        ? "DE441 涵蓋目標年的地球／太陽絕對狀態；仍須整合資料轉接器、日期黃道轉換與過境求根。"
         : audit.status === "absolute-state-coverage-gap"
-          ? `現有 registry 沒有同時涵蓋 ${targetYear} 且提供 absolute state 或 direct seasonal event 的 source。`
-          : "absolute seasonal epoch pipeline 尚未滿足完整 runtime contract。"
+          ? `現有資料登錄表沒有同時涵蓋 ${targetYear} 且提供絕對狀態或直接節氣事件的來源。`
+          : "絕對節氣時代的處理鏈尚未滿足完整執行條件。"
   );
   const gap = audit.nearestEphemerisBoundary;
   setText("epoch-audit-footnote", audit.status === "resolved"
-    ? `Production runtime coverage 只認 provider 自己宣告的年份；目前 usable anchors：${audit.usableSourceIds.join(" · ")}。target instant 仍須獨立使用 typed TT / UT1 / fixed-zone-from-UT1 contract。`
+    ? `可用年份只依各資料來源自己的宣告；目前可用節氣錨點：${audit.usableSourceIds.join(" · ")}。目標時刻仍須獨立綁定 TT / UT1 與 fixed-zone-from-UT1。`
     : gap && !audit.identity
-      ? `最近的 absolute seasonal-epoch source 邊界：${gap.sourceId} → ${formatYear(gap.boundaryYear)}；距目標 ${gap.gapYears.toLocaleString("en-US")} 年。長期 shape/parameter coverage 不會被當成 absolute state 或 timestamp coverage。`
-      : "source coverage、absolute-state capability、direct-event runtime 與 seasonal-epoch solver 分開記錄。"
+      ? `最近的絕對節氣資料邊界：${gap.sourceId} → ${formatYear(gap.boundaryYear)}；距目標 ${gap.gapYears.toLocaleString("en-US")} 年。長期形狀／參數範圍不等於絕對狀態或時間戳範圍。`
+      : "資料範圍、絕對狀態能力、直接節氣事件與節氣求解器分開記錄。"
   );
 
   panel.dataset.ready = "true";
@@ -547,7 +547,7 @@ function refresh() {
   const firstBlockerStage = proof.stages.find(stage => stage.id === proof.firstHardBlocker);
   setText(
     "proof-chain-first-blocker",
-    identity ? "Δ=0 · identity bypass" : firstBlockerStage?.label ?? "none"
+    identity ? "Δ=0 · 同一狀態免驗" : firstBlockerStage?.label ?? "無"
   );
   setText(
     "proof-chain-resolution-summary",
@@ -574,18 +574,18 @@ function refresh() {
                         : proof.firstHardBlocker === "equation-of-time"
                           ? "經度已綁定；local apparent solar clock 還缺該 target year 可授權 recurrence 的 Equation of Time evidence。"
                           : proof.hour.resolved
-                            ? "Day 與 Hour proof chain 已在目前明示 conventions 下解析；這不擴張任何未來政治時區主張。"
+                            ? "日柱與時柱證明鏈已在目前明示的約定下解析；這不擴張任何未來政治時區主張。"
                             : "依賴鏈會從第一個未滿足的硬條件開始阻塞。"
   );
-  setText("proof-chain-day-status", proof.day.resolved ? "resolved" : "blocked");
+  setText("proof-chain-day-status", proof.day.resolved ? "已解析" : "仍阻塞");
   setText(
     "proof-chain-day-blockers",
-    proof.day.blockers.length ? proof.day.blockers.map(readableBlocker).join(" · ") : "無 blocker"
+    proof.day.blockers.length ? proof.day.blockers.map(readableBlocker).join(" · ") : "無阻塞"
   );
-  setText("proof-chain-hour-status", proof.hour.resolved ? "resolved" : "blocked");
+  setText("proof-chain-hour-status", proof.hour.resolved ? "已解析" : "仍阻塞");
   setText(
     "proof-chain-hour-blockers",
-    proof.hour.blockers.length ? proof.hour.blockers.map(readableBlocker).join(" · ") : "無 blocker"
+    proof.hour.blockers.length ? proof.hour.blockers.map(readableBlocker).join(" · ") : "無阻塞"
   );
 
   panel.dataset.ready = "true";
