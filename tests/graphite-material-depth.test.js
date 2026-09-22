@@ -129,15 +129,15 @@ test("wheel surface depth stays ring-local while visible SVG stipple stays absen
   }
   assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-light m2-\$\{id\}-rim-light`/);
   assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-shadow m2-\$\{id\}-rim-shadow`/);
-  assert.match(atlasHtml, /id="m2-rim-light-stroke"[\s\S]*?stop-opacity="\.12"[\s\S]*?stop-opacity="\.015"/);
+  assert.match(atlasHtml, /id="m2-rim-light-stroke"[\s\S]*?stop-opacity="\.20"[\s\S]*?stop-opacity="\.025"/);
   assert.match(atlasHtml, /id="m2-rim-shadow-stroke"[\s\S]*?stop-opacity="\.58"/);
-  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke-width:\s*\.85;/);
+  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke-width:\s*1\.05;/);
   assert.match(radialHierarchy, /\.m2-ring-rim-shadow \{[\s\S]*?stroke-width:\s*1\.25;/);
   assert.doesNotMatch(atlasHtml, /id="m2-surface-sheen"/);
   assert.doesNotMatch(renderer, /m2-ring-sheen|data-material-sheen-ring/);
   assert.match(atlasHtml, /id="m2-groove-stroke"[\s\S]*?stop-opacity="\.68"/);
-  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.16;/);
-  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-light-alpha:\s*\.21;/);
+  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.230;[^}]*--m2-shoulder-alpha:\s*\.165;/);
+  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-light-alpha:\s*\.295;[^}]*--m2-shoulder-alpha:\s*\.212;/);
   assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*1\.35;/);
   assert.match(radialHierarchy, /#month-track \.cycle-sector\.is-active \{[\s\S]*?currentColor 26%, transparent/);
   assert.match(radialHierarchy, /#year-track \.cycle-sector\.is-active \{[\s\S]*?currentColor 30%, transparent/);

@@ -93,11 +93,11 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /localPoint = rotation\(-ringRotation\) \* point/);
   assert.match(material, /const float FIELD_PERIOD = 96\.0/);
   assert.doesNotMatch(material, /FIELD_TEXEL|fieldDx|fieldDy|slopeLocal|slopeWorld|microNormal/);
-  assert.match(material, /roughness = clamp\(0\.825 \+ fieldCentered \* 0\.018, 0\.816, 0\.834\)/);
+  assert.match(material, /roughness = clamp\(0\.785 \+ fieldCentered \* 0\.014, 0\.778, 0\.792\)/);
   assert.match(material, /vec3 normal = vec3\(0\.0, 0\.0, 1\.0\)/);
-  assert.match(material, /specularPower = mix\(16\.0, 7\.0, roughness\)/);
-  assert.match(material, /environmentResponse = clamp\([\s\S]*?point \/ vec2\(760\.0, 500\.0\)[\s\S]*?0\.80,[\s\S]*?1\.00/);
-  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specular \* environmentResponse \* 1\.55, 0\.0, 0\.040\)/);
+  assert.match(material, /specularPower = mix\(18\.0, 8\.0, roughness\)/);
+  assert.match(material, /environmentResponse = clamp\([\s\S]*?point \/ vec2\(760\.0, 500\.0\)[\s\S]*?0\.74,[\s\S]*?1\.04/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specular \* environmentResponse \* 1\.65, 0\.0, 0\.055\)/);
   assert.match(material, /out_color = vec4\(reflectionTint \* overlayAlpha, overlayAlpha\)/);
   assert.match(radial, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(radial, /\.m2-(?:hour|day|month|year)-material-face \{[^}]*opacity:/);

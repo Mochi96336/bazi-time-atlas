@@ -120,14 +120,18 @@
 /* Keep the body dark enough to read as one graphite instrument. Scale is
    carried by a narrow luminance ladder; depth should come from the machined
    edges, not from broad gray slabs. */
-#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .16; --m2-mid-alpha: .080; --m2-dark-alpha: .030; }
-#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .17; --m2-mid-alpha: .085; --m2-dark-alpha: .032; }
-#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .19; --m2-mid-alpha: .095; --m2-dark-alpha: .035; }
-#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .21; --m2-mid-alpha: .105; --m2-dark-alpha: .038; }
+#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .230; --m2-shoulder-alpha: .165; --m2-mid-alpha: .105; --m2-dark-alpha: .034; }
+#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .245; --m2-shoulder-alpha: .176; --m2-mid-alpha: .112; --m2-dark-alpha: .036; }
+#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .270; --m2-shoulder-alpha: .194; --m2-mid-alpha: .124; --m2-dark-alpha: .040; }
+#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .295; --m2-shoulder-alpha: .212; --m2-mid-alpha: .136; --m2-dark-alpha: .044; }
 
 .m2-ring-gradient .m2-light {
   stop-color: color-mix(in srgb, var(--m2-ring-color) 84%, #dfe3e1);
   stop-opacity: var(--m2-light-alpha);
+}
+.m2-ring-gradient .m2-shoulder {
+  stop-color: color-mix(in srgb, var(--m2-ring-color) 91%, #cfd4d1);
+  stop-opacity: var(--m2-shoulder-alpha);
 }
 .m2-ring-gradient .m2-mid {
   stop-color: var(--m2-ring-color);
@@ -153,12 +157,12 @@
   pointer-events: none;
 }
 
-/* The body no longer carries a broad diagonal sheen. A narrow directional rim
-   is enough to imply machining while the four bands still read as one object. */
+/* A fixed, broad softbox response now carries the first metal cue in the ring
+   body. The rim is the second cue: a restrained machined edge, not an outline. */
 .m2-ring-rim { fill: none; pointer-events: none; }
 .m2-ring-rim-light {
   stroke: url(#m2-rim-light-stroke);
-  stroke-width: .85;
+  stroke-width: 1.05;
 }
 .m2-ring-rim-shadow {
   stroke: url(#m2-rim-shadow-stroke);
