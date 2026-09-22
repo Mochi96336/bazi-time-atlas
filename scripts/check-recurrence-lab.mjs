@@ -107,12 +107,32 @@ function expectSignedEvidenceCopy(dom, { year, day }, label, url) {
   }
 }
 
+function expectDiscreteComprehension(dom, url) {
+  if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 閉合 · 左右為距 0 的最短循環位移")) {
+    throw new Error(`phase gauge does not explain its zero / signed-shortest semantics: ${url}`);
+  }
+  if (!dom.includes(">閉合 · 0</text>")) {
+    throw new Error(`phase gauge zero reference is not labeled as closure: ${url}`);
+  }
+  for (const delta of ["400", "1200", "8000", "24000"]) {
+    if (!new RegExp(`class="discrete-derivation-step[^"]*"[^>]*data-delta-years="${delta}"`).test(dom)) {
+      throw new Error(`visible discrete derivation is missing +${delta}: ${url}`);
+    }
+  }
+  if (!dom.includes("400 年＝146,097 日；公曆結構先回到 0")) {
+    throw new Error(`400-year Gregorian/day bridge is not visible: ${url}`);
+  }
+  if (!dom.includes("三個離散相位同時歸零，只建立四柱重現候選")) {
+    throw new Error(`discrete result is overclaiming beyond candidate closure: ${url}`);
+  }
+}
+
 function expectConsolidatedGlobalPeriod(dom, url) {
   const preset = dom.match(/<button[^>]*data-delta-years="24000"[^>]*>[^<]*<\/button>/)?.[0] ?? "";
   if (!preset.includes(">全域 24,000</button>")) {
     throw new Error(`24000-year preset does not own the global-period label: ${url}`);
   }
-  if (!preset.includes('aria-label="三層全域閉合 24,000 年"')) {
+  if (!preset.includes('aria-label="三個離散相位同時歸零 24,000 年"')) {
     throw new Error(`24000-year preset is missing global-closure aria semantics: ${url}`);
   }
   if (!preset.includes('data-research-global-period-preset="1"')) {
@@ -148,7 +168,8 @@ const local = expectCase(
   "1980-year local recurrence"
 );
 expectFixedGauge(local.dom, local.url);
-if (!/此起點年＋日首次重遇/.test(local.dom) || !/1,980 年/.test(local.dom)) {
+expectDiscreteComprehension(local.dom, local.url);
+if (!/此起點 60 年序＋60 日序首次重遇/.test(local.dom) || !/1,980 年/.test(local.dom)) {
   throw new Error(`1980-year local recurrence explanation missing: ${local.url}`);
 }
 expectMarker(local.dom, "gregorian", "-98.000", "-20", "1980-year local recurrence", local.url);
@@ -176,8 +197,9 @@ const global = expectCase(
   "24000-year global recurrence"
 );
 expectFixedGauge(global.dom, global.url);
+expectDiscreteComprehension(global.dom, global.url);
 expectConsolidatedGlobalPeriod(global.dom, global.url);
-if (!/三層全域閉合/.test(global.dom) || !/26026-09-13/.test(global.dom)) {
+if (!/三個離散相位同時歸零/.test(global.dom) || !/26026-09-13/.test(global.dom)) {
   throw new Error(`24000-year global closure explanation missing: ${global.url}`);
 }
 for (const key of ["gregorian", "year", "day"]) expectMarker(global.dom, key, "-90.000", "0", "24000-year global recurrence", global.url);
@@ -200,7 +222,8 @@ const gregorian = expectCase(
   "400-year Gregorian recurrence"
 );
 expectFixedGauge(gregorian.dom, gregorian.url);
-if (!/公曆閏年骨架回原位/.test(gregorian.dom)) {
+expectDiscreteComprehension(gregorian.dom, gregorian.url);
+if (!/公曆結構回原位/.test(gregorian.dom)) {
   throw new Error(`400-year Gregorian-only explanation missing: ${gregorian.url}`);
 }
 expectMarker(gregorian.dom, "gregorian", "-90.000", "0", "400-year Gregorian recurrence", gregorian.url);
