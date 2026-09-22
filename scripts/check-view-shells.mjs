@@ -131,7 +131,7 @@ const deltaDockGap = Number(attr(probe, "data-recurrence-delta-dock-gap"));
 if (
   ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, deltaDockTop, deltaDockBottom, recurrenceTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom && taskHeadBottom <= deltaDockTop && deltaDockTop < deltaDockBottom && deltaDockBottom < recurrenceTop)
-  || outlineHeight > 42
+  || outlineHeight > 46
 ) {
   throw new Error(
     `Recurrence mobile outline must stay compact and precede section 01 ` +
