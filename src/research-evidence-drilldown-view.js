@@ -59,7 +59,10 @@ function ensureSupportDetails(panel, { id, label, metaId, openForConventionQuery
     panel.insertAdjacentElement("beforebegin", details);
     details.append(drilldownSummary(label, metaId), panel);
   }
-  if (openForConventionQuery && hasResearchConventionQuery()) details.open = true;
+  if (openForConventionQuery && details.dataset.queryRevealApplied !== "true") {
+    details.dataset.queryRevealApplied = "true";
+    if (hasResearchConventionQuery()) details.open = true;
+  }
   revealHash(details, panel);
   return details;
 }
@@ -112,6 +115,10 @@ function ensureEpochAuditSupport() {
     label:"天文來源能力",
     metaId:"epoch-audit-support-meta"
   });
+  const proofSupport = document.querySelector("#proof-chain-support-details");
+  if (details && proofSupport?.contains(details)) {
+    proofSupport.insertAdjacentElement("afterend", details);
+  }
   const target = panel.querySelector("#epoch-audit-target")?.textContent?.trim();
   setTextIfChanged(
     details?.querySelector("#epoch-audit-support-meta"),
