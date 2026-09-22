@@ -1,7 +1,7 @@
 import {
-  GLOBAL_GREGORIAN_YEAR_DAY_PERIOD,
+  GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD,
   canonicalRecurrenceCandidates,
-  findFirstLocalYearDayRecurrence,
+  findFirstLocalYearSequenceDayRecurrence,
   recurrenceState,
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
@@ -19,7 +19,7 @@ const CURSOR_ANGLE = -90;
 const FAN_START = -170;
 const FAN_END = -10;
 const MAX_GREGORIAN_YEAR = 10_000_000;
-const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_DAY_PERIOD;
+const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -152,7 +152,7 @@ function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
   const phases = {
     day:state.phases.day,
-    year:state.phases.year,
+    year:state.phases.yearSequence,
     gregorian:state.phases.gregorian
   };
 
@@ -271,12 +271,12 @@ function updateDeltaScaleMode() {
 
 function stateMeaning(state, localYears) {
   if (state.deltaYears === 0) return "基準點";
-  if (state.closed.gregorian && state.closed.year && state.closed.day) return "三層全域閉合";
-  if (state.deltaYears === localYears && state.closed.year && state.closed.day) return "此起點年＋日首次重遇";
-  if (state.closed.gregorian && state.closed.year) return "公曆＋年序閉合；日序仍偏";
+  if (state.closed.gregorian && state.closed.yearSequence && state.closed.day) return "三層全域閉合";
+  if (state.deltaYears === localYears && state.closed.yearSequence && state.closed.day) return "此起點年＋日首次重遇";
+  if (state.closed.gregorian && state.closed.yearSequence) return "公曆＋年序閉合；日序仍偏";
   if (state.closed.gregorian && state.closed.day) return "公曆＋日序閉合；年序仍偏";
   if (state.closed.gregorian) return "公曆閏年骨架回原位";
-  if (state.closed.year) return "年序回原位";
+  if (state.closed.yearSequence) return "年序回原位";
   if (state.closed.day) return "日序回原位";
   return "沒有完整閉合";
 }
@@ -289,7 +289,7 @@ function phaseCell(closed, phase, modulus) {
 }
 
 function rebuildCandidates() {
-  const local = findFirstLocalYearDayRecurrence(currentBase);
+  const local = findFirstLocalYearSequenceDayRecurrence(currentBase);
   const localYears = local?.deltaYears ?? null;
   candidateStates = canonicalRecurrenceCandidates(currentBase);
   candidateButtons.replaceChildren();
@@ -306,13 +306,13 @@ function rebuildCandidates() {
     const row = document.createElement("div");
     row.className = "milestone-row";
     row.dataset.deltaYears = String(state.deltaYears);
-    row.innerHTML = `<strong>${state.deltaYears.toLocaleString("en-US")}</strong>${phaseCell(state.closed.gregorian, state.phases.gregorian, 400)}${phaseCell(state.closed.year, state.phases.year, 60)}${phaseCell(state.closed.day, state.phases.day, 60)}<span>${stateMeaning(state, localYears)}</span>`;
+    row.innerHTML = `<strong>${state.deltaYears.toLocaleString("en-US")}</strong>${phaseCell(state.closed.gregorian, state.phases.gregorian, 400)}${phaseCell(state.closed.yearSequence, state.phases.yearSequence, 60)}${phaseCell(state.closed.day, state.phases.day, 60)}<span>${stateMeaning(state, localYears)}</span>`;
     row.addEventListener("click", () => setDelta(state.deltaYears, { source:"milestone" }));
     milestoneRows.appendChild(row);
   });
 
   setText("local-recurrence", local ? `${local.deltaYears.toLocaleString("en-US")} 年` : "未找到");
-  instrument.dataset.localYearDayRecurrence = local ? String(local.deltaYears) : "none";
+  instrument.dataset.localYearSequenceDayRecurrence = local ? String(local.deltaYears) : "none";
 }
 
 function setClosureArticle(key, closed, phase) {
@@ -351,31 +351,31 @@ function renderState() {
   renderReturnMarkers(state);
 
   setText("gregorian-phase-readout", phaseReadout(state.phases.gregorian, 400));
-  setText("year-phase-readout", phaseReadout(state.phases.year, 60));
+  setText("year-phase-readout", phaseReadout(state.phases.yearSequence, 60));
   setText("day-phase-readout", phaseReadout(state.phases.day, 60));
   setText("delta-readout", `${currentDelta.toLocaleString("en-US")} 年`);
   setText("target-date-readout", state.targetValid ? formatDate(state.targetDate) : `${state.targetDate.year}-${String(state.targetDate.month).padStart(2,"0")}-${String(state.targetDate.day).padStart(2,"0")}（不存在）`);
 
   setClosureArticle("gregorian", state.closed.gregorian, state.phases.gregorian);
-  setClosureArticle("year", state.closed.year, state.phases.year);
+  setClosureArticle("year", state.closed.yearSequence, state.phases.yearSequence);
   setClosureArticle("day", state.closed.day, state.phases.day);
 
-  const localYears = findFirstLocalYearDayRecurrence(currentBase)?.deltaYears ?? null;
+  const localYears = findFirstLocalYearSequenceDayRecurrence(currentBase)?.deltaYears ?? null;
   setText("closure-summary", stateMeaning(state, localYears));
 
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.deltaYears = String(currentDelta);
   instrument.dataset.phaseDisplay = "signed-shortest";
   instrument.dataset.gregorianPhase = String(state.phases.gregorian);
-  instrument.dataset.yearPhase = String(state.phases.year);
+  instrument.dataset.yearSequencePhase = String(state.phases.yearSequence);
   instrument.dataset.dayPhase = state.phases.day === null ? "invalid" : String(state.phases.day);
   instrument.dataset.gregorianPhaseSigned = String(signedShortestPhase(state.phases.gregorian, 400));
-  instrument.dataset.yearPhaseSigned = String(signedShortestPhase(state.phases.year, 60));
+  instrument.dataset.yearSequencePhaseSigned = String(signedShortestPhase(state.phases.yearSequence, 60));
   instrument.dataset.dayPhaseSigned = state.phases.day === null ? "invalid" : String(signedShortestPhase(state.phases.day, 60));
   instrument.dataset.gregorianClosed = String(state.closed.gregorian);
-  instrument.dataset.yearClosed = String(state.closed.year);
+  instrument.dataset.yearSequenceClosed = String(state.closed.yearSequence);
   instrument.dataset.dayClosed = String(state.closed.day);
-  instrument.dataset.globalClosed = String(state.closed.gregorian && state.closed.year && state.closed.day);
+  instrument.dataset.globalClosed = String(state.closed.gregorian && state.closed.yearSequence && state.closed.day);
 
   candidateButtons.querySelectorAll("button").forEach(button => button.classList.toggle("active", Number(button.dataset.deltaYears) === currentDelta));
   milestoneRows.querySelectorAll(".milestone-row").forEach(row => row.classList.toggle("active", Number(row.dataset.deltaYears) === currentDelta));
