@@ -63,6 +63,9 @@ const bestLabel = `+${bestDelta.toLocaleString("en-US")} 年`;
 if (!baseline.dom.includes(bestLabel)) {
   throw new Error(`best candidate headline missing (${bestLabel}): ${baseline.url}`);
 }
+if (!baseline.dom.includes("搜尋最佳") || !baseline.dom.includes("搜尋最佳殘差") || baseline.dom.includes("目前最佳")) {
+  throw new Error(`near-recurrence search scope labels are ambiguous: ${baseline.url}`);
+}
 if (!baseline.dom.includes(`<button type="button" class="near-ranking-row best" data-delta-years="${bestDelta}"`)) {
   throw new Error(`best candidate is not rendered as an interactive ranking button: ${baseline.url}`);
 }
@@ -86,6 +89,24 @@ if (!deep.dom.includes(`深時間 +${bestDelta.toLocaleString("en-US")} 年`)) {
 }
 if (!deep.dom.includes(`class="near-ranking-row best selected"`)) {
   throw new Error(`best ranking row is not selected in deep-time state: ${deep.url}`);
+}
+
+const nonExactDeep = dump("recurrence.html?date=2026-09-13&delta=100000");
+const nonExactAttr = instrumentAttrs(nonExactDeep.dom);
+if (nonExactAttr("data-delta-mode") !== "deep") {
+  throw new Error(`non-exact deep selection did not enter deep mode: ${nonExactDeep.url}`);
+}
+if (nonExactAttr("data-global-closed") === "true") {
+  throw new Error(`non-exact deep selection unexpectedly reports exact discrete closure: ${nonExactDeep.url}`);
+}
+if (nonExactAttr("data-near-search-selected-delta-years") !== null) {
+  throw new Error(`non-exact deep selection was incorrectly attributed to a ranked exact candidate: ${nonExactDeep.url}`);
+}
+if (!nonExactDeep.dom.includes("超出滑桿範圍")) {
+  throw new Error(`deep selection no longer explains the fine-slider boundary: ${nonExactDeep.url}`);
+}
+if (nonExactDeep.dom.includes("深時間 exact 候選")) {
+  throw new Error(`non-exact deep selection is still mislabeled as an exact candidate: ${nonExactDeep.url}`);
 }
 
 console.log(`[near-recurrence] PASS ${count} candidates; best +${bestDelta} y; max=${bestMax.toFixed(3)} h; RMS=${bestRms.toFixed(3)} h; deep-link preserves exact closure and selected state`);
