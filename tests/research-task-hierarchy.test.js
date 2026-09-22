@@ -64,16 +64,20 @@ test("Research narrative spine is a live read-only summary of existing authoriti
   assert.doesNotMatch(spineJs, /solarTermShapeResiduals|fourPillarDeterminacy|rankExactDiscreteAstronomyCandidates|recurrenceStateForDelta/);
 });
 
-test("discrete task owns the instrument, exact closure evidence, and structural 60-day cycle", () => {
+test("discrete task owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
   assert.match(discrete, /id="recurrence-instrument"/);
-  assert.match(discrete, /class="closure-grid"/);
+  assert.match(discrete, /class="recurrence-readout research-current-state"/);
+  assert.match(discrete, /id="research-year-strip"/);
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
-  assert.match(discrete, /class="milestone-table"/);
   assert.match(discrete, /class="discrete-derivation"/);
   assert.match(discrete, /先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定/);
+  assert.match(discrete, /一年怎麼走/);
+  assert.match(discrete, /1\/1 與立春不是同一個年界/);
   assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
-  assert.ok(discrete.indexOf('class="milestone-table"') < discrete.indexOf('id="research-sexagenary-cycle"'));
+  assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('class="discrete-derivation"'));
+  assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
+  assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
   assert.doesNotMatch(discrete, /class="astronomy-panel"/);
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
