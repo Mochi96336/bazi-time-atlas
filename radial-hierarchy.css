@@ -110,15 +110,14 @@
   font-weight: 860;
 }
 
-/* M2 anodized-graphite material: Material G makes the visible surface stack
-   explicit. The fixed guide bed owns the dark graphite body; a separate
-   fixed-world reflection/rim layer sits above that body and below every semantic
-   sector, label and tick. The WebGL roughness field stays unresolved and
-   low-energy underneath SVG instead of being asked to carry the first metal cue.
-   There is no page/background light field and no per-sector texture. */
+/* M2 anodized-graphite material: Material H keeps Material G's explicit
+   surface stack, but moves material recognition down to the micro scale. The
+   fixed SVG body/reflection/rims remain the low-frequency form cue; the WebGL
+   layer now carries a restrained multiscale rough surface that rotates with each
+   ring under fixed-world light. No visible grain primitives or per-sector texture. */
 /* Keep the body dark enough to read as one graphite instrument. Scale is
-   carried by a narrow luminance ladder; the broad reflection establishes metal,
-   while narrow machined edges provide the secondary hard-material cue. */
+   carried by a narrow luminance ladder. The broad reflection is intentionally
+   subordinate now: it reveals form, while micro-surface response supplies touch. */
 #m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .13; --m2-mid-alpha: .062; --m2-dark-alpha: .026; }
 #m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .14; --m2-mid-alpha: .066; --m2-dark-alpha: .027; }
 #m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .16; --m2-mid-alpha: .076; --m2-dark-alpha: .030; }
@@ -150,10 +149,10 @@
   stroke: none;
   pointer-events: none;
 }
-.m2-hour-reflection { opacity: .62; }
-.m2-day-reflection { opacity: .66; }
-.m2-month-reflection { opacity: .70; }
-.m2-year-reflection { opacity: .74; }
+.m2-hour-reflection { opacity: .46; }
+.m2-day-reflection { opacity: .49; }
+.m2-month-reflection { opacity: .52; }
+.m2-year-reflection { opacity: .55; }
 
 .m2-ring-material-face {
   /* Legacy fallback slot only. The visible metal cue is now the dedicated
