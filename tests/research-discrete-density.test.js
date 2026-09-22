@@ -26,12 +26,13 @@ test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.remove\(\)/);
 });
 
-test("time displacement has one control owner below the recurrence instrument", () => {
-  const toolbarStart = recurrenceHtml.indexOf('<div class="recurrence-toolbar">');
-  const instrumentEnd = recurrenceHtml.indexOf("</section>", recurrenceHtml.indexOf('id="recurrence-instrument"'));
+test("time displacement has one control owner before the recurrence instrument", () => {
   const dockStart = recurrenceHtml.indexOf('<section class="delta-dock"');
   const candidateStart = recurrenceHtml.indexOf('id="candidate-buttons"');
-  assert.ok(toolbarStart >= 0 && instrumentEnd > toolbarStart && dockStart > instrumentEnd && candidateStart > dockStart);
+  const instrumentStart = recurrenceHtml.indexOf('id="recurrence-instrument"');
+  const toolbarStart = recurrenceHtml.indexOf('<div class="recurrence-toolbar">');
+  const instrumentEnd = recurrenceHtml.indexOf("</section>", instrumentStart);
+  assert.ok(dockStart >= 0 && candidateStart > dockStart && instrumentStart > candidateStart && toolbarStart > instrumentStart && instrumentEnd > toolbarStart);
   assert.doesNotMatch(
     recurrenceHtml.slice(toolbarStart, instrumentEnd),
     /id="candidate-buttons"/
@@ -42,7 +43,7 @@ test("time displacement has one control owner below the recurrence instrument", 
   );
   assert.match(
     recurrenceCss,
-    /\.delta-dock\s*\{[\s\S]*?grid-template-areas:"number presets presets" "slider slider global";/
+    /\.delta-dock\s*\{[\s\S]*?margin:\s*0 0 12px;[\s\S]*?grid-template-areas:"number presets presets" "slider slider global";/
   );
   assert.match(
     recurrenceCss,

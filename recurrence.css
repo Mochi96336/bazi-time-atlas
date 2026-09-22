@@ -81,7 +81,7 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
 .recurrence-readout > div:nth-child(2) { margin-top:5px; font-size:clamp(20px,2.3vw,31px); }
 .recurrence-readout span { color:#69736c; padding:0 6px; }.recurrence-readout p { margin:6px 0 0; color:#8d978f; font-size:10px; }
 .delta-dock {
-  margin-top:12px;
+  margin:0 0 12px;
   display:grid;
   grid-template-columns:minmax(130px,180px) minmax(0,1fr) minmax(130px,170px);
   grid-template-areas:"number presets presets" "slider slider global";
