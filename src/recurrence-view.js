@@ -31,7 +31,9 @@ const deltaNumber = document.querySelector("#delta-number");
 const deltaSlider = document.querySelector("#delta-slider");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const milestoneRows = document.querySelector("#milestone-rows");
+const derivationSteps = document.querySelector("#discrete-derivation-steps");
 const cursorGroup = document.querySelector("#recurrence-cursor");
+const DERIVATION_DELTAS = Object.freeze([400, 1200, 8000, 24_000]);
 
 // Radial scale follows the same product grammar as the main atlas: shorter
 // recurrence cycles live inside, longer cycles live outside. Astronomy remains
@@ -145,7 +147,7 @@ function renderCursor() {
   svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
   const labelPoint = polar(595, CURSOR_ANGLE);
   const label = svgEl("text", { x:labelPoint.x, y:labelPoint.y, class:"cursor-label" }, cursorGroup);
-  label.textContent = "SAME REFERENCE · 0";
+  label.textContent = "閉合 · 0";
 }
 
 function renderReturnMarkers(state) {
@@ -271,13 +273,13 @@ function updateDeltaScaleMode() {
 
 function stateMeaning(state, localYears) {
   if (state.deltaYears === 0) return "基準點";
-  if (state.closed.gregorian && state.closed.yearSequence && state.closed.day) return "三層全域閉合";
-  if (state.deltaYears === localYears && state.closed.yearSequence && state.closed.day) return "此起點年＋日首次重遇";
-  if (state.closed.gregorian && state.closed.yearSequence) return "公曆＋年序閉合；日序仍偏";
-  if (state.closed.gregorian && state.closed.day) return "公曆＋日序閉合；年序仍偏";
-  if (state.closed.gregorian) return "公曆閏年骨架回原位";
-  if (state.closed.yearSequence) return "年序回原位";
-  if (state.closed.day) return "日序回原位";
+  if (state.closed.gregorian && state.closed.yearSequence && state.closed.day) return "三個離散相位同時歸零";
+  if (state.deltaYears === localYears && state.closed.yearSequence && state.closed.day) return "此起點 60 年序＋60 日序首次重遇";
+  if (state.closed.gregorian && state.closed.yearSequence) return "公曆結構＋60 年序閉合；60 日序仍偏";
+  if (state.closed.gregorian && state.closed.day) return "公曆結構＋60 日序閉合；60 年序仍偏";
+  if (state.closed.gregorian) return "公曆結構回原位";
+  if (state.closed.yearSequence) return "60 年序回原位";
+  if (state.closed.day) return "60 日序回原位";
   return "沒有完整閉合";
 }
 
@@ -288,12 +290,42 @@ function phaseCell(closed, phase, modulus) {
   return `<span class="${closed ? "phase-ok" : "phase-no"}" data-phase-raw="${phase}" data-phase-signed="${signed}" data-phase-modulus="${modulus}">${text}</span>`;
 }
 
+function derivationPhase(label, closed, phase, modulus) {
+  if (phase === null) return `<span><small>${label}</small><em class="phase-no">—</em></span>`;
+  const signed = signedShortestPhase(phase, modulus);
+  return `<span><small>${label}</small><em class="${closed ? "phase-ok" : "phase-no"}">${closed ? "0" : formatSigned(signed)}</em></span>`;
+}
+
+function derivationMeaning(deltaYears) {
+  if (deltaYears === 400) return "400 年＝146,097 日；公曆結構先回到 0";
+  if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0";
+  if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0";
+  return "三個離散相位第一次全域同時歸零";
+}
+
+function renderDerivation(states) {
+  if (!derivationSteps) return;
+  derivationSteps.replaceChildren();
+  for (const deltaYears of DERIVATION_DELTAS) {
+    const state = states.find(candidate => candidate.deltaYears === deltaYears);
+    if (!state) continue;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "discrete-derivation-step";
+    button.dataset.deltaYears = String(deltaYears);
+    button.innerHTML = `<strong>+${deltaYears.toLocaleString("en-US")} 年</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears)}</small>`;
+    button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
+    derivationSteps.appendChild(button);
+  }
+}
+
 function rebuildCandidates() {
   const local = findFirstLocalYearSequenceDayRecurrence(currentBase);
   const localYears = local?.deltaYears ?? null;
   candidateStates = canonicalRecurrenceCandidates(currentBase);
   candidateButtons.replaceChildren();
   milestoneRows.replaceChildren();
+  renderDerivation(candidateStates);
 
   candidateStates.forEach(state => {
     const button = document.createElement("button");
@@ -379,6 +411,7 @@ function renderState() {
 
   candidateButtons.querySelectorAll("button").forEach(button => button.classList.toggle("active", Number(button.dataset.deltaYears) === currentDelta));
   milestoneRows.querySelectorAll(".milestone-row").forEach(row => row.classList.toggle("active", Number(row.dataset.deltaYears) === currentDelta));
+  derivationSteps?.querySelectorAll(".discrete-derivation-step").forEach(step => step.classList.toggle("active", Number(step.dataset.deltaYears) === currentDelta));
 }
 
 function setDelta(value, options = {}) {
