@@ -10,6 +10,13 @@ export function cycleIndexFromLocalPoint(x, y, cx = 320, cy = 320) {
   return wrapCycleIndex(Math.floor((angle + 3) / 6));
 }
 
+export function cycleScrubIndexFromLocalPoint(x, y, cx = 320, cy = 320) {
+  if (![x, y, cx, cy].every(Number.isFinite)) throw new RangeError("cycle point coordinates must be finite");
+  const radius = Math.hypot(x - cx, y - cy);
+  if (radius < 232 || radius > 312) return null;
+  return cycleIndexFromLocalPoint(x, y, cx, cy);
+}
+
 if (svg) {
   const cx = 320;
   const cy = 320;
@@ -158,7 +165,7 @@ if (svg) {
     point.x = event.clientX;
     point.y = event.clientY;
     const local = point.matrixTransform(matrix.inverse());
-    return cycleIndexFromLocalPoint(local.x, local.y, cx, cy);
+    return cycleScrubIndexFromLocalPoint(local.x, local.y, cx, cy);
   }
 
   function scrubToPointer(event) {
@@ -169,9 +176,11 @@ if (svg) {
 
   svg.addEventListener("pointerdown", event => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    const index = indexFromPointer(event);
+    if (index === null) return;
     activePointerId = event.pointerId;
     svg.setPointerCapture?.(event.pointerId);
-    scrubToPointer(event);
+    if (index !== activeIndex) setActive(index);
     event.preventDefault();
   });
   svg.addEventListener("pointermove", event => {
