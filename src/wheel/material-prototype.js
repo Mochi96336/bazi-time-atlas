@@ -93,8 +93,9 @@ const FRAGMENT_SHADER = [
   "  vec3 halfVector = normalize(lightDirection + viewDirection);",
   "  vec3 normal = vec3(0.0, 0.0, 1.0);",
   "  float specularPower = mix(18.0, 8.0, roughness);",
+    "  float microScatter = 1.0 + fieldCentered * 0.24;",
   "  float specular = pow(max(dot(normal, halfVector), 0.0), specularPower)",
-  "    * (0.026 + (1.0 - roughness) * 0.13);",
+  "    * (0.026 + (1.0 - roughness) * 0.13) * microScatter;",
   "",
   "  float environmentResponse = clamp(",
   "    0.86 + dot(point / vec2(760.0, 500.0), lightDirection.xy) * 0.16,",
@@ -108,7 +109,7 @@ const FRAGMENT_SHADER = [
   "",
   "  vec3 reflectionTint = vec3(0.86, 0.90, 0.92);",
   "  float edgeMask = smoothstep(0.0, 1.5, edgeDistance);",
-  "  float overlayAlpha = edgeMask * clamp(specular * environmentResponse * 1.65, 0.0, 0.055);",
+  "  float overlayAlpha = edgeMask * clamp(specular * environmentResponse * 1.72, 0.0, 0.060);",
   "  out_color = vec4(reflectionTint * overlayAlpha, overlayAlpha);",
   "}"
 ].join("\n");
