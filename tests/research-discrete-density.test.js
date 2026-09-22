@@ -54,7 +54,7 @@ test("time displacement has one control owner before the recurrence instrument",
 test("global period meaning is attached to the preset instead of a duplicate static readout", () => {
   assert.match(view, /button\[data-delta-years="24000"\]/);
   assert.match(view, /preset\.textContent = "全域 24,000"/);
-  assert.match(view, /preset\.setAttribute\("aria-label", "三層全域閉合 24,000 年"\)/);
+  assert.match(view, /preset\.setAttribute\("aria-label", "三個離散相位同時歸零 24,000 年"\)/);
   assert.match(view, /preset\.dataset\.researchGlobalPeriodPreset = "1"/);
   assert.match(view, /dock\?\.querySelector\("\.global-period"\)/);
   assert.match(view, /duplicate\?\.remove\(\)/);
@@ -65,7 +65,7 @@ test("global period meaning is attached to the preset instead of a duplicate sta
 test("local recurrence remains visible while derived closure interpretation is disclosed", () => {
   assert.match(view, /details\.id = "discrete-closure-details"/);
   assert.match(view, /local\.classList\.add\("research-local-recurrence-rail"\)/);
-  assert.match(view, /label\.textContent = "局部年＋日首次重遇"/);
+  assert.match(view, /label\.textContent = "局部年序＋日序首次重遇"/);
   assert.match(view, /note\.hidden = true/);
   assert.match(view, /grid\.insertAdjacentElement\("beforebegin", local\)/);
   assert.match(view, /details\.append\(summary, grid\)/);
@@ -75,8 +75,8 @@ test("local recurrence remains visible while derived closure interpretation is d
 test("60-day cycle is supporting evidence behind a closed native drilldown", () => {
   assert.match(view, /details\.id = "discrete-sexagenary-details"/);
   assert.match(view, /details\.dataset\.researchDrilldown = "discrete-sexagenary"/);
-  assert.match(view, /六十日干支循環/);
-  assert.match(view, /60 日後配對重新重合/);
+  assert.match(view, /60 日序來源/);
+  assert.match(view, /10 天干 \/ 12 地支 → 60 配對/);
   assert.match(view, /details\.append\(summary, cycle\)/);
   assert.doesNotMatch(view, /discrete-sexagenary-details[\s\S]*?\.open\s*=\s*true/);
   assert.match(view, /hashTargetsCycle\(cycle\)/);
@@ -121,4 +121,16 @@ test("browser contract verifies the global period preset owns the semantic label
 
 test("research integration loads the discrete presentation layer", () => {
   assert.match(host, /import "\.\/research-discrete-density-view\.js";/);
+});
+
+
+test("visible derivation explains why 24000 years is the discrete candidate before supporting drilldowns", () => {
+  assert.match(recurrenceHtml, /class="discrete-derivation"/);
+  assert.match(recurrenceHtml, /id="discrete-derivation-steps"/);
+  assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
+  const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
+  const milestoneStart = recurrenceHtml.indexOf('class="milestone-table"');
+  const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
+  assert.ok(derivationStart >= 0 && milestoneStart > derivationStart && cycleStart > milestoneStart);
+  assert.match(recurrenceCss, /\.phase-gauge-caption[\s\S]*0 =/);
 });
