@@ -47,9 +47,9 @@ test("Research product labels use Chinese while canonical research terms stay re
 });
 
 test("Research presentation layers do not reintroduce prototype English copy", () => {
-  assert.match(discreteView, /展開看相位/);
-  assert.match(discreteView, /個候選 · 公曆結構 \/ 60 年序 \/ 60 日序/);
-  assert.doesNotMatch(discreteView, /展開看 phase| candidates · /);
+  assert.match(discreteView, /60 日序來源/);
+  assert.match(discreteView, /10 天干 \/ 12 地支 → 60 配對/);
+  assert.doesNotMatch(discreteView, /展開看相位|相位明細|個候選 · 公曆結構 \/ 60 年序 \/ 60 日序|展開看 phase| candidates · /);
 
   assert.match(astronomyView, /headlineLabel\.textContent = "RMS 殘差"/);
   assert.match(astronomyView, /maxLabel\.textContent = "最大殘差"/);

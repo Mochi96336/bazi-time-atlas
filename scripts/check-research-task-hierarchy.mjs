@@ -84,8 +84,11 @@ for (const expected of ["基準狀態", "同一參照", "4 / 4 同一"]) {
 }
 
 if (!discrete || !astronomy || !evidence) throw new Error(`three Research ownership sections were not rendered: ${probe.url}`);
-if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="closure-grid"') || !discrete.includes('id="research-sexagenary-cycle"')) {
-  throw new Error(`discrete task lost instrument, closure evidence, or 60-day cycle: ${probe.url}`);
+if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="recurrence-readout research-current-state"') || !discrete.includes('id="research-year-strip"') || !discrete.includes('id="research-sexagenary-cycle"')) {
+  throw new Error(`discrete task lost instrument, compact current state, year strip, or 60-day cycle: ${probe.url}`);
+}
+if (discrete.includes('class="closure-grid"') || discrete.includes('class="milestone-table"') || discrete.includes('id="milestone-rows"')) {
+  throw new Error(`retired duplicate closure/milestone UI returned: ${probe.url}`);
 }
 if (!discrete.includes('id="research-cycle-title">甲子</') || !discrete.includes('id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</')) {
   throw new Error(`60-day Ganzhi cycle did not initialize at 甲子 / 01: ${probe.url}`);

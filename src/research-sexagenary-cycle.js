@@ -2,7 +2,20 @@ import { polar, annularSectorPath } from "./geometry.js";
 import { heavenlyStems, earthlyBranches, sexagenaryCycle, cycleItem, wrapCycleIndex } from "./sexagenary-data.js";
 
 const NS = "http://www.w3.org/2000/svg";
-const svg = document.querySelector("#research-sexagenary-wheel");
+const svg = typeof document === "undefined" ? null : document.querySelector("#research-sexagenary-wheel");
+
+export function cycleIndexFromLocalPoint(x, y, cx = 320, cy = 320) {
+  if (![x, y, cx, cy].every(Number.isFinite)) throw new RangeError("cycle point coordinates must be finite");
+  const angle = (Math.atan2(y - cy, x - cx) * 180 / Math.PI + 360) % 360;
+  return wrapCycleIndex(Math.floor((angle + 3) / 6));
+}
+
+export function cycleScrubIndexFromLocalPoint(x, y, cx = 320, cy = 320) {
+  if (![x, y, cx, cy].every(Number.isFinite)) throw new RangeError("cycle point coordinates must be finite");
+  const radius = Math.hypot(x - cx, y - cy);
+  if (radius < 232 || radius > 312) return null;
+  return cycleIndexFromLocalPoint(x, y, cx, cy);
+}
 
 if (svg) {
   const cx = 320;
@@ -76,7 +89,7 @@ if (svg) {
     if (index % 5 === 0) textAt(groups.cycle, 296, angle, String(item.ordinal).padStart(2, "0"), "research-cycle-index");
     const hit = svgEl("path", {
       d:annularSectorPath(cx, cy, 242, 306, angle - 3, angle + 3),
-      class:"research-cycle-hit", tabindex:0, role:"button",
+      class:"research-cycle-hit", tabindex:-1, role:"button",
       "aria-label":`第 ${item.ordinal} 日序，${item.name}`
     }, groups.cycle);
     addTitle(hit, `${String(item.ordinal).padStart(2, "0")} · ${item.name}`);
@@ -143,8 +156,46 @@ if (svg) {
     updateReadout(item);
   }
 
-  document.querySelector("#research-cycle-prev")?.addEventListener("click", () => setActive(activeIndex - 1));
-  document.querySelector("#research-cycle-next")?.addEventListener("click", () => setActive(activeIndex + 1));
+  let activePointerId = null;
+
+  function indexFromPointer(event) {
+    const matrix = svg.getScreenCTM();
+    if (!matrix) return null;
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const local = point.matrixTransform(matrix.inverse());
+    return cycleScrubIndexFromLocalPoint(local.x, local.y, cx, cy);
+  }
+
+  function scrubToPointer(event) {
+    const index = indexFromPointer(event);
+    if (index === null || index === activeIndex) return;
+    setActive(index);
+  }
+
+  svg.addEventListener("pointerdown", event => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    const index = indexFromPointer(event);
+    if (index === null) return;
+    activePointerId = event.pointerId;
+    svg.setPointerCapture?.(event.pointerId);
+    if (index !== activeIndex) setActive(index);
+    event.preventDefault();
+  });
+  svg.addEventListener("pointermove", event => {
+    if (event.pointerId !== activePointerId) return;
+    scrubToPointer(event);
+    event.preventDefault();
+  });
+  const releasePointer = event => {
+    if (event.pointerId !== activePointerId) return;
+    svg.releasePointerCapture?.(event.pointerId);
+    activePointerId = null;
+  };
+  svg.addEventListener("pointerup", releasePointer);
+  svg.addEventListener("pointercancel", releasePointer);
+
   svg.setAttribute("tabindex", "0");
   svg.addEventListener("keydown", event => {
     if (event.key === "ArrowLeft") {

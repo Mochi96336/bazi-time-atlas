@@ -2,24 +2,29 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [view, css, host, recurrenceGate, recurrenceHtml, recurrenceCss] = await Promise.all([
+const [
+  view,
+  css,
+  host,
+  recurrenceGate,
+  recurrenceHtml,
+  recurrenceCss,
+  recurrenceView,
+  yearStripView,
+  cycleView,
+  cycleCss
+] = await Promise.all([
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
   readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
   readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8"),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence.css", import.meta.url), "utf8")
+  readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
+  readFile(new URL("../src/recurrence-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
+  readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8")
 ]);
-
-function functionSlice(source, name, nextName) {
-  const start = source.indexOf(`function ${name}(`);
-  const end = source.indexOf(`function ${nextName}(`, start + 1);
-  assert.ok(start >= 0 && end > start, `missing function slice ${name} → ${nextName}`);
-  return source.slice(start, end);
-}
-
-const closureView = functionSlice(view, "ensureClosureDrilldown", "hashTargetsCycle");
-const milestoneView = functionSlice(view, "ensureMilestoneDrilldown", "syncMilestoneMeta");
 
 test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.recurrence-intro > \.scope-note/);
@@ -33,104 +38,94 @@ test("time displacement has one control owner before the recurrence instrument",
   const toolbarStart = recurrenceHtml.indexOf('<div class="recurrence-toolbar">');
   const instrumentEnd = recurrenceHtml.indexOf("</section>", instrumentStart);
   assert.ok(dockStart >= 0 && candidateStart > dockStart && instrumentStart > candidateStart && toolbarStart > instrumentStart && instrumentEnd > toolbarStart);
-  assert.doesNotMatch(
-    recurrenceHtml.slice(toolbarStart, instrumentEnd),
-    /id="candidate-buttons"/
-  );
-  assert.match(
-    recurrenceHtml.slice(dockStart),
-    /id="delta-number"[\s\S]*?id="candidate-buttons"[\s\S]*?id="delta-slider"/
-  );
-  assert.match(
-    recurrenceCss,
-    /\.delta-dock\s*\{[\s\S]*?margin:\s*0 0 12px;[\s\S]*?grid-template-areas:"number presets presets" "slider slider global";/
-  );
-  assert.match(
-    recurrenceCss,
-    /@media \(max-width:820px\)[\s\S]*?grid-template-areas:"number" "presets" "slider" "global";/
-  );
+  assert.doesNotMatch(recurrenceHtml.slice(toolbarStart, instrumentEnd), /id="candidate-buttons"/);
+  assert.match(recurrenceHtml.slice(dockStart), /id="delta-number"[\s\S]*?id="candidate-buttons"[\s\S]*?id="delta-slider"/);
+  assert.match(recurrenceCss, /\.delta-dock\s*\{[\s\S]*?margin:\s*0 0 12px;/);
 });
 
-test("global period meaning is attached to the preset instead of a duplicate static readout", () => {
+test("global period meaning remains attached to the 24000 preset", () => {
   assert.match(view, /button\[data-delta-years="24000"\]/);
   assert.match(view, /preset\.textContent = "全域 24,000"/);
-  assert.match(view, /preset\.setAttribute\("aria-label", "三個離散相位同時歸零 24,000 年"\)/);
-  assert.match(view, /preset\.dataset\.researchGlobalPeriodPreset = "1"/);
-  assert.match(view, /dock\?\.querySelector\("\.global-period"\)/);
+  assert.match(view, /三個離散相位同時歸零 24,000 年/);
   assert.match(view, /duplicate\?\.remove\(\)/);
-  assert.match(view, /dock\.classList\.add\("research-delta-consolidated"\)/);
-  assert.match(css, /@media \(min-width:821px\)[\s\S]*?\.delta-dock\.research-delta-consolidated\s*\{[\s\S]*?grid-template-columns:\s*minmax\(130px,180px\) minmax\(0,1fr\)/);
+  assert.match(css, /\.delta-dock\.research-delta-consolidated/);
 });
 
-test("local recurrence remains visible while derived closure interpretation is disclosed", () => {
-  assert.match(view, /details\.id = "discrete-closure-details"/);
-  assert.match(view, /local\.classList\.add\("research-local-recurrence-rail"\)/);
-  assert.match(view, /label\.textContent = "局部年序＋日序首次重遇"/);
-  assert.match(view, /note\.hidden = true/);
-  assert.match(view, /grid\.insertAdjacentElement\("beforebegin", local\)/);
-  assert.match(view, /details\.append\(summary, grid\)/);
-  assert.doesNotMatch(closureView, /details\.open\s*=\s*true/);
+test("current closure state is one compact rail instead of a card wall or disclosure", () => {
+  assert.match(recurrenceHtml, /class="recurrence-readout research-current-state"/);
+  assert.match(recurrenceHtml, /data-closure="gregorian"[\s\S]*id="gregorian-status"/);
+  assert.match(recurrenceHtml, /data-closure="year"[\s\S]*id="year-status"/);
+  assert.match(recurrenceHtml, /data-closure="day"[\s\S]*id="day-status"/);
+  assert.match(css, /\.recurrence-readout\.research-current-state\s*\{[\s\S]*?grid-template-columns:/);
+  assert.doesNotMatch(recurrenceHtml, /class="closure-grid"|discrete-closure-details|research-local-recurrence-rail/);
+  assert.doesNotMatch(view, /ensureClosureDrilldown|discrete-closure-details/);
+  assert.match(recurrenceGate, /compact current-state rail/);
 });
 
-test("60-day cycle is supporting evidence behind a closed native drilldown", () => {
+test("milestone detail table is fully removed while the derivation stays visible", () => {
+  assert.doesNotMatch(recurrenceHtml, /class="milestone-table"|id="milestone-rows"|相位明細/);
+  assert.doesNotMatch(view, /ensureMilestoneDrilldown|discrete-milestone-details|milestone-rows/);
+  assert.doesNotMatch(recurrenceView, /milestoneRows|milestone-row/);
+  for (const delta of ["400", "1200", "8000", "24,000"]) {
+    assert.ok(recurrenceView.includes(delta), `missing derivation delta ${delta}`);
+  }
+  assert.match(recurrenceHtml, /class="discrete-derivation"/);
+});
+
+test("year strip owns the visible 1/1, Li Chun, base date, year end, and next-same-date cue", () => {
+  assert.match(recurrenceHtml, /id="research-year-strip"/);
+  assert.match(recurrenceHtml, />1\/1</);
+  assert.match(recurrenceHtml, />立春</);
+  assert.match(recurrenceHtml, />基準日</);
+  assert.match(recurrenceHtml, />12\/31</);
+  assert.match(recurrenceHtml, /id="research-year-next-date"/);
+  assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
+  assert.match(recurrenceHtml, /跨過下一個立春年界後，進入下一個干支年序/);
+  assert.match(recurrenceHtml, /research-year-strip-view\.js/);
+});
+
+test("year strip composes existing authorities and fails closed outside exact Li Chun coverage", () => {
+  assert.match(yearStripView, /gregorianOrdinal/);
+  assert.match(yearStripView, /recurrenceState/);
+  assert.match(yearStripView, /validateGregorianDate/);
+  assert.match(yearStripView, /solarTermEventForCivilYear/);
+  assert.match(yearStripView, /solarTermEventForCivilYear\(year, "立春"\)/);
+  assert.match(yearStripView, /catch \{[\s\S]*?return null;/);
+  assert.match(yearStripView, /liChunMarker\.hidden = true/);
+  assert.match(yearStripView, /liChunUnavailable\.hidden = false/);
+  assert.doesNotMatch(yearStripView, /2\/4|02-04|year\s*%\s*4/);
+});
+
+test("60-day cycle remains supporting evidence behind one flat drilldown", () => {
   assert.match(view, /details\.id = "discrete-sexagenary-details"/);
   assert.match(view, /details\.dataset\.researchDrilldown = "discrete-sexagenary"/);
   assert.match(view, /60 日序來源/);
   assert.match(view, /10 天干 \/ 12 地支 → 60 配對/);
-  assert.match(view, /details\.append\(summary, cycle\)/);
-  assert.doesNotMatch(view, /discrete-sexagenary-details[\s\S]*?\.open\s*=\s*true/);
-  assert.match(view, /hashTargetsCycle\(cycle\)/);
-  assert.match(view, /details\.open = true/);
-  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?margin-top:\s*0;[\s\S]*?border-top:\s*0;/);
-  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle \.research-cycle-head\s*\{\s*display:\s*none;/);
+  assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?border-top:\s*0;/);
 });
 
-test("milestone table is progressively disclosed without deleting its rows", () => {
-  assert.match(view, /document\.createElement\("details"\)/);
-  assert.match(view, /details\.id = "discrete-milestone-details"/);
-  assert.match(view, /details\.append\(summary, table\)/);
-  assert.match(view, /#milestone-rows > \.milestone-row/);
-  assert.doesNotMatch(milestoneView, /details\.open\s*=\s*true/);
+test("60-day wheel is the selector: direct sector click, pointer scrub, and keyboard arrows remain", () => {
+  assert.doesNotMatch(recurrenceHtml, /research-cycle-prev|research-cycle-next|前一位|後一位/);
+  assert.match(cycleView, /hit\.addEventListener\("click", \(\) => setActive\(index\)\)/);
+  assert.match(cycleView, /export function cycleIndexFromLocalPoint/);
+  assert.match(cycleView, /addEventListener\("pointerdown"/);
+  assert.match(cycleView, /addEventListener\("pointermove"/);
+  assert.match(cycleView, /setPointerCapture/);
+  assert.match(cycleView, /event\.key === "ArrowLeft"/);
+  assert.match(cycleView, /event\.key === "ArrowRight"/);
+  assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*none;/);
 });
 
-test("discrete drilldowns stay flat rather than becoming cards", () => {
-  assert.match(css, /\.research-local-recurrence-rail\s*\{[\s\S]*?border-top:[^;]+;/);
-  assert.doesNotMatch(css, /\.research-local-recurrence-rail\s*\{[\s\S]*?border-radius\s*:/);
-  assert.doesNotMatch(css, /\.research-local-recurrence-rail\s*\{[\s\S]*?box-shadow\s*:/);
-  assert.match(css, /\.research-discrete-drilldown\s*\{[\s\S]*?border-top:[^;]+;[\s\S]*?border-bottom:[^;]+;/);
-  assert.doesNotMatch(css, /\.research-discrete-drilldown\s*\{[\s\S]*?border-radius\s*:/);
-  assert.doesNotMatch(css, /\.research-discrete-drilldown\s*\{[\s\S]*?box-shadow\s*:/);
-  assert.match(css, /\.research-closure-drilldown > \.closure-grid\s*\{[\s\S]*?margin-top:\s*0/);
-  assert.match(css, /\.research-discrete-drilldown > \.milestone-table\s*\{[\s\S]*?margin-top:\s*0/);
-});
-
-test("browser contract treats legend as visible phase evidence and closure status as disclosed interpretation", () => {
-  assert.match(recurrenceGate, /function expectSignedEvidenceCopy/);
-  assert.doesNotMatch(recurrenceGate, /expectVisibleSignedCopy/);
-  assert.match(recurrenceGate, /discrete-closure-details/);
-  assert.match(recurrenceGate, /research-local-recurrence-rail/);
-});
-
-test("browser contract verifies the global period preset owns the semantic label", () => {
-  assert.match(recurrenceGate, /function expectConsolidatedGlobalPeriod/);
-  assert.match(recurrenceGate, /data-delta-years="24000"/);
-  assert.match(recurrenceGate, /全域 24,000/);
-  assert.match(recurrenceGate, /三個離散相位同時歸零 24,000 年/);
-  assert.match(recurrenceGate, /global-period/);
-});
-
-test("research integration loads the discrete presentation layer", () => {
-  assert.match(host, /import "\.\/research-discrete-density-view\.js";/);
-});
-
-
-test("visible derivation explains why 24000 years is the discrete candidate before supporting drilldowns", () => {
-  assert.match(recurrenceHtml, /class="discrete-derivation"/);
-  assert.match(recurrenceHtml, /id="discrete-derivation-steps"/);
-  assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
+test("visible reading order is current state then year strip then derivation then supporting cycle", () => {
+  const stateStart = recurrenceHtml.indexOf('class="recurrence-readout research-current-state"');
+  const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
-  const milestoneStart = recurrenceHtml.indexOf('class="milestone-table"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
-  assert.ok(derivationStart >= 0 && milestoneStart > derivationStart && cycleStart > milestoneStart);
+  assert.ok(stateStart >= 0 && stripStart > stateStart && derivationStart > stripStart && cycleStart > derivationStart);
+  assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
   assert.match(recurrenceHtml, /class="phase-gauge-caption"[\s\S]*0 = 閉合/);
+});
+
+test("research integration still loads the discrete presentation layer", () => {
+  assert.match(host, /import "\.\/research-discrete-density-view\.js";/);
 });

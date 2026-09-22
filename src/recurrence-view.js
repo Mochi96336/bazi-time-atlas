@@ -30,7 +30,6 @@ const dayInput = document.querySelector("#base-day");
 const deltaNumber = document.querySelector("#delta-number");
 const deltaSlider = document.querySelector("#delta-slider");
 const candidateButtons = document.querySelector("#candidate-buttons");
-const milestoneRows = document.querySelector("#milestone-rows");
 const derivationSteps = document.querySelector("#discrete-derivation-steps");
 const cursorGroup = document.querySelector("#recurrence-cursor");
 const DERIVATION_DELTAS = Object.freeze([400, 1200, 8000, 24_000]);
@@ -283,13 +282,6 @@ function stateMeaning(state, localYears) {
   return "沒有完整閉合";
 }
 
-function phaseCell(closed, phase, modulus) {
-  if (phase === null) return `<span class="phase-no">—</span>`;
-  const signed = signedShortestPhase(phase, modulus);
-  const text = closed ? "✓ 0" : formatSigned(signed);
-  return `<span class="${closed ? "phase-ok" : "phase-no"}" data-phase-raw="${phase}" data-phase-signed="${signed}" data-phase-modulus="${modulus}">${text}</span>`;
-}
-
 function derivationPhase(label, closed, phase, modulus) {
   if (phase === null) return `<span><small>${label}</small><em class="phase-no">—</em></span>`;
   const signed = signedShortestPhase(phase, modulus);
@@ -324,7 +316,6 @@ function rebuildCandidates() {
   const localYears = local?.deltaYears ?? null;
   candidateStates = canonicalRecurrenceCandidates(currentBase);
   candidateButtons.replaceChildren();
-  milestoneRows.replaceChildren();
   renderDerivation(candidateStates);
 
   candidateStates.forEach(state => {
@@ -335,15 +326,8 @@ function rebuildCandidates() {
     button.addEventListener("click", () => setDelta(state.deltaYears, { source:"canonical" }));
     candidateButtons.appendChild(button);
 
-    const row = document.createElement("div");
-    row.className = "milestone-row";
-    row.dataset.deltaYears = String(state.deltaYears);
-    row.innerHTML = `<strong>${state.deltaYears.toLocaleString("en-US")}</strong>${phaseCell(state.closed.gregorian, state.phases.gregorian, 400)}${phaseCell(state.closed.yearSequence, state.phases.yearSequence, 60)}${phaseCell(state.closed.day, state.phases.day, 60)}<span>${stateMeaning(state, localYears)}</span>`;
-    row.addEventListener("click", () => setDelta(state.deltaYears, { source:"milestone" }));
-    milestoneRows.appendChild(row);
   });
 
-  setText("local-recurrence", local ? `${local.deltaYears.toLocaleString("en-US")} 年` : "未找到");
   instrument.dataset.localYearSequenceDayRecurrence = local ? String(local.deltaYears) : "none";
 }
 
@@ -362,7 +346,7 @@ function setClosureArticle(key, closed, phase) {
     article.dataset.phaseSigned = String(signed);
     article.dataset.phaseModulus = String(modulus);
   }
-  setText(`${key}-status`, phase === null ? "無對應日期" : closed ? "閉合 · 0" : `偏移 ${formatSigned(signed)}`);
+  setText(`${key}-status`, phase === null ? "—" : closed ? "0" : formatSigned(signed));
 }
 
 function phaseReadout(phase, modulus) {
@@ -410,7 +394,6 @@ function renderState() {
   instrument.dataset.globalClosed = String(state.closed.gregorian && state.closed.yearSequence && state.closed.day);
 
   candidateButtons.querySelectorAll("button").forEach(button => button.classList.toggle("active", Number(button.dataset.deltaYears) === currentDelta));
-  milestoneRows.querySelectorAll(".milestone-row").forEach(row => row.classList.toggle("active", Number(row.dataset.deltaYears) === currentDelta));
   derivationSteps?.querySelectorAll(".discrete-derivation-step").forEach(step => step.classList.toggle("active", Number(step.dataset.deltaYears) === currentDelta));
 }
 
