@@ -174,7 +174,7 @@ const nonAligned = expect(
   {
     exact: {
       "data-gregorian-closed": "true",
-      "data-year-closed": "false",
+      "data-year-sequence-closed": "false",
       "data-year-sequence-aligned": "false",
       "data-full-pillar-attribution": "mixed-with-year-sequence-offset"
     }
@@ -193,7 +193,7 @@ const local = expect(
   "recurrence.html?date=2026-09-13&delta=1980",
   {
     exact: {
-      "data-year-closed": "true",
+      "data-year-sequence-closed": "true",
       "data-day-closed": "true",
       "data-global-closed": "false",
       "data-astronomy-shape-closed": "false",
@@ -222,7 +222,7 @@ const global = expect(
     exact: {
       "data-global-closed": "true",
       "data-gregorian-closed": "true",
-      "data-year-closed": "true",
+      "data-year-sequence-closed": "true",
       "data-day-closed": "true",
       "data-astronomy-shape-closed": "false",
       "data-astronomy-target-year": "26026",
