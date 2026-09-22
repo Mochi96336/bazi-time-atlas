@@ -94,6 +94,28 @@ function assertPillarDecomposition(result, label) {
   return values;
 }
 
+function assertBoundaryShiftDiagram(result, label, { identity = false } = {}) {
+  if (!result.dom.includes('id="boundary-shift-diagram"') || !result.dom.includes("兩條邊界之間＝分歧窗口")) {
+    throw new Error(`${label}: visible boundary-shift mechanism diagram missing: ${result.url}`);
+  }
+  const rows = result.dom.match(/class="boundary-shift-row [^"]*"[^>]*>/g) ?? [];
+  if (rows.length < 1 || rows.length > 2) {
+    throw new Error(`${label}: expected one or two compact boundary-shift rows, got ${rows.length}: ${result.url}`);
+  }
+  if (identity) {
+    if (!result.dom.includes('data-boundary-shift-role="identity"') || !result.dom.includes('data-boundary-shift-window-hours="0.000000"')) {
+      throw new Error(`${label}: identity diagram did not collapse to a zero-width boundary: ${result.url}`);
+    }
+    return;
+  }
+  if (!result.dom.includes('data-boundary-shift-li-chun="true"')) {
+    throw new Error(`${label}: Li Chun year/month boundary row missing: ${result.url}`);
+  }
+  if (!/data-boundary-shift-window-hours="(?:0\.(?!000000)|[1-9])/.test(result.dom)) {
+    throw new Error(`${label}: diagram did not expose a non-zero disagreement window: ${result.url}`);
+  }
+}
+
 function assertBoundaryIsolatedGanzhi(result, label) {
   if (attr(result.tag, "data-year-sequence-aligned") !== "true") {
     throw new Error(`${label}: expected closed 60-year sequence: ${result.url}`);
@@ -143,6 +165,7 @@ if ((zero.dom.match(/class="month-boundary-window /g) ?? []).length !== 12) {
   throw new Error(`zero-year month-boundary exposure: expected 12 window cells: ${zero.url}`);
 }
 assertPillarDecomposition(zero, "zero-year astronomical identity");
+assertBoundaryShiftDiagram(zero, "zero-year astronomical identity", { identity:true });
 assertBoundaryIsolatedGanzhi(zero, "zero-year astronomical identity");
 console.log(`[astronomy-residual] PASS zero identity + canonical pillar transitions: ${zero.url}`);
 
@@ -230,6 +253,7 @@ const global = expect(
 if (!/95\.11 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
   throw new Error(`24000-year astronomical residual readout missing: ${global.url}`);
 }
+assertBoundaryShiftDiagram(global, "24000-year global recurrence");
 assertBoundaryIsolatedGanzhi(global, "24000-year global recurrence");
 if (!global.dom.includes("丁未·壬寅") || !global.dom.includes("丙午·辛丑")) {
   throw new Error(`24000-year Li Chun full Ganzhi state missing: ${global.url}`);
@@ -275,6 +299,7 @@ const near = expect(
   },
   "792000-year exact-discrete near recurrence"
 );
+assertBoundaryShiftDiagram(near, "792000-year near recurrence");
 assertBoundaryIsolatedGanzhi(near, "792000-year near recurrence");
 if (!near.dom.includes("丁未·壬寅") || !near.dom.includes("丙午·辛丑")) {
   throw new Error(`792000-year Li Chun full Ganzhi state missing: ${near.url}`);
