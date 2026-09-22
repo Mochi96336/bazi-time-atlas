@@ -151,7 +151,9 @@
   .pillar-impact-strip { grid-template-columns:1fr; gap:6px; }
   .month-boundary-window-grid { grid-template-columns:repeat(4,1fr); row-gap:12px; }
   .month-boundary-stat strong { font-size:14px; }
-  .full-pillar-attribution { font-size:7.5px; }
+  .month-boundary-stat small { font-size:9px; }
+  .pillar-impact-item small { font-size:8.5px; }
+  .full-pillar-attribution { font-size:8.5px; }
   .window-ganzhi { font-size:7.5px; }
   .window-ganzhi.aligned,.window-ganzhi.mixed { font-size:7px; }
 }
