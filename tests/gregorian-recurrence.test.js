@@ -10,10 +10,10 @@ import {
   recurrenceState
 } from "../src/recurrence/gregorian-cycle.js";
 
-const BASE = { yearSequence: 2026, month: 9, day: 13 };
+const BASE = { year: 2026, month: 9, day: 13 };
 
 test("Gregorian 400-year block is exactly 146097 days", () => {
-  const delta = gregorianOrdinal({ yearSequence: 2426, month: 9, day: 13 }) - gregorianOrdinal(BASE);
+  const delta = gregorianOrdinal({ year: 2426, month: 9, day: 13 }) - gregorianOrdinal(BASE);
   assert.equal(delta, GREGORIAN_400_YEAR_DAYS);
 });
 
