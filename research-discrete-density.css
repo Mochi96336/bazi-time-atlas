@@ -98,12 +98,12 @@
 }
 .research-year-strip > header strong {
   color: #d8ded9;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 680;
 }
 .research-year-strip > header span {
   color: #737d76;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .research-year-track {
@@ -155,13 +155,13 @@
 .research-year-marker > strong {
   top: 47px;
   color: #cdd4cf;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 .research-year-marker > small {
-  top: 62px;
+  top: 63px;
   color: #68736c;
-  font-size: 8px;
+  font-size: 9px;
 }
 .research-year-li-chun > strong { top: 0; color: #e1d8b8; }
 .research-year-li-chun > small { top: 14px; color: #8e876f; }
@@ -181,10 +181,10 @@
   align-items: baseline;
   margin: -3px 20px 7px;
   color: #69736c;
-  font-size: 8.5px;
+  font-size: 9.5px;
 }
 .research-year-li-chun-unavailable[hidden] { display: none; }
-.research-year-li-chun-unavailable strong { color: #9b9580; font-size: 9px; }
+.research-year-li-chun-unavailable strong { color: #9b9580; font-size: 10px; }
 
 .research-year-relations {
   display: grid;
@@ -202,12 +202,12 @@
   display: block;
   margin-bottom: 3px;
   color: #a0aaa3;
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 700;
 }
 .research-year-relations span {
   color: #747f77;
-  font-size: 8.5px;
+  font-size: 9.5px;
   line-height: 1.45;
 }
 .research-year-relations b {
@@ -225,7 +225,7 @@
 }
 .research-year-continuation > strong {
   color: #aeb7b1;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
@@ -260,7 +260,7 @@
   padding: 0 7px;
   background: #0b0f0d;
   color: #6f7972;
-  font-size: 8px;
+  font-size: 8.5px;
   font-style: normal;
   white-space: nowrap;
   transform: translateX(-50%);
@@ -452,17 +452,17 @@
   .research-discrete-scope { margin: -2px 0 9px; font-size: 8.5px; }
   .research-year-strip { margin-top: 12px; padding-top: 10px; }
   .research-year-strip > header { display: block; }
-  .research-year-strip > header strong { font-size: 11px; }
-  .research-year-strip > header span { display: block; margin-top: 2px; font-size: 8px; }
+  .research-year-strip > header strong { font-size: 12px; }
+  .research-year-strip > header span { display: block; margin-top: 2px; font-size: 9px; }
   .research-year-track { height: 92px; margin: 11px 10px 0; }
-  .research-year-marker > strong { font-size: 9px; }
-  .research-year-marker > small { font-size: 7.5px; }
-  .research-year-li-chun-unavailable { margin-left: 10px; margin-right: 10px; font-size: 8px; }
+  .research-year-marker > strong { font-size: 10px; }
+  .research-year-marker > small { font-size: 8.5px; }
+  .research-year-li-chun-unavailable { margin-left: 10px; margin-right: 10px; font-size: 9px; }
   .research-year-relations strong,
-  .research-year-relations span { font-size: 8px; }
+  .research-year-relations span { font-size: 9px; }
   .research-year-continuation { grid-template-columns: auto minmax(48px,1fr) auto; gap: 6px; }
-  .research-year-continuation > strong { font-size: 8px; }
-  .research-year-continuation em { font-size: 7.5px; padding: 0 4px; }
+  .research-year-continuation > strong { font-size: 8.5px; }
+  .research-year-continuation em { font-size: 8px; padding: 0 4px; }
 
   .research-discrete-drilldown { margin-top: 14px; }
   .research-discrete-drilldown > summary {
