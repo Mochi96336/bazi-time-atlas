@@ -55,7 +55,6 @@ function ensureEpochAuditDrilldown() {
   }
 
   const count = sources.querySelectorAll(".epoch-audit-source").length;
-  const verdict = panel.dataset.auditStatus;
   setTextIfChanged(
     details.querySelector("#epoch-audit-drilldown-meta"),
     `${count} 個來源 · 展開看能力邊界`
