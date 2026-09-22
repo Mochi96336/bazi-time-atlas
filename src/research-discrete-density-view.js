@@ -26,39 +26,6 @@ function consolidateGlobalPeriod() {
   dock.classList.add("research-delta-consolidated");
 }
 
-function ensureClosureDrilldown() {
-  const grid = researchDiscrete?.querySelector(".closure-grid");
-  if (!grid) return null;
-
-  let details = grid.closest("#discrete-closure-details");
-  const local = researchDiscrete.querySelector(".research-local-recurrence-rail") ?? grid.querySelector(".local-card");
-  if (!local) return details;
-
-  if (!local.classList.contains("research-local-recurrence-rail")) {
-    local.classList.add("research-local-recurrence-rail");
-    const label = local.querySelector("span");
-    const note = local.querySelector("small");
-    if (label) label.textContent = "局部年序＋日序首次重遇";
-    if (note) note.hidden = true;
-  }
-
-  if (!details) {
-    details = document.createElement("details");
-    details.id = "discrete-closure-details";
-    details.className = "research-discrete-drilldown research-closure-drilldown";
-    details.dataset.researchDrilldown = "discrete-closure";
-
-    const summary = document.createElement("summary");
-    summary.innerHTML = `<span>閉合狀態</span><strong>公曆結構 / 60 年序 / 60 日序</strong>`;
-
-    grid.insertAdjacentElement("beforebegin", local);
-    grid.insertAdjacentElement("beforebegin", details);
-    details.append(summary, grid);
-  }
-
-  return details;
-}
-
 function hashTargetsCycle(cycle) {
   const id = decodeURIComponent(location.hash.slice(1));
   if (!id) return false;
@@ -97,48 +64,17 @@ function ensureSexagenaryDrilldown() {
   return details;
 }
 
-function ensureMilestoneDrilldown() {
-  const table = researchDiscrete?.querySelector(".milestone-table");
-  if (!table) return null;
-
-  let details = table.closest("#discrete-milestone-details");
-  if (!details) {
-    details = document.createElement("details");
-    details.id = "discrete-milestone-details";
-    details.className = "research-discrete-drilldown";
-    details.dataset.researchDrilldown = "discrete-milestones";
-
-    const summary = document.createElement("summary");
-    summary.innerHTML = `<span>相位明細</span><strong id="discrete-milestone-meta">完整候選 · 展開看相位原值</strong>`;
-
-    table.insertAdjacentElement("beforebegin", details);
-    details.append(summary, table);
-  }
-  return details;
-}
-
-function syncMilestoneMeta(details) {
-  const rows = details?.querySelectorAll("#milestone-rows > .milestone-row").length ?? 0;
-  const meta = details?.querySelector("#discrete-milestone-meta");
-  if (!meta) return;
-  const next = `${rows || 6} 個候選 · 公曆結構 / 60 年序 / 60 日序`;
-  if (meta.textContent !== next) meta.textContent = next;
-}
-
 function syncDiscretePresentation() {
   if (!researchDiscrete) return;
   removeDuplicateScopeNote();
   consolidateGlobalPeriod();
-  ensureClosureDrilldown();
   ensureSexagenaryDrilldown();
-  const details = ensureMilestoneDrilldown();
-  syncMilestoneMeta(details);
 }
 
 if (researchDiscrete) {
   ensureStyles();
-  const rows = researchDiscrete.querySelector("#milestone-rows");
-  if (rows) new MutationObserver(syncDiscretePresentation).observe(rows, { childList:true });
+  const candidates = researchDiscrete.querySelector("#candidate-buttons");
+  if (candidates) new MutationObserver(syncDiscretePresentation).observe(candidates, { childList:true });
   window.addEventListener("hashchange", () => {
     const cycle = researchDiscrete.querySelector("#research-sexagenary-cycle");
     const details = cycle?.closest("#discrete-sexagenary-details");
