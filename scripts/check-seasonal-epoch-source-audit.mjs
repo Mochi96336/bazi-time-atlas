@@ -52,7 +52,7 @@ expectAttr(identityPanel, "data-ready", "true", "identity audit", identity.url);
 expectAttr(identityPanel, "data-target-year", "2026", "identity audit", identity.url);
 expectAttr(identityPanel, "data-audit-status", "identity-bypass", "identity audit", identity.url);
 expectAttr(identityPanel, "data-seasonal-epoch-solver-required", "false", "identity audit", identity.url);
-if (!identity.dom.includes("Δ=0 不需要跨 epoch source")) {
+if (!identity.dom.includes("Δ=0 不需要跨時代資料來源")) {
   throw new Error(`identity audit: bypass explanation missing: ${identity.url}`);
 }
 console.log(`[seasonal-epoch-audit] PASS identity bypass: ${identity.url}`);
@@ -82,11 +82,11 @@ expectAttr(localDirect, "data-direct-seasonal-epoch", "true", "4006 direct provi
 expectAttr(localDirect, "data-implemented-direct-provider", "true", "4006 direct provider", local.url);
 expectAttr(localDirect, "data-qualified-coverage", "true", "4006 direct provider", local.url);
 expectAttr(localDirect, "data-reason", "usable", "4006 direct provider", local.url);
-if (!local.dom.includes("anchors runtime 可用") || !local.dom.includes(DE441_EVENT_PROVIDER_ID)) {
+if (!local.dom.includes("節氣錨點可用") || !local.dom.includes(DE441_EVENT_PROVIDER_ID)) {
   throw new Error(`4006 audit: bounded direct-event anchors runtime not rendered as usable: ${local.url}`);
 }
-if (!local.dom.includes("不會自動綁定 recurrence target instant")
-  || !local.dom.includes("typed TT / UT1 / fixed-zone-from-UT1 contract")) {
+if (!local.dom.includes("不會自動綁定回歸的目標時刻")
+  || !local.dom.includes("目標時刻仍須獨立綁定 TT / UT1")) {
   throw new Error(`4006 audit: seasonal anchors must remain separate from typed target-instant binding: ${local.url}`);
 }
 console.log(`[seasonal-epoch-audit] PASS 4006 exposes bounded JPL seasonal anchors without binding a recurrence target instant: ${local.url}`);
@@ -127,7 +127,7 @@ expectAttr(de441, "data-ephemeris-basis-capable", "true", "26026 DE441", global.
 expectAttr(direct, "data-covers-target", "false", "26026 direct provider", global.url);
 expectAttr(la2004, "data-covers-target", "true", "26026 La2004", global.url);
 expectAttr(la2004, "data-ephemeris-basis-capable", "false", "26026 La2004", global.url);
-if (!global.dom.includes("absolute-state ephemeris coverage gap") || !global.dom.includes("距目標 8,835 年")) {
+if (!global.dom.includes("絕對狀態星曆範圍不足") || !global.dom.includes("距目標 8,835 年")) {
   throw new Error(`26026 audit: explicit coverage-gap explanation missing: ${global.url}`);
 }
 console.log(`[seasonal-epoch-audit] PASS 26026 remains outside every absolute seasonal-epoch source: ${global.url}`);
