@@ -101,6 +101,20 @@ requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recur
 requireEqual(attr(probe, "data-recurrence-delta-slider-in-dock"), "true", "Recurrence slider left the unified dock", url);
 requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
 
+for (const [label, dataName, minHeight] of [
+  ["research outline link", "data-recurrence-outline-link-height", 42],
+  ["canonical candidate button", "data-recurrence-candidate-button-height", 42],
+  ["numeric displacement input", "data-recurrence-delta-number-height", 42],
+  ["base-date input", "data-recurrence-base-date-input-height", 42],
+  ["model-boundary disclosure", "data-recurrence-model-boundary-summary-height", 42],
+  ["displacement slider", "data-recurrence-delta-slider-height", 32]
+]) {
+  const height = Number(attr(probe, dataName));
+  if (!Number.isFinite(height) || height < minHeight) {
+    throw new Error(`Recurrence mobile ${label} fell below its interaction floor (${height}px < ${minHeight}px): ${url}`);
+  }
+}
+
 const outlineTop = Number(attr(probe, "data-recurrence-outline-top"));
 const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
 const outlineHeight = Number(attr(probe, "data-recurrence-outline-height"));
