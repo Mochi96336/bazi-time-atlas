@@ -87,8 +87,10 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   const grainPattern = html.match(/<pattern id="m2-rotating-micrograin"[\s\S]*?<\/pattern>/)?.[0] ?? "";
   assert.match(grainPattern, /width="67" height="59"/);
   assert.equal((grainPattern.match(/<circle /g) ?? []).length, 132);
-  assert.match(grainPattern, /fill="#eef1ef" fill-opacity="\.28"/);
-  assert.match(grainPattern, /fill="#020303" fill-opacity="\.30"/);
+  assert.match(grainPattern, /fill="#eef1ef" fill-opacity="\.18"/);
+  assert.match(grainPattern, /fill="#020303" fill-opacity="\.20"/);
+  assert.match(grainPattern, /fill="#c9cecb" fill-opacity="\.14"/);
+  assert.match(grainPattern, /fill="#0a0c0c" fill-opacity="\.16"/);
   assert.match(css, /\.material-wheel-layer\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /data-material-prototype="roughness"\] \.material-wheel-layer\s*\{[\s\S]*?opacity:\s*1;/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
