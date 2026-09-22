@@ -115,12 +115,12 @@
   .research-discrete-drilldown { margin-top: 14px; }
   .research-closure-drilldown { margin-top: 0; }
   .research-discrete-drilldown > summary {
-    min-height: 32px;
+    min-height: 42px;
     gap: 7px;
-    padding: 6px 1px;
+    padding: 8px 1px;
   }
   .research-discrete-drilldown > summary strong {
     max-width: 180px;
-    font-size: 7.5px;
+    font-size: 8.5px;
   }
 }
