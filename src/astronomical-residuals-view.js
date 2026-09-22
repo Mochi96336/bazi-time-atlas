@@ -72,7 +72,7 @@ function ensureMonthBoundaryPanel() {
   panel.setAttribute("aria-label", "十二節位移對八字月界與年界判定的潛在分歧窗口");
   panel.innerHTML = `
     <div class="month-boundary-copy">
-      <div class="eyebrow">BaZi pillar-boundary exposure</div>
+      <div class="eyebrow">年／月柱邊界</div>
       <h3>交節窗口不只告訴你偏了多久，也能指出會差在哪一柱。</h3>
       <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份才會站在不同的月支 sector；11 個節只影響月柱，立春的 丑→寅 同時也是本站採用的年柱切換邊界。比例仍是幾何相位窗口，不是人口上的「八字錯誤率」。</p>
     </div>
@@ -88,12 +88,12 @@ function ensureMonthBoundaryPanel() {
     </div>
     <div class="pillar-impact-strip" aria-label="分歧窗口依受影響柱位分解">
       <div class="pillar-impact-item month-only">
-        <span>Month only · 11 節</span>
+        <span>僅月柱 · 11 節</span>
         <strong id="pillar-impact-month-only-hours">—</strong>
         <small id="pillar-impact-month-only-percent">—</small>
       </div>
       <div class="pillar-impact-item year-month">
-        <span>Year + Month · 立春</span>
+        <span>年柱＋月柱 · 立春</span>
         <strong id="pillar-impact-year-month-hours">—</strong>
         <small id="pillar-impact-year-month-percent">—</small>
       </div>
@@ -145,7 +145,7 @@ function renderMonthBoundaryExposure(result) {
   const liChunWindow = exposure.yearMonthWindow;
 
   setText("month-boundary-exposure-hours", `${exposure.unionExposureHours.toFixed(2)} h`);
-  setText("month-boundary-exposure-percent", `標準化年 ${exposure.yearPercent.toFixed(3)}%`);
+  setText("month-boundary-exposure-percent", `相位窗口 ${exposure.yearPercent.toFixed(3)}% · 非人口機率`);
   setText(
     "month-boundary-largest",
     exposure.largestWindow ? `${exposure.largestWindow.name} · ${exposure.largestWindow.widthHours.toFixed(2)} h` : "0.00 h"
@@ -157,9 +157,9 @@ function renderMonthBoundaryExposure(result) {
       : `${exposure.mergedWindows.length} 個不重疊窗口`
   );
   setText("pillar-impact-month-only-hours", `${exposure.monthOnlyExposureHours.toFixed(2)} h`);
-  setText("pillar-impact-month-only-percent", `標準化年 ${exposure.monthOnlyPercent.toFixed(3)}%`);
+  setText("pillar-impact-month-only-percent", `相位窗口 ${exposure.monthOnlyPercent.toFixed(3)}%`);
   setText("pillar-impact-year-month-hours", `${exposure.yearMonthExposureHours.toFixed(2)} h`);
-  setText("pillar-impact-year-month-percent", `標準化年 ${exposure.yearMonthPercent.toFixed(3)}%`);
+  setText("pillar-impact-year-month-percent", `相位窗口 ${exposure.yearMonthPercent.toFixed(3)}%`);
   setText(
     "full-pillar-attribution-note",
     exposure.yearSequenceAligned
@@ -368,7 +368,7 @@ function renderResult(result) {
   renderMonthBoundaryExposure(result);
 
   setResidualHeadline(`${result.maxAbsHours.toFixed(2)} h`);
-  setText("astronomy-rms-residual", `${result.rmsHours.toFixed(2)} h RMS`);
+  setText("astronomy-rms-residual", `${result.rmsHours.toFixed(2)} h`);
   setText(
     "astronomy-orbit-readout",
     `e ${result.baseParameters.eccentricity.toFixed(5)} → ${result.targetParameters.eccentricity.toFixed(5)} · 近日點 ${result.baseParameters.perihelionLongitudeDegrees.toFixed(1)}° → ${result.targetParameters.perihelionLongitudeDegrees.toFixed(1)}°`
