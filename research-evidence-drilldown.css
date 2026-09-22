@@ -1,8 +1,10 @@
+.research-evidence-support,
 .research-evidence-drilldown {
   margin-top: 8px;
   border-top: 1px solid rgba(238,242,237,.07);
 }
 
+.research-evidence-support > summary,
 .research-evidence-drilldown > summary {
   min-height: 34px;
   display: grid;
@@ -16,7 +18,9 @@
   user-select: none;
 }
 
+.research-evidence-support > summary::-webkit-details-marker,
 .research-evidence-drilldown > summary::-webkit-details-marker { display: none; }
+.research-evidence-support > summary span,
 .research-evidence-drilldown > summary span {
   min-width: 0;
   color: #9ca69f;
@@ -24,12 +28,14 @@
   font-weight: 650;
   letter-spacing: .02em;
 }
+.research-evidence-support > summary strong,
 .research-evidence-drilldown > summary strong {
   color: #707a73;
   font-size: 8px;
   font-weight: 500;
   text-align: right;
 }
+.research-evidence-support > summary::after,
 .research-evidence-drilldown > summary::after {
   content: "+";
   width: 14px;
@@ -38,10 +44,22 @@
   line-height: 1;
   text-align: center;
 }
+.research-evidence-support[open] > summary::after,
 .research-evidence-drilldown[open] > summary::after { content: "−"; }
+.research-evidence-support[open] > summary,
 .research-evidence-drilldown[open] > summary {
   border-bottom: 1px solid rgba(238,242,237,.045);
 }
+.research-evidence-support > .proof-chain-panel,
+.research-evidence-support > .epoch-audit-panel {
+  margin-top: 0;
+  border-top: 0;
+}
+.research-evidence-support[open] > .proof-chain-panel,
+.research-evidence-support[open] > .epoch-audit-panel {
+  padding-top: 10px;
+}
+
 .research-evidence-drilldown[open] > .proof-chain-stages,
 .research-evidence-drilldown[open] > .epoch-audit-sources {
   margin-top: 7px;
@@ -51,14 +69,21 @@
 }
 
 @media (max-width:480px) {
-  .research-evidence-drilldown { margin-top: 6px; }
-  .research-evidence-drilldown > summary {
+  .research-evidence-support,
+.research-evidence-drilldown { margin-top: 6px; }
+  .research-evidence-support > summary,
+.research-evidence-drilldown > summary {
     min-height: 32px;
     gap: 7px;
     padding: 6px 1px;
   }
-  .research-evidence-drilldown > summary strong {
-    max-width: 150px;
+  .research-evidence-support > summary strong,
+.research-evidence-drilldown > summary strong {
+    max-width: 170px;
     font-size: 7.5px;
+  .research-evidence-support[open] > .proof-chain-panel,
+  .research-evidence-support[open] > .epoch-audit-panel {
+    padding-top: 8px;
+  }
   }
 }
