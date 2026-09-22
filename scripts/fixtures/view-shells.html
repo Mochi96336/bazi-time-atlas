@@ -120,6 +120,10 @@
       const astronomyTaskHead = recurrenceDoc.querySelector("#research-astronomy > .research-task-head");
       const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
       const discreteTaskHead = recurrenceDoc.querySelector("#research-discrete > .research-task-head");
+      const outlineLink = recurrenceDoc.querySelector(".research-outline a");
+      const candidateButton = candidateButtons?.querySelector("button");
+      const baseDateInput = recurrenceDoc.querySelector(".base-date input");
+      const modelBoundarySummary = recurrenceDoc.querySelector(".model-boundary summary");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
       const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
@@ -127,6 +131,12 @@
       const astronomyTaskHeadRect = astronomyTaskHead?.getBoundingClientRect();
       const taskNavRect = researchTaskNav?.getBoundingClientRect();
       const taskHeadRect = discreteTaskHead?.getBoundingClientRect();
+      const outlineLinkRect = outlineLink?.getBoundingClientRect();
+      const candidateButtonRect = candidateButton?.getBoundingClientRect();
+      const deltaNumberRect = deltaNumber?.getBoundingClientRect();
+      const deltaSliderRect = deltaSlider?.getBoundingClientRect();
+      const baseDateInputRect = baseDateInput?.getBoundingClientRect();
+      const modelBoundarySummaryRect = modelBoundarySummary?.getBoundingClientRect();
       const viewportHeight = recurrenceWin.innerHeight;
       const visibleInstrumentHeight = recurrenceRect
         ? Math.max(0, Math.min(recurrenceRect.bottom, viewportHeight) - Math.max(recurrenceRect.top, 0))
@@ -157,6 +167,12 @@
       probe.dataset.recurrenceDeltaNumberInDock = String(Boolean(deltaNumber && deltaDock?.contains(deltaNumber)));
       probe.dataset.recurrenceDeltaSliderInDock = String(Boolean(deltaSlider && deltaDock?.contains(deltaSlider)));
       probe.dataset.recurrenceCandidateCount = String(candidateButtons?.querySelectorAll("button").length ?? -1);
+      probe.dataset.recurrenceOutlineLinkHeight = String(Math.round(outlineLinkRect?.height ?? -1));
+      probe.dataset.recurrenceCandidateButtonHeight = String(Math.round(candidateButtonRect?.height ?? -1));
+      probe.dataset.recurrenceDeltaNumberHeight = String(Math.round(deltaNumberRect?.height ?? -1));
+      probe.dataset.recurrenceDeltaSliderHeight = String(Math.round(deltaSliderRect?.height ?? -1));
+      probe.dataset.recurrenceBaseDateInputHeight = String(Math.round(baseDateInputRect?.height ?? -1));
+      probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
       probe.dataset.recurrenceDeltaDockTop = String(Math.round(deltaDockRect?.top ?? -1));
       probe.dataset.recurrenceDeltaDockBottom = String(Math.round(deltaDockRect?.bottom ?? -1));
       probe.dataset.recurrenceDeltaDockBeforeInstrument = String(Boolean(
