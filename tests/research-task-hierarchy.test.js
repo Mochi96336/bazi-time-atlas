@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, astronomyCss, residualCss, recurrenceCss] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, astronomyCss, residualCss, recurrenceCss, spineJs] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
@@ -16,7 +16,8 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
   readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
   readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence.css", import.meta.url), "utf8")
+  readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
+  readFile(new URL("../src/research-narrative-spine-view.js", import.meta.url), "utf8")
 ]);
 
 const discreteStart = html.indexOf('id="research-discrete"');
@@ -33,12 +34,34 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.doesNotMatch(html, /class="research-task-nav"/);
   assert.match(html, /class="research-outline"[^>]*aria-label="研究項目"/);
   assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?離散閉合/);
-  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?天文差異/);
-  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?四柱證據/);
+  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?天文偏移/);
+  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?四柱判定/);
   assert.match(html, />離散閉合</);
-  assert.match(html, />天文差異</);
-  assert.match(html, />四柱證據</);
+  assert.match(html, />天文偏移</);
+  assert.match(html, />四柱判定</);
+  assert.match(html, /離散週期重新對齊，四柱也會回到同一狀態嗎？/);
+  assert.match(html, /id="research-spine-discrete">等待狀態<\/small>/);
+  assert.match(html, /id="research-spine-astronomy">等待狀態<\/small>/);
+  assert.match(html, /id="research-spine-evidence">等待狀態<\/small>/);
+  assert.match(html, /class="research-task-relation">離散閉合 ≠ 天文閉合<\/span>/);
+  assert.match(html, /class="research-task-relation">天文偏移 → 柱位判定<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
+});
+
+
+test("Research narrative spine is a live read-only summary of existing authorities", () => {
+  assert.match(html, /research-narrative-spine-view\.js/);
+  assert.match(spineJs, /instrument\.dataset\.deltaYears/);
+  assert.match(spineJs, /boolDataset\("gregorianClosed"\)/);
+  assert.match(spineJs, /boolDataset\("yearClosed"\)/);
+  assert.match(spineJs, /boolDataset\("dayClosed"\)/);
+  assert.match(spineJs, /instrument\.dataset\.astronomyValidity/);
+  assert.match(spineJs, /boolDataset\("astronomyShapeClosed"\)/);
+  assert.match(spineJs, /instrument\.dataset\.fourPillarResolvedCount/);
+  for (const copy of ["基準狀態", "3 / 3 exact", "仍有偏移", "4 / 4 同一", "可解析", "模型範圍外"]) {
+    assert.ok(spineJs.includes(copy), `missing live-spine outcome: ${copy}`);
+  }
+  assert.doesNotMatch(spineJs, /solarTermShapeResiduals|fourPillarDeterminacy|rankExactDiscreteAstronomyCandidates|recurrenceStateForDelta/);
 });
 
 test("discrete task owns the instrument, exact closure evidence, and structural 60-day cycle", () => {
@@ -115,7 +138,8 @@ test("evidence defaults to outcome-first disclosure while research links can rev
 test("section chrome stays flat and compact on phone", () => {
   assert.doesNotMatch(taskCss, /research-task-nav/);
   assert.match(taskCss, /\.research-outline\s*\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
-  assert.match(taskCss, /\.research-outline a\s*\{[\s\S]*min-height:34px/);
+  assert.match(taskCss, /\.research-outline a\s*\{[\s\S]*min-height:42px/);
+  assert.match(taskCss, /\.research-outline small\s*\{[\s\S]*grid-area:outcome/);
   assert.match(taskCss, /@media \(max-width:480px\)[\s\S]*\.research-outline a\s*\{\s*min-height:42px;\s*\}/);
   assert.doesNotMatch(taskCss, /\.research-outline[^}]*border-radius/);
   assert.match(taskCss, /\.research-task-head\s*\{[\s\S]*display:flex/);
