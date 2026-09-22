@@ -175,9 +175,8 @@ function makeBoundaryShiftRow(window, scaleHours, { role, label, meta } = {}) {
   row.innerHTML = `
     <div class="boundary-shift-row-head"><span>${rowLabel}</span><strong>${rowMeta}</strong></div>
     <div class="boundary-shift-plot" aria-hidden="true">
-      <div class="boundary-shift-lane"><span>基準</span><i><b class="boundary-shift-base"></b></i></div>
-      <div class="boundary-shift-lane"><span>目標</span><i><b class="boundary-shift-target"></b></i></div>
-      <em class="boundary-shift-window"></em>
+      <div class="boundary-shift-lane"><span>基準</span><i><em class="boundary-shift-window"></em><b class="boundary-shift-base"></b></i></div>
+      <div class="boundary-shift-lane"><span>目標</span><i><em class="boundary-shift-window"></em><b class="boundary-shift-target"></b></i></div>
     </div>
   `;
   return row;
