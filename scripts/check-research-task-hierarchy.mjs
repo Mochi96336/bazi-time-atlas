@@ -61,6 +61,28 @@ const discrete = sectionById(probe.dom, "research-discrete");
 const astronomy = sectionById(probe.dom, "research-astronomy");
 const evidence = sectionById(probe.dom, "research-evidence");
 
+for (const expected of [
+  "離散週期重新對齊，四柱也會回到同一狀態嗎？",
+  "天文偏移",
+  "四柱判定",
+  "離散閉合 ≠ 天文閉合",
+  "天文偏移 → 柱位判定",
+  "3 / 3 exact",
+  "仍有偏移",
+  "2 / 4 可解析"
+]) {
+  if (!probe.dom.includes(expected)) {
+    throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
+  }
+}
+
+const identityProbe = dump("recurrence.html?delta=0");
+for (const expected of ["基準狀態", "同一參照", "4 / 4 同一"]) {
+  if (!identityProbe.dom.includes(expected)) {
+    throw new Error(`Research identity spine missing "${expected}": ${identityProbe.url}`);
+  }
+}
+
 if (!discrete || !astronomy || !evidence) throw new Error(`three Research ownership sections were not rendered: ${probe.url}`);
 if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="closure-grid"') || !discrete.includes('id="research-sexagenary-cycle"')) {
   throw new Error(`discrete task lost instrument, closure evidence, or 60-day cycle: ${probe.url}`);

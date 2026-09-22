@@ -85,7 +85,7 @@ for (const id of ["atlasmobile", "recurrencemobile", "birthmobile", "sexagenarym
 }
 requireEqual(attr(probe, "data-sexagenarydesktop-width"), "1200", "sexagenary desktop fixture width drifted", url);
 
-requireEqual(attr(probe, "data-recurrence-lede-hidden"), "true", "Recurrence mobile lede must stay out of the first-screen instrument flow", url);
+requireEqual(attr(probe, "data-recurrence-lede-hidden"), "false", "Research question must remain visible in the mobile first-screen flow", url);
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
@@ -100,6 +100,10 @@ requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recu
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
 requireEqual(attr(probe, "data-recurrence-delta-slider-in-dock"), "true", "Recurrence slider left the unified dock", url);
 requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
+requireEqual(attr(probe, "data-recurrence-question-text"), "離散週期重新對齊，四柱也會回到同一狀態嗎？", "Research question changed", url);
+requireEqual(attr(probe, "data-recurrence-spine-discrete"), "基準狀態", "Research discrete spine lost identity state", url);
+requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "同一參照", "Research astronomy spine lost identity state", url);
+requireEqual(attr(probe, "data-recurrence-spine-evidence"), "4 / 4 同一", "Research evidence spine lost identity state", url);
 
 for (const [label, dataName, minHeight] of [
   ["research outline link", "data-recurrence-outline-link-height", 42],

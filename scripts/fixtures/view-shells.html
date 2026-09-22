@@ -142,6 +142,10 @@
         ? Math.max(0, Math.min(recurrenceRect.bottom, viewportHeight) - Math.max(recurrenceRect.top, 0))
         : -1;
       probe.dataset.recurrenceLedeHidden = String(hidden(recurrenceWin, recurrenceLede));
+      probe.dataset.recurrenceQuestionText = recurrenceLede?.textContent.trim() ?? "missing";
+      probe.dataset.recurrenceSpineDiscrete = recurrenceDoc.querySelector("#research-spine-discrete")?.textContent.trim() ?? "missing";
+      probe.dataset.recurrenceSpineAstronomy = recurrenceDoc.querySelector("#research-spine-astronomy")?.textContent.trim() ?? "missing";
+      probe.dataset.recurrenceSpineEvidence = recurrenceDoc.querySelector("#research-spine-evidence")?.textContent.trim() ?? "missing";
       probe.dataset.recurrenceScopeHidden = String(hidden(recurrenceWin, recurrenceScope));
       probe.dataset.recurrenceOutlineVisible = String(Boolean(recurrenceOutline && !hidden(recurrenceWin, recurrenceOutline)));
       probe.dataset.recurrenceOutlineCount = String(recurrenceOutlineLinks.length);
