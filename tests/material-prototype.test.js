@@ -84,11 +84,17 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   ]);
 
   assert.match(html, /<canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"><\/canvas>/);
+  assert.match(html, /<g id="material-base-layer" aria-hidden="true"><\/g>\s*<g id="material-reflection-layer" aria-hidden="true"><\/g>\s*<g id="guide-layer"><\/g>\s*<g id="hour-track"><\/g>/);
+  assert.match(html, /id="m2-visible-metal-reflection"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.doesNotMatch(html, /id="m2-visible-metal-reflection"[^>]*gradientTransform=/);
   assert.doesNotMatch(html, /m2-rotating-micrograin|<pattern[^>]*micrograin|<circle[^>]*fill-opacity=/);
   assert.match(css, /\.material-wheel-layer\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /data-material-prototype="roughness"\] \.material-wheel-layer\s*\{[\s\S]*?opacity:\s*1;/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-material-face/);
+  assert.match(renderer, /const materialBaseLayer = svg\.querySelector\("#material-base-layer"\)/);
+  assert.match(renderer, /const materialReflectionLayer = svg\.querySelector\("#material-reflection-layer"\)/);
+  assert.match(renderer, /class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?"data-material-reflection-ring": id[\s\S]*?\}, surfaceLayer\);/);
   assert.match(renderer, /materialPrototype\.updateFrame\(renderedRotations\)/);
   assert.match(material, /localPoint = rotation\(-ringRotation\) \* point/);
   assert.match(material, /const float FIELD_PERIOD = 96\.0/);
