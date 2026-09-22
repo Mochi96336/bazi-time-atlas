@@ -198,7 +198,8 @@
   .determinacy-card { padding:7px 7px 8px; }
   .determinacy-card header span { display:none; }
   .determinacy-card header strong { font-size:15px; }
-  .determinacy-card p { font-size:7.5px; }
+  .determinacy-card p { font-size:9px; }
+  .determinacy-foot { font-size:9px; }
   .proof-chain-stages { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .proof-chain-stage { padding:6px 6px 7px; }
   .proof-chain-stage > div { grid-template-columns:1fr; gap:2px; }

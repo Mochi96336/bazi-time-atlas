@@ -73,14 +73,14 @@
   .research-evidence-drilldown { margin-top: 6px; }
   .research-evidence-support > summary,
   .research-evidence-drilldown > summary {
-    min-height: 32px;
+    min-height: 42px;
     gap: 7px;
-    padding: 6px 1px;
+    padding: 8px 1px;
   }
   .research-evidence-support > summary strong,
   .research-evidence-drilldown > summary strong {
     max-width: 170px;
-    font-size: 7.5px;
+    font-size: 8.5px;
   }
   .research-evidence-support[open] > .proof-chain-panel,
   .research-evidence-support[open] > .epoch-audit-panel {
