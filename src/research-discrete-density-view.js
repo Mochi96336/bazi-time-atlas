@@ -109,7 +109,7 @@ function ensureMilestoneDrilldown() {
     details.dataset.researchDrilldown = "discrete-milestones";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = `<span>相位明細</span><strong id="discrete-milestone-meta">完整候選 · 展開看 raw phase</strong>`;
+    summary.innerHTML = `<span>相位明細</span><strong id="discrete-milestone-meta">完整候選 · 展開看相位原值</strong>`;
 
     table.insertAdjacentElement("beforebegin", details);
     details.append(summary, table);
