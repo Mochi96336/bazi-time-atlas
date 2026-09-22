@@ -99,7 +99,9 @@ test("evidence defaults to outcome-first disclosure while research links can rev
   assert.match(evidenceJs, /id:"epoch-audit-support-details"/);
   assert.match(evidenceJs, /label:"天文來源能力"/);
   assert.match(evidenceJs, /revealHash\(details, panel\)/);
-  assert.doesNotMatch(evidenceJs, /details\.open\s*=\s*true;[\s\S]*id:"epoch-audit-support-details"/);
+  assert.match(evidenceJs, /queryRevealApplied/);
+  const epochConfig = evidenceJs.match(/id:"epoch-audit-support-details"[\s\S]*?\n  \}\);/)?.[0] ?? "";
+  assert.doesNotMatch(epochConfig, /openForConventionQuery:true/);
 
   assert.match(evidenceCss, /\.research-evidence-support\s*,[\s\S]*\.research-evidence-drilldown\s*\{/);
   assert.match(evidenceCss, /\.research-evidence-support > \.proof-chain-panel,[\s\S]*margin-top:\s*0;[\s\S]*border-top:\s*0;/);
