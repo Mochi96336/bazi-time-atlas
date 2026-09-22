@@ -61,7 +61,7 @@ if (attr(zeroPanel, "data-ready") !== "true" || attr(zeroPanel, "data-identity")
 if (attr(zeroInstrument, "data-day-hour-proof-day-resolved") !== "true" || attr(zeroInstrument, "data-day-hour-proof-hour-resolved") !== "true") {
   throw new Error(`zero identity: Day/Hour identity bypass missing: ${zero.url}`);
 }
-if (!zero.dom.includes("Δ=0 · identity bypass") || !zero.dom.includes("同一狀態不需要跨時代的絕對時間投影")) {
+if (!zero.dom.includes("Δ=0 · 同一狀態免驗") || !zero.dom.includes("同一狀態不需要跨時代的絕對時間投影")) {
   throw new Error(`zero identity: identity-bypass explanation missing: ${zero.url}`);
 }
 expectStage(zero.dom, "absolute-seasonal-epoch", "satisfied", "zero identity", zero.url);
@@ -135,7 +135,7 @@ if (!local.dom.includes("proleptic Gregorian + 固定 UT1 offset") || !local.dom
 const localDayBlockers = textById(local.dom, "proof-chain-day-blockers");
 const localHourBlockers = textById(local.dom, "proof-chain-hour-blockers");
 if (
-  !localDayBlockers.includes("地方鐘面／zone convention")
+  !localDayBlockers.includes("地方鐘面／時區約定")
   || localDayBlockers.includes("localZoneBound")
   || !localHourBlockers.includes("已解析日柱")
   || localHourBlockers.includes("localZoneBound")
@@ -239,7 +239,7 @@ expectStage(ziBoundary.dom, "clock-basis", "unbound-convention", "4006 zi-bounda
 if (!ziBoundary.dom.includes("canonical zi-initial-next-day") || !ziBoundary.dom.includes("子初 23:00") || !ziBoundary.dom.includes("時柱仍需明示 civil / local mean solar / local apparent solar clock basis")) {
   throw new Error(`4006 zi-boundary proof: canonical boundary or next-blocker explanation missing: ${ziBoundary.url}`);
 }
-if (textById(ziBoundary.dom, "proof-chain-day-blockers") !== "無 blocker" || !textById(ziBoundary.dom, "proof-chain-hour-blockers").includes("local clock basis")) {
+if (textById(ziBoundary.dom, "proof-chain-day-blockers") !== "無阻塞" || !textById(ziBoundary.dom, "proof-chain-hour-blockers").includes("地方時計時基準")) {
   throw new Error(`4006 zi-boundary proof: Day should resolve while Hour stops at clock basis: ${ziBoundary.url}`);
 }
 console.log(`[day-hour-proof] PASS canonical zi-initial day boundary advances 4006 proof to clock-basis: ${ziBoundary.url}`);
@@ -312,7 +312,7 @@ expectStage(civilClock.dom, "equation-of-time", "not-required", "4006 civil-cloc
 if (!civilClock.dom.includes("已選 civil/zone-clock reading") || !civilClock.dom.includes("不代表未來政治時區已解決")) {
   throw new Error(`4006 civil-clock proof: fixed-zone civil semantics warning missing: ${civilClock.url}`);
 }
-if (textById(civilClock.dom, "proof-chain-hour-blockers") !== "無 blocker") {
+if (textById(civilClock.dom, "proof-chain-hour-blockers") !== "無阻塞") {
   throw new Error(`4006 civil-clock proof: Hour should resolve without longitude/EoT: ${civilClock.url}`);
 }
 console.log(`[day-hour-proof] PASS explicit civil clock basis resolves Hour without longitude or EoT: ${civilClock.url}`);
@@ -332,7 +332,7 @@ if (
 expectStage(meanSolar.dom, "clock-basis", "satisfied", "4006 mean-solar proof", meanSolar.url);
 expectStage(meanSolar.dom, "longitude", "unbound-convention", "4006 mean-solar proof", meanSolar.url);
 expectStage(meanSolar.dom, "equation-of-time", "not-required", "4006 mean-solar proof", meanSolar.url);
-if (!textById(meanSolar.dom, "proof-chain-hour-blockers").includes("經度") || textById(meanSolar.dom, "proof-chain-hour-blockers").includes("local clock basis")) {
+if (!textById(meanSolar.dom, "proof-chain-hour-blockers").includes("經度") || textById(meanSolar.dom, "proof-chain-hour-blockers").includes("地方時計時基準")) {
   throw new Error(`4006 mean-solar proof: Hour blocker should move from clock basis to longitude: ${meanSolar.url}`);
 }
 console.log(`[day-hour-proof] PASS explicit local-mean-solar basis advances Hour proof to longitude: ${meanSolar.url}`);
@@ -354,7 +354,7 @@ expectStage(apparentSolar.dom, "clock-basis", "satisfied", "4006 apparent-solar 
 expectStage(apparentSolar.dom, "longitude", "unbound-convention", "4006 apparent-solar proof", apparentSolar.url);
 expectStage(apparentSolar.dom, "equation-of-time", "evidence-not-authoritative", "4006 apparent-solar proof", apparentSolar.url);
 const apparentBlockers = textById(apparentSolar.dom, "proof-chain-hour-blockers");
-if (!apparentBlockers.includes("經度") || !apparentBlockers.includes("Equation of Time")) {
+if (!apparentBlockers.includes("經度") || !apparentBlockers.includes("均時差（Equation of Time）")) {
   throw new Error(`4006 apparent-solar proof: both downstream blockers must be visible: ${apparentSolar.url}`);
 }
 if (!apparentSolar.dom.includes("swiss-ephemeris-eot-4006-dense-v2") || !apparentSolar.dom.includes("有實證 · 未授權")) {
