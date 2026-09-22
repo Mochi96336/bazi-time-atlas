@@ -114,7 +114,7 @@ function renderChart(search) {
     });
     makeDotInteractive(dot, candidate);
     const title = document.createElementNS(NS, "title");
-    title.textContent = `+${formatYears(candidate.deltaYears)} 年 · max ${candidate.maxAbsHours.toFixed(2)} h · RMS ${candidate.rmsHours.toFixed(2)} h`;
+    title.textContent = `+${formatYears(candidate.deltaYears)} 年 · 最大 ${candidate.maxAbsHours.toFixed(2)} h · RMS ${candidate.rmsHours.toFixed(2)} h`;
     dot.appendChild(title);
   });
 
@@ -164,7 +164,7 @@ function renderSearch(baseYear) {
     renderChart(search);
     setText("near-candidate-count", `${search.candidateCount} 個`);
     setText("near-best-delta", `+${formatYears(best.deltaYears)} 年`);
-    setText("near-best-residual", `${best.maxAbsHours.toFixed(2)} h max · ${best.rmsHours.toFixed(2)} h RMS`);
+    setText("near-best-residual", `最大 ${best.maxAbsHours.toFixed(2)} h · RMS ${best.rmsHours.toFixed(2)} h`);
     setText("near-search-horizon", `搜尋到 +${formatYears(search.chronological.at(-1).deltaYears)} 年`);
 
     instrument.dataset.nearSearchCandidateCount = String(search.candidateCount);
@@ -178,7 +178,7 @@ function renderSearch(baseYear) {
     ranking?.replaceChildren();
     chart?.replaceChildren();
     setText("near-candidate-count", "—");
-    setText("near-best-delta", "model unavailable");
+    setText("near-best-delta", "模型不可用");
     setText("near-best-residual", error instanceof Error ? error.message : String(error));
     setText("near-search-horizon", "—");
     instrument.dataset.nearSearchCandidateCount = "0";

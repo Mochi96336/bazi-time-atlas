@@ -145,7 +145,7 @@ function renderMonthBoundaryExposure(result) {
   const liChunWindow = exposure.yearMonthWindow;
 
   setText("month-boundary-exposure-hours", `${exposure.unionExposureHours.toFixed(2)} h`);
-  setText("month-boundary-exposure-percent", `${exposure.yearPercent.toFixed(3)}% of normalized year`);
+  setText("month-boundary-exposure-percent", `標準化年 ${exposure.yearPercent.toFixed(3)}%`);
   setText(
     "month-boundary-largest",
     exposure.largestWindow ? `${exposure.largestWindow.name} · ${exposure.largestWindow.widthHours.toFixed(2)} h` : "0.00 h"
@@ -157,9 +157,9 @@ function renderMonthBoundaryExposure(result) {
       : `${exposure.mergedWindows.length} 個不重疊窗口`
   );
   setText("pillar-impact-month-only-hours", `${exposure.monthOnlyExposureHours.toFixed(2)} h`);
-  setText("pillar-impact-month-only-percent", `${exposure.monthOnlyPercent.toFixed(3)}% of normalized year`);
+  setText("pillar-impact-month-only-percent", `標準化年 ${exposure.monthOnlyPercent.toFixed(3)}%`);
   setText("pillar-impact-year-month-hours", `${exposure.yearMonthExposureHours.toFixed(2)} h`);
-  setText("pillar-impact-year-month-percent", `${exposure.yearMonthPercent.toFixed(3)}% of normalized year`);
+  setText("pillar-impact-year-month-percent", `標準化年 ${exposure.yearMonthPercent.toFixed(3)}%`);
   setText(
     "full-pillar-attribution-note",
     exposure.yearSequenceAligned
@@ -233,7 +233,7 @@ function renderMonthBoundaryUnavailable() {
   const panel = ensureMonthBoundaryPanel();
   panel?.querySelector("#month-boundary-window-grid")?.replaceChildren();
   panel?.classList.remove("year-sequence-misaligned");
-  setText("month-boundary-exposure-hours", "model unavailable");
+  setText("month-boundary-exposure-hours", "模型不可用");
   setText("month-boundary-exposure-percent", "—");
   setText("month-boundary-largest", "—");
   setText("month-boundary-overlap", "—");
@@ -273,7 +273,7 @@ function renderUnavailable(message) {
   group.replaceChildren();
   termGrid?.replaceChildren();
   renderMonthBoundaryUnavailable();
-  setResidualHeadline("model unavailable");
+  setResidualHeadline("模型不可用");
   setText("astronomy-rms-residual", "—");
   setText("astronomy-orbit-readout", message);
   setText("astronomy-scale-readout", "—");
