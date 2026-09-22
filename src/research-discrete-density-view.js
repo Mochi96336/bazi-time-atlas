@@ -20,7 +20,7 @@ function consolidateGlobalPeriod() {
   if (!dock || !preset) return;
 
   preset.textContent = "全域 24,000";
-  preset.setAttribute("aria-label", "三層全域閉合 24,000 年");
+  preset.setAttribute("aria-label", "三個離散相位同時歸零 24,000 年");
   preset.dataset.researchGlobalPeriodPreset = "1";
   duplicate?.remove();
   dock.classList.add("research-delta-consolidated");
@@ -38,7 +38,7 @@ function ensureClosureDrilldown() {
     local.classList.add("research-local-recurrence-rail");
     const label = local.querySelector("span");
     const note = local.querySelector("small");
-    if (label) label.textContent = "局部年＋日首次重遇";
+    if (label) label.textContent = "局部年序＋日序首次重遇";
     if (note) note.hidden = true;
   }
 
@@ -49,7 +49,7 @@ function ensureClosureDrilldown() {
     details.dataset.researchDrilldown = "discrete-closure";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = `<span>閉合狀態</span><strong>公曆 / 年序 / 日序</strong>`;
+    summary.innerHTML = `<span>閉合狀態</span><strong>公曆結構 / 60 年序 / 60 日序</strong>`;
 
     grid.insertAdjacentElement("beforebegin", local);
     grid.insertAdjacentElement("beforebegin", details);
@@ -87,7 +87,7 @@ function ensureSexagenaryDrilldown() {
     details.dataset.researchDrilldown = "discrete-sexagenary";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = "<span>六十日干支循環</span><strong>60 日後配對重新重合</strong>";
+    summary.innerHTML = "<span>60 日序來源</span><strong>10 天干 / 12 地支 → 60 配對</strong>";
 
     cycle.insertAdjacentElement("beforebegin", details);
     details.append(summary, cycle);
@@ -109,7 +109,7 @@ function ensureMilestoneDrilldown() {
     details.dataset.researchDrilldown = "discrete-milestones";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = `<span>候選閉合明細</span><strong id="discrete-milestone-meta">典型候選 · 展開看相位</strong>`;
+    summary.innerHTML = `<span>相位明細</span><strong id="discrete-milestone-meta">完整候選 · 展開看相位原值</strong>`;
 
     table.insertAdjacentElement("beforebegin", details);
     details.append(summary, table);
@@ -121,7 +121,7 @@ function syncMilestoneMeta(details) {
   const rows = details?.querySelectorAll("#milestone-rows > .milestone-row").length ?? 0;
   const meta = details?.querySelector("#discrete-milestone-meta");
   if (!meta) return;
-  const next = `${rows || 6} 個候選 · 公曆 / 年序 / 日序`;
+  const next = `${rows || 6} 個候選 · 公曆結構 / 60 年序 / 60 日序`;
   if (meta.textContent !== next) meta.textContent = next;
 }
 

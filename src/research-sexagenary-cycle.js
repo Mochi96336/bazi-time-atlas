@@ -109,10 +109,10 @@ if (svg) {
     document.querySelector("#research-cycle-branch").textContent = item.branch.name;
     document.querySelector("#research-cycle-branch-meta").textContent = `${item.branch.yinYang} · ${item.branch.element}`;
     document.querySelector("#research-cycle-branch-index").textContent = `${item.branchIndex + 1} / 12`;
-    document.querySelector("#research-cycle-center-kicker").textContent = `${String(item.ordinal).padStart(2, "0")} / 60`;
-    document.querySelector("#research-cycle-center-value").textContent = item.name;
-    document.querySelector("#research-cycle-center-note").textContent = `${item.stem.name} · ${item.stemIndex + 1}/10　${item.branch.name} · ${item.branchIndex + 1}/12`;
-    svg.setAttribute("aria-label", `六十日干支循環第 ${item.ordinal} 位 ${item.name}`);
+    document.querySelector("#research-cycle-center-kicker").textContent = item.name;
+    document.querySelector("#research-cycle-center-value").textContent = `${String(item.ordinal).padStart(2, "0")} / 60`;
+    document.querySelector("#research-cycle-center-note").textContent = `天干 ${item.stem.name} · ${item.stemIndex + 1}/10　地支 ${item.branch.name} · ${item.branchIndex + 1}/12`;
+    svg.setAttribute("aria-label", `六十日序第 ${item.ordinal} 位，${item.name}`);
   }
 
   function updateHighlights(item) {

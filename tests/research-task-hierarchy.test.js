@@ -43,7 +43,7 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.match(html, /id="research-spine-discrete">等待狀態<\/small>/);
   assert.match(html, /id="research-spine-astronomy">等待狀態<\/small>/);
   assert.match(html, /id="research-spine-evidence">等待狀態<\/small>/);
-  assert.match(html, /class="research-task-relation">離散閉合 ≠ 天文閉合<\/span>/);
+  assert.match(html, /class="research-task-relation">離散候選 → 節氣邊界驗證<\/span>/);
   assert.match(html, /class="research-task-relation">天文偏移 → 柱位判定<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
@@ -70,6 +70,10 @@ test("discrete task owns the instrument, exact closure evidence, and structural 
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="milestone-table"/);
+  assert.match(discrete, /class="discrete-derivation"/);
+  assert.match(discrete, /先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定/);
+  assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
+  assert.ok(discrete.indexOf('class="milestone-table"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /class="astronomy-panel"/);
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
@@ -79,6 +83,8 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.match(cycleJs, /sexagenaryCycle\.forEach/);
   assert.match(cycleJs, /heavenlyStems\.forEach/);
   assert.match(cycleJs, /earthlyBranches\.forEach/);
+  assert.match(cycleJs, /research-cycle-center-value.*item\.ordinal/s);
+  assert.match(html, /六十日序[\s\S]*10 天干 · 12 地支配對/);
   assert.match(html, /research-sexagenary-cycle\.css/);
   assert.match(html, /research-sexagenary-cycle\.js/);
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);

@@ -112,7 +112,7 @@
 }
 .research-cycle-center-value {
   fill: #edf1ed;
-  font-size: 43px;
+  font-size: 34px;
   font-weight: 790;
   letter-spacing: .05em;
   text-anchor: middle;
@@ -177,6 +177,6 @@
   #research-sexagenary-wheel { width: calc(100% + 10px); margin-left: -5px; }
   .research-cycle-node-label { font-size: 15px; }
   .research-cycle-index { display: none; }
-  .research-cycle-center-value { font-size: 39px; }
+  .research-cycle-center-value { font-size: 30px; }
   .research-cycle-inspector h4 { font-size: 36px; }
 }
