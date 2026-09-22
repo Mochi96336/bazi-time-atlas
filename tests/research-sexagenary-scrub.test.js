@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cycleIndexFromLocalPoint } from "../src/research-sexagenary-cycle.js";
+import { cycleIndexFromLocalPoint, cycleScrubIndexFromLocalPoint } from "../src/research-sexagenary-cycle.js";
 
 function pointAt(angleDegrees, radius = 270) {
   const angle = angleDegrees * Math.PI / 180;
@@ -29,4 +29,11 @@ test("pointer scrub wraps continuously across 59 and 0", () => {
 
 test("pointer mapping rejects non-finite geometry", () => {
   assert.throws(() => cycleIndexFromLocalPoint(Number.NaN, 320), /finite/);
+});
+
+
+test("pointer scrub is owned by the outer 60-position annulus, not the center", () => {
+  assert.equal(cycleScrubIndexFromLocalPoint(590, 320), 0);
+  assert.equal(cycleScrubIndexFromLocalPoint(320, 320), null);
+  assert.equal(cycleScrubIndexFromLocalPoint(640, 320), null);
 });
