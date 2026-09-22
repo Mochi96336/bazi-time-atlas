@@ -116,7 +116,12 @@ test("wheel surface depth stays ring-local while visible SVG stipple stays absen
   assert.doesNotMatch(instrument, /\.instrument-shell::before\s*\{/);
   assert.doesNotMatch(instrument, /radial-gradient\(circle at 34% 12%/);
   assert.match(instrument, /#kinetic-wheel \{ z-index:\s*1; \}/);
-  assert.match(renderer, /function renderMaterialBeds\(\) \{[\s\S]*?SEXAGENARY_RING_IDS\.forEach\(id => \{[\s\S]*?annularSectorPath\(WHEEL_CENTER, model\.innerRadius, model\.outerRadius, FAN\.start, FAN\.end\)[\s\S]*?class: `m2-ring-bed m2-\$\{id\}-bed`/);
+  assert.match(atlasHtml, /<g id="material-base-layer" aria-hidden="true"><\/g>\s*<g id="material-reflection-layer" aria-hidden="true"><\/g>\s*<g id="guide-layer"><\/g>\s*<g id="hour-track"><\/g>/);
+  assert.match(atlasHtml, /id="m2-visible-metal-reflection"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.doesNotMatch(atlasHtml, /id="m2-visible-metal-reflection"[^>]*gradientTransform=/);
+  assert.match(radialHierarchy, /#material-base-layer,\s*#material-reflection-layer \{ pointer-events:\s*none; \}/);
+  assert.match(radialHierarchy, /\.m2-ring-reflection \{[\s\S]*?fill:\s*url\(#m2-visible-metal-reflection\);[\s\S]*?pointer-events:\s*none;/);
+  assert.match(renderer, /function renderMaterialBeds\(\) \{[\s\S]*?const baseLayer = materialBaseLayer \?\? guides;[\s\S]*?const surfaceLayer = materialReflectionLayer \?\? guides;[\s\S]*?class: `m2-ring-bed m2-\$\{id\}-bed`[\s\S]*?\}, baseLayer\);[\s\S]*?class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?\}, surfaceLayer\);/);
   assert.match(renderer, /function renderStatic\(\) \{\s*renderMaterialBeds\(\);\s*renderGuides\(\);/);
   assert.match(
     renderer,
@@ -127,17 +132,19 @@ test("wheel surface depth stays ring-local while visible SVG stipple stays absen
     assert.match(atlasHtml, new RegExp(`id="m2-${ring}-surface"[^>]*gradientUnits="userSpaceOnUse"`));
     assert.doesNotMatch(atlasHtml, new RegExp(`id="m2-${ring}-active"`));
   }
-  assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-light m2-\$\{id\}-rim-light`/);
-  assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-shadow m2-\$\{id\}-rim-shadow`/);
-  assert.match(atlasHtml, /id="m2-rim-light-stroke"[\s\S]*?stop-opacity="\.12"[\s\S]*?stop-opacity="\.015"/);
+  assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-light m2-\$\{id\}-rim-light`[\s\S]*?\}, surfaceLayer\);/);
+  assert.match(renderer, /class: `m2-ring-rim m2-ring-rim-shadow m2-\$\{id\}-rim-shadow`[\s\S]*?\}, surfaceLayer\);/);
+  assert.match(atlasHtml, /id="m2-rim-light-stroke"[^>]*gradientUnits="userSpaceOnUse"/);
   assert.match(atlasHtml, /id="m2-rim-shadow-stroke"[\s\S]*?stop-opacity="\.58"/);
-  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke-width:\s*\.85;/);
+  assert.match(radialHierarchy, /\.m2-ring-rim-light \{[\s\S]*?stroke:\s*url\(#m2-rim-light-stroke\);[\s\S]*?stroke-width:/);
   assert.match(radialHierarchy, /\.m2-ring-rim-shadow \{[\s\S]*?stroke-width:\s*1\.25;/);
+  assert.match(radialHierarchy, /#kinetic-instrument:not\(\[data-classification-overlay="on"\]\) #hour-track \.hour-sector/);
+  assert.match(radialHierarchy, /#kinetic-instrument:not\(\[data-classification-overlay="on"\]\) #year-track \.year-sector/);
   assert.doesNotMatch(atlasHtml, /id="m2-surface-sheen"/);
   assert.doesNotMatch(renderer, /m2-ring-sheen|data-material-sheen-ring/);
   assert.match(atlasHtml, /id="m2-groove-stroke"[\s\S]*?stop-opacity="\.68"/);
-  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-light-alpha:\s*\.16;/);
-  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-light-alpha:\s*\.21;/);
+  assert.match(radialHierarchy, /#m2-hour-surface \{[^}]*--m2-ring-color:\s*var\(--hour\);/);
+  assert.match(radialHierarchy, /#m2-year-surface \{[^}]*--m2-ring-color:\s*var\(--year\);/);
   assert.match(radialHierarchy, /#guide-layer \.guide-arc:not\(\.annual-subdivide\) \{[\s\S]*?stroke-width:\s*1\.35;/);
   assert.match(radialHierarchy, /#month-track \.cycle-sector\.is-active \{[\s\S]*?currentColor 26%, transparent/);
   assert.match(radialHierarchy, /#year-track \.cycle-sector\.is-active \{[\s\S]*?currentColor 30%, transparent/);
