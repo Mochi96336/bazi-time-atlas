@@ -2,13 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, discreteView, astronomyView, nearView, residualView, determinacyView] = await Promise.all([
+const [html, discreteView, astronomyView, nearView, residualView, determinacyView, dayHourView, evidenceView] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-astronomy-drilldown-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/near-recurrence-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/astronomical-residuals-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8")
+  readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8")
 ]);
 
 test("Research product labels use Chinese while canonical research terms stay recognizable", () => {
@@ -60,4 +62,37 @@ test("Research presentation layers do not reintroduce prototype English copy", (
 
   assert.match(determinacyView, /年柱＋月柱可隔離 · 日柱＋時柱未解/);
   assert.doesNotMatch(determinacyView, /Year \+ Month 可隔離 · Day \+ Hour 未解/);
+});
+
+
+test("Research evidence verdicts use product language while canonical contracts stay untouched", () => {
+  for (const text of [
+    "目標時刻 / 日界 / 計時基準 / 經度 · 研究約定",
+    "第一個硬阻塞",
+    "日柱證明",
+    "時柱證明",
+    "目標年 / 結論",
+    "地方鐘面／時區約定",
+    "地方時計時基準",
+    "均時差（Equation of Time）",
+    "已解析",
+    "仍阻塞",
+    "無阻塞"
+  ]) assert.ok(dayHourView.includes(text), `missing Research evidence label: ${text}`);
+
+  for (const stale of [
+    "Target / Day boundary / Clock basis / Longitude · research conventions",
+    "<span>First hard blocker</span>",
+    "<span>Day proof</span>",
+    "<span>Hour proof</span>",
+    "<span>Target / verdict</span>",
+    "<label>Target local clock",
+    "<label>Fixed offset from UT1",
+    "<option value=\"\">Not selected</option>",
+    '"無 blocker"'
+  ]) assert.ok(!dayHourView.includes(stale), `stale evidence product copy returned: ${stale}`);
+
+  assert.match(evidenceView, /\$\{count \|\| 11\} 層 · 展開看逐層證據/);
+  assert.match(evidenceView, /\$\{count\} 個來源 · 展開看能力邊界/);
+  assert.doesNotMatch(evidenceView, /stages ·|sources ·|展開看 coverage/);
 });
