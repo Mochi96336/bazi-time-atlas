@@ -10,7 +10,7 @@ function state(deltaYears, astronomyWithinRange = true) {
   return fourPillarDeterminacy({
     deltaYears,
     yearSequenceAligned: deltaYears % 60 === 0,
-    discreteYearClosed: recurrence.closed.year,
+    discreteYearSequenceClosed: recurrence.closed.yearSequence,
     discreteDayClosed: recurrence.closed.day,
     astronomyWithinRange
   });
@@ -27,7 +27,7 @@ test("zero displacement is identical for all four pillars by definition", () => 
 
 test("exact 24000-year discrete closure resolves Year/Month boundary attribution only", () => {
   const recurrence = recurrenceState(baseDate, 24_000);
-  assert.equal(recurrence.closed.year, true);
+  assert.equal(recurrence.closed.yearSequence, true);
   assert.equal(recurrence.closed.day, true);
   assert.equal(recurrence.closed.gregorian, true);
 
@@ -50,7 +50,7 @@ test("exact 24000-year discrete closure resolves Year/Month boundary attribution
 
 test("1980-year Year+Day local recurrence still cannot prove Day/Hour pillars in the shape window", () => {
   const recurrence = recurrenceState(baseDate, 1980);
-  assert.equal(recurrence.closed.year, true);
+  assert.equal(recurrence.closed.yearSequence, true);
   assert.equal(recurrence.closed.day, true);
 
   const result = state(1980);
@@ -63,7 +63,7 @@ test("1980-year Year+Day local recurrence still cannot prove Day/Hour pillars in
 test("400-year Gregorian closure resolves month branches but not pure full Ganzhi", () => {
   const recurrence = recurrenceState(baseDate, 400);
   assert.equal(recurrence.closed.gregorian, true);
-  assert.equal(recurrence.closed.year, false);
+  assert.equal(recurrence.closed.yearSequence, false);
 
   const result = state(400);
   assert.equal(result.yearSequenceAligned, false);

@@ -46,6 +46,13 @@ export function gregorianOrdinal({ year, month, day }) {
   return ordinal;
 }
 
+/**
+ * Compare one proleptic-Gregorian month/day at +deltaYears.
+ *
+ * yearSequence is only the nominal 60-year label displacement (deltaYears mod 60).
+ * It does not decide which Li-Chun year is active at a concrete instant; that
+ * boundary attribution belongs to the astronomy / pillar layer.
+ */
 export function recurrenceState(baseDate, deltaYears) {
   if (!validateGregorianDate(baseDate)) throw new RangeError("invalid baseDate");
   if (!Number.isInteger(deltaYears) || deltaYears < 0) throw new RangeError("deltaYears must be a non-negative integer");
@@ -57,7 +64,7 @@ export function recurrenceState(baseDate, deltaYears) {
   assertYear(targetDate.year);
   const targetValid = validateGregorianDate(targetDate);
   const dayDelta = targetValid ? gregorianOrdinal(targetDate) - gregorianOrdinal(baseDate) : null;
-  const yearPhase = mod(deltaYears, 60);
+  const yearSequencePhase = mod(deltaYears, 60);
   const gregorianPhase = mod(deltaYears, 400);
   const dayPhase = dayDelta === null ? null : mod(dayDelta, 60);
 
@@ -68,31 +75,31 @@ export function recurrenceState(baseDate, deltaYears) {
     targetValid,
     dayDelta,
     phases: Object.freeze({
-      year: yearPhase,
+      yearSequence: yearSequencePhase,
       gregorian: gregorianPhase,
       day: dayPhase
     }),
     closed: Object.freeze({
-      year: yearPhase === 0,
+      yearSequence: yearSequencePhase === 0,
       gregorian: gregorianPhase === 0,
       day: dayPhase === 0
     })
   });
 }
 
-export function findFirstLocalYearDayRecurrence(baseDate, options = {}) {
+export function findFirstLocalYearSequenceDayRecurrence(baseDate, options = {}) {
   if (!validateGregorianDate(baseDate)) throw new RangeError("invalid baseDate");
   const maxYears = options.maxYears ?? 24_000;
   if (!Number.isInteger(maxYears) || maxYears < 60) throw new RangeError("maxYears must be an integer >= 60");
 
   for (let deltaYears = 60; deltaYears <= maxYears; deltaYears += 60) {
     const state = recurrenceState(baseDate, deltaYears);
-    if (state.closed.year && state.closed.day) return state;
+    if (state.closed.yearSequence && state.closed.day) return state;
   }
   return null;
 }
 
-export function findGlobalGregorianYearDayPeriod(options = {}) {
+export function findGlobalGregorianYearSequenceDayPeriod(options = {}) {
   const maxYears = options.maxYears ?? 24_000;
   if (!Number.isInteger(maxYears) || maxYears < 400) throw new RangeError("maxYears must be an integer >= 400");
   const daysPerGregorian400Years = 146_097;
@@ -111,7 +118,7 @@ export function findGlobalGregorianYearDayPeriod(options = {}) {
 }
 
 export function canonicalRecurrenceCandidates(baseDate) {
-  const local = findFirstLocalYearDayRecurrence(baseDate);
+  const local = findFirstLocalYearSequenceDayRecurrence(baseDate);
   const values = [60, 400, 1200, local?.deltaYears, 8000, 24_000]
     .filter(Number.isInteger);
   return [...new Set(values)]
@@ -119,5 +126,5 @@ export function canonicalRecurrenceCandidates(baseDate) {
     .map(deltaYears => recurrenceState(baseDate, deltaYears));
 }
 
-export const GLOBAL_GREGORIAN_YEAR_DAY_PERIOD = 24_000;
+export const GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD = 24_000;
 export const GREGORIAN_400_YEAR_DAYS = 146_097;

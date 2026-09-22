@@ -70,7 +70,7 @@ console.log(`[four-pillar] PASS zero identity: ${zero.url}`);
 
 const gregorianOnly = expectState(400, {
   "data-gregorian-closed":"true",
-  "data-year-closed":"false",
+  "data-year-sequence-closed":"false",
   "data-four-pillar-year-status":"mixed-with-year-sequence",
   "data-four-pillar-month-status":"branch-resolved-stem-mixed",
   "data-four-pillar-day-status":"not-resolved-by-shape-model",
@@ -83,7 +83,7 @@ if (attr(pillarTag(gregorianOnly.dom, "month"), "data-resolved") !== "false" || 
 console.log(`[four-pillar] PASS 400-year mixed year/month attribution: ${gregorianOnly.url}`);
 
 const local = expectState(1980, {
-  "data-year-closed":"true",
+  "data-year-sequence-closed":"true",
   "data-day-closed":"true",
   "data-four-pillar-year-status":"boundary-resolved",
   "data-four-pillar-month-status":"boundary-resolved",
@@ -101,7 +101,7 @@ console.log(`[four-pillar] PASS 1980-year closed-day guard: ${local.url}`);
 
 const global = expectState(24000, {
   "data-global-closed":"true",
-  "data-year-closed":"true",
+  "data-year-sequence-closed":"true",
   "data-day-closed":"true",
   "data-four-pillar-year-status":"boundary-resolved",
   "data-four-pillar-month-status":"boundary-resolved",

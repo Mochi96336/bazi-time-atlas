@@ -53,7 +53,7 @@ test("Research narrative spine is a live read-only summary of existing authoriti
   assert.match(html, /research-narrative-spine-view\.js/);
   assert.match(spineJs, /instrument\.dataset\.deltaYears/);
   assert.match(spineJs, /boolDataset\("gregorianClosed"\)/);
-  assert.match(spineJs, /boolDataset\("yearClosed"\)/);
+  assert.match(spineJs, /boolDataset\("yearSequenceClosed"\)/);
   assert.match(spineJs, /boolDataset\("dayClosed"\)/);
   assert.match(spineJs, /instrument\.dataset\.astronomyValidity/);
   assert.match(spineJs, /boolDataset\("astronomyShapeClosed"\)/);

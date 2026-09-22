@@ -66,11 +66,11 @@ function renderPillar(name, pillar) {
 function refresh() {
   if (!instrument || !panel) return;
   const deltaYears = Number(instrument.dataset.deltaYears);
-  const discreteYearClosed = boolDataset("yearClosed");
+  const discreteYearSequenceClosed = boolDataset("yearSequenceClosed");
   const discreteDayClosed = boolDataset("dayClosed");
   const astronomyValidity = instrument.dataset.astronomyValidity;
 
-  if (!Number.isInteger(deltaYears) || discreteYearClosed === null || discreteDayClosed === null || !astronomyValidity) {
+  if (!Number.isInteger(deltaYears) || discreteYearSequenceClosed === null || discreteDayClosed === null || !astronomyValidity) {
     renderPending();
     return;
   }
@@ -78,7 +78,7 @@ function refresh() {
   const result = fourPillarDeterminacy({
     deltaYears,
     yearSequenceAligned: deltaYears % 60 === 0,
-    discreteYearClosed,
+    discreteYearSequenceClosed,
     discreteDayClosed,
     astronomyWithinRange: astronomyValidity === "within-range"
   });
@@ -137,7 +137,7 @@ if (instrument && panel) {
     attributes:true,
     attributeFilter:[
       "data-delta-years",
-      "data-year-closed",
+      "data-year-sequence-closed",
       "data-day-closed",
       "data-astronomy-validity"
     ]
