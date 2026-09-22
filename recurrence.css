@@ -144,11 +144,14 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   .recurrence-intro .lede,
   .scope-note { display:none; }
   .recurrence-instrument { min-height:610px; }
-  .base-date input { width:58px; }
+  .base-date input { width:58px; min-height:42px; }
   .base-date label:first-child input { width:76px; }
-  .candidate-buttons button { min-height:30px; padding:0 8px; font-size:9px; }
+  .delta-dock input[type="number"] { min-height:42px; }
+  .candidate-buttons button { min-height:42px; padding:0 8px; font-size:9px; }
+  .delta-slider-wrap input { min-height:32px; }
   .recurrence-readout { bottom:14px; }
   .recurrence-readout > div:nth-child(2) { font-size:19px; }
   .closure-grid { grid-template-columns:1fr 1fr; }
   .milestone-head,.milestone-row { grid-template-columns:64px 42px 42px 42px 1fr; }
+  .model-boundary summary { min-height:42px; display:flex; align-items:center; }
 }
