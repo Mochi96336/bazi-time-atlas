@@ -2,9 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [view, css] = await Promise.all([
+const [view, css, residualView, residualCss] = await Promise.all([
   readFile(new URL("../src/research-astronomy-drilldown-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8")
+  readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
+  readFile(new URL("../src/astronomical-residuals-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8")
 ]);
 
 test("astronomy progressive disclosure keeps three closed native drilldowns", () => {
@@ -35,6 +37,17 @@ test("month boundary keeps summary stats and moves only prose and deep evidence"
   ]) assert.ok(view.includes(token), `missing ${token}`);
   assert.match(view, /heading\.textContent\s*=\s*"交節分歧窗口"/);
   assert.doesNotMatch(view, /month-boundary-exposure-hours.*appendChild/s);
+});
+
+test("month-boundary outcome keeps a visible mechanism diagram without duplicating the model", () => {
+  assert.match(residualView, /id="boundary-shift-diagram"/);
+  assert.match(residualView, /兩條邊界之間＝分歧窗口/);
+  assert.match(residualView, /renderBoundaryShiftDiagram\(panel, exposure\)/);
+  assert.match(residualView, /exposure\.largestWindow/);
+  assert.match(residualView, /exposure\.yearMonthWindow/);
+  assert.doesNotMatch(view, /boundary-shift-diagram.*appendChild/s);
+  assert.match(residualCss, /\.boundary-shift-diagram\s*\{[\s\S]*grid-column:1 \/ -1/);
+  assert.match(residualCss, /\.boundary-shift-window\s*\{[\s\S]*background:/);
 });
 
 test("near recurrence summary remains visible while chart and ranking body drill down", () => {

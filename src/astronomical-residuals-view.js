@@ -86,6 +86,13 @@ function ensureMonthBoundaryPanel() {
       <strong id="month-boundary-largest">—</strong>
       <small id="month-boundary-overlap">—</small>
     </div>
+    <div id="boundary-shift-diagram" class="boundary-shift-diagram" aria-label="基準與目標交節邊界錯開示意">
+      <div class="boundary-shift-key">
+        <span>邊界錯開示意</span>
+        <strong>兩條邊界之間＝分歧窗口</strong>
+      </div>
+      <div id="boundary-shift-rows" class="boundary-shift-rows"></div>
+    </div>
     <div class="pillar-impact-strip" aria-label="分歧窗口依受影響柱位分解">
       <div class="pillar-impact-item month-only">
         <span>僅月柱 · 11 節</span>
@@ -136,6 +143,84 @@ function fullPillarMarkup(window, yearSequenceAligned) {
   return `<em class="window-ganzhi"><span>${base.monthPillar}</span><b>↔</b><span>${target.monthPillar}</span></em>`;
 }
 
+function makeBoundaryShiftRow(window, scaleHours, { role, label, meta } = {}) {
+  if (!window) return null;
+  const row = document.createElement("div");
+  row.className = `boundary-shift-row ${window.direction}`;
+  row.dataset.boundaryShiftRole = role ?? "featured";
+  row.dataset.boundaryShiftTerm = window.name;
+  row.dataset.boundaryShiftLiChun = String(window.isYearBoundary);
+  row.dataset.boundaryShiftWindowHours = window.widthHours.toFixed(6);
+  row.dataset.boundaryShiftDirection = window.direction;
+
+  const gap = scaleHours > 1e-9
+    ? Math.max(0, Math.min(42, window.widthHours / scaleHours * 42))
+    : 0;
+  const left = 50 - gap / 2;
+  const right = 50 + gap / 2;
+  const base = window.direction === "target-earlier" ? right : left;
+  const target = window.direction === "target-earlier" ? left : right;
+  row.style.setProperty("--boundary-window-left", `${left.toFixed(3)}%`);
+  row.style.setProperty("--boundary-window-width", `${gap.toFixed(3)}%`);
+  row.style.setProperty("--boundary-base-pos", `${base.toFixed(3)}%`);
+  row.style.setProperty("--boundary-target-pos", `${target.toFixed(3)}%`);
+
+  const impact = window.isYearBoundary ? "年＋月柱" : "月柱";
+  const rowLabel = label ?? window.name;
+  const rowMeta = meta ?? `${window.widthHours.toFixed(2)} h · ${impact}`;
+  row.setAttribute(
+    "aria-label",
+    `${rowLabel}：基準與目標交節邊界相差 ${window.widthHours.toFixed(2)} 小時；${window.direction === "aligned" ? "邊界重合" : `中間為${impact}可能不同的分歧窗口`}`
+  );
+  row.innerHTML = `
+    <div class="boundary-shift-row-head"><span>${rowLabel}</span><strong>${rowMeta}</strong></div>
+    <div class="boundary-shift-plot" aria-hidden="true">
+      <div class="boundary-shift-lane"><span>基準</span><i><em class="boundary-shift-window"></em><b class="boundary-shift-base"></b></i></div>
+      <div class="boundary-shift-lane"><span>目標</span><i><em class="boundary-shift-window"></em><b class="boundary-shift-target"></b></i></div>
+    </div>
+  `;
+  return row;
+}
+
+function renderBoundaryShiftDiagram(panel, exposure) {
+  const diagram = panel?.querySelector("#boundary-shift-diagram");
+  const rows = panel?.querySelector("#boundary-shift-rows");
+  if (!diagram || !rows) return;
+
+  diagram.hidden = false;
+  rows.replaceChildren();
+
+  const liChun = exposure.yearMonthWindow;
+  if (exposure.closed) {
+    const identity = liChun ?? exposure.largestWindow;
+    const row = makeBoundaryShiftRow(identity, 1, {
+      role:"identity",
+      label:"十二節",
+      meta:"0.00 h · 邊界重合"
+    });
+    if (row) rows.appendChild(row);
+    return;
+  }
+
+  const largest = exposure.largestWindow;
+  const scaleHours = Math.max(largest?.widthHours ?? 0, liChun?.widthHours ?? 0, 1e-9);
+  if (largest) {
+    const sameAsLiChun = Boolean(liChun && largest.name === liChun.name);
+    const row = makeBoundaryShiftRow(largest, scaleHours, {
+      role:sameAsLiChun ? "largest-li-chun" : "largest",
+      label:sameAsLiChun ? `最大 · ${largest.name} · 立春年界` : `最大 · ${largest.name}`
+    });
+    if (row) rows.appendChild(row);
+  }
+  if (liChun && (!largest || liChun.name !== largest.name)) {
+    const row = makeBoundaryShiftRow(liChun, scaleHours, {
+      role:"li-chun",
+      label:"立春年界"
+    });
+    if (row) rows.appendChild(row);
+  }
+}
+
 function renderMonthBoundaryExposure(result) {
   const panel = ensureMonthBoundaryPanel();
   if (!panel) return;
@@ -143,6 +228,7 @@ function renderMonthBoundaryExposure(result) {
   const grid = panel.querySelector("#month-boundary-window-grid");
   const maxWindow = Math.max(...exposure.windows.map(window => window.widthHours), 1e-9);
   const liChunWindow = exposure.yearMonthWindow;
+  renderBoundaryShiftDiagram(panel, exposure);
 
   setText("month-boundary-exposure-hours", `${exposure.unionExposureHours.toFixed(2)} h`);
   setText("month-boundary-exposure-percent", `相位窗口 ${exposure.yearPercent.toFixed(3)}% · 非人口機率`);
@@ -232,6 +318,9 @@ function renderMonthBoundaryExposure(result) {
 function renderMonthBoundaryUnavailable() {
   const panel = ensureMonthBoundaryPanel();
   panel?.querySelector("#month-boundary-window-grid")?.replaceChildren();
+  panel?.querySelector("#boundary-shift-rows")?.replaceChildren();
+  const boundaryDiagram = panel?.querySelector("#boundary-shift-diagram");
+  if (boundaryDiagram) boundaryDiagram.hidden = true;
   panel?.classList.remove("year-sequence-misaligned");
   setText("month-boundary-exposure-hours", "模型不可用");
   setText("month-boundary-exposure-percent", "—");
