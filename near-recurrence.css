@@ -80,4 +80,5 @@
   .near-search-head { grid-template-columns:1fr 1fr; gap:10px; }
   .near-stat:last-child { grid-column:1 / -1; }
   .near-search-body { gap:8px; }
+  .near-ranking-row { min-height:42px; }
 }
