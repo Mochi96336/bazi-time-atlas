@@ -100,6 +100,38 @@ if (!evidence.includes('id="four-pillar-determinacy"') || !evidence.includes('id
 if (!evidence.includes('class="model-boundary research-evidence-appendix"')) {
   throw new Error(`model boundary is no longer attached to the evidence task: ${probe.url}`);
 }
+
+const proofSupport = detailsById(probe.dom, "proof-chain-support-details");
+const epochSupport = detailsById(probe.dom, "epoch-audit-support-details");
+if (!proofSupport || !proofSupport.includes('id="day-hour-proof-chain"') || !proofSupport.includes("日／時柱證明")) {
+  throw new Error(`Day/Hour proof did not move behind its evidence support disclosure: ${probe.url}`);
+}
+if (!/^<details[^>]*\sopen(?:\s|=|>)/.test(proofSupport)) {
+  throw new Error(`research convention query did not auto-open Day/Hour proof support: ${probe.url}`);
+}
+if (!epochSupport || !epochSupport.includes('id="seasonal-epoch-source-audit"') || !epochSupport.includes("天文來源能力")) {
+  throw new Error(`seasonal source audit did not move behind its evidence support disclosure: ${probe.url}`);
+}
+if (/^<details[^>]*\sopen(?:\s|=|>)/.test(epochSupport)) {
+  throw new Error(`source audit should stay closed unless directly targeted: ${probe.url}`);
+}
+
+const defaultEvidenceProbe = dump("recurrence.html?delta=24000");
+const defaultEvidence = sectionById(defaultEvidenceProbe.dom, "research-evidence");
+const defaultProofSupport = detailsById(defaultEvidenceProbe.dom, "proof-chain-support-details");
+const defaultEpochSupport = detailsById(defaultEvidenceProbe.dom, "epoch-audit-support-details");
+if (!defaultProofSupport || !defaultEpochSupport) {
+  throw new Error(`default Research evidence disclosures were not rendered: ${defaultEvidenceProbe.url}`);
+}
+if (/^<details[^>]*\sopen(?:\s|=|>)/.test(defaultProofSupport) || /^<details[^>]*\sopen(?:\s|=|>)/.test(defaultEpochSupport)) {
+  throw new Error(`supporting evidence must remain closed by default: ${defaultEvidenceProbe.url}`);
+}
+const determinacyIndex = defaultEvidence.indexOf('id="four-pillar-determinacy"');
+const proofSupportIndex = defaultEvidence.indexOf('id="proof-chain-support-details"');
+const epochSupportIndex = defaultEvidence.indexOf('id="epoch-audit-support-details"');
+if (!(determinacyIndex >= 0 && proofSupportIndex > determinacyIndex && epochSupportIndex > proofSupportIndex)) {
+  throw new Error(`evidence outcome/support ordering regressed: ${defaultEvidenceProbe.url}`);
+}
 if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/.test(probe.dom)) {
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
@@ -174,4 +206,16 @@ if (!cycleDeepLinkDetail.includes('id="research-sexagenary-cycle"')) {
   throw new Error(`direct 60-day cycle hash lost its original section owner: ${cycleDeepLink.url}`);
 }
 
-console.log(`[research-hierarchy] PASS concise three-section ownership + closed-by-default 60-day support + deep-link reveal + RMS astronomy headline at 390px: ${probe.url}`);
+const proofDeepLink = dump("recurrence.html?delta=24000#day-hour-proof-chain");
+const proofDeepLinkDetail = detailsById(proofDeepLink.dom, "proof-chain-support-details");
+if (!proofDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(proofDeepLinkDetail) || !proofDeepLinkDetail.includes('id="day-hour-proof-chain"')) {
+  throw new Error(`direct Day/Hour proof hash did not auto-open supporting evidence: ${proofDeepLink.url}`);
+}
+
+const sourceDeepLink = dump("recurrence.html?delta=24000#seasonal-epoch-source-audit");
+const sourceDeepLinkDetail = detailsById(sourceDeepLink.dom, "epoch-audit-support-details");
+if (!sourceDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(sourceDeepLinkDetail) || !sourceDeepLinkDetail.includes('id="seasonal-epoch-source-audit"')) {
+  throw new Error(`direct source-audit hash did not auto-open supporting evidence: ${sourceDeepLink.url}`);
+}
+
+console.log(`[research-hierarchy] PASS outcome-first three-section ownership + closed supporting evidence + query/hash reveal + RMS astronomy headline at 390px: ${probe.url}`);
