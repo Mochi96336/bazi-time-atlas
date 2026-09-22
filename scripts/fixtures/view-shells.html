@@ -144,6 +144,7 @@
       probe.dataset.recurrenceTaskNavVisible = String(Boolean(researchTaskNav && !hidden(recurrenceWin, researchTaskNav)));
       probe.dataset.recurrenceTaskNavTop = String(Math.round(taskNavRect?.top ?? -1));
       probe.dataset.recurrenceTaskHeadTop = String(Math.round(taskHeadRect?.top ?? -1));
+      probe.dataset.recurrenceTaskHeadBottom = String(Math.round(taskHeadRect?.bottom ?? -1));
       probe.dataset.recurrenceTaskHeadBeforeInstrument = String(Boolean(taskHeadRect && recurrenceRect && taskHeadRect.bottom <= recurrenceRect.top));
       probe.dataset.recurrenceInstrumentTop = String(Math.round(recurrenceRect?.top ?? -1));
       probe.dataset.recurrenceInstrumentHeight = String(Math.round(recurrenceRect?.height ?? -1));
@@ -157,8 +158,15 @@
       probe.dataset.recurrenceDeltaSliderInDock = String(Boolean(deltaSlider && deltaDock?.contains(deltaSlider)));
       probe.dataset.recurrenceCandidateCount = String(candidateButtons?.querySelectorAll("button").length ?? -1);
       probe.dataset.recurrenceDeltaDockTop = String(Math.round(deltaDockRect?.top ?? -1));
+      probe.dataset.recurrenceDeltaDockBottom = String(Math.round(deltaDockRect?.bottom ?? -1));
+      probe.dataset.recurrenceDeltaDockBeforeInstrument = String(Boolean(
+        recurrenceRect && deltaDockRect && deltaDockRect.bottom <= recurrenceRect.top
+      ));
+      probe.dataset.recurrenceDeltaDockInFirstViewport = String(Boolean(
+        deltaDockRect && deltaDockRect.top >= 0 && deltaDockRect.bottom <= viewportHeight
+      ));
       probe.dataset.recurrenceDeltaDockGap = String(Math.round(
-        recurrenceRect && deltaDockRect ? deltaDockRect.top - recurrenceRect.bottom : -1
+        recurrenceRect && deltaDockRect ? recurrenceRect.top - deltaDockRect.bottom : -1
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];
