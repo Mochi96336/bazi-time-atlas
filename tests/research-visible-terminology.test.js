@@ -17,9 +17,9 @@ test("Research product labels use Chinese while canonical research terms stay re
   for (const text of [
     "時間位移",
     "超出滑桿範圍",
-    "公曆骨架",
-    "干支年序",
-    "干支日序",
+    "公曆結構",
+    "60 年序",
+    "60 日序",
     "十二節形狀殘差",
     "軌道參數",
     "視覺尺度",
