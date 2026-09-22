@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
@@ -10,7 +10,9 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../near-recurrence.css", import.meta.url), "utf8"),
   readFile(new URL("../four-pillar-determinacy.css", import.meta.url), "utf8"),
   readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8"),
-  readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8")
+  readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8")
 ]);
 
 const discreteStart = html.indexOf('id="research-discrete"');
@@ -82,6 +84,28 @@ test("research-only fixed-zone warning stays authoritative without occupying the
   assert.match(targetClockCss, /\.target-instant-controls\[data-enabled="true"\] > p\s*\{\s*display:block;\s*\}/);
   assert.match(proofJs, /proleptic Gregorian \+ 固定 UT1 offset/);
   assert.match(proofJs, /不是西元遠未來 UTC、DST 或政治時區預測/);
+});
+
+
+
+test("evidence defaults to outcome-first disclosure while research links can reveal the proof controls", () => {
+  assert.match(evidenceJs, /id:"proof-chain-support-details"/);
+  assert.match(evidenceJs, /label:"日／時柱證明"/);
+  assert.match(evidenceJs, /openForConventionQuery:true/);
+  assert.match(evidenceJs, /RESEARCH_CONVENTION_QUERY_KEYS/);
+  for (const key of ["targetClock", "targetTime", "ut1Offset", "dayBoundary", "clockBasis", "lon"]) {
+    assert.ok(evidenceJs.includes(`"${key}"`), `missing research convention query key: ${key}`);
+  }
+  assert.match(evidenceJs, /id:"epoch-audit-support-details"/);
+  assert.match(evidenceJs, /label:"天文來源能力"/);
+  assert.match(evidenceJs, /revealHash\(details, panel\)/);
+  assert.match(evidenceJs, /queryRevealApplied/);
+  const epochConfig = evidenceJs.match(/id:"epoch-audit-support-details"[\s\S]*?\n  \}\);/)?.[0] ?? "";
+  assert.doesNotMatch(epochConfig, /openForConventionQuery:true/);
+
+  assert.match(evidenceCss, /\.research-evidence-support\s*,[\s\S]*\.research-evidence-drilldown\s*\{/);
+  assert.match(evidenceCss, /\.research-evidence-support > \.proof-chain-panel,[\s\S]*margin-top:\s*0;[\s\S]*border-top:\s*0;/);
+  assert.match(evidenceCss, /@media \(max-width:480px\)[\s\S]*\.research-evidence-support,[\s\S]*min-height:\s*32px/);
 });
 
 test("section chrome stays flat and compact on phone", () => {

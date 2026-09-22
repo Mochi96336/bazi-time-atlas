@@ -1,4 +1,12 @@
 const researchEvidence = document.querySelector("#research-evidence");
+const RESEARCH_CONVENTION_QUERY_KEYS = Object.freeze([
+  "targetClock",
+  "targetTime",
+  "ut1Offset",
+  "dayBoundary",
+  "clockBasis",
+  "lon"
+]);
 
 function ensureStyles() {
   if (document.querySelector("link[data-research-evidence-drilldown-styles]")) return;
@@ -19,6 +27,67 @@ function drilldownSummary(label, metaId) {
   return summary;
 }
 
+function hashTargets(panel) {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (!id) return false;
+  const target = document.getElementById(id);
+  return Boolean(target && (target === panel || panel.contains(target)));
+}
+
+function revealHash(details, panel) {
+  if (!details || !panel || !hashTargets(panel)) return;
+  details.open = true;
+  requestAnimationFrame(() => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    document.getElementById(id)?.scrollIntoView({ block:"start" });
+  });
+}
+
+function hasResearchConventionQuery() {
+  const params = new URLSearchParams(location.search);
+  return RESEARCH_CONVENTION_QUERY_KEYS.some(key => params.has(key));
+}
+
+function ensureSupportDetails(panel, { id, label, metaId, openForConventionQuery = false }) {
+  if (!panel) return null;
+  let details = panel.closest(`#${id}`);
+  if (!details) {
+    details = document.createElement("details");
+    details.id = id;
+    details.className = "research-evidence-support";
+    details.dataset.researchSupport = id;
+    panel.insertAdjacentElement("beforebegin", details);
+    details.append(drilldownSummary(label, metaId), panel);
+  }
+  if (openForConventionQuery && details.dataset.queryRevealApplied !== "true") {
+    details.dataset.queryRevealApplied = "true";
+    if (hasResearchConventionQuery()) details.open = true;
+  }
+  revealHash(details, panel);
+  return details;
+}
+
+function ensureProofSupport() {
+  const panel = document.querySelector("#day-hour-proof-chain");
+  if (!panel) return null;
+  const details = ensureSupportDetails(panel, {
+    id:"proof-chain-support-details",
+    label:"日／時柱證明",
+    metaId:"proof-chain-support-meta",
+    openForConventionQuery:true
+  });
+  const blocker = panel.querySelector("#proof-chain-first-blocker")?.textContent?.trim();
+  const day = panel.querySelector("#proof-chain-day-status")?.textContent?.trim();
+  const hour = panel.querySelector("#proof-chain-hour-status")?.textContent?.trim();
+  const meta = day === "已解析" && hour === "已解析"
+    ? "日柱與時柱皆已解析"
+    : blocker && blocker !== "—"
+      ? `第一阻塞 · ${blocker}`
+      : "展開研究約定與證據";
+  setTextIfChanged(details?.querySelector("#proof-chain-support-meta"), meta);
+  return details;
+}
+
 function ensureProofDrilldown() {
   const panel = document.querySelector("#day-hour-proof-chain");
   const stages = panel?.querySelector("#proof-chain-stages");
@@ -36,6 +105,26 @@ function ensureProofDrilldown() {
 
   const count = stages.querySelectorAll(".proof-chain-stage").length;
   setTextIfChanged(details.querySelector("#proof-chain-drilldown-meta"), `${count || 11} 層 · 展開看逐層證據`);
+}
+
+function ensureEpochAuditSupport() {
+  const panel = document.querySelector("#seasonal-epoch-source-audit");
+  if (!panel) return null;
+  const details = ensureSupportDetails(panel, {
+    id:"epoch-audit-support-details",
+    label:"天文來源能力",
+    metaId:"epoch-audit-support-meta"
+  });
+  const proofSupport = document.querySelector("#proof-chain-support-details");
+  if (details && proofSupport?.contains(details)) {
+    proofSupport.insertAdjacentElement("afterend", details);
+  }
+  const target = panel.querySelector("#epoch-audit-target")?.textContent?.trim();
+  setTextIfChanged(
+    details?.querySelector("#epoch-audit-support-meta"),
+    target && target !== "—" ? target : "展開來源能力"
+  );
+  return details;
 }
 
 function ensureEpochAuditDrilldown() {
@@ -67,7 +156,9 @@ function syncDrilldowns() {
   queued = true;
   queueMicrotask(() => {
     queued = false;
+    ensureProofSupport();
     ensureProofDrilldown();
+    ensureEpochAuditSupport();
     ensureEpochAuditDrilldown();
   });
 }
@@ -75,5 +166,6 @@ function syncDrilldowns() {
 if (researchEvidence) {
   ensureStyles();
   new MutationObserver(syncDrilldowns).observe(researchEvidence, { childList:true, subtree:true });
+  window.addEventListener("hashchange", syncDrilldowns);
   syncDrilldowns();
 }
