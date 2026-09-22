@@ -27,15 +27,15 @@
       <div>
         <div class="eyebrow">Recurrence laboratory</div>
         <h1>回歸研究</h1>
-        <p class="lede">離散週期、60 日干支與長期天文殘差。</p>
+        <p class="lede">離散週期重新對齊，四柱也會回到同一狀態嗎？</p>
       </div>
       <p class="scope-note">天文外圈採 Berger 1978 長期近似；只比較季節形狀，不作遠未來民用時刻預報。</p>
     </section>
 
     <nav class="research-outline" aria-label="研究項目">
-      <a href="#research-discrete"><span>01</span><strong>離散閉合</strong></a>
-      <a href="#research-astronomy"><span>02</span><strong>天文差異</strong></a>
-      <a href="#research-evidence"><span>03</span><strong>四柱證據</strong></a>
+      <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>離散閉合</strong><small id="research-spine-discrete">等待狀態</small></a>
+      <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>天文偏移</strong><small id="research-spine-astronomy">等待狀態</small></a>
+      <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>四柱判定</strong><small id="research-spine-evidence">等待狀態</small></a>
     </nav>
 
     <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
@@ -144,7 +144,8 @@
     <section id="research-astronomy" class="research-task" data-research-task="astronomy" aria-labelledby="research-astronomy-title">
       <header class="research-task-head">
         <div class="research-task-index">02</div>
-        <div><div class="eyebrow">Astronomical difference</div><h2 id="research-astronomy-title">天文差異</h2></div>
+        <div><div class="eyebrow">Astronomical offset</div><h2 id="research-astronomy-title">天文偏移</h2></div>
+        <span class="research-task-relation">離散閉合 ≠ 天文閉合</span>
       </header>
 
       <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
@@ -174,7 +175,8 @@
     <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">
       <header class="research-task-head">
         <div class="research-task-index">03</div>
-        <div><div class="eyebrow">Four-pillar evidence</div><h2 id="research-evidence-title">四柱證據</h2></div>
+        <div><div class="eyebrow">Four-pillar verdict</div><h2 id="research-evidence-title">四柱判定</h2></div>
+        <span class="research-task-relation">天文偏移 → 柱位判定</span>
       </header>
 
       <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">
@@ -200,5 +202,6 @@
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>
+  <script type="module" src="./src/research-narrative-spine-view.js"></script>
 </body>
 </html>
