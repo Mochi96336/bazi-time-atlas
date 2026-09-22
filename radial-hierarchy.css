@@ -110,20 +110,19 @@
   font-weight: 860;
 }
 
-/* M2 anodized-graphite material: the temporal rings remain continuous matte
-   surfaces. Low-frequency depth stays on fixed ring-only beds; a single
-   procedural micrograin layer lives inside each rotating sexagenary track.
+/* M2 anodized-graphite material: Material G makes the visible surface stack
+   explicit. The fixed guide bed owns the dark graphite body; a separate
+   fixed-world reflection/rim layer sits above that body and below every semantic
+   sector, label and tick. The WebGL roughness field stays unresolved and
+   low-energy underneath SVG instead of being asked to carry the first metal cue.
    There is no page/background light field and no per-sector texture. */
-/* The fixed bed carries broad directional material response while the micrograin
-   follows the physical ring pose. This separates illumination from surface
-   identity: the page stays unlit, but the material itself moves with the ring. */
 /* Keep the body dark enough to read as one graphite instrument. Scale is
-   carried by a narrow luminance ladder; depth should come from the machined
-   edges, not from broad gray slabs. */
-#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .16; --m2-mid-alpha: .080; --m2-dark-alpha: .030; }
-#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .17; --m2-mid-alpha: .085; --m2-dark-alpha: .032; }
-#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .19; --m2-mid-alpha: .095; --m2-dark-alpha: .035; }
-#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .21; --m2-mid-alpha: .105; --m2-dark-alpha: .038; }
+   carried by a narrow luminance ladder; the broad reflection establishes metal,
+   while narrow machined edges provide the secondary hard-material cue. */
+#m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .13; --m2-mid-alpha: .062; --m2-dark-alpha: .026; }
+#m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .14; --m2-mid-alpha: .066; --m2-dark-alpha: .027; }
+#m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .16; --m2-mid-alpha: .076; --m2-dark-alpha: .030; }
+#m2-year-surface { --m2-ring-color: var(--year); --m2-light-alpha: .18; --m2-mid-alpha: .086; --m2-dark-alpha: .033; }
 
 .m2-ring-gradient .m2-light {
   stop-color: color-mix(in srgb, var(--m2-ring-color) 84%, #dfe3e1);
@@ -144,35 +143,54 @@
 .m2-month-bed { fill: url(#m2-month-surface); }
 .m2-year-bed { fill: url(#m2-year-surface); }
 
+#material-base-layer,
+#material-reflection-layer { pointer-events: none; }
+.m2-ring-reflection {
+  fill: url(#m2-visible-metal-reflection);
+  stroke: none;
+  pointer-events: none;
+}
+.m2-hour-reflection { opacity: .62; }
+.m2-day-reflection { opacity: .66; }
+.m2-month-reflection { opacity: .70; }
+.m2-year-reflection { opacity: .74; }
+
 .m2-ring-material-face {
-  /* SVG fallback stays deliberately quiet: body gradients and machined rims
-     establish graphite. Fine bead-blast response belongs to the continuous
-     WebGL roughness field, never to visible dot/stipple primitives. */
+  /* Legacy fallback slot only. The visible metal cue is now the dedicated
+     surface reflection layer; fine roughness stays procedural and unresolved. */
   fill: none;
   opacity: 0;
   pointer-events: none;
 }
 
-/* The body no longer carries a broad diagonal sheen. A narrow directional rim
-   is enough to imply machining while the four bands still read as one object. */
+/* Machined rims are the second cue after the broad body reflection. Keep them
+   narrow and directional so they read as cut edges, never white outlines. */
 .m2-ring-rim { fill: none; pointer-events: none; }
 .m2-ring-rim-light {
   stroke: url(#m2-rim-light-stroke);
-  stroke-width: .85;
+  stroke-width: 1.05;
 }
 .m2-ring-rim-shadow {
   stroke: url(#m2-rim-shadow-stroke);
   stroke-width: 1.25;
 }
-.m2-hour-rim-light, .m2-hour-rim-shadow { opacity: .42; }
-.m2-day-rim-light, .m2-day-rim-shadow { opacity: .48; }
-.m2-month-rim-light, .m2-month-rim-shadow { opacity: .54; }
-.m2-year-rim-light, .m2-year-rim-shadow { opacity: .60; }
+.m2-hour-rim-light { opacity: .58; }
+.m2-day-rim-light { opacity: .62; }
+.m2-month-rim-light { opacity: .66; }
+.m2-year-rim-light { opacity: .70; }
+.m2-hour-rim-shadow { opacity: .46; }
+.m2-day-rim-shadow { opacity: .52; }
+.m2-month-rim-shadow { opacity: .58; }
+.m2-year-rim-shadow { opacity: .64; }
 
-#hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 12%, transparent); }
-#day-track .day-sector { fill: color-mix(in srgb, var(--day) 14%, transparent); }
-#month-track .month-sector { fill: color-mix(in srgb, var(--month) 20%, transparent); }
-#year-track .year-sector { fill: color-mix(in srgb, var(--year) 24%, transparent); }
+/* Ordinary sectors are semantic veils, not the visible material body. Keep
+   enough ring-family tint to identify scale, but let the fixed-world metal
+   reflection remain the dominant surface read. Classification owns its own
+   categorical fills and is intentionally excluded from this restraint. */
+#kinetic-instrument:not([data-classification-overlay="on"]) #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 7%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #day-track .day-sector { fill: color-mix(in srgb, var(--day) 8%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #month-track .month-sector { fill: color-mix(in srgb, var(--month) 11%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #year-track .year-sector { fill: color-mix(in srgb, var(--year) 13%, transparent); }
 
 .cycle-sector:not(.is-active),
 .cycle-sector.is-active { stroke: none; }
