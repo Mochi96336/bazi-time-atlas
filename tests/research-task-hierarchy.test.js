@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, astronomyCss, residualCss] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, astronomyCss, residualCss, recurrenceCss] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
@@ -15,7 +15,8 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8"),
   readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
   readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
-  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8")
+  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
+  readFile(new URL("../recurrence.css", import.meta.url), "utf8")
 ]);
 
 const discreteStart = html.indexOf('id="research-discrete"');
@@ -115,6 +116,7 @@ test("section chrome stays flat and compact on phone", () => {
   assert.doesNotMatch(taskCss, /research-task-nav/);
   assert.match(taskCss, /\.research-outline\s*\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(taskCss, /\.research-outline a\s*\{[\s\S]*min-height:34px/);
+  assert.match(taskCss, /@media \(max-width:480px\)[\s\S]*\.research-outline a\s*\{\s*min-height:42px;\s*\}/);
   assert.doesNotMatch(taskCss, /\.research-outline[^}]*border-radius/);
   assert.match(taskCss, /\.research-task-head\s*\{[\s\S]*display:flex/);
   assert.match(taskCss, /\.research-task-head \.eyebrow,[\s\S]*display:none/);
@@ -142,4 +144,12 @@ test("mobile Research outcomes keep a readable interaction floor without inflati
     residualCss,
     /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*8\.5px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*8\.5px;\s*\}/
   );
+});
+
+test("mobile Research primary interactions meet the same tap-target floor as disclosure rails", () => {
+  assert.match(
+    recurrenceCss,
+    /@media \(max-width:480px\)[\s\S]*\.base-date input\s*\{[^}]*min-height:42px;[\s\S]*\.delta-dock input\[type="number"\]\s*\{\s*min-height:42px;\s*\}[\s\S]*\.candidate-buttons button\s*\{\s*min-height:42px;[\s\S]*\.delta-slider-wrap input\s*\{\s*min-height:32px;\s*\}[\s\S]*\.model-boundary summary\s*\{\s*min-height:42px;/
+  );
+  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:42px;\s*\}/);
 });
