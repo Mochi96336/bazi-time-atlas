@@ -1,7 +1,7 @@
-import { GLOBAL_GREGORIAN_YEAR_DAY_PERIOD } from "./gregorian-cycle.js";
+import { GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD } from "./gregorian-cycle.js";
 import { BERGER_MODEL, solarTermShapeResiduals } from "./berger-orbit.js";
 
-export const EXACT_DISCRETE_STEP_YEARS = GLOBAL_GREGORIAN_YEAR_DAY_PERIOD;
+export const EXACT_DISCRETE_STEP_YEARS = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 
 function assertBaseYear(baseYear) {
   if (!Number.isFinite(baseYear)) throw new RangeError("baseYear must be finite");
