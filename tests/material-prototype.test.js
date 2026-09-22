@@ -122,4 +122,3 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.doesNotMatch(material, /selectedMs|Selected Instant|solarLongitude|temporalCycleRotation|setModelRotation|effectiveRotation/);
   assert.doesNotMatch(material, /<img|https?:\/\/|feTurbulence|repeating-(?:linear|radial)-gradient/i);
 });
-
