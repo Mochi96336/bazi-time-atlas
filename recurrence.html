@@ -88,29 +88,56 @@
           <g id="recurrence-cursor"></g>
         </svg>
 
-        <div class="recurrence-readout" aria-live="polite">
-          <div class="readout-kicker">時間位移</div>
-          <div><strong id="delta-readout">0 年</strong> <span>→</span> <strong id="target-date-readout">2026-09-13</strong></div>
+        <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
+          <div class="research-current-state-head"><span>目前 Δ</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
+          <div class="research-current-state-phases">
+            <span data-closure="gregorian"><small>公曆結構</small><strong id="gregorian-status">—</strong></span>
+            <span data-closure="year"><small>60 年序</small><strong id="year-status">—</strong></span>
+            <span data-closure="day"><small>60 日序</small><strong id="day-status">—</strong></span>
+          </div>
           <p id="closure-summary">基準點：三層都在 0 相位。</p>
         </div>
       </section>
 
-      <section class="closure-grid" aria-label="目前閉合狀態">
-        <article data-closure="gregorian"><span>公曆結構</span><strong id="gregorian-status">—</strong><small>400 年閏年排列</small></article>
-        <article data-closure="year"><span>60 年序</span><strong id="year-status">—</strong><small>年份標籤 mod 60</small></article>
-        <article data-closure="day"><span>60 日序</span><strong id="day-status">—</strong><small>實際經過日數 mod 60</small></article>
-        <article class="local-card"><span>年序＋日序首次重遇</span><strong id="local-recurrence">—</strong><small>不等於年柱已判定</small></article>
+      <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
+        <header>
+          <strong id="research-year-strip-title">一年怎麼走</strong>
+          <span>1/1 與立春不是同一個年界</span>
+        </header>
+        <div class="research-year-track" aria-label="公曆年、立春年界與基準日位置">
+          <div class="research-year-line" aria-hidden="true"></div>
+          <div class="research-year-marker research-year-start" style="--year-x:0%">
+            <i aria-hidden="true"></i><strong>1/1</strong><small>公曆換年</small>
+          </div>
+          <div id="research-year-li-chun-marker" class="research-year-marker research-year-li-chun" hidden>
+            <i aria-hidden="true"></i><strong>立春</strong><small id="research-year-li-chun-label">節氣年界</small>
+          </div>
+          <div id="research-year-base-marker" class="research-year-marker research-year-base" style="--year-x:70%">
+            <i aria-hidden="true"></i><strong>基準日</strong><small id="research-year-base-label">2026/09/13</small>
+          </div>
+          <div class="research-year-marker research-year-end" style="--year-x:100%">
+            <i aria-hidden="true"></i><strong>12/31</strong><small>公曆年末</small>
+          </div>
+        </div>
+        <div id="research-year-li-chun-unavailable" class="research-year-li-chun-unavailable" hidden>
+          <strong>立春</strong><span>節氣年界 · exact civil position unavailable</span>
+        </div>
+        <div class="research-year-relations" aria-label="三種一年關係">
+          <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
+          <div><strong>60 年序</strong><span>跨過下一個立春年界後，進入下一個干支年序</span></div>
+          <div><strong>60 日序</strong><span>看兩日期間實際經過 <b id="research-year-day-count">—</b> 日</span></div>
+        </div>
+        <div class="research-year-continuation" aria-label="基準日到下一年同月同日">
+          <strong id="research-year-base-date">2026/09/13</strong>
+          <span><i aria-hidden="true"></i><em>實際經過 <b id="research-year-elapsed-days">—</b> 日</em></span>
+          <strong id="research-year-next-date">2027/09/13</strong>
+        </div>
       </section>
 
       <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
         <header><strong id="discrete-derivation-title">24,000 年怎麼來</strong><span>同一個 Δ，同時檢查三個離散相位</span></header>
         <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
         <p>三個離散相位同時歸零，只建立四柱重現候選。</p>
-      </section>
-
-      <section class="milestone-table" aria-label="典型回歸候選">
-        <div class="milestone-head"><span>Δ years</span><span>公曆</span><span>年序</span><span>日序</span><span>意義</span></div>
-        <div id="milestone-rows"></div>
       </section>
 
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
@@ -139,10 +166,6 @@
             <div class="research-cycle-phases">
               <div class="research-cycle-phase"><span>天干</span><div><strong id="research-cycle-stem">甲</strong><small id="research-cycle-stem-meta">陽 · 木</small></div><em id="research-cycle-stem-index">1 / 10</em></div>
               <div class="research-cycle-phase"><span>地支</span><div><strong id="research-cycle-branch">子</strong><small id="research-cycle-branch-meta">陽 · 水</small></div><em id="research-cycle-branch-index">1 / 12</em></div>
-            </div>
-            <div class="research-cycle-stepper">
-              <button id="research-cycle-prev" type="button">← 前一位</button>
-              <button id="research-cycle-next" type="button">後一位 →</button>
             </div>
           </aside>
         </div>
@@ -208,6 +231,7 @@
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
+  <script type="module" src="./src/research-year-strip-view.js"></script>
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
