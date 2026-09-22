@@ -94,14 +94,14 @@ if (astronomyDetail.includes('id="astronomy-rms-residual"')) {
 if (/^<details[^>]*\sopen(?:\s|=|>)/.test(astronomyDetail)) {
   throw new Error(`astronomy residual detail must remain closed by default: ${probe.url}`);
 }
-const rmsHeadline = astronomy.match(/id="astronomy-rms-residual"[^>]*>([^<]*)<\\//)?.[1]?.trim() ?? "";
-if (!/^\\d+(?:\\.\\d+)? h$/.test(rmsHeadline)) {
+const rmsHeadline = astronomy.match(/id="astronomy-rms-residual"[^>]*>([^<]*)<\//)?.[1]?.trim() ?? "";
+if (!/^\d+(?:\.\d+)? h$/.test(rmsHeadline)) {
   throw new Error(`RMS headline should expose one unit without repeating RMS: "${rmsHeadline}": ${probe.url}`);
 }
 if (!astronomy.includes("年／月柱邊界") || !astronomy.includes("非人口機率")) {
   throw new Error(`astronomy boundary summary lost its visible interpretation guard: ${probe.url}`);
 }
-if (/BaZi pillar-boundary exposure|Month only ·|Year \\+ Month ·/.test(astronomy)) {
+if (/BaZi pillar-boundary exposure|Month only ·|Year \+ Month ·/.test(astronomy)) {
   throw new Error(`prototype boundary copy returned to astronomy outcome: ${probe.url}`);
 }
 if (!evidence.includes('id="four-pillar-determinacy"') || !evidence.includes('id="day-hour-proof-chain"') || !evidence.includes('id="seasonal-epoch-source-audit"')) {
