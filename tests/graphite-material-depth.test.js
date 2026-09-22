@@ -94,21 +94,17 @@ test("wheel structure uses etched M2 edges without beveling temporal sectors", (
   );
 });
 
-test("material depth stays procedural without external texture chrome", () => {
+test("material depth stays procedural without visible texture primitives", () => {
   for (const source of [material, inspector, visibleTenGods, analysisPolish, solarAnalysis]) {
     assert.doesNotMatch(source, /filter:\s*url\(|background(?:-image)?:\s*url\(/i);
     assert.doesNotMatch(source, /repeating-(?:linear|radial)-gradient/i);
   }
-  assert.match(radialHierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*url\(#m2-rotating-micrograin\);[\s\S]*?opacity:\s*\.16;/);
+  assert.match(radialHierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(radialHierarchy, /mix-blend-mode:/);
   assert.doesNotMatch(radialHierarchy, /background(?:-image)?:\s*url\(/i);
   assert.doesNotMatch(radialHierarchy, /repeating-(?:linear|radial)-gradient/i);
   assert.doesNotMatch(atlasHtml, /<image\b[^>]*(?:href|xlink:href)=["'](?:data:|https?:|\/)/i);
-  const grainPattern = atlasHtml.match(/<pattern id="m2-rotating-micrograin"[\s\S]*?<\/pattern>/)?.[0] ?? "";
-  assert.match(grainPattern, /width="67" height="59" patternUnits="userSpaceOnUse"/);
-  assert.equal((grainPattern.match(/<circle /g) ?? []).length, 128);
-  assert.match(grainPattern, /fill="#eef1ef" fill-opacity="\.28"/);
-  assert.match(grainPattern, /fill="#020303" fill-opacity="\.30"/);
+  assert.doesNotMatch(atlasHtml, /m2-rotating-micrograin|<pattern[^>]*micrograin|<circle[^>]*fill-opacity=/);
   assert.doesNotMatch(atlasHtml, /<feTurbulence\b|<filter\b|<fe(?:Diffuse|Specular)Lighting\b/);
 });
 
@@ -116,7 +112,7 @@ test("material hierarchy does not resurrect a card around the wheel", () => {
   assert.match(instrument, /\.instrument-shell\s*\{[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
   assert.doesNotMatch(instrument, /#kinetic-wheel\s*\{[^}]*box-shadow:/s);
 });
-test("wheel surface depth stays ring-local while micrograin rotates with each ring", () => {
+test("wheel surface depth stays ring-local while visible SVG stipple stays absent", () => {
   assert.doesNotMatch(instrument, /\.instrument-shell::before\s*\{/);
   assert.doesNotMatch(instrument, /radial-gradient\(circle at 34% 12%/);
   assert.match(instrument, /#kinetic-wheel \{ z-index:\s*1; \}/);

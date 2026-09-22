@@ -145,14 +145,13 @@
 .m2-year-bed { fill: url(#m2-year-surface); }
 
 .m2-ring-material-face {
-  fill: url(#m2-rotating-micrograin);
-  opacity: .16;
+  /* SVG fallback stays deliberately quiet: body gradients and machined rims
+     establish graphite. Fine bead-blast response belongs to the continuous
+     WebGL roughness field, never to visible dot/stipple primitives. */
+  fill: none;
+  opacity: 0;
   pointer-events: none;
 }
-.m2-hour-material-face { opacity: .34; }
-.m2-day-material-face { opacity: .36; }
-.m2-month-material-face { opacity: .38; }
-.m2-year-material-face { opacity: .40; }
 
 /* The body no longer carries a broad diagonal sheen. A narrow directional rim
    is enough to imply machining while the four bands still read as one object. */
