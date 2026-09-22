@@ -31,7 +31,7 @@ function sync() {
   const identity = deltaYears === 0;
   const closed = [
     boolDataset("gregorianClosed"),
-    boolDataset("yearClosed"),
+    boolDataset("yearSequenceClosed"),
     boolDataset("dayClosed")
   ];
 
@@ -92,7 +92,7 @@ if (instrument) {
     attributeFilter:[
       "data-delta-years",
       "data-gregorian-closed",
-      "data-year-closed",
+      "data-year-sequence-closed",
       "data-day-closed",
       "data-astronomy-validity",
       "data-astronomy-shape-closed",
