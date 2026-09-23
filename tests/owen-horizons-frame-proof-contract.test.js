@@ -9,7 +9,9 @@ test("Owen frame proof is pinned to the same Swiss source already used by long-t
   assert.match(c.sourceModel, /Owen 1990/);
   assert.equal(c.inputFrame, "ICRF apparent direction (Horizons quantity #45)");
   assert.equal(c.outputFrame, "Earth mean ecliptic-of-date direction (Horizons quantity #31)");
-  assert.equal(c.nutationApplied, false);
+  assert.equal(c.seasonalPlaneSemantics, "mean-ecliptic-of-date");
+  assert.equal(c.apparentEquinoxCorrectionTested, true);
+  assert.equal(c.fullTrueEclipticClaim, false);
 });
 
 test("Owen proof must first recover existing 4006 Horizons truth before touching 10026", () => {
@@ -22,7 +24,7 @@ test("Owen proof must first recover existing 4006 Horizons truth before touching
   assert.equal(c.productionIntegrated, false);
 });
 
-test("probe source explicitly follows the mean-ecliptic seasonal frame and excludes nutation", async () => {
+test("probe compares mean frame against the apparent-equinox path without claiming a true-ecliptic seasonal plane", async () => {
   const source = await readFile(
     new URL("../scripts/research-swiss-owen-frame-probe.c", import.meta.url),
     "utf8"
@@ -32,6 +34,8 @@ test("probe source explicitly follows the mean-ecliptic seasonal frame and exclu
   assert.match(source, /SEFLG_JPLHOR/);
   assert.match(source, /swi_epsiln/);
   assert.match(source, /swi_coortrf/);
-  assert.doesNotMatch(source, /swi_nutate\s*\(/);
-  assert.doesNotMatch(source, /swi_nutation\s*\(/);
+  assert.match(source, /swi_nutate\s*\(/);
+  assert.match(source, /swi_nutation\s*\(/);
+  assert.match(source, /mode, "mean"/);
+  assert.match(source, /mode, "apparent"/);
 });
