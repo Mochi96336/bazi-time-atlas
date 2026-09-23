@@ -117,12 +117,19 @@ test("wheel surface depth stays ring-local while visible SVG stipple stays absen
   assert.doesNotMatch(instrument, /radial-gradient\(circle at 34% 12%/);
   assert.match(instrument, /#kinetic-wheel \{ z-index:\s*1; \}/);
   assert.match(atlasHtml, /<g id="material-base-layer" aria-hidden="true"><\/g>\s*<g id="material-reflection-layer" aria-hidden="true"><\/g>\s*<g id="guide-layer"><\/g>\s*<g id="hour-track"><\/g>/);
-  assert.match(atlasHtml, /id="m2-visible-metal-reflection"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.match(atlasHtml, /<radialGradient id="m2-visible-metal-reflection"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.doesNotMatch(atlasHtml, /<linearGradient id="m2-visible-metal-reflection"/);
   assert.doesNotMatch(atlasHtml, /id="m2-visible-metal-reflection"[^>]*gradientTransform=/);
+  assert.match(atlasHtml, /id="m2-solar-brass-surface"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.match(atlasHtml, /id="m2-zodiac-hard-surface"[^>]*gradientUnits="userSpaceOnUse"/);
   assert.match(radialHierarchy, /#material-base-layer,\s*#material-reflection-layer \{ pointer-events:\s*none; \}/);
   assert.match(radialHierarchy, /\.m2-ring-reflection \{[\s\S]*?fill:\s*url\(#m2-visible-metal-reflection\);[\s\S]*?pointer-events:\s*none;/);
   assert.match(renderer, /function renderMaterialBeds\(\) \{[\s\S]*?const baseLayer = materialBaseLayer \?\? guides;[\s\S]*?const surfaceLayer = materialReflectionLayer \?\? guides;[\s\S]*?class: `m2-ring-bed m2-\$\{id\}-bed`[\s\S]*?\}, baseLayer\);[\s\S]*?class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?\}, surfaceLayer\);/);
   assert.match(renderer, /function renderStatic\(\) \{\s*renderMaterialBeds\(\);\s*renderGuides\(\);/);
+  assert.match(renderer, /id:"solar"[\s\S]*?m2-solar-brass-bed[\s\S]*?m2-solar-brass-response/);
+  assert.match(renderer, /id:"zodiac"[\s\S]*?m2-zodiac-hard-bed[\s\S]*?m2-zodiac-hard-response/);
+  assert.match(radialHierarchy, /\.m2-solar-brass-bed \{ fill: url\(#m2-solar-brass-surface\); \}/);
+  assert.match(radialHierarchy, /\.m2-zodiac-hard-bed \{ fill: url\(#m2-zodiac-hard-surface\); \}/);
   assert.match(
     renderer,
     /function renderCycleRing\(id\) \{[\s\S]*?group\.classList\.add\("ring-track", `\$\{id\}-track`\);[\s\S]*?class: `m2-ring-material-face m2-\$\{id\}-material-face`[\s\S]*?"data-material-face-ring": id[\s\S]*?sexagenary\.forEach/
