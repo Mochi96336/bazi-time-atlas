@@ -173,27 +173,15 @@
 .m2-solar-brass-bed { fill: url(#m2-solar-brass-surface); }
 .m2-solar-brass-response { fill: url(#m2-solar-brass-response); opacity: .72; }
 
-/* Material K2 roughness mode owns the complete Solar brass body in WebGL.
-   Keep the authored SVG bed intact as the ?material=svg fallback, but do not
-   wash the procedural oxidation/scratches back toward a flat golden band.
-   A faint response veil remains above the shader for integration with the
-   surrounding SVG instrument semantics; Zodiac stays untouched. */
+/* Material K3 keeps the complete Solar brass body in WebGL for roughness mode.
+   The SVG bed remains intact for ?material=svg, but is fully suppressed here so
+   it cannot brighten or flatten the procedural body. Keep only a very faint
+   response veil for integration with the surrounding instrument semantics. */
 #kinetic-instrument[data-material-prototype="roughness"] .m2-solar-brass-bed {
   opacity: 0;
 }
 #kinetic-instrument[data-material-prototype="roughness"] .m2-solar-brass-response {
-  opacity: .12;
-}
-
-/* SVG remains the complete no-WebGL brass fallback. Once the procedural
-   roughness pass is active, keep only a faint Solar semantic veil above the
-   canvas so the fallback gradient cannot wash out aged-brass oxidation and
-   scratch response. Sector/label semantics remain in the normal SVG stack. */
-#kinetic-instrument[data-material-prototype="roughness"] .m2-solar-brass-bed {
-  opacity: .14;
-}
-#kinetic-instrument[data-material-prototype="roughness"] .m2-solar-brass-response {
-  opacity: .16;
+  opacity: .09;
 }
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
