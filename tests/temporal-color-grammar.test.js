@@ -51,6 +51,9 @@ test("Material I keeps material beds below semantic sectors and luminosity chann
   assert.match(hierarchy, /m2-zodiac-hard-bed/);
   assert.match(hierarchy, /#m2-solar-brass-surface[\s\S]*?var\(--solar\)/);
   assert.match(hierarchy, /#m2-zodiac-hard-surface[\s\S]*?var\(--zodiac\)/);
+  assert.match(hierarchy, /#m2-zodiac-hard-surface \.m2-zodiac-light \{[\s\S]*?#8794a6/);
+  assert.match(hierarchy, /#m2-zodiac-hard-response \.m2-zodiac-response-light \{[\s\S]*?#9aa8bc/);
+  assert.match(atlas, /--zodiac:\s*#716e82;/);
   assert.match(hierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(hierarchy, /background-image:\s*url\(/);
   for (const ring of ["hour", "day", "month", "year"]) {
