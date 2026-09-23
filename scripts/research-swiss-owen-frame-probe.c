@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
    * explicitly while leaving the other current model slots unchanged.
    * The JPLHOR flag below still owns the long-term Owen precession override.
    */
-  char astro_models[] = "5,10,10,1,3,0,0,4";
+  char astro_models[] = "5,9,9,1,3,0,0,4";
   swe_set_astro_models(astro_models, 0);
 
   if (argc != 5) {
@@ -69,12 +69,13 @@ int main(int argc, char **argv) {
   };
 
   /*
-   * Horizons quantity #45 is ICRF apparent direction. This probe feeds an already-apparent Horizons #45 ICRF direction into the
-   * frame transform, so pin Owen 1990 directly instead of using SEFLG_JPLHOR.
-   * The latter adds Swiss's pipeline-specific ~0.066816 arcsec Owen longitude
-   * correction intended for its full Horizons-emulation pipeline.
+   * Horizons quantity #45 is an ICRF apparent direction. The JPLHOR flag is used
+   * here only to select pinned Swiss's documented long-term Horizons frame
+   * geometry: Owen 1990 outside 1799–2202 plus its source-defined longitude
+   * alignment. Nutation itself is evaluated explicitly below to avoid the
+   * EOP-backed global cache path.
    */
-  const int32 iflag = 0;
+  const int32 iflag = SEFLG_JPLHOR;
   if (!no_bias) {
     swi_bias(vector, tt_jd, iflag, reverse_bias ? TRUE : FALSE);
   }
@@ -105,27 +106,59 @@ int main(int argc, char **argv) {
   }
 
   /*
-   * Keep the seasonal plane on Owen's mean ecliptic-of-date. Horizons
-   * quantity #31 is apparent longitude, so test the apparent equinox
-   * separately through nutation in longitude instead of invoking Swiss's
-   * cached JPLHOR nutation matrix path (which requires full EOP runtime
-   * initialization and is not a standalone frame helper).
+   * Reproduce Swiss app_pos_rest() explicitly without touching its global
+   * nutation cache. The previous longitude += dpsi shortcut omitted the full
+   * equatorial nutation matrix and the post-ecliptic deps rotation.
+   *
+   * Horizons #31 uses apparent longitude in the IAU76/80 ecliptic-of-date
+   * system. We therefore:
+   *   1. evaluate the explicitly pinned IAU1980 dpsi/deps angles;
+   *   2. build the same nut_matrix() as pinned Swiss;
+   *   3. apply the matrix to mean equatorial-of-date;
+   *   4. rotate by mean obliquity and then by deps, matching app_pos_rest().
    */
+  const double obliquity = swi_epsiln(tt_jd, iflag);
   if (apparent_mode) {
     if (swi_nutation(tt_jd, 0, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
     }
+
+    const double psi = nutation[0];
+    const double eps = obliquity + nutation[1];
+    const double sinpsi = sin(psi);
+    const double cospsi = cos(psi);
+    const double sineps0 = sin(obliquity);
+    const double coseps0 = cos(obliquity);
+    const double sineps = sin(eps);
+    const double coseps = cos(eps);
+    double matrix[3][3];
+
+    matrix[0][0] = cospsi;
+    matrix[0][1] = sinpsi * coseps;
+    matrix[0][2] = sinpsi * sineps;
+    matrix[1][0] = -sinpsi * coseps0;
+    matrix[1][1] = cospsi * coseps * coseps0 + sineps * sineps0;
+    matrix[1][2] = cospsi * sineps * coseps0 - coseps * sineps0;
+    matrix[2][0] = -sinpsi * sineps0;
+    matrix[2][1] = cospsi * coseps * sineps0 - sineps * coseps0;
+    matrix[2][2] = cospsi * sineps * sineps0 + coseps * coseps0;
+
+    double nutated[3];
+    for (int i = 0; i < 3; i++) {
+      nutated[i] = vector[0] * matrix[0][i]
+        + vector[1] * matrix[1][i]
+        + vector[2] * matrix[2][i];
+    }
+    for (int i = 0; i < 3; i++) vector[i] = nutated[i];
   }
 
-  const double obliquity = swi_epsiln(tt_jd, iflag);
   swi_coortrf(vector, vector, obliquity);
-
-  double longitude = normalized_degrees(atan2(vector[1], vector[0]));
   if (apparent_mode) {
-    longitude = fmod(longitude + nutation[0] * 180.0 / M_PI, 360.0);
-    if (longitude < 0.0) longitude += 360.0;
+    swi_coortrf(vector, vector, nutation[1]);
   }
+
+  const double longitude = normalized_degrees(atan2(vector[1], vector[0]));
   const double latitude = atan2(vector[2], hypot(vector[0], vector[1])) * 180.0 / M_PI;
 
   printf("%.12f %.12f %.12f\n", longitude, latitude, obliquity * 180.0 / M_PI);
