@@ -33,8 +33,9 @@ function separationArcsec(a, b) {
   return Math.atan2(Math.hypot(...cross), dot) * 206264.80624709636;
 }
 
-function runProbe(jdTt, icrf) {
+function runProbe(mode, jdTt, icrf) {
   const run = spawnSync(probe, [
+    mode,
     String(jdTt),
     String(icrf[0]),
     String(icrf[1])
@@ -75,34 +76,43 @@ for (const target of ["sun", "moon"]) {
   });
 }
 
-const residuals = samples.map(sample => {
-  const predicted = runProbe(sample.jdTt, sample.icrf);
+const evaluate = mode => {
+  const residuals = samples.map(sample => {
+    const predicted = runProbe(mode, sample.jdTt, sample.icrf);
+    return {
+      ...sample,
+      predicted:predicted.ecliptic,
+      obliquityDegrees:predicted.obliquityDegrees,
+      residualArcsec:separationArcsec(unit(predicted.ecliptic), unit(sample.expected))
+    };
+  });
+  const values = residuals.map(item => item.residualArcsec);
   return {
-    ...sample,
-    predicted:predicted.ecliptic,
-    obliquityDegrees:predicted.obliquityDegrees,
-    residualArcsec:separationArcsec(unit(predicted.ecliptic), unit(sample.expected))
+    mode,
+    maxResidualArcsec:Math.max(...values),
+    meanResidualArcsec:values.reduce((sum,value)=>sum+value,0)/values.length,
+    samples:residuals
   };
-});
+};
 
-const residualValues = residuals.map(item => item.residualArcsec);
+const mean = evaluate("mean");
+const apparent = evaluate("apparent");
 const result = {
-  schemaVersion:1,
+  schemaVersion:2,
   source:{
     implementation:"Swiss Ephemeris pinned Owen/JPLHOR frame path",
     swissCommit:"9083a12d59e98034fb2337061481ac8800c16e64",
     inputFrame:"ICRF apparent direction (Horizons quantity #45)",
-    outputFrame:"Earth mean ecliptic-of-date direction (Horizons quantity #31)",
-    nutationApplied:false
+    outputFrame:"Earth ecliptic-of-date apparent direction (Horizons quantity #31)"
   },
   validation:{
     catalogueYear:4006,
-    sampleCount:residuals.length,
-    maxResidualArcsec:Math.max(...residualValues),
-    meanResidualArcsec:residualValues.reduce((sum,value)=>sum+value,0)/residualValues.length,
-    gateArcsec:0.05
+    sampleCount:samples.length,
+    gateArcsec:0.05,
+    mean:Object.fromEntries(Object.entries(mean).filter(([key])=>key!=="samples")),
+    apparent:Object.fromEntries(Object.entries(apparent).filter(([key])=>key!=="samples"))
   },
-  samples:residuals
+  modes:{ mean:mean.samples, apparent:apparent.samples }
 };
 
 writeFileSync(output, JSON.stringify(result, null, 2) + "\n");
@@ -111,10 +121,10 @@ console.log(JSON.stringify(result.validation, null, 2));
 if (result.validation.sampleCount !== 18) {
   throw new Error(`expected 18 pinned directions, got ${result.validation.sampleCount}`);
 }
-if (!(result.validation.maxResidualArcsec < result.validation.gateArcsec)) {
-  const worst = residuals.toSorted((a,b)=>b.residualArcsec-a.residualArcsec)[0];
+if (!(result.validation.apparent.maxResidualArcsec < result.validation.gateArcsec)) {
+  const worst = apparent.samples.toSorted((a,b)=>b.residualArcsec-a.residualArcsec)[0];
   throw new Error(
-    `Owen/JPLHOR frame misses pinned Horizons truth: max=${result.validation.maxResidualArcsec}" `
+    `Owen/JPLHOR apparent frame misses pinned Horizons truth: max=${result.validation.apparent.maxResidualArcsec}" `
     + `at ${worst.id}; gate=${result.validation.gateArcsec}"`
   );
 }
