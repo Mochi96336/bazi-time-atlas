@@ -13,7 +13,8 @@ const [
   yearStripView,
   dayHourView,
   targetInstantAuthority,
-  liChunResolution,
+  seasonalBoundaryAuthority,
+  seasonalCivilProjection,
   cycleView,
   cycleCss
 ] = await Promise.all([
@@ -27,7 +28,8 @@ const [
   readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/recurrence/target-instant-instrument.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/recurrence/li-chun-target-resolution.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/recurrence/seasonal-boundary-authority.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/recurrence/seasonal-civil-projection.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8")
 ]);
@@ -84,7 +86,8 @@ test("year strip owns the visible 1/1, Li Chun, selected date, year end, and nex
   assert.match(recurrenceHtml, /id="research-year-li-chun-title">立春 · — → —<\/strong>/);
   assert.match(recurrenceHtml, /id="research-year-base-title">選定日 · —年<\/strong>/);
   assert.match(recurrenceHtml, />12\/31</);
-  assert.match(recurrenceHtml, /立春逐年實算 · 1\/1 不是干支年界/);
+  assert.match(recurrenceHtml, /id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1\+8 固定時差/);
+  assert.match(recurrenceHtml, /id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析/);
   assert.match(recurrenceHtml, /id="research-year-next-date"/);
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
   assert.match(recurrenceHtml, /aria-label="選定日到下一年同月同日"/);
@@ -104,42 +107,50 @@ test("year strip follows the currently selected target date instead of the recur
   assert.doesNotMatch(yearStripView, /parseDate\(instrument\.dataset\.baseDate\)/);
 });
 
-test("year strip composes existing authorities and fails closed outside exact Li Chun coverage", () => {
+test("year strip composes seasonal epoch and civil-projection authorities without a legacy civil bypass", () => {
   assert.match(yearStripView, /gregorianOrdinal/);
   assert.match(yearStripView, /recurrenceState/);
   assert.match(yearStripView, /validateGregorianDate/);
-  assert.match(yearStripView, /solarTermEventForCivilYear/);
-  assert.match(yearStripView, /solarTermEventForCivilYear\(year, "立春"\)/);
+  assert.match(yearStripView, /resolveSeasonalBoundary/);
+  assert.match(yearStripView, /projectSeasonalBoundaryToCivil/);
+  assert.doesNotMatch(yearStripView, /solarTermEventForCivilYear/);
   assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear/);
   assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(selectedDate\.year - 1\)/);
   assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(selectedDate\.year\)/);
+  assert.match(yearStripView, /liChunTransition = freeze\(\{ before:beforeYearPillar, after:afterYearPillar \}\)/);
+  assert.match(yearStripView, /strip\.dataset\.liChunBoundaryStatus/);
+  assert.match(yearStripView, /strip\.dataset\.liChunProjectionStatus/);
   assert.match(yearStripView, /strip\.dataset\.selectedYearPillar/);
-  assert.match(yearStripView, /research-year-li-chun-title/);
-  assert.match(yearStripView, /research-year-base-title/);
-  assert.match(yearStripView, /catch \{[\s\S]*?return null;/);
-  assert.match(yearStripView, /liChunMarker\.hidden = true/);
-  assert.match(yearStripView, /liChunUnavailable\.hidden = false/);
+  assert.match(yearStripView, /research-year-li-chun-unavailable-copy/);
+  assert.match(yearStripView, /source-covered-runtime-missing/);
+  assert.match(yearStripView, /absolute-source-unavailable/);
   assert.doesNotMatch(yearStripView, /2\/4|02-04|year\s*%\s*4/);
 });
 
-test("year strip resolves Li Chun only through the shared target-instant authority", () => {
+test("year strip consumes shared target-instant authority while seasonal epoch and projection stay independently typed", () => {
   assert.match(dayHourView, /publishSelectedTargetInstant\(instrument\.dataset, targetInstant\)/);
   assert.match(targetInstantAuthority, /selectedTargetInstantBasis/);
   assert.match(targetInstantAuthority, /selectedTargetInstantJulianDay/);
   assert.match(yearStripView, /readSelectedTargetInstant\(instrument\.dataset\)/);
-  assert.match(yearStripView, /resolveLiChunYearSideFromTargetInstant/);
+  assert.match(yearStripView, /TARGET_INSTANT_BASIS/);
+  assert.match(yearStripView, /compareTargetInstantToBoundary/);
   assert.doesNotMatch(yearStripView, /target-instant-controls|target-instant-time|target-instant-offset/);
-  assert.match(liChunResolution, /solveSolarLongitude/);
-  assert.match(liChunResolution, /ShouXingUtil\.dtT/);
-  assert.match(liChunResolution, /outside-validated-coverage/);
+  assert.match(seasonalBoundaryAuthority, /reviewed-production-direct-event/);
+  assert.match(seasonalBoundaryAuthority, /source-covered-runtime-missing/);
+  assert.match(seasonalCivilProjection, /status:"estimated"/);
+  assert.match(seasonalCivilProjection, /deep-time-earth-rotation-uncertainty/);
+  assert.doesNotMatch(yearStripView, /resolveLiChunYearSideFromTargetInstant/);
 });
 
-test("year strip keeps date-only and unsupported deep-time Li Chun boundary days fail closed", () => {
+test("year strip keeps date-only and uncertain deep-time Li Chun membership fail closed", () => {
   assert.match(yearStripView, /selectedCivilLiChunRelation/);
   assert.match(yearStripView, /"boundary-day"/);
+  assert.match(yearStripView, /"boundary-uncertain"/);
   assert.match(yearStripView, /strip\.dataset\.liChunInstantResolution/);
+  assert.match(yearStripView, /target-instant-unbound/);
+  assert.match(yearStripView, /earth-rotation-uncertain/);
   assert.match(yearStripView, /立春日需時刻判定/);
-  assert.match(yearStripView, /立春日仍待時間尺度/);
+  assert.match(yearStripView, /立春區間內仍不確定/);
 });
 
 test("mobile year strip moves edge-adjacent base labels onto a second lane", () => {
