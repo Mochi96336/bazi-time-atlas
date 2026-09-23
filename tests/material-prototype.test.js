@@ -10,7 +10,9 @@ import {
   buildRoughnessField,
   fillRenderedRotations,
   materialGeometry,
-  resolveMaterialMode
+  renderedSolarRotation,
+  resolveMaterialMode,
+  solarMaterialGeometry
 } from "../src/wheel/material-prototype.js";
 import { ringModel } from "../src/wheel/ring-model.js";
 
@@ -32,6 +34,24 @@ test("material geometry is borrowed from the canonical ring model and excludes S
     assert.equal(item.outerRadius, canonical.outerRadius);
   }
   assert.equal(geometry.some(item => item.id === "solar" || item.id === "zodiac"), false);
+});
+
+test("Solar material borrows the annual-band geometry and final rendered pose", () => {
+  const solar = ringModel("solar");
+  const zodiac = ringModel("zodiac");
+  const geometry = solarMaterialGeometry();
+  assert.deepEqual(geometry, {
+    id: "solar",
+    innerRadius: solar.innerRadius,
+    outerRadius: zodiac.innerRadius
+  });
+
+  const rotations = new Map([
+    ["solar", 87.625],
+    ["year", 12]
+  ]);
+  assert.equal(renderedSolarRotation(rotations), 87.625);
+  assert.equal(renderedSolarRotation(new Map()), 0);
 });
 
 test("roughness field is deterministic, dense, bounded, and seed-sensitive", () => {
@@ -125,6 +145,22 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(renderer, /id:"solar"[\s\S]*?materialOuterRadius:RADII\.solarTermOuter/);
   assert.match(renderer, /const outerRadius = Number\.isFinite\(materialOuterRadius\) \? materialOuterRadius : model\.outerRadius/);
   assert.match(material, /localPoint = rotation\(ringRotation\) \* point/);
+  assert.match(material, /uniform float u_solar_inner_radius/);
+  assert.match(material, /uniform float u_solar_outer_radius/);
+  assert.match(material, /uniform float u_solar_rotation/);
+  assert.match(material, /renderSolarBrass\(point, u_solar_rotation, pixelFootprint\)/);
+  assert.match(material, /oxidationWarp\(vec2 localPoint\)/);
+  assert.match(material, /OXIDE_WARP_STRENGTH = 24\.0/);
+  assert.match(material, /oxidationField\(vec2 localPoint\)/);
+  assert.match(material, /deepOxidationField\(vec2 localPoint\)/);
+  assert.match(material, /scratchFromCell\(vec2 uv, vec2 cell, float handling\)/);
+  assert.match(material, /for \(int offset = -1; offset <= 1; offset \+= 1\)/);
+  assert.match(material, /float threshold = mix\(0\.60, 0\.978, handling\)/);
+  assert.match(material, /shortBias = r3 \* r3/);
+  assert.match(material, /maxAngle = mix\(0\.16, 0\.68, handling\)/);
+  assert.match(material, /fwidth\(distanceToScratch\)/);
+  assert.match(material, /fineAttenuation = mix\(0\.28, 1\.0, 1\.0 - smoothstep\(1\.15, 3\.0, pixelFootprint\)\)/);
+  assert.match(material, /solarRotation = renderedSolarRotation\(renderedRotations\)/);
   assert.match(material, /SURFACE_PERIOD_LARGE = 108\.0/);
   assert.match(material, /SURFACE_PERIOD_MEDIUM = 38\.0/);
   assert.match(material, /SURFACE_PERIOD_FINE = 15\.0/);
@@ -156,4 +192,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.doesNotMatch(material, /viewWidth|viewHeight|contentOrigin|u_svg_scale/);
   assert.doesNotMatch(material, /selectedMs|Selected Instant|solarLongitude|temporalCycleRotation|setModelRotation|effectiveRotation/);
   assert.doesNotMatch(material, /<img|https?:\/\/|feTurbulence|repeating-(?:linear|radial)-gradient/i);
+  assert.doesNotMatch(material, /selectedMs|Selected Instant|solarLongitude|temporalCycleRotation|effectiveRotation/);
+  assert.doesNotMatch(material, /for \(int i = 0; i < 500/);
 });
+
