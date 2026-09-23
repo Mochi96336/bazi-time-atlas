@@ -9,7 +9,7 @@
    this layer only consumes them. The four Ganzhi clocks are one achromatic
    graphite family whose lightness opens outward with temporal scale. Solar
    longitude keeps the single matte-brass channel; derived Zodiac stays a recessed
-   cool violet; the warm ivory cursor remains reserved for the Selected Instant.
+   cool blue-violet; the warm ivory cursor remains reserved for the Selected Instant.
    Classification mode may deliberately replace this resting grammar with
    categorical element colors. */
 
@@ -174,27 +174,27 @@
 .m2-solar-brass-response { fill: url(#m2-solar-brass-response); opacity: .72; }
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 76%, #9b9aaa);
+  stop-color: color-mix(in srgb, var(--zodiac) 56%, #8794a6);
   stop-opacity: .25;
 }
 #m2-zodiac-hard-surface .m2-zodiac-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 88%, #353642);
+  stop-color: color-mix(in srgb, var(--zodiac) 62%, #303946);
   stop-opacity: .20;
 }
 #m2-zodiac-hard-surface .m2-zodiac-dark {
-  stop-color: color-mix(in srgb, var(--zodiac) 58%, #111319);
+  stop-color: color-mix(in srgb, var(--zodiac) 46%, #0d141c);
   stop-opacity: .18;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 70%, #b3b2bf);
+  stop-color: color-mix(in srgb, var(--zodiac) 46%, #9aa8bc);
   stop-opacity: .090;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 82%, #555766);
+  stop-color: color-mix(in srgb, var(--zodiac) 56%, #445365);
   stop-opacity: .040;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-dark {
-  stop-color: #101218;
+  stop-color: #0a1118;
   stop-opacity: .014;
 }
 .m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
