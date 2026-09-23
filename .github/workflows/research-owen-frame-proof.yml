@@ -61,8 +61,10 @@ jobs:
           const result = JSON.parse(fs.readFileSync("tmp/owen-frame-proof-4006.json","utf8"));
           if (result.validation.catalogueYear !== 4006) throw new Error("wrong catalogue year");
           if (result.validation.sampleCount !== 18) throw new Error("wrong sample count");
-          if (!(result.validation.maxResidualArcsec < 0.05)) throw new Error("frame residual gate failed");
-          if (result.source.nutationApplied !== false) throw new Error("seasonal frame must remain mean-of-date");
+          if (!(result.validation.apparent.maxResidualArcsec < 0.05)) throw new Error("apparent-frame residual gate failed");
+          if (!(result.validation.mean.maxResidualArcsec > result.validation.apparent.maxResidualArcsec)) {
+            throw new Error("apparent equinox did not improve the frame proof");
+          }
           NODE
 
       - name: Upload Owen frame proof
