@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "swephexp.h"
 #include "sweph.h"
@@ -30,14 +31,15 @@ static double normalized_degrees(double radians) {
 }
 
 int main(int argc, char **argv) {
-  if (argc != 4) {
-    fprintf(stderr, "usage: %s <tt-jd> <icrf-ra-deg> <icrf-dec-deg>\n", argv[0]);
+  if (argc != 5) {
+    fprintf(stderr, "usage: %s <mode:mean|apparent> <tt-jd> <icrf-ra-deg> <icrf-dec-deg>\n", argv[0]);
     return 2;
   }
+  const char *mode = argv[1];
 
-  const double tt_jd = parse_number(argv[1], "tt-jd");
-  const double ra = parse_number(argv[2], "ra") * M_PI / 180.0;
-  const double dec = parse_number(argv[3], "dec") * M_PI / 180.0;
+  const double tt_jd = parse_number(argv[2], "tt-jd");
+  const double ra = parse_number(argv[3], "ra") * M_PI / 180.0;
+  const double dec = parse_number(argv[4], "dec") * M_PI / 180.0;
   const double cos_dec = cos(dec);
 
   double vector[6] = {
@@ -52,7 +54,7 @@ int main(int argc, char **argv) {
    * pipeline converts ICRS/GCRS directions to dynamical J2000 before its
    * JPLHOR precession stage, so reproduce that exact frame-only path here.
    */
-  const int32 iflag = SEFLG_JPLHOR | SEFLG_NONUT;
+  const int32 iflag = SEFLG_JPLHOR;
   swi_bias(vector, tt_jd, iflag, FALSE);
   if (swi_precess(vector, tt_jd, iflag, J2000_TO_J) != 0) {
     fprintf(stderr, "swi_precess failed\n");
@@ -60,13 +62,33 @@ int main(int argc, char **argv) {
   }
 
   /*
-   * Earth seasonal longitude uses the mean ecliptic-of-date plane. Do not
-   * apply nutation here. For dates beyond the IAU76 short-term window,
-   * SEFLG_JPLHOR makes both precession and obliquity use Owen's long-term
-   * Horizons-compatible model.
+   * Both modes use Owen's long-term mean equator/ecliptic geometry.
+   *
+   * "mean" stops at the mean equator-of-date before rotating to the mean
+   * ecliptic. "apparent" mirrors Swiss app_pos_rest(): it applies the JPLHOR
+   * IAU80 nutation matrix to the already-apparent ICRF direction, then rotates
+   * by mean obliquity and the nutation-in-obliquity term. This tests whether
+   * Horizons quantity #31's apparent longitude uses the apparent equinox even
+   * though the seasonal plane itself is the mean ecliptic-of-date plane.
    */
+  double nutation[2] = {0.0, 0.0};
+  if (strcmp(mode, "apparent") == 0) {
+    swi_check_nutation(tt_jd, iflag);
+    swi_nutate(vector, iflag, FALSE);
+    if (swi_nutation(tt_jd, iflag, nutation) != 0) {
+      fprintf(stderr, "swi_nutation failed\n");
+      return 4;
+    }
+  } else if (strcmp(mode, "mean") != 0) {
+    fprintf(stderr, "unknown mode: %s\n", mode);
+    return 2;
+  }
+
   const double obliquity = swi_epsiln(tt_jd, iflag);
   swi_coortrf(vector, vector, obliquity);
+  if (strcmp(mode, "apparent") == 0) {
+    swi_coortrf(vector, vector, nutation[1]);
+  }
 
   const double longitude = normalized_degrees(atan2(vector[1], vector[0]));
   const double latitude = atan2(vector[2], hypot(vector[0], vector[1])) * 180.0 / M_PI;
