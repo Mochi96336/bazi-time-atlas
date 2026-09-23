@@ -89,6 +89,7 @@ function render() {
   strip.dataset.ready = "true";
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
   strip.dataset.baseBeforeLiChun = state.baseBeforeLiChun === null ? "unknown" : String(state.baseBeforeLiChun);
+  strip.dataset.baseEdge = state.basePosition < 20 ? "start" : state.basePosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
 
   if (baseMarker) baseMarker.style.setProperty("--year-x", `${state.basePosition.toFixed(4)}%`);
