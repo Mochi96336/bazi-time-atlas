@@ -52,6 +52,9 @@ int main(int argc, char **argv) {
     return 2;
   }
   const char *mode = argv[1];
+  const int no_bias = strstr(mode, "no-bias") != NULL;
+  const int reverse_bias = strstr(mode, "reverse-bias") != NULL;
+  const int apparent_mode = strstr(mode, "apparent") != NULL;
 
   const double tt_jd = parse_number(argv[2], "tt-jd");
   const double ra = parse_number(argv[3], "ra") * M_PI / 180.0;
@@ -72,11 +75,9 @@ int main(int argc, char **argv) {
    * with the explicitly pinned IAU1980 model below, avoiding the EOP cache.
    */
   const int32 iflag = SEFLG_JPLHOR;
-  fprintf(stderr, "stage=bias\n");
-  fflush(stderr);
-  swi_bias(vector, tt_jd, iflag, FALSE);
-  fprintf(stderr, "stage=precess\n");
-  fflush(stderr);
+  if (!no_bias) {
+    swi_bias(vector, tt_jd, iflag, reverse_bias ? TRUE : FALSE);
+  }
   if (swi_precess(vector, tt_jd, iflag, J2000_TO_J) != 0) {
     fprintf(stderr, "swi_precess failed\n");
     return 3;
@@ -93,7 +94,12 @@ int main(int argc, char **argv) {
    * though the seasonal plane itself is the mean ecliptic-of-date plane.
    */
   double nutation[2] = {0.0, 0.0};
-  if (strcmp(mode, "apparent") != 0 && strcmp(mode, "mean") != 0) {
+  if (
+    strcmp(mode, "mean") != 0
+    && strcmp(mode, "apparent") != 0
+    && strcmp(mode, "apparent-no-bias") != 0
+    && strcmp(mode, "apparent-reverse-bias") != 0
+  ) {
     fprintf(stderr, "unknown mode: %s\n", mode);
     return 2;
   }
@@ -105,7 +111,7 @@ int main(int argc, char **argv) {
    * cached JPLHOR nutation matrix path (which requires full EOP runtime
    * initialization and is not a standalone frame helper).
    */
-  if (strcmp(mode, "apparent") == 0) {
+  if (apparent_mode) {
     if (swi_nutation(tt_jd, 0, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
@@ -116,7 +122,7 @@ int main(int argc, char **argv) {
   swi_coortrf(vector, vector, obliquity);
 
   double longitude = normalized_degrees(atan2(vector[1], vector[0]));
-  if (strcmp(mode, "apparent") == 0) {
+  if (apparent_mode) {
     longitude = fmod(longitude + nutation[0] * 180.0 / M_PI, 360.0);
     if (longitude < 0.0) longitude += 360.0;
   }
