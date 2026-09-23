@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
    * initialization and is not a standalone frame helper).
    */
   if (strcmp(mode, "apparent") == 0) {
-    if (swi_nutation(tt_jd, 0, nutation) != 0) {
+    if (swi_nutation(tt_jd, iflag, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
     }
