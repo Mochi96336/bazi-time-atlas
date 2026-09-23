@@ -72,17 +72,27 @@ test("milestone detail table is fully removed while the derivation stays visible
   assert.match(recurrenceHtml, /class="discrete-derivation"/);
 });
 
-test("year strip owns the visible 1/1, Li Chun, base date, year end, and next-same-date cue", () => {
+test("year strip owns the visible 1/1, Li Chun, selected date, year end, and next-same-date cue", () => {
   assert.match(recurrenceHtml, /id="research-year-strip"/);
   assert.match(recurrenceHtml, />1\/1</);
   assert.match(recurrenceHtml, /id="research-year-li-chun-title">立春 · — → —<\/strong>/);
-  assert.match(recurrenceHtml, /id="research-year-base-title">基準日 · —年<\/strong>/);
+  assert.match(recurrenceHtml, /id="research-year-base-title">選定日 · —年<\/strong>/);
   assert.match(recurrenceHtml, />12\/31</);
   assert.match(recurrenceHtml, /立春逐年實算 · 1\/1 不是干支年界/);
   assert.match(recurrenceHtml, /id="research-year-next-date"/);
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
+  assert.match(recurrenceHtml, /aria-label="選定日到下一年同月同日"/);
+  assert.doesNotMatch(recurrenceHtml, /aria-label="基準日到下一年同月同日"/);
   assert.match(recurrenceHtml, /跨過下一個立春年界後，進入下一個干支年序/);
   assert.match(recurrenceHtml, /research-year-strip-view\.js/);
+});
+
+test("year strip follows the currently selected target date instead of the recurrence base date", () => {
+  assert.match(recurrenceView, /instrument\.dataset\.targetDate = state\.targetValid \? formatDate\(state\.targetDate\) : "invalid"/);
+  assert.match(yearStripView, /parseDate\(instrument\.dataset\.targetDate\)/);
+  assert.match(yearStripView, /attributeName === "data-target-date"/);
+  assert.match(yearStripView, /attributeFilter:\["data-target-date"\]/);
+  assert.doesNotMatch(yearStripView, /parseDate\(instrument\.dataset\.baseDate\)/);
 });
 
 test("year strip composes existing authorities and fails closed outside exact Li Chun coverage", () => {
@@ -92,8 +102,8 @@ test("year strip composes existing authorities and fails closed outside exact Li
   assert.match(yearStripView, /solarTermEventForCivilYear/);
   assert.match(yearStripView, /solarTermEventForCivilYear\(year, "立春"\)/);
   assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear/);
-  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(baseDate\.year - 1\)/);
-  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(baseDate\.year\)/);
+  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(selectedDate\.year - 1\)/);
+  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(selectedDate\.year\)/);
   assert.match(yearStripView, /strip\.dataset\.selectedYearPillar/);
   assert.match(yearStripView, /research-year-li-chun-title/);
   assert.match(yearStripView, /research-year-base-title/);
@@ -104,7 +114,7 @@ test("year strip composes existing authorities and fails closed outside exact Li
 });
 
 test("mobile year strip moves edge-adjacent base labels onto a second lane", () => {
-  assert.match(yearStripView, /strip\.dataset\.baseEdge = state\.basePosition < 20 \? "start" : state\.basePosition > 80 \? "end" : "none"/);
+  assert.match(yearStripView, /strip\.dataset\.baseEdge = state\.selectedPosition < 20 \? "start" : state\.selectedPosition > 80 \? "end" : "none"/);
   assert.match(css, /@media \(max-width:480px\)[\s\S]*?data-base-edge="start"[\s\S]*?research-year-track \{ height: 118px;/);
   assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > strong \{ top: 76px;/);
   assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > small \{ top: 92px;/);

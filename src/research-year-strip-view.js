@@ -13,7 +13,7 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function parseBaseDate(value) {
+function parseDate(value) {
   const match = /^(\d{1,8})-(\d{2})-(\d{2})$/.exec(value ?? "");
   if (!match) return null;
   const date = { year:Number(match[1]), month:Number(match[2]), day:Number(match[3]) };
@@ -51,28 +51,28 @@ function exactLiChunForYear(year) {
   }
 }
 
-export function researchYearStripState(baseDate) {
-  if (!validateGregorianDate(baseDate)) throw new RangeError("invalid baseDate");
+export function researchYearStripState(selectedDate) {
+  if (!validateGregorianDate(selectedDate)) throw new RangeError("invalid selectedDate");
 
-  const next = recurrenceState(baseDate, 1);
-  const liChun = exactLiChunForYear(baseDate.year);
-  const basePosition = positionForDate(baseDate);
+  const next = recurrenceState(selectedDate, 1);
+  const liChun = exactLiChunForYear(selectedDate.year);
+  const selectedPosition = positionForDate(selectedDate);
   const nextDate = next.targetValid ? next.targetDate : null;
-  const baseBeforeLiChun = liChun ? basePosition < liChun.position : null;
-  const beforeYearPillar = sexagenaryYearPillarForLiChunYear(baseDate.year - 1);
-  const afterYearPillar = sexagenaryYearPillarForLiChunYear(baseDate.year);
+  const selectedBeforeLiChun = liChun ? selectedPosition < liChun.position : null;
+  const beforeYearPillar = sexagenaryYearPillarForLiChunYear(selectedDate.year - 1);
+  const afterYearPillar = sexagenaryYearPillarForLiChunYear(selectedDate.year);
   const liChunTransition = liChun
     ? Object.freeze({ before:beforeYearPillar, after:afterYearPillar })
     : null;
-  const selectedYearPillar = baseBeforeLiChun === null
+  const selectedYearPillar = selectedBeforeLiChun === null
     ? null
-    : baseBeforeLiChun ? beforeYearPillar : afterYearPillar;
+    : selectedBeforeLiChun ? beforeYearPillar : afterYearPillar;
 
   return Object.freeze({
-    baseDate:Object.freeze({ ...baseDate }),
-    basePosition,
+    selectedDate:Object.freeze({ ...selectedDate }),
+    selectedPosition,
     liChun,
-    baseBeforeLiChun,
+    selectedBeforeLiChun,
     liChunTransition,
     selectedYearPillar,
     nextDate:nextDate ? Object.freeze({ ...nextDate }) : null,
@@ -87,33 +87,33 @@ function setText(id, value) {
 
 function render() {
   if (!strip || !instrument) return;
-  const baseDate = parseBaseDate(instrument.dataset.baseDate);
-  if (!baseDate) {
+  const selectedDate = parseDate(instrument.dataset.targetDate);
+  if (!selectedDate) {
     strip.dataset.ready = "false";
     return;
   }
 
-  const state = researchYearStripState(baseDate);
+  const state = researchYearStripState(selectedDate);
   const baseMarker = document.querySelector("#research-year-base-marker");
   const liChunMarker = document.querySelector("#research-year-li-chun-marker");
   const liChunUnavailable = document.querySelector("#research-year-li-chun-unavailable");
 
   strip.dataset.ready = "true";
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
-  strip.dataset.baseBeforeLiChun = state.baseBeforeLiChun === null ? "unknown" : String(state.baseBeforeLiChun);
-  strip.dataset.baseEdge = state.basePosition < 20 ? "start" : state.basePosition > 80 ? "end" : "none";
+  strip.dataset.selectedBeforeLiChun = state.selectedBeforeLiChun === null ? "unknown" : String(state.selectedBeforeLiChun);
+  strip.dataset.baseEdge = state.selectedPosition < 20 ? "start" : state.selectedPosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
   strip.dataset.selectedYearPillar = state.selectedYearPillar?.name ?? "unavailable";
   strip.dataset.liChunYearPillarBefore = state.liChunTransition?.before.name ?? "unavailable";
   strip.dataset.liChunYearPillarAfter = state.liChunTransition?.after.name ?? "unavailable";
 
-  if (baseMarker) baseMarker.style.setProperty("--year-x", `${state.basePosition.toFixed(4)}%`);
+  if (baseMarker) baseMarker.style.setProperty("--year-x", `${state.selectedPosition.toFixed(4)}%`);
   setText(
     "research-year-base-title",
-    state.selectedYearPillar ? `基準日 · ${state.selectedYearPillar.name}年` : "基準日 · 年柱待節氣判定"
+    state.selectedYearPillar ? `選定日 · ${state.selectedYearPillar.name}年` : "選定日 · 年柱待節氣判定"
   );
-  setText("research-year-base-label", formatDate(state.baseDate));
-  setText("research-year-base-date", formatDate(state.baseDate));
+  setText("research-year-base-label", formatDate(state.selectedDate));
+  setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
     liChunMarker.hidden = false;
@@ -137,8 +137,8 @@ function render() {
 
 if (strip && instrument) {
   const observer = new MutationObserver(records => {
-    if (records.some(record => record.attributeName === "data-base-date")) render();
+    if (records.some(record => record.attributeName === "data-target-date")) render();
   });
-  observer.observe(instrument, { attributes:true, attributeFilter:["data-base-date"] });
+  observer.observe(instrument, { attributes:true, attributeFilter:["data-target-date"] });
   render();
 }

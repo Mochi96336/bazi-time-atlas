@@ -380,6 +380,7 @@ function renderState() {
   setText("closure-summary", stateMeaning(state, localYears));
 
   instrument.dataset.baseDate = formatDate(currentBase);
+  instrument.dataset.targetDate = state.targetValid ? formatDate(state.targetDate) : "invalid";
   instrument.dataset.deltaYears = String(currentDelta);
   instrument.dataset.phaseDisplay = "signed-shortest";
   instrument.dataset.gregorianPhase = String(state.phases.gregorian);
