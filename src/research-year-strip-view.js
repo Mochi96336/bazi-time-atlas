@@ -5,6 +5,8 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { solarTermEventForCivilYear } from "./astronomy/solar-term-boundaries.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
+import { resolveLiChunYearSideFromTargetInstant } from "./recurrence/li-chun-target-resolution.js";
+import { readSelectedTargetInstant } from "./recurrence/target-instant-instrument.js";
 
 const strip = typeof document === "undefined" ? null : document.querySelector("#research-year-strip");
 const instrument = typeof document === "undefined" ? null : document.querySelector("#recurrence-instrument");
@@ -51,7 +53,7 @@ function exactLiChunForYear(year) {
   }
 }
 
-export function researchYearStripState(selectedDate) {
+export function researchYearStripState(selectedDate, { targetInstant = null } = {}) {
   if (!validateGregorianDate(selectedDate)) throw new RangeError("invalid selectedDate");
 
   const next = recurrenceState(selectedDate, 1);
@@ -60,13 +62,19 @@ export function researchYearStripState(selectedDate) {
   const nextDate = next.targetValid ? next.targetDate : null;
   const selectedOrdinal = gregorianOrdinal(selectedDate);
   const liChunOrdinal = liChun ? gregorianOrdinal(liChun.date) : null;
-  const selectedLiChunRelation = liChunOrdinal === null
+  const selectedCivilLiChunRelation = liChunOrdinal === null
     ? "unknown"
     : selectedOrdinal < liChunOrdinal
       ? "before"
       : selectedOrdinal > liChunOrdinal
         ? "after"
         : "boundary-day";
+  const liChunInstantResolution = selectedCivilLiChunRelation === "boundary-day"
+    ? resolveLiChunYearSideFromTargetInstant({ year:selectedDate.year, targetInstant })
+    : null;
+  const selectedLiChunRelation = liChunInstantResolution?.status === "resolved"
+    ? liChunInstantResolution.side
+    : selectedCivilLiChunRelation;
   const selectedBeforeLiChun = selectedLiChunRelation === "before"
     ? true
     : selectedLiChunRelation === "after"
@@ -85,7 +93,9 @@ export function researchYearStripState(selectedDate) {
     selectedDate:Object.freeze({ ...selectedDate }),
     selectedPosition,
     liChun,
+    selectedCivilLiChunRelation,
     selectedLiChunRelation,
+    liChunInstantResolution,
     selectedBeforeLiChun,
     liChunTransition,
     selectedYearPillar,
@@ -107,14 +117,23 @@ function render() {
     return;
   }
 
-  const state = researchYearStripState(selectedDate);
+  let targetInstant = null;
+  try {
+    targetInstant = readSelectedTargetInstant(instrument.dataset);
+  } catch {
+    targetInstant = null;
+  }
+  const state = researchYearStripState(selectedDate, { targetInstant });
   const baseMarker = document.querySelector("#research-year-base-marker");
   const liChunMarker = document.querySelector("#research-year-li-chun-marker");
   const liChunUnavailable = document.querySelector("#research-year-li-chun-unavailable");
 
   strip.dataset.ready = "true";
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
+  strip.dataset.selectedCivilLiChunRelation = state.selectedCivilLiChunRelation;
   strip.dataset.selectedLiChunRelation = state.selectedLiChunRelation;
+  strip.dataset.liChunInstantResolution = state.liChunInstantResolution?.status ?? "not-needed";
+  strip.dataset.liChunTargetBasis = state.liChunInstantResolution?.targetBasis ?? "none";
   strip.dataset.selectedBeforeLiChun = state.selectedBeforeLiChun === null ? "unknown" : String(state.selectedBeforeLiChun);
   strip.dataset.baseEdge = state.selectedPosition < 20 ? "start" : state.selectedPosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
@@ -127,8 +146,10 @@ function render() {
     "research-year-base-title",
     state.selectedYearPillar
       ? `選定日 · ${state.selectedYearPillar.name}年`
-      : state.selectedLiChunRelation === "boundary-day"
-        ? "選定日 · 立春日需時刻判定"
+      : state.selectedCivilLiChunRelation === "boundary-day"
+        ? state.liChunInstantResolution?.status === "target-instant-unbound"
+          ? "選定日 · 立春日需時刻判定"
+          : "選定日 · 立春日仍待時間尺度"
         : "選定日 · 年柱待節氣判定"
   );
   setText("research-year-base-label", formatDate(state.selectedDate));
@@ -155,9 +176,21 @@ function render() {
 }
 
 if (strip && instrument) {
+  const targetInstantAttributes = [
+    "data-selected-target-instant-basis",
+    "data-selected-target-instant-bound",
+    "data-selected-target-instant-julian-day",
+    "data-selected-target-instant-local-offset-hours-from-ut1"
+  ];
   const observer = new MutationObserver(records => {
-    if (records.some(record => record.attributeName === "data-target-date")) render();
+    if (records.some(record =>
+      record.attributeName === "data-target-date"
+      || targetInstantAttributes.includes(record.attributeName)
+    )) render();
   });
-  observer.observe(instrument, { attributes:true, attributeFilter:["data-target-date"] });
+  observer.observe(instrument, {
+    attributes:true,
+    attributeFilter:["data-target-date", ...targetInstantAttributes]
+  });
   render();
 }

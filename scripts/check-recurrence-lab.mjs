@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { solarTermEventForCivilYear } from "../src/astronomy/solar-term-boundaries.js";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 
@@ -225,6 +226,64 @@ if (
   throw new Error(`date-only Li Chun selection incorrectly assigned a Ganzhi year: ${liChunBoundaryDay.url}`);
 }
 console.log(`[recurrence] PASS date-only Li Chun boundary fails closed until target time is bound: ${liChunBoundaryDay.url}`);
+
+const liChunBefore = expectCase(
+  "recurrence.html?date=2024-02-04&delta=0&targetClock=fixed-zone&targetTime=00%3A00%3A00&ut1Offset=8",
+  {
+    "data-target-date":"2024-02-04",
+    "data-selected-target-instant-basis":"fixed-zone-from-ut1",
+    "data-selected-target-instant-bound":"true"
+  },
+  "bound target before 2024 Li Chun"
+);
+if (
+  !liChunBefore.dom.includes('data-selected-civil-li-chun-relation="boundary-day"') ||
+  !liChunBefore.dom.includes('data-li-chun-instant-resolution="resolved"') ||
+  !liChunBefore.dom.includes('data-selected-li-chun-relation="before"') ||
+  !liChunBefore.dom.includes('id="research-year-base-title">選定日 · 癸卯年<')
+) {
+  throw new Error(`bound target before 2024 Li Chun did not resolve to 癸卯 on the shared TT basis: ${liChunBefore.url}`);
+}
+console.log(`[recurrence] PASS shared target instant resolves pre-Li-Chun 2024 boundary day: ${liChunBefore.url}`);
+
+const liChunAfter = expectCase(
+  "recurrence.html?date=2024-02-04&delta=0&targetClock=fixed-zone&targetTime=23%3A59%3A59&ut1Offset=8",
+  {
+    "data-target-date":"2024-02-04",
+    "data-selected-target-instant-basis":"fixed-zone-from-ut1",
+    "data-selected-target-instant-bound":"true"
+  },
+  "bound target after 2024 Li Chun"
+);
+if (
+  !liChunAfter.dom.includes('data-li-chun-instant-resolution="resolved"') ||
+  !liChunAfter.dom.includes('data-selected-li-chun-relation="after"') ||
+  !liChunAfter.dom.includes('id="research-year-base-title">選定日 · 甲辰年<')
+) {
+  throw new Error(`bound target after 2024 Li Chun did not resolve to 甲辰 on the shared TT basis: ${liChunAfter.url}`);
+}
+console.log(`[recurrence] PASS shared target instant resolves post-Li-Chun 2024 boundary day: ${liChunAfter.url}`);
+
+const deepLiChunFields = solarTermEventForCivilYear(2426, "立春").referenceFields;
+const deepLiChunDate = `${deepLiChunFields.year}-${String(deepLiChunFields.month).padStart(2, "0")}-${String(deepLiChunFields.day).padStart(2, "0")}`;
+const deepLiChun = expectCase(
+  `recurrence.html?date=${deepLiChunDate}&delta=0&targetClock=fixed-zone&targetTime=23%3A59%3A59&ut1Offset=8`,
+  {
+    "data-target-date":deepLiChunDate,
+    "data-selected-target-instant-basis":"fixed-zone-from-ut1",
+    "data-selected-target-instant-bound":"true"
+  },
+  "deep-time bound Li Chun boundary"
+);
+if (
+  !deepLiChun.dom.includes('data-selected-civil-li-chun-relation="boundary-day"') ||
+  !deepLiChun.dom.includes('data-li-chun-instant-resolution="outside-validated-coverage"') ||
+  !deepLiChun.dom.includes('data-selected-year-pillar="unavailable"') ||
+  !deepLiChun.dom.includes('id="research-year-base-title">選定日 · 立春日仍待時間尺度<')
+) {
+  throw new Error(`deep-time target clock must not promote Li Chun membership outside validated TT/UT1 coverage: ${deepLiChun.url}`);
+}
+console.log(`[recurrence] PASS deep-time Li Chun target remains fail-closed outside validated TT/UT1 coverage: ${deepLiChun.url}`);
 
 const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",

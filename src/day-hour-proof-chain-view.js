@@ -7,6 +7,7 @@ import { fixedZoneTargetClock } from "./recurrence/fixed-zone-target-clock.js";
 import { geographicLongitudeBinding } from "./recurrence/geographic-longitude-binding.js";
 import { recurrenceState } from "./recurrence/gregorian-cycle.js";
 import { seasonalEpochSourceAudit } from "./recurrence/seasonal-epoch-source-audit.js";
+import { publishSelectedTargetInstant } from "./recurrence/target-instant-instrument.js";
 
 const instrument = document.querySelector("#recurrence-instrument");
 const determinacyPanel = document.querySelector("#four-pillar-determinacy");
@@ -524,6 +525,7 @@ function refresh() {
   const targetYear = baseYear + deltaYears;
   const audit = seasonalEpochSourceAudit({ baseYear, targetYear });
   const targetInstant = targetInstantForCurrentState(deltaYears);
+  publishSelectedTargetInstant(instrument.dataset, targetInstant);
   const dayBoundary = selectedDayBoundary();
   const clockBasis = selectedClockBasis();
   const longitudeDegrees = selectedLongitudeDegrees();

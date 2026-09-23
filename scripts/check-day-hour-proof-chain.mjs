@@ -107,6 +107,13 @@ if (attr(localInstrument, "data-day-hour-proof-first-hard-blocker") !== "target-
   throw new Error(`4006 proof: instrument first blocker mismatch: ${local.url}`);
 }
 if (
+  attr(localInstrument, "data-selected-target-instant-basis") !== "date-only"
+  || attr(localInstrument, "data-selected-target-instant-bound") !== "false"
+  || attr(localInstrument, "data-selected-target-instant-julian-day") !== null
+) {
+  throw new Error(`4006 proof: shared selected-target authority must remain date-only while target clock is unbound: ${local.url}`);
+}
+if (
   attr(localInstrument, "data-day-hour-proof-day-boundary") !== "unbound"
   || attr(localInstrument, "data-day-hour-proof-day-boundary-bound") !== "false"
   || attr(localInstrument, "data-day-hour-proof-clock-basis") !== "unbound"
@@ -185,6 +192,14 @@ if (
 }
 if (attr(boundInstrument, "data-day-hour-proof-target-instant-basis") !== "fixed-zone-from-ut1" || attr(boundInstrument, "data-day-hour-proof-target-instant-bound") !== "true") {
   throw new Error(`4006 fixed-zone proof: instrument target binding mismatch: ${bound.url}`);
+}
+if (
+  attr(boundInstrument, "data-selected-target-instant-basis") !== "fixed-zone-from-ut1"
+  || attr(boundInstrument, "data-selected-target-instant-bound") !== "true"
+  || !Number.isFinite(Number(attr(boundInstrument, "data-selected-target-instant-julian-day")))
+  || attr(boundInstrument, "data-selected-target-instant-local-offset-hours-from-ut1") !== "8"
+) {
+  throw new Error(`4006 fixed-zone proof: shared selected-target authority did not mirror the typed target instant: ${bound.url}`);
 }
 expectStage(bound.dom, "absolute-seasonal-epoch", "satisfied", "4006 fixed-zone proof", bound.url);
 expectStage(bound.dom, "target-instant", "satisfied", "4006 fixed-zone proof", bound.url);
