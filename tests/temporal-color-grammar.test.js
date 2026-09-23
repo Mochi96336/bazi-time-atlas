@@ -45,8 +45,12 @@ test("annual coordinate colors are token-owned and do not reintroduce literal le
   assert.doesNotMatch(hierarchy, /rgba\(153,139,180/);
 });
 
-test("M2 material overlay stays isolated from semantic sectors and luminosity channels", () => {
-  assert.match(hierarchy, /M2 anodized-graphite material/);
+test("Material I keeps material beds below semantic sectors and luminosity channels", () => {
+  assert.match(hierarchy, /Material I keeps the explicit surface stack/);
+  assert.match(hierarchy, /m2-solar-brass-bed/);
+  assert.match(hierarchy, /m2-zodiac-hard-bed/);
+  assert.match(hierarchy, /#m2-solar-brass-surface[\s\S]*?var\(--solar\)/);
+  assert.match(hierarchy, /#m2-zodiac-hard-surface[\s\S]*?var\(--zodiac\)/);
   assert.match(hierarchy, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(hierarchy, /background-image:\s*url\(/);
   for (const ring of ["hour", "day", "month", "year"]) {
