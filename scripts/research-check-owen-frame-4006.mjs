@@ -23,6 +23,13 @@ function unit([longitudeDegrees, latitudeDegrees]) {
   ];
 }
 
+function signedAngularArcsec(actualDegrees, expectedDegrees) {
+  let delta = actualDegrees - expectedDegrees;
+  while (delta <= -180) delta += 360;
+  while (delta > 180) delta -= 360;
+  return delta * 3600;
+}
+
 function separationArcsec(a, b) {
   const cross = [
     a[1] * b[2] - a[2] * b[1],
@@ -87,7 +94,9 @@ const evaluate = mode => {
       ...sample,
       predicted:predicted.ecliptic,
       obliquityDegrees:predicted.obliquityDegrees,
-      residualArcsec:separationArcsec(unit(predicted.ecliptic), unit(sample.expected))
+      residualArcsec:separationArcsec(unit(predicted.ecliptic), unit(sample.expected)),
+      longitudeResidualArcsec:signedAngularArcsec(predicted.ecliptic[0], sample.expected[0]),
+      latitudeResidualArcsec:(predicted.ecliptic[1] - sample.expected[1]) * 3600
     };
   });
   const values = residuals.map(item => item.residualArcsec);
@@ -107,6 +116,20 @@ console.log(JSON.stringify({
   }
 }, null, 2));
 const apparent = evaluate("apparent");
+const diagnostics = Object.fromEntries(["sun","moon"].map(target => {
+  const rows = apparent.samples.filter(sample => sample.target === target);
+  const mean = key => rows.reduce((sum,row)=>sum+row[key],0)/rows.length;
+  return [target, {
+    meanLongitudeResidualArcsec:mean("longitudeResidualArcsec"),
+    meanLatitudeResidualArcsec:mean("latitudeResidualArcsec"),
+    minLongitudeResidualArcsec:Math.min(...rows.map(row=>row.longitudeResidualArcsec)),
+    maxLongitudeResidualArcsec:Math.max(...rows.map(row=>row.longitudeResidualArcsec)),
+    minLatitudeResidualArcsec:Math.min(...rows.map(row=>row.latitudeResidualArcsec)),
+    maxLatitudeResidualArcsec:Math.max(...rows.map(row=>row.latitudeResidualArcsec))
+  }];
+}));
+console.log(JSON.stringify({ apparentDiagnostics:diagnostics }, null, 2));
+
 const result = {
   schemaVersion:2,
   source:{
