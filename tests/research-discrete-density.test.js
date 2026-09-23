@@ -113,6 +113,13 @@ test("year strip composes existing authorities and fails closed outside exact Li
   assert.doesNotMatch(yearStripView, /2\/4|02-04|year\s*%\s*4/);
 });
 
+test("year strip fails closed on a date-only Li Chun boundary day", () => {
+  assert.match(yearStripView, /selectedLiChunRelation/);
+  assert.match(yearStripView, /"boundary-day"/);
+  assert.match(yearStripView, /strip\.dataset\.selectedLiChunRelation = state\.selectedLiChunRelation/);
+  assert.match(yearStripView, /立春日需時刻判定/);
+});
+
 test("mobile year strip moves edge-adjacent base labels onto a second lane", () => {
   assert.match(yearStripView, /strip\.dataset\.baseEdge = state\.selectedPosition < 20 \? "start" : state\.selectedPosition > 80 \? "end" : "none"/);
   assert.match(css, /@media \(max-width:480px\)[\s\S]*?data-base-edge="start"[\s\S]*?research-year-track \{ height: 118px;/);
