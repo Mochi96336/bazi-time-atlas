@@ -46,6 +46,10 @@ jobs:
           done
           cat /tmp/bazi-time-atlas-http.log
           exit 1
+      - name: Verify material shader activation
+        run: node scripts/check-material-shader.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify cross-view deep links
         run: node scripts/check-deep-links.mjs
         env:

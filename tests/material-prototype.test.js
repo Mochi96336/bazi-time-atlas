@@ -137,6 +137,10 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(css, /data-material-prototype="roughness"\] \.material-wheel-layer\s*\{[\s\S]*?opacity:\s*1;/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-material-face/);
+  assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
+  assert.match(radial, /data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*\.14;/);
+  assert.match(radial, /data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.16;/);
+  assert.doesNotMatch(radial, /data-material-prototype="roughness"\][^\n{]*\.m2-zodiac-hard/);
   assert.match(renderer, /const materialBaseLayer = svg\.querySelector\("#material-base-layer"\)/);
   assert.match(renderer, /const materialReflectionLayer = svg\.querySelector\("#material-reflection-layer"\)/);
   assert.match(renderer, /class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?"data-material-reflection-ring": id[\s\S]*?\}, surfaceLayer\);/);
@@ -149,17 +153,53 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /uniform float u_solar_outer_radius/);
   assert.match(material, /uniform float u_solar_rotation/);
   assert.match(material, /renderSolarBrass\(point, u_solar_rotation, pixelFootprint\)/);
-  assert.match(material, /oxidationWarp\(vec2 localPoint\)/);
-  assert.match(material, /OXIDE_WARP_STRENGTH = 24\.0/);
-  assert.match(material, /oxidationField\(vec2 localPoint\)/);
-  assert.match(material, /deepOxidationField\(vec2 localPoint\)/);
-  assert.match(material, /scratchFromCell\(vec2 uv, vec2 cell, float handling\)/);
+  // Material K2 is intentionally demo-faithful: Solar no longer samples the
+  // repeating 128×128 graphite texture for oxidation. It owns a deterministic
+  // value-noise/fBm field, then applies the demo's domain-warped low/mid/fine
+  // hierarchy in ring-local coordinates.
+  assert.match(material, /float solarValueNoise\(vec2 p, float seed\)/);
+  assert.match(material, /float solarFbm\(vec2 p, float seed\)/);
+  assert.match(material, /for \(int octave = 0; octave < 3; octave \+= 1\)/);
+  assert.match(material, /vec3 solarOxidation\(vec2 localPoint\)/);
+  assert.match(material, /wx = \(solarFbm\(p \* 0\.60, 51\.0\) - 0\.5\) \* 2\.1/);
+  assert.match(material, /combined = low \* 0\.63 \+ mid \* 0\.30 \+ fine \* 0\.07/);
+  assert.match(material, /oxidePatch = smoothstep\(0\.41, 0\.64, combined\)/);
+
+  // Scratch generation mirrors demo v3 instead of the previous tangent-cell
+  // hatch: dense jittered cells, near-radial primary marks, ±12° variation,
+  // 8–143 unit short-biased lengths, bend, light/dark polarity and separate
+  // sparse all-angle handling marks.
+  assert.match(material, /scratchFromCell\(vec2 uv, float cell, float cellSize, float handling, float circumference, float phase\)/);
   assert.match(material, /for \(int offset = -1; offset <= 1; offset \+= 1\)/);
-  assert.match(material, /float threshold = mix\(0\.60, 0\.978, handling\)/);
-  assert.match(material, /shortBias = r3 \* r3/);
-  assert.match(material, /maxAngle = mix\(0\.16, 0\.68, handling\)/);
+  assert.match(material, /float exists = step\(mix\(0\.17, 0\.52, handling\), r0\)/);
+  assert.match(material, /shortBias = pow\(r3, 2\.2\)/);
+  assert.match(material, /demoScale = clamp\(bandWidth \/ 240\.0, 0\.28, 0\.50\)/);
+  assert.match(material, /8\.0 \+ shortBias \* 135\.0[\s\S]*?\* demoScale/);
+  assert.match(material, /1\.675516 \+ \(angleRandom - 0\.5\) \* 0\.418879/);
+  assert.match(material, /angleRandom \* PI, handling/);
+  assert.match(material, /vec2 primaryScratchField\(vec2 localPoint\)/);
+  assert.match(material, /scratchLayer\(localPoint, 0\.0, 0\.0\)/);
+  assert.match(material, /scratchLayer\(localPoint, 0\.0, 1\.0\)/);
+  assert.match(material, /vec2 handlingScratchField\(vec2 localPoint\)/);
+  assert.match(material, /scratchLayer\(localPoint, 1\.0, 2\.0\)/);
   assert.match(material, /fwidth\(distanceToScratch\)/);
-  assert.match(material, /fineAttenuation = mix\(0\.28, 1\.0, 1\.0 - smoothstep\(1\.15, 3\.0, pixelFootprint\)\)/);
+  assert.match(material, /fineAttenuation = mix\(0\.34, 1\.0, 1\.0 - smoothstep\(1\.15, 2\.85, pixelFootprint\)\)/);
+
+  // The body is no longer a nearly-transparent response layer. The shader
+  // carries the same gold/brown body family as the approved demo and then
+  // applies oxidation/scratches before compositing beneath SVG semantics.
+  assert.match(material, /vec3 brassBody\(vec2 worldPoint\)/);
+  assert.match(material, /brassLight = vec3\(0\.773, 0\.608, 0\.376\)/);
+  assert.match(material, /brassMid = vec3\(0\.596, 0\.443, 0\.259\)/);
+  assert.match(material, /brassDark = vec3\(0\.212, 0\.137, 0\.075\)/);
+  assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
+  assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);
+  assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.44 \+ aging\.y \* 0\.24 \+ aging\.z \* 0\.04, 0\.0, 0\.62\)/);
+  assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
+  assert.match(material, /primaryStrength = abs\(primaryScratch\.x\) \* 0\.028 \* fineAttenuation/);
+  assert.match(material, /handlingStrength = abs\(handlingScratch\.x\) \* 0\.018 \* fineAttenuation/);
+  assert.match(material, /bodyAlpha = edgeMask \* 0\.92/);
+  assert.match(material, /return vec4\(body \* bodyAlpha, bodyAlpha\)/);
   assert.match(material, /solarRotation = renderedSolarRotation\(renderedRotations\)/);
   assert.match(material, /SURFACE_PERIOD_LARGE = 108\.0/);
   assert.match(material, /SURFACE_PERIOD_MEDIUM = 38\.0/);
@@ -176,6 +216,10 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.39 \+ abs\(fieldCentered\) \* 0\.013, 0\.0, 0\.034\)/);
   assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.044\)/);
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*0;/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.12;/);
+  assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
+  assert.doesNotMatch(radial, /data-material-prototype="roughness"[^\n{]*\.m2-zodiac-hard/);
   assert.match(radial, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(radial, /\.m2-(?:hour|day|month|year)-material-face \{[^}]*opacity:/);
   assert.doesNotMatch(material, /vec3 base =|bodyResponse|crownSlope|float diffuse|lightAlignment|broadSheen/);
