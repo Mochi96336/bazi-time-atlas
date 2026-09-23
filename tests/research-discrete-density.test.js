@@ -72,7 +72,7 @@ test("milestone detail table is fully removed while the derivation stays visible
   assert.match(recurrenceHtml, /class="discrete-derivation"/);
 });
 
-test("year strip owns the visible 1/1, Li Chun, base date, year end, and next-same-date cue", () => {
+test("year strip owns the visible 1/1, Li Chun, selected date, year end, and next-same-date cue", () => {
   assert.match(recurrenceHtml, /id="research-year-strip"/);
   assert.match(recurrenceHtml, />1\/1</);
   assert.match(recurrenceHtml, /id="research-year-li-chun-title">立春 · — → —<\/strong>/);
@@ -83,6 +83,14 @@ test("year strip owns the visible 1/1, Li Chun, base date, year end, and next-sa
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
   assert.match(recurrenceHtml, /跨過下一個立春年界後，進入下一個干支年序/);
   assert.match(recurrenceHtml, /research-year-strip-view\.js/);
+});
+
+test("year strip follows the currently selected target date instead of the recurrence base date", () => {
+  assert.match(recurrenceView, /instrument\.dataset\.targetDate = state\.targetValid \? formatDate\(state\.targetDate\) : "invalid"/);
+  assert.match(yearStripView, /parseDate\(instrument\.dataset\.targetDate\)/);
+  assert.match(yearStripView, /attributeName === "data-target-date"/);
+  assert.match(yearStripView, /attributeFilter:\["data-target-date"\]/);
+  assert.doesNotMatch(yearStripView, /parseDate\(instrument\.dataset\.baseDate\)/);
 });
 
 test("year strip composes existing authorities and fails closed outside exact Li Chun coverage", () => {
