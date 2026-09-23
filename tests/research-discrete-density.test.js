@@ -11,6 +11,9 @@ const [
   recurrenceCss,
   recurrenceView,
   yearStripView,
+  dayHourView,
+  targetInstantAuthority,
+  liChunResolution,
   cycleView,
   cycleCss
 ] = await Promise.all([
@@ -22,6 +25,9 @@ const [
   readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
   readFile(new URL("../src/recurrence-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/recurrence/target-instant-instrument.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/recurrence/li-chun-target-resolution.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8")
 ]);
@@ -91,7 +97,9 @@ test("year strip follows the currently selected target date instead of the recur
   assert.match(recurrenceView, /instrument\.dataset\.targetDate = state\.targetValid \? formatDate\(state\.targetDate\) : "invalid"/);
   assert.match(yearStripView, /parseDate\(instrument\.dataset\.targetDate\)/);
   assert.match(yearStripView, /attributeName === "data-target-date"/);
-  assert.match(yearStripView, /attributeFilter:\["data-target-date"\]/);
+  assert.match(yearStripView, /data-selected-target-instant-basis/);
+  assert.match(yearStripView, /data-selected-target-instant-bound/);
+  assert.match(yearStripView, /data-selected-target-instant-julian-day/);
   assert.doesNotMatch(yearStripView, /parseDate\(instrument\.dataset\.baseDate\)/);
 });
 
@@ -113,11 +121,24 @@ test("year strip composes existing authorities and fails closed outside exact Li
   assert.doesNotMatch(yearStripView, /2\/4|02-04|year\s*%\s*4/);
 });
 
-test("year strip fails closed on a date-only Li Chun boundary day", () => {
-  assert.match(yearStripView, /selectedLiChunRelation/);
+test("year strip resolves Li Chun only through the shared target-instant authority", () => {
+  assert.match(dayHourView, /publishSelectedTargetInstant\(instrument\.dataset, targetInstant\)/);
+  assert.match(targetInstantAuthority, /selectedTargetInstantBasis/);
+  assert.match(targetInstantAuthority, /selectedTargetInstantJulianDay/);
+  assert.match(yearStripView, /readSelectedTargetInstant\(instrument\.dataset\)/);
+  assert.match(yearStripView, /resolveLiChunYearSideFromTargetInstant/);
+  assert.doesNotMatch(yearStripView, /target-instant-controls|target-instant-time|target-instant-offset/);
+  assert.match(liChunResolution, /solveSolarLongitude/);
+  assert.match(liChunResolution, /ShouXingUtil\.dtT/);
+  assert.match(liChunResolution, /outside-validated-coverage/);
+});
+
+test("year strip keeps date-only and unsupported deep-time Li Chun boundary days fail closed", () => {
+  assert.match(yearStripView, /selectedCivilLiChunRelation/);
   assert.match(yearStripView, /"boundary-day"/);
-  assert.match(yearStripView, /strip\.dataset\.selectedLiChunRelation = state\.selectedLiChunRelation/);
+  assert.match(yearStripView, /strip\.dataset\.liChunInstantResolution/);
   assert.match(yearStripView, /立春日需時刻判定/);
+  assert.match(yearStripView, /立春日仍待時間尺度/);
 });
 
 test("mobile year strip moves edge-adjacent base labels onto a second lane", () => {
