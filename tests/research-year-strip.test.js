@@ -2,20 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { researchYearStripState } from "../src/research-year-strip-view.js";
 
-test("year strip orders a base date before and after the exact Li Chun boundary", () => {
+test("year strip orders the selected date before and after the exact Li Chun boundary", () => {
   const before = researchYearStripState({ year:2024, month:2, day:1 });
   const after = researchYearStripState({ year:2024, month:2, day:10 });
 
   assert.ok(before.liChun, "2024 Li Chun should be available from the exact solar-term authority");
   assert.ok(after.liChun, "2024 Li Chun should be available from the exact solar-term authority");
-  assert.equal(before.baseBeforeLiChun, true);
-  assert.equal(after.baseBeforeLiChun, false);
+  assert.equal(before.selectedBeforeLiChun, true);
+  assert.equal(after.selectedBeforeLiChun, false);
   assert.equal(before.selectedYearPillar.name, "癸卯");
   assert.equal(after.selectedYearPillar.name, "甲辰");
   assert.equal(before.liChunTransition.before.name, "癸卯");
   assert.equal(before.liChunTransition.after.name, "甲辰");
-  assert.ok(before.basePosition < before.liChun.position);
-  assert.ok(after.basePosition > after.liChun.position);
+  assert.ok(before.selectedPosition < before.liChun.position);
+  assert.ok(after.selectedPosition > after.liChun.position);
 });
 
 test("year strip recalculates Li Chun and Ganzhi transition for each civil year", () => {
@@ -45,7 +45,7 @@ test("year strip fails closed when exact civil Li Chun authority is out of range
   const state = researchYearStripState({ year:10000, month:9, day:13 });
 
   assert.equal(state.liChun, null);
-  assert.equal(state.baseBeforeLiChun, null);
+  assert.equal(state.selectedBeforeLiChun, null);
   assert.equal(state.liChunTransition, null);
   assert.equal(state.selectedYearPillar, null);
   assert.equal(state.elapsedDays, 365);
