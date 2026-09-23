@@ -78,6 +78,8 @@ export function resolveSeasonalBoundary({ year, longitudeDegrees }) {
       longitudeDegrees
     });
     return freezeResult({
+      year,
+      longitudeDegrees,
       status:"resolved",
       epochStatus:"resolved",
       authorityClass:"reviewed-production-direct-event",
@@ -100,6 +102,8 @@ export function resolveSeasonalBoundary({ year, longitudeDegrees }) {
     const event = solveSolarLongitude({ year, longitudeDegrees });
     const evidence = independentEvidenceFor(TYME_SHOUXING_DIRECT_PROVIDER.id, year);
     return freezeResult({
+      year,
+      longitudeDegrees,
       status:"resolved",
       epochStatus:"resolved",
       authorityClass:"declared-model-direct-event",
@@ -133,6 +137,8 @@ export function resolveSeasonalBoundary({ year, longitudeDegrees }) {
       });
     }));
     return freezeResult({
+      year,
+      longitudeDegrees,
       status:"source-covered-runtime-missing",
       epochStatus:"unresolved",
       authorityClass:"qualified-source-without-runtime",
@@ -150,6 +156,8 @@ export function resolveSeasonalBoundary({ year, longitudeDegrees }) {
   }
 
   return freezeResult({
+    year,
+    longitudeDegrees,
     status:"absolute-source-unavailable",
     epochStatus:"unresolved",
     authorityClass:"no-qualified-absolute-source",
