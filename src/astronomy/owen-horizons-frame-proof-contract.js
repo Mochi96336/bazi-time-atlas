@@ -7,10 +7,13 @@ export const OWEN_HORIZONS_FRAME_PROOF_CONTRACT = Object.freeze({
   stages:Object.freeze([
     "ICRF-to-dynamical-J2000 frame bias",
     "JPLHOR Owen long-term precession",
-    "JPLHOR Owen long-term mean obliquity",
-    "equatorial-of-date to mean-ecliptic-of-date rotation"
+    "JPLHOR IAU80 apparent-equinox test",
+    "Owen long-term mean obliquity",
+    "equatorial-of-date to Earth ecliptic-of-date apparent longitude frame"
   ]),
-  nutationApplied:false,
+  seasonalPlaneSemantics:"mean-ecliptic-of-date",
+  apparentEquinoxCorrectionTested:true,
+  fullTrueEclipticClaim:false,
   validation:Object.freeze({
     catalogueYear:4006,
     pinnedDirectionCount:18,
