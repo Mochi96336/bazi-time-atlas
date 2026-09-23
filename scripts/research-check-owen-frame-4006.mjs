@@ -100,6 +100,12 @@ const evaluate = mode => {
 };
 
 const mean = evaluate("mean");
+console.log(JSON.stringify({
+  meanOnly:{
+    maxResidualArcsec:mean.maxResidualArcsec,
+    meanResidualArcsec:mean.meanResidualArcsec
+  }
+}, null, 2));
 const apparent = evaluate("apparent");
 const result = {
   schemaVersion:2,
