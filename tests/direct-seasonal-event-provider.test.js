@@ -25,6 +25,8 @@ test("direct provider is explicit TT seasonal-event provenance, not a state-vect
   assert.equal(TYME_SHOUXING_DIRECT_PROVIDER.capabilities.directSeasonalEpoch, true);
   assert.equal(TYME_SHOUXING_DIRECT_PROVIDER.capabilities.continuousDynamicalTime, true);
   assert.equal(TYME_SHOUXING_DIRECT_PROVIDER.capabilities.absoluteStateVector, false);
+  assert.equal(TYME_SHOUXING_DIRECT_PROVIDER.coverageSemantics, "declared-operational-model-window");
+  assert.equal(TYME_SHOUXING_DIRECT_PROVIDER.independentlyValidatedCoverage, false);
   assert.deepEqual(TYME_SHOUXING_DIRECT_PROVIDER.coverage, {
     mode:"absolute-year",
     minYear:1900,
@@ -72,13 +74,13 @@ test("solveSolarLongitude is not limited to named 15-degree terms", () => {
   assert.ok(solved.residualDegrees < MAX_SOLVER_RESIDUAL_DEGREES);
 });
 
-test("direct proof stays fail-closed outside its validated coverage", () => {
+test("direct proof stays fail-closed outside its declared operational coverage", () => {
   assert.throws(
     () => solveSolarLongitude({ year:4006, longitudeDegrees:315 }),
-    /validated direct-provider coverage/
+    /declared direct-provider coverage/
   );
   assert.throws(
     () => solveSolarLongitude({ year:26026, longitudeDegrees:315 }),
-    /validated direct-provider coverage/
+    /declared direct-provider coverage/
   );
 });
