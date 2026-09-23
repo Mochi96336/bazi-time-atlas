@@ -1,0 +1,31 @@
+name: JPL Horizons 2426 source probe
+
+on:
+  push:
+    branches:
+      - research/jpl-horizons-2426-evidence
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Prepare pinned Tyme vendor
+        run: npm run vendor:prepare
+      - name: Capture 24 year-2426 seasonal crossings from JPL Horizons DE441
+        run: node scripts/probe-jpl-horizons-2426.mjs
+      - name: Upload pinned source evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: jpl-horizons-2426-evidence
+          path: jpl-horizons-2426-evidence.json
+          if-no-files-found: error
+          retention-days: 30
