@@ -116,6 +116,24 @@ console.log(JSON.stringify({
   }
 }, null, 2));
 const apparent = evaluate("apparent");
+const apparentNoBias = evaluate("apparent-no-bias");
+const apparentReverseBias = evaluate("apparent-reverse-bias");
+console.log(JSON.stringify({
+  biasVariants:{
+    normal:{
+      maxResidualArcsec:apparent.maxResidualArcsec,
+      meanResidualArcsec:apparent.meanResidualArcsec
+    },
+    noBias:{
+      maxResidualArcsec:apparentNoBias.maxResidualArcsec,
+      meanResidualArcsec:apparentNoBias.meanResidualArcsec
+    },
+    reverseBias:{
+      maxResidualArcsec:apparentReverseBias.maxResidualArcsec,
+      meanResidualArcsec:apparentReverseBias.meanResidualArcsec
+    }
+  }
+}, null, 2));
 const diagnostics = Object.fromEntries(["sun","moon"].map(target => {
   const rows = apparent.samples.filter(sample => sample.target === target);
   const mean = key => rows.reduce((sum,row)=>sum+row[key],0)/rows.length;
