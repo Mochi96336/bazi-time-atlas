@@ -35,9 +35,10 @@ export const DE441_10026_STATE_CAPTURE_CONTRACT = Object.freeze({
     sunMaxVelocityErrorMetersPerSecond:0.000000003
   }),
   researchOnly:true,
-  absoluteStateCaptured:false,
+  absoluteStateCaptured:true,
+  stateInterpolationValidated:true,
   meanEclipticOfDateTransformResolved:false,
   apparentSeasonalCrossingResolved:false,
   productionIntegrated:false,
-  note:"This contract only defines the reproducible offline DE441 state-capture experiment for catalogue year 10026. Passing it must not be interpreted as a seasonal TT epoch, civil Li Chun position, or year-pillar proof."
+  note:"The reproducible offline DE441 state capture for catalogue year 10026 has now passed and is pinned separately as evidence. This still must not be interpreted as a seasonal TT epoch, civil Li Chun position, or year-pillar proof."
 });
