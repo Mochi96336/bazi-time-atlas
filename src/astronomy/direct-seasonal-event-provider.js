@@ -17,6 +17,8 @@ export const TYME_SHOUXING_DIRECT_PROVIDER = defineSeasonalEpochProvider({
   sourceUrl:"https://github.com/6tail/tyme4ts",
   modelFamily:"shouxing",
   coverage:{ mode:"absolute-year", minYear:1900, maxYear:2100 },
+  coverageSemantics:"declared-operational-model-window",
+  independentlyValidatedCoverage:false,
   capabilities:{
     relativeSeasonGeometry:true,
     absoluteStateVector:false,
@@ -25,7 +27,7 @@ export const TYME_SHOUXING_DIRECT_PROVIDER = defineSeasonalEpochProvider({
   },
   implementation:"bundled-direct-event-proof",
   timeScale:"TT",
-  note:"Proof-of-pipeline provider. It directly inverts the pinned ShouXing apparent solar-longitude model onto TT inside a deliberately conservative 1900–2100 validation window. It is not DE441, does not expose Earth/Sun state vectors, and does not by itself supply TT↔UT, civil-time or Day/Hour proof."
+  note:"Proof-of-pipeline provider. It directly inverts the pinned ShouXing apparent solar-longitude model onto TT inside a deliberately conservative 1900–2100 declared operational window. That window is not a claim that every year has independent ephemeris validation. It is not DE441, does not expose Earth/Sun state vectors, and does not by itself supply TT↔UT, civil-time or Day/Hour proof."
 });
 
 function assertFinite(name, value) {
@@ -45,7 +47,7 @@ function validateRequest(year, longitudeDegrees) {
   if (!Number.isInteger(year)) throw new RangeError("year must be an integer");
   const { minYear, maxYear } = TYME_SHOUXING_DIRECT_PROVIDER.coverage;
   if (year < minYear || year > maxYear) {
-    throw new RangeError(`year must be within validated direct-provider coverage ${minYear}..${maxYear}`);
+    throw new RangeError(`year must be within declared direct-provider coverage ${minYear}..${maxYear}`);
   }
   assertFinite("longitudeDegrees", longitudeDegrees);
 }
