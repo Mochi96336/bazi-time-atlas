@@ -81,6 +81,8 @@ test("year strip owns the visible 1/1, Li Chun, selected date, year end, and nex
   assert.match(recurrenceHtml, /立春逐年實算 · 1\/1 不是干支年界/);
   assert.match(recurrenceHtml, /id="research-year-next-date"/);
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
+  assert.match(recurrenceHtml, /aria-label="選定日到下一年同月同日"/);
+  assert.doesNotMatch(recurrenceHtml, /aria-label="基準日到下一年同月同日"/);
   assert.match(recurrenceHtml, /跨過下一個立春年界後，進入下一個干支年序/);
   assert.match(recurrenceHtml, /research-year-strip-view\.js/);
 });
