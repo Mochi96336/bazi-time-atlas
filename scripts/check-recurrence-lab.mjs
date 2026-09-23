@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-import { solarTermEventForCivilYear } from "../src/astronomy/solar-term-boundaries.js";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 
@@ -204,6 +203,14 @@ if (!/三個離散相位同時歸零/.test(global.dom) || !/26026-09-13/.test(gl
 }
 for (const key of ["gregorian", "year", "day"]) expectMarker(global.dom, key, "-90.000", "0", "24000-year global recurrence", global.url);
 console.log(`[recurrence] PASS global closure stacks every discrete marker on the same reference and owns one labeled preset: ${global.url}`);
+if (
+  !global.dom.includes('data-li-chun-boundary-status="absolute-source-unavailable"') ||
+  !global.dom.includes('data-li-chun-projection-status="unavailable"') ||
+  !global.dom.includes("超出目前 absolute seasonal-epoch source")
+) {
+  throw new Error(`26026 global discrete closure must remain separate from unavailable absolute Li Chun authority: ${global.url}`);
+}
+console.log(`[recurrence] PASS 26026 keeps exact discrete closure separate from absolute seasonal source coverage: ${global.url}`);
 
 const liChunBoundaryDay = expectCase(
   "recurrence.html?date=2024-02-04&delta=0",
@@ -264,26 +271,43 @@ if (
 }
 console.log(`[recurrence] PASS shared target instant resolves post-Li-Chun 2024 boundary day: ${liChunAfter.url}`);
 
-const deepLiChunFields = solarTermEventForCivilYear(2426, "立春").referenceFields;
-const deepLiChunDate = `${deepLiChunFields.year}-${String(deepLiChunFields.month).padStart(2, "0")}-${String(deepLiChunFields.day).padStart(2, "0")}`;
-const deepLiChun = expectCase(
-  `recurrence.html?date=${deepLiChunDate}&delta=0&targetClock=fixed-zone&targetTime=23%3A59%3A59&ut1Offset=8`,
+const runtimeGap = expectCase(
+  "recurrence.html?date=2026-09-13&delta=400",
   {
-    "data-target-date":deepLiChunDate,
-    "data-selected-target-instant-basis":"fixed-zone-from-ut1",
-    "data-selected-target-instant-bound":"true"
+    "data-target-date":"2426-09-13"
   },
-  "deep-time bound Li Chun boundary"
+  "2426 seasonal runtime gap"
 );
 if (
-  !deepLiChun.dom.includes('data-selected-civil-li-chun-relation="boundary-day"') ||
-  !deepLiChun.dom.includes('data-li-chun-instant-resolution="outside-validated-coverage"') ||
-  !deepLiChun.dom.includes('data-selected-year-pillar="unavailable"') ||
-  !deepLiChun.dom.includes('id="research-year-base-title">選定日 · 立春日仍待時間尺度<')
+  !runtimeGap.dom.includes('data-li-chun-boundary-status="source-covered-runtime-missing"') ||
+  !runtimeGap.dom.includes('data-li-chun-projection-status="unavailable"') ||
+  !runtimeGap.dom.includes('data-li-chun-provider="none"') ||
+  !runtimeGap.dom.includes('data-selected-year-pillar="unavailable"') ||
+  !runtimeGap.dom.includes('id="research-year-li-chun-unavailable-title">立春 · 乙酉 → 丙戌<') ||
+  !runtimeGap.dom.includes("DE441 涵蓋此年 · 節氣 epoch 尚未發布")
 ) {
-  throw new Error(`deep-time target clock must not promote Li Chun membership outside validated TT/UT1 coverage: ${deepLiChun.url}`);
+  throw new Error(`2426 must expose the DE441 source-covered/runtime-missing gap instead of legacy Tyme civil fields: ${runtimeGap.url}`);
 }
-console.log(`[recurrence] PASS deep-time Li Chun target remains fail-closed outside validated TT/UT1 coverage: ${deepLiChun.url}`);
+console.log(`[recurrence] PASS 2426 year strip exposes seasonal runtime gap: ${runtimeGap.url}`);
+
+const de441Estimated = expectCase(
+  "recurrence.html?date=4006-09-13&delta=0",
+  {
+    "data-target-date":"4006-09-13"
+  },
+  "4006 DE441 estimated Li Chun"
+);
+if (
+  !de441Estimated.dom.includes('data-li-chun-boundary-status="resolved"') ||
+  !de441Estimated.dom.includes('data-li-chun-provider="jpl-de441-seasonal-events-v1"') ||
+  !de441Estimated.dom.includes('data-li-chun-projection-status="estimated"') ||
+  !de441Estimated.dom.includes('data-li-chun-position-status="estimated"') ||
+  !de441Estimated.dom.includes('id="research-year-li-chun-label">≈ ') ||
+  !de441Estimated.dom.includes("jpl-de441-seasonal-events-v1")
+) {
+  throw new Error(`4006 must use reviewed DE441 TT and expose only an estimated civil position: ${de441Estimated.url}`);
+}
+console.log(`[recurrence] PASS 4006 year strip uses DE441 + estimated civil projection: ${de441Estimated.url}`);
 
 const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",
@@ -308,11 +332,12 @@ if (!/公曆結構回原位/.test(gregorian.dom)) {
   throw new Error(`400-year Gregorian-only explanation missing: ${gregorian.url}`);
 }
 if (
-  !gregorian.dom.includes('id="research-year-base-title">選定日 · 丙戌年<') ||
+  !gregorian.dom.includes('id="research-year-base-title">選定日 · 年柱待節氣判定<') ||
   !gregorian.dom.includes('id="research-year-base-label">2426/09/13<') ||
-  !gregorian.dom.includes('id="research-year-li-chun-title">立春 · 乙酉 → 丙戌<')
+  !gregorian.dom.includes('id="research-year-li-chun-unavailable-title">立春 · 乙酉 → 丙戌<') ||
+  !gregorian.dom.includes("DE441 涵蓋此年 · 節氣 epoch 尚未發布")
 ) {
-  throw new Error(`400-year selected target did not own the year strip / Ganzhi boundary: ${gregorian.url}`);
+  throw new Error(`400-year selected target must expose the seasonal authority gap instead of inventing a Ganzhi-year membership: ${gregorian.url}`);
 }
 expectMarker(gregorian.dom, "gregorian", "-90.000", "0", "400-year Gregorian recurrence", gregorian.url);
 expectMarker(gregorian.dom, "year", "-143.333", "-20", "400-year Gregorian recurrence", gregorian.url);
