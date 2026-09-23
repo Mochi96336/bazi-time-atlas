@@ -204,6 +204,28 @@ if (!/三個離散相位同時歸零/.test(global.dom) || !/26026-09-13/.test(gl
 for (const key of ["gregorian", "year", "day"]) expectMarker(global.dom, key, "-90.000", "0", "24000-year global recurrence", global.url);
 console.log(`[recurrence] PASS global closure stacks every discrete marker on the same reference and owns one labeled preset: ${global.url}`);
 
+const liChunBoundaryDay = expectCase(
+  "recurrence.html?date=2024-02-04&delta=0",
+  {
+    "data-target-date":"2024-02-04"
+  },
+  "date-only Li Chun boundary"
+);
+if (
+  !liChunBoundaryDay.dom.includes('data-selected-li-chun-relation="boundary-day"') ||
+  !liChunBoundaryDay.dom.includes('id="research-year-base-title">選定日 · 立春日需時刻判定<') ||
+  !liChunBoundaryDay.dom.includes('id="research-year-li-chun-title">立春 · 癸卯 → 甲辰<')
+) {
+  throw new Error(`date-only Li Chun selection must remain Ganzhi-year ambiguous until a target time is bound: ${liChunBoundaryDay.url}`);
+}
+if (
+  liChunBoundaryDay.dom.includes('id="research-year-base-title">選定日 · 癸卯年<') ||
+  liChunBoundaryDay.dom.includes('id="research-year-base-title">選定日 · 甲辰年<')
+) {
+  throw new Error(`date-only Li Chun selection incorrectly assigned a Ganzhi year: ${liChunBoundaryDay.url}`);
+}
+console.log(`[recurrence] PASS date-only Li Chun boundary fails closed until target time is bound: ${liChunBoundaryDay.url}`);
+
 const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",
   {
