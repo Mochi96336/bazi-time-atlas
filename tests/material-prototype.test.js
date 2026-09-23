@@ -151,8 +151,8 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /uniform float u_solar_outer_radius/);
   assert.match(material, /uniform float u_solar_rotation/);
   assert.match(material, /renderSolarBrass\(point, u_solar_rotation, pixelFootprint\)/);
-  // Material K4.2 keeps the K2 procedural language, but miniaturizes the
-  // oxidation/scratch field after exact-head PNG review found K4.1 still coarse.
+  // Material K4.3 keeps the K2 procedural language, but removes the remaining
+  // broad oxide-island read in favor of high-frequency low-contrast variation.
   // repeating 128×128 graphite texture for oxidation. It owns a deterministic
   // value-noise/fBm field, then applies the demo's domain-warped low/mid/fine
   // hierarchy in ring-local coordinates.
@@ -160,15 +160,15 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /float solarFbm\(vec2 p, float seed\)/);
   assert.match(material, /for \(int octave = 0; octave < 3; octave \+= 1\)/);
   assert.match(material, /vec3 solarOxidation\(vec2 localPoint\)/);
-  assert.match(material, /wx = \(solarFbm\(p \* 1\.50, 51\.0\) - 0\.5\) \* 1\.05/);
-  assert.match(material, /wy = \(solarFbm\(p \* 1\.42 \+ vec2\(17\.0, -9\.0\), 73\.0\) - 0\.5\) \* 0\.92/);
-  assert.match(material, /low = solarFbm\(warped \* 1\.72, 11\.0\)/);
-  assert.match(material, /mid = solarFbm\(vec2\(warped\.x \* 3\.20, warped\.y \* 2\.98\)/);
-  assert.match(material, /fine = solarFbm\(warped \* 5\.20/);
-  assert.match(material, /combined = low \* 0\.36 \+ mid \* 0\.50 \+ fine \* 0\.14/);
-  assert.match(material, /oxidePatch = smoothstep\(0\.52, 0\.68, combined\)/);
-  assert.match(material, /deep = smoothstep\(0\.65, 0\.80, solarFbm\(p \* vec2\(2\.30, 2\.00\)/);
-  assert.match(material, /cool = smoothstep\(0\.69, 0\.84, solarValueNoise\(p \* vec2\(1\.85, 1\.72\)/);
+  assert.match(material, /wx = \(solarFbm\(p \* 2\.10, 51\.0\) - 0\.5\) \* 0\.55/);
+  assert.match(material, /wy = \(solarFbm\(p \* 1\.95 \+ vec2\(17\.0, -9\.0\), 73\.0\) - 0\.5\) \* 0\.48/);
+  assert.match(material, /low = solarFbm\(warped \* 2\.60, 11\.0\)/);
+  assert.match(material, /mid = solarFbm\(vec2\(warped\.x \* 5\.00, warped\.y \* 4\.65\)/);
+  assert.match(material, /fine = solarFbm\(warped \* 8\.50/);
+  assert.match(material, /combined = low \* 0\.18 \+ mid \* 0\.46 \+ fine \* 0\.36/);
+  assert.match(material, /oxidePatch = smoothstep\(0\.58, 0\.76, combined\)/);
+  assert.match(material, /deep = smoothstep\(0\.72, 0\.86, solarFbm\(p \* vec2\(4\.00, 3\.50\)/);
+  assert.match(material, /cool = smoothstep\(0\.75, 0\.89, solarValueNoise\(p \* vec2\(3\.20, 2\.90\)/);
 
   // Scratch generation mirrors demo v3 instead of the previous tangent-cell
   // hatch: dense jittered cells, near-radial primary marks, ±12° variation,
@@ -201,7 +201,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
   assert.match(material, /warmCatch \* 0\.015/);
   assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);
-  assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.18 \+ aging\.y \* 0\.09 \+ aging\.z \* 0\.012, 0\.0, 0\.26\)/);
+  assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.10 \+ aging\.y \* 0\.045 \+ aging\.z \* 0\.005, 0\.0, 0\.14\)/);
   assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
   assert.match(material, /primaryStrength = abs\(primaryScratch\.x\) \* 0\.012 \* fineAttenuation/);
   assert.match(material, /handlingStrength = abs\(handlingScratch\.x\) \* 0\.007 \* fineAttenuation/);
