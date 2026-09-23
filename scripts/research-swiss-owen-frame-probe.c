@@ -58,11 +58,12 @@ int main(int argc, char **argv) {
   };
 
   /*
-   * Horizons quantity #45 is ICRF apparent direction. Swiss's JPL ephemeris
-   * pipeline converts ICRS/GCRS directions to dynamical J2000 before its
-   * JPLHOR precession stage, so reproduce that exact frame-only path here.
+   * Horizons quantity #45 is ICRF apparent direction. Swiss's Horizons-compatible path converts ICRS/GCRS directions to
+   * dynamical J2000 before its long-term precession stage. Use the explicit
+   * JPLHOR_APPROX model because this standalone frame probe has no EOP files
+   * and must not enter the EOP-backed JPLHOR cache path.
    */
-  const int32 iflag = SEFLG_JPLHOR;
+  const int32 iflag = SEFLG_JPLHOR_APPROX;
   fprintf(stderr, "stage=bias\n");
   fflush(stderr);
   swi_bias(vector, tt_jd, iflag, FALSE);
