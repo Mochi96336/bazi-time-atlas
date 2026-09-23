@@ -38,6 +38,14 @@ int main(int argc, char **argv) {
    * is performed by this probe.
    */
   swe_set_ephe_path(NULL);
+  /*
+   * Horizons quantity #31 uses the IAU76/80 Earth ecliptic-of-date system.
+   * Swiss 2.06 defaults to IAU2000B nutation, so pin N1 (IAU1980/Wahr)
+   * explicitly while leaving the other current model slots unchanged.
+   * The JPLHOR flag below still owns the long-term Owen precession override.
+   */
+  char astro_models[] = "5,9,9,1,3,0,0,4";
+  swe_set_astro_models(astro_models, 0);
 
   if (argc != 5) {
     fprintf(stderr, "usage: %s <mode:mean|apparent> <tt-jd> <icrf-ra-deg> <icrf-dec-deg>\n", argv[0]);
@@ -58,12 +66,12 @@ int main(int argc, char **argv) {
   };
 
   /*
-   * Horizons quantity #45 is ICRF apparent direction. Swiss's Horizons-compatible path converts ICRS/GCRS directions to
-   * dynamical J2000 before its long-term precession stage. Use the explicit
-   * JPLHOR_APPROX model because this standalone frame probe has no EOP files
-   * and must not enter the EOP-backed JPLHOR cache path.
+   * Horizons quantity #45 is ICRF apparent direction. Swiss's JPL Horizons path converts ICRS/GCRS directions to dynamical J2000
+   * before its Owen long-term precession stage. We use the JPLHOR flag only
+   * for bias/precession selection; nutation angles are evaluated separately
+   * with the explicitly pinned IAU1980 model below, avoiding the EOP cache.
    */
-  const int32 iflag = SEFLG_JPLHOR_APPROX;
+  const int32 iflag = SEFLG_JPLHOR;
   fprintf(stderr, "stage=bias\n");
   fflush(stderr);
   swi_bias(vector, tt_jd, iflag, FALSE);
@@ -98,7 +106,7 @@ int main(int argc, char **argv) {
    * initialization and is not a standalone frame helper).
    */
   if (strcmp(mode, "apparent") == 0) {
-    if (swi_nutation(tt_jd, iflag, nutation) != 0) {
+    if (swi_nutation(tt_jd, 0, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
     }
