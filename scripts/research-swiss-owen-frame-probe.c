@@ -63,7 +63,11 @@ int main(int argc, char **argv) {
    * JPLHOR precession stage, so reproduce that exact frame-only path here.
    */
   const int32 iflag = SEFLG_JPLHOR;
+  fprintf(stderr, "stage=bias\n");
+  fflush(stderr);
   swi_bias(vector, tt_jd, iflag, FALSE);
+  fprintf(stderr, "stage=precess\n");
+  fflush(stderr);
   if (swi_precess(vector, tt_jd, iflag, J2000_TO_J) != 0) {
     fprintf(stderr, "swi_precess failed\n");
     return 3;
@@ -81,8 +85,14 @@ int main(int argc, char **argv) {
    */
   double nutation[2] = {0.0, 0.0};
   if (strcmp(mode, "apparent") == 0) {
+    fprintf(stderr, "stage=check-nutation\n");
+    fflush(stderr);
     swi_check_nutation(tt_jd, iflag);
+    fprintf(stderr, "stage=nutate\n");
+    fflush(stderr);
     swi_nutate(vector, iflag, FALSE);
+    fprintf(stderr, "stage=nutation-values\n");
+    fflush(stderr);
     if (swi_nutation(tt_jd, iflag, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
@@ -92,7 +102,11 @@ int main(int argc, char **argv) {
     return 2;
   }
 
+  fprintf(stderr, "stage=obliquity\n");
+  fflush(stderr);
   const double obliquity = swi_epsiln(tt_jd, iflag);
+  fprintf(stderr, "stage=ecliptic-rotate\n");
+  fflush(stderr);
   swi_coortrf(vector, vector, obliquity);
   if (strcmp(mode, "apparent") == 0) {
     swi_coortrf(vector, vector, nutation[1]);
