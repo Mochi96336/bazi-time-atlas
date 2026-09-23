@@ -84,35 +84,33 @@ int main(int argc, char **argv) {
    * though the seasonal plane itself is the mean ecliptic-of-date plane.
    */
   double nutation[2] = {0.0, 0.0};
-  if (strcmp(mode, "apparent") == 0) {
-    fprintf(stderr, "stage=check-nutation\n");
-    fflush(stderr);
-    swi_check_nutation(tt_jd, iflag);
-    fprintf(stderr, "stage=nutate\n");
-    fflush(stderr);
-    swi_nutate(vector, iflag, FALSE);
-    fprintf(stderr, "stage=nutation-values\n");
-    fflush(stderr);
-    if (swi_nutation(tt_jd, iflag, nutation) != 0) {
-      fprintf(stderr, "swi_nutation failed\n");
-      return 4;
-    }
-  } else if (strcmp(mode, "mean") != 0) {
+  if (strcmp(mode, "apparent") != 0 && strcmp(mode, "mean") != 0) {
     fprintf(stderr, "unknown mode: %s\n", mode);
     return 2;
   }
 
-  fprintf(stderr, "stage=obliquity\n");
-  fflush(stderr);
-  const double obliquity = swi_epsiln(tt_jd, iflag);
-  fprintf(stderr, "stage=ecliptic-rotate\n");
-  fflush(stderr);
-  swi_coortrf(vector, vector, obliquity);
+  /*
+   * Keep the seasonal plane on Owen's mean ecliptic-of-date. Horizons
+   * quantity #31 is apparent longitude, so test the apparent equinox
+   * separately through nutation in longitude instead of invoking Swiss's
+   * cached JPLHOR nutation matrix path (which requires full EOP runtime
+   * initialization and is not a standalone frame helper).
+   */
   if (strcmp(mode, "apparent") == 0) {
-    swi_coortrf(vector, vector, nutation[1]);
+    if (swi_nutation(tt_jd, 0, nutation) != 0) {
+      fprintf(stderr, "swi_nutation failed\n");
+      return 4;
+    }
   }
 
-  const double longitude = normalized_degrees(atan2(vector[1], vector[0]));
+  const double obliquity = swi_epsiln(tt_jd, iflag);
+  swi_coortrf(vector, vector, obliquity);
+
+  double longitude = normalized_degrees(atan2(vector[1], vector[0]));
+  if (strcmp(mode, "apparent") == 0) {
+    longitude = fmod(longitude + nutation[0] * 180.0 / M_PI, 360.0);
+    if (longitude < 0.0) longitude += 360.0;
+  }
   const double latitude = atan2(vector[2], hypot(vector[0], vector[1])) * 180.0 / M_PI;
 
   printf("%.12f %.12f %.12f\n", longitude, latitude, obliquity * 180.0 / M_PI);
