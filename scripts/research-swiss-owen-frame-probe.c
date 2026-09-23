@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
    * explicitly while leaving the other current model slots unchanged.
    * The JPLHOR flag below still owns the long-term Owen precession override.
    */
-  char astro_models[] = "5,9,9,1,3,0,0,4";
+  char astro_models[] = "5,10,10,1,3,0,0,4";
   swe_set_astro_models(astro_models, 0);
 
   if (argc != 5) {
@@ -69,12 +69,12 @@ int main(int argc, char **argv) {
   };
 
   /*
-   * Horizons quantity #45 is ICRF apparent direction. Swiss's JPL Horizons path converts ICRS/GCRS directions to dynamical J2000
-   * before its Owen long-term precession stage. We use the JPLHOR flag only
-   * for bias/precession selection; nutation angles are evaluated separately
-   * with the explicitly pinned IAU1980 model below, avoiding the EOP cache.
+   * Horizons quantity #45 is ICRF apparent direction. This probe feeds an already-apparent Horizons #45 ICRF direction into the
+   * frame transform, so pin Owen 1990 directly instead of using SEFLG_JPLHOR.
+   * The latter adds Swiss's pipeline-specific ~0.066816 arcsec Owen longitude
+   * correction intended for its full Horizons-emulation pipeline.
    */
-  const int32 iflag = SEFLG_JPLHOR;
+  const int32 iflag = 0;
   if (!no_bias) {
     swi_bias(vector, tt_jd, iflag, reverse_bias ? TRUE : FALSE);
   }
