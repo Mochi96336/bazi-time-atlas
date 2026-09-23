@@ -1,15 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import {
   RESEARCH_YEAR_STRIP_CONTRACT,
   researchYearStripState
 } from "../src/research-year-strip-view.js";
 import { fixedZoneTargetClock } from "../src/recurrence/fixed-zone-target-clock.js";
 
-test("year strip no longer treats the legacy civil solar-term helper as its authority", () => {
+test("year strip no longer treats the legacy civil solar-term helper as its authority", async () => {
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.directLegacyCivilSolarTermAuthority, false);
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.transitionIndependentFromEpochAvailability, true);
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.defaultDisplayOffsetHoursFromUt1, 8);
+
+  const source = await readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /solarTermEventForCivilYear/);
+  assert.match(source, /resolveSeasonalBoundary/);
+  assert.match(source, /projectSeasonalBoundaryToCivil/);
 });
 
 test("modern year strip orders selected dates before and after the resolved Li Chun boundary", () => {
