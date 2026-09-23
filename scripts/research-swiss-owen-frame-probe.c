@@ -31,6 +31,14 @@ static double normalized_degrees(double radians) {
 }
 
 int main(int argc, char **argv) {
+  /*
+   * The low-level Swiss frame helpers read the shared swed model state.
+   * Initialise that state through the public API before calling swi_bias /
+   * swi_precess / nutation helpers directly. No ephemeris body calculation
+   * is performed by this probe.
+   */
+  swe_set_ephe_path(NULL);
+
   if (argc != 5) {
     fprintf(stderr, "usage: %s <mode:mean|apparent> <tt-jd> <icrf-ra-deg> <icrf-dec-deg>\n", argv[0]);
     return 2;
