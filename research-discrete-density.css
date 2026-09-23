@@ -163,7 +163,7 @@
   color: #68736c;
   font-size: 9px;
 }
-.research-year-li-chun > strong { top: 0; color: #e1d8b8; }
+.research-year-li-chun > strong { top: 0; color: #e1d8b8; transform: translateX(-18%); }
 .research-year-li-chun > small { top: 14px; color: #8e876f; }
 .research-year-li-chun > i { background: rgba(225,216,184,.56); }
 .research-year-li-chun > i::after { background: #d9cfa9; }
@@ -174,6 +174,10 @@
 .research-year-start > small { transform: none; }
 .research-year-end > strong,
 .research-year-end > small { transform: translateX(-100%); }
+.research-year-strip[data-base-edge="start"] .research-year-base > strong,
+.research-year-strip[data-base-edge="start"] .research-year-base > small { transform: none; }
+.research-year-strip[data-base-edge="end"] .research-year-base > strong,
+.research-year-strip[data-base-edge="end"] .research-year-base > small { transform: translateX(-100%); }
 
 .research-year-li-chun-unavailable {
   display: flex;

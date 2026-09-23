@@ -75,9 +75,10 @@ test("milestone detail table is fully removed while the derivation stays visible
 test("year strip owns the visible 1/1, Li Chun, base date, year end, and next-same-date cue", () => {
   assert.match(recurrenceHtml, /id="research-year-strip"/);
   assert.match(recurrenceHtml, />1\/1</);
-  assert.match(recurrenceHtml, />立春</);
-  assert.match(recurrenceHtml, />基準日</);
+  assert.match(recurrenceHtml, /id="research-year-li-chun-title">立春 · — → —<\/strong>/);
+  assert.match(recurrenceHtml, /id="research-year-base-title">基準日 · —年<\/strong>/);
   assert.match(recurrenceHtml, />12\/31</);
+  assert.match(recurrenceHtml, /立春逐年實算 · 1\/1 不是干支年界/);
   assert.match(recurrenceHtml, /id="research-year-next-date"/);
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
   assert.match(recurrenceHtml, /跨過下一個立春年界後，進入下一個干支年序/);
@@ -90,6 +91,12 @@ test("year strip composes existing authorities and fails closed outside exact Li
   assert.match(yearStripView, /validateGregorianDate/);
   assert.match(yearStripView, /solarTermEventForCivilYear/);
   assert.match(yearStripView, /solarTermEventForCivilYear\(year, "立春"\)/);
+  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear/);
+  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(baseDate\.year - 1\)/);
+  assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear\(baseDate\.year\)/);
+  assert.match(yearStripView, /strip\.dataset\.selectedYearPillar/);
+  assert.match(yearStripView, /research-year-li-chun-title/);
+  assert.match(yearStripView, /research-year-base-title/);
   assert.match(yearStripView, /catch \{[\s\S]*?return null;/);
   assert.match(yearStripView, /liChunMarker\.hidden = true/);
   assert.match(yearStripView, /liChunUnavailable\.hidden = false/);
@@ -101,6 +108,8 @@ test("mobile year strip moves edge-adjacent base labels onto a second lane", () 
   assert.match(css, /@media \(max-width:480px\)[\s\S]*?data-base-edge="start"[\s\S]*?research-year-track \{ height: 118px;/);
   assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > strong \{ top: 76px;/);
   assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > small \{ top: 92px;/);
+  assert.match(css, /data-base-edge="start"[\s\S]*?research-year-base > strong,[\s\S]*?transform: none;/);
+  assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > strong,[\s\S]*?transform: translateX\(-100%\)/);
 });
 
 test("60-day cycle remains supporting evidence behind one flat drilldown", () => {
