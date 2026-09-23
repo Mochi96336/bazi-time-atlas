@@ -4,6 +4,7 @@ import {
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { solarTermEventForCivilYear } from "./astronomy/solar-term-boundaries.js";
+import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
 
 const strip = typeof document === "undefined" ? null : document.querySelector("#research-year-strip");
 const instrument = typeof document === "undefined" ? null : document.querySelector("#recurrence-instrument");
@@ -57,12 +58,23 @@ export function researchYearStripState(baseDate) {
   const liChun = exactLiChunForYear(baseDate.year);
   const basePosition = positionForDate(baseDate);
   const nextDate = next.targetValid ? next.targetDate : null;
+  const baseBeforeLiChun = liChun ? basePosition < liChun.position : null;
+  const beforeYearPillar = sexagenaryYearPillarForLiChunYear(baseDate.year - 1);
+  const afterYearPillar = sexagenaryYearPillarForLiChunYear(baseDate.year);
+  const liChunTransition = liChun
+    ? Object.freeze({ before:beforeYearPillar, after:afterYearPillar })
+    : null;
+  const selectedYearPillar = baseBeforeLiChun === null
+    ? null
+    : baseBeforeLiChun ? beforeYearPillar : afterYearPillar;
 
   return Object.freeze({
     baseDate:Object.freeze({ ...baseDate }),
     basePosition,
     liChun,
-    baseBeforeLiChun:liChun ? basePosition < liChun.position : null,
+    baseBeforeLiChun,
+    liChunTransition,
+    selectedYearPillar,
     nextDate:nextDate ? Object.freeze({ ...nextDate }) : null,
     elapsedDays:next.dayDelta
   });
@@ -91,14 +103,25 @@ function render() {
   strip.dataset.baseBeforeLiChun = state.baseBeforeLiChun === null ? "unknown" : String(state.baseBeforeLiChun);
   strip.dataset.baseEdge = state.basePosition < 20 ? "start" : state.basePosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
+  strip.dataset.selectedYearPillar = state.selectedYearPillar?.name ?? "unavailable";
+  strip.dataset.liChunYearPillarBefore = state.liChunTransition?.before.name ?? "unavailable";
+  strip.dataset.liChunYearPillarAfter = state.liChunTransition?.after.name ?? "unavailable";
 
   if (baseMarker) baseMarker.style.setProperty("--year-x", `${state.basePosition.toFixed(4)}%`);
+  setText(
+    "research-year-base-title",
+    state.selectedYearPillar ? `基準日 · ${state.selectedYearPillar.name}年` : "基準日 · 年柱待節氣判定"
+  );
   setText("research-year-base-label", formatDate(state.baseDate));
   setText("research-year-base-date", formatDate(state.baseDate));
 
   if (state.liChun) {
     liChunMarker.hidden = false;
     liChunMarker.style.setProperty("--year-x", `${state.liChun.position.toFixed(4)}%`);
+    setText(
+      "research-year-li-chun-title",
+      `立春 · ${state.liChunTransition.before.name} → ${state.liChunTransition.after.name}`
+    );
     setText("research-year-li-chun-label", state.liChun.label);
     liChunUnavailable.hidden = true;
   } else {
