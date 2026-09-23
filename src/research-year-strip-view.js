@@ -58,7 +58,20 @@ export function researchYearStripState(selectedDate) {
   const liChun = exactLiChunForYear(selectedDate.year);
   const selectedPosition = positionForDate(selectedDate);
   const nextDate = next.targetValid ? next.targetDate : null;
-  const selectedBeforeLiChun = liChun ? selectedPosition < liChun.position : null;
+  const selectedOrdinal = gregorianOrdinal(selectedDate);
+  const liChunOrdinal = liChun ? gregorianOrdinal(liChun.date) : null;
+  const selectedLiChunRelation = liChunOrdinal === null
+    ? "unknown"
+    : selectedOrdinal < liChunOrdinal
+      ? "before"
+      : selectedOrdinal > liChunOrdinal
+        ? "after"
+        : "boundary-day";
+  const selectedBeforeLiChun = selectedLiChunRelation === "before"
+    ? true
+    : selectedLiChunRelation === "after"
+      ? false
+      : null;
   const beforeYearPillar = sexagenaryYearPillarForLiChunYear(selectedDate.year - 1);
   const afterYearPillar = sexagenaryYearPillarForLiChunYear(selectedDate.year);
   const liChunTransition = liChun
@@ -72,6 +85,7 @@ export function researchYearStripState(selectedDate) {
     selectedDate:Object.freeze({ ...selectedDate }),
     selectedPosition,
     liChun,
+    selectedLiChunRelation,
     selectedBeforeLiChun,
     liChunTransition,
     selectedYearPillar,
@@ -100,6 +114,7 @@ function render() {
 
   strip.dataset.ready = "true";
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
+  strip.dataset.selectedLiChunRelation = state.selectedLiChunRelation;
   strip.dataset.selectedBeforeLiChun = state.selectedBeforeLiChun === null ? "unknown" : String(state.selectedBeforeLiChun);
   strip.dataset.baseEdge = state.selectedPosition < 20 ? "start" : state.selectedPosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
@@ -110,7 +125,11 @@ function render() {
   if (baseMarker) baseMarker.style.setProperty("--year-x", `${state.selectedPosition.toFixed(4)}%`);
   setText(
     "research-year-base-title",
-    state.selectedYearPillar ? `選定日 · ${state.selectedYearPillar.name}年` : "選定日 · 年柱待節氣判定"
+    state.selectedYearPillar
+      ? `選定日 · ${state.selectedYearPillar.name}年`
+      : state.selectedLiChunRelation === "boundary-day"
+        ? "選定日 · 立春日需時刻判定"
+        : "選定日 · 年柱待節氣判定"
   );
   setText("research-year-base-label", formatDate(state.selectedDate));
   setText("research-year-base-date", formatDate(state.selectedDate));
