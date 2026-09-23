@@ -37,6 +37,10 @@ const FRAGMENT_SHADER = [
   "uniform vec4 u_inner_radii;",
   "uniform vec4 u_outer_radii;",
   "uniform vec4 u_rotations;",
+  "uniform float u_solar_inner_radius;",
+  "uniform float u_solar_outer_radius;",
+  "uniform float u_solar_rotation;",
+  "uniform float u_has_solar_material;",
   "uniform sampler2D u_roughness_field;",
   "out vec4 out_color;",
   "",
@@ -45,6 +49,13 @@ const FRAGMENT_SHADER = [
   "const float SURFACE_PERIOD_MEDIUM = 38.0;",
   "const float SURFACE_PERIOD_FINE = 15.0;",
   "const float SURFACE_SAMPLE_STEP = 0.90;",
+  "const float OXIDE_PERIOD_LARGE = 166.0;",
+  "const float OXIDE_PERIOD_MEDIUM = 72.0;",
+  "const float OXIDE_PERIOD_FINE = 29.0;",
+  "const float OXIDE_WARP_STRENGTH = 24.0;",
+  "const float SCRATCH_CELL_TANGENT = 46.0;",
+  "const float SCRATCH_CELL_RADIAL = 21.0;",
+  "const float SCRATCH_SAMPLE_STEP = 0.85;",
   "",
   "mat2 rotation(float radians) {",
   "  float c = cos(radians);",
@@ -81,6 +92,165 @@ const FRAGMENT_SHADER = [
   "  return large * 0.10 + medium * 0.28 + fine * 0.62;",
   "}",
   "",
+  "vec2 oxidationWarp(vec2 localPoint) {",
+  "  float wx = fieldAt(localPoint, 171.0, vec2(0.17, 0.63)) - 0.5;",
+  "  float wy = fieldAt(rotation(0.73) * localPoint, 143.0, vec2(0.61, 0.21)) - 0.5;",
+  "  return vec2(wx, wy);",
+  "}",
+  "",
+  "float oxidationBase(vec2 localPoint) {",
+  "  vec2 warped = localPoint + oxidationWarp(localPoint) * OXIDE_WARP_STRENGTH;",
+  "  float large = fieldAt(warped, OXIDE_PERIOD_LARGE, vec2(0.31, 0.77));",
+  "  float medium = fieldAt(rotation(-0.43) * warped, OXIDE_PERIOD_MEDIUM, vec2(0.67, 0.11));",
+  "  float fine = fieldAt(rotation(0.58) * warped, OXIDE_PERIOD_FINE, vec2(0.09, 0.53));",
+  "  return large * 0.58 + medium * 0.31 + fine * 0.11;",
+  "}",
+  "",
+  "float oxidationField(vec2 localPoint) {",
+  "  float thresholdVariation = (fieldAt(localPoint, 238.0, vec2(0.83, 0.27)) - 0.5) * 0.10;",
+  "  return smoothstep(0.49 + thresholdVariation, 0.68 + thresholdVariation, oxidationBase(localPoint));",
+  "}",
+  "",
+  "float deepOxidationField(vec2 localPoint) {",
+  "  vec2 shifted = rotation(0.41) * localPoint + vec2(37.0, -19.0);",
+  "  return smoothstep(0.70, 0.82, oxidationBase(shifted));",
+  "}",
+  "",
+  "float hash21(vec2 p) {",
+  "  p = fract(p * vec2(123.34, 456.21));",
+  "  p += dot(p, p + 45.32);",
+  "  return fract(p.x * p.y);",
+  "}",
+  "",
+  "float segmentDistance(vec2 p, vec2 a, vec2 b) {",
+  "  vec2 pa = p - a;",
+  "  vec2 ba = b - a;",
+  "  float h = clamp(dot(pa, ba) / max(dot(ba, ba), 0.0001), 0.0, 1.0);",
+  "  return length(pa - ba * h);",
+  "}",
+  "",
+  "vec2 solarScratchUv(vec2 localPoint) {",
+  "  float radius = length(localPoint);",
+  "  float midRadius = (u_solar_inner_radius + u_solar_outer_radius) * 0.5;",
+  "  return vec2(atan(localPoint.y, localPoint.x) * midRadius, radius - u_solar_inner_radius);",
+  "}",
+  "",
+  "float scratchFromCell(vec2 uv, vec2 cell, float handling) {",
+  "  vec2 cellSize = vec2(SCRATCH_CELL_TANGENT, SCRATCH_CELL_RADIAL);",
+  "  vec2 seed = cell + vec2(handling * 71.0, handling * 113.0);",
+  "  float r0 = hash21(seed + vec2(0.11, 0.73));",
+  "  float r1 = hash21(seed + vec2(1.37, 2.19));",
+  "  float r2 = hash21(seed + vec2(3.71, 0.43));",
+  "  float r3 = hash21(seed + vec2(5.23, 7.17));",
+  "  float r4 = hash21(seed + vec2(9.41, 1.89));",
+  "  float r5 = hash21(seed + vec2(2.83, 11.31));",
+  "  float r6 = hash21(seed + vec2(13.13, 4.57));",
+  "  float r7 = hash21(seed + vec2(6.67, 15.79));",
+  "  float threshold = mix(0.60, 0.978, handling);",
+  "  float exists = step(threshold, r0);",
+  "  vec2 center = cell * cellSize + vec2(r1 * cellSize.x, r2 * cellSize.y);",
+  "  float shortBias = r3 * r3;",
+  "  float scratchLength = mix(mix(9.0, 22.0, handling), mix(40.0, 64.0, handling), shortBias);",
+  "  float maxAngle = mix(0.16, 0.68, handling);",
+  "  float angle = (r5 - 0.5) * 2.0 * maxAngle;",
+  "  vec2 direction = vec2(cos(angle), sin(angle));",
+  "  vec2 normal = vec2(-direction.y, direction.x);",
+  "  vec2 a = center - direction * scratchLength * 0.5;",
+  "  vec2 b = center + direction * scratchLength * 0.5;",
+  "  float axis = dot(uv - center, direction);",
+  "  float bendWindow = sin(clamp(axis / scratchLength + 0.5, 0.0, 1.0) * PI);",
+  "  float bend = bendWindow * (r6 - 0.5) * mix(1.25, 2.4, handling);",
+  "  float distanceToScratch = segmentDistance(uv - normal * bend, a, b);",
+  "  float width = mix(mix(0.26, 0.38, handling), mix(0.82, 0.96, handling), r4);",
+  "  float feather = max(0.34, fwidth(distanceToScratch) * 0.90);",
+  "  float mask = (1.0 - smoothstep(width, width + feather, distanceToScratch)) * exists;",
+  "  float polarity = r7 > 0.46 ? 1.0 : -1.0;",
+  "  return mask * polarity;",
+  "}",
+  "",
+  "float scratchField(vec2 localPoint, float handling) {",
+  "  vec2 uv = solarScratchUv(localPoint);",
+  "  vec2 cellSize = vec2(SCRATCH_CELL_TANGENT, SCRATCH_CELL_RADIAL);",
+  "  vec2 baseCell = floor(uv / cellSize);",
+  "  float best = 0.0;",
+  "  for (int offset = -1; offset <= 1; offset += 1) {",
+  "    float candidate = scratchFromCell(uv, baseCell + vec2(float(offset), 0.0), handling);",
+  "    if (abs(candidate) > abs(best)) best = candidate;",
+  "  }",
+  "  return best;",
+  "}",
+  "",
+  "float brassMicroField(vec2 localPoint) {",
+  "  float medium = fieldAt(rotation(0.29) * localPoint, 47.0, vec2(0.23, 0.87));",
+  "  float fine = fieldAt(rotation(-0.52) * localPoint, 17.0, vec2(0.79, 0.33));",
+  "  return medium * 0.34 + fine * 0.66;",
+  "}",
+  "",
+  "vec4 renderSolarBrass(vec2 worldPoint, float rotationDegrees, float pixelFootprint) {",
+  "  float ringRotation = rotationDegrees * PI / 180.0;",
+  "  vec2 localPoint = rotation(ringRotation) * worldPoint;",
+  "  float oxide = oxidationField(localPoint);",
+  "  float deepOxide = deepOxidationField(localPoint) * oxide;",
+  "  float primaryScratch = scratchField(localPoint, 0.0);",
+  "  float handlingScratch = scratchField(localPoint + vec2(11.0, -7.0), 1.0);",
+  "  float scratchSigned = primaryScratch + handlingScratch * 0.25;",
+  "  float scratch = clamp(abs(primaryScratch) + abs(handlingScratch) * 0.25, 0.0, 1.0);",
+  "  float micro = brassMicroField(localPoint);",
+  "  float roughness = clamp(0.72 + (micro - 0.5) * 0.045 + oxide * 0.085 + scratch * 0.060, 0.64, 0.90);",
+  "",
+  "  float scratchDx = (scratchField(localPoint + vec2(SCRATCH_SAMPLE_STEP, 0.0), 0.0)",
+  "    - scratchField(localPoint - vec2(SCRATCH_SAMPLE_STEP, 0.0), 0.0)) / (2.0 * SCRATCH_SAMPLE_STEP);",
+  "  float scratchDy = (scratchField(localPoint + vec2(0.0, SCRATCH_SAMPLE_STEP), 0.0)",
+  "    - scratchField(localPoint - vec2(0.0, SCRATCH_SAMPLE_STEP), 0.0)) / (2.0 * SCRATCH_SAMPLE_STEP);",
+  "  vec2 slopeLocal = vec2(scratchDx, scratchDy) * 0.22;",
+  "  vec2 slopeWorld = rotation(-ringRotation) * slopeLocal;",
+  "  vec3 microNormal = normalize(vec3(-slopeWorld.x, -slopeWorld.y, 1.0));",
+  "",
+  "  vec3 lightDirection = normalize(vec3(-0.42, -0.56, 0.714));",
+  "  vec3 viewDirection = vec3(0.0, 0.0, 1.0);",
+  "  vec3 halfVector = normalize(lightDirection + viewDirection);",
+  "  float baseLight = max(lightDirection.z, 0.0);",
+  "  float microLightDelta = clamp(dot(microNormal, lightDirection) - baseLight, -0.085, 0.085);",
+  "  float specularPower = mix(15.0, 5.5, roughness);",
+  "  float specular = pow(max(dot(microNormal, halfVector), 0.0), specularPower)",
+  "    * (0.020 + (1.0 - roughness) * 0.12);",
+  "  float environmentResponse = clamp(",
+  "    0.91 + dot(worldPoint / vec2(840.0, 560.0), lightDirection.xy) * 0.075,",
+  "    0.84,",
+  "    0.99",
+  "  );",
+  "  float responseLoss = 1.0 - oxide * 0.22;",
+  "",
+  "  float coolNoise = fieldAt(rotation(-0.52) * localPoint, 43.0, vec2(0.57, 0.91));",
+  "  float coolOxide = smoothstep(0.76, 0.88, coolNoise) * oxide;",
+  "  vec3 oxideWarm = vec3(0.24, 0.14, 0.065);",
+  "  vec3 oxideCool = vec3(0.18, 0.19, 0.135);",
+  "  vec3 oxideTint = mix(oxideWarm, oxideCool, coolOxide * 0.12);",
+  "  vec3 reflectionTint = vec3(0.92, 0.84, 0.66);",
+  "  vec3 microLightTint = vec3(0.86, 0.74, 0.52);",
+  "  vec3 microDarkTint = vec3(0.12, 0.072, 0.032);",
+  "",
+  "  float fineAttenuation = mix(0.28, 1.0, 1.0 - smoothstep(1.15, 3.0, pixelFootprint));",
+  "  float oxideAlpha = clamp(oxide * 0.026 + deepOxide * 0.016, 0.0, 0.038);",
+  "  float specularAlpha = clamp(specular * environmentResponse * responseLoss * 0.40, 0.0, 0.012);",
+  "  float microAlpha = clamp(",
+  "    abs(microLightDelta) * 0.27 * fineAttenuation",
+  "      + scratch * 0.016 * fineAttenuation",
+  "      + abs(micro - 0.5) * 0.009,",
+  "    0.0,",
+  "    0.030",
+  "  );",
+  "  vec3 microTint = (microLightDelta + scratchSigned * 0.015) >= 0.0 ? microLightTint : microDarkTint;",
+  "  float radius = length(worldPoint);",
+  "  float edgeDistance = min(radius - u_solar_inner_radius, u_solar_outer_radius - radius);",
+  "  float edgeMask = smoothstep(0.0, 1.35, edgeDistance);",
+  "  float overlayAlpha = edgeMask * clamp(oxideAlpha + specularAlpha + microAlpha, 0.0, 0.062);",
+  "  vec3 overlayColor = oxideTint * oxideAlpha",
+  "    + reflectionTint * specularAlpha",
+  "    + microTint * microAlpha;",
+  "  return vec4(overlayColor * edgeMask, overlayAlpha);",
+  "}",
+  "",
   "void main() {",
   "  vec2 canvasPoint = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y) / u_device_scale;",
   "  vec2 svgPoint = vec2(",
@@ -91,6 +261,14 @@ const FRAGMENT_SHADER = [
   "  float radius = length(point);",
   "  float angleDegrees = atan(point.y, point.x) * 180.0 / PI;",
   "  if (angleDegrees < u_fan_degrees.x || angleDegrees > u_fan_degrees.y) discard;",
+  "  float pixelFootprint = max(length(dFdx(svgPoint)), length(dFdy(svgPoint)));",
+  "  bool inSolar = u_has_solar_material > 0.5",
+  "    && radius >= u_solar_inner_radius",
+  "    && radius <= u_solar_outer_radius;",
+  "  if (inSolar) {",
+  "    out_color = renderSolarBrass(point, u_solar_rotation, pixelFootprint);",
+  "    return;",
+  "  }",
   "  int index = ringIndex(radius);",
   "  if (index < 0) discard;",
   "",
@@ -171,6 +349,21 @@ export function materialGeometry() {
       outerRadius: model.outerRadius
     });
   });
+}
+
+export function solarMaterialGeometry() {
+  const solar = ringModel("solar");
+  const zodiac = ringModel("zodiac");
+  return Object.freeze({
+    id: solar.id,
+    innerRadius: solar.innerRadius,
+    outerRadius: zodiac.innerRadius
+  });
+}
+
+export function renderedSolarRotation(renderedRotations) {
+  const value = renderedRotations?.get?.("solar");
+  return Number.isFinite(value) ? value : 0;
 }
 
 export function fillRenderedRotations(renderedRotations, target = new Float32Array(MATERIAL_RING_IDS.length)) {
@@ -282,6 +475,10 @@ function uniformLocations(gl, program) {
     innerRadii: gl.getUniformLocation(program, "u_inner_radii"),
     outerRadii: gl.getUniformLocation(program, "u_outer_radii"),
     rotations: gl.getUniformLocation(program, "u_rotations"),
+    solarInnerRadius: gl.getUniformLocation(program, "u_solar_inner_radius"),
+    solarOuterRadius: gl.getUniformLocation(program, "u_solar_outer_radius"),
+    solarRotation: gl.getUniformLocation(program, "u_solar_rotation"),
+    hasSolarMaterial: gl.getUniformLocation(program, "u_has_solar_material"),
     field: gl.getUniformLocation(program, "u_roughness_field")
   });
 }
@@ -337,9 +534,11 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   }
   const shell = svg?.closest?.("#kinetic-instrument") ?? null;
   const geometry = materialGeometry();
+  const solarGeometry = solarMaterialGeometry();
   const innerRadii = new Float32Array(geometry.map(item => item.innerRadius));
   const outerRadii = new Float32Array(geometry.map(item => item.outerRadius));
   const rotations = new Float32Array(MATERIAL_RING_IDS.length);
+  let solarRotation = 0;
 
   let gl = null;
   let program = null;
@@ -413,6 +612,10 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.uniform4fv(uniforms.innerRadii, innerRadii);
     gl.uniform4fv(uniforms.outerRadii, outerRadii);
     gl.uniform4fv(uniforms.rotations, rotations);
+    gl.uniform1f(uniforms.solarInnerRadius, solarGeometry.innerRadius);
+    gl.uniform1f(uniforms.solarOuterRadius, solarGeometry.outerRadius);
+    gl.uniform1f(uniforms.solarRotation, solarRotation);
+    gl.uniform1f(uniforms.hasSolarMaterial, 1);
     gl.uniform1i(uniforms.field, 0);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -500,6 +703,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   function updateFrame(renderedRotations) {
     if (!active) return;
     fillRenderedRotations(renderedRotations, rotations);
+    solarRotation = renderedSolarRotation(renderedRotations);
     draw();
   }
 
