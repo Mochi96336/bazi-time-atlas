@@ -41,8 +41,12 @@ function runProbe(mode, jdTt, icrf) {
     String(icrf[1])
   ], { encoding:"utf8" });
   if (run.status !== 0) {
-    process.stderr.write(run.stderr ?? "");
-    throw new Error(`Owen probe failed at TT JD ${jdTt}`);
+    const stderr = (run.stderr ?? "").trim();
+    if (stderr) process.stderr.write(stderr + "\n");
+    throw new Error(
+      `Owen probe failed at TT JD ${jdTt}; status=${run.status}; signal=${run.signal ?? "none"}`
+      + (stderr ? `; stderr=${stderr}` : "")
+    );
   }
   const values = run.stdout.trim().split(/\s+/).map(Number);
   if (values.length !== 3 || values.some(value => !Number.isFinite(value))) {
