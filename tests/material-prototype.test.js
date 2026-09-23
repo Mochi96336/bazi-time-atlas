@@ -195,11 +195,11 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   // carries the same gold/brown body family as the approved demo and then
   // applies oxidation/scratches before compositing beneath SVG semantics.
   assert.match(material, /vec3 brassBody\(vec2 worldPoint\)/);
-  assert.match(material, /brassLight = vec3\(0\.396, 0\.302, 0\.178\)/);
-  assert.match(material, /brassMid = vec3\(0\.340, 0\.248, 0\.142\)/);
-  assert.match(material, /brassDark = vec3\(0\.175, 0\.113, 0\.061\)/);
+  assert.match(material, /brassLight = vec3\(0\.387, 0\.295, 0\.174\)/);
+  assert.match(material, /brassMid = vec3\(0\.333, 0\.243, 0\.139\)/);
+  assert.match(material, /brassDark = vec3\(0\.173, 0\.111, 0\.060\)/);
   assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
-  assert.match(material, /warmCatch \* 0\.010/);
+  assert.match(material, /warmCatch \* 0\.008/);
   assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);
   assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.10 \+ aging\.y \* 0\.045 \+ aging\.z \* 0\.005, 0\.0, 0\.14\)/);
   assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
@@ -224,7 +224,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.044\)/);
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*0;/);
-  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.018;/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.012;/);
   assert.doesNotMatch(radial, /data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*\.(?:0?[1-9]|[1-9]\d*)/);
   assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
   assert.doesNotMatch(radial, /data-material-prototype="roughness"[^\n{]*\.m2-zodiac-hard/);
