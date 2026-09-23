@@ -110,14 +110,13 @@
   font-weight: 860;
 }
 
-/* M2 anodized-graphite material: Material H keeps Material G's explicit
-   surface stack, but moves material recognition down to the micro scale. The
-   fixed SVG body/reflection/rims remain the low-frequency form cue; the WebGL
-   layer now carries a restrained multiscale rough surface that rotates with each
-   ring under fixed-world light. No visible grain primitives or per-sector texture. */
-/* Keep the body dark enough to read as one graphite instrument. Scale is
-   carried by a narrow luminance ladder. The broad reflection is intentionally
-   subordinate now: it reveals form, while micro-surface response supplies touch. */
+/* Material I keeps the explicit surface stack but removes the readable
+   stripe cue. Graphite rings use a finer rotating WebGL micro-surface under a
+   diffuse fixed-world ambient field; Solar and Zodiac now receive dedicated
+   fixed material beds below their rotating semantics. No visible grain primitive,
+   image texture, stipple or per-sector material texture is introduced. */
+/* Keep the body dark enough to read as one instrument. Surface recognition is
+   carried by fine-scale response first; broad lighting only establishes volume. */
 #m2-hour-surface { --m2-ring-color: var(--hour); --m2-light-alpha: .13; --m2-mid-alpha: .062; --m2-dark-alpha: .026; }
 #m2-day-surface { --m2-ring-color: var(--day); --m2-light-alpha: .14; --m2-mid-alpha: .066; --m2-dark-alpha: .027; }
 #m2-month-surface { --m2-ring-color: var(--month); --m2-light-alpha: .16; --m2-mid-alpha: .076; --m2-dark-alpha: .030; }
@@ -142,6 +141,65 @@
 .m2-month-bed { fill: url(#m2-month-surface); }
 .m2-year-bed { fill: url(#m2-year-surface); }
 
+.m2-annual-material-bed,
+.m2-annual-material-response {
+  stroke: none;
+  pointer-events: none;
+}
+#m2-solar-brass-surface .m2-brass-light {
+  stop-color: color-mix(in srgb, var(--solar) 76%, #d7b277);
+  stop-opacity: .34;
+}
+#m2-solar-brass-surface .m2-brass-mid {
+  stop-color: color-mix(in srgb, var(--solar) 86%, #6f4b24);
+  stop-opacity: .24;
+}
+#m2-solar-brass-surface .m2-brass-dark {
+  stop-color: color-mix(in srgb, var(--solar) 62%, #171109);
+  stop-opacity: .20;
+}
+#m2-solar-brass-response .m2-brass-response-light {
+  stop-color: color-mix(in srgb, var(--solar) 58%, #ead7aa);
+  stop-opacity: .16;
+}
+#m2-solar-brass-response .m2-brass-response-mid {
+  stop-color: color-mix(in srgb, var(--solar) 72%, #8c6739);
+  stop-opacity: .070;
+}
+#m2-solar-brass-response .m2-brass-response-dark {
+  stop-color: #171109;
+  stop-opacity: .018;
+}
+.m2-solar-brass-bed { fill: url(#m2-solar-brass-surface); }
+.m2-solar-brass-response { fill: url(#m2-solar-brass-response); opacity: .72; }
+
+#m2-zodiac-hard-surface .m2-zodiac-light {
+  stop-color: color-mix(in srgb, var(--zodiac) 76%, #9b9aaa);
+  stop-opacity: .25;
+}
+#m2-zodiac-hard-surface .m2-zodiac-mid {
+  stop-color: color-mix(in srgb, var(--zodiac) 88%, #353642);
+  stop-opacity: .20;
+}
+#m2-zodiac-hard-surface .m2-zodiac-dark {
+  stop-color: color-mix(in srgb, var(--zodiac) 58%, #111319);
+  stop-opacity: .18;
+}
+#m2-zodiac-hard-response .m2-zodiac-response-light {
+  stop-color: color-mix(in srgb, var(--zodiac) 70%, #b3b2bf);
+  stop-opacity: .090;
+}
+#m2-zodiac-hard-response .m2-zodiac-response-mid {
+  stop-color: color-mix(in srgb, var(--zodiac) 82%, #555766);
+  stop-opacity: .040;
+}
+#m2-zodiac-hard-response .m2-zodiac-response-dark {
+  stop-color: #101218;
+  stop-opacity: .014;
+}
+.m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
+.m2-zodiac-hard-response { fill: url(#m2-zodiac-hard-response); opacity: .68; }
+
 #material-base-layer,
 #material-reflection-layer { pointer-events: none; }
 .m2-ring-reflection {
@@ -155,8 +213,8 @@
 .m2-year-reflection { opacity: .55; }
 
 .m2-ring-material-face {
-  /* Legacy fallback slot only. The visible metal cue is now the dedicated
-     surface reflection layer; fine roughness stays procedural and unresolved. */
+  /* Legacy fallback slot only. Fine roughness stays procedural and unresolved;
+     the visible low-frequency cue is now a diffuse ambient field, not a stripe. */
   fill: none;
   opacity: 0;
   pointer-events: none;
@@ -241,10 +299,10 @@
 }
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
-   not two more peer clocks. Matte brass stays warmer than the graphite but does
-   not become a gold CTA; Zodiac is deliberately more recessed and less violet.
-   Active fills locate the current interval without competing with the shared
-   Selected-Instant cursor. */
+   not two more peer clocks. Solar now sits on a real matte-brass material bed;
+   Zodiac keeps its existing blue-violet hue but receives the same hard-surface
+   hierarchy instead of reading as a flat tint. Active fills remain semantic veils
+   above those beds and never become material authority. */
 #guide-layer .guide-arc.annual-subdivide {
   stroke: color-mix(in srgb, var(--solar) 10%, transparent);
   stroke-dasharray: 3 6;

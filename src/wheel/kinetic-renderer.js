@@ -77,10 +77,10 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   }
 
   function renderMaterialBeds() {
-    // Material G surface order is explicit:
-    //   base body -> fixed-world reflection/rim -> guide marks -> rotating semantics.
-    // The WebGL roughness canvas remains a low-energy support below SVG; the first
-    // readable metal cue now lives on the visible surface stack itself.
+    // Material I surface order is explicit:
+    //   material body -> diffuse fixed-world response -> guide marks -> rotating semantics.
+    // Four sexagenary rings receive the rotating WebGL micro-surface; the annual Solar
+    // and Zodiac bands use dedicated brass / blue-violet hard-material beds below semantics.
     const baseLayer = materialBaseLayer ?? guides;
     const surfaceLayer = materialReflectionLayer ?? guides;
 
@@ -109,6 +109,37 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         d: arcPath(WHEEL_CENTER, model.innerRadius + 1, FAN.start, FAN.end),
         class: `m2-ring-rim m2-ring-rim-shadow m2-${id}-rim-shadow`,
         "data-material-rim-shadow": id,
+        "aria-hidden": "true"
+      }, surfaceLayer);
+    });
+
+    [
+      {
+        id:"solar",
+        materialOuterRadius:RADII.solarTermOuter,
+        bedClass:"m2-annual-material-bed m2-solar-brass-bed",
+        responseClass:"m2-annual-material-response m2-solar-brass-response"
+      },
+      {
+        id:"zodiac",
+        materialOuterRadius:null,
+        bedClass:"m2-annual-material-bed m2-zodiac-hard-bed",
+        responseClass:"m2-annual-material-response m2-zodiac-hard-response"
+      }
+    ].forEach(({ id, materialOuterRadius, bedClass, responseClass }) => {
+      const model = ringModel(id);
+      const outerRadius = Number.isFinite(materialOuterRadius) ? materialOuterRadius : model.outerRadius;
+      const d = annularSectorPath(WHEEL_CENTER, model.innerRadius, outerRadius, FAN.start, FAN.end);
+      el("path", {
+        d,
+        class: bedClass,
+        "data-annual-material-ring": id,
+        "aria-hidden": "true"
+      }, baseLayer);
+      el("path", {
+        d,
+        class: responseClass,
+        "data-annual-material-response": id,
         "aria-hidden": "true"
       }, surfaceLayer);
     });
