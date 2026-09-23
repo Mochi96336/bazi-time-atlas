@@ -74,6 +74,28 @@ test("rendered rotation bridge reuses caller storage and does not derive another
   assert.deepEqual(FIXED_LIGHT_DIRECTION, [-0.42, -0.56, 0.714]);
 });
 
+test("material sampling sign is the inverse of SVG y-down ring rotation", () => {
+  const radians = 37 * Math.PI / 180;
+  const c = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const local = { x: 31.5, y: -14.25 };
+
+  // SVG rotate(+a) in y-down user space.
+  const world = {
+    x: c * local.x - sin * local.y,
+    y: sin * local.x + c * local.y
+  };
+  // GLSL mat2(c,-s,s,c) is column-major, so rotation(+a) numerically
+  // performs the inverse mapping needed by world -> local sampling.
+  const recovered = {
+    x: c * world.x + sin * world.y,
+    y: -sin * world.x + c * world.y
+  };
+
+  assert.ok(Math.abs(recovered.x - local.x) < 1e-10);
+  assert.ok(Math.abs(recovered.y - local.y) < 1e-10);
+});
+
 test("canvas stays pointer-inert and renderer owns the only runtime pose bridge", async () => {
   const [html, css, renderer, material, radial] = await Promise.all([
     readFile(new URL("../index.html", import.meta.url), "utf8"),
@@ -85,8 +107,11 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
 
   assert.match(html, /<canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"><\/canvas>/);
   assert.match(html, /<g id="material-base-layer" aria-hidden="true"><\/g>\s*<g id="material-reflection-layer" aria-hidden="true"><\/g>\s*<g id="guide-layer"><\/g>\s*<g id="hour-track"><\/g>/);
-  assert.match(html, /id="m2-visible-metal-reflection"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.match(html, /<radialGradient id="m2-visible-metal-reflection"[^>]*gradientUnits="userSpaceOnUse"/);
   assert.doesNotMatch(html, /id="m2-visible-metal-reflection"[^>]*gradientTransform=/);
+  assert.doesNotMatch(html, /<linearGradient id="m2-visible-metal-reflection"/);
+  assert.match(html, /id="m2-solar-brass-surface"[^>]*gradientUnits="userSpaceOnUse"/);
+  assert.match(html, /id="m2-zodiac-hard-surface"[^>]*gradientUnits="userSpaceOnUse"/);
   assert.doesNotMatch(html, /m2-rotating-micrograin|<pattern[^>]*micrograin|<circle[^>]*fill-opacity=/);
   assert.match(css, /\.material-wheel-layer\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /data-material-prototype="roughness"\] \.material-wheel-layer\s*\{[\s\S]*?opacity:\s*1;/);
@@ -96,21 +121,24 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(renderer, /const materialReflectionLayer = svg\.querySelector\("#material-reflection-layer"\)/);
   assert.match(renderer, /class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?"data-material-reflection-ring": id[\s\S]*?\}, surfaceLayer\);/);
   assert.match(renderer, /materialPrototype\.updateFrame\(renderedRotations\)/);
-  assert.match(material, /localPoint = rotation\(-ringRotation\) \* point/);
-  assert.match(material, /SURFACE_PERIOD_LARGE = 156\.0/);
-  assert.match(material, /SURFACE_PERIOD_MEDIUM = 58\.0/);
-  assert.match(material, /SURFACE_PERIOD_FINE = 23\.0/);
-  assert.match(material, /surfaceField\(vec2 localPoint\)[\s\S]*?large \* 0\.34 \+ medium \* 0\.43 \+ fine \* 0\.23/);
-  assert.match(material, /roughness = clamp\(0\.805 \+ fieldCentered \* 0\.11, 0\.760, 0\.850\)/);
+  assert.match(renderer, /id:"solar"[\s\S]*?m2-solar-brass-bed[\s\S]*?id:"zodiac"[\s\S]*?m2-zodiac-hard-bed/);
+  assert.match(renderer, /id:"solar"[\s\S]*?materialOuterRadius:RADII\.solarTermOuter/);
+  assert.match(renderer, /const outerRadius = Number\.isFinite\(materialOuterRadius\) \? materialOuterRadius : model\.outerRadius/);
+  assert.match(material, /localPoint = rotation\(ringRotation\) \* point/);
+  assert.match(material, /SURFACE_PERIOD_LARGE = 108\.0/);
+  assert.match(material, /SURFACE_PERIOD_MEDIUM = 38\.0/);
+  assert.match(material, /SURFACE_PERIOD_FINE = 15\.0/);
+  assert.match(material, /surfaceField\(vec2 localPoint\)[\s\S]*?large \* 0\.10 \+ medium \* 0\.28 \+ fine \* 0\.62/);
+  assert.match(material, /roughness = clamp\(0\.810 \+ fieldCentered \* 0\.090, 0\.770, 0\.850\)/);
   assert.match(material, /fieldDx = \([\s\S]*?fieldDy = \(/);
-  assert.match(material, /slopeLocal = vec2\(fieldDx, fieldDy\) \* 0\.72/);
-  assert.match(material, /slopeWorld = rotation\(ringRotation\) \* slopeLocal/);
+  assert.match(material, /slopeLocal = vec2\(fieldDx, fieldDy\) \* 0\.44/);
+  assert.match(material, /slopeWorld = rotation\(-ringRotation\) \* slopeLocal/);
   assert.match(material, /microNormal = normalize\(vec3\(-slopeWorld\.x, -slopeWorld\.y, 1\.0\)\)/);
-  assert.match(material, /microLightDelta = clamp\(dot\(microNormal, lightDirection\) - baseLight, -0\.075, 0\.075\)/);
+  assert.match(material, /microLightDelta = clamp\(dot\(microNormal, lightDirection\) - baseLight, -0\.060, 0\.060\)/);
   assert.match(material, /specularPower = mix\(18\.0, 6\.0, roughness\)/);
   assert.match(material, /environmentResponse = clamp\([\s\S]*?point \/ vec2\(760\.0, 500\.0\)[\s\S]*?0\.80,[\s\S]*?1\.00/);
-  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.46 \+ abs\(fieldCentered\) \* 0\.016, 0\.0, 0\.038\)/);
-  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.051\)/);
+  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.39 \+ abs\(fieldCentered\) \* 0\.013, 0\.0, 0\.034\)/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.044\)/);
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
   assert.match(radial, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(radial, /\.m2-(?:hour|day|month|year)-material-face \{[^}]*opacity:/);
