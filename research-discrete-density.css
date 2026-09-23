@@ -457,6 +457,14 @@
   .research-year-track { height: 92px; margin: 11px 10px 0; }
   .research-year-marker > strong { font-size: 10px; }
   .research-year-marker > small { font-size: 8.5px; }
+  .research-year-strip[data-base-edge="start"] .research-year-track,
+  .research-year-strip[data-base-edge="end"] .research-year-track { height: 118px; }
+  .research-year-strip[data-base-edge="start"] .research-year-base > i,
+  .research-year-strip[data-base-edge="end"] .research-year-base > i { height: 44px; }
+  .research-year-strip[data-base-edge="start"] .research-year-base > strong,
+  .research-year-strip[data-base-edge="end"] .research-year-base > strong { top: 76px; }
+  .research-year-strip[data-base-edge="start"] .research-year-base > small,
+  .research-year-strip[data-base-edge="end"] .research-year-base > small { top: 92px; }
   .research-year-li-chun-unavailable { margin-left: 10px; margin-right: 10px; font-size: 9px; }
   .research-year-relations strong,
   .research-year-relations span { font-size: 9px; }

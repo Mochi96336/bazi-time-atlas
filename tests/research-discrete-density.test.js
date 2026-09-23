@@ -96,6 +96,13 @@ test("year strip composes existing authorities and fails closed outside exact Li
   assert.doesNotMatch(yearStripView, /2\/4|02-04|year\s*%\s*4/);
 });
 
+test("mobile year strip moves edge-adjacent base labels onto a second lane", () => {
+  assert.match(yearStripView, /strip\.dataset\.baseEdge = state\.basePosition < 20 \? "start" : state\.basePosition > 80 \? "end" : "none"/);
+  assert.match(css, /@media \(max-width:480px\)[\s\S]*?data-base-edge="start"[\s\S]*?research-year-track \{ height: 118px;/);
+  assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > strong \{ top: 76px;/);
+  assert.match(css, /data-base-edge="end"[\s\S]*?research-year-base > small \{ top: 92px;/);
+});
+
 test("60-day cycle remains supporting evidence behind one flat drilldown", () => {
   assert.match(view, /details\.id = "discrete-sexagenary-details"/);
   assert.match(view, /details\.dataset\.researchDrilldown = "discrete-sexagenary"/);
