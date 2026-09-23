@@ -173,7 +173,7 @@
 .m2-solar-brass-bed { fill: url(#m2-solar-brass-surface); }
 .m2-solar-brass-response { fill: url(#m2-solar-brass-response); opacity: .72; }
 
-/* Material K3 keeps the complete Solar brass body in WebGL for roughness mode.
+/* Material K4.4 keeps the complete Solar brass body in WebGL for roughness mode.
    The SVG bed remains intact for ?material=svg, but is fully suppressed here so
    it cannot brighten or flatten the procedural body. Keep only a very faint
    response veil for integration with the surrounding instrument semantics. */
@@ -181,7 +181,7 @@
   opacity: 0;
 }
 #kinetic-instrument[data-material-prototype="roughness"] .m2-solar-brass-response {
-  opacity: .025;
+  opacity: .012;
 }
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
