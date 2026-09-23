@@ -207,6 +207,7 @@ console.log(`[recurrence] PASS global closure stacks every discrete marker on th
 const gregorian = expectCase(
   "recurrence.html?date=2026-09-13&delta=400",
   {
+    "data-target-date":"2426-09-13",
     "data-gregorian-phase":"0",
     "data-gregorian-phase-signed":"0",
     "data-year-sequence-phase":"40",
@@ -224,6 +225,13 @@ expectFixedGauge(gregorian.dom, gregorian.url);
 expectDiscreteComprehension(gregorian.dom, gregorian.url);
 if (!/公曆結構回原位/.test(gregorian.dom)) {
   throw new Error(`400-year Gregorian-only explanation missing: ${gregorian.url}`);
+}
+if (
+  !gregorian.dom.includes('id="research-year-base-title">選定日 · 丙戌年<') ||
+  !gregorian.dom.includes('id="research-year-base-label">2426/09/13<') ||
+  !gregorian.dom.includes('id="research-year-li-chun-title">立春 · 乙酉 → 丙戌<')
+) {
+  throw new Error(`400-year selected target did not own the year strip / Ganzhi boundary: ${gregorian.url}`);
 }
 expectMarker(gregorian.dom, "gregorian", "-90.000", "0", "400-year Gregorian recurrence", gregorian.url);
 expectMarker(gregorian.dom, "year", "-143.333", "-20", "400-year Gregorian recurrence", gregorian.url);
