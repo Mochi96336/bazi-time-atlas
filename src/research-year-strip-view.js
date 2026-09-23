@@ -303,6 +303,7 @@ function render() {
   const state = researchYearStripState(selectedDate, { targetInstant });
   const baseMarker = document.querySelector("#research-year-base-marker");
   const liChunMarker = document.querySelector("#research-year-li-chun-marker");
+  const liChunBand = document.querySelector("#research-year-li-chun-band");
   const liChunUnavailable = document.querySelector("#research-year-li-chun-unavailable");
 
   strip.dataset.ready = "true";
@@ -355,6 +356,20 @@ function render() {
     if (Number.isFinite(state.liChun.positionMax)) {
       liChunMarker.style.setProperty("--year-x-max", `${state.liChun.positionMax.toFixed(4)}%`);
     }
+    if (
+      liChunBand
+      && state.liChun.positionStatus === "estimated"
+      && Number.isFinite(state.liChun.positionMin)
+      && Number.isFinite(state.liChun.positionMax)
+    ) {
+      const left = Math.min(state.liChun.positionMin, state.liChun.positionMax);
+      const right = Math.max(state.liChun.positionMin, state.liChun.positionMax);
+      liChunBand.hidden = false;
+      liChunBand.style.left = `${left.toFixed(4)}%`;
+      liChunBand.style.width = `${Math.max(.12, right - left).toFixed(4)}%`;
+    } else if (liChunBand) {
+      liChunBand.hidden = true;
+    }
     setText(
       "research-year-li-chun-title",
       `立春 · ${state.liChunTransition.before.name} → ${state.liChunTransition.after.name}`
@@ -366,6 +381,7 @@ function render() {
     liChunUnavailable.hidden = true;
   } else {
     liChunMarker.hidden = true;
+    if (liChunBand) liChunBand.hidden = true;
     liChunUnavailable.hidden = false;
     setText(
       "research-year-li-chun-unavailable-title",
