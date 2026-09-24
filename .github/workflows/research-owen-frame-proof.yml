@@ -78,7 +78,10 @@ jobs:
           const eop = result.source.iersEop;
           if (eop.authority !== "IERS Earth Orientation Centre") throw new Error("wrong EOP authority");
           if (eop.terminalDate !== "2026-01-05") throw new Error("unexpected EOP terminal date");
-          if (!/^[0-9a-f]{64}$/.test(eop.sha256)) throw new Error("missing EOP sha256");
+          if (eop.sha256 !== "40347f18a10eb72b15e4f84e647b5f1b7da4709534d935e2e1289697bdfa79df") throw new Error("EOP sha256 mismatch");
+          if (eop.terminalMjd !== 61045) throw new Error("unexpected EOP terminal MJD");
+          if (eop.terminalDPsiArcsec !== -0.113478) throw new Error("unexpected terminal dPsi");
+          if (eop.terminalDEpsArcsec !== -0.006944) throw new Error("unexpected terminal dEps");
           if (!(result.validation.apparent.maxResidualArcsec < 0.05)) throw new Error("apparent-frame residual gate failed");
           if (!(result.validation.mean.maxResidualArcsec > result.validation.apparent.maxResidualArcsec)) {
             throw new Error("apparent equinox did not improve the frame proof");
