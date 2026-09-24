@@ -34,7 +34,9 @@ test("probe compares mean frame against the apparent-equinox path without claimi
   assert.match(source, /SEFLG_JPLHOR/);
   assert.match(source, /swi_epsiln/);
   assert.match(source, /swi_coortrf/);
-  assert.match(source, /swi_nutation\s*\(\s*tt_jd\s*,\s*SEFLG_JPLHOR\s*,/);
+  assert.match(source, /swi_nutation\s*\(\s*tt_jd\s*,\s*0\s*,/);
+  assert.match(source, /eop_dpsi_arcsec/);
+  assert.match(source, /eop_deps_arcsec/);
   assert.match(source, /mode, "mean"/);
   assert.match(source, /mode, "apparent"/);
 });
