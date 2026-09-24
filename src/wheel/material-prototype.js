@@ -41,6 +41,8 @@ const FRAGMENT_SHADER = [
   "uniform float u_solar_outer_radius;",
   "uniform float u_solar_rotation;",
   "uniform float u_has_solar_material;",
+  "uniform float u_zodiac_inner_radius;",
+  "uniform float u_zodiac_outer_radius;",
   "uniform sampler2D u_roughness_field;",
   "out vec4 out_color;",
   "",
@@ -261,6 +263,53 @@ const FRAGMENT_SHADER = [
   "  return vec4(body * bodyAlpha, bodyAlpha);",
   "}",
   "",
+  "vec4 renderZodiacMicroResponse(vec2 worldPoint, float rotationDegrees) {",
+  "  float ringRotation = rotationDegrees * PI / 180.0;",
+  "  vec2 localPoint = rotation(ringRotation) * worldPoint;",
+  "  float field = surfaceField(localPoint);",
+  "  float fieldCentered = field - 0.5;",
+  "  float roughness = clamp(0.810 + fieldCentered * 0.090, 0.770, 0.850);",
+  "",
+  "  float fieldDx = (",
+  "    surfaceField(localPoint + vec2(SURFACE_SAMPLE_STEP, 0.0))",
+  "    - surfaceField(localPoint - vec2(SURFACE_SAMPLE_STEP, 0.0))",
+  "  ) / (2.0 * SURFACE_SAMPLE_STEP);",
+  "  float fieldDy = (",
+  "    surfaceField(localPoint + vec2(0.0, SURFACE_SAMPLE_STEP))",
+  "    - surfaceField(localPoint - vec2(0.0, SURFACE_SAMPLE_STEP))",
+  "  ) / (2.0 * SURFACE_SAMPLE_STEP);",
+  "  vec2 slopeLocal = vec2(fieldDx, fieldDy) * 0.44;",
+  "  vec2 slopeWorld = rotation(-ringRotation) * slopeLocal;",
+  "  vec3 microNormal = normalize(vec3(-slopeWorld.x, -slopeWorld.y, 1.0));",
+  "",
+  "  vec3 lightDirection = normalize(vec3(-0.42, -0.56, 0.714));",
+  "  vec3 viewDirection = vec3(0.0, 0.0, 1.0);",
+  "  vec3 halfVector = normalize(lightDirection + viewDirection);",
+  "  float baseLight = max(lightDirection.z, 0.0);",
+  "  float microLightDelta = clamp(dot(microNormal, lightDirection) - baseLight, -0.060, 0.060);",
+  "  float specularPower = mix(18.0, 6.0, roughness);",
+  "  float specular = pow(max(dot(microNormal, halfVector), 0.0), specularPower)",
+  "    * (0.018 + (1.0 - roughness) * 0.13);",
+  "  float environmentResponse = clamp(",
+  "    0.88 + dot(worldPoint / vec2(760.0, 500.0), lightDirection.xy) * 0.12,",
+  "    0.80,",
+  "    1.00",
+  "  );",
+  "",
+  "  float radius = length(worldPoint);",
+  "  float edgeDistance = min(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius);",
+  "  float edgeMask = smoothstep(0.0, 1.5, edgeDistance);",
+  "  vec3 reflectionTint = vec3(0.44, 0.48, 0.56);",
+  "  vec3 microLightTint = vec3(0.38, 0.42, 0.50);",
+  "  vec3 microDarkTint = vec3(0.030, 0.034, 0.044);",
+  "  float specularAlpha = clamp(specular * environmentResponse * 0.16, 0.0, 0.004);",
+  "  float microAlpha = clamp(abs(microLightDelta) * 0.19 + abs(fieldCentered) * 0.006, 0.0, 0.015);",
+  "  vec3 microTint = microLightDelta >= 0.0 ? microLightTint : microDarkTint;",
+  "  float overlayAlpha = edgeMask * clamp(specularAlpha + microAlpha, 0.0, 0.018);",
+  "  vec3 overlayColor = reflectionTint * specularAlpha + microTint * microAlpha;",
+  "  return vec4(overlayColor * edgeMask, overlayAlpha);",
+  "}",
+  "",
   "void main() {",
   "  vec2 canvasPoint = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y) / u_device_scale;",
   "  vec2 svgPoint = vec2(",
@@ -277,6 +326,11 @@ const FRAGMENT_SHADER = [
   "    && radius <= u_solar_outer_radius;",
   "  if (inSolar) {",
   "    out_color = renderSolarBrass(point, u_solar_rotation, pixelFootprint);",
+  "    return;",
+  "  }",
+  "  bool inZodiac = radius >= u_zodiac_inner_radius && radius <= u_zodiac_outer_radius;",
+  "  if (inZodiac) {",
+  "    out_color = renderZodiacMicroResponse(point, u_solar_rotation);",
   "    return;",
   "  }",
   "  int index = ringIndex(radius);",
@@ -368,6 +422,15 @@ export function solarMaterialGeometry() {
     id: solar.id,
     innerRadius: solar.innerRadius,
     outerRadius: zodiac.innerRadius
+  });
+}
+
+export function zodiacMaterialGeometry() {
+  const zodiac = ringModel("zodiac");
+  return Object.freeze({
+    id: zodiac.id,
+    innerRadius: zodiac.innerRadius,
+    outerRadius: zodiac.outerRadius
   });
 }
 
@@ -489,6 +552,8 @@ function uniformLocations(gl, program) {
     solarOuterRadius: gl.getUniformLocation(program, "u_solar_outer_radius"),
     solarRotation: gl.getUniformLocation(program, "u_solar_rotation"),
     hasSolarMaterial: gl.getUniformLocation(program, "u_has_solar_material"),
+    zodiacInnerRadius: gl.getUniformLocation(program, "u_zodiac_inner_radius"),
+    zodiacOuterRadius: gl.getUniformLocation(program, "u_zodiac_outer_radius"),
     field: gl.getUniformLocation(program, "u_roughness_field")
   });
 }
@@ -545,6 +610,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   const shell = svg?.closest?.("#kinetic-instrument") ?? null;
   const geometry = materialGeometry();
   const solarGeometry = solarMaterialGeometry();
+  const zodiacGeometry = zodiacMaterialGeometry();
   const innerRadii = new Float32Array(geometry.map(item => item.innerRadius));
   const outerRadii = new Float32Array(geometry.map(item => item.outerRadius));
   const rotations = new Float32Array(MATERIAL_RING_IDS.length);
@@ -633,6 +699,8 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.uniform1f(uniforms.solarOuterRadius, solarGeometry.outerRadius);
     gl.uniform1f(uniforms.solarRotation, solarRotation);
     gl.uniform1f(uniforms.hasSolarMaterial, 1);
+    gl.uniform1f(uniforms.zodiacInnerRadius, zodiacGeometry.innerRadius);
+    gl.uniform1f(uniforms.zodiacOuterRadius, zodiacGeometry.outerRadius);
     gl.uniform1i(uniforms.field, 0);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
