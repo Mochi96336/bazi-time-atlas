@@ -27,9 +27,16 @@ export const DE441_10026_SEASONAL_CROSSING_PROOF_CONTRACT = Object.freeze({
     alternateSeedParitySeconds:0.02,
     maxBracketHalfWidthDays:16
   }),
+  proofResult:Object.freeze({
+    sourceDerivedSeasonalCrossingsGenerated:true,
+    solvedCrossings:24,
+    evidenceId:"de441-10026-source-derived-seasonal-crossing-evidence-v1",
+    liChunTtJulianDay:5383013.532143416
+  }),
   claimBoundary:Object.freeze({
     independentTargetYearTruth:false,
     sourceDerivedTargetYear:true,
+    frameIndependentlyValidatedAtTargetYear:false,
     resolvesCivilTime:false,
     productionIntegrated:false,
     productionAuthorityGranted:false
