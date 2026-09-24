@@ -85,7 +85,8 @@ test("year 10026 source-derived TT evidence projects only as an uncertain local-
   assert.equal(result.localClockResolved, false);
   assert.equal(result.deterministicWithinModel, false);
   assert.equal(result.localClock.year, 10026);
-  assert.equal(result.localClock.month, 2);
+  assert.equal(result.localClock.month, 1);
+  assert.equal(result.localClock.day, 31);
   assert.ok(result.uncertaintySeconds > 60_000);
   assert.ok(result.oneSigmaLocalJulianDayMin < result.localJulianDay);
   assert.ok(result.localJulianDay < result.oneSigmaLocalJulianDayMax);
