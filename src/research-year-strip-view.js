@@ -41,6 +41,21 @@ function offsetLabel(offsetHours) {
   return `UT1${offsetHours >= 0 ? "+" : ""}${offsetHours}`;
 }
 
+function seasonalAuthorityLabel(boundary) {
+  if (boundary.authorityClass === "source-derived-research-evidence") {
+    return "DE441-derived · source-derived";
+  }
+  if (boundary.authorityClass === "reviewed-production-direct-event") {
+    return boundary.providerId?.includes("de441")
+      ? "DE441 · reviewed direct event"
+      : "reviewed direct event";
+  }
+  if (boundary.authorityClass === "declared-model-direct-event") {
+    return "ShouXing · model";
+  }
+  return boundary.providerId ?? "seasonal authority";
+}
+
 function positionForDate(date, fraction = 0) {
   const start = gregorianOrdinal({ year:date.year, month:1, day:1 });
   const end = gregorianOrdinal({ year:date.year, month:12, day:31 });
@@ -310,6 +325,13 @@ function render() {
   strip.dataset.liChunBoundaryStatus = state.liChunBoundary.status;
   strip.dataset.liChunEpochStatus = state.liChunBoundary.epochStatus;
   strip.dataset.liChunProvider = state.liChunBoundary.providerId ?? "none";
+  strip.dataset.liChunAuthorityClass = state.liChunBoundary.authorityClass ?? "none";
+  strip.dataset.liChunProductionAuthority = state.liChunBoundary.productionAuthorityGranted === undefined
+    ? "not-declared"
+    : String(state.liChunBoundary.productionAuthorityGranted);
+  strip.dataset.liChunIndependentTargetYearTruth = state.liChunBoundary.independentTargetYearTruth === undefined
+    ? "not-declared"
+    : String(state.liChunBoundary.independentTargetYearTruth);
   strip.dataset.liChunProjectionStatus = state.liChunProjection.status;
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
   strip.dataset.liChunPositionStatus = state.liChun?.positionStatus ?? "unavailable";
@@ -376,7 +398,7 @@ function render() {
     );
     setText(
       "research-year-li-chun-label",
-      `${state.liChun.label} · ${offsetLabel(state.displayOffset.hours)} · ${state.liChunBoundary.providerId}`
+      `${state.liChun.label} · ${offsetLabel(state.displayOffset.hours)} · ${seasonalAuthorityLabel(state.liChunBoundary)}`
     );
     liChunUnavailable.hidden = true;
   } else {
