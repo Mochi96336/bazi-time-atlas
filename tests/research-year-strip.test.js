@@ -15,6 +15,11 @@ test("year strip no longer treats the legacy civil solar-term helper as its auth
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.directLegacyCivilSolarTermAuthority, false);
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.transitionIndependentFromEpochAvailability, true);
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.defaultDisplayOffsetHoursFromUt1, 8);
+  assert.deepEqual(
+    RESEARCH_YEAR_STRIP_CONTRACT.selectedYearMembershipStatuses,
+    ["exact", "model-estimated", "unresolved"]
+  );
+  assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.oneSigmaIntervalIsHardDecisionBound, false);
 
   const source = await readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /solarTermEventForCivilYear/);
@@ -37,6 +42,9 @@ test("modern year strip orders selected dates before and after the resolved Li C
   assert.equal(after.selectedBeforeLiChun, false);
   assert.equal(before.selectedYearPillar.name, "癸卯");
   assert.equal(after.selectedYearPillar.name, "甲辰");
+  assert.equal(before.selectedYearMembership.status, "model-estimated");
+  assert.equal(after.selectedYearMembership.status, "model-estimated");
+  assert.equal(before.selectedYearMembership.reason, "seasonal-boundary-model");
   assert.equal(before.liChunTransition.before.name, "癸卯");
   assert.equal(before.liChunTransition.after.name, "甲辰");
   assert.ok(before.selectedPosition < before.liChun.position);
@@ -52,6 +60,7 @@ test("date-only selection on the resolved modern Li Chun day remains year-pillar
   assert.equal(boundaryDay.liChunInstantResolution.status, "target-instant-unbound");
   assert.equal(boundaryDay.selectedBeforeLiChun, null);
   assert.equal(boundaryDay.selectedYearPillar, null);
+  assert.equal(boundaryDay.selectedYearMembership.status, "unresolved");
   assert.equal(boundaryDay.liChunTransition.before.name, "癸卯");
   assert.equal(boundaryDay.liChunTransition.after.name, "甲辰");
 });
@@ -79,9 +88,11 @@ test("bound fixed-zone target resolves the modern Li Chun boundary on the same e
   assert.equal(before.liChunInstantResolution.status, "resolved");
   assert.equal(before.selectedLiChunRelation, "before");
   assert.equal(before.selectedYearPillar.name, "癸卯");
+  assert.equal(before.selectedYearMembership.status, "model-estimated");
   assert.equal(after.liChunInstantResolution.status, "resolved");
   assert.equal(after.selectedLiChunRelation, "after");
   assert.equal(after.selectedYearPillar.name, "甲辰");
+  assert.equal(after.selectedYearMembership.status, "model-estimated");
 });
 
 test("year 2426 now exposes the DE441 runtime gap instead of silently using legacy Tyme civil fields", () => {
@@ -94,6 +105,7 @@ test("year 2426 now exposes the DE441 runtime gap instead of silently using lega
   assert.match(state.liChunUnavailableMessage, /DE441.*尚未發布/);
   assert.equal(state.selectedLiChunRelation, "unknown");
   assert.equal(state.selectedYearPillar, null);
+  assert.equal(state.selectedYearMembership.status, "unresolved");
   assert.equal(state.liChunTransition.before.name, "乙酉");
   assert.equal(state.liChunTransition.after.name, "丙戌");
 });
@@ -111,6 +123,8 @@ test("year 4006 uses reviewed DE441 TT and renders only an estimated civil posit
   assert.ok(state.liChun.positionMin < state.liChun.positionMax);
   assert.equal(state.selectedLiChunRelation, "after");
   assert.ok(state.selectedYearPillar);
+  assert.equal(state.selectedYearMembership.status, "model-estimated");
+  assert.equal(state.selectedYearMembership.reason, "earth-rotation-model");
 });
 
 test("year 4006 TT target resolves Li Chun membership directly on the DE441 TT epoch", () => {
@@ -140,11 +154,14 @@ test("year 4006 TT target resolves Li Chun membership directly on the DE441 TT e
   assert.equal(before.liChunInstantResolution.targetBasis, "tt-julian-day");
   assert.equal(before.selectedLiChunRelation, "before");
   assert.equal(before.selectedYearPillar.name, before.liChunTransition.before.name);
+  assert.equal(before.selectedYearMembership.status, "exact");
+  assert.equal(before.selectedYearMembership.reason, "authoritative-same-scale-comparison");
 
   assert.equal(after.selectedCivilLiChunRelation, "boundary-uncertain");
   assert.equal(after.liChunInstantResolution.status, "resolved");
   assert.equal(after.selectedLiChunRelation, "after");
   assert.equal(after.selectedYearPillar.name, after.liChunTransition.after.name);
+  assert.equal(after.selectedYearMembership.status, "exact");
 });
 
 test("year 4006 UT1 target stays unresolved inside the Earth-rotation uncertainty interval", () => {
@@ -167,9 +184,10 @@ test("year 4006 UT1 target stays unresolved inside the Earth-rotation uncertaint
   assert.equal(center.selectedLiChunRelation, "boundary-uncertain");
   assert.equal(center.selectedBeforeLiChun, null);
   assert.equal(center.selectedYearPillar, null);
+  assert.equal(center.selectedYearMembership.status, "unresolved");
 });
 
-test("year 4006 UT1 targets outside the one-sigma Li Chun interval can still resolve a side", () => {
+test("year 4006 UT1 targets outside the one-sigma interval remain model-estimated, not exact", () => {
   const probe = researchYearStripState({ year:4006, month:9, day:13 });
   const boundaryDate = {
     year:4006,
@@ -190,13 +208,16 @@ test("year 4006 UT1 targets outside the one-sigma Li Chun interval can still res
   const before = researchYearStripState(boundaryDate, { targetInstant:beforeTarget });
   const after = researchYearStripState(boundaryDate, { targetInstant:afterTarget });
 
-  assert.equal(before.liChunInstantResolution.status, "resolved");
+  assert.equal(before.liChunInstantResolution.status, "model-estimated");
   assert.equal(before.selectedLiChunRelation, "before");
   assert.equal(before.selectedYearPillar.name, before.liChunTransition.before.name);
+  assert.equal(before.selectedYearMembership.status, "model-estimated");
+  assert.equal(before.selectedYearMembership.reason, "earth-rotation-model");
 
-  assert.equal(after.liChunInstantResolution.status, "resolved");
+  assert.equal(after.liChunInstantResolution.status, "model-estimated");
   assert.equal(after.selectedLiChunRelation, "after");
   assert.equal(after.selectedYearPillar.name, after.liChunTransition.after.name);
+  assert.equal(after.selectedYearMembership.status, "model-estimated");
 });
 
 test("year 10026 consumes pinned DE441-derived TT evidence without promoting it to production truth", () => {
@@ -214,6 +235,8 @@ test("year 10026 consumes pinned DE441-derived TT evidence without promoting it 
   assert.ok(state.liChun.positionMin < state.liChun.positionMax);
   assert.equal(state.selectedLiChunRelation, "after");
   assert.ok(state.selectedYearPillar);
+  assert.equal(state.selectedYearMembership.status, "model-estimated");
+  assert.equal(state.selectedYearMembership.reason, "research-source-derived-boundary");
   assert.ok(state.liChunTransition.before.name);
   assert.ok(state.liChunTransition.after.name);
   assert.equal(state.liChunUnavailableMessage, null);
@@ -228,6 +251,7 @@ test("year 26026 keeps the Ganzhi transition visible but reports an absolute sea
   assert.equal(state.liChun, null);
   assert.equal(state.selectedLiChunRelation, "unknown");
   assert.equal(state.selectedYearPillar, null);
+  assert.equal(state.selectedYearMembership.status, "unresolved");
   assert.ok(state.liChunTransition.before.name);
   assert.ok(state.liChunTransition.after.name);
   assert.match(state.liChunUnavailableMessage, /absolute seasonal-epoch source/);
