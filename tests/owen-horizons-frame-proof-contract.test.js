@@ -12,6 +12,11 @@ test("Owen frame proof is pinned to the same Swiss source already used by long-t
   assert.equal(c.seasonalPlaneSemantics, "mean-ecliptic-of-date");
   assert.equal(c.apparentEquinoxCorrectionTested, true);
   assert.equal(c.fullTrueEclipticClaim, false);
+  assert.equal(c.eopSource.authority, "IERS Earth Orientation Centre");
+  assert.equal(c.eopSource.terminalDate, "2026-01-05");
+  assert.equal(c.eopSource.terminalDPsiArcsec, -0.113478);
+  assert.equal(c.eopSource.terminalDEpsArcsec, -0.006944);
+  assert.match(c.eopSource.sha256, /^[0-9a-f]{64}$/);
 });
 
 test("Owen proof must first recover existing 4006 Horizons truth before touching 10026", () => {
@@ -19,6 +24,7 @@ test("Owen proof must first recover existing 4006 Horizons truth before touching
   assert.equal(c.validation.catalogueYear, 4006);
   assert.equal(c.validation.pinnedDirectionCount, 18);
   assert.equal(c.validation.maximumAngularResidualArcsec, 0.05);
+  assert.ok(c.validation.observedMaximumAngularResidualArcsec < 0.01);
   assert.equal(c.proofOnly, true);
   assert.equal(c.year10026FramePromoted, false);
   assert.equal(c.productionIntegrated, false);
@@ -29,6 +35,7 @@ test("probe compares mean frame against the apparent-equinox path without claimi
     new URL("../scripts/research-swiss-owen-frame-probe.c", import.meta.url),
     "utf8"
   );
+  assert.match(source, /apply_bias/);
   assert.match(source, /swi_bias/);
   assert.match(source, /swi_precess/);
   assert.match(source, /SEFLG_JPLHOR/);
