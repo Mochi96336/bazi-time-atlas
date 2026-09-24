@@ -12,6 +12,9 @@ import {
 } from "./seasonal-epoch-runtime-registry.js";
 import { seasonalEpochCoverageBounds } from "./seasonal-epoch-provider.js";
 import {
+  researchSeasonalEvidenceForLongitude
+} from "./research-seasonal-evidence-registry.js";
+import {
   SEASONAL_EPOCH_SOURCES,
   seasonalEpochSourceAudit
 } from "./seasonal-epoch-source-audit.js";
@@ -118,6 +121,29 @@ export function resolveSeasonalBoundary({ year, longitudeDegrees }) {
     });
   }
 
+  const researchEvent = researchSeasonalEvidenceForLongitude({ year, longitudeDegrees });
+  if (researchEvent) {
+    return freezeResult({
+      status:"resolved-research-evidence",
+      epochStatus:"resolved",
+      authorityClass:"source-derived-research-evidence",
+      providerId:researchEvent.evidenceId,
+      providerRole:"research-source-derived-event",
+      timeScale:researchEvent.timeScale,
+      ttJulianDay:researchEvent.ttJulianDay,
+      event:researchEvent,
+      sourceIds:Object.freeze(["jpl-de441"]),
+      sourceCoverage:Object.freeze({ minYear:year, maxYear:year }),
+      runtimeCoverage:null,
+      evidenceIds:Object.freeze([researchEvent.evidenceId]),
+      evidenceClass:researchEvent.validationKind,
+      independentTargetYearTruth:researchEvent.independentTargetYearTruth,
+      sourceDerivedTargetYear:researchEvent.sourceDerivedTargetYear,
+      productionAuthorityGranted:researchEvent.productionAuthorityGranted,
+      blocker:"target-year-independent-validation"
+    });
+  }
+
   const audit = sourceAuditFor(year);
   if (audit.qualifiedStateBasisSourceIds.length || audit.qualifiedDirectEventSourceIds.length) {
     const sourceIds = Object.freeze([
@@ -174,6 +200,7 @@ export const SEASONAL_BOUNDARY_AUTHORITY_CONTRACT = Object.freeze({
   providerPriority:Object.freeze([
     "reviewed-production-direct-event",
     "declared-model-direct-event",
+    "source-derived-research-evidence",
     "qualified-source-without-runtime",
     "no-qualified-absolute-source"
   ])
