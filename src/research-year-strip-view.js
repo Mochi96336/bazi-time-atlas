@@ -209,7 +209,10 @@ function instantResolution({ civilRelation, targetInstant, boundary, projection 
   const side = compareTargetInstantToBoundary({ targetInstant, boundary, projection });
   if (side === "before" || side === "after") {
     return freeze({
-      status:"resolved",
+      status:projection.status === "estimated"
+        && targetInstant.basis !== TARGET_INSTANT_BASIS.TT_JULIAN_DAY
+        ? "model-estimated"
+        : "resolved",
       side,
       targetBasis:targetInstant.basis
     });
@@ -221,6 +224,68 @@ function instantResolution({ civilRelation, targetInstant, boundary, projection 
       : "target-time-scale-unresolved",
     side:null,
     targetBasis:targetInstant.basis
+  });
+}
+
+function selectedYearMembership({
+  relation,
+  targetInstant,
+  boundary,
+  projection,
+  instantResolution:resolution,
+  beforeYearPillar,
+  afterYearPillar
+}) {
+  if (relation !== "before" && relation !== "after") {
+    return freeze({
+      status:"unresolved",
+      side:null,
+      pillar:null,
+      reason:relation === "boundary-uncertain"
+        ? "boundary-uncertain"
+        : boundary.epochStatus !== "resolved"
+          ? "seasonal-epoch-unresolved"
+          : "target-relation-unresolved"
+    });
+  }
+
+  const pillar = relation === "before" ? beforeYearPillar : afterYearPillar;
+  const sameScaleAuthoritativeComparison =
+    boundary.authorityClass === "reviewed-production-direct-event"
+    && boundary.timeScale === "TT"
+    && targetInstant?.basis === TARGET_INSTANT_BASIS.TT_JULIAN_DAY
+    && resolution?.status === "resolved";
+
+  const deterministicAuthoritativeProjection =
+    boundary.authorityClass === "reviewed-production-direct-event"
+    && projection.status === "resolved"
+    && projection.deterministicWithinModel === true;
+
+  if (sameScaleAuthoritativeComparison || deterministicAuthoritativeProjection) {
+    return freeze({
+      status:"exact",
+      side:relation,
+      pillar,
+      reason:sameScaleAuthoritativeComparison
+        ? "authoritative-same-scale-comparison"
+        : "authoritative-deterministic-projection"
+    });
+  }
+
+  let reason = "model-dependent-boundary";
+  if (boundary.authorityClass === "source-derived-research-evidence") {
+    reason = "research-source-derived-boundary";
+  } else if (projection.status === "estimated") {
+    reason = "earth-rotation-model";
+  } else if (boundary.authorityClass === "declared-model-direct-event") {
+    reason = "seasonal-boundary-model";
+  }
+
+  return freeze({
+    status:"model-estimated",
+    side:relation,
+    pillar,
+    reason
   });
 }
 
@@ -264,17 +329,26 @@ export function researchYearStripState(selectedDate, { targetInstant = null } = 
     boundary:liChunBoundary,
     projection:liChunProjection
   });
-  const selectedLiChunRelation = liChunInstantResolution?.status === "resolved"
+  const selectedLiChunRelation = ["resolved", "model-estimated"].includes(
+    liChunInstantResolution?.status
+  )
     ? liChunInstantResolution.side
     : selectedCivilLiChunRelation;
-  const selectedBeforeLiChun = selectedLiChunRelation === "before"
+  const yearMembership = selectedYearMembership({
+    relation:selectedLiChunRelation,
+    targetInstant,
+    boundary:liChunBoundary,
+    projection:liChunProjection,
+    instantResolution:liChunInstantResolution,
+    beforeYearPillar,
+    afterYearPillar
+  });
+  const selectedBeforeLiChun = yearMembership.side === "before"
     ? true
-    : selectedLiChunRelation === "after"
+    : yearMembership.side === "after"
       ? false
       : null;
-  const selectedYearPillar = selectedBeforeLiChun === null
-    ? null
-    : selectedBeforeLiChun ? beforeYearPillar : afterYearPillar;
+  const selectedYearPillar = yearMembership.pillar;
 
   return freeze({
     selectedDate:freeze({ ...selectedDate }),
@@ -289,6 +363,7 @@ export function researchYearStripState(selectedDate, { targetInstant = null } = 
     liChunInstantResolution,
     selectedBeforeLiChun,
     liChunTransition,
+    selectedYearMembership:yearMembership,
     selectedYearPillar,
     nextDate:nextDate ? freeze({ ...nextDate }) : null,
     elapsedDays:next.dayDelta
@@ -344,6 +419,8 @@ function render() {
   strip.dataset.selectedBeforeLiChun = state.selectedBeforeLiChun === null ? "unknown" : String(state.selectedBeforeLiChun);
   strip.dataset.baseEdge = state.selectedPosition < 20 ? "start" : state.selectedPosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
+  strip.dataset.selectedYearMembershipStatus = state.selectedYearMembership.status;
+  strip.dataset.selectedYearMembershipReason = state.selectedYearMembership.reason;
   strip.dataset.selectedYearPillar = state.selectedYearPillar?.name ?? "unavailable";
   strip.dataset.liChunYearPillarBefore = state.liChunTransition.before.name;
   strip.dataset.liChunYearPillarAfter = state.liChunTransition.after.name;
@@ -356,7 +433,9 @@ function render() {
   setText(
     "research-year-base-title",
     state.selectedYearPillar
-      ? `選定日 · ${state.selectedYearPillar.name}年`
+      ? state.selectedYearMembership.status === "model-estimated"
+        ? `選定日 · ${state.selectedYearPillar.name}年 · 模型估計`
+        : `選定日 · ${state.selectedYearPillar.name}年`
       : ["boundary-day", "boundary-uncertain"].includes(state.selectedCivilLiChunRelation)
         ? state.liChunInstantResolution?.status === "target-instant-unbound"
           ? "選定日 · 立春日需時刻判定"
@@ -443,5 +522,7 @@ export const RESEARCH_YEAR_STRIP_CONTRACT = freeze({
   liChunLongitudeDegrees:LI_CHUN_LONGITUDE_DEGREES,
   defaultDisplayOffsetHoursFromUt1:DEFAULT_YEAR_STRIP_OFFSET_HOURS_FROM_UT1,
   transitionIndependentFromEpochAvailability:true,
-  directLegacyCivilSolarTermAuthority:false
+  directLegacyCivilSolarTermAuthority:false,
+  selectedYearMembershipStatuses:freeze(["exact", "model-estimated", "unresolved"]),
+  oneSigmaIntervalIsHardDecisionBound:false
 });
