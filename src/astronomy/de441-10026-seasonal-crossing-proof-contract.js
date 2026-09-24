@@ -1,0 +1,39 @@
+export const DE441_10026_SEASONAL_CROSSING_PROOF_CONTRACT = Object.freeze({
+  id:"de441-10026-source-derived-seasonal-crossing-proof-v1",
+  catalogueYear:10026,
+  sourceEphemeris:"DE441",
+  sourceStateEvidence:Object.freeze({
+    id:"jpl-de441-10026-offline-state-capture-evidence-v1",
+    researchPullRequest:450,
+    workflowRunId:35_929_146_374,
+    artifactId:10_780_616_042,
+    artifactDigest:"sha256:d133db4bd66e871827a9024bfc11aad6fd975a68e10a3497538f56ca6e0e31e9",
+    captureSha256:"d1f7c06152771ffa2db8538dd2807b7f8d4785114e20b6d5655ee7cf1b110481"
+  }),
+  frameProof:Object.freeze({
+    id:"swiss-owen-horizons-frame-proof-v1",
+    independentlyValidatedCatalogueYears:Object.freeze([4006]),
+    targetYearIndependentlyValidated:false,
+    sourceDerivedExtensionToTargetYear:true
+  }),
+  apparentDirectionModelId:"horizons-sun-center-apparent-direction-proof",
+  referenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
+  timeScale:"TT",
+  requiredCrossings:24,
+  longitudeStepDegrees:15,
+  rootSolve:Object.freeze({
+    toleranceSeconds:0.005,
+    maxResidualArcsec:0.001,
+    alternateSeedParitySeconds:0.02,
+    maxBracketHalfWidthDays:16
+  }),
+  claimBoundary:Object.freeze({
+    independentTargetYearTruth:false,
+    sourceDerivedTargetYear:true,
+    resolvesCivilTime:false,
+    productionIntegrated:false,
+    productionAuthorityGranted:false
+  }),
+  proofOnly:true,
+  note:"This proof asks whether the already-pinned DE441 year-10026 state capture can be composed with the 4006-validated apparent-direction and Owen/JPLHOR frame path to produce a stable 24-crossing TT event slice. It does not pretend that Horizons independently validates year 10026, and a passing result does not itself register a production direct-event provider."
+});
