@@ -34,6 +34,18 @@ jobs:
           grep -q 'SEMOD_PREC_OWEN_1990' tmp/swisseph/swephlib.c
           grep -q 'psia += -0.000018560' tmp/swisseph/swephlib.c
 
+      - name: Fetch static IERS EOP14 IAU1980 correction source
+        shell: bash
+        run: |
+          set -euo pipefail
+          IERS_EOP_URL=https://datacenter.iers.org/data/223/eopc04_14.62-now.txt
+          curl --fail --location --retry 4 --retry-all-errors \
+            "$IERS_EOP_URL" \
+            --output tmp/eopc04_14.62-now.txt
+          test -s tmp/eopc04_14.62-now.txt
+          tail -n 3 tmp/eopc04_14.62-now.txt
+          sha256sum tmp/eopc04_14.62-now.txt
+
       - name: Build pinned Swiss static library and frame probe
         shell: bash
         run: |
@@ -50,6 +62,8 @@ jobs:
         env:
           OWEN_FRAME_PROBE: tmp/owen-frame-probe
           OUTPUT_JSON: tmp/owen-frame-proof-4006.json
+          IERS_EOP_FILE: tmp/eopc04_14.62-now.txt
+          IERS_EOP_SOURCE_URL: https://datacenter.iers.org/data/223/eopc04_14.62-now.txt
         run: node scripts/research-check-owen-frame-4006.mjs
 
       - name: Verify proof boundary
@@ -61,6 +75,10 @@ jobs:
           const result = JSON.parse(fs.readFileSync("tmp/owen-frame-proof-4006.json","utf8"));
           if (result.validation.catalogueYear !== 4006) throw new Error("wrong catalogue year");
           if (result.validation.sampleCount !== 18) throw new Error("wrong sample count");
+          const eop = result.source.iersEop;
+          if (eop.authority !== "IERS Earth Orientation Centre") throw new Error("wrong EOP authority");
+          if (eop.terminalDate !== "2026-01-05") throw new Error("unexpected EOP terminal date");
+          if (!/^[0-9a-f]{64}$/.test(eop.sha256)) throw new Error("missing EOP sha256");
           if (!(result.validation.apparent.maxResidualArcsec < 0.05)) throw new Error("apparent-frame residual gate failed");
           if (!(result.validation.mean.maxResidualArcsec > result.validation.apparent.maxResidualArcsec)) {
             throw new Error("apparent equinox did not improve the frame proof");
