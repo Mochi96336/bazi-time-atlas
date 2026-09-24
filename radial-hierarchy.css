@@ -9,7 +9,7 @@
    this layer only consumes them. The four Ganzhi clocks are one achromatic
    graphite family whose lightness opens outward with temporal scale. Solar
    longitude keeps the single matte-brass channel; derived Zodiac stays a recessed
-   cool violet; the warm ivory cursor remains reserved for the Selected Instant.
+   night-indigo; the warm ivory cursor remains reserved for the Selected Instant.
    Classification mode may deliberately replace this resting grammar with
    categorical element colors. */
 
@@ -185,36 +185,36 @@
 }
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 76%, #9b9aaa);
+  stop-color: color-mix(in srgb, var(--zodiac) 80%, #8090aa);
   stop-opacity: .25;
 }
 #m2-zodiac-hard-surface .m2-zodiac-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 88%, #353642);
+  stop-color: color-mix(in srgb, var(--zodiac) 90%, #242b38);
   stop-opacity: .20;
 }
 #m2-zodiac-hard-surface .m2-zodiac-dark {
-  stop-color: color-mix(in srgb, var(--zodiac) 58%, #111319);
+  stop-color: color-mix(in srgb, var(--zodiac) 64%, #090e16);
   stop-opacity: .18;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 70%, #b3b2bf);
+  stop-color: color-mix(in srgb, var(--zodiac) 74%, #92a2ba);
   stop-opacity: .090;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 82%, #555766);
+  stop-color: color-mix(in srgb, var(--zodiac) 84%, #354255);
   stop-opacity: .040;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-dark {
-  stop-color: #101218;
+  stop-color: #080d15;
   stop-opacity: .014;
 }
 .m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
 .m2-zodiac-hard-response { fill: url(#m2-zodiac-hard-response); opacity: .68; }
 
-/* Material L1 keeps the existing cool-violet Zodiac body/fallback, but roughness
-   mode lets the shared rotating micro-field carry the fine surface response.
-   Retain only a faint broad SVG response so the band no longer reads as a
-   separate fixed-gradient material demo. */
+/* Material L2 keeps the L1 shared rotating micro-field and response energy, but
+   retunes the Zodiac body/fallback toward a darker night-indigo surface. The
+   broad SVG veil stays faint and cool so it reads as moonlit depth rather than
+   a separate purple-gray decorative band. */
 #kinetic-instrument[data-material-prototype="roughness"] .m2-zodiac-hard-response {
   opacity: .08;
 }
@@ -319,8 +319,8 @@
 
 /* Solar terms and zodiac are two readings of one annual longitude coordinate,
    not two more peer clocks. Solar now sits on a real matte-brass material bed;
-   Zodiac keeps its existing blue-violet hue but receives the same hard-surface
-   hierarchy instead of reading as a flat tint. Active fills remain semantic veils
+   Zodiac keeps a subdued night-indigo hue within the same hard-surface hierarchy
+   instead of reading as a flat purple-gray tint. Active fills remain semantic veils
    above those beds and never become material authority. */
 #guide-layer .guide-arc.annual-subdivide {
   stroke: color-mix(in srgb, var(--solar) 10%, transparent);
