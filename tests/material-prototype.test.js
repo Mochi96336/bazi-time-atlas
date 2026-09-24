@@ -238,7 +238,12 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /edgeDistance = min\(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius\)/);
   assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.20, 0\.0, 0\.005\)/);
   assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.28 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.022\)/);
-  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.026\)/);
+  assert.match(material, /float zodiacNebulaField\(vec2 localPoint\)/);
+  assert.match(material, /localPoint\.x \/ 128\.0, localPoint\.y \/ 112\.0/);
+  assert.match(material, /low \* 0\.24 \+ mid \* 0\.50 \+ fine \* 0\.26/);
+  assert.match(material, /nebulaLightAlpha = smoothstep\(0\.57, 0\.76, nebula\) \* 0\.010/);
+  assert.match(material, /nebulaDarkAlpha = smoothstep\(0\.58, 0\.77, 1\.0 - nebula\) \* 0\.012/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha \+ nebulaAlpha, 0\.0, 0\.038\)/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*0;/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.012;/);
   assert.doesNotMatch(radial, /data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*\.(?:0?[1-9]|[1-9]\d*)/);
