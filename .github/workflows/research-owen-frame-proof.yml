@@ -1,0 +1,97 @@
+name: Research Owen frame proof
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-owen-frame-proof.yml"
+      - "scripts/research-swiss-owen-frame-probe.c"
+      - "scripts/research-check-owen-frame-4006.mjs"
+      - "src/astronomy/owen-horizons-frame-proof-contract.js"
+      - "tests/owen-horizons-frame-proof-contract.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owen-frame-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+          grep -q 'SEMOD_PREC_OWEN_1990' tmp/swisseph/swephlib.c
+          grep -q 'psia += -0.000018560' tmp/swisseph/swephlib.c
+
+      - name: Fetch static IERS EOP14 IAU1980 correction source
+        shell: bash
+        run: |
+          set -euo pipefail
+          IERS_EOP_URL=https://datacenter.iers.org/data/223/eopc04_14.62-now.txt
+          curl --fail --location --retry 4 --retry-all-errors \
+            "$IERS_EOP_URL" \
+            --output tmp/eopc04_14.62-now.txt
+          test -s tmp/eopc04_14.62-now.txt
+          tail -n 3 tmp/eopc04_14.62-now.txt
+          sha256sum tmp/eopc04_14.62-now.txt
+
+      - name: Build pinned Swiss static library and frame probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          cc -O2 -Wall -Wextra \
+            -I tmp/swisseph \
+            scripts/research-swiss-owen-frame-probe.c \
+            tmp/swisseph/libswe.a \
+            -lm -ldl \
+            -o tmp/owen-frame-probe
+
+      - name: Compare Owen frame against pinned Horizons 4006 truth
+        env:
+          OWEN_FRAME_PROBE: tmp/owen-frame-probe
+          OUTPUT_JSON: tmp/owen-frame-proof-4006.json
+          IERS_EOP_FILE: tmp/eopc04_14.62-now.txt
+          IERS_EOP_SOURCE_URL: https://datacenter.iers.org/data/223/eopc04_14.62-now.txt
+        run: node scripts/research-check-owen-frame-4006.mjs
+
+      - name: Verify proof boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("fs");
+          const result = JSON.parse(fs.readFileSync("tmp/owen-frame-proof-4006.json","utf8"));
+          if (result.validation.catalogueYear !== 4006) throw new Error("wrong catalogue year");
+          if (result.validation.sampleCount !== 18) throw new Error("wrong sample count");
+          const eop = result.source.iersEop;
+          if (eop.authority !== "IERS Earth Orientation Centre") throw new Error("wrong EOP authority");
+          if (eop.terminalDate !== "2026-01-05") throw new Error("unexpected EOP terminal date");
+          if (eop.sha256 !== "40347f18a10eb72b15e4f84e647b5f1b7da4709534d935e2e1289697bdfa79df") throw new Error("EOP sha256 mismatch");
+          if (eop.terminalMjd !== 61045) throw new Error("unexpected EOP terminal MJD");
+          if (eop.terminalDPsiArcsec !== -0.113478) throw new Error("unexpected terminal dPsi");
+          if (eop.terminalDEpsArcsec !== -0.006944) throw new Error("unexpected terminal dEps");
+          if (!(result.validation.apparent.maxResidualArcsec < 0.05)) throw new Error("apparent-frame residual gate failed");
+          if (!(result.validation.mean.maxResidualArcsec > result.validation.apparent.maxResidualArcsec)) {
+            throw new Error("apparent equinox did not improve the frame proof");
+          }
+          NODE
+
+      - name: Upload Owen frame proof
+        uses: actions/upload-artifact@v7
+        with:
+          name: owen-frame-proof-4006
+          path: tmp/owen-frame-proof-4006.json
+          if-no-files-found: error
+          retention-days: 7
