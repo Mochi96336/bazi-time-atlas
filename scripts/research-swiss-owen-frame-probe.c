@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
   char astro_models[] = "5,9,9,1,3,0,0,4";
   swe_set_astro_models(astro_models, 0);
 
-  if (argc != 5) {
-    fprintf(stderr, "usage: %s <mode:mean|apparent> <tt-jd> <icrf-ra-deg> <icrf-dec-deg>\n", argv[0]);
+  if (argc != 7) {
+    fprintf(stderr, "usage: %s <mode:mean|apparent> <tt-jd> <icrf-ra-deg> <icrf-dec-deg> <eop-dpsi-arcsec> <eop-deps-arcsec>\n", argv[0]);
     return 2;
   }
   const char *mode = argv[1];
@@ -59,6 +59,8 @@ int main(int argc, char **argv) {
   const double tt_jd = parse_number(argv[2], "tt-jd");
   const double ra = parse_number(argv[3], "ra") * M_PI / 180.0;
   const double dec = parse_number(argv[4], "dec") * M_PI / 180.0;
+  const double eop_dpsi_arcsec = parse_number(argv[5], "eop-dpsi-arcsec");
+  const double eop_deps_arcsec = parse_number(argv[6], "eop-deps-arcsec");
   const double cos_dec = cos(dec);
 
   double vector[6] = {
@@ -112,18 +114,23 @@ int main(int argc, char **argv) {
    *
    * Horizons #31 uses apparent longitude in the IAU76/80 ecliptic-of-date
    * system. We therefore:
-   *   1. evaluate pinned Swiss's full JPLHOR IAU1980 dpsi/deps path,
-   *      including Horizons-specific correction terms outside loaded EOP ranges;
-   *   2. build the same nut_matrix() as pinned Swiss;
-   *   3. apply the matrix to mean equatorial-of-date;
-   *   4. rotate by mean obliquity and then by deps, matching app_pos_rest().
+   *   1. evaluate pinned Swiss's IAU1980 base nutation;
+   *   2. add the source-pinned terminal IERS dpsi/deps correction. Pinned
+   *      Swiss's full JPLHOR path holds the terminal EOP correction constant
+   *      when the requested date lies beyond the loaded table;
+   *   3. build the same nut_matrix() as pinned Swiss;
+   *   4. apply the matrix to mean equatorial-of-date;
+   *   5. rotate by mean obliquity and then by deps, matching app_pos_rest().
    */
   const double obliquity = swi_epsiln(tt_jd, iflag);
   if (apparent_mode) {
-    if (swi_nutation(tt_jd, SEFLG_JPLHOR, nutation) != 0) {
+    if (swi_nutation(tt_jd, 0, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
     }
+    const double arcsec_to_radians = M_PI / (180.0 * 3600.0);
+    nutation[0] += eop_dpsi_arcsec * arcsec_to_radians;
+    nutation[1] += eop_deps_arcsec * arcsec_to_radians;
 
     const double psi = nutation[0];
     const double eps = obliquity + nutation[1];
