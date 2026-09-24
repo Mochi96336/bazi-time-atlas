@@ -1,0 +1,61 @@
+import {
+  DE441_10026_SEASONAL_CROSSING_EVIDENCE
+} from "../astronomy/de441-10026-seasonal-crossing-evidence.js";
+
+const EVIDENCE = Object.freeze([
+  DE441_10026_SEASONAL_CROSSING_EVIDENCE
+]);
+
+function normalizedLongitude(value) {
+  if (!Number.isFinite(value)) throw new RangeError("longitudeDegrees must be finite");
+  return ((value % 360) + 360) % 360;
+}
+
+function freeze(value) {
+  return Object.freeze(value);
+}
+
+/**
+ * Research-only seasonal-event evidence.
+ *
+ * This registry exists so Research views can consume a pinned, reproducible
+ * source-derived TT crossing without registering it as a production provider.
+ * Every returned event carries the evidence claim boundary unchanged.
+ */
+export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees }) {
+  if (!Number.isInteger(year)) throw new RangeError("year must be an integer");
+  const longitude = normalizedLongitude(longitudeDegrees);
+  const evidence = EVIDENCE.find(item => item.catalogueYear === year);
+  if (!evidence) return null;
+
+  const term = evidence.terms.find(item => item.longitudeDegrees === longitude);
+  if (!term) return null;
+
+  return freeze({
+    id:`${evidence.id}:${longitude}`,
+    evidenceId:evidence.id,
+    validationKind:evidence.validationKind,
+    authority:evidence.authority,
+    sourceEphemeris:evidence.sourceEphemeris,
+    year,
+    name:term.name,
+    longitudeDegrees:longitude,
+    timeScale:evidence.timeScale,
+    ttJulianDay:term.ttJulianDay,
+    independentTargetYearTruth:evidence.claimBoundary.independentTargetYearTruth,
+    sourceDerivedTargetYear:evidence.claimBoundary.sourceDerivedTargetYear,
+    frameIndependentlyValidatedAtTargetYear:
+      evidence.claimBoundary.frameIndependentlyValidatedAtTargetYear,
+    productionIntegrated:evidence.claimBoundary.productionIntegrated,
+    productionAuthorityGranted:evidence.claimBoundary.productionAuthorityGranted,
+    civilTimeResolved:evidence.claimBoundary.civilTimeResolved,
+    researchRun:evidence.researchRun
+  });
+}
+
+export const RESEARCH_SEASONAL_EVIDENCE_REGISTRY = freeze({
+  id:"research-source-derived-seasonal-evidence-registry-v1",
+  evidenceIds:freeze(EVIDENCE.map(item => item.id)),
+  productionAuthorityGranted:false,
+  independentTargetYearTruthRequiredForProductionPromotion:true
+});
