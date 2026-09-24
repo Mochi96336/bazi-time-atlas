@@ -185,36 +185,36 @@
 }
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 80%, #8090aa);
-  stop-opacity: .25;
+  stop-color: color-mix(in srgb, var(--zodiac) 84%, #68758f);
+  stop-opacity: .24;
 }
 #m2-zodiac-hard-surface .m2-zodiac-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 90%, #242b38);
-  stop-opacity: .20;
+  stop-color: color-mix(in srgb, var(--zodiac) 92%, #1c2230);
+  stop-opacity: .19;
 }
 #m2-zodiac-hard-surface .m2-zodiac-dark {
-  stop-color: color-mix(in srgb, var(--zodiac) 64%, #090e16);
+  stop-color: color-mix(in srgb, var(--zodiac) 68%, #070b12);
   stop-opacity: .18;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 74%, #92a2ba);
-  stop-opacity: .090;
+  stop-color: color-mix(in srgb, var(--zodiac) 78%, #7f8faa);
+  stop-opacity: .084;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 84%, #354255);
-  stop-opacity: .040;
+  stop-color: color-mix(in srgb, var(--zodiac) 87%, #2b374a);
+  stop-opacity: .036;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-dark {
-  stop-color: #080d15;
+  stop-color: #060a11;
   stop-opacity: .014;
 }
 .m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
 .m2-zodiac-hard-response { fill: url(#m2-zodiac-hard-response); opacity: .68; }
 
-/* Material L2 keeps the L1 shared rotating micro-field and response energy, but
-   retunes the Zodiac body/fallback toward a darker night-indigo surface. The
-   broad SVG veil stays faint and cool so it reads as moonlit depth rather than
-   a separate purple-gray decorative band. */
+/* Material L3 deepens the L2 night-indigo body and lets the procedural layer add
+   a restrained cloud-patina field derived from the same deterministic fBm family
+   used by Solar oxidation. It should read as cold celestial dust, never stars,
+   glow, or a painted nebula. The broad SVG veil remains deliberately faint. */
 #kinetic-instrument[data-material-prototype="roughness"] .m2-zodiac-hard-response {
   opacity: .08;
 }
