@@ -146,7 +146,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-material-face/);
   assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
-  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-response\s*\{[^}]*opacity:\s*\.14;/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-response\s*\{[^}]*opacity:\s*\.08;/);
   assert.match(renderer, /const materialBaseLayer = svg\.querySelector\("#material-base-layer"\)/);
   assert.match(renderer, /const materialReflectionLayer = svg\.querySelector\("#material-reflection-layer"\)/);
   assert.match(renderer, /class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?"data-material-reflection-ring": id[\s\S]*?\}, surfaceLayer\);/);
@@ -236,14 +236,14 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
   assert.match(material, /vec4 renderZodiacMicroResponse\(vec2 worldPoint, float rotationDegrees\)/);
   assert.match(material, /edgeDistance = min\(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius\)/);
-  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.16, 0\.0, 0\.004\)/);
-  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.19 \+ abs\(fieldCentered\) \* 0\.006, 0\.0, 0\.015\)/);
-  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.018\)/);
+  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.20, 0\.0, 0\.005\)/);
+  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.28 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.022\)/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.026\)/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*0;/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.012;/);
   assert.doesNotMatch(radial, /data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*\.(?:0?[1-9]|[1-9]\d*)/);
   assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
-  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-response\s*\{[^}]*opacity:\s*\.14;/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-response\s*\{[^}]*opacity:\s*\.08;/);
   assert.doesNotMatch(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-bed\s*\{[^}]*opacity:\s*0;/);
   assert.match(radial, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(radial, /\.m2-(?:hour|day|month|year)-material-face \{[^}]*opacity:/);
