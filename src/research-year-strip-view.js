@@ -4,7 +4,7 @@ import {
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
-import { resolveSeasonalBoundary } from "./recurrence/seasonal-boundary-authority.js";
+import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import { projectSeasonalBoundaryToCivil } from "./recurrence/seasonal-civil-projection.js";
 import {
   TARGET_INSTANT_BASIS
@@ -240,7 +240,7 @@ export function researchYearStripState(selectedDate, { targetInstant = null } = 
 
   const next = recurrenceState(selectedDate, 1);
   const displayOffset = yearStripOffset(targetInstant);
-  const liChunBoundary = resolveSeasonalBoundary({
+  const liChunBoundary = resolveResearchSeasonalBoundary({
     year:selectedDate.year,
     longitudeDegrees:LI_CHUN_LONGITUDE_DEGREES
   });
