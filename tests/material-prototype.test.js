@@ -146,7 +146,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-bed/);
   assert.doesNotMatch(css, /data-material-prototype="roughness"\] \.m2-ring-material-face/);
   assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
-  assert.doesNotMatch(radial, /data-material-prototype="roughness"\][^\n{]*\.m2-zodiac-hard/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-response\s*\{[^}]*opacity:\s*\.14;/);
   assert.match(renderer, /const materialBaseLayer = svg\.querySelector\("#material-base-layer"\)/);
   assert.match(renderer, /const materialReflectionLayer = svg\.querySelector\("#material-reflection-layer"\)/);
   assert.match(renderer, /class: `m2-ring-reflection m2-\$\{id\}-reflection`[\s\S]*?"data-material-reflection-ring": id[\s\S]*?\}, surfaceLayer\);/);
