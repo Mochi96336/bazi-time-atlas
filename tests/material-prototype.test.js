@@ -12,7 +12,8 @@ import {
   materialGeometry,
   renderedSolarRotation,
   resolveMaterialMode,
-  solarMaterialGeometry
+  solarMaterialGeometry,
+  zodiacMaterialGeometry
 } from "../src/wheel/material-prototype.js";
 import { ringModel } from "../src/wheel/ring-model.js";
 
@@ -52,6 +53,13 @@ test("Solar material borrows the annual-band geometry and final rendered pose", 
   ]);
   assert.equal(renderedSolarRotation(rotations), 87.625);
   assert.equal(renderedSolarRotation(new Map()), 0);
+
+  const zodiacGeometry = zodiacMaterialGeometry();
+  assert.deepEqual(zodiacGeometry, {
+    id: zodiac.id,
+    innerRadius: zodiac.innerRadius,
+    outerRadius: zodiac.outerRadius
+  });
 });
 
 test("roughness field is deterministic, dense, bounded, and seed-sensitive", () => {
@@ -150,7 +158,10 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /uniform float u_solar_inner_radius/);
   assert.match(material, /uniform float u_solar_outer_radius/);
   assert.match(material, /uniform float u_solar_rotation/);
+  assert.match(material, /uniform float u_zodiac_inner_radius/);
+  assert.match(material, /uniform float u_zodiac_outer_radius/);
   assert.match(material, /renderSolarBrass\(point, u_solar_rotation, pixelFootprint\)/);
+  assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
   // broad oxide-island read in favor of high-frequency low-contrast variation.
   // repeating 128×128 graphite texture for oxidation. It owns a deterministic
@@ -223,11 +234,17 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.39 \+ abs\(fieldCentered\) \* 0\.013, 0\.0, 0\.034\)/);
   assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.044\)/);
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
+  assert.match(material, /vec4 renderZodiacMicroResponse\(vec2 worldPoint, float rotationDegrees\)/);
+  assert.match(material, /edgeDistance = min\(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius\)/);
+  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.16, 0\.0, 0\.004\)/);
+  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.19 \+ abs\(fieldCentered\) \* 0\.006, 0\.0, 0\.015\)/);
+  assert.match(material, /overlayAlpha = edgeMask \* clamp\(specularAlpha \+ microAlpha, 0\.0, 0\.018\)/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*0;/);
   assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.012;/);
   assert.doesNotMatch(radial, /data-material-prototype="roughness"\] \.m2-solar-brass-bed\s*\{[^}]*opacity:\s*\.(?:0?[1-9]|[1-9]\d*)/);
   assert.match(radial, /\.m2-solar-brass-response\s*\{[^}]*opacity:\s*\.72;/);
-  assert.doesNotMatch(radial, /data-material-prototype="roughness"[^\n{]*\.m2-zodiac-hard/);
+  assert.match(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-response\s*\{[^}]*opacity:\s*\.14;/);
+  assert.doesNotMatch(radial, /#kinetic-instrument\[data-material-prototype="roughness"\] \.m2-zodiac-hard-bed\s*\{[^}]*opacity:\s*0;/);
   assert.match(radial, /\.m2-ring-material-face \{[\s\S]*?fill:\s*none;[\s\S]*?opacity:\s*0;/);
   assert.doesNotMatch(radial, /\.m2-(?:hour|day|month|year)-material-face \{[^}]*opacity:/);
   assert.doesNotMatch(material, /vec3 base =|bodyResponse|crownSlope|float diffuse|lightAlignment|broadSheen/);
