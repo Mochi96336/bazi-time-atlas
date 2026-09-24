@@ -50,17 +50,22 @@ test("year 4006 prefers the reviewed production DE441 direct-event runtime over 
   assert.notEqual(result.providerId, TYME_SHOUXING_DIRECT_PROVIDER.id);
 });
 
-test("year 10026 distinguishes DE441 source coverage from missing production runtime", () => {
+test("year 10026 resolves pinned DE441-derived research evidence without granting production authority", () => {
   const result = resolveSeasonalBoundary({ year:10026, longitudeDegrees:LI_CHUN_LONGITUDE });
 
-  assert.equal(result.status, "source-covered-runtime-missing");
-  assert.equal(result.epochStatus, "unresolved");
-  assert.equal(result.authorityClass, "qualified-source-without-runtime");
-  assert.equal(result.ttJulianDay, null);
-  assert.ok(result.sourceIds.includes("jpl-de441"));
-  const de441 = result.sourceCoverage.find(item => item.providerId === "jpl-de441");
-  assert.deepEqual(de441.coverage, { minYear:-13200, maxYear:17191 });
-  assert.equal(result.blocker, "implementation-and-seasonal-epoch-solver");
+  assert.equal(result.status, "resolved-research-evidence");
+  assert.equal(result.epochStatus, "resolved");
+  assert.equal(result.authorityClass, "source-derived-research-evidence");
+  assert.equal(result.providerRole, "research-source-derived-event");
+  assert.equal(result.timeScale, "TT");
+  assert.equal(result.ttJulianDay, 5383013.532143416);
+  assert.deepEqual(result.sourceIds, ["jpl-de441"]);
+  assert.deepEqual(result.sourceCoverage, { minYear:10026, maxYear:10026 });
+  assert.equal(result.evidenceClass, "source-derived-reconstruction");
+  assert.equal(result.independentTargetYearTruth, false);
+  assert.equal(result.sourceDerivedTargetYear, true);
+  assert.equal(result.productionAuthorityGranted, false);
+  assert.equal(result.blocker, "target-year-independent-validation");
 });
 
 test("year 26026 reports an absolute ephemeris source coverage gap rather than a generic unavailable state", () => {
