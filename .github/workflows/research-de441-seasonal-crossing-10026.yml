@@ -1,0 +1,129 @@
+name: Research DE441 10026 seasonal crossing proof
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-de441-seasonal-crossing-10026.yml"
+      - "scripts/research-solve-de441-10026-seasonal.mjs"
+      - "scripts/research-swiss-owen-frame-probe.c"
+      - "src/astronomy/de441-10026-seasonal-crossing-proof-contract.js"
+      - "src/astronomy/de441-10026-seasonal-crossing-evidence.js"
+      - "src/astronomy/de441-10026-state-capture-evidence.js"
+      - "src/astronomy/de441-state-segment-adapter.js"
+      - "src/astronomy/naif-tt-tdb-time-bridge.js"
+      - "src/astronomy/absolute-state-seasonal-solver.js"
+      - "src/astronomy/horizons-sun-apparent-direction-proof.js"
+      - "src/astronomy/owen-horizons-frame-proof-contract.js"
+      - "tests/de441-10026-seasonal-crossing-proof-contract.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  solve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download pinned #450 compact state evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: "10780616042"
+          EXPECTED_CAPTURE_SHA256: "d1f7c06152771ffa2db8538dd2807b7f8d4785114e20b6d5655ee7cf1b110481"
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/de441-10026-state
+          curl --fail --location --retry 4 --retry-all-errors             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             -H "X-GitHub-Api-Version: 2022-11-28"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip"             --output tmp/de441-10026-state.zip
+          unzip -q tmp/de441-10026-state.zip -d tmp/de441-10026-state
+          test -s tmp/de441-10026-state/de441-10026-state-capture.json
+          node - <<'NODE'
+          const fs = require("fs");
+          const crypto = require("crypto");
+          const raw = fs.readFileSync("tmp/de441-10026-state/de441-10026-state-capture.json","utf8").trimEnd();
+          const digest = crypto.createHash("sha256").update(raw).digest("hex");
+          if (digest !== process.env.EXPECTED_CAPTURE_SHA256) {
+            throw new Error(`state capture SHA mismatch: ${digest}`);
+          }
+          NODE
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+          grep -q 'SEMOD_PREC_OWEN_1990' tmp/swisseph/swephlib.c
+          grep -q 'psia += -0.000018560' tmp/swisseph/swephlib.c
+
+      - name: Build pinned Owen frame probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          cc -O2 -Wall -Wextra             -I tmp/swisseph             scripts/research-swiss-owen-frame-probe.c             tmp/swisseph/libswe.a             -lm -ldl             -o tmp/owen-frame-probe
+
+      - name: Solve all 24 year-10026 seasonal crossings
+        env:
+          STATE_CAPTURE_JSON: tmp/de441-10026-state/de441-10026-state-capture.json
+          OWEN_FRAME_PROBE: tmp/owen-frame-probe
+          OUTPUT_JSON: tmp/de441-10026-seasonal-crossing-proof.json
+        run: node scripts/research-solve-de441-10026-seasonal.mjs
+
+      - name: Verify source-derived proof boundary
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const result = JSON.parse(fs.readFileSync("tmp/de441-10026-seasonal-crossing-proof.json","utf8"));
+          if (result.catalogueYear !== 10026) throw new Error("wrong catalogue year");
+          if (result.validation.solvedCrossings !== 24) throw new Error("did not solve 24 crossings");
+          if (!(result.validation.maxRootResidualArcsec < 0.001)) throw new Error("root residual gate failed");
+          if (!(result.validation.maxSeedParitySeconds < 0.02)) throw new Error("alternate-seed parity gate failed");
+          if (result.claimBoundary.independentTargetYearTruth !== false) throw new Error("target year must not claim independent truth");
+          if (result.claimBoundary.sourceDerivedTargetYear !== true) throw new Error("target year must be labeled source-derived");
+          if (result.claimBoundary.productionIntegrated !== false) throw new Error("proof must remain non-production");
+          if (!result.events.some(event => event.longitudeDegrees === 315)) throw new Error("Li Chun crossing missing");
+          NODE
+
+      - name: Verify pinned crossing evidence reproduces
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from "node:fs";
+          import { DE441_10026_SEASONAL_CROSSING_EVIDENCE as pinned } from "./src/astronomy/de441-10026-seasonal-crossing-evidence.js";
+          const actual = JSON.parse(fs.readFileSync("tmp/de441-10026-seasonal-crossing-proof.json","utf8"));
+          if (actual.events.length !== pinned.terms.length) throw new Error("pinned crossing count drift");
+          for (let i = 0; i < pinned.terms.length; i += 1) {
+            const expected = pinned.terms[i];
+            const observed = actual.events[i];
+            if (expected.name !== observed.name || expected.longitudeDegrees !== observed.longitudeDegrees) {
+              throw new Error(`crossing identity drift at index ${i}`);
+            }
+            const deltaSeconds = Math.abs(expected.ttJulianDay - observed.ttJulianDay) * 86400;
+            if (!(deltaSeconds < 0.002)) {
+              throw new Error(`crossing epoch drift at ${expected.name}: ${deltaSeconds}s`);
+            }
+          }
+          if (Math.abs(actual.liChun.ttJulianDay - pinned.liChun.ttJulianDay) * 86400 >= 0.002) {
+            throw new Error("pinned Li Chun epoch drift");
+          }
+          if (pinned.claimBoundary.independentTargetYearTruth !== false) {
+            throw new Error("pinned evidence overclaims independent target-year truth");
+          }
+          NODE
+
+      - name: Upload year-10026 seasonal crossing proof
+        uses: actions/upload-artifact@v7
+        with:
+          name: de441-10026-seasonal-crossing-proof
+          path: tmp/de441-10026-seasonal-crossing-proof.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 9
