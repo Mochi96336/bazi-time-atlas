@@ -112,14 +112,15 @@ int main(int argc, char **argv) {
    *
    * Horizons #31 uses apparent longitude in the IAU76/80 ecliptic-of-date
    * system. We therefore:
-   *   1. evaluate the explicitly pinned IAU1980 dpsi/deps angles;
+   *   1. evaluate pinned Swiss's full JPLHOR IAU1980 dpsi/deps path,
+   *      including Horizons-specific correction terms outside loaded EOP ranges;
    *   2. build the same nut_matrix() as pinned Swiss;
    *   3. apply the matrix to mean equatorial-of-date;
    *   4. rotate by mean obliquity and then by deps, matching app_pos_rest().
    */
   const double obliquity = swi_epsiln(tt_jd, iflag);
   if (apparent_mode) {
-    if (swi_nutation(tt_jd, 0, nutation) != 0) {
+    if (swi_nutation(tt_jd, SEFLG_JPLHOR, nutation) != 0) {
       fprintf(stderr, "swi_nutation failed\n");
       return 4;
     }
