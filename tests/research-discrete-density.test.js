@@ -111,7 +111,7 @@ test("year strip composes seasonal epoch and civil-projection authorities withou
   assert.match(yearStripView, /gregorianOrdinal/);
   assert.match(yearStripView, /recurrenceState/);
   assert.match(yearStripView, /validateGregorianDate/);
-  assert.match(yearStripView, /resolveSeasonalBoundary/);
+  assert.match(yearStripView, /resolveResearchSeasonalBoundary/);
   assert.match(yearStripView, /projectSeasonalBoundaryToCivil/);
   assert.doesNotMatch(yearStripView, /solarTermEventForCivilYear/);
   assert.match(yearStripView, /sexagenaryYearPillarForLiChunYear/);
