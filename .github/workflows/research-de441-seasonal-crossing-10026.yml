@@ -7,6 +7,7 @@ on:
       - "scripts/research-solve-de441-10026-seasonal.mjs"
       - "scripts/research-swiss-owen-frame-probe.c"
       - "src/astronomy/de441-10026-seasonal-crossing-proof-contract.js"
+      - "src/astronomy/de441-10026-seasonal-crossing-evidence.js"
       - "src/astronomy/de441-10026-state-capture-evidence.js"
       - "src/astronomy/de441-state-segment-adapter.js"
       - "src/astronomy/naif-tt-tdb-time-bridge.js"
@@ -90,6 +91,32 @@ jobs:
           if (result.claimBoundary.sourceDerivedTargetYear !== true) throw new Error("target year must be labeled source-derived");
           if (result.claimBoundary.productionIntegrated !== false) throw new Error("proof must remain non-production");
           if (!result.events.some(event => event.longitudeDegrees === 315)) throw new Error("Li Chun crossing missing");
+          NODE
+
+      - name: Verify pinned crossing evidence reproduces
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from "node:fs";
+          import { DE441_10026_SEASONAL_CROSSING_EVIDENCE as pinned } from "./src/astronomy/de441-10026-seasonal-crossing-evidence.js";
+          const actual = JSON.parse(fs.readFileSync("tmp/de441-10026-seasonal-crossing-proof.json","utf8"));
+          if (actual.events.length !== pinned.terms.length) throw new Error("pinned crossing count drift");
+          for (let i = 0; i < pinned.terms.length; i += 1) {
+            const expected = pinned.terms[i];
+            const observed = actual.events[i];
+            if (expected.name !== observed.name || expected.longitudeDegrees !== observed.longitudeDegrees) {
+              throw new Error(`crossing identity drift at index ${i}`);
+            }
+            const deltaSeconds = Math.abs(expected.ttJulianDay - observed.ttJulianDay) * 86400;
+            if (!(deltaSeconds < 0.002)) {
+              throw new Error(`crossing epoch drift at ${expected.name}: ${deltaSeconds}s`);
+            }
+          }
+          if (Math.abs(actual.liChun.ttJulianDay - pinned.liChun.ttJulianDay) * 86400 >= 0.002) {
+            throw new Error("pinned Li Chun epoch drift");
+          }
+          if (pinned.claimBoundary.independentTargetYearTruth !== false) {
+            throw new Error("pinned evidence overclaims independent target-year truth");
+          }
           NODE
 
       - name: Upload year-10026 seasonal crossing proof
