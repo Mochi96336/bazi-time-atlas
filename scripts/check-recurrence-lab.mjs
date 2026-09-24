@@ -206,6 +206,7 @@ console.log(`[recurrence] PASS global closure stacks every discrete marker on th
 if (
   !global.dom.includes('data-li-chun-boundary-status="absolute-source-unavailable"') ||
   !global.dom.includes('data-li-chun-projection-status="unavailable"') ||
+  !global.dom.includes('data-selected-year-membership-status="unresolved"') ||
   !global.dom.includes("超出目前 absolute seasonal-epoch source")
 ) {
   throw new Error(`26026 global discrete closure must remain separate from unavailable absolute Li Chun authority: ${global.url}`);
@@ -227,6 +228,7 @@ if (
   attr(sourceDerivedStrip, "data-li-chun-independent-target-year-truth") !== "false" ||
   attr(sourceDerivedStrip, "data-li-chun-projection-status") !== "estimated" ||
   attr(sourceDerivedStrip, "data-li-chun-position-status") !== "estimated" ||
+  attr(sourceDerivedStrip, "data-selected-year-membership-status") !== "model-estimated" ||
   !sourceDerived8000.dom.includes("DE441-derived · source-derived")
 ) {
   throw new Error(`10026 must expose pinned DE441-derived Research evidence without presenting it as production truth: ${sourceDerived8000.url}`);
@@ -245,6 +247,7 @@ const liChunBoundaryDay = expectCase(
 );
 if (
   !liChunBoundaryDay.dom.includes('data-selected-li-chun-relation="boundary-day"') ||
+  !liChunBoundaryDay.dom.includes('data-selected-year-membership-status="unresolved"') ||
   !liChunBoundaryDay.dom.includes('id="research-year-base-title">選定日 · 立春日需時刻判定<') ||
   !liChunBoundaryDay.dom.includes('id="research-year-li-chun-title">立春 · 癸卯 → 甲辰<')
 ) {
@@ -271,7 +274,8 @@ if (
   !liChunBefore.dom.includes('data-selected-civil-li-chun-relation="boundary-day"') ||
   !liChunBefore.dom.includes('data-li-chun-instant-resolution="resolved"') ||
   !liChunBefore.dom.includes('data-selected-li-chun-relation="before"') ||
-  !liChunBefore.dom.includes('id="research-year-base-title">選定日 · 癸卯年<')
+  !liChunBefore.dom.includes('data-selected-year-membership-status="model-estimated"') ||
+  !liChunBefore.dom.includes('id="research-year-base-title">選定日 · 癸卯年 · 模型估計<')
 ) {
   throw new Error(`bound target before 2024 Li Chun did not resolve to 癸卯 on the shared TT basis: ${liChunBefore.url}`);
 }
@@ -289,7 +293,8 @@ const liChunAfter = expectCase(
 if (
   !liChunAfter.dom.includes('data-li-chun-instant-resolution="resolved"') ||
   !liChunAfter.dom.includes('data-selected-li-chun-relation="after"') ||
-  !liChunAfter.dom.includes('id="research-year-base-title">選定日 · 甲辰年<')
+  !liChunAfter.dom.includes('data-selected-year-membership-status="model-estimated"') ||
+  !liChunAfter.dom.includes('id="research-year-base-title">選定日 · 甲辰年 · 模型估計<')
 ) {
   throw new Error(`bound target after 2024 Li Chun did not resolve to 甲辰 on the shared TT basis: ${liChunAfter.url}`);
 }
@@ -306,6 +311,7 @@ if (
   !runtimeGap.dom.includes('data-li-chun-boundary-status="source-covered-runtime-missing"') ||
   !runtimeGap.dom.includes('data-li-chun-projection-status="unavailable"') ||
   !runtimeGap.dom.includes('data-li-chun-provider="none"') ||
+  !runtimeGap.dom.includes('data-selected-year-membership-status="unresolved"') ||
   !runtimeGap.dom.includes('data-selected-year-pillar="unavailable"') ||
   !runtimeGap.dom.includes('id="research-year-li-chun-unavailable-title">立春 · 乙酉 → 丙戌<') ||
   !runtimeGap.dom.includes("DE441 涵蓋此年 · 節氣 epoch 尚未發布")
@@ -326,6 +332,7 @@ if (
   !de441Estimated.dom.includes('data-li-chun-provider="jpl-de441-seasonal-events-v1"') ||
   !de441Estimated.dom.includes('data-li-chun-projection-status="estimated"') ||
   !de441Estimated.dom.includes('data-li-chun-position-status="estimated"') ||
+  !de441Estimated.dom.includes('data-selected-year-membership-status="model-estimated"') ||
   !de441Estimated.dom.includes('id="research-year-li-chun-label">≈ ') ||
   !de441Estimated.dom.includes("jpl-de441-seasonal-events-v1")
 ) {
