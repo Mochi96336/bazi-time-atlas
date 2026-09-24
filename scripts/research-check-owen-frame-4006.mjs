@@ -154,17 +154,17 @@ console.log(JSON.stringify({
   }
 }, null, 2));
 const apparent = evaluate("apparent");
-const apparentNoBias = evaluate("apparent-no-bias");
+const apparentWithBias = evaluate("apparent-with-bias");
 const apparentReverseBias = evaluate("apparent-reverse-bias");
 console.log(JSON.stringify({
   biasVariants:{
-    normal:{
+    canonicalIcrf:{
       maxResidualArcsec:apparent.maxResidualArcsec,
       meanResidualArcsec:apparent.meanResidualArcsec
     },
-    noBias:{
-      maxResidualArcsec:apparentNoBias.maxResidualArcsec,
-      meanResidualArcsec:apparentNoBias.meanResidualArcsec
+    withBias:{
+      maxResidualArcsec:apparentWithBias.maxResidualArcsec,
+      meanResidualArcsec:apparentWithBias.meanResidualArcsec
     },
     reverseBias:{
       maxResidualArcsec:apparentReverseBias.maxResidualArcsec,
