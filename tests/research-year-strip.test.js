@@ -18,7 +18,7 @@ test("year strip no longer treats the legacy civil solar-term helper as its auth
 
   const source = await readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /solarTermEventForCivilYear/);
-  assert.match(source, /resolveSeasonalBoundary/);
+  assert.match(source, /resolveResearchSeasonalBoundary/);
   assert.match(source, /projectSeasonalBoundaryToCivil/);
 });
 
