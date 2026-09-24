@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     return 2;
   }
   const char *mode = argv[1];
-  const int no_bias = strstr(mode, "no-bias") != NULL;
+  const int apply_bias = strstr(mode, "with-bias") != NULL || strstr(mode, "reverse-bias") != NULL;
   const int reverse_bias = strstr(mode, "reverse-bias") != NULL;
   const int apparent_mode = strstr(mode, "apparent") != NULL;
 
@@ -78,7 +78,12 @@ int main(int argc, char **argv) {
    * EOP-backed global cache path.
    */
   const int32 iflag = SEFLG_JPLHOR;
-  if (!no_bias) {
+  /*
+   * Full Swiss JPLHOR forces SEFLG_ICRS and therefore skips the ICRS->J2000
+   * frame-bias rotation before precession. Horizons quantity #45 is already an
+   * inertial ICRF apparent direction. Bias variants remain diagnostic only.
+   */
+  if (apply_bias) {
     swi_bias(vector, tt_jd, iflag, reverse_bias ? TRUE : FALSE);
   }
   if (swi_precess(vector, tt_jd, iflag, J2000_TO_J) != 0) {
@@ -100,7 +105,7 @@ int main(int argc, char **argv) {
   if (
     strcmp(mode, "mean") != 0
     && strcmp(mode, "apparent") != 0
-    && strcmp(mode, "apparent-no-bias") != 0
+    && strcmp(mode, "apparent-with-bias") != 0
     && strcmp(mode, "apparent-reverse-bias") != 0
   ) {
     fprintf(stderr, "unknown mode: %s\n", mode);
