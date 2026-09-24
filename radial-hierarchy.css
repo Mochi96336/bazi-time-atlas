@@ -216,7 +216,7 @@
    Retain only a faint broad SVG response so the band no longer reads as a
    separate fixed-gradient material demo. */
 #kinetic-instrument[data-material-prototype="roughness"] .m2-zodiac-hard-response {
-  opacity: .14;
+  opacity: .08;
 }
 
 #material-base-layer,
