@@ -15,7 +15,7 @@ test("base stylesheet is the single owner of the graphite temporal palette", () 
   assert.match(atlas, /--month:\s*#777e81;/);
   assert.match(atlas, /--year:\s*#93999b;/);
   assert.match(atlas, /--solar:\s*#bc9257;/);
-  assert.match(atlas, /--zodiac:\s*#716e82;/);
+  assert.match(atlas, /--zodiac:\s*#4d556b;/);
 
   const atlasDefinitions = atlas.match(TEMPORAL_TOKEN_DEFINITION) ?? [];
   assert.equal(atlasDefinitions.length, 6, "kinetic-atlas.css must define each temporal token exactly once");
