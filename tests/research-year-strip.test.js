@@ -18,7 +18,7 @@ test("year strip no longer treats the legacy civil solar-term helper as its auth
 
   const source = await readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /solarTermEventForCivilYear/);
-  assert.match(source, /resolveSeasonalBoundary/);
+  assert.match(source, /resolveResearchSeasonalBoundary/);
   assert.match(source, /projectSeasonalBoundaryToCivil/);
 });
 
@@ -199,18 +199,24 @@ test("year 4006 UT1 targets outside the one-sigma Li Chun interval can still res
   assert.equal(after.selectedYearPillar.name, after.liChunTransition.after.name);
 });
 
-test("year 10026 keeps the Ganzhi transition visible while the DE441 seasonal runtime is missing", () => {
+test("year 10026 consumes pinned DE441-derived TT evidence without promoting it to production truth", () => {
   const state = researchYearStripState({ year:10026, month:9, day:13 });
 
-  assert.equal(state.liChunBoundary.status, "source-covered-runtime-missing");
-  assert.ok(state.liChunBoundary.sourceIds.includes("jpl-de441"));
-  assert.equal(state.liChunProjection.status, "unavailable");
-  assert.equal(state.liChun, null);
-  assert.equal(state.selectedLiChunRelation, "unknown");
-  assert.equal(state.selectedYearPillar, null);
+  assert.equal(state.liChunBoundary.status, "resolved-research-evidence");
+  assert.equal(state.liChunBoundary.authorityClass, "source-derived-research-evidence");
+  assert.equal(state.liChunBoundary.productionAuthorityGranted, false);
+  assert.equal(state.liChunBoundary.independentTargetYearTruth, false);
+  assert.equal(state.liChunBoundary.ttJulianDay, 5383013.532143416);
+  assert.equal(state.liChunProjection.status, "estimated");
+  assert.equal(state.liChunProjection.localClockResolved, false);
+  assert.ok(state.liChunProjection.uncertaintySeconds > 60_000);
+  assert.equal(state.liChun.positionStatus, "estimated");
+  assert.ok(state.liChun.positionMin < state.liChun.positionMax);
+  assert.equal(state.selectedLiChunRelation, "after");
+  assert.ok(state.selectedYearPillar);
   assert.ok(state.liChunTransition.before.name);
   assert.ok(state.liChunTransition.after.name);
-  assert.match(state.liChunUnavailableMessage, /DE441.*尚未發布/);
+  assert.equal(state.liChunUnavailableMessage, null);
 });
 
 test("year 26026 keeps the Ganzhi transition visible but reports an absolute seasonal source gap", () => {

@@ -4,7 +4,7 @@ import {
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
-import { resolveSeasonalBoundary } from "./recurrence/seasonal-boundary-authority.js";
+import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import { projectSeasonalBoundaryToCivil } from "./recurrence/seasonal-civil-projection.js";
 import {
   TARGET_INSTANT_BASIS
@@ -39,6 +39,21 @@ function formatDate(date) {
 
 function offsetLabel(offsetHours) {
   return `UT1${offsetHours >= 0 ? "+" : ""}${offsetHours}`;
+}
+
+function seasonalAuthorityLabel(boundary) {
+  if (boundary.authorityClass === "source-derived-research-evidence") {
+    return "DE441-derived · source-derived";
+  }
+  if (boundary.authorityClass === "reviewed-production-direct-event") {
+    return boundary.providerId?.includes("de441")
+      ? "DE441 · reviewed direct event"
+      : "reviewed direct event";
+  }
+  if (boundary.authorityClass === "declared-model-direct-event") {
+    return "ShouXing · model";
+  }
+  return boundary.providerId ?? "seasonal authority";
 }
 
 function positionForDate(date, fraction = 0) {
@@ -225,7 +240,7 @@ export function researchYearStripState(selectedDate, { targetInstant = null } = 
 
   const next = recurrenceState(selectedDate, 1);
   const displayOffset = yearStripOffset(targetInstant);
-  const liChunBoundary = resolveSeasonalBoundary({
+  const liChunBoundary = resolveResearchSeasonalBoundary({
     year:selectedDate.year,
     longitudeDegrees:LI_CHUN_LONGITUDE_DEGREES
   });
@@ -310,6 +325,13 @@ function render() {
   strip.dataset.liChunBoundaryStatus = state.liChunBoundary.status;
   strip.dataset.liChunEpochStatus = state.liChunBoundary.epochStatus;
   strip.dataset.liChunProvider = state.liChunBoundary.providerId ?? "none";
+  strip.dataset.liChunAuthorityClass = state.liChunBoundary.authorityClass ?? "none";
+  strip.dataset.liChunProductionAuthority = state.liChunBoundary.productionAuthorityGranted === undefined
+    ? "not-declared"
+    : String(state.liChunBoundary.productionAuthorityGranted);
+  strip.dataset.liChunIndependentTargetYearTruth = state.liChunBoundary.independentTargetYearTruth === undefined
+    ? "not-declared"
+    : String(state.liChunBoundary.independentTargetYearTruth);
   strip.dataset.liChunProjectionStatus = state.liChunProjection.status;
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
   strip.dataset.liChunPositionStatus = state.liChun?.positionStatus ?? "unavailable";
@@ -376,7 +398,7 @@ function render() {
     );
     setText(
       "research-year-li-chun-label",
-      `${state.liChun.label} · ${offsetLabel(state.displayOffset.hours)} · ${state.liChunBoundary.providerId}`
+      `${state.liChun.label} · ${offsetLabel(state.displayOffset.hours)} · ${seasonalAuthorityLabel(state.liChunBoundary)}`
     );
     liChunUnavailable.hidden = true;
   } else {

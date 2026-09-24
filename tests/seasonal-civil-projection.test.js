@@ -4,6 +4,9 @@ import {
   resolveSeasonalBoundary
 } from "../src/recurrence/seasonal-boundary-authority.js";
 import {
+  resolveResearchSeasonalBoundary
+} from "../src/recurrence/research-seasonal-boundary-resolution.js";
+import {
   SEASONAL_CIVIL_PROJECTION_CONTRACT,
   projectSeasonalBoundaryToCivil
 } from "../src/recurrence/seasonal-civil-projection.js";
@@ -70,19 +73,27 @@ test("year 4006 DE441 Li Chun gets an uncertain local-clock interval rather than
   assert.equal(result.blocker, "deep-time-earth-rotation-uncertainty");
 });
 
-test("source-covered but runtime-missing year 10026 stays unavailable instead of fabricating a civil marker", () => {
-  const boundary = resolveSeasonalBoundary({ year:10026, longitudeDegrees:LI_CHUN });
+test("year 10026 Research overlay projects source-derived TT evidence only as an uncertain local-clock interval", () => {
+  const boundary = resolveResearchSeasonalBoundary({ year:10026, longitudeDegrees:LI_CHUN });
   const result = projectSeasonalBoundaryToCivil({
     year:10026,
     boundary,
     localOffsetHoursFromUt1:8
   });
 
-  assert.equal(boundary.status, "source-covered-runtime-missing");
-  assert.equal(result.status, "unavailable");
-  assert.equal(result.pointEstimateAvailable, false);
+  assert.equal(boundary.status, "resolved-research-evidence");
+  assert.equal(boundary.productionAuthorityGranted, false);
+  assert.equal(result.status, "estimated");
+  assert.equal(result.pointEstimateAvailable, true);
   assert.equal(result.localClockResolved, false);
-  assert.equal(result.blocker, "implementation-and-seasonal-epoch-solver");
+  assert.equal(result.deterministicWithinModel, false);
+  assert.equal(result.localClock.year, 10026);
+  assert.equal(result.localClock.month, 1);
+  assert.equal(result.localClock.day, 30);
+  assert.ok(result.uncertaintySeconds > 60_000);
+  assert.ok(result.oneSigmaLocalJulianDayMin < result.localJulianDay);
+  assert.ok(result.localJulianDay < result.oneSigmaLocalJulianDayMax);
+  assert.equal(result.blocker, "deep-time-earth-rotation-uncertainty");
 });
 
 test("absolute-source gap at year 26026 remains unavailable before civil projection is considered", () => {
