@@ -212,6 +212,30 @@ if (
 }
 console.log(`[recurrence] PASS 26026 keeps exact discrete closure separate from absolute seasonal source coverage: ${global.url}`);
 
+const sourceDerived8000 = expectCase(
+  "recurrence.html?date=2026-09-13&delta=8000",
+  {
+    "data-target-date":"10026-09-13"
+  },
+  "8000-year source-derived seasonal evidence"
+);
+const sourceDerivedStrip = tagById(sourceDerived8000.dom, "research-year-strip");
+if (
+  attr(sourceDerivedStrip, "data-li-chun-boundary-status") !== "resolved-research-evidence" ||
+  attr(sourceDerivedStrip, "data-li-chun-authority-class") !== "source-derived-research-evidence" ||
+  attr(sourceDerivedStrip, "data-li-chun-production-authority") !== "false" ||
+  attr(sourceDerivedStrip, "data-li-chun-independent-target-year-truth") !== "false" ||
+  attr(sourceDerivedStrip, "data-li-chun-projection-status") !== "estimated" ||
+  attr(sourceDerivedStrip, "data-li-chun-position-status") !== "estimated" ||
+  !sourceDerived8000.dom.includes("DE441-derived · source-derived")
+) {
+  throw new Error(`10026 must expose pinned DE441-derived Research evidence without presenting it as production truth: ${sourceDerived8000.url}`);
+}
+if (attr(sourceDerivedStrip, "data-selected-year-pillar") === "unavailable") {
+  throw new Error(`10026 September date should resolve a side outside the Li Chun uncertainty band: ${sourceDerived8000.url}`);
+}
+console.log(`[recurrence] PASS 10026 uses source-derived DE441 TT with explicit non-production labeling: ${sourceDerived8000.url}`);
+
 const liChunBoundaryDay = expectCase(
   "recurrence.html?date=2024-02-04&delta=0",
   {
