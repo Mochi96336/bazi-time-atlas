@@ -6,6 +6,10 @@ import {
   researchYearStripState
 } from "../src/research-year-strip-view.js";
 import { fixedZoneTargetClock } from "../src/recurrence/fixed-zone-target-clock.js";
+import {
+  TARGET_INSTANT_BASIS,
+  targetInstantBinding
+} from "../src/recurrence/target-instant-binding.js";
 
 test("year strip no longer treats the legacy civil solar-term helper as its authority", async () => {
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.directLegacyCivilSolarTermAuthority, false);
@@ -107,6 +111,92 @@ test("year 4006 uses reviewed DE441 TT and renders only an estimated civil posit
   assert.ok(state.liChun.positionMin < state.liChun.positionMax);
   assert.equal(state.selectedLiChunRelation, "after");
   assert.ok(state.selectedYearPillar);
+});
+
+test("year 4006 TT target resolves Li Chun membership directly on the DE441 TT epoch", () => {
+  const probe = researchYearStripState({ year:4006, month:9, day:13 });
+  const boundaryDate = {
+    year:4006,
+    month:probe.liChunProjection.localClock.month,
+    day:probe.liChunProjection.localClock.day
+  };
+  const epsilonDays = 1 / 86400;
+  const beforeTarget = targetInstantBinding({
+    basis:TARGET_INSTANT_BASIS.TT_JULIAN_DAY,
+    julianDay:probe.liChunBoundary.ttJulianDay - epsilonDays
+  });
+  const afterTarget = targetInstantBinding({
+    basis:TARGET_INSTANT_BASIS.TT_JULIAN_DAY,
+    julianDay:probe.liChunBoundary.ttJulianDay + epsilonDays
+  });
+
+  const before = researchYearStripState(boundaryDate, { targetInstant:beforeTarget });
+  const after = researchYearStripState(boundaryDate, { targetInstant:afterTarget });
+
+  assert.equal(before.liChunBoundary.providerId, "jpl-de441-seasonal-events-v1");
+  assert.equal(before.liChunProjection.status, "estimated");
+  assert.equal(before.selectedCivilLiChunRelation, "boundary-uncertain");
+  assert.equal(before.liChunInstantResolution.status, "resolved");
+  assert.equal(before.liChunInstantResolution.targetBasis, "tt-julian-day");
+  assert.equal(before.selectedLiChunRelation, "before");
+  assert.equal(before.selectedYearPillar.name, before.liChunTransition.before.name);
+
+  assert.equal(after.selectedCivilLiChunRelation, "boundary-uncertain");
+  assert.equal(after.liChunInstantResolution.status, "resolved");
+  assert.equal(after.selectedLiChunRelation, "after");
+  assert.equal(after.selectedYearPillar.name, after.liChunTransition.after.name);
+});
+
+test("year 4006 UT1 target stays unresolved inside the Earth-rotation uncertainty interval", () => {
+  const probe = researchYearStripState({ year:4006, month:9, day:13 });
+  const boundaryDate = {
+    year:4006,
+    month:probe.liChunProjection.localClock.month,
+    day:probe.liChunProjection.localClock.day
+  };
+  const centerTarget = targetInstantBinding({
+    basis:TARGET_INSTANT_BASIS.UT1_JULIAN_DAY,
+    julianDay:probe.liChunProjection.ut1JulianDay
+  });
+
+  const center = researchYearStripState(boundaryDate, { targetInstant:centerTarget });
+
+  assert.equal(center.selectedCivilLiChunRelation, "boundary-uncertain");
+  assert.equal(center.liChunInstantResolution.status, "earth-rotation-uncertain");
+  assert.equal(center.liChunInstantResolution.targetBasis, "ut1-julian-day");
+  assert.equal(center.selectedLiChunRelation, "boundary-uncertain");
+  assert.equal(center.selectedBeforeLiChun, null);
+  assert.equal(center.selectedYearPillar, null);
+});
+
+test("year 4006 UT1 targets outside the one-sigma Li Chun interval can still resolve a side", () => {
+  const probe = researchYearStripState({ year:4006, month:9, day:13 });
+  const boundaryDate = {
+    year:4006,
+    month:probe.liChunProjection.localClock.month,
+    day:probe.liChunProjection.localClock.day
+  };
+  const offsetDays = probe.displayOffset.hours / 24;
+  const guardDays = 1 / 24;
+  const beforeTarget = targetInstantBinding({
+    basis:TARGET_INSTANT_BASIS.UT1_JULIAN_DAY,
+    julianDay:probe.liChunProjection.oneSigmaLocalJulianDayMin - offsetDays - guardDays
+  });
+  const afterTarget = targetInstantBinding({
+    basis:TARGET_INSTANT_BASIS.UT1_JULIAN_DAY,
+    julianDay:probe.liChunProjection.oneSigmaLocalJulianDayMax - offsetDays + guardDays
+  });
+
+  const before = researchYearStripState(boundaryDate, { targetInstant:beforeTarget });
+  const after = researchYearStripState(boundaryDate, { targetInstant:afterTarget });
+
+  assert.equal(before.liChunInstantResolution.status, "resolved");
+  assert.equal(before.selectedLiChunRelation, "before");
+  assert.equal(before.selectedYearPillar.name, before.liChunTransition.before.name);
+
+  assert.equal(after.liChunInstantResolution.status, "resolved");
+  assert.equal(after.selectedLiChunRelation, "after");
+  assert.equal(after.selectedYearPillar.name, after.liChunTransition.after.name);
 });
 
 test("year 10026 keeps the Ganzhi transition visible while the DE441 seasonal runtime is missing", () => {
