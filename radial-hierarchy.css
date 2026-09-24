@@ -211,6 +211,14 @@
 .m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
 .m2-zodiac-hard-response { fill: url(#m2-zodiac-hard-response); opacity: .68; }
 
+/* Material L1 keeps the existing cool-violet Zodiac body/fallback, but roughness
+   mode lets the shared rotating micro-field carry the fine surface response.
+   Retain only a faint broad SVG response so the band no longer reads as a
+   separate fixed-gradient material demo. */
+#kinetic-instrument[data-material-prototype="roughness"] .m2-zodiac-hard-response {
+  opacity: .08;
+}
+
 #material-base-layer,
 #material-reflection-layer { pointer-events: none; }
 .m2-ring-reflection {
