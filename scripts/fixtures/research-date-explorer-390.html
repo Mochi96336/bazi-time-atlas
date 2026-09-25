@@ -52,6 +52,22 @@
         assert(viewport===390,"fixture must use real 390px iframe viewport");
         assert(tabsRect.left>=0 && tabsRect.right<=391,"research mode switch overflows 390px");
         assert(formRect.left>=0 && formRect.right<=391,"free-date form overflows 390px");
+        const glance = doc.querySelector(".research-explorer-mobile-glance");
+        const glanceRect = glance.getBoundingClientRect();
+        assert(doc.defaultView.getComputedStyle(glance).display==="grid",
+          "the mobile first-screen Year/Day readhead is not visible");
+        assert(glanceRect.left>=0 && glanceRect.right<=391 && glanceRect.bottom<=844,
+          "both named cycles must be visible together within the first 844px mobile viewport");
+        for (const [quick,detail] of [
+          ["research-explorer-glance-year-base","research-explorer-year-base"],
+          ["research-explorer-glance-year-target","research-explorer-year-target"],
+          ["research-explorer-glance-day-base","research-explorer-day-base"],
+          ["research-explorer-glance-day-target","research-explorer-day-target"]
+        ]) {
+          assert(doc.getElementById(quick).textContent===doc.getElementById(detail).textContent,
+            "first-screen readhead diverged from the common Year/Day comparison model");
+        }
+
         const baseDay = root.dataset.baseDayPillar;
         const targetDay = root.dataset.targetDayPillar;
         record("initial-mode",doc.body.dataset.researchMode);
@@ -64,6 +80,8 @@
         record("mobile-viewport",viewport);
         record("mobile-tabs-in-bounds",tabsRect.left>=0 && tabsRect.right<=391);
         record("mobile-form-in-bounds",formRect.left>=0 && formRect.right<=391);
+        record("mobile-glance-visible",doc.defaultView.getComputedStyle(glance).display==="grid");
+        record("mobile-glance-first-screen",glanceRect.bottom<=844);
 
         const targetInputs = dateFields(doc,"target");
         targetInputs[2].value = "11";
