@@ -185,9 +185,10 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
   assert.ok(material.includes("uniform int u_material_probe;"));
   assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0)"));
-  for (const id of [1, 2, 3, 4, 5, 6, 7]) {
+  for (const id of [1, 2, 3, 4, 5, 6]) {
     assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
   }
+  assert.ok(material.includes("u_material_probe != 7"), "new probe disables only groove lighting");
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
   // broad oxide-island read in favor of high-frequency low-contrast variation.
   // repeating 128×128 graphite texture for oxidation. It owns a deterministic
