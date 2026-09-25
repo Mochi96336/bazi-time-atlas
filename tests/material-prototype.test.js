@@ -30,10 +30,11 @@ test("roughness is the production default while explicit invalid modes fail clos
 test("H2.0 material ablations are explicit roughness-only diagnostics", () => {
   const labels = [
     "none", "solar-no-oxidation", "solar-no-scratches", "solar-no-reflection",
-    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response"
+    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response",
+    "solar-no-scratch-light"
   ];
   assert.deepEqual(Object.keys(MATERIAL_PROBES), labels);
-  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6]);
+  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6, 7]);
   assert.equal(resolveMaterialProbe(""), null);
   assert.equal(resolveMaterialProbe("?material=roughness"), null);
   assert.equal(resolveMaterialProbe("?material=svg&materialProbe=solar-no-scratches"), null);
@@ -184,7 +185,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
   assert.ok(material.includes("uniform int u_material_probe;"));
   assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0)"));
-  for (const id of [1, 2, 3, 4, 5, 6]) {
+  for (const id of [1, 2, 3, 4, 5, 6, 7]) {
     assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
   }
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
@@ -219,12 +220,16 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /bend = bendWindow[\s\S]*?\* demoScale \* 0\.52/);
   assert.match(material, /1\.675516 \+ \(angleRandom - 0\.5\) \* 0\.418879/);
   assert.match(material, /angleRandom \* PI, handling/);
-  assert.match(material, /vec2 primaryScratchField\(vec2 localPoint\)/);
+  assert.match(material, /vec4 primaryScratchField\(vec2 localPoint\)/);
   assert.match(material, /scratchLayer\(localPoint, 0\.0, 0\.0\)/);
   assert.match(material, /scratchLayer\(localPoint, 0\.0, 1\.0\)/);
-  assert.match(material, /vec2 handlingScratchField\(vec2 localPoint\)/);
+  assert.match(material, /vec4 handlingScratchField\(vec2 localPoint\)/);
   assert.match(material, /scratchLayer\(localPoint, 1\.0, 2\.0\)/);
   assert.match(material, /fwidth\(distanceToScratch\)/);
+  assert.match(material, /return vec4\(mask \* polarity, mask, normal\.x \* bevel, normal\.y \* bevel\)/);
+  assert.match(material, /grooveWorld = rotation\(-ringRotation\) \* grooveLocal/);
+  assert.match(material, /u_material_probe != 7 && primaryScratch\.y \+ handlingScratch\.y > 0\.001/);
+  assert.match(material, /body = clamp\(body \+ vec3\(0\.60, 0\.53, 0\.44\) \* localReflection, 0\.0, 1\.0\)/);
   assert.match(material, /fineAttenuation = mix\(0\.34, 1\.0, 1\.0 - smoothstep\(1\.15, 2\.85, pixelFootprint\)\)/);
 
   // The body is no longer a nearly-transparent response layer. The shader
