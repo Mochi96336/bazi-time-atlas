@@ -130,6 +130,26 @@ test("tampered 10026 binary fails SHA-256 verification and is never installed", 
   );
 });
 
+test("manifest reference semantics cannot drift while reusing the same binary", async () => {
+  reset();
+  const { manifest, binary } = await fixture();
+  const drifted = { ...manifest, referenceSemantics:"geometric-ecliptic-longitude" };
+  const calls = [];
+
+  await assert.rejects(
+    () => ensureResearchSeasonalEvidenceForYear(10026, {
+      fetchImpl:fixtureFetch({ manifest:drifted, binary, calls }),
+      cryptoImpl:webcrypto
+    }),
+    /reference-semantics mismatch/
+  );
+  assert.equal(calls.length, 1);
+  assert.equal(
+    researchSeasonalEvidenceForLongitude({ year:10026, longitudeDegrees:315 }),
+    null
+  );
+});
+
 test("manifest cannot promote source-derived 10026 evidence while loading it", async () => {
   reset();
   const { manifest, binary } = await fixture();
