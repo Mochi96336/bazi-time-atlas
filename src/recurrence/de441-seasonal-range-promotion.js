@@ -49,10 +49,50 @@ export function requiredDe441InteriorValidationCount(minYear, maxYear, policy = 
   if (maxYear < minYear) throw new RangeError("maxYear must be >= minYear");
   const yearCount = maxYear - minYear + 1;
   if (yearCount <= 2) return 0;
+  const availableInteriorYears = yearCount - 2;
   return Math.min(
+    availableInteriorYears,
     policy.maximumInteriorSamples,
     Math.max(policy.minimumInteriorSamples, Math.ceil(Math.log2(yearCount)))
   );
+}
+
+function seedState(seedSha256) {
+  if (!validSha256(seedSha256)) {
+    throw new RangeError("seedSha256 must be a 64-character hexadecimal SHA-256 value");
+  }
+  let state = Number.parseInt(seedSha256.slice(0,8), 16) >>> 0;
+  state ^= Number.parseInt(seedSha256.slice(8,16), 16) >>> 0;
+  state ^= Number.parseInt(seedSha256.slice(16,24), 16) >>> 0;
+  state ^= Number.parseInt(seedSha256.slice(24,32), 16) >>> 0;
+  return state === 0 ? 0x9e3779b9 : state;
+}
+
+function nextXorshift32(state) {
+  let value = state >>> 0;
+  value ^= (value << 13) >>> 0;
+  value ^= value >>> 17;
+  value ^= (value << 5) >>> 0;
+  return value >>> 0;
+}
+
+export function deriveDe441InteriorValidationYears({
+  minYear,
+  maxYear,
+  seedSha256,
+  policy = DE441_SEASONAL_RANGE_PROMOTION_POLICY
+}) {
+  const count = requiredDe441InteriorValidationCount(minYear, maxYear, policy);
+  if (count === 0) return Object.freeze([]);
+  const interiorSpan = maxYear - minYear - 1;
+  let state = seedState(seedSha256);
+  const selected = new Set();
+
+  while (selected.size < count) {
+    state = nextXorshift32(state);
+    selected.add(minYear + 1 + (state % interiorSpan));
+  }
+  return Object.freeze([...selected].sort((a,b) => a-b));
 }
 
 function validateChunks({ chunks, minYear, maxYear, policy }) {
@@ -107,21 +147,36 @@ function requiredValidationYears({ minYear, maxYear, validationPlan, policy }) {
     failures.push("interior-selection-method");
     return { required, failures };
   }
-  if (!validSha256(validationPlan.seedSha256)) failures.push("interior-selection-seed");
+  if (!validSha256(validationPlan.seedSha256)) {
+    failures.push("interior-selection-seed");
+    return { required, failures };
+  }
   if (!Array.isArray(validationPlan.interiorYears)) {
     failures.push("interior-years-missing");
     return { required, failures };
   }
 
-  const unique = [...new Set(validationPlan.interiorYears)];
-  if (unique.length < interiorCount) failures.push("interior-sample-count");
+  const unique = [...new Set(validationPlan.interiorYears)].sort((a,b) => a-b);
+  if (unique.length !== interiorCount) failures.push("interior-sample-count");
   for (const year of unique) {
     if (!Number.isInteger(year) || year <= minYear || year >= maxYear) {
       failures.push(`interior-year-outside-range:${year}`);
-      continue;
     }
-    required.add(year);
   }
+
+  const derived = deriveDe441InteriorValidationYears({
+    minYear,
+    maxYear,
+    seedSha256:validationPlan.seedSha256,
+    policy
+  });
+  if (
+    unique.length !== derived.length
+    || unique.some((year,index) => year !== derived[index])
+  ) {
+    failures.push("interior-years-seed-mismatch");
+  }
+  derived.forEach(year => required.add(year));
   return { required, failures };
 }
 
