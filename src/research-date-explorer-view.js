@@ -1,5 +1,6 @@
 import { compareResearchDates } from "./recurrence/research-date-pair.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
+import { dayWheelDateDestinations } from "./recurrence/day-wheel-date-destinations.js";
 import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
 import {
@@ -256,6 +257,46 @@ function stepComparisonDate(days) {
   syncFreeQuery();
 }
 
+/**
+ * The free Day wheel is an exploration-only presenter. Only this owner can
+ * commit a resulting date; always re-evaluate the selected index and requested
+ * direction from the CURRENT date. Stale previews, uncommitted form edits and
+ * calendar bounds fail closed and never rewrite the annual instrument.
+ */
+function jumpToSelectedDay(event) {
+  if (mode!=="dates" || root.dataset.ready!=="true")return;
+  const {direction,selectedIndex,fromDate} = event.detail ?? {};
+  if (!["previous","next"].includes(direction))return;
+  if (!Number.isInteger(selectedIndex) || selectedIndex<0 || selectedIndex>=60)return;
+  const inputBase=readFields("base");
+  const inputTarget=readFields("target");
+  if(!inputBase || !inputTarget ||
+    dateKey(inputBase)!==dateKey(base) || dateKey(inputTarget)!==dateKey(target) ||
+    fromDate!==dateKey(target)) {
+    root.dataset.ready="false";
+    document.querySelector("#research-explorer-results").hidden=true;
+    setError("日期輸入尚未確認，請先按「比較日期」，再用轉盤跳轉。");
+    root.dataset.wheelJumpOutcome="stale-input";
+    return;
+  }
+  const choices=dayWheelDateDestinations(target,selectedIndex);
+  const selected=choices[direction];
+  if(!selected.date) {
+    root.dataset.wheelJumpOutcome="out-of-range";
+    setError("這個方向沒有可用的公曆日期，原比較日期未改動。");
+    return;
+  }
+  target=selected.date;
+  root.dataset.wheelJumpOutcome="applied";
+  root.dataset.wheelJumpDirection=direction;
+  root.dataset.wheelJumpOffset=String(selected.offsetDays);
+  root.dataset.wheelSelectedIndex=String(selectedIndex);
+  syncInputs();
+  setError(null);
+  render();
+  syncFreeQuery();
+}
+
 function setMode(next,{updateUrl=true}={}) {
   mode = next;
   const dates = next === "dates";
@@ -317,6 +358,7 @@ if (root && form && annualButton && datesButton) {
     if (![-60,-1,1,60].includes(displacement)) throw new Error("unsupported date-explorer step");
     button.addEventListener("click",() => stepComparisonDate(displacement));
   });
+  root.addEventListener("research-free-wheel:jump",jumpToSelectedDay);
   // Existing Research-only source loads asynchronously. A new verified chunk
   // may refine Year identities but must never change the discrete date phases.
   const refreshYearEvidence = event => {
