@@ -89,6 +89,22 @@ test("10026 source-derived data may be Research-load eligible while production p
   assert.ok(result.validationFailures.includes("10026:independentImplementationValidated"));
 });
 
+test("interior validation sampling consumes the full SHA-256 seed", () => {
+  const prefix = "1".repeat(32);
+  const first = deriveDe441InteriorValidationYears({
+    minYear:4000,
+    maxYear:4999,
+    seedSha256:prefix + "2".repeat(32)
+  });
+  const second = deriveDe441InteriorValidationYears({
+    minYear:4000,
+    maxYear:4999,
+    seedSha256:prefix + "3".repeat(32)
+  });
+
+  assert.notDeepEqual(first, second);
+});
+
 test("multi-year promotion requires both coverage edges plus a seeded interior validation plan", () => {
   const minYear = 4000;
   const maxYear = 4999;
