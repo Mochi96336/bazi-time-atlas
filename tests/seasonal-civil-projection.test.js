@@ -7,6 +7,9 @@ import {
   resolveResearchSeasonalBoundary
 } from "../src/recurrence/research-seasonal-boundary-resolution.js";
 import {
+  installResearchSeasonal10026Fixture
+} from "./helpers/install-research-seasonal-10026.js";
+import {
   SEASONAL_CIVIL_PROJECTION_CONTRACT,
   projectSeasonalBoundaryToCivil
 } from "../src/recurrence/seasonal-civil-projection.js";
@@ -73,7 +76,8 @@ test("year 4006 DE441 Li Chun gets an uncertain local-clock interval rather than
   assert.equal(result.blocker, "deep-time-earth-rotation-uncertainty");
 });
 
-test("year 10026 Research overlay projects source-derived TT evidence only as an uncertain local-clock interval", () => {
+test("year 10026 Research overlay projects installed source-derived TT evidence only as an uncertain local-clock interval", async () => {
+  await installResearchSeasonal10026Fixture();
   const boundary = resolveResearchSeasonalBoundary({ year:10026, longitudeDegrees:LI_CHUN });
   const result = projectSeasonalBoundaryToCivil({
     year:10026,
