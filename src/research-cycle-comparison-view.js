@@ -7,7 +7,7 @@ const panel = typeof document === "undefined" ? null : document.querySelector("#
 const instrument = typeof document === "undefined" ? null : document.querySelector("#recurrence-instrument");
 
 function parseDate(value) {
-  const match = /^(\\d{1,8})-(\\d{2})-(\\d{2})$/.exec(value ?? "");
+  const match = /^([0-9]{1,8})-([0-9]{2})-([0-9]{2})$/.exec(value ?? "");
   if (!match) return null;
   const date = {year:Number(match[1]),month:Number(match[2]),day:Number(match[3])};
   return validateGregorianDate(date) ? date : null;
