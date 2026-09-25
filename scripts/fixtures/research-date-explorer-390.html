@@ -107,6 +107,15 @@
           "return-to-comparison must discard exploration without changing date");
         record("wheel-keyboard-and-return",true);
         hits[nextIndex].dispatchEvent(new MouseEvent("click",{bubbles:true}));
+        // Background seasonal-source refinement may repeat the same calendar
+        // dataset values. Such a rerender cannot erase user-selected preview.
+        root.dataset.ready="true";
+        root.dataset.targetDate="2024-02-10";
+        await wait(0);
+        assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
+          freeWheel.dataset.selectionLinked==="false",
+          "same-date asynchronous evidence refresh discarded a deliberate wheel preview");
+        record("wheel-same-date-refresh-preserves-exploration",true);
         assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
           freeWheel.dataset.selectionLinked==="false" &&
           freeWheel.dataset.previousOffset==="-59" && freeWheel.dataset.nextOffset==="1" &&
