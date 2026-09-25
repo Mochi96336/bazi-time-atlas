@@ -170,7 +170,7 @@ if (svg) {
   function syncDayFromResearchDate() {
     const instrument = document.querySelector("#recurrence-instrument");
     const value = instrument?.dataset.targetDate;
-    const match = /^(\\d{1,8})-(\\d{2})-(\\d{2})$/.exec(value ?? "");
+  const match = /^([0-9]{1,8})-([0-9]{2})-([0-9]{2})$/.exec(value ?? "");
     const date = match
       ? {year:Number(match[1]),month:Number(match[2]),day:Number(match[3])}
       : null;
