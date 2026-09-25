@@ -46,6 +46,12 @@ if(attr(probe,"data-ready")!=="true") throw new Error(
 );
 const expected={
   "data-initial-mode":"dates",
+  "data-day-step-forward-and-back":"true",
+  "data-day-step-sixty-cycle":"true",
+  "data-day-step-share-url":"true",
+  "data-mobile-glance-after-step":"true",
+  "data-newyear-nominal-vs-active":"true",
+  "data-out-of-range-preserves-state":"true",
   "data-initial-day-phase":"9",
   "data-initial-year-phase":"0",
   "data-initial-year-status":"model-estimated",
