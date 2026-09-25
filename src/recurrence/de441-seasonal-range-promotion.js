@@ -121,6 +121,9 @@ function validateChunks({ chunks, minYear, maxYear, policy }) {
       failures.push(`chunk-reference-semantics:${chunk.id ?? chunk.minYear}`);
     }
     if (!validSha256(chunk.payloadSha256)) failures.push(`chunk-sha256:${chunk.id ?? chunk.minYear}`);
+    if (chunk.payloadIntegrityVerified !== true) {
+      failures.push(`chunk-payload-integrity:${chunk.id ?? chunk.minYear}`);
+    }
     if (chunk.byteLength !== de441SeasonalChunkByteLength(span)) {
       failures.push(`chunk-byte-length:${chunk.id ?? chunk.minYear}`);
     }
