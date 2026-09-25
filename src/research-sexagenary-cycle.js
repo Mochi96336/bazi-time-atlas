@@ -1,5 +1,7 @@
 import { polar, annularSectorPath } from "./geometry.js";
 import { heavenlyStems, earthlyBranches, sexagenaryCycle, cycleItem, wrapCycleIndex } from "./sexagenary-data.js";
+import { sexagenaryDayForGregorianDate } from "./recurrence/ganzhi-cycle-comparison.js";
+import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const svg = typeof document === "undefined" ? null : document.querySelector("#research-sexagenary-wheel");
@@ -21,6 +23,7 @@ if (svg) {
   const cx = 320;
   const cy = 320;
   let activeIndex = 0;
+  let linkedDayIndex = null;
   const groups = Object.fromEntries(
     ["guides", "stems", "branches", "cycle", "selection"].map(name => [
       name,
@@ -148,12 +151,41 @@ if (svg) {
     });
   }
 
-  function setActive(index) {
+  function setActive(index, { linked = false } = {}) {
     activeIndex = wrapCycleIndex(index);
     const item = cycleItem(activeIndex);
     renderSelection(item);
     updateHighlights(item);
     updateReadout(item);
+    svg.dataset.activeIndex = String(activeIndex);
+    svg.dataset.selectedDateLinked = String(linked);
+    const binding = document.querySelector("#research-cycle-binding");
+    const returnButton = document.querySelector("#research-cycle-return");
+    if (binding) binding.textContent = linked
+      ? "跟隨比較日期 · 目前日干支"
+      : "探索位置 · 未修改比較日期";
+    if (returnButton) returnButton.hidden = linked || linkedDayIndex === null;
+  }
+
+  function syncDayFromResearchDate() {
+    const instrument = document.querySelector("#recurrence-instrument");
+    const value = instrument?.dataset.targetDate;
+    const match = /^(\\d{1,8})-(\\d{2})-(\\d{2})$/.exec(value ?? "");
+    const date = match
+      ? {year:Number(match[1]),month:Number(match[2]),day:Number(match[3])}
+      : null;
+    if (!date || !validateGregorianDate(date)) {
+      linkedDayIndex = null;
+      svg.dataset.selectedDateLinked = "false";
+      const binding = document.querySelector("#research-cycle-binding");
+      if (binding) binding.textContent = "比較日期無效，無法定位日干支";
+      const returnButton = document.querySelector("#research-cycle-return");
+      if (returnButton) returnButton.hidden = true;
+      return;
+    }
+    linkedDayIndex = sexagenaryDayForGregorianDate(date).index;
+    svg.dataset.researchDate = value;
+    setActive(linkedDayIndex,{linked:true});
   }
 
   let activePointerId = null;
@@ -207,5 +239,12 @@ if (svg) {
     }
   });
 
-  setActive(0);
+  const instrument = document.querySelector("#recurrence-instrument");
+  if (instrument) {
+    new MutationObserver(records => {
+      if (records.some(record => record.attributeName === "data-target-date")) syncDayFromResearchDate();
+    }).observe(instrument,{attributes:true,attributeFilter:["data-target-date"]});
+  }
+  document.querySelector("#research-cycle-return")?.addEventListener("click",syncDayFromResearchDate);
+  syncDayFromResearchDate();
 }
