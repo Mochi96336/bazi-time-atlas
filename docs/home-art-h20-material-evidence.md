@@ -35,10 +35,23 @@ Only an explicitly selected roughness URL can change material layers:
 | `graphite-no-response` | Remove the four graphite shader overlays only |
 
 Missing or unknown probe names, a probe without `material=roughness`, and all
-SVG/fallback requests must leave production behavior unchanged. The named
-probe and the precise SVG-to-screen matrix are exposed as DOM attributes only
-while a valid diagnostic probe is active. The latter gives measurements a
-geometry-derived material region; there are no hand-picked pixel rectangles.
+SVG/fallback requests must leave production behavior unchanged. A named
+probe exposes a separate DOM flag for activation checks. For measurement,
+the screenshot process itself renders a 96×4 lossless pixel fiducial in the
+otherwise empty top-left margin encoding its own six SVG screen CTM values.
+That 96×4 diagnostic marker is NEVER present on default or fallback pages,
+never enters any radial material ROI, and is ignored when comparing baseline
+material pixels. The reader reconstructs the CTM from the captured PNG itself
+and rejects corrupt fiducials or changing geometry between probes.
+
+IMPORTANT: an initial adversarial H2.0 run found that separate Chromium
+`--dump-dom` and `--screenshot` launches had **different vertical viewport
+origins (100px)** despite nominally identical window-size flags. DOM-only
+CTM measurements had incorrectly placed Solar masks on the Day band and
+attributed real Solar changes to other rings. The pixel fiducial, not the
+independent DOM measurement, is now the sole authority for PNG-region masks.
+The independent DOM matrix and its discrepancy remain in evidence for audit.
+There are no hand-picked material pixel rectangles.
 
 ## Evidence generation
 
@@ -52,8 +65,8 @@ New evidence:
 - `material-probe-{NAME}-1440x900.png` and one independent `none-replay`
   of the same reference probe.
 - `material-probe-evidence.json`: screenshot SHA256 and byte size, fixed
-  instant, exact screen CTM, canonical radius mask pixel counts, and measured
-  per-layer RGB/brightness differences.
+  instant, screenshot-embedded CTM, independent DOM CTM and discrepancy,
+  canonical radius mask counts, and measured per-layer RGB/brightness differences.
 - Original no-probe `material-roughness-1440x900.png` is also compared against
   the explicit `none` screenshot to detect any diagnostic-mode baseline drift.
 
@@ -84,8 +97,9 @@ prevents optimizing to an arbitrary screenshot-difference score.
    fixed identities, Selected Instant ownership and absence of new edge seams.
 4. Review ordinary, Tools, Classification, Find Time and inspector captures
    from the existing Visual suite for cross-view hierarchy and legibility.
-5. Examine `material-probe-evidence.json` for unexpected non-target changes
-   and for baseline variability before interpreting small material deltas.
+5. Examine `material-probe-evidence.json` for unexpected non-target changes,
+   the DOM/screenshot CTM discrepancy and baseline variability. Any material
+   ROI with significant outside changes must halt H2.1 attribution.
 6. Keep every H2.1 material/style change in a separate PR with its own
    before/after screenshots and the same contract. No palette or roughness
    amplitude change should be smuggled into H2.0.
