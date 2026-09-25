@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "de441-seasonal-10026-source-derived-v1",
+  "encoding": "bta-de441-seasonal-f64le-v1",
+  "chunkSchemaVersion": 1,
+  "sourceEphemeris": "DE441",
+  "referenceSemantics": "geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
+  "timeScale": "TT",
+  "yearBasis": "atlas-solar-term-catalogue",
+  "minYear": 10026,
+  "maxYear": 10026,
+  "yearCount": 1,
+  "eventsPerYear": 24,
+  "longitudeStepDegrees": 15,
+  "byteLength": 224,
+  "payloadSha256": "742723de83e87d66ce866666827644b7ba74fb4f20f96b0c14f63d4a04809219",
+  "evidenceIds": [
+    "de441-10026-source-derived-seasonal-crossing-evidence-v1"
+  ],
+  "claimClass": "de441-derived",
+  "productionAuthorityGranted": false,
+  "independentTargetYearTruth": false,
+  "assetPath": "./10026.bin"
+}
