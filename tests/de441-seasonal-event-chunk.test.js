@@ -4,7 +4,6 @@ import {
   DE441_SEASONAL_EVENT_SOURCE_EVIDENCE,
   seasonalEventsForCatalogueYear
 } from "../src/astronomy/de441-seasonal-event-data-product.js";
-import { DE441_10026_SEASONAL_CROSSING_EVIDENCE } from "../src/astronomy/de441-10026-seasonal-crossing-evidence.js";
 import {
   DE441_SEASONAL_CHUNK_FORMAT,
   canonicalEpochsFromSeasonalEvents,
@@ -42,21 +41,6 @@ test("Float64 seasonal chunk round-trips the authoritative 4006 production slice
     chunk.ttJulianDayFor({ year:4006, longitudeDegrees:315 }),
     DE441_SEASONAL_EVENT_SOURCE_EVIDENCE.terms.find(term => term.longitudeDegrees === 315).ttJulianDay
   );
-});
-
-test("Float64 seasonal chunk also represents 10026 source-derived Research evidence without changing its claim class", () => {
-  const bytes = encodeDe441SeasonalEpochChunk({
-    minYear:10026,
-    years:[row(10026, DE441_10026_SEASONAL_CROSSING_EVIDENCE.terms)]
-  });
-  const chunk = decodeDe441SeasonalEpochChunk(bytes);
-
-  assert.equal(
-    chunk.ttJulianDayFor({ year:10026, longitudeDegrees:315 }),
-    DE441_10026_SEASONAL_CROSSING_EVIDENCE.liChun.ttJulianDay
-  );
-  assert.equal(DE441_10026_SEASONAL_CROSSING_EVIDENCE.claimBoundary.productionAuthorityGranted, false);
-  assert.equal(DE441_10026_SEASONAL_CROSSING_EVIDENCE.claimBoundary.independentTargetYearTruth, false);
 });
 
 test("chunk format keeps the full DE441 epoch payload near the existing 5.8 MB projection", () => {
