@@ -6,6 +6,11 @@ import {
   researchSeasonalEvidenceLoadedForYear
 } from "./research-seasonal-evidence-registry.js";
 
+const REFERENCE_SEMANTICS = "geocentric-apparent-solar-longitude-mean-ecliptic-of-date";
+const YEAR_BASIS = "atlas-solar-term-catalogue";
+const VALIDATION_KIND = "source-derived-reconstruction";
+const CLAIM_CLASS = "de441-derived-source-derived";
+
 const catalogue = Object.freeze({
   10026:Object.freeze({
     manifestUrl:new URL(
@@ -35,6 +40,22 @@ function assertManifest(manifest, requestedYear) {
   }
   if (manifest.sourceEphemeris !== "DE441") throw new RangeError("Research seasonal manifest source mismatch");
   if (manifest.timeScale !== "TT") throw new RangeError("Research seasonal manifest time-scale mismatch");
+  if (manifest.referenceSemantics !== REFERENCE_SEMANTICS) {
+    throw new RangeError("Research seasonal manifest reference-semantics mismatch");
+  }
+  if (manifest.yearBasis !== YEAR_BASIS) {
+    throw new RangeError("Research seasonal manifest year-basis mismatch");
+  }
+  if (manifest.validationKind !== VALIDATION_KIND || manifest.claimClass !== CLAIM_CLASS) {
+    throw new RangeError("Research seasonal manifest claim class mismatch");
+  }
+  if (
+    manifest.chunkSchemaVersion !== 1
+    || manifest.eventsPerYear !== 24
+    || manifest.longitudeStepDegrees !== 15
+  ) {
+    throw new RangeError("Research seasonal manifest seasonal-grid contract mismatch");
+  }
   if (
     !Number.isInteger(manifest.minYear)
     || !Number.isInteger(manifest.maxYear)
