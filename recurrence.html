@@ -32,8 +32,8 @@
         <p class="lede">離散週期重新對齊，四柱也會回到同一狀態嗎？</p>
       </div>
       <div class="research-mode-switch" role="group" aria-label="研究操作模式">
-        <button type="button" id="research-mode-annual" aria-pressed="true">跨年回歸</button>
-        <button type="button" id="research-mode-dates" aria-pressed="false">日期探索</button>
+        <button type="button" id="research-mode-annual" aria-controls="research-discrete" aria-pressed="true">跨年回歸</button>
+        <button type="button" id="research-mode-dates" aria-controls="research-free-explorer" aria-pressed="false">日期探索</button>
       </div>
       <p class="scope-note">天文外圈採 Berger 1978 長期近似；只比較季節形狀，不作遠未來民用時刻預報。</p>
     </section>
@@ -46,7 +46,7 @@
           <h2 id="research-date-explorer-title">兩個日期，兩組干支循環</h2>
           <p>分別選定基準日與比較日，觀察名義年序、實際年柱與連續日序；年界資料不足時不猜測年柱。</p>
         </div>
-        <span class="research-date-explorer-scope">僅離散日期探索<br>天文與四柱未評估</span>
+        <span class="research-date-explorer-scope">雙日期離散比較<br>十二節形狀與四柱回歸未評估</span>
       </header>
 
       <form id="research-date-explorer-form" class="research-date-explorer-form" novalidate>
