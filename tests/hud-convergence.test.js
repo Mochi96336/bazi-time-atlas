@@ -3,8 +3,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
+const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 const mobileLegendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
 const classificationCss = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+
+test("small inner-ring identities keep a dedicated legibility floor without altering material color", () => {
+  assert.ok(atlasCss.includes("--identity-hour: color-mix(in srgb, var(--hour) 50%, var(--ink))"));
+  assert.ok(atlasCss.includes("--identity-day: color-mix(in srgb, var(--day) 57%, var(--ink))"));
+});
 
 test("normal reading view turns the layer legend into fixed ring identity labels", () => {
   assert.match(analysisCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend \{[\s\S]*?inset:\s*0;[\s\S]*?display:\s*block;/);
@@ -52,7 +58,7 @@ test("direct ring identities remain readable without becoming chips, leaders, or
   );
   assert.match(
     analysisCss,
-    /@media \(max-width: 480px\)[\s\S]*?\.ring-legend-row span::after\s*\{[\s\S]*?font-size:\s*8px;/
+    /@media \(max-width: 480px\)[\s\S]*?\.ring-legend-row span::after\s*\{[\s\S]*?font-size:\s*10px;/
   );
 });
 

@@ -206,17 +206,17 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   // carries the same gold/brown body family as the approved demo and then
   // applies oxidation/scratches before compositing beneath SVG semantics.
   assert.match(material, /vec3 brassBody\(vec2 worldPoint\)/);
-  assert.match(material, /brassLight = vec3\(0\.387, 0\.295, 0\.174\)/);
-  assert.match(material, /brassMid = vec3\(0\.333, 0\.243, 0\.139\)/);
-  assert.match(material, /brassDark = vec3\(0\.173, 0\.111, 0\.060\)/);
+  assert.match(material, /brassLight = vec3\(0\.328, 0\.282, 0\.230\)/);
+  assert.match(material, /brassMid = vec3\(0\.286, 0\.241, 0\.198\)/);
+  assert.match(material, /brassDark = vec3\(0\.138, 0\.105, 0\.085\)/);
   assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
-  assert.match(material, /warmCatch \* 0\.008/);
+  assert.match(material, /warmCatch \* 0\.047/);
   assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);
   assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.10 \+ aging\.y \* 0\.045 \+ aging\.z \* 0\.005, 0\.0, 0\.14\)/);
   assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
   assert.match(material, /primaryStrength = abs\(primaryScratch\.x\) \* 0\.012 \* fineAttenuation/);
   assert.match(material, /handlingStrength = abs\(handlingScratch\.x\) \* 0\.007 \* fineAttenuation/);
-  assert.match(material, /bodyAlpha = edgeMask \* 0\.92/);
+  assert.match(material, /bodyAlpha = edgeMask \* 0\.90/);
   assert.match(material, /return vec4\(body \* bodyAlpha, bodyAlpha\)/);
   assert.match(material, /solarRotation = renderedSolarRotation\(renderedRotations\)/);
   assert.match(material, /SURFACE_PERIOD_LARGE = 108\.0/);
@@ -236,8 +236,12 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
   assert.match(material, /vec4 renderZodiacMicroResponse\(vec2 worldPoint, float rotationDegrees\)/);
   assert.match(material, /edgeDistance = min\(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius\)/);
-  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.20, 0\.0, 0\.005\)/);
-  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.28 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.022\)/);
+  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.22, 0\.0, 0\.006\)/);
+  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.31 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.024\)/);
+  // Night-indigo pigment tints are owned by the Zodiac renderer; do not reintroduce blue glow.
+  assert.ok(material.includes("reflectionTint = vec3(0.37, 0.44, 0.51)"));
+  assert.ok(material.includes("microLightTint = vec3(0.30, 0.37, 0.44)"));
+  assert.ok(material.includes("nebulaLightTint = vec3(0.18, 0.26, 0.35)"));
   assert.match(material, /float zodiacNebulaField\(vec2 localPoint\)/);
   assert.match(material, /localPoint\.x \/ 128\.0, localPoint\.y \/ 112\.0/);
   assert.match(material, /low \* 0\.24 \+ mid \* 0\.50 \+ fine \* 0\.26/);

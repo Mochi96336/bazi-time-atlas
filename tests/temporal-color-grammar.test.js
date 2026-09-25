@@ -10,12 +10,12 @@ const classification = readFileSync(new URL("../classification-overlay.css", imp
 const TEMPORAL_TOKEN_DEFINITION = /--(?:hour|day|month|year|solar|zodiac)\s*:/g;
 
 test("base stylesheet is the single owner of the graphite temporal palette", () => {
-  assert.match(atlas, /--hour:\s*#52585b;/);
-  assert.match(atlas, /--day:\s*#62696c;/);
-  assert.match(atlas, /--month:\s*#777e81;/);
-  assert.match(atlas, /--year:\s*#93999b;/);
-  assert.match(atlas, /--solar:\s*#bc9257;/);
-  assert.match(atlas, /--zodiac:\s*#42495c;/);
+  assert.match(atlas, /--hour:\s*#555d62;/);
+  assert.match(atlas, /--day:\s*#646c71;/);
+  assert.match(atlas, /--month:\s*#777f84;/);
+  assert.match(atlas, /--year:\s*#90989d;/);
+  assert.match(atlas, /--solar:\s*#ac906e;/);
+  assert.match(atlas, /--zodiac:\s*#424b59;/);
 
   const atlasDefinitions = atlas.match(TEMPORAL_TOKEN_DEFINITION) ?? [];
   assert.equal(atlasDefinitions.length, 6, "kinetic-atlas.css must define each temporal token exactly once");
@@ -31,8 +31,8 @@ test("resting graphite palette does not regress to the former green clock family
   for (const legacy of ["#6f8983", "#78928b", "#859e96", "#96aaa2", "#c7d9cd"]) {
     assert.doesNotMatch(atlas, new RegExp(legacy, "i"));
   }
-  assert.match(atlas, /--field:\s*#090a0b;/);
-  assert.match(atlas, /--field-raised:\s*#0e1011;/);
+  assert.match(atlas, /--field:\s*#090b0f;/);
+  assert.match(atlas, /--field-raised:\s*#0e1116;/);
   assert.match(atlas, /--bg:\s*var\(--field\);/);
   assert.match(atlas, /--accent:\s*#c5c9c7;/);
   assert.match(hierarchy, /achromatic\s+graphite family/);
