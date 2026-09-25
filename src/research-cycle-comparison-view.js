@@ -24,6 +24,36 @@ function displayDate(date) {
     : "目標日期不存在";
 }
 
+function renderTape(id, baseIndex, targetIndex, label) {
+  const tape = document.getElementById(id);
+  if (!tape) return;
+  if (tape.childElementCount !== 60) {
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 60; i++) {
+      const tick = document.createElement("span");
+      tick.setAttribute("aria-hidden","true");
+      fragment.appendChild(tick);
+    }
+    tape.replaceChildren(fragment);
+  }
+  tape.dataset.positions = "60";
+  tape.dataset.baseIndex = String(baseIndex);
+  tape.dataset.targetIndex = targetIndex === null ? "unavailable" : String(targetIndex);
+  tape.setAttribute(
+    "aria-label",
+    targetIndex === null
+      ? `${label}：基準位 ${baseIndex + 1}／60；比較日期無效`
+      : `${label}：基準位 ${baseIndex + 1}／60，比較位 ${targetIndex + 1}／60${targetIndex === baseIndex ? "，兩者重合" : ""}`
+  );
+  [...tape.children].forEach((tick,index) => {
+    const base = index === baseIndex;
+    const target = index === targetIndex;
+    tick.dataset.base = String(base);
+    tick.dataset.target = String(target);
+    tick.dataset.both = String(base && target);
+  });
+}
+
 function visibleYear(date, nominal) {
   const state = researchYearStripState(date);
   const before = state.liChunTransition.before.name;
@@ -72,6 +102,8 @@ function render() {
   panel.dataset.targetDayPillar = model.target?.day.name ?? "invalid";
   panel.dataset.dayAnchorConvention = model.dayConvention;
 
+  renderTape("research-cycles-year-tape",model.base.year.cycleIndex,model.target?.year.cycleIndex ?? null,"60 年序");
+  renderTape("research-cycles-day-tape",model.base.day.index,model.target?.day.index ?? null,"60 日序");
   const baseYear = visibleYear(model.base.date,model.base.year);
   const targetYear = model.target ? visibleYear(model.target.date,model.target.year) : null;
   setText("research-cycles-base-date",displayDate(model.base.date));
