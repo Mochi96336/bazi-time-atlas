@@ -6,7 +6,7 @@ import { MATERIAL_FIXED_INSTANT, MATERIAL_VIEWPORTS } from "./material-visual-co
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
 const instant = MATERIAL_FIXED_INSTANT;
-const modes = ["svg", "roughness"];
+const modes = ["svg", "roughness", "fallback"];
 const viewports = MATERIAL_VIEWPORTS;
 
 function findBrowser() {
@@ -19,7 +19,9 @@ function findBrowser() {
 }
 
 function materialPath(mode) {
-  return "?material=" + encodeURIComponent(mode) + "&instant=" + instant;
+  return mode === "fallback"
+    ? "?material=roughness&materialWebgl=off&instant=" + instant
+    : "?material=" + encodeURIComponent(mode) + "&instant=" + instant;
 }
 
 function mobileHarnessPath(target, height) {
@@ -60,6 +62,14 @@ function probeMode(browser, mode) {
   if (mode === "svg") {
     if (/data-material-prototype="roughness"/.test(result.stdout)) {
       throw new Error("SVG baseline unexpectedly activated the shader");
+    }
+    return;
+  }
+
+  if (mode === "fallback") {
+    if (!result.stdout.includes('data-material-prototype-fallback="forced"')
+      || result.stdout.includes('data-material-prototype="roughness"')) {
+      throw new Error("Forced SVG fallback did not activate for visual evidence");
     }
     return;
   }
