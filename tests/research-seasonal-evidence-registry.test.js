@@ -9,7 +9,8 @@ test("research seasonal evidence registry is explicitly non-production", () => {
   assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.productionAuthorityGranted, false);
   assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.cachePreferred, true);
   assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.binaryTransport, "verified-binary-chunk");
-  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackTransport, "pinned-js-li-chun-summary");\n  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackCoverage, "li-chun-only");
+  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackTransport, "pinned-js-li-chun-summary");
+  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackCoverage, "li-chun-only");
   assert.equal(
     RESEARCH_SEASONAL_EVIDENCE_REGISTRY.independentTargetYearTruthRequiredForProductionPromotion,
     true
