@@ -4,6 +4,12 @@ import {
   resolveSeasonalBoundary
 } from "../src/recurrence/seasonal-boundary-authority.js";
 import {
+  clearResearchSeasonalEvidenceForTests
+} from "../src/recurrence/research-seasonal-evidence-registry.js";
+import {
+  installResearchSeasonal10026Fixture
+} from "./helpers/install-research-seasonal-10026.js";
+import {
   RESEARCH_SEASONAL_BOUNDARY_RESOLUTION_CONTRACT,
   resolveResearchSeasonalBoundary
 } from "../src/recurrence/research-seasonal-boundary-resolution.js";
@@ -30,7 +36,18 @@ test("Research overlay leaves canonical authority semantics unchanged", () => {
   assert.ok(canonical.sourceIds.includes("jpl-de441"));
 });
 
-test("Research overlay may consume pinned 10026 DE441-derived evidence without promoting it", () => {
+test("Research overlay stays canonical until the 10026 binary evidence is installed", () => {
+  clearResearchSeasonalEvidenceForTests();
+  const boundary = resolveResearchSeasonalBoundary({
+    year:10026,
+    longitudeDegrees:LI_CHUN
+  });
+  assert.equal(boundary.status, "source-covered-runtime-missing");
+  assert.equal(boundary.epochStatus, "unresolved");
+});
+
+test("Research overlay may consume installed 10026 DE441-derived evidence without promoting it", async () => {
+  await installResearchSeasonal10026Fixture();
   const boundary = resolveResearchSeasonalBoundary({
     year:10026,
     longitudeDegrees:LI_CHUN
