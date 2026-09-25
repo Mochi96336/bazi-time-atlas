@@ -106,7 +106,7 @@ try {
         return JSON.stringify({
           mode: shell?.dataset.materialPrototype ?? null,
           probe: shell?.dataset.materialProbe ?? null,
-          bench: shell?.dataset.materialBench ?? null,
+          ready: typeof shell?.__h21MaterialDraw === "function",
           fallback: shell?.dataset.materialPrototypeFallback ?? null,
           error: shell?.dataset.materialPrototypeError ?? null,
           clock: performance.now()
@@ -119,43 +119,94 @@ try {
     if (typeof value === "string") {
       last = JSON.parse(value);
       if (last.fallback || last.error) throw new Error("Material shader unavailable: " + JSON.stringify(last));
-      if (last.mode === "roughness" && last.probe === "none" && last.bench) {
+      if (last.mode === "roughness" && last.probe === "none" && last.ready) {
         payload = last;
         break;
       }
     }
     await sleep(200);
   }
-  if (!payload) throw new Error("CDP real-time material benchmark never completed: " + JSON.stringify(last));
-  if (!Number.isFinite(payload.clock) || payload.clock <= 0) {
-    throw new Error("CDP browser clock is not advancing; reject benchmark");
-  }
+  if (!payload) throw new Error("CDP diagnostic draw hook unavailable: " + JSON.stringify(last));
 
-  const values = Object.fromEntries(payload.bench.split(";").map(item => item.split("=")));
-  for (const key of ["offMs", "onMs", "ratio", "samples", "width", "height"]) {
-    if (!Number.isFinite(Number(values[key]))) throw new Error("Invalid benchmark field: " + key);
+  // The page process clocks were observed returning *zero* around gl.finish()
+  // even in a live CDP session. External Node monotonic time is the authority:
+  // each request batches six complete draws in exactly the same WebGL context.
+  // RPC overhead is measured independently; high noise => inconclusive, never
+  // pretend to have a precise GPU-only or real-device FPS measurement.
+  const batchSize = 6;
+  const pairs = 10;
+  const median = xs => {
+    const a = [...xs].sort((x, y) => x - y);
+    return (a[4] + a[5]) / 2;
+  };
+  let dimensions = null;
+  const timeBatch = async (probe, repeats = batchSize) => {
+    const expression = `(() => {
+      const shell = document.querySelector("#kinetic-instrument");
+      if (!shell || typeof shell.__h21MaterialDraw !== "function") throw new Error("draw hook lost");
+      let dimensions;
+      for (let i = 0; i < ${repeats}; i++) dimensions = shell.__h21MaterialDraw(${probe});
+      return dimensions;
+    })()`;
+    const start = process.hrtime.bigint();
+    const result = await send("Runtime.evaluate", { expression, returnByValue: true });
+    const ms = Number(process.hrtime.bigint() - start) / 1e6 / repeats;
+    if (result.exceptionDetails || !Array.isArray(result.result?.value)) {
+      throw new Error("CDP material draw batch failed");
+    }
+    dimensions = result.result.value;
+    if (!Number.isFinite(ms) || ms <= 0) throw new Error("external monotonic measurement failed");
+    return ms;
+  };
+  const rpc = [];
+  for (let i = 0; i < 10; i++) {
+    const start = process.hrtime.bigint();
+    const result = await send("Runtime.evaluate", { expression: "42", returnByValue: true });
+    if (result.result?.value !== 42) throw new Error("CDP control failed");
+    rpc.push(Number(process.hrtime.bigint() - start) / 1e6 / batchSize);
   }
-  if (Number(values.offMs) <= 0 || Number(values.onMs) <= 0 || Number(values.ratio) <= 0
-    || Number(values.samples) !== 10 || Number(values.width) < 1 || Number(values.height) < 1) {
-    throw new Error("Unusable CDP benchmark: " + JSON.stringify(values));
+  for (let i = 0; i < 4; i++) {
+    await timeBatch(7);
+    await timeBatch(0);
+  }
+  const disabled = [], enabled = [];
+  for (let i = 0; i < pairs; i++) {
+    if (i % 2 === 0) {
+      disabled.push(await timeBatch(7));
+      enabled.push(await timeBatch(0));
+    } else {
+      enabled.push(await timeBatch(0));
+      disabled.push(await timeBatch(7));
+    }
+  }
+  // Restore the same explicit probe baseline after the diagnostic measurements.
+  await timeBatch(0, 1);
+  const off = median(disabled), on = median(enabled), baselineRpc = median(rpc);
+  if (off <= 0 || on <= 0 || !Array.isArray(dimensions)
+    || dimensions.some(n => !Number.isFinite(n) || n <= 1)) {
+    throw new Error("invalid external CDP benchmark result");
   }
   const results = {
     kind:"h21-solar-groove-relative-draw-cost",
     instantUtc:decodeURIComponent(MATERIAL_FIXED_INSTANT),
     viewportRequested:"1440x900",
     sameGlContext:true,
-    measurementBrowser:"Live CDP page; no --dump-dom or virtual-time-budget",
-    roughnessWithScratchLightingMedianMs:Number(values.onMs),
-    roughnessWithoutScratchLightingMedianMs:Number(values.offMs),
-    withVsWithoutRatio:Number(values.ratio),
-    pairs:Number(values.samples),
-    canvasPx:[Number(values.width), Number(values.height)],
-    method:"Four warmup pairs then ten order-alternating pairs; performance.now() around draw+gl.finish in one context.",
+    measurementBrowser:"Live CDP page; external Node process.hrtime.bigint around batched GPU-finish RPCs",
+    roughnessWithScratchLightingMedianMs:Number(on.toFixed(5)),
+    roughnessWithoutScratchLightingMedianMs:Number(off.toFixed(5)),
+    withVsWithoutRatio:Number((on / off).toFixed(5)),
+    rpcBaselinePerDrawMs:Number(baselineRpc.toFixed(5)),
+    enabledSamplesMs:enabled.map(n => Number(n.toFixed(5))),
+    disabledSamplesMs:disabled.map(n => Number(n.toFixed(5))),
+    pairs,
+    drawsPerSample:batchSize,
+    canvasPx:dimensions,
+    method:"Four warmup pairs, ten order-alternating pairs of six gl.finish-synchronized draws per CDP call; external monotonic Node clock.",
     limitations:[
-      "CPU submission plus software-renderer GPU-inclusive wall time, NOT isolated GPU shader execution.",
-      "SwiftShader headless CI is not a user-device GPU; compare same-run relative costs only.",
-      "Normal viewport material perception must be checked separately; no beauty score or auto-merge.",
-      "Browser navigation and font load are excluded from the timed section."
+      "Measured values include CDP RPC and CPU submission, plus software-renderer gl.finish wall time; NOT isolated GPU timer data.",
+      "Any apparent improvement/regression comparable to RPC overhead or per-run spread is inconclusive.",
+      "SwiftShader headless CI does not represent native GPU/device FPS. Benchmark the real device separately.",
+      "Normal-zoom material quality must be reviewed using real PNGs; cost or pixel-change ratios are not aesthetic scores."
     ]
   };
   await mkdir(path.resolve("tmp/visual-check"), { recursive:true });
