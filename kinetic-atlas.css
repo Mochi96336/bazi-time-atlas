@@ -20,7 +20,7 @@
   --month: #777f84;
   --year: #90989d;
   --solar: #ac906e;
-  --zodiac: #42495c;
+  --zodiac: #424b59;
   /* Material color and tiny fixed-label readability are separate roles. The
      identity tokens retain each ring hue while supplying an ink floor. */
   --identity-hour: color-mix(in srgb, var(--hour) 56%, var(--ink));

@@ -185,23 +185,23 @@
 }
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 84%, #68758f);
+  stop-color: color-mix(in srgb, var(--zodiac) 84%, #687786);
   stop-opacity: .24;
 }
 #m2-zodiac-hard-surface .m2-zodiac-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 92%, #1c2230);
+  stop-color: color-mix(in srgb, var(--zodiac) 92%, #1d2630);
   stop-opacity: .19;
 }
 #m2-zodiac-hard-surface .m2-zodiac-dark {
-  stop-color: color-mix(in srgb, var(--zodiac) 68%, #070b12);
+  stop-color: color-mix(in srgb, var(--zodiac) 68%, #080c13);
   stop-opacity: .18;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-light {
-  stop-color: color-mix(in srgb, var(--zodiac) 78%, #7f8faa);
+  stop-color: color-mix(in srgb, var(--zodiac) 78%, #7b8d9f);
   stop-opacity: .084;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-mid {
-  stop-color: color-mix(in srgb, var(--zodiac) 87%, #2b374a);
+  stop-color: color-mix(in srgb, var(--zodiac) 87%, #2c3945);
   stop-opacity: .036;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-dark {
