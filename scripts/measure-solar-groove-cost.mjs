@@ -19,7 +19,7 @@ const url = new URL("?material=roughness&materialProbe=none&materialPerf=1&insta
 const r = spawnSync(browser, [
   "--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--hide-scrollbars",
   "--force-device-scale-factor=1", "--enable-unsafe-swiftshader",
-  "--use-angle=swiftshader-webgl", "--virtual-time-budget=4000",
+  "--use-angle=swiftshader-webgl",
   "--window-size=1440,900", "--dump-dom", url
 ], { encoding:"utf8", timeout:90_000, killSignal:"SIGKILL" });
 if (r.status !== 0) {
@@ -35,6 +35,13 @@ if (!match) throw new Error("same-context draw-cost evidence missing");
 const values = Object.fromEntries(match[1].split(";").map(v => v.split("=")));
 for (const k of ["offMs", "onMs", "ratio", "samples", "width", "height"]) {
   if (!Number.isFinite(Number(values[k]))) throw new Error("invalid benchmark field: " + k);
+}
+// --virtual-time-budget freezes performance.now() during synchronous GPU finishes
+// on some headless Chromium runs. Reject zero timings rather than passing a
+// meaningless "0x render cost" report.
+if (Number(values.offMs) <= 0 || Number(values.onMs) <= 0
+  || Number(values.ratio) <= 0) {
+  throw new Error("invalid zero/negative benchmark timings; rerun with real monotonic clock");
 }
 if (Number(values.samples) !== 10 || Number(values.width) < 1 || Number(values.height) < 1) {
   throw new Error("unexpected benchmark sample count or canvas dimensions");
