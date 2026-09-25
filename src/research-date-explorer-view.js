@@ -236,7 +236,13 @@ function stepComparisonDate(days) {
     shifted = shiftGregorianDate(candidateTarget,days);
   } catch {
     root.dataset.stepOutcome = "out-of-range";
-    setError("目標日期超出可用公曆範圍；原本的比較日期和結果沒有改動。");
+    // The visible fields may contain an unsaved, otherwise valid date that
+    // differs from the last committed result. Never show stale comparison
+    // values beside that failed edit; keep the fields so a reverse step can
+    // recover without retyping.
+    root.dataset.ready = "false";
+    document.querySelector("#research-explorer-results").hidden = true;
+    setError("比較日期位移超出可用公曆範圍，未更新已選日期。請修改日期或改用反方向位移。");
     return;
   }
   base = candidateBase;
