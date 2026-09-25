@@ -9,7 +9,7 @@ test("research seasonal evidence registry is explicitly non-production", () => {
   assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.productionAuthorityGranted, false);
   assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.cachePreferred, true);
   assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.binaryTransport, "verified-binary-chunk");
-  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackTransport, "pinned-js-evidence");
+  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackTransport, "pinned-js-li-chun-summary");\n  assert.equal(RESEARCH_SEASONAL_EVIDENCE_REGISTRY.fallbackCoverage, "li-chun-only");
   assert.equal(
     RESEARCH_SEASONAL_EVIDENCE_REGISTRY.independentTargetYearTruthRequiredForProductionPromotion,
     true
@@ -35,7 +35,7 @@ test("year 10026 Li Chun resolves from the pinned source-derived DE441 evidence"
   assert.equal(event.productionIntegrated, false);
   assert.equal(event.productionAuthorityGranted, false);
   assert.equal(event.civilTimeResolved, false);
-  assert.equal(event.transport, "pinned-js-evidence");
+  assert.equal(event.transport, "pinned-js-li-chun-summary");
   assert.equal(event.payloadIntegrityVerified, false);
 });
 
@@ -50,13 +50,17 @@ test("research registry does not widen the pinned evidence beyond its catalogue 
   );
 });
 
-test("research registry only returns pinned canonical seasonal longitudes", () => {
+test("JS fallback is intentionally narrowed to Li Chun only", () => {
   assert.equal(
     researchSeasonalEvidenceForLongitude({ year:10026, longitudeDegrees:314.5 }),
     null
   );
   assert.equal(
-    researchSeasonalEvidenceForLongitude({ year:10026, longitudeDegrees:360 }).name,
-    "春分"
+    researchSeasonalEvidenceForLongitude({ year:10026, longitudeDegrees:0 }),
+    null
+  );
+  assert.equal(
+    researchSeasonalEvidenceForLongitude({ year:10026, longitudeDegrees:315 }).name,
+    "立春"
   );
 });
