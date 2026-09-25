@@ -242,4 +242,6 @@ if(root && panel && svg){
     }
   }).observe(root,{attributes:true,attributeFilter:["data-target-date","data-ready"]});
   followCommittedDate();
+  if (new URL(location.href).searchParams.get("wheel")==="open" &&
+      document.body.dataset.researchMode==="dates") panel.open=true;
 }
