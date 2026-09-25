@@ -229,6 +229,9 @@ if (
   attr(sourceDerivedStrip, "data-li-chun-projection-status") !== "estimated" ||
   attr(sourceDerivedStrip, "data-li-chun-position-status") !== "estimated" ||
   attr(sourceDerivedStrip, "data-selected-year-membership-status") !== "model-estimated" ||
+  attr(sourceDerivedStrip, "data-li-chun-evidence-transport") !== "verified-binary-chunk" ||
+  attr(sourceDerivedStrip, "data-li-chun-payload-integrity-verified") !== "true" ||
+  attr(sourceDerivedStrip, "data-li-chun-payload-sha256") !== "742723de83e87d66ce866666827644b7ba74fb4f20f96b0c14f63d4a04809219" ||
   !sourceDerived8000.dom.includes("DE441-derived · source-derived")
 ) {
   throw new Error(`10026 must expose pinned DE441-derived Research evidence without presenting it as production truth: ${sourceDerived8000.url}`);
@@ -236,7 +239,7 @@ if (
 if (attr(sourceDerivedStrip, "data-selected-year-pillar") === "unavailable") {
   throw new Error(`10026 September date should resolve a side outside the Li Chun uncertainty band: ${sourceDerived8000.url}`);
 }
-console.log(`[recurrence] PASS 10026 uses source-derived DE441 TT with explicit non-production labeling: ${sourceDerived8000.url}`);
+console.log(`[recurrence] PASS 10026 uses digest-verified binary DE441 TT with explicit non-production labeling: ${sourceDerived8000.url}`);
 
 const liChunBoundaryDay = expectCase(
   "recurrence.html?date=2024-02-04&delta=0",

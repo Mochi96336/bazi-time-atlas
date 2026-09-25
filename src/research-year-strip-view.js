@@ -5,6 +5,9 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
+import {
+  RESEARCH_SEASONAL_EVIDENCE_READY_EVENT
+} from "./recurrence/research-seasonal-chunk-prefetch.js";
 import { projectSeasonalBoundaryToCivil } from "./recurrence/seasonal-civil-projection.js";
 import {
   TARGET_INSTANT_BASIS
@@ -375,6 +378,11 @@ function setText(id, value) {
   if (node) node.textContent = value;
 }
 
+function selectedYearForRender() {
+  const selectedDate = parseDate(instrument?.dataset.targetDate);
+  return selectedDate?.year ?? null;
+}
+
 function render() {
   if (!strip || !instrument) return;
   const selectedDate = parseDate(instrument.dataset.targetDate);
@@ -407,6 +415,11 @@ function render() {
   strip.dataset.liChunIndependentTargetYearTruth = state.liChunBoundary.independentTargetYearTruth === undefined
     ? "not-declared"
     : String(state.liChunBoundary.independentTargetYearTruth);
+  strip.dataset.liChunEvidenceTransport = state.liChunBoundary.event?.transport ?? "canonical-authority";
+  strip.dataset.liChunPayloadIntegrityVerified = state.liChunBoundary.event?.payloadIntegrityVerified === undefined
+    ? "not-applicable"
+    : String(state.liChunBoundary.event.payloadIntegrityVerified);
+  strip.dataset.liChunPayloadSha256 = state.liChunBoundary.event?.payloadSha256 ?? "none";
   strip.dataset.liChunProjectionStatus = state.liChunProjection.status;
   strip.dataset.liChunPositionAvailable = String(Boolean(state.liChun));
   strip.dataset.liChunPositionStatus = state.liChun?.positionStatus ?? "unavailable";
@@ -514,6 +527,9 @@ if (strip && instrument) {
     attributes:true,
     attributeFilter:["data-target-date", ...targetInstantAttributes]
   });
+  document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_READY_EVENT, event => {
+    if (event.detail?.year === selectedYearForRender()) render();
+  });
   render();
 }
 
@@ -524,5 +540,7 @@ export const RESEARCH_YEAR_STRIP_CONTRACT = freeze({
   transitionIndependentFromEpochAvailability:true,
   directLegacyCivilSolarTermAuthority:false,
   selectedYearMembershipStatuses:freeze(["exact", "model-estimated", "unresolved"]),
-  oneSigmaIntervalIsHardDecisionBound:false
+  oneSigmaIntervalIsHardDecisionBound:false,
+  verifiedBinaryPrefetchEvent:RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,
+  rerendersWhenVerifiedBinaryEvidenceArrives:true
 });
