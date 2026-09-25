@@ -673,6 +673,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     active = false;
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
+    shell?.removeAttribute("data-material-probe-transform");
     if (shell) {
       shell.dataset.materialPrototypeFallback = reason;
       if (detail) {
@@ -715,6 +716,15 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       screenToSvg = screenCtm.inverse();
     } catch {
       return;
+    }
+
+    // Screenshot-only DOM evidence: exact screen/SVG mapping for material ROI masks.
+    // No extra DOM writes or probes in the default production path.
+    if (requestedProbe !== null && shell) {
+      shell.dataset.materialProbeTransform = [
+        screenCtm.a, screenCtm.b, screenCtm.c,
+        screenCtm.d, screenCtm.e, screenCtm.f
+      ].map(value => Number(value.toFixed(6))).join(",");
     }
 
     const deviceScaleX = canvas.width / canvasRect.width;
