@@ -206,11 +206,11 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   // carries the same gold/brown body family as the approved demo and then
   // applies oxidation/scratches before compositing beneath SVG semantics.
   assert.match(material, /vec3 brassBody\(vec2 worldPoint\)/);
-  assert.match(material, /brassLight = vec3\(0\.355, 0\.283, 0\.208\)/);
-  assert.match(material, /brassMid = vec3\(0\.304, 0\.242, 0\.179\)/);
-  assert.match(material, /brassDark = vec3\(0\.150, 0\.103, 0\.072\)/);
+  assert.match(material, /brassLight = vec3\(0\.328, 0\.282, 0\.230\)/);
+  assert.match(material, /brassMid = vec3\(0\.286, 0\.241, 0\.198\)/);
+  assert.match(material, /brassDark = vec3\(0\.138, 0\.105, 0\.085\)/);
   assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
-  assert.match(material, /warmCatch \* 0\.035/);
+  assert.match(material, /warmCatch \* 0\.047/);
   assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);
   assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.10 \+ aging\.y \* 0\.045 \+ aging\.z \* 0\.005, 0\.0, 0\.14\)/);
   assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
