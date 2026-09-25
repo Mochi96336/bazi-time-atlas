@@ -183,8 +183,10 @@ function syncFreeQuery() {
   url.searchParams.set("mode","dates");
   url.searchParams.set("base",dateKey(base));
   url.searchParams.set("compare",dateKey(target));
-  if (url.hash && !document.querySelector("#research-free-explorer " + url.hash)) url.hash = "";
-  history.replaceState(null,"",url.pathname + url.search + url.hash);
+  // An annual-only anchor must never survive into a mode that hides its target.
+  url.hash = "";
+  history.replaceState(null,"",url.pathname + url.search);
+  root.dataset.urlValid = "true";
 }
 
 function applyDates(writeUrl=true) {
