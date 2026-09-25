@@ -1,0 +1,107 @@
+/* Research 01: separate Day-wheel input in independent-date mode.
+   Shares the existing research-cycle geometry/material classes, not its
+   annual-recurrence data owner. Closed by default so Year/Day remain first. */
+.research-free-day-wheel {
+  border:1px solid rgba(120,153,165,.23);
+  border-radius:17px;
+  margin:17px 0 7px;
+  background:linear-gradient(140deg,rgba(120,153,165,.052),rgba(12,17,15,.7));
+  overflow:hidden;
+}
+.research-free-day-wheel > summary {
+  list-style:none; min-height:63px; padding:12px 17px;
+  cursor:pointer; display:flex; align-items:center; flex-wrap:wrap; gap:6px 16px;
+}
+.research-free-day-wheel > summary::-webkit-details-marker { display:none; }
+.research-free-day-wheel > summary > span {
+  color:#bfd6d8; font-size:14px; font-weight:710;
+}
+.research-free-day-wheel > summary > strong {
+  color:#a5b2a8; font-size:11px; font-weight:520;
+}
+.research-free-day-wheel > summary > i {
+  margin-left:auto; color:#bdd5d8; font-size:11px; font-style:normal; white-space:nowrap;
+}
+.research-free-day-wheel[open] > summary {
+  border-bottom:1px solid var(--hairline);
+}
+.research-free-day-wheel[open] > summary > i { transform:rotate(90deg); }
+.research-free-day-wheel-body {
+  display:grid; grid-template-columns:minmax(0,1.35fr) minmax(255px,.7fr);
+  gap:clamp(12px,2vw,28px); align-items:center; padding:18px 17px 22px;
+}
+.research-free-day-wheel-stage { min-width:0; }
+#research-free-day-wheel-svg {
+  display:block; width:min(100%,550px); height:auto; margin:0 auto;
+  touch-action:none; overflow:visible;
+}
+#research-free-day-wheel-svg .research-cycle-index { font-size:9px; }
+#research-free-day-wheel-svg .research-cycle-dot.is-current {
+  fill:#82bbba; stroke:#bbdfdc; stroke-width:1.1;
+}
+.research-free-day-wheel-inspector {
+  min-width:0; border-left:1px solid var(--hairline);
+  padding:5px 0 5px clamp(12px,2vw,24px);
+}
+.research-free-day-wheel-eyebrow {
+  font-size:10px; color:#9dac9f; text-transform:uppercase; letter-spacing:.06em;
+}
+.research-free-day-wheel-inspector h3 {
+  font-size:clamp(34px,4vw,52px); font-weight:720;
+  color:#d4e6e6; margin:7px 0 3px;
+}
+#research-free-wheel-status {font-size:11px;color:#a4b4a9;margin:0 0 17px;line-height:1.5;}
+.research-free-day-wheel-current {
+  display:grid; gap:4px; border-top:1px solid var(--hairline); padding-top:12px;
+}
+.research-free-day-wheel-current span {font-size:10px;color:#92a397;}
+.research-free-day-wheel-current strong {
+  color:#e1ede7; font-size:19px; font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+.research-free-day-wheel-current small {font-size:11px;color:#a8bac4;}
+.research-free-day-wheel-destinations {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px;}
+.research-free-day-wheel-destinations button {
+  display:grid; align-content:center; gap:6px;
+  min-width:0; min-height:98px; padding:10px 9px;
+  text-align:left; border:1px solid rgba(170,202,200,.3); border-radius:12px;
+  background:rgba(120,153,165,.082); color:#dae9e7; cursor:pointer;
+}
+.research-free-day-wheel-destinations button:hover:not(:disabled) {
+  border-color:rgba(189,228,225,.7); background:rgba(120,153,165,.18);
+}
+.research-free-day-wheel-destinations button:disabled {
+  opacity:.43; cursor:not-allowed; border-color:var(--hairline);
+}
+.research-free-day-wheel-destinations button span {font-size:10px;color:#adc8c6;}
+.research-free-day-wheel-destinations button strong {
+  font-size:clamp(13px,1.5vw,17px);font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;line-height:1.35;
+}
+.research-free-day-wheel-destinations button small {font-size:10px;color:#8fafad;}
+.research-free-day-wheel-return {
+  min-height:42px; margin-top:10px; padding:6px 12px;
+  border:1px solid var(--hairline); border-radius:11px;
+  background:transparent; color:#c2dad6; font-size:12px; cursor:pointer;
+}
+.research-free-day-wheel-explanation {
+  display:block; color:#8e9c92; font-size:10px; line-height:1.65; margin-top:11px;
+}
+@media(max-width:900px) {
+  .research-free-day-wheel-body {grid-template-columns:1fr;}
+  #research-free-day-wheel-svg {max-width:490px;}
+  .research-free-day-wheel-inspector {
+    border-left:0; border-top:1px solid var(--hairline); padding:14px 0 0;
+  }
+}
+@media(max-width:480px) {
+  .research-free-day-wheel > summary {padding:11px 12px;gap:4px 7px;}
+  .research-free-day-wheel > summary > strong {
+    flex-basis:100%;order:3;line-height:1.5;
+  }
+  .research-free-day-wheel-body {padding:10px 10px 14px; gap:8px;}
+  #research-free-day-wheel-svg {width:calc(100% + 8px);margin-left:-4px;}
+  .research-free-day-wheel-inspector h3 {font-size:38px;}
+  .research-free-day-wheel-destinations button {min-height:102px;}
+  .research-free-day-wheel-destinations button strong {font-size:14px;}
+}
