@@ -5,6 +5,7 @@ import {
   activeYearIdentityForDate
 } from "../src/recurrence/research-date-pair.js";
 import { shiftGregorianDate } from "../src/recurrence/gregorian-date-navigation.js";
+import { researchYearStripState } from "../src/research-year-strip-view.js";
 import { recurrenceState } from "../src/recurrence/gregorian-cycle.js";
 import { researchGanzhiCycleComparison } from "../src/recurrence/ganzhi-cycle-comparison.js";
 import { sexagenaryYearPillarForLiChunYear } from "../src/calendar/sexagenary-year.js";
@@ -190,4 +191,31 @@ test("invalid, overflowed or mismatched inputs must fail closed", () => {
     selectedYearPillar:null
   }),TypeError);
   assert.equal(compareResearchDates(base,{year:2028,month:2,day:29}).applicability.annualRecurrenceEligible,true);
+});
+
+test("real Year Strip authority integrates without promoting modeled year evidence", () => {
+  const beforeDate = {year:2024,month:2,day:1};
+  const boundaryDate = {year:2024,month:2,day:4};
+  const afterDate = {year:2024,month:2,day:10};
+  const beforeEvidence = researchYearStripState(beforeDate);
+  const boundaryEvidence = researchYearStripState(boundaryDate);
+  const afterEvidence = researchYearStripState(afterDate);
+  const pair = compareResearchDates(beforeDate,afterDate,{
+    baseYearEvidence:beforeEvidence,
+    targetYearEvidence:afterEvidence
+  });
+  assert.equal(pair.base.activeYear.status,"model-estimated");
+  assert.equal(pair.target.activeYear.status,"model-estimated");
+  assert.equal(pair.base.activeYear.pillar.name,"癸卯");
+  assert.equal(pair.target.activeYear.pillar.name,"甲辰");
+  assert.equal(pair.yearSequence.phase,0);
+  const boundary = compareResearchDates(boundaryDate,afterDate,{
+    baseYearEvidence:boundaryEvidence,targetYearEvidence:afterEvidence
+  });
+  assert.equal(boundary.base.activeYear.status,"unresolved");
+  assert.equal(boundary.base.activeYear.pillar,null);
+  assert.deepEqual(boundary.base.activeYear.possiblePillars.map(p=>p.name),["癸卯","甲辰"]);
+  assert.throws(()=>compareResearchDates(afterDate,beforeDate,{
+    baseYearEvidence:beforeEvidence
+  }),/must belong/);
 });
