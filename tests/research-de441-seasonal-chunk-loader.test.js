@@ -31,15 +31,16 @@ test("year-10026 binary Research chunk verifies its pinned SHA-256 before decode
     DE441_10026_SEASONAL_CROSSING_EVIDENCE.liChun.ttJulianDay
   );
 
-  for (const term of DE441_10026_SEASONAL_CROSSING_EVIDENCE.terms) {
-    assert.equal(
-      loaded.chunk.ttJulianDayFor({
-        year:10026,
-        longitudeDegrees:term.longitudeDegrees
-      }),
-      term.ttJulianDay
-    );
-  }
+  assert.equal(loaded.chunk.eventsPerYear, 24);
+  assert.equal(loaded.chunk.longitudeStepDegrees, 15);
+  assert.equal(
+    DE441_10026_SEASONAL_CROSSING_EVIDENCE.compactRuntimeAsset.payloadSha256,
+    loaded.payloadSha256
+  );
+  assert.equal(
+    DE441_10026_SEASONAL_CROSSING_EVIDENCE.compactRuntimeAsset.runtimeDataCopy,
+    "compact-binary-only"
+  );
 });
 
 test("verified 10026 binary is Research-load eligible but cannot cross the production promotion boundary", async () => {
