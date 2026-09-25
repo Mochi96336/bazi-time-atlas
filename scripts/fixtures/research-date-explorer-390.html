@@ -8,7 +8,7 @@
     const frame = document.getElementById("explorer-frame");
     const probe = document.getElementById("probe");
     const wait = (ms) => new Promise(resolve => setTimeout(resolve,ms));
-    function record(name,value) {probe.dataset[name] = String(value);}
+    function record(name,value) {probe.setAttribute("data-"+name,String(value));}
     function assert(condition,message) {if(!condition)throw new Error(message);}
     function change(input) {input.dispatchEvent(new Event("change",{bubbles:true}));}
     const dateFields = (doc,kind) => ["year","month","day"].map(key =>
