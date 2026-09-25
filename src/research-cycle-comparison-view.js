@@ -37,17 +37,15 @@ function renderTape(id, baseIndex, targetIndex, label) {
     tape.replaceChildren(fragment);
   }
   tape.dataset.positions = "60";
-  tape.dataset.baseIndex = String(baseIndex);
+  tape.dataset.baseIndex = baseIndex === null ? "unavailable" : String(baseIndex);
   tape.dataset.targetIndex = targetIndex === null ? "unavailable" : String(targetIndex);
   tape.setAttribute(
     "aria-label",
-    targetIndex === null
-      ? `${label}：基準位 ${baseIndex + 1}／60；比較日期無效`
-      : `${label}：基準位 ${baseIndex + 1}／60，比較位 ${targetIndex + 1}／60${targetIndex === baseIndex ? "，兩者重合" : ""}`
+    `${label}：基準${baseIndex === null ? "待判" : `第 ${baseIndex + 1} 位`}；比較${targetIndex === null ? "待判或日期無效" : `第 ${targetIndex + 1} 位`}${baseIndex !== null && targetIndex === baseIndex ? "，兩者重合" : ""}`
   );
   [...tape.children].forEach((tick,index) => {
-    const base = index === baseIndex;
-    const target = index === targetIndex;
+    const base = baseIndex !== null && index === baseIndex;
+    const target = targetIndex !== null && index === targetIndex;
     tick.dataset.base = String(base);
     tick.dataset.target = String(target);
     tick.dataset.both = String(base && target);
@@ -55,23 +53,28 @@ function renderTape(id, baseIndex, targetIndex, label) {
 }
 
 function visibleYear(date, nominal) {
-  const state = researchYearStripState(date);
+  let state;
+  try { state = researchYearStripState(date); } catch {
+    return { name:nominal.name,cycleIndex:nominal.cycleIndex,positionBasis:"nominal",
+      note:"僅名義立春後年標 · 年界資料不可用" };
+  }
   const before = state.liChunTransition.before.name;
   const after = state.liChunTransition.after.name;
   if (state.selectedYearPillar) {
     const status = state.selectedYearMembership.status;
     return {
       name:state.selectedYearPillar.name,
+      cycleIndex:state.selectedYearPillar.cycleIndex,
+      positionBasis:"active",
       note:status === "exact" ? "已判定年柱"
         : status === "model-estimated" ? "年界模型估計" : "年界待驗"
     };
   }
   if (["boundary-day","boundary-uncertain"].includes(state.selectedCivilLiChunRelation)) {
-    return {name:`${before}／${after}`, note:"立春界日／區間待判"};
+    return {name:`${before}／${after}`,cycleIndex:null,positionBasis:"unresolved",note:"立春界日／區間待判"};
   }
-  // A year-label sequence is always computable even where the astronomical
-  // event is unavailable, but MUST NOT masquerade as the active birth year.
-  return {name:nominal.name, note:"僅名義立春後年標 · 當日待判"};
+  return {name:nominal.name,cycleIndex:nominal.cycleIndex,positionBasis:"nominal",
+    note:"僅名義立春後年標 · 當日待判"};
 }
 
 function render() {
@@ -102,10 +105,21 @@ function render() {
   panel.dataset.targetDayPillar = model.target?.day.name ?? "invalid";
   panel.dataset.dayAnchorConvention = model.dayConvention;
 
-  renderTape("research-cycles-year-tape",model.base.year.cycleIndex,model.target?.year.cycleIndex ?? null,"60 年序");
-  renderTape("research-cycles-day-tape",model.base.day.index,model.target?.day.index ?? null,"60 日序");
   const baseYear = visibleYear(model.base.date,model.base.year);
   const targetYear = model.target ? visibleYear(model.target.date,model.target.year) : null;
+  renderTape("research-cycles-year-tape",baseYear.cycleIndex,targetYear?.cycleIndex ?? null,"干支年位置");
+  renderTape("research-cycles-day-tape",model.base.day.index,model.target?.day.index ?? null,"60 日序");
+  panel.dataset.baseYearDisplayed = baseYear.name;
+  panel.dataset.targetYearDisplayed = targetYear?.name ?? "unavailable";
+  panel.dataset.yearTapeBasis = baseYear.positionBasis === "active" && targetYear?.positionBasis === "active"
+    ? "active-year-pillars" : "nominal-or-unresolved";
+  const activeYearPhase = baseYear.positionBasis === "active" && targetYear?.positionBasis === "active"
+    ? ((targetYear.cycleIndex - baseYear.cycleIndex) % 60 + 60) % 60 : null;
+  setText("research-cycles-year-tape-basis",
+    activeYearPhase !== null && activeYearPhase !== model.yearPhase
+      ? "刻度＝實際年柱位置；與下方名義年序相位不同"
+      : panel.dataset.yearTapeBasis === "active-year-pillars"
+        ? "刻度＝實際年柱位置" : "刻度＝可判年柱，資料不足處僅顯示名義年標");
   setText("research-cycles-base-date",displayDate(model.base.date));
   setText("research-cycles-target-date",displayDate(model.target?.date));
   setText("research-cycles-year-base",baseYear.name);
