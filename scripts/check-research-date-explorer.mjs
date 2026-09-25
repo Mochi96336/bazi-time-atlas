@@ -116,3 +116,17 @@ if(
   [tag(annual.dom,"research-discrete"),tag(annual.dom,"research-astronomy"),tag(annual.dom,"research-evidence")].some(value=>value.includes(" hidden"))
 ) throw new Error("Existing annual URL must keep its original recurrence and evidence sections visible: "+annual.url);
 console.log("[explorer] PASS legacy annual deep link remains authoritative and unchanged");
+
+const wheelLink=dump("recurrence.html?mode=dates&base=2024-02-01&compare=2024-02-10&wheel=open");
+const linkedPanel=tag(wheelLink.dom,"research-free-day-wheel","details");
+const linkedRoot=tag(wheelLink.dom,"research-free-explorer");
+if(
+  attr(linkedRoot,"data-ready")!=="true" ||
+  attr(linkedPanel,"data-ready")!=="true" ||
+  attr(linkedPanel,"data-selection-linked")!=="true" ||
+  attr(linkedPanel,"data-current-date")!=="2024-02-10" ||
+  !/\\sopen(?:=|\\s|>)/.test(linkedPanel) ||
+  !wheelLink.dom.includes('id="research-free-day-wheel-svg"')
+) throw new Error("Free-date wheel deep link must open linked to the chosen target date, not the annual wheel: "+wheelLink.url);
+console.log("[explorer] PASS explicit free-wheel deep link initializes the separate selectable wheel");
+
