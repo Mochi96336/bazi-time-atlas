@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   RESEARCH_YEAR_STRIP_CONTRACT,
-  researchYearStripState
+  researchYearStripState,
+  seasonalAuthorityLabel
 } from "../src/research-year-strip-view.js";
 import { fixedZoneTargetClock } from "../src/recurrence/fixed-zone-target-clock.js";
 import {
@@ -284,4 +285,26 @@ test("year strip does not invent a next same-date when February 29 disappears", 
   const state = researchYearStripState({ year:2024, month:2, day:29 });
   assert.equal(state.nextDate, null);
   assert.equal(state.elapsedDays, null);
+});
+
+test("Research Li Chun label separates verified binary provenance from unverified JS fallback", () => {
+  const fallback = researchYearStripState({ year:10026, month:9, day:13 });
+  assert.equal(fallback.liChunBoundary.event.transport, "pinned-js-li-chun-summary");
+  assert.equal(fallback.liChunBoundary.event.payloadIntegrityVerified, false);
+  assert.match(seasonalAuthorityLabel(fallback.liChunBoundary), /JS 立春摘要.*binary 未驗證/);
+
+  const verified = {
+    ...fallback.liChunBoundary,
+    event:{ ...fallback.liChunBoundary.event,
+      transport:"verified-binary-chunk",
+      payloadIntegrityVerified:true
+    }
+  };
+  assert.match(seasonalAuthorityLabel(verified), /SHA-256 已驗證/);
+
+  const unresolvedTransport = {
+    ...fallback.liChunBoundary,
+    event:{ ...fallback.liChunBoundary.event, transport:"unknown" }
+  };
+  assert.match(seasonalAuthorityLabel(unresolvedTransport), /傳輸來源待確認/);
 });
