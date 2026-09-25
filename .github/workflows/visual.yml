@@ -176,6 +176,10 @@ jobs:
           node scripts/visual-check-determinacy.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Capture independent date explorer PNG evidence
+        run: node scripts/visual-check-research-date-explorer.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Upload visual evidence
         if: always()
         uses: actions/upload-artifact@v7
