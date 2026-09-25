@@ -81,9 +81,9 @@
     border: 0;
     padding: 14px 58px 18px 18px;
     background: linear-gradient(to right,
-      rgba(9,10,11,.97) 0%,
-      rgba(9,10,11,.90) 70%,
-      rgba(9,10,11,0) 100%);
+      color-mix(in srgb, var(--field) 97%, transparent) 0%,
+      color-mix(in srgb, var(--field) 90%, transparent) 70%,
+      transparent 100%);
     box-shadow: none;
     scrollbar-width: thin;
   }
@@ -173,9 +173,9 @@
     border-radius: 0;
     padding: 14px 58px 16px 18px;
     background: linear-gradient(to right,
-      rgba(9,10,11,.97) 0%,
-      rgba(9,10,11,.90) 70%,
-      rgba(9,10,11,0) 100%);
+      color-mix(in srgb, var(--field) 97%, transparent) 0%,
+      color-mix(in srgb, var(--field) 90%, transparent) 70%,
+      transparent 100%);
     backdrop-filter: none;
     box-shadow: none;
     pointer-events: none;
@@ -221,9 +221,9 @@
     border-radius: 0;
     padding: 16px 18px 18px 56px;
     background: linear-gradient(to left,
-      rgba(9,10,11,.96) 0%,
-      rgba(9,10,11,.88) 70%,
-      rgba(9,10,11,0) 100%);
+      color-mix(in srgb, var(--field) 96%, transparent) 0%,
+      color-mix(in srgb, var(--field) 88%, transparent) 70%,
+      transparent 100%);
     box-shadow: none;
     pointer-events: auto;
   }
@@ -310,14 +310,14 @@
     border-radius: 0;
     padding-left: 38px;
     background: linear-gradient(to left,
-      rgba(9,10,11,.98) 0%,
-      rgba(9,10,11,.92) 72%,
-      rgba(9,10,11,0) 100%);
+      color-mix(in srgb, var(--field) 98%, transparent) 0%,
+      color-mix(in srgb, var(--field) 92%, transparent) 72%,
+      transparent 100%);
     background-image: none;
     box-shadow: none;
   }
   #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector .ganzhi-inspector-head {
-    background: rgba(9,10,11,.9);
+    background: color-mix(in srgb, var(--field) 90%, transparent);
   }
 
   /* Four Pillars is the persistent evidence rail in Tools, so its labels must

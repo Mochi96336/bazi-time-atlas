@@ -59,7 +59,9 @@ test("selected-instant interval surfaces stay borderless until interaction or cl
 
   // Dense categorical borders remain opt-in and own their stroke explicitly.
   assert.match(classification, /data-classification-overlay="on"\] \.cycle-sector\[data-branch-element=/);
-  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\s*\{[\s\S]*?stroke:\s*color-mix/);
+  assert.match(classification, /--classification-zodiac-outline:\s*#[0-9a-f]{6};/i);
+  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\s*\{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
+  assert.doesNotMatch(classification, /data-classification-overlay="on"\] \.zodiac-sector\s*\{[\s\S]*?stroke:[^;]*var\(--zodiac\)/);
   assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\[data-zodiac-modality=/);
 });
 

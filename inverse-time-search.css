@@ -216,9 +216,9 @@
     padding: 14px 58px 16px 18px;
     border: 0;
     background: linear-gradient(to right,
-      rgba(9,10,11,.97) 0%,
-      rgba(9,10,11,.90) 70%,
-      rgba(9,10,11,0) 100%);
+      color-mix(in srgb, var(--field) 97%, transparent) 0%,
+      color-mix(in srgb, var(--field) 90%, transparent) 70%,
+      transparent 100%);
     background-image: none;
     box-shadow: none;
   }

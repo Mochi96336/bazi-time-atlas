@@ -10,10 +10,12 @@
   --z-earth: #91a07e;
   --z-air: #8da9ad;
   --z-water: #858fb4;
+  /* Structural evidence belongs to Classification, not the resting material. */
+  --classification-zodiac-outline: #8f999d;
 }
 
 #classification-overlay-button.active {
-  color: #111512;
+  color: var(--field-raised);
   background: #cbd8cf;
   border-color: #cbd8cf;
 }
@@ -27,7 +29,7 @@
   padding: 10px 11px;
   border: 1px solid rgba(238,242,237,.13);
   border-radius: 14px;
-  background: rgba(13,17,14,.84);
+  background: color-mix(in srgb, var(--field) 84%, transparent);
   backdrop-filter: blur(14px);
   box-shadow: 0 14px 42px rgba(0,0,0,.22);
   pointer-events: none;
@@ -92,7 +94,7 @@
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="固定"] { stroke-dasharray:1.5 3; }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector[data-zodiac-modality="變動"] { stroke-dasharray:5 3; }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector {
-  stroke: color-mix(in srgb, var(--zodiac) 62%, var(--ink));
+  stroke: var(--classification-zodiac-outline);
   stroke-width:1.7;
 }
 #kinetic-instrument[data-classification-overlay="on"] .zodiac-sector.is-active { stroke-width:2.3; filter:brightness(1.18); }

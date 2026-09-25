@@ -31,7 +31,9 @@ test("resting graphite palette does not regress to the former green clock family
   for (const legacy of ["#6f8983", "#78928b", "#859e96", "#96aaa2", "#c7d9cd"]) {
     assert.doesNotMatch(atlas, new RegExp(legacy, "i"));
   }
-  assert.match(atlas, /--bg:\s*#090a0b;/);
+  assert.match(atlas, /--field:\s*#090a0b;/);
+  assert.match(atlas, /--field-raised:\s*#0e1011;/);
+  assert.match(atlas, /--bg:\s*var\(--field\);/);
   assert.match(atlas, /--accent:\s*#c5c9c7;/);
   assert.match(hierarchy, /achromatic\s+graphite family/);
 });

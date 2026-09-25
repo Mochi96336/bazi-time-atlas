@@ -25,11 +25,11 @@ test("analysis chrome stays neutral under Graphite M2", () => {
   assert.match(css, /data-analysis-open="true"\] \{[\s\S]*?border-color:\s*rgba\(200,204,203,\.22\);/);
 });
 
-test("direct ring identity fallbacks mirror the production M2 semantic tokens", () => {
-  assert.match(css, /var\(--year, #93999b\)/);
-  assert.match(css, /var\(--month, #777e81\)/);
-  assert.match(css, /var\(--solar, #bc9257\)/);
-  assert.match(css, /var\(--day, #62696c\)/);
-  assert.match(css, /var\(--hour, #52585b\)/);
-  assert.match(css, /text-shadow:\s*0 0 3px #090a0b/);
+test("direct ring identities preserve semantic fallbacks while using shared field/readability authorities", () => {
+  assert.match(css, /var\(--identity-year, var\(--year, #93999b\)\)/);
+  assert.match(css, /var\(--identity-month, var\(--month, #777e81\)\)/);
+  assert.match(css, /var\(--identity-solar, var\(--solar, #bc9257\)\)/);
+  assert.match(css, /var\(--identity-day, var\(--day, #62696c\)\)/);
+  assert.match(css, /var\(--identity-hour, var\(--hour, #52585b\)\)/);
+  assert.match(css, /text-shadow:\s*0 0 3px var\(--field\)/);
 });
