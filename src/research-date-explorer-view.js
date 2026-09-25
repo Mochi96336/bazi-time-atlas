@@ -2,6 +2,10 @@ import { compareResearchDates } from "./recurrence/research-date-pair.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
 import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
+import {
+  RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,
+  RESEARCH_SEASONAL_EVIDENCE_ERROR_EVENT
+} from "./recurrence/research-seasonal-chunk-prefetch.js";
 
 const root = document.querySelector("#research-free-explorer");
 const form = document.querySelector("#research-date-explorer-form");
@@ -30,6 +34,7 @@ let base = defaultBase;
 let target = defaultTarget;
 let mode = "annual";
 let annualQuery = freeFromLink ? "" : location.search;
+let annualHash = freeFromLink ? "" : location.hash;
 let hasExplorerSelection = freeFromLink;
 
 function readDateString(value) {
@@ -241,8 +246,9 @@ function setMode(next,{updateUrl=true}={}) {
       url.searchParams.set("date",annualInstrument?.dataset.baseDate ?? "2026-09-13");
       url.searchParams.set("delta",annualInstrument?.dataset.deltaYears ?? "0");
     }
-    url.hash = "";
-    history.replaceState(null,"",url.pathname + url.search);
+    url.hash = annualHash;
+    history.replaceState(null,"",url.pathname + url.search + url.hash);
+    if (annualHash) window.dispatchEvent(new Event("hashchange"));
   }
 }
 
@@ -262,9 +268,22 @@ if (root && form && annualButton && datesButton) {
     render();
     if (mode==="dates") syncFreeQuery();
   });
+  // Existing Research-only source loads asynchronously. A new verified chunk
+  // may refine Year identities but must never change the discrete date phases.
+  const refreshYearEvidence = event => {
+    if (![base.year,target.year].includes(event.detail?.year)) return;
+    evidenceCache.delete(dateKey(base));
+    evidenceCache.delete(dateKey(target));
+    if (mode==="dates" && root.dataset.ready==="true") render();
+  };
+  document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,refreshYearEvidence);
+  document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_ERROR_EVENT,refreshYearEvidence);
   annualButton.addEventListener("click",() => setMode("annual"));
   datesButton.addEventListener("click",() => {
-    if (mode==="annual") annualQuery = location.search;
+    if (mode==="annual") {
+      annualQuery = location.search;
+      annualHash = location.hash;
+    }
     setMode("dates");
   });
   setMode(freeFromLink ? "dates" : "annual",{updateUrl:false});
