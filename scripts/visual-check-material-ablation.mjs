@@ -3,7 +3,7 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { MATERIAL_FIXED_INSTANT, MATERIAL_PROBE_NAMES, MATERIAL_PROBE_REGION } from "./material-visual-contract.mjs";
-import { decodePngRgb, materialMasks, compareMaterialPng } from "./material-png-metrics.mjs";
+import { decodePngRgb, materialMasks, compareMaterialPng, readScreenshotCtm } from "./material-png-metrics.mjs";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
@@ -87,7 +87,7 @@ async function capture(browser, fileName, url) {
 
 await mkdir(outputDir, { recursive: true });
 const browser = browserPath();
-const ctm = baselineTransform(browser);
+const domCtm = baselineTransform(browser);
 const screenshots = [];
 for (const name of MATERIAL_PROBE_NAMES) {
   screenshots.push({ name, ...await capture(browser, "material-probe-" + name + "-1440x900.png", probeUrl(name)) });
@@ -97,8 +97,17 @@ for (const name of MATERIAL_PROBE_NAMES) {
 const replay = await capture(browser, "material-probe-none-replay-1440x900.png", probeUrl("none"));
 const defaultFile = path.join(outputDir, "material-roughness-1440x900.png");
 const defaultPng = decodePngRgb(await readFile(defaultFile));
-const { masks, counts } = materialMasks(viewport.width, viewport.height, ctm);
 const baseline = screenshots[0];
+// Screenshot-process CTM is the ONLY geometry authority for PNG pixel masks.
+// --dump-dom is used solely as an independent diagnostic/mode-activation check.
+const ctm = readScreenshotCtm(baseline.png);
+for (const shot of screenshots.slice(1).concat(replay)) {
+  const other = readScreenshotCtm(shot.png);
+  if (other.some((value, index) => Math.abs(value - ctm[index]) > 0.001)) {
+    throw new Error("Material screenshot geometry changed between ablations: " + shot.name);
+  }
+}
+const { masks, counts } = materialMasks(viewport.width, viewport.height, ctm);
 const metrics = {
   defaultVsExplicit: compareMaterialPng(defaultPng, baseline.png, masks.all),
   baselineReplay: compareMaterialPng(baseline.png, replay.png, masks.all),
@@ -121,13 +130,16 @@ const report = {
   instantUtc: decodeURIComponent(MATERIAL_FIXED_INSTANT),
   actualViewport: "1440x900",
   referenceCtm: ctm,
+  independentDumpDomCtm: domCtm,
+  dumpDomVsScreenshotCtm: ctm.map((value, index) => Number((domCtm[index] - value).toFixed(6))),
   regionPixels: counts,
   materialMode: "roughness",
   captures: [...screenshots, { name: "none-replay", ...replay }].map(({ png, ...meta }) => meta),
   metrics,
   notes: [
     "Scores are RGB-channel pixel differences, NOT a material-realism or beauty judgment.",
-    "Geometry ROI uses the live SVG screen CTM and canonical radii, not hand-picked crops.",
+    "ROI authority is the CTM embedded by the screenshot process, NOT a separate dump-dom browser process.",
+    "Canonical radii and the screenshot CTM define ROIs; nonmatching screenshot probes fail closed.",
     "Text/sector semantics remain in screenshots; inspect actual PNGs before aesthetic conclusions.",
     "Repeated baseline measures Chromium timing/raster noise. No minimum visible-change threshold is imposed.",
     "Run the pre-existing 2047/1440/390 SVG/roughness evidence matrix for fallback and responsive checks."
