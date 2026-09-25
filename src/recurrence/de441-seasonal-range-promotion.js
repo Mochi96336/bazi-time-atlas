@@ -61,10 +61,11 @@ function seedState(seedSha256) {
   if (!validSha256(seedSha256)) {
     throw new RangeError("seedSha256 must be a 64-character hexadecimal SHA-256 value");
   }
-  let state = Number.parseInt(seedSha256.slice(0,8), 16) >>> 0;
-  state ^= Number.parseInt(seedSha256.slice(8,16), 16) >>> 0;
-  state ^= Number.parseInt(seedSha256.slice(16,24), 16) >>> 0;
-  state ^= Number.parseInt(seedSha256.slice(24,32), 16) >>> 0;
+  let state = 0;
+  for (let offset = 0; offset < seedSha256.length; offset += 8) {
+    state ^= Number.parseInt(seedSha256.slice(offset, offset + 8), 16) >>> 0;
+    state = nextXorshift32(state === 0 ? 0x9e3779b9 : state);
+  }
   return state === 0 ? 0x9e3779b9 : state;
 }
 
