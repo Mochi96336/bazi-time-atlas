@@ -123,11 +123,11 @@
 /* Fixed identities preserve ring hue without reusing the dark material body
    as text. Readability tokens are derived from each semantic material channel
    plus the shared ink floor; no chip, leader, box, or glow is introduced. */
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span { color: var(--identity-year, var(--year, #93999b)); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span { color: var(--identity-month, var(--month, #777e81)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span { color: var(--identity-year, var(--year, #90989d)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span { color: var(--identity-month, var(--month, #777f84)); }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: var(--identity-solar, var(--solar, #bc9257)); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--identity-day, var(--day, #62696c)); }
-#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--identity-hour, var(--hour, #52585b)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--identity-day, var(--day, #646c71)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--identity-hour, var(--hour, #555d62)); }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-year span::after { content: "年"; }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-month span::after { content: "月"; }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span::after { content: "太陽"; }
