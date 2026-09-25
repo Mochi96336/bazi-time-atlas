@@ -167,7 +167,7 @@ function setSelected(index,linked) {
   document.getElementById("research-free-wheel-return").hidden=linked;
 }
 
-function followCommittedDate() {
+function followCommittedDate(force=false) {
   if(!root || root.dataset.ready!=="true"){
     if(panel)panel.dataset.ready="false";
     for(const direction of ["previous","next"]) {
@@ -178,6 +178,10 @@ function followCommittedDate() {
   }
   const date=getDate(root.dataset.targetDate);
   if(!date)return;
+  // Li Chun chunk refinement can rerender the same free-date model. It must
+  // not discard a deliberately explored Day position unless the committed
+  // calendar date genuinely changed or invalid input has just recovered.
+  if(!force && currentDateKey===root.dataset.targetDate && panel.dataset.ready==="true")return;
   currentDateKey=root.dataset.targetDate;
   // The only arithmetic used by this wheel is the pure resolver, which
   // obtains its own canonical current index from the validated date.
@@ -223,7 +227,7 @@ if(root && panel && svg){
   };
   svg.addEventListener("pointerup",release);
   svg.addEventListener("pointercancel",release);
-  document.getElementById("research-free-wheel-return").addEventListener("click",followCommittedDate);
+  document.getElementById("research-free-wheel-return").addEventListener("click",()=>followCommittedDate(true));
   for(const direction of ["previous","next"]){
     document.getElementById("research-free-wheel-"+direction).addEventListener("click",()=>{
       if(!preview||!preview[direction].date||root.dataset.ready!=="true")return;
