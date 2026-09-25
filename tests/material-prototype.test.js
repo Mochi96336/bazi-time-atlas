@@ -210,13 +210,13 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /brassMid = vec3\(0\.304, 0\.242, 0\.179\)/);
   assert.match(material, /brassDark = vec3\(0\.150, 0\.103, 0\.072\)/);
   assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
-  assert.match(material, /warmCatch \* 0\.008/);
+  assert.match(material, /warmCatch \* 0\.035/);
   assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);
   assert.match(material, /oxideStrength = clamp\(aging\.x \* 0\.10 \+ aging\.y \* 0\.045 \+ aging\.z \* 0\.005, 0\.0, 0\.14\)/);
   assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
   assert.match(material, /primaryStrength = abs\(primaryScratch\.x\) \* 0\.012 \* fineAttenuation/);
   assert.match(material, /handlingStrength = abs\(handlingScratch\.x\) \* 0\.007 \* fineAttenuation/);
-  assert.match(material, /bodyAlpha = edgeMask \* 0\.92/);
+  assert.match(material, /bodyAlpha = edgeMask \* 0\.90/);
   assert.match(material, /return vec4\(body \* bodyAlpha, bodyAlpha\)/);
   assert.match(material, /solarRotation = renderedSolarRotation\(renderedRotations\)/);
   assert.match(material, /SURFACE_PERIOD_LARGE = 108\.0/);

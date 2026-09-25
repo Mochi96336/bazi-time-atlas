@@ -148,7 +148,7 @@
 }
 #m2-solar-brass-surface .m2-brass-light {
   stop-color: color-mix(in srgb, var(--solar) 76%, #c1ac89);
-  stop-opacity: .34;
+  stop-opacity: .33;
 }
 #m2-solar-brass-surface .m2-brass-mid {
   stop-color: color-mix(in srgb, var(--solar) 86%, #756146);
@@ -160,7 +160,7 @@
 }
 #m2-solar-brass-response .m2-brass-response-light {
   stop-color: color-mix(in srgb, var(--solar) 58%, #dfd1b9);
-  stop-opacity: .16;
+  stop-opacity: .175;
 }
 #m2-solar-brass-response .m2-brass-response-mid {
   stop-color: color-mix(in srgb, var(--solar) 72%, #846f57);
