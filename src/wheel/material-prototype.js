@@ -668,12 +668,15 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   let active = false;
   let sizeDirty = true;
   let resizeObserver = null;
+  let materialEvidenceStamp = null;
 
   function fallBack(reason, detail = "") {
     active = false;
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
     shell?.removeAttribute("data-material-probe-transform");
+    materialEvidenceStamp?.remove();
+    materialEvidenceStamp = null;
     if (shell) {
       shell.dataset.materialPrototypeFallback = reason;
       if (detail) {
@@ -718,13 +721,38 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       return;
     }
 
-    // Screenshot-only DOM evidence: exact screen/SVG mapping for material ROI masks.
-    // No extra DOM writes or probes in the default production path.
+    // --dump-dom and --screenshot can use different Chromium viewport heights.
+    // Only an EXPLICIT diagnostic probe embeds its own CTM in screenshot pixels.
+    // This 96x4 marker is outside all wheel material masks. No default DOM work.
     if (requestedProbe !== null && shell) {
-      shell.dataset.materialProbeTransform = [
-        screenCtm.a, screenCtm.b, screenCtm.c,
-        screenCtm.d, screenCtm.e, screenCtm.f
-      ].map(value => Number(value.toFixed(6))).join(",");
+      const ctm = [screenCtm.a, screenCtm.b, screenCtm.c,
+        screenCtm.d, screenCtm.e, screenCtm.f];
+      shell.dataset.materialProbeTransform = ctm.map(value => Number(value.toFixed(6))).join(",");
+      if (!materialEvidenceStamp) {
+        materialEvidenceStamp = globalThis.document.createElement("canvas");
+        materialEvidenceStamp.width = 96;
+        materialEvidenceStamp.height = 4;
+        materialEvidenceStamp.setAttribute("aria-hidden", "true");
+        materialEvidenceStamp.style.cssText =
+          "position:fixed;left:0;top:0;width:96px;height:4px;z-index:2147483647;" +
+          "pointer-events:none;image-rendering:pixelated;";
+        globalThis.document.body.appendChild(materialEvidenceStamp);
+      }
+      const values = new DataView(new ArrayBuffer(24));
+      ctm.forEach((value, index) => values.setInt32(index * 4, Math.round(value * 1e6), false));
+      const bytes = new Uint8Array(values.buffer);
+      const context = materialEvidenceStamp.getContext("2d", { willReadFrequently: false });
+      const image = context.createImageData(96, 4);
+      for (let i = 0; i < 24; i += 1) {
+        for (let y = 0; y < 4; y += 1) for (let x = i * 4; x < i * 4 + 4; x += 1) {
+          const offset = (y * 96 + x) * 4;
+          image.data[offset] = bytes[i];
+          image.data[offset + 1] = bytes[i];
+          image.data[offset + 2] = bytes[i];
+          image.data[offset + 3] = 255;
+        }
+      }
+      context.putImageData(image, 0, 0);
     }
 
     const deviceScaleX = canvas.width / canvasRect.width;
