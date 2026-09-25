@@ -83,6 +83,41 @@
         record("mobile-glance-visible",doc.defaultView.getComputedStyle(glance).display==="grid");
         record("mobile-glance-first-screen",glanceRect.bottom<=844);
 
+        const step = days => doc.querySelector('[data-explorer-step-days="' + days + '"]')?.click();
+        const initialTargetDay = root.dataset.targetDayPillar;
+        step(1);
+        assert(root.dataset.targetDate==="2024-02-11" &&
+          root.dataset.dayPhase==="10" && root.dataset.lastStepDays==="1",
+          "one-day forward step did not commit the next Gregorian day");
+        assert(root.dataset.targetDayPillar!==initialTargetDay,
+          "one-day forward step did not advance the absolute Day identity");
+        assert(root.dataset.baseDate==="2024-02-01" && root.dataset.yearPhase==="0",
+          "one-day step changed the baseline or nominal Year phase");
+        step(-1);
+        assert(root.dataset.targetDate==="2024-02-10" &&
+          root.dataset.dayPhase==="9" && root.dataset.targetDayPillar===initialTargetDay,
+          "one-day inverse step did not return to the original Day identity");
+        step(60);
+        assert(root.dataset.targetDate==="2024-04-10" &&
+          root.dataset.dayPhase==="9" && root.dataset.targetDayPillar===initialTargetDay,
+          "60 Gregorian days must return to the exact same named Day position");
+        assert(root.dataset.yearPhase==="0" &&
+          root.dataset.astronomyApplicability==="not-evaluated",
+          "60-day jump altered the nominal Year or promoted unavailable astronomy");
+        step(-60);
+        assert(root.dataset.targetDate==="2024-02-10" &&
+          root.dataset.dayPhase==="9" && root.dataset.stepOutcome==="applied",
+          "inverse 60-day jump lost the selected target or phase");
+        assert(frame.contentWindow.location.search.includes("compare=2024-02-10"),
+          "date-step commit did not persist a consistent shareable date");
+        const afterSteps = glance.getBoundingClientRect();
+        assert(afterSteps.bottom<=844,
+          "day-step controls displaced both named cycles below the 390px first viewport");
+        record("day-step-forward-and-back",true);
+        record("day-step-sixty-cycle",true);
+        record("day-step-share-url",true);
+        record("mobile-glance-after-step",afterSteps.bottom<=844);
+
         const targetInputs = dateFields(doc,"target");
         targetInputs[2].value = "11";
         change(targetInputs[2]);
@@ -136,6 +171,33 @@
         assert(annual.hidden && astronomy.hidden && evidence.hidden,
           "returning to free-date mode exposed stale annual-only evidence");
         record("free-restored",true);
+        // Midnight civil-year transition is NOT the Li Chun active-year switch.
+        dateValues(doc,"base",[2023,12,31]);
+        dateValues(doc,"target",[2023,12,31]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        step(1);
+        assert(root.dataset.baseDate==="2023-12-31" &&
+          root.dataset.targetDate==="2024-01-01" &&
+          root.dataset.signedElapsedDays==="1" &&
+          root.dataset.dayPhase==="1" && root.dataset.yearPhase==="1",
+          "one-day step across New Year failed to advance both discrete phases");
+        assert(doc.getElementById("research-explorer-year-target").textContent==="甲辰" &&
+          doc.getElementById("research-explorer-year-active-target").textContent.startsWith("癸卯"),
+          "calendar New Year incorrectly became the active Li Chun year");
+        record("newyear-nominal-vs-active",true);
+
+        const boundaryTarget = root.dataset.targetDate;
+        const boundaryUrl = frame.contentWindow.location.search;
+        dateValues(doc,"target",[1,1,1]);
+        step(-1);
+        assert(root.dataset.stepOutcome==="out-of-range" &&
+          root.dataset.targetDate===boundaryTarget &&
+          frame.contentWindow.location.search===boundaryUrl &&
+          !doc.getElementById("research-explorer-error").hidden,
+          "out-of-range day step mutated the committed state or permalink");
+        record("out-of-range-preserves-state",true);
+
         probe.dataset.error = "none";
         probe.dataset.ready = "true";
       } catch (error) {
