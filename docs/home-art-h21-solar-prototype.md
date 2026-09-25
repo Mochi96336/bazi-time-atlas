@@ -40,3 +40,8 @@ Compared the actual [H2.0 merged-main Visual artifact](https://github.com/Mochi9
 The earlier screenshot difference only proves rendering changes, not frame cost. This PR therefore adds an **opt-in**, same-WebGL-context diagnostic (`?material=roughness&materialProbe=none&materialPerf=1`) and records `solar-groove-draw-cost.json` in the visual artifact. It measures ten alternating on/off groove-response pairs after warmups, with `gl.finish()` in both modes and no browser launch in the timed section. It remains a CPU+GPU-inclusive headless-browser estimate, not an actual device benchmark or GPU-only timer. Review measured values and uncertainty before using it to justify a production cost decision.
 
 Current position: **hold Draft pending the exact new-head benchmark, native material review and evidence about the comb-like right arc**. If the additional groove is only visible as repetitive stripes, a separate targeted iteration should improve the spatial variation rather than increasing the material amplitude.
+
+
+### Cost-probe correction
+
+The first headless CI experiment (Visual run `36183088426`) returned `off=0ms`, `on=0ms` and `ratio=0`, despite passing the earlier validity checks. These numbers are **invalid and must not be interpreted as free GPU cost**: Chromium's `--virtual-time-budget` can freeze `performance.now()` across synchronous WebGL `gl.finish()` calls. The next commit removes virtual time **only from the separate cost-probe process** and rejects any zero or negative time results. Fixed-instant visual screenshots remain under their original deterministic virtual-time controls. Review the new actual measurement only after exact-head CI/artifact verification.
