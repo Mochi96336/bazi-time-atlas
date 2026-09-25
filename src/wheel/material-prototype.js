@@ -670,6 +670,8 @@ function setupRoughnessTexture(gl) {
 export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.location?.search ?? "" }) {
   const requestedMode = resolveMaterialMode(search);
   const requestedProbe = resolveMaterialProbe(search);
+  // H2.1: explicit, opt-in draw-cost measurement; never execute in normal sessions.
+  const diagnosticBench = requestedProbe === 0 && new URLSearchParams(search).get("materialPerf") === "1";
   let materialWasExplicit = false;
   try {
     materialWasExplicit = new URLSearchParams(search).has("material");
@@ -698,6 +700,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
     shell?.removeAttribute("data-material-probe-transform");
+    shell?.removeAttribute("data-material-bench");
     materialEvidenceStamp?.remove();
     materialEvidenceStamp = null;
     if (shell) {
@@ -729,7 +732,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.viewport(0, 0, width, height);
   }
 
-  function draw() {
+  function draw(probeOverride = null, skipStamp = false) {
     if (!active) return;
     resizeCanvas();
     if (!(canvas.width > 1 && canvas.height > 1)) return;
@@ -747,7 +750,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     // --dump-dom and --screenshot can use different Chromium viewport heights.
     // Only an EXPLICIT diagnostic probe embeds its own CTM in screenshot pixels.
     // This 96x4 marker is outside all wheel material masks. No default DOM work.
-    if (requestedProbe !== null && shell) {
+    if (!skipStamp && requestedProbe !== null && shell) {
       const ctm = [screenCtm.a, screenCtm.b, screenCtm.c,
         screenCtm.d, screenCtm.e, screenCtm.f];
       shell.dataset.materialProbeTransform = ctm.map(value => Number(value.toFixed(6))).join(",");
@@ -810,10 +813,54 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.uniform1f(uniforms.zodiacInnerRadius, zodiacGeometry.innerRadius);
     gl.uniform1f(uniforms.zodiacOuterRadius, zodiacGeometry.outerRadius);
     gl.uniform1i(uniforms.field, 0);
-    gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0);
+    gl.uniform1i(uniforms.materialProbe, probeOverride ?? requestedProbe ?? 0);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+
+  function benchmarkScratchLighting() {
+    if (!diagnosticBench || !active || !shell || canvas.width <= 1 || canvas.height <= 1) return;
+    // Compare identical shader/program/geometry in the SAME GL context.
+    // probe 7 disables only scratch-light. gl.finish gives GPU-inclusive
+    // wall time, not a hardware-independent fragment cost or FPS claim.
+    const samples = { disabled: [], enabled: [] };
+    const drawAndTime = (probe, key) => {
+      const start = globalThis.performance.now();
+      draw(probe, true);
+      gl.finish();
+      if (key) samples[key].push(globalThis.performance.now() - start);
+    };
+    gl.finish();
+    for (let i = 0; i < 4; i += 1) {
+      drawAndTime(7, null);
+      drawAndTime(0, null);
+    }
+    for (let i = 0; i < 10; i += 1) {
+      if (i % 2 === 0) {
+        drawAndTime(7, "disabled");
+        drawAndTime(0, "enabled");
+      } else {
+        drawAndTime(0, "enabled");
+        drawAndTime(7, "disabled");
+      }
+    }
+    const median = values => {
+      const sorted = [...values].sort((a, b) => a - b);
+      return (sorted[4] + sorted[5]) / 2;
+    };
+    const off = median(samples.disabled);
+    const on = median(samples.enabled);
+    // Restore diagnostic baseline; the benchmark does not change screenshots.
+    draw();
+    shell.dataset.materialBench = [
+      "offMs=" + off.toFixed(4),
+      "onMs=" + on.toFixed(4),
+      "ratio=" + (on / Math.max(off, 0.0001)).toFixed(4),
+      "samples=10",
+      "width=" + canvas.width,
+      "height=" + canvas.height
+    ].join(";");
   }
 
   function activateShader() {
@@ -872,6 +919,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
 
       sizeDirty = true;
       draw();
+      benchmarkScratchLighting();
       return true;
     } catch (error) {
       const forced = error?.message === "forced WebGL fallback";
