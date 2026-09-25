@@ -43,6 +43,9 @@ test("freely compared dates advance the Day by one without requiring a year shif
   assert.equal(pair.base.activeYear.status,"not-evaluated");
   assert.equal(pair.base.activeYear.pillar,null);
   assert.equal(pair.target.activeYear.pillar,null);
+  assert.equal(pair.activeYearComparison.status,"not-evaluated");
+  assert.equal(pair.activeYearComparison.phase,null);
+  assert.equal(pair.activeYearComparison.closed,null);
   assert.ok(Object.isFrozen(pair));
   assert.ok(Object.isFrozen(pair.base));
   assert.ok(Object.isFrozen(pair.yearSequence));
@@ -64,6 +67,10 @@ test("civil New Year increments only the nominal year, not an invented active Li
   assert.equal(pair.target.activeYear.pillar.name,"癸卯");
   assert.equal(pair.base.activeYear.status,"exact");
   assert.equal(pair.target.activeYear.status,"exact");
+  assert.equal(pair.activeYearComparison.status,"exact");
+  assert.equal(pair.activeYearComparison.phase,0);
+  assert.equal(pair.activeYearComparison.closed,true);
+  assert.equal(pair.activeYearComparison.samePhaseAsNominal,false);
   assert.equal(pair.applicability.annualRecurrenceEligible,false);
 });
 
@@ -80,6 +87,9 @@ test("pre/post Li Chun active-year identities can change with NO change in nomin
   assert.equal(pair.target.nominalYear.name,"甲辰");
   assert.equal(pair.base.activeYear.pillar.name,"癸卯");
   assert.equal(pair.target.activeYear.pillar.name,"甲辰");
+  assert.equal(pair.activeYearComparison.status,"exact");
+  assert.equal(pair.activeYearComparison.phase,1);
+  assert.equal(pair.activeYearComparison.samePhaseAsNominal,false);
 });
 
 test("unresolved boundary never fabricates a side or collapses possible pillars", () => {
@@ -206,6 +216,9 @@ test("real Year Strip authority integrates without promoting modeled year eviden
   });
   assert.equal(pair.base.activeYear.status,"model-estimated");
   assert.equal(pair.target.activeYear.status,"model-estimated");
+  assert.equal(pair.activeYearComparison.status,"model-estimated");
+  assert.equal(pair.activeYearComparison.phase,1);
+  assert.equal(pair.activeYearComparison.samePhaseAsNominal,false);
   assert.equal(pair.base.activeYear.pillar.name,"癸卯");
   assert.equal(pair.target.activeYear.pillar.name,"甲辰");
   assert.equal(pair.yearSequence.phase,0);
@@ -215,6 +228,8 @@ test("real Year Strip authority integrates without promoting modeled year eviden
   assert.equal(boundary.base.activeYear.status,"unresolved");
   assert.equal(boundary.base.activeYear.pillar,null);
   assert.deepEqual(boundary.base.activeYear.possiblePillars.map(p=>p.name),["癸卯","甲辰"]);
+  assert.equal(boundary.activeYearComparison.status,"unresolved");
+  assert.equal(boundary.activeYearComparison.phase,null);
   assert.throws(()=>compareResearchDates(afterDate,beforeDate,{
     baseYearEvidence:beforeEvidence
   }),/must belong/);
