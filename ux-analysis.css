@@ -259,7 +259,7 @@
     margin: 26px 0 0 4px;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: .08em;
   }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 3%; top: 19%; }
