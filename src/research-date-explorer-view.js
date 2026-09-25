@@ -163,6 +163,10 @@ function render() {
   setText("research-explorer-year-target",comparison.target.nominalYear.name);
   setText("research-explorer-day-base",comparison.base.day.name);
   setText("research-explorer-day-target",comparison.target.day.name);
+  setText("research-explorer-glance-year-base",comparison.base.nominalYear.name);
+  setText("research-explorer-glance-year-target",comparison.target.nominalYear.name);
+  setText("research-explorer-glance-day-base",comparison.base.day.name);
+  setText("research-explorer-glance-day-target",comparison.target.day.name);
   setText("research-explorer-year-phase",comparison.yearSequence.phase + " / 60");
   setText("research-explorer-day-phase",comparison.daySequence.phase + " / 60");
   setText("research-explorer-year-active-base",activeYearText(comparison.base.activeYear));
