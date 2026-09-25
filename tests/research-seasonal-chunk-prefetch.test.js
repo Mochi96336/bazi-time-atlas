@@ -46,7 +46,7 @@ test("year-10026 prefetch verifies the real asset before handing it to cache ins
 
 test("prefetch contract keeps failure fallback separate from production authority", () => {
   assert.equal(RESEARCH_SEASONAL_PREFETCH_CONTRACT.assetLoad, "lazy-browser-fetch");
-  assert.equal(RESEARCH_SEASONAL_PREFETCH_CONTRACT.errorFallback, "pinned-js-evidence");
+  assert.equal(RESEARCH_SEASONAL_PREFETCH_CONTRACT.errorFallback, "pinned-js-li-chun-summary");
   assert.equal(RESEARCH_SEASONAL_PREFETCH_CONTRACT.payloadIntegrityRequired, true);
   assert.equal(RESEARCH_SEASONAL_PREFETCH_CONTRACT.productionAuthorityGranted, false);
 });
