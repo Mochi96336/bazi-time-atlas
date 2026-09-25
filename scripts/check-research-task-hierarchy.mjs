@@ -90,8 +90,20 @@ if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('clas
 if (discrete.includes('class="closure-grid"') || discrete.includes('class="milestone-table"') || discrete.includes('id="milestone-rows"')) {
   throw new Error(`retired duplicate closure/milestone UI returned: ${probe.url}`);
 }
-if (!discrete.includes('id="research-cycle-title">甲子</') || !discrete.includes('id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</')) {
-  throw new Error(`60-day Ganzhi cycle did not initialize at 甲子 / 01: ${probe.url}`);
+const cycleComparison = discrete.match(/<section[^>]*id="research-cycle-comparison"[^>]*>/)?.[0] ?? "";
+const dayWheel = discrete.match(/<svg[^>]*id="research-sexagenary-wheel"[^>]*>/)?.[0] ?? "";
+const targetPillar = cycleComparison.match(/data-target-day-pillar="([^"]*)"/)?.[1] ?? "";
+const activeIndex = Number(dayWheel.match(/data-active-index="([^"]*)"/)?.[1]);
+const expectedOrdinal = Number.isInteger(activeIndex) ? String(activeIndex + 1).padStart(2,"0") : "";
+if (
+  !targetPillar ||
+  !cycleComparison.includes('data-ready="true"') ||
+  !dayWheel.includes('data-selected-date-linked="true"') ||
+  !dayWheel.includes('data-research-date="26026-09-13"') ||
+  !discrete.includes(`id="research-cycle-title">${targetPillar}</h4>`) ||
+  !discrete.includes(`id="research-cycle-ordinal" class="research-cycle-ordinal">${expectedOrdinal} / 60</span>`)
+) {
+  throw new Error(`The supporting 60-day wheel must initialize at the chosen comparison date's day pillar instead of a hard-coded 甲子: ${probe.url}`);
 }
 const sexagenaryDetail = detailsById(probe.dom, "discrete-sexagenary-details");
 if (!sexagenaryDetail || !sexagenaryDetail.includes('data-research-drilldown="discrete-sexagenary"')) {

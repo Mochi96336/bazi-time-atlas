@@ -94,7 +94,10 @@ requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired 
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-dock-before-instrument"), "true", "Recurrence displacement controls must precede the result instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Recurrence displacement controls must stay fully usable in the first viewport", url);
-requireEqual(attr(probe, "data-recurrence-instrument-starts-in-first-viewport"), "true", "Recurrence mobile instrument must still begin in the first viewport", url);
+requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
+requireEqual(attr(probe, "data-recurrence-year-day-same-row"), "true", "Named Year and Day cycles must share the 390px first-screen row", url);
+requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "Both named cycles must be fully visible in the mobile first viewport", url);
+requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
@@ -126,39 +129,42 @@ const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const taskHeadBottom = Number(attr(probe, "data-recurrence-task-head-bottom"));
 const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
 const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
-const recurrenceVisibleHeight = Number(attr(probe, "data-recurrence-instrument-visible-height"));
+const comparisonTop = Number(attr(probe, "data-recurrence-primary-comparison-top"));
+const comparisonBottom = Number(attr(probe, "data-recurrence-primary-comparison-bottom"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
 const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"));
 const deltaDockTop = Number(attr(probe, "data-recurrence-delta-dock-top"));
 const deltaDockBottom = Number(attr(probe, "data-recurrence-delta-dock-bottom"));
 const deltaDockGap = Number(attr(probe, "data-recurrence-delta-dock-gap"));
 if (
-  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, deltaDockTop, deltaDockBottom, recurrenceTop].every(Number.isFinite)
-  || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom && taskHeadBottom <= deltaDockTop && deltaDockTop < deltaDockBottom && deltaDockBottom < recurrenceTop)
+  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, deltaDockTop, deltaDockBottom, comparisonTop, comparisonBottom, recurrenceTop].every(Number.isFinite)
+  || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom
+    && taskHeadBottom <= deltaDockTop && deltaDockTop < deltaDockBottom
+    && deltaDockBottom < comparisonTop && comparisonTop < comparisonBottom && comparisonBottom <= recurrenceTop)
   || outlineHeight > 46
 ) {
   throw new Error(
     `Recurrence mobile outline must stay compact and precede section 01 ` +
-    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, instrument=${recurrenceTop}): ${url}`
+    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}): ${url}`
   );
 }
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
   throw new Error(`Recurrence mobile instrument became too shallow (${recurrenceHeight}px): ${url}`);
 }
-if (!Number.isFinite(recurrenceVisibleHeight) || recurrenceVisibleHeight < 320) {
-  throw new Error(`Recurrence mobile first viewport must still expose a substantial instrument area (${recurrenceVisibleHeight}px): ${url}`);
+if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
+  throw new Error(`Named Year/Day comparison must begin within the first 844px mobile viewport (${comparisonTop}..${comparisonBottom}): ${url}`);
 }
 if (
   !Number.isFinite(deltaDockTop)
   || !Number.isFinite(deltaDockBottom)
   || !Number.isFinite(deltaDockGap)
   || deltaDockTop <= taskHeadBottom
-  || deltaDockBottom >= recurrenceTop
+  || deltaDockBottom >= comparisonTop
   || deltaDockGap < 8
   || deltaDockGap > 20
 ) {
   throw new Error(
-    "Recurrence displacement dock must stay directly before the instrument " +
+    "Recurrence displacement dock must stay directly before the named cycle comparison " +
     "(top=" + deltaDockTop + ", bottom=" + deltaDockBottom + ", gap=" + deltaDockGap + "): " + url
   );
 }

@@ -107,6 +107,9 @@
 
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
+      const recurrenceComparison = recurrenceDoc.querySelector("#research-cycle-comparison");
+      const recurrenceYearCard = recurrenceDoc.querySelector(".research-cycles-year");
+      const recurrenceDayCard = recurrenceDoc.querySelector(".research-cycles-day");
       const recurrenceToolbar = recurrenceDoc.querySelector(".recurrence-toolbar");
       const deltaDock = recurrenceDoc.querySelector(".delta-dock");
       const candidateButtons = recurrenceDoc.querySelector("#candidate-buttons");
@@ -125,6 +128,9 @@
       const baseDateInput = recurrenceDoc.querySelector(".base-date input");
       const modelBoundarySummary = recurrenceDoc.querySelector(".model-boundary summary");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
+      const comparisonRect = recurrenceComparison?.getBoundingClientRect();
+      const yearCardRect = recurrenceYearCard?.getBoundingClientRect();
+      const dayCardRect = recurrenceDayCard?.getBoundingClientRect();
       const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
       const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
@@ -160,6 +166,19 @@
       probe.dataset.recurrenceTaskHeadTop = String(Math.round(taskHeadRect?.top ?? -1));
       probe.dataset.recurrenceTaskHeadBottom = String(Math.round(taskHeadRect?.bottom ?? -1));
       probe.dataset.recurrenceTaskHeadBeforeInstrument = String(Boolean(taskHeadRect && recurrenceRect && taskHeadRect.bottom <= recurrenceRect.top));
+      probe.dataset.recurrencePrimaryComparisonReady = recurrenceComparison?.dataset.ready ?? "missing";
+      probe.dataset.recurrencePrimaryComparisonTop = String(Math.round(comparisonRect?.top ?? -1));
+      probe.dataset.recurrencePrimaryComparisonBottom = String(Math.round(comparisonRect?.bottom ?? -1));
+      probe.dataset.recurrenceYearDaySameRow = String(Boolean(
+        yearCardRect && dayCardRect && Math.abs(yearCardRect.top - dayCardRect.top) < 15
+      ));
+      probe.dataset.recurrenceYearDayFullyVisible = String(Boolean(
+        yearCardRect && dayCardRect && yearCardRect.top >= 0 && dayCardRect.top >= 0
+        && yearCardRect.bottom <= viewportHeight && dayCardRect.bottom <= viewportHeight
+      ));
+      probe.dataset.recurrenceComparisonBeforeFan = String(Boolean(
+        comparisonRect && recurrenceRect && comparisonRect.bottom <= recurrenceRect.top
+      ));
       probe.dataset.recurrenceInstrumentTop = String(Math.round(recurrenceRect?.top ?? -1));
       probe.dataset.recurrenceInstrumentHeight = String(Math.round(recurrenceRect?.height ?? -1));
       probe.dataset.recurrenceInstrumentVisibleHeight = String(Math.round(visibleInstrumentHeight));
@@ -186,7 +205,7 @@
         deltaDockRect && deltaDockRect.top >= 0 && deltaDockRect.bottom <= viewportHeight
       ));
       probe.dataset.recurrenceDeltaDockGap = String(Math.round(
-        recurrenceRect && deltaDockRect ? recurrenceRect.top - deltaDockRect.bottom : -1
+        comparisonRect && deltaDockRect ? comparisonRect.top - deltaDockRect.bottom : -1
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];

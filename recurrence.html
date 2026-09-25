@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./astronomical-residuals.css">
   <link rel="stylesheet" href="./four-pillar-determinacy.css">
   <link rel="stylesheet" href="./near-recurrence.css">
+  <link rel="stylesheet" href="./research-cycle-comparison.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -46,6 +47,11 @@
       <p class="research-discrete-scope">先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定。</p>
 
       <section class="delta-dock" aria-label="時間位移控制">
+        <div class="base-date research-base-date" aria-label="基準日期">
+          <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
+          <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
+          <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+        </div>
         <label>位移年數
           <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
           <small id="delta-range-note">0–24,000 年；深時間候選可由下方排名跳轉。</small>
@@ -58,14 +64,46 @@
         <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
       </section>
 
-      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散相位與十二節形狀比較">
-        <div class="recurrence-toolbar">
-          <div class="base-date" aria-label="基準日期">
-            <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
-            <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
-            <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+      <section id="research-cycle-comparison" class="research-cycle-comparison" aria-label="選定日期的干支年與干支日雙週期對照" data-ready="false">
+        <header class="research-cycles-head">
+          <div><strong>同一日期，兩個六十循環</strong><small>年序與日序同步比較；立春精度不是循環的前提</small></div>
+          <div class="research-cycles-dates">
+            <span>基準 <b id="research-cycles-base-date">—</b></span>
+            <i aria-hidden="true">→</i>
+            <span>比較 <b id="research-cycles-target-date">—</b></span>
           </div>
+        </header>
+        <div class="research-cycles-grid">
+          <article class="research-cycles-card research-cycles-year" aria-labelledby="research-cycles-year-title">
+            <div class="research-cycles-card-head"><h3 id="research-cycles-year-title">干支年</h3><span>60 年一輪</span></div>
+            <div class="research-cycles-identities">
+              <div><small>基準</small><strong id="research-cycles-year-base">—</strong><span id="research-cycles-year-base-note">—</span></div>
+              <i aria-hidden="true">→</i>
+              <div><small>比較</small><strong id="research-cycles-year-target">—</strong><span id="research-cycles-year-target-note">—</span></div>
+            </div>
+            <div id="research-cycles-year-tape" class="research-cycles-tape" role="img" aria-label="60 年序基準與比較位置"></div>
+            <small id="research-cycles-year-tape-basis" class="research-cycles-tape-basis">刻度＝可判年柱</small>
+            <small class="research-cycles-tape-legend">淡色＝基準 · 亮色＝比較 · 重疊＝同步</small>
+            <div class="research-cycles-phase"><span>名義年序位移</span><strong id="research-cycles-year-phase">—</strong></div>
+          </article>
+          <article class="research-cycles-card research-cycles-day" aria-labelledby="research-cycles-day-title">
+            <div class="research-cycles-card-head"><h3 id="research-cycles-day-title">干支日</h3><span>60 日一輪</span></div>
+            <div class="research-cycles-identities">
+              <div><small>基準</small><strong id="research-cycles-day-base">—</strong><span id="research-cycles-day-base-ordinal">—</span></div>
+              <i aria-hidden="true">→</i>
+              <div><small>比較</small><strong id="research-cycles-day-target">—</strong><span id="research-cycles-day-target-ordinal">—</span></div>
+            </div>
+            <div id="research-cycles-day-tape" class="research-cycles-tape" role="img" aria-label="60 日序基準與比較位置"></div>
+            <small class="research-cycles-tape-legend">淡色＝基準 · 亮色＝比較 · 重疊＝同步</small>
+            <a class="research-cycle-open" href="#research-sexagenary-cycle">展開可拖動的六十日轉盤 ↗</a>
+            <div class="research-cycles-phase"><span id="research-cycles-day-elapsed">實際經過 — 日</span><strong id="research-cycles-day-phase">—</strong></div>
+          </article>
         </div>
+        <p id="research-cycles-closure" class="research-cycles-closure" aria-live="polite">載入兩組離散相位…</p>
+        <p class="research-cycles-convention">日序：選定公曆日期的連續日數（以當地中午作錨點）；年序：公曆年份 mod 60 的立春後年標。實際年柱若無年界資料會另行標示，不冒充確定結果。</p>
+      </section>
+
+      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散相位與十二節形狀比較">
 
         <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 閉合 · 左右為距 0 的最短循環位移</span></div>
         <div class="recurrence-legend" aria-hidden="true">
@@ -136,12 +174,6 @@
         </div>
       </section>
 
-      <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
-        <header><strong id="discrete-derivation-title">24,000 年怎麼來</strong><span>同一個 Δ，同時檢查三個離散相位</span></header>
-        <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
-        <p>三個離散相位同時歸零，只建立四柱重現候選。</p>
-      </section>
-
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
         <header class="research-cycle-head">
           <div><div class="eyebrow">60-day Ganzhi</div><h3 id="research-cycle-heading">六十日干支循環</h3></div>
@@ -169,9 +201,18 @@
               <div class="research-cycle-phase"><span>天干</span><div><strong id="research-cycle-stem">甲</strong><small id="research-cycle-stem-meta">陽 · 木</small></div><em id="research-cycle-stem-index">1 / 10</em></div>
               <div class="research-cycle-phase"><span>地支</span><div><strong id="research-cycle-branch">子</strong><small id="research-cycle-branch-meta">陽 · 水</small></div><em id="research-cycle-branch-index">1 / 12</em></div>
             </div>
+            <p id="research-cycle-binding" class="research-cycle-binding">跟隨比較日期 · 目前日干支</p>
+            <button id="research-cycle-return" type="button" class="research-cycle-return" hidden>回到比較日</button>
           </aside>
         </div>
       </section>
+
+      <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
+        <header><strong id="discrete-derivation-title">24,000 年怎麼來</strong><span>同一個 Δ，同時檢查三個離散相位</span></header>
+        <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
+        <p>三個離散相位同時歸零，只建立四柱重現候選。</p>
+      </section>
+
       <p class="discrete-to-astronomy">下一步：立春與十二節邊界也回到同一位置嗎？</p>
 
     </section>
@@ -234,6 +275,7 @@
 
   <script type="module" src="./src/recurrence-view.js"></script>
   <script type="module" src="./src/research-year-strip-view.js"></script>
+  <script type="module" src="./src/research-cycle-comparison-view.js"></script>
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
