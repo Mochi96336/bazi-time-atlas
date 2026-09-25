@@ -194,9 +194,17 @@
         assert(root.dataset.stepOutcome==="out-of-range" &&
           root.dataset.targetDate===boundaryTarget &&
           frame.contentWindow.location.search===boundaryUrl &&
-          !doc.getElementById("research-explorer-error").hidden,
-          "out-of-range day step mutated the committed state or permalink");
+          !doc.getElementById("research-explorer-error").hidden &&
+          doc.getElementById("research-explorer-results").hidden,
+          "out-of-range day step mutated the committed state, or exposed stale results beside invalid edit");
         record("out-of-range-preserves-state",true);
+        step(1);
+        assert(root.dataset.ready==="true" &&
+          root.dataset.targetDate==="1-01-02" &&
+          root.dataset.stepOutcome==="applied" &&
+          frame.contentWindow.location.search.includes("compare=1-01-02"),
+          "the reverse step must recover from a failed CE-boundary edit without retyping");
+        record("boundary-reverse-step-recovers",true);
 
         probe.dataset.error = "none";
         probe.dataset.ready = "true";
