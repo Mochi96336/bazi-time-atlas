@@ -16,12 +16,12 @@ test("normal reading view turns the layer legend into fixed ring identity labels
   }
 });
 
-test("direct ring identities consume the same semantic palette as the instrument", () => {
+test("direct ring identities derive readable text from the same semantic material channels", () => {
   for (const role of ["year", "month", "solar", "day", "hour"]) {
     assert.match(
       analysisCss,
-      new RegExp(`\\.ring-${role} span \\{ color: var\\(--${role},`),
-      `${role} direct label must consume its semantic color variable`
+      new RegExp(`\\.ring-${role} span \\{ color: var\\(--identity-${role}, var\\(--${role},`),
+      `${role} direct label must consume its readability token with the material role as fallback`
     );
   }
 });
@@ -37,7 +37,7 @@ test("direct ring identities remain readable without becoming chips, leaders, or
   );
   assert.match(
     analysisCss,
-    /\.ring-legend-row span::after\s*\{[\s\S]*?text-shadow:\s*0 0 3px #090a0b,\s*0 1px 7px rgba\(0,0,0,\.94\);/,
+    /\.ring-legend-row span::after\s*\{[\s\S]*?text-shadow:\s*0 0 3px var\(--field\),\s*0 1px 7px rgba\(0,0,0,\.94\);/,
     "fixed identities need a tight cardless halo where moving sector labels cross their spoke"
   );
   assert.doesNotMatch(
