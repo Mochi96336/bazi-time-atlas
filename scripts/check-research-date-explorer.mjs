@@ -52,6 +52,7 @@ const expected={
   "data-mobile-glance-after-step":"true",
   "data-newyear-nominal-vs-active":"true",
   "data-out-of-range-preserves-state":"true",
+  "data-boundary-reverse-step-recovers":"true",
   "data-initial-day-phase":"9",
   "data-initial-year-phase":"0",
   "data-initial-year-status":"model-estimated",
