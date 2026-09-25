@@ -1,6 +1,9 @@
 import {
   DE441_10026_SEASONAL_CROSSING_EVIDENCE
 } from "../astronomy/de441-10026-seasonal-crossing-evidence.js";
+import {
+  cachedResearchSeasonalEvidenceForLongitude
+} from "./research-seasonal-evidence-cache.js";
 
 const EVIDENCE = Object.freeze([
   DE441_10026_SEASONAL_CROSSING_EVIDENCE
@@ -25,6 +28,12 @@ function freeze(value) {
 export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees }) {
   if (!Number.isInteger(year)) throw new RangeError("year must be an integer");
   const longitude = normalizedLongitude(longitudeDegrees);
+  const cached = cachedResearchSeasonalEvidenceForLongitude({
+    year,
+    longitudeDegrees:longitude
+  });
+  if (cached) return cached;
+
   const evidence = EVIDENCE.find(item => item.catalogueYear === year);
   if (!evidence) return null;
 
@@ -49,13 +58,20 @@ export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees })
     productionIntegrated:evidence.claimBoundary.productionIntegrated,
     productionAuthorityGranted:evidence.claimBoundary.productionAuthorityGranted,
     civilTimeResolved:evidence.claimBoundary.civilTimeResolved,
-    researchRun:evidence.researchRun
+    researchRun:evidence.researchRun,
+    transport:"pinned-js-evidence",
+    payloadIntegrityVerified:false,
+    payloadSha256:null,
+    chunkId:null
   });
 }
 
 export const RESEARCH_SEASONAL_EVIDENCE_REGISTRY = freeze({
   id:"research-source-derived-seasonal-evidence-registry-v1",
   evidenceIds:freeze(EVIDENCE.map(item => item.id)),
+  cachePreferred:true,
+  binaryTransport:"verified-binary-chunk",
+  fallbackTransport:"pinned-js-evidence",
   productionAuthorityGranted:false,
   independentTargetYearTruthRequiredForProductionPromotion:true
 });
