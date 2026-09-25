@@ -1,3 +1,7 @@
+import {
+  de441SeasonalCanonicalLongitudeIndex
+} from "../astronomy/de441-seasonal-event-chunk.js";
+
 const CATALOGUED_EVIDENCE_IDS = Object.freeze([
   "de441-10026-source-derived-seasonal-crossing-evidence-v1"
 ]);
@@ -86,19 +90,30 @@ export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees })
   const loaded = loadedByYear.get(year);
   if (!loaded) return null;
 
+  let longitudeIndex;
+  try {
+    longitudeIndex = de441SeasonalCanonicalLongitudeIndex(longitude);
+  } catch {
+    return null;
+  }
+  const canonicalLongitude = longitudeIndex * 15;
+
   const { manifest, chunk } = loaded;
-  const ttJulianDay = chunk.ttJulianDayFor({ year, longitudeDegrees:longitude });
+  const ttJulianDay = chunk.ttJulianDayFor({
+    year,
+    longitudeDegrees:canonicalLongitude
+  });
   const evidenceId = manifest.evidenceIds[0];
 
   return freeze({
-    id:`${evidenceId}:${longitude}`,
+    id:`${evidenceId}:${canonicalLongitude}`,
     evidenceId,
     validationKind:manifest.validationKind,
     authority:manifest.authority,
     sourceEphemeris:manifest.sourceEphemeris,
     year,
-    name:manifest.termNamesByLongitude?.[String(longitude)] ?? `${longitude}°`,
-    longitudeDegrees:longitude,
+    name:manifest.termNamesByLongitude?.[String(canonicalLongitude)] ?? `${canonicalLongitude}°`,
+    longitudeDegrees:canonicalLongitude,
     timeScale:manifest.timeScale,
     ttJulianDay,
     independentTargetYearTruth:manifest.independentTargetYearTruth,
