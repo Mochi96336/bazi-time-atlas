@@ -96,6 +96,6 @@ test("instrument-first and Analysis controls keep neutral Graphite M2 chrome", (
 test("neutral chrome does not disturb the matte material or warm semantic channels", () => {
   assert.doesNotMatch(boundaries, /filter:\s*url\(|feTurbulence|background-image:\s*url\(/);
   assert.match(boundaries, /#kinetic-wheel\[data-active-ring="solar"\][\s\S]*?rgba\(244, 230, 183, \.58\)/);
-  assert.match(palette, /--solar:\s*#bc9257;/);
+  assert.match(palette, /--solar:\s*#ac906e;/);
   assert.match(palette, /--cursor:\s*#f4dda0;/);
 });

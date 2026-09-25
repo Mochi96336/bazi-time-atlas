@@ -147,27 +147,27 @@
   pointer-events: none;
 }
 #m2-solar-brass-surface .m2-brass-light {
-  stop-color: color-mix(in srgb, var(--solar) 76%, #d7b277);
+  stop-color: color-mix(in srgb, var(--solar) 76%, #c1ac89);
   stop-opacity: .34;
 }
 #m2-solar-brass-surface .m2-brass-mid {
-  stop-color: color-mix(in srgb, var(--solar) 86%, #6f4b24);
+  stop-color: color-mix(in srgb, var(--solar) 86%, #756146);
   stop-opacity: .24;
 }
 #m2-solar-brass-surface .m2-brass-dark {
-  stop-color: color-mix(in srgb, var(--solar) 62%, #171109);
+  stop-color: color-mix(in srgb, var(--solar) 62%, #201a14);
   stop-opacity: .20;
 }
 #m2-solar-brass-response .m2-brass-response-light {
-  stop-color: color-mix(in srgb, var(--solar) 58%, #ead7aa);
+  stop-color: color-mix(in srgb, var(--solar) 58%, #dfd1b9);
   stop-opacity: .16;
 }
 #m2-solar-brass-response .m2-brass-response-mid {
-  stop-color: color-mix(in srgb, var(--solar) 72%, #8c6739);
+  stop-color: color-mix(in srgb, var(--solar) 72%, #846f57);
   stop-opacity: .070;
 }
 #m2-solar-brass-response .m2-brass-response-dark {
-  stop-color: #171109;
+  stop-color: #201a14;
   stop-opacity: .018;
 }
 .m2-solar-brass-bed { fill: url(#m2-solar-brass-surface); }

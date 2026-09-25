@@ -159,7 +159,7 @@ test("wheel surface depth stays ring-local while visible SVG stipple stays absen
 
 
 test("Graphite hierarchy leaves warm semantic channels untouched", () => {
-  assert.match(palette, /--solar:\s*#bc9257;/);
+  assert.match(palette, /--solar:\s*#ac906e;/);
   assert.match(palette, /--cursor:\s*#f4dda0;/);
   assert.match(
     solarAnalysis,

@@ -206,9 +206,9 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   // carries the same gold/brown body family as the approved demo and then
   // applies oxidation/scratches before compositing beneath SVG semantics.
   assert.match(material, /vec3 brassBody\(vec2 worldPoint\)/);
-  assert.match(material, /brassLight = vec3\(0\.387, 0\.295, 0\.174\)/);
-  assert.match(material, /brassMid = vec3\(0\.333, 0\.243, 0\.139\)/);
-  assert.match(material, /brassDark = vec3\(0\.173, 0\.111, 0\.060\)/);
+  assert.match(material, /brassLight = vec3\(0\.355, 0\.283, 0\.208\)/);
+  assert.match(material, /brassMid = vec3\(0\.304, 0\.242, 0\.179\)/);
+  assert.match(material, /brassDark = vec3\(0\.150, 0\.103, 0\.072\)/);
   assert.match(material, /worldAngleDegrees = atan\(worldPoint\.y, worldPoint\.x\) \* 180\.0 \/ PI/);
   assert.match(material, /warmCatch \* 0\.008/);
   assert.match(material, /bodyCoordinate = clamp\(\(worldAngleDegrees - u_fan_degrees\.x\) \/ fanSpan, 0\.0, 1\.0\)/);

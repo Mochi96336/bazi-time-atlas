@@ -14,7 +14,7 @@ test("base stylesheet is the single owner of the graphite temporal palette", () 
   assert.match(atlas, /--day:\s*#646c71;/);
   assert.match(atlas, /--month:\s*#777f84;/);
   assert.match(atlas, /--year:\s*#90989d;/);
-  assert.match(atlas, /--solar:\s*#bc9257;/);
+  assert.match(atlas, /--solar:\s*#ac906e;/);
   assert.match(atlas, /--zodiac:\s*#42495c;/);
 
   const atlasDefinitions = atlas.match(TEMPORAL_TOKEN_DEFINITION) ?? [];
