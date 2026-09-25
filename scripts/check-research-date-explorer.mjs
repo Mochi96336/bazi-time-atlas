@@ -46,6 +46,10 @@ if(attr(probe,"data-ready")!=="true") throw new Error(
 );
 const expected={
   "data-initial-mode":"dates",
+  "data-wheel-select-preview-not-commit":"true",
+  "data-wheel-strict-same-day-sixty":"true",
+  "data-wheel-next-previous-roundtrip":"true",
+  "data-wheel-annual-isolation":"true",
   "data-day-step-forward-and-back":"true",
   "data-day-step-sixty-cycle":"true",
   "data-day-step-share-url":"true",
