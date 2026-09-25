@@ -236,8 +236,8 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
   assert.match(material, /vec4 renderZodiacMicroResponse\(vec2 worldPoint, float rotationDegrees\)/);
   assert.match(material, /edgeDistance = min\(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius\)/);
-  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.20, 0\.0, 0\.005\)/);
-  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.28 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.022\)/);
+  assert.match(material, /specularAlpha = clamp\(specular \* environmentResponse \* 0\.22, 0\.0, 0\.006\)/);
+  assert.match(material, /microAlpha = clamp\(abs\(microLightDelta\) \* 0\.31 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.024\)/);
   // Night-indigo pigment tints are owned by the Zodiac renderer; do not reintroduce blue glow.
   assert.ok(material.includes("reflectionTint = vec3(0.37, 0.44, 0.51)"));
   assert.ok(material.includes("microLightTint = vec3(0.30, 0.37, 0.44)"));

@@ -186,7 +186,7 @@
 
 #m2-zodiac-hard-surface .m2-zodiac-light {
   stop-color: color-mix(in srgb, var(--zodiac) 84%, #687786);
-  stop-opacity: .24;
+  stop-opacity: .25;
 }
 #m2-zodiac-hard-surface .m2-zodiac-mid {
   stop-color: color-mix(in srgb, var(--zodiac) 92%, #1d2630);
@@ -198,7 +198,7 @@
 }
 #m2-zodiac-hard-response .m2-zodiac-response-light {
   stop-color: color-mix(in srgb, var(--zodiac) 78%, #7b8d9f);
-  stop-opacity: .084;
+  stop-opacity: .090;
 }
 #m2-zodiac-hard-response .m2-zodiac-response-mid {
   stop-color: color-mix(in srgb, var(--zodiac) 87%, #2c3945);
