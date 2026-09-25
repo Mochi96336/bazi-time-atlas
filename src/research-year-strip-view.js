@@ -5,6 +5,10 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
+import {
+  ensureResearchSeasonalEvidenceForYear,
+  researchSeasonalEvidenceCatalogueHasYear
+} from "./recurrence/research-seasonal-chunk-loader.js";
 import { projectSeasonalBoundaryToCivil } from "./recurrence/seasonal-civil-projection.js";
 import {
   TARGET_INSTANT_BASIS
@@ -16,6 +20,7 @@ const DEFAULT_YEAR_STRIP_OFFSET_HOURS_FROM_UT1 = 8;
 
 const strip = typeof document === "undefined" ? null : document.querySelector("#research-year-strip");
 const instrument = typeof document === "undefined" ? null : document.querySelector("#recurrence-instrument");
+const evidenceLoadStateByYear = new Map();
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -375,6 +380,39 @@ function setText(id, value) {
   if (node) node.textContent = value;
 }
 
+function scheduleResearchEvidenceLoad(selectedDate, state) {
+  const year = selectedDate.year;
+  if (!researchSeasonalEvidenceCatalogueHasYear(year)) {
+    evidenceLoadStateByYear.set(year, "not-catalogued");
+    return "not-catalogued";
+  }
+  if (state.liChunBoundary.status === "resolved-research-evidence") {
+    evidenceLoadStateByYear.set(year, "loaded");
+    return "loaded";
+  }
+
+  const existing = evidenceLoadStateByYear.get(year);
+  if (existing === "loading" || existing === "failed") return existing;
+
+  evidenceLoadStateByYear.set(year, "loading");
+  void ensureResearchSeasonalEvidenceForYear(year)
+    .then(result => {
+      evidenceLoadStateByYear.set(
+        year,
+        result.status === "loaded" || result.status === "already-loaded" ? "loaded" : result.status
+      );
+      const current = parseDate(instrument?.dataset.targetDate);
+      if (current?.year === year) render();
+    })
+    .catch(error => {
+      evidenceLoadStateByYear.set(year, "failed");
+      if (strip) strip.dataset.liChunEvidenceLoadError = error?.name ?? "Error";
+      const current = parseDate(instrument?.dataset.targetDate);
+      if (current?.year === year) render();
+    });
+  return "loading";
+}
+
 function render() {
   if (!strip || !instrument) return;
   const selectedDate = parseDate(instrument.dataset.targetDate);
@@ -397,6 +435,9 @@ function render() {
   const liChunUnavailable = document.querySelector("#research-year-li-chun-unavailable");
 
   strip.dataset.ready = "true";
+  const evidenceLoadState = scheduleResearchEvidenceLoad(selectedDate, state);
+  strip.dataset.liChunEvidenceLoadState = evidenceLoadState;
+  if (evidenceLoadState !== "failed") delete strip.dataset.liChunEvidenceLoadError;
   strip.dataset.liChunBoundaryStatus = state.liChunBoundary.status;
   strip.dataset.liChunEpochStatus = state.liChunBoundary.epochStatus;
   strip.dataset.liChunProvider = state.liChunBoundary.providerId ?? "none";
@@ -524,5 +565,6 @@ export const RESEARCH_YEAR_STRIP_CONTRACT = freeze({
   transitionIndependentFromEpochAvailability:true,
   directLegacyCivilSolarTermAuthority:false,
   selectedYearMembershipStatuses:freeze(["exact", "model-estimated", "unresolved"]),
-  oneSigmaIntervalIsHardDecisionBound:false
+  oneSigmaIntervalIsHardDecisionBound:false,
+  researchSeasonalEpochPayloadMode:"verified-lazy-binary-chunk"
 });
