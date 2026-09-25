@@ -93,6 +93,19 @@
         assert(hits.length===60,"free Day wheel must expose 60 independently selectable sectors");
         const wheelOrigin=Number(freeWheel.dataset.selectedIndex);
         const nextIndex=(wheelOrigin+1)%60;
+        freeWheelSvg.dispatchEvent(new KeyboardEvent("keydown",{
+          key:"ArrowRight",bubbles:true,cancelable:true
+        }));
+        assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
+          freeWheel.dataset.selectionLinked==="false" &&
+          root.dataset.targetDate==="2024-02-10",
+          "keyboard arrow must preview adjacent Ganzhi without committing a civil date");
+        doc.getElementById("research-free-wheel-return").click();
+        assert(freeWheel.dataset.selectedIndex===String(wheelOrigin) &&
+          freeWheel.dataset.selectionLinked==="true" &&
+          root.dataset.targetDate==="2024-02-10",
+          "return-to-comparison must discard exploration without changing date");
+        record("wheel-keyboard-and-return",true);
         hits[nextIndex].dispatchEvent(new MouseEvent("click",{bubbles:true}));
         assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
           freeWheel.dataset.selectionLinked==="false" &&
