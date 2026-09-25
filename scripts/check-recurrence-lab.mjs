@@ -166,6 +166,23 @@ const local = expectCase(
   },
   "1980-year local recurrence"
 );
+const linkedCycles = tagById(local.dom, "research-cycle-comparison");
+const linkedDayWheel = tagById(local.dom, "research-sexagenary-wheel");
+if (
+  attr(linkedCycles, "data-ready") !== "true" ||
+  attr(linkedCycles, "data-base-date") !== "2026-09-13" ||
+  attr(linkedCycles, "data-target-date") !== "4006-09-13" ||
+  attr(linkedCycles, "data-year-phase") !== "0" ||
+  attr(linkedCycles, "data-day-phase") !== "0" ||
+  !attr(linkedCycles, "data-base-day-pillar") ||
+  attr(linkedCycles, "data-base-day-pillar") !== attr(linkedCycles, "data-target-day-pillar") ||
+  attr(linkedDayWheel, "data-selected-date-linked") !== "true" ||
+  attr(linkedDayWheel, "data-research-date") !== "4006-09-13"
+) {
+  throw new Error(`Year and Day labels / interactive 60-day wheel must follow the same comparison date: ${local.url}`);
+}
+console.log(`[recurrence] PASS paired absolute identities + day-wheel sync at +1980: ${local.url}`);
+
 expectFixedGauge(local.dom, local.url);
 expectDiscreteComprehension(local.dom, local.url);
 if (!/此起點 60 年序＋60 日序首次重遇/.test(local.dom) || !/1,980 年/.test(local.dom)) {
@@ -212,6 +229,29 @@ if (
   throw new Error(`26026 global discrete closure must remain separate from unavailable absolute Li Chun authority: ${global.url}`);
 }
 console.log(`[recurrence] PASS 26026 keeps exact discrete closure separate from absolute seasonal source coverage: ${global.url}`);
+
+const futureCycles = tagById(global.dom, "research-cycle-comparison");
+if (
+  attr(futureCycles, "data-target-date") !== "26026-09-13" ||
+  attr(futureCycles, "data-day-phase") !== "0" ||
+  attr(futureCycles, "data-base-day-pillar") !== attr(futureCycles, "data-target-day-pillar") ||
+  !global.dom.includes('id="research-cycles-year-target-note">僅名義立春後年標 · 當日待判')
+) {
+  throw new Error(`26026 must display computable discrete Year/Day labels without inventing the active Li Chun birth pillar: ${global.url}`);
+}
+
+const beforeLiChun = expectCase("recurrence.html?date=2024-02-01&delta=0", {"data-target-date":"2024-02-01"}, "pre-Li Chun year identity");
+const afterLiChun = expectCase("recurrence.html?date=2024-02-10&delta=0", {"data-target-date":"2024-02-10"}, "post-Li Chun year identity");
+if (
+  !beforeLiChun.dom.includes('id="research-cycles-year-base">癸卯') ||
+  !afterLiChun.dom.includes('id="research-cycles-year-base">甲辰') ||
+  attr(tagById(beforeLiChun.dom,"research-sexagenary-wheel"), "data-research-date") !== "2024-02-01" ||
+  attr(tagById(afterLiChun.dom,"research-sexagenary-wheel"), "data-research-date") !== "2024-02-10"
+) {
+  throw new Error("The two named cycles must follow selected date, not the nominal Li Chun year or an independent 甲子 default");
+}
+console.log("[recurrence] PASS active year boundary and linked day identity for two independent calendar dates");
+
 
 const sourceDerived8000 = expectCase(
   "recurrence.html?date=2026-09-13&delta=8000",
