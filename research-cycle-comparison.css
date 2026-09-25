@@ -75,6 +75,7 @@
 .research-cycles-tape span[data-base="true"] { height:14px; background:var(--cursor); }
 .research-cycles-tape span[data-target="true"] { height:23px; background:var(--cycle-active); box-shadow:0 0 6px color-mix(in srgb,var(--cycle-active) 55%,transparent); }
 .research-cycles-tape span[data-both="true"] { height:23px; background:var(--cursor); outline:2px solid var(--cycle-active); outline-offset:1px; }
+.research-cycles-tape-basis { display:block; color:var(--muted); font-size:10px; line-height:1.4; margin:3px 0 4px; }
 .research-cycles-tape-legend { display:block; margin:0 0 10px; color:var(--faint); font-size:9px; }
 .research-cycle-open { display:inline-flex; align-items:center; min-height:36px; margin:0 0 10px; color:#b4d0d8; text-decoration:none; font-size:11px; font-weight:620; }
 .research-cycle-open:hover { text-decoration:underline; }
