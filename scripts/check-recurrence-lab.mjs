@@ -211,6 +211,10 @@ if (
 ) {
   throw new Error(`26026 global discrete closure must remain separate from unavailable absolute Li Chun authority: ${global.url}`);
 }
+const globalYearStrip = tagById(global.dom, "research-year-strip");
+if (attr(globalYearStrip, "data-li-chun-evidence-load-state") !== "not-catalogued") {
+  throw new Error(`26026 must not attempt a Research seasonal binary fetch: ${global.url}`);
+}
 console.log(`[recurrence] PASS 26026 keeps exact discrete closure separate from absolute seasonal source coverage: ${global.url}`);
 
 const sourceDerived8000 = expectCase(
@@ -222,6 +226,7 @@ const sourceDerived8000 = expectCase(
 );
 const sourceDerivedStrip = tagById(sourceDerived8000.dom, "research-year-strip");
 if (
+  attr(sourceDerivedStrip, "data-li-chun-evidence-load-state") !== "loaded" ||
   attr(sourceDerivedStrip, "data-li-chun-boundary-status") !== "resolved-research-evidence" ||
   attr(sourceDerivedStrip, "data-li-chun-authority-class") !== "source-derived-research-evidence" ||
   attr(sourceDerivedStrip, "data-li-chun-production-authority") !== "false" ||
