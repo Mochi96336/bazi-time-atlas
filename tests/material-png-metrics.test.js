@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { deflateSync } from "node:zlib";
-import { decodePngRgb, materialMasks, compareMaterialPng } from "../scripts/material-png-metrics.mjs";
+import { decodePngRgb, materialMasks, compareMaterialPng, readScreenshotCtm } from "../scripts/material-png-metrics.mjs";
 
 const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
@@ -52,6 +52,28 @@ test("H2.0 reports actual sampled delta, not a subjective quality score", () => 
   assert.deepEqual(delta.changedBounds, { x0: 0, y0: 0, x1: 0, y1: 0 });
   assert.equal(compareMaterialPng(a, a, mask).changedPixels3, 0);
   assert.throws(() => compareMaterialPng(a, b, Uint8Array.of(1)), /dimensions/);
+});
+
+test("H2.0 reconstructs a screenshot-process CTM from lossless pixel fiducials", () => {
+  const expected = [1.001316, 0, 0, 1.001316, 119.210526, -50];
+  const matrix = new DataView(new ArrayBuffer(24));
+  expected.forEach((value, index) => matrix.setInt32(index * 4, Math.round(value * 1e6), false));
+  const bytes = new Uint8Array(matrix.buffer);
+  const rows = [];
+  for (let y = 0; y < 4; y += 1) {
+    rows.push(0);
+    for (let x = 0; x < 96; x += 1) {
+      const v = bytes[Math.floor(x / 4)];
+      rows.push(v, v, v);
+    }
+  }
+  const screenshot = decodePngRgb(makePng(96, 4, rows));
+  assert.deepEqual(readScreenshotCtm(screenshot), expected);
+  screenshot.rgb[0] ^= 1; // Edge pixel is not sampled; center fiducials remain authoritative.
+  assert.deepEqual(readScreenshotCtm(screenshot), expected);
+  screenshot.rgb[(2 * 96 + 2) * 3 + 1] ^= 5;
+  assert.throws(() => readScreenshotCtm(screenshot), /grayscale/);
+  assert.throws(() => readScreenshotCtm(decodePngRgb(makePng(96, 4, new Array(4 * (1 + 96 * 3)).fill(0)))), /invalid/);
 });
 
 test("H2.0 surface ROIs come from canonical SVG geometry and a measured CTM", () => {
