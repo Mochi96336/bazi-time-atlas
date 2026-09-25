@@ -7,6 +7,9 @@ import {
 } from "../src/research-year-strip-view.js";
 import { fixedZoneTargetClock } from "../src/recurrence/fixed-zone-target-clock.js";
 import {
+  installResearchSeasonal10026Fixture
+} from "./helpers/install-research-seasonal-10026.js";
+import {
   TARGET_INSTANT_BASIS,
   targetInstantBinding
 } from "../src/recurrence/target-instant-binding.js";
@@ -20,6 +23,10 @@ test("year strip no longer treats the legacy civil solar-term helper as its auth
     ["exact", "model-estimated", "unresolved"]
   );
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.oneSigmaIntervalIsHardDecisionBound, false);
+  assert.equal(
+    RESEARCH_YEAR_STRIP_CONTRACT.researchSeasonalEpochPayloadMode,
+    "verified-lazy-binary-chunk"
+  );
 
   const source = await readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /solarTermEventForCivilYear/);
@@ -220,7 +227,8 @@ test("year 4006 UT1 targets outside the one-sigma interval remain model-estimate
   assert.equal(after.selectedYearMembership.status, "model-estimated");
 });
 
-test("year 10026 consumes pinned DE441-derived TT evidence without promoting it to production truth", () => {
+test("year 10026 consumes installed DE441-derived binary TT evidence without promoting it to production truth", async () => {
+  await installResearchSeasonal10026Fixture();
   const state = researchYearStripState({ year:10026, month:9, day:13 });
 
   assert.equal(state.liChunBoundary.status, "resolved-research-evidence");
