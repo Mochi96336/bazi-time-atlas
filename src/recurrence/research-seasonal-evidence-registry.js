@@ -6,6 +6,11 @@ const CATALOGUED_EVIDENCE_IDS = Object.freeze([
   "de441-10026-source-derived-seasonal-crossing-evidence-v1"
 ]);
 
+const REFERENCE_SEMANTICS = "geocentric-apparent-solar-longitude-mean-ecliptic-of-date";
+const YEAR_BASIS = "atlas-solar-term-catalogue";
+const VALIDATION_KIND = "source-derived-reconstruction";
+const CLAIM_CLASS = "de441-derived-source-derived";
+
 const loadedByYear = new Map();
 
 function normalizedLongitude(value) {
@@ -21,6 +26,22 @@ function assertResearchOnlyManifest(manifest) {
   if (!manifest || typeof manifest !== "object") throw new TypeError("manifest is required");
   if (manifest.sourceEphemeris !== "DE441") throw new RangeError("Research seasonal manifest must be DE441");
   if (manifest.timeScale !== "TT") throw new RangeError("Research seasonal manifest must use TT");
+  if (manifest.referenceSemantics !== REFERENCE_SEMANTICS) {
+    throw new RangeError("Research seasonal manifest reference semantics mismatch");
+  }
+  if (manifest.yearBasis !== YEAR_BASIS) {
+    throw new RangeError("Research seasonal manifest year basis mismatch");
+  }
+  if (manifest.validationKind !== VALIDATION_KIND || manifest.claimClass !== CLAIM_CLASS) {
+    throw new RangeError("Research seasonal manifest claim class mismatch");
+  }
+  if (
+    manifest.chunkSchemaVersion !== 1
+    || manifest.eventsPerYear !== 24
+    || manifest.longitudeStepDegrees !== 15
+  ) {
+    throw new RangeError("Research seasonal manifest seasonal grid mismatch");
+  }
   if (manifest.productionAuthorityGranted !== false) {
     throw new RangeError("Research seasonal manifest must not grant production authority");
   }
@@ -32,6 +53,12 @@ function assertResearchOnlyManifest(manifest) {
   }
   if (manifest.sourceDerivedTargetYear !== true) {
     throw new RangeError("Research seasonal manifest must declare source-derived target-year semantics");
+  }
+  if (
+    manifest.frameIndependentlyValidatedAtTargetYear !== false
+    || manifest.civilTimeResolved !== false
+  ) {
+    throw new RangeError("Research seasonal manifest overstates target-year validation or civil time");
   }
   if (!Array.isArray(manifest.evidenceIds) || manifest.evidenceIds.length < 1) {
     throw new RangeError("Research seasonal manifest must pin evidence ids");
