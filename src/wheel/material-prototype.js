@@ -26,7 +26,8 @@ export const MATERIAL_PROBES = Object.freeze({
   "zodiac-no-patina": 4,
   "zodiac-no-reflection": 5,
   "graphite-no-response": 6,
-  "solar-no-scratch-light": 7
+  "solar-no-scratch-light": 7,
+  "solar-untapered-scratch-light": 8
 });
 
 export function resolveMaterialProbe(search = "") {
@@ -213,7 +214,16 @@ const FRAGMENT_SHADER = [
   "  mask *= response;",
   "  float polarity = fract(r5 * 3.17 + r0) > 0.43 ? 1.0 : -1.0;",
   "  float side = dot(uv - center, normal) - bend;",
-  "  float bevel = (smoothstep(-0.35, 0.35, side) * 2.0 - 1.0) * mask;",
+  "  // Fade the *lighting*, not the physical scratch mark, at individually randomized ends.",
+  "  // A derivative-aware window prevents mobile-scale pinpricks and breaks long comb strokes.",
+  "  float along = clamp(axis / max(scratchLength, 0.001) + 0.5, 0.0, 1.0);",
+  "  float startFade = mix(0.03, 0.18, fract(r1 * 1.91 + r5 * 0.47));",
+  "  float endFade = mix(0.79, 0.96, fract(r2 * 1.63 + r4 * 0.29));",
+  "  float fadeWidth = max(0.14, fwidth(along) * 1.25);",
+  "  float envelope = smoothstep(startFade, startFade + fadeWidth, along)",
+  "    * (1.0 - smoothstep(endFade - fadeWidth, endFade, along));",
+  "  float bevel = (smoothstep(-0.35, 0.35, side) * 2.0 - 1.0) * mask",
+  "    * (u_material_probe == 8 ? 1.0 : envelope);",
   "  return vec4(mask * polarity, mask, normal.x * bevel, normal.y * bevel);",
   "}",
   "",

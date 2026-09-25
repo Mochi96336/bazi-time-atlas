@@ -45,3 +45,10 @@ Current position: **hold Draft pending the exact new-head benchmark, native mate
 ### Cost-probe correction
 
 The first headless CI experiment (Visual run `36183088426`) returned `off=0ms`, `on=0ms` and `ratio=0`, despite passing the earlier validity checks. These numbers are **invalid and must not be interpreted as free GPU cost**: Chromium's `--virtual-time-budget` can freeze `performance.now()` across synchronous WebGL `gl.finish()` calls. The next commit removes virtual time **only from the separate cost-probe process** and rejects any zero or negative time results. Fixed-instant visual screenshots remain under their original deterministic virtual-time controls. Review the new actual measurement only after exact-head CI/artifact verification.
+
+
+### H2.1 optical refinement — endpoint envelope (experimental)
+
+The original normal prototype is most visible as nearly parallel right-side strokes. The next candidate does not change positions, width, color, density or oxidation. It uses existing per-cell scratch seeds to fade **only the groove reflection** at staggered segment ends and anti-aliases that window against screen derivatives. A new `solar-untapered-scratch-light` probe (ID 8) recovers the immediately preceding H2.1 unwindowed response from the same shader, while ID 7 still removes groove lighting entirely. Compare ID 8, the default windowed response and ID 7 in true 1440/390 screenshot evidence; don't approve based only on smaller diff area.
+
+Corrected external-CDP monotonic timing generated valid nonzero samples in Visual run [36187048851](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36187048851), but **cost attribution is inconclusive**: medians were 0.16068ms with vs 0.15657ms without, approximately 0.136ms of control CDP overhead per equivalent draw, and individual samples had very large system outliers. That does not establish either a significant rendering penalty or free rendering. CI timing is only a rough software-renderer diagnostic; real-device performance remains an independent acceptance requirement.

@@ -31,10 +31,10 @@ test("H2.0 material ablations are explicit roughness-only diagnostics", () => {
   const labels = [
     "none", "solar-no-oxidation", "solar-no-scratches", "solar-no-reflection",
     "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response",
-    "solar-no-scratch-light"
+    "solar-no-scratch-light", "solar-untapered-scratch-light"
   ];
   assert.deepEqual(Object.keys(MATERIAL_PROBES), labels);
-  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6, 7, 8]);
   assert.equal(resolveMaterialProbe(""), null);
   assert.equal(resolveMaterialProbe("?material=roughness"), null);
   assert.equal(resolveMaterialProbe("?material=svg&materialProbe=solar-no-scratches"), null);
@@ -188,7 +188,8 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   for (const id of [1, 2, 3, 4, 5, 6]) {
     assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
   }
-  assert.ok(material.includes("u_material_probe != 7"), "new probe disables only groove lighting");
+  assert.ok(material.includes("u_material_probe != 7"), "probe 7 disables all groove lighting");
+  assert.ok(material.includes("u_material_probe == 8 ? 1.0 : envelope"), "probe 8 restores untapered H2.1 groove response");
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
   // broad oxide-island read in favor of high-frequency low-contrast variation.
   // repeating 128×128 graphite texture for oxidation. It owns a deterministic
@@ -228,6 +229,9 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /scratchLayer\(localPoint, 1\.0, 2\.0\)/);
   assert.match(material, /fwidth\(distanceToScratch\)/);
   assert.match(material, /return vec4\(mask \* polarity, mask, normal\.x \* bevel, normal\.y \* bevel\)/);
+  assert.match(material, /startFade = mix\(0\.03, 0\.18/);
+  assert.match(material, /endFade = mix\(0\.79, 0\.96/);
+  assert.match(material, /fadeWidth = max\(0\.14, fwidth\(along\) \* 1\.25\)/);
   assert.match(material, /grooveWorld = rotation\(-ringRotation\) \* grooveLocal/);
   assert.match(material, /u_material_probe != 7 && primaryScratch\.y \+ handlingScratch\.y > 0\.001/);
   assert.match(material, /body = clamp\(body \+ vec3\(0\.60, 0\.53, 0\.44\) \* localReflection, 0\.0, 1\.0\)/);
