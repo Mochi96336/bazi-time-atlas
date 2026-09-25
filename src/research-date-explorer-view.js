@@ -216,6 +216,40 @@ function applyDates(writeUrl=true) {
   return true;
 }
 
+/**
+ * Step the COMMITTED comparison date from the two visible date inputs.
+ * Never synthesize an astronomical or four-pillar result from this operation.
+ * Invalid in-progress edits and finite calendar bounds must fail without
+ * changing either committed date or the shareable URL.
+ */
+function stepComparisonDate(days) {
+  if (mode !== "dates") return;
+  const candidateBase = readFields("base");
+  const candidateTarget = readFields("target");
+  if (!candidateBase || !candidateTarget) {
+    applyDates(false);
+    root.dataset.stepOutcome = "invalid-input";
+    return;
+  }
+  let shifted;
+  try {
+    shifted = shiftGregorianDate(candidateTarget,days);
+  } catch {
+    root.dataset.stepOutcome = "out-of-range";
+    setError("目標日期超出可用公曆範圍；原本的比較日期和結果沒有改動。");
+    return;
+  }
+  base = candidateBase;
+  target = shifted;
+  hasExplorerSelection = true;
+  root.dataset.stepOutcome = "applied";
+  root.dataset.lastStepDays = String(days);
+  syncInputs();
+  setError(null);
+  render();
+  syncFreeQuery();
+}
+
 function setMode(next,{updateUrl=true}={}) {
   mode = next;
   const dates = next === "dates";
@@ -271,6 +305,11 @@ if (root && form && annualButton && datesButton) {
     setError(null);
     render();
     if (mode==="dates") syncFreeQuery();
+  });
+  root.querySelectorAll("[data-explorer-step-days]").forEach(button => {
+    const displacement = Number(button.dataset.explorerStepDays);
+    if (![-60,-1,1,60].includes(displacement)) throw new Error("unsupported date-explorer step");
+    button.addEventListener("click",() => stepComparisonDate(displacement));
   });
   // Existing Research-only source loads asynchronously. A new verified chunk
   // may refine Year identities but must never change the discrete date phases.
