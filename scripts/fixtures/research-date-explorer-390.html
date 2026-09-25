@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body>
+  <iframe id="explorer-frame" title="Date explorer interaction proof" style="width:390px;height:1500px;border:0" src="../../recurrence.html?mode=dates&base=2024-02-01&compare=2024-02-10"></iframe>
+  <output id="probe" data-ready="false" data-error="initializing"></output>
+  <script type="module">
+    const frame = document.getElementById("explorer-frame");
+    const probe = document.getElementById("probe");
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve,ms));
+    function record(name,value) {probe.dataset[name] = String(value);}
+    function assert(condition,message) {if(!condition)throw new Error(message);}
+    function change(input) {input.dispatchEvent(new Event("change",{bubbles:true}));}
+    const dateFields = (doc,kind) => ["year","month","day"].map(key =>
+      doc.getElementById("research-explorer-"+kind+"-"+key));
+    const dateValues = (doc,kind,values) => dateFields(doc,kind).forEach((input,index) => {
+      input.value = String(values[index]);
+    });
+    async function loaded(doc) {
+      for (let i=0; i<180; i++) {
+        if (doc.getElementById("research-free-explorer")?.dataset.ready==="true") return;
+        await wait(40);
+      }
+      throw new Error("date explorer never reached ready state");
+    }
+    frame.addEventListener("load", async () => {
+      try {
+        const doc = frame.contentDocument;
+        await loaded(doc);
+        const root = doc.getElementById("research-free-explorer");
+        const annual = doc.getElementById("research-discrete");
+        const astronomy = doc.getElementById("research-astronomy");
+        const evidence = doc.getElementById("research-evidence");
+        const legacy = doc.getElementById("recurrence-instrument");
+        const initialLegacyBase = legacy.dataset.baseDate;
+        const initialLegacyDelta = legacy.dataset.deltaYears;
+        assert(doc.body.dataset.researchMode==="dates","mode did not initialize from permalink");
+        assert(root.hidden===false && annual.hidden && astronomy.hidden && evidence.hidden,
+          "free-date mode leaked annual-only results");
+        assert(root.dataset.astronomyApplicability==="not-evaluated" &&
+          root.dataset.fourPillarsApplicability==="not-evaluated","free-date authority leaked");
+        assert(root.dataset.baseDate==="2024-02-01" && root.dataset.targetDate==="2024-02-10",
+          "permalink dates were lost");
+        assert(root.dataset.dayPhase==="9" && root.dataset.yearPhase==="0",
+          "two independent dates have wrong initial phases");
+        assert(root.dataset.baseActiveYearStatus==="model-estimated" &&
+          root.dataset.targetActiveYearStatus==="model-estimated","year-boundary model status lost");
+        const tabs = doc.querySelector(".research-mode-switch");
+        const viewport = doc.documentElement.clientWidth;
+        const tabsRect = tabs.getBoundingClientRect();
+        const formRect = doc.getElementById("research-date-explorer-form").getBoundingClientRect();
+        assert(viewport===390,"fixture must use real 390px iframe viewport");
+        assert(tabsRect.left>=0 && tabsRect.right<=391,"research mode switch overflows 390px");
+        assert(formRect.left>=0 && formRect.right<=391,"free-date form overflows 390px");
+        const baseDay = root.dataset.baseDayPillar;
+        const targetDay = root.dataset.targetDayPillar;
+        record("initial-mode",doc.body.dataset.researchMode);
+        record("initial-day-phase",root.dataset.dayPhase);
+        record("initial-year-phase",root.dataset.yearPhase);
+        record("initial-year-status",root.dataset.baseActiveYearStatus);
+        record("initial-day-changed",baseDay!==targetDay);
+        record("initial-astronomy-hidden",astronomy.hidden);
+        record("initial-four-pillars-hidden",evidence.hidden);
+        record("mobile-viewport",viewport);
+        record("mobile-tabs-in-bounds",tabsRect.left>=0 && tabsRect.right<=391);
+        record("mobile-form-in-bounds",formRect.left>=0 && formRect.right<=391);
+
+        const targetInputs = dateFields(doc,"target");
+        targetInputs[2].value = "11";
+        change(targetInputs[2]);
+        assert(root.dataset.targetDate==="2024-02-11" && root.dataset.dayPhase==="10",
+          "changing one day did not update the free-date pair");
+        assert(root.dataset.targetDayPillar!==targetDay,"daily Ganzhi name failed to advance");
+        assert(frame.contentWindow.location.search.includes("compare=2024-02-11") &&
+          !frame.contentWindow.location.search.includes("delta="),"free URL leaked annual delta");
+        record("changed-day-phase",root.dataset.dayPhase);
+        record("changed-day-identity",root.dataset.targetDayPillar);
+
+        doc.getElementById("research-explorer-swap").click();
+        assert(root.dataset.baseDate==="2024-02-11" && root.dataset.targetDate==="2024-02-01",
+          "swap did not reverse the two date owners");
+        assert(root.dataset.signedElapsedDays==="-10" && root.dataset.dayPhase==="50",
+          "reverse compare did not retain signed elapsed days and modular phase");
+        record("reversed-day-phase",root.dataset.dayPhase);
+        record("reversed-elapsed-days",root.dataset.signedElapsedDays);
+
+        dateValues(doc,"target",[2025,2,29]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        assert(root.dataset.ready==="false" &&
+          doc.getElementById("research-explorer-results").hidden===true,
+          "invalid leap day must hide stale result");
+        assert(root.dataset.targetDate==="2024-02-01","invalid date mutated the committed pair");
+        record("invalid-hidden",doc.getElementById("research-explorer-results").hidden);
+        dateValues(doc,"target",[2024,2,29]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        assert(root.dataset.ready==="true" && root.dataset.targetDate==="2024-02-29",
+          "correcting invalid leap day did not restore the explorer");
+        record("recovered",root.dataset.ready);
+
+        doc.getElementById("research-mode-annual").click();
+        assert(doc.body.dataset.researchMode==="annual" && root.hidden &&
+          !annual.hidden && !astronomy.hidden && !evidence.hidden,
+          "annual mode did not restore every annual-only section");
+        assert(legacy.dataset.baseDate===initialLegacyBase &&
+          legacy.dataset.deltaYears===initialLegacyDelta,
+          "free-date changes rewrote the annual recurrence calculation");
+        assert(!frame.contentWindow.location.search.includes("mode=dates") &&
+          !frame.contentWindow.location.search.includes("compare="),
+          "annual mode retained stale free-date query values");
+        record("annual-preserved",true);
+
+        doc.getElementById("research-mode-dates").click();
+        assert(doc.body.dataset.researchMode==="dates" &&
+          root.dataset.baseDate==="2024-02-11" && root.dataset.targetDate==="2024-02-29",
+          "returning to free-date mode lost the chosen pair");
+        assert(annual.hidden && astronomy.hidden && evidence.hidden,
+          "returning to free-date mode exposed stale annual-only evidence");
+        record("free-restored",true);
+        probe.dataset.error = "none";
+        probe.dataset.ready = "true";
+      } catch (error) {
+        probe.dataset.error = error?.stack ?? String(error);
+        probe.dataset.ready = "error";
+      }
+    },{once:true});
+  </script>
+</body>
+</html>
