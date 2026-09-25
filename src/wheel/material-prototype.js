@@ -17,6 +17,30 @@ export const ROUGHNESS_FIELD_SEED = 0x6d32616c;
 
 const SHADER_MODES = new Set([MATERIAL_MODES.ROUGHNESS]);
 
+// Explicit screenshot-only ablations: absent/invalid query means zero production change.
+export const MATERIAL_PROBES = Object.freeze({
+  none: 0,
+  "solar-no-oxidation": 1,
+  "solar-no-scratches": 2,
+  "solar-no-reflection": 3,
+  "zodiac-no-patina": 4,
+  "zodiac-no-reflection": 5,
+  "graphite-no-response": 6
+});
+
+export function resolveMaterialProbe(search = "") {
+  try {
+    const params = new URLSearchParams(search);
+    if (params.get("material") !== MATERIAL_MODES.ROUGHNESS) return null;
+    const name = params.get("materialProbe");
+    return name !== null && Object.prototype.hasOwnProperty.call(MATERIAL_PROBES, name)
+      ? MATERIAL_PROBES[name]
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 const VERTEX_SHADER = [
   "#version 300 es",
   "in vec2 a_position;",
@@ -44,6 +68,7 @@ const FRAGMENT_SHADER = [
   "uniform float u_zodiac_inner_radius;",
   "uniform float u_zodiac_outer_radius;",
   "uniform sampler2D u_roughness_field;",
+  "uniform int u_material_probe;",
   "out vec4 out_color;",
   "",
   "const float PI = 3.141592653589793;",
@@ -231,15 +256,15 @@ const FRAGMENT_SHADER = [
   "    ? mix(brassLight, brassMid, bodyCoordinate / 0.46)",
   "    : mix(brassMid, brassDark, (bodyCoordinate - 0.46) / 0.54);",
   "  float warmCatch = 1.0 - smoothstep(0.0, 0.22, abs(bodyCoordinate - 0.18));",
-  "  return mix(body, vec3(0.930, 0.880, 0.760), warmCatch * 0.047);",
+  "  return mix(body, vec3(0.930, 0.880, 0.760), u_material_probe == 3 ? 0.0 : warmCatch * 0.047);",
   "}",
   "",
   "vec4 renderSolarBrass(vec2 worldPoint, float rotationDegrees, float pixelFootprint) {",
   "  float ringRotation = rotationDegrees * PI / 180.0;",
   "  vec2 localPoint = rotation(ringRotation) * worldPoint;",
-  "  vec3 aging = solarOxidation(localPoint);",
-  "  vec2 primaryScratch = primaryScratchField(localPoint);",
-  "  vec2 handlingScratch = handlingScratchField(localPoint + vec2(19.0, -11.0));",
+  "  vec3 aging = u_material_probe == 1 ? vec3(0.0) : solarOxidation(localPoint);",
+  "  vec2 primaryScratch = u_material_probe == 2 ? vec2(0.0) : primaryScratchField(localPoint);",
+  "  vec2 handlingScratch = u_material_probe == 2 ? vec2(0.0) : handlingScratchField(localPoint + vec2(19.0, -11.0));",
   "",
   "  vec3 body = brassBody(worldPoint);",
   "  vec3 oxideWarm = vec3(0.245, 0.180, 0.128);",
@@ -313,10 +338,10 @@ const FRAGMENT_SHADER = [
   "  vec3 reflectionTint = vec3(0.37, 0.44, 0.51);",
   "  vec3 microLightTint = vec3(0.30, 0.37, 0.44);",
   "  vec3 microDarkTint = vec3(0.020, 0.027, 0.035);",
-  "  float specularAlpha = clamp(specular * environmentResponse * 0.22, 0.0, 0.006);",
-  "  float microAlpha = clamp(abs(microLightDelta) * 0.31 + abs(fieldCentered) * 0.009, 0.0, 0.024);",
+  "  float specularAlpha = u_material_probe == 5 ? 0.0 : clamp(specular * environmentResponse * 0.22, 0.0, 0.006);",
+  "  float microAlpha = u_material_probe == 5 ? 0.0 : clamp(abs(microLightDelta) * 0.31 + abs(fieldCentered) * 0.009, 0.0, 0.024);",
   "  vec3 microTint = microLightDelta >= 0.0 ? microLightTint : microDarkTint;",
-  "  float nebula = zodiacNebulaField(localPoint);",
+  "  float nebula = u_material_probe == 4 ? 0.5 : zodiacNebulaField(localPoint);",
   "  float nebulaLightAlpha = smoothstep(0.57, 0.76, nebula) * 0.060;",
   "  float nebulaDarkAlpha = smoothstep(0.58, 0.77, 1.0 - nebula) * 0.080;",
   "  vec3 nebulaLightTint = vec3(0.18, 0.26, 0.35);",
@@ -351,6 +376,7 @@ const FRAGMENT_SHADER = [
   "    out_color = renderZodiacMicroResponse(point, u_solar_rotation);",
   "    return;",
   "  }",
+  "  if (u_material_probe == 6) { out_color = vec4(0.0); return; }",
   "  int index = ringIndex(radius);",
   "  if (index < 0) discard;",
   "",
@@ -572,7 +598,8 @@ function uniformLocations(gl, program) {
     hasSolarMaterial: gl.getUniformLocation(program, "u_has_solar_material"),
     zodiacInnerRadius: gl.getUniformLocation(program, "u_zodiac_inner_radius"),
     zodiacOuterRadius: gl.getUniformLocation(program, "u_zodiac_outer_radius"),
-    field: gl.getUniformLocation(program, "u_roughness_field")
+    field: gl.getUniformLocation(program, "u_roughness_field"),
+    materialProbe: gl.getUniformLocation(program, "u_material_probe")
   });
 }
 
@@ -619,6 +646,7 @@ function setupRoughnessTexture(gl) {
 
 export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.location?.search ?? "" }) {
   const requestedMode = resolveMaterialMode(search);
+  const requestedProbe = resolveMaterialProbe(search);
   let materialWasExplicit = false;
   try {
     materialWasExplicit = new URLSearchParams(search).has("material");
@@ -640,10 +668,15 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   let active = false;
   let sizeDirty = true;
   let resizeObserver = null;
+  let materialEvidenceStamp = null;
 
   function fallBack(reason, detail = "") {
     active = false;
     shell?.removeAttribute("data-material-prototype");
+    shell?.removeAttribute("data-material-probe");
+    shell?.removeAttribute("data-material-probe-transform");
+    materialEvidenceStamp?.remove();
+    materialEvidenceStamp = null;
     if (shell) {
       shell.dataset.materialPrototypeFallback = reason;
       if (detail) {
@@ -688,6 +721,40 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       return;
     }
 
+    // --dump-dom and --screenshot can use different Chromium viewport heights.
+    // Only an EXPLICIT diagnostic probe embeds its own CTM in screenshot pixels.
+    // This 96x4 marker is outside all wheel material masks. No default DOM work.
+    if (requestedProbe !== null && shell) {
+      const ctm = [screenCtm.a, screenCtm.b, screenCtm.c,
+        screenCtm.d, screenCtm.e, screenCtm.f];
+      shell.dataset.materialProbeTransform = ctm.map(value => Number(value.toFixed(6))).join(",");
+      if (!materialEvidenceStamp) {
+        materialEvidenceStamp = globalThis.document.createElement("canvas");
+        materialEvidenceStamp.width = 96;
+        materialEvidenceStamp.height = 4;
+        materialEvidenceStamp.setAttribute("aria-hidden", "true");
+        materialEvidenceStamp.style.cssText =
+          "position:fixed;left:0;top:0;width:96px;height:4px;z-index:2147483647;" +
+          "pointer-events:none;image-rendering:pixelated;";
+        globalThis.document.body.appendChild(materialEvidenceStamp);
+      }
+      const values = new DataView(new ArrayBuffer(24));
+      ctm.forEach((value, index) => values.setInt32(index * 4, Math.round(value * 1e6), false));
+      const bytes = new Uint8Array(values.buffer);
+      const context = materialEvidenceStamp.getContext("2d", { willReadFrequently: false });
+      const image = context.createImageData(96, 4);
+      for (let i = 0; i < 24; i += 1) {
+        for (let y = 0; y < 4; y += 1) for (let x = i * 4; x < i * 4 + 4; x += 1) {
+          const offset = (y * 96 + x) * 4;
+          image.data[offset] = bytes[i];
+          image.data[offset + 1] = bytes[i];
+          image.data[offset + 2] = bytes[i];
+          image.data[offset + 3] = 255;
+        }
+      }
+      context.putImageData(image, 0, 0);
+    }
+
     const deviceScaleX = canvas.width / canvasRect.width;
     const deviceScaleY = canvas.height / canvasRect.height;
     const offsetX = screenToSvg.a * canvasRect.left
@@ -720,6 +787,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.uniform1f(uniforms.zodiacInnerRadius, zodiacGeometry.innerRadius);
     gl.uniform1f(uniforms.zodiacOuterRadius, zodiacGeometry.outerRadius);
     gl.uniform1i(uniforms.field, 0);
+    gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -753,7 +821,13 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       active = true;
       shell?.removeAttribute("data-material-prototype-fallback");
       shell?.removeAttribute("data-material-prototype-error");
-      if (shell) shell.dataset.materialPrototype = requestedMode;
+      if (shell) {
+        shell.dataset.materialPrototype = requestedMode;
+        if (requestedProbe !== null) {
+          const name = Object.keys(MATERIAL_PROBES).find(key => MATERIAL_PROBES[key] === requestedProbe);
+          shell.dataset.materialProbe = name;
+        }
+      }
 
       canvas.addEventListener("webglcontextlost", event => {
         event.preventDefault();

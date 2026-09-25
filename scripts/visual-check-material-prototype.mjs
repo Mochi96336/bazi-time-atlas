@@ -1,16 +1,13 @@
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { MATERIAL_FIXED_INSTANT, MATERIAL_VIEWPORTS } from "./material-visual-contract.mjs";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
-const instant = "2026-09-13T23%3A43%3A42.000Z";
-const modes = ["svg", "roughness"];
-const viewports = [
-  { key:"2047x1038", width:2047, height:1038, mobile:false },
-  { key:"1440x900", width:1440, height:900, mobile:false },
-  { key:"390x844", width:390, height:844, mobile:true }
-];
+const instant = MATERIAL_FIXED_INSTANT;
+const modes = ["svg", "roughness", "fallback"];
+const viewports = MATERIAL_VIEWPORTS;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -22,7 +19,9 @@ function findBrowser() {
 }
 
 function materialPath(mode) {
-  return "?material=" + encodeURIComponent(mode) + "&instant=" + instant;
+  return mode === "fallback"
+    ? "?material=roughness&materialWebgl=off&instant=" + instant
+    : "?material=" + encodeURIComponent(mode) + "&instant=" + instant;
 }
 
 function mobileHarnessPath(target, height) {
@@ -63,6 +62,14 @@ function probeMode(browser, mode) {
   if (mode === "svg") {
     if (/data-material-prototype="roughness"/.test(result.stdout)) {
       throw new Error("SVG baseline unexpectedly activated the shader");
+    }
+    return;
+  }
+
+  if (mode === "fallback") {
+    if (!result.stdout.includes('data-material-prototype-fallback="forced"')
+      || result.stdout.includes('data-material-prototype="roughness"')) {
+      throw new Error("Forced SVG fallback did not activate for visual evidence");
     }
     return;
   }
