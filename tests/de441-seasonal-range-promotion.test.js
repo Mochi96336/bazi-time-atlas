@@ -7,6 +7,7 @@ import {
 import {
   DE441_SEASONAL_RANGE_PROMOTION_POLICY,
   assessDe441SeasonalRangePromotion,
+  deriveDe441InteriorValidationYears,
   requiredDe441InteriorValidationCount
 } from "../src/recurrence/de441-seasonal-range-promotion.js";
 
@@ -103,7 +104,13 @@ test("multi-year promotion requires both coverage edges plus a seeded interior v
   assert.equal(noPlan.status, "validation-plan-incomplete");
   assert.equal(noPlan.productionPromotionEligible, false);
 
-  const interiorYears = [4051,4127,4211,4333,4471,4591,4679,4783,4871,4933];
+  const seedSha256 = "c".repeat(64);
+  const interiorYears = deriveDe441InteriorValidationYears({
+    minYear,
+    maxYear,
+    seedSha256
+  });
+  assert.equal(interiorYears.length, requiredInterior);
   const withPlan = assessDe441SeasonalRangePromotion({
     minYear,
     maxYear,
@@ -111,7 +118,7 @@ test("multi-year promotion requires both coverage edges plus a seeded interior v
     chunks:[chunk(minYear,maxYear)],
     validationPlan:{
       selectionMethod:DE441_SEASONAL_RANGE_PROMOTION_POLICY.interiorSelectionMethod,
-      seedSha256:"c".repeat(64),
+      seedSha256,
       interiorYears
     },
     validationSamples:[
@@ -123,6 +130,25 @@ test("multi-year promotion requires both coverage edges plus a seeded interior v
   assert.equal(withPlan.status, "range-promotion-pass");
   assert.equal(withPlan.productionPromotionEligible, true);
   assert.deepEqual(withPlan.requiredValidationYears, [minYear,...interiorYears,maxYear].sort((a,b)=>a-b));
+
+  const tampered = assessDe441SeasonalRangePromotion({
+    minYear,
+    maxYear,
+    sourceCoverage:SOURCE_COVERAGE,
+    chunks:[chunk(minYear,maxYear)],
+    validationPlan:{
+      selectionMethod:DE441_SEASONAL_RANGE_PROMOTION_POLICY.interiorSelectionMethod,
+      seedSha256,
+      interiorYears:[...interiorYears.slice(0,-1), interiorYears.at(-1) - 1]
+    },
+    validationSamples:[
+      validatedSample(minYear),
+      ...interiorYears.map(validatedSample),
+      validatedSample(maxYear)
+    ]
+  });
+  assert.equal(tampered.status, "validation-plan-incomplete");
+  assert.ok(tampered.validationPlanFailures.includes("interior-years-seed-mismatch"));
 });
 
 test("full DE441-range promotion scales interior evidence instead of inheriting source coverage", () => {
