@@ -93,6 +93,28 @@ export function activeYearIdentityForDate(date, evidence = null) {
   });
 }
 
+function compareActiveYears(baseIdentity, targetIdentity, nominalPhase) {
+  const base = baseIdentity.activeYear;
+  const target = targetIdentity.activeYear;
+  const status = base.status === "not-evaluated" || target.status === "not-evaluated"
+    ? "not-evaluated"
+    : base.status === "unresolved" || target.status === "unresolved"
+      ? "unresolved"
+      : base.status === "exact" && target.status === "exact"
+        ? "exact" : "model-estimated";
+  const phase = base.pillar && target.pillar
+    ? mod60(target.pillar.cycleIndex - base.pillar.cycleIndex) : null;
+  if ((status === "not-evaluated" || status === "unresolved") && phase !== null) {
+    throw new Error("unresolved active years must not produce a relative pillar phase");
+  }
+  return Object.freeze({
+    status,
+    phase,
+    closed:phase === null ? null : phase === 0,
+    samePhaseAsNominal:phase === null ? null : phase === nominalPhase
+  });
+}
+
 function datedIdentity(date, yearEvidence) {
   return Object.freeze({
     date,
@@ -145,6 +167,7 @@ export function compareResearchDates(baseDate, targetDate, options = {}) {
       closed:dayPhase === 0,
       convention:"proleptic-gregorian-local-noon-discrete"
     }),
+    activeYearComparison:compareActiveYears(baseIdentity,targetIdentity,yearPhase),
     closure:Object.freeze({
       nominalYearAndDay:yearPhase === 0 && dayPhase === 0,
       gregorianStructure:null,
