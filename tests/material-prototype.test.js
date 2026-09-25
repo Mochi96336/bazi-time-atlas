@@ -184,7 +184,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /renderSolarBrass\(point, u_solar_rotation, pixelFootprint\)/);
   assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
   assert.ok(material.includes("uniform int u_material_probe;"));
-  assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0)"));
+  assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, probeOverride ?? requestedProbe ?? 0)"));
   for (const id of [1, 2, 3, 4, 5, 6]) {
     assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
   }
