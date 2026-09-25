@@ -83,6 +83,71 @@
         record("mobile-glance-visible",doc.defaultView.getComputedStyle(glance).display==="grid");
         record("mobile-glance-first-screen",glanceRect.bottom<=844);
 
+        const freeWheel = doc.getElementById("research-free-day-wheel");
+        const freeWheelSvg = doc.getElementById("research-free-day-wheel-svg");
+        assert(freeWheel && freeWheel.dataset.ready==="true" &&
+          freeWheel.dataset.selectionLinked==="true" && !freeWheel.open,
+          "date-only Day wheel must initialize linked but remain collapsed below Year/Day");
+        freeWheel.open=true;
+        const hits=[...freeWheelSvg.querySelectorAll(".research-cycle-hit")];
+        assert(hits.length===60,"free Day wheel must expose 60 independently selectable sectors");
+        const wheelOrigin=Number(freeWheel.dataset.selectedIndex);
+        const nextIndex=(wheelOrigin+1)%60;
+        hits[nextIndex].dispatchEvent(new MouseEvent("click",{bubbles:true}));
+        assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
+          freeWheel.dataset.selectionLinked==="false" &&
+          freeWheel.dataset.previousOffset==="-59" && freeWheel.dataset.nextOffset==="1" &&
+          freeWheel.dataset.nextDate==="2024/02/11",
+          "selecting one Day ahead must PREVIEW both strict occurrences without committing the date");
+        assert(root.dataset.targetDate==="2024-02-10" &&
+          frame.contentWindow.location.search.includes("compare=2024-02-10"),
+          "wheel sector click must not mutate comparison date or permalink");
+        doc.getElementById("research-free-wheel-next").click();
+        await wait(0);
+        assert(root.dataset.targetDate==="2024-02-11" &&
+          root.dataset.dayPhase==="10" && root.dataset.yearPhase==="0" &&
+          root.dataset.wheelJumpOutcome==="applied" &&
+          root.dataset.wheelJumpDirection==="next" && root.dataset.wheelJumpOffset==="1" &&
+          freeWheel.dataset.selectionLinked==="true" &&
+          Number(freeWheel.dataset.selectedIndex)===nextIndex,
+          "next occurrence must commit exactly one day through the single free-date owner");
+        const sameIndex=Number(freeWheel.dataset.selectedIndex);
+        hits[sameIndex].dispatchEvent(new MouseEvent("click",{bubbles:true}));
+        assert(freeWheel.dataset.previousOffset==="-60" &&
+          freeWheel.dataset.nextOffset==="60",
+          "same-name search must mean strict prior/next occurrence, not current date");
+        doc.getElementById("research-free-wheel-previous").click();
+        await wait(0);
+        assert(root.dataset.targetDate==="2023-12-13" &&
+          root.dataset.yearPhase==="59" &&
+          root.dataset.dayPhase==="10" &&
+          root.dataset.wheelJumpOffset==="-60",
+          "strict same-name previous occurrence must cross calendar year and preserve Day identity");
+        hits[Number(freeWheel.dataset.selectedIndex)].dispatchEvent(new MouseEvent("click",{bubbles:true}));
+        doc.getElementById("research-free-wheel-next").click();
+        await wait(0);
+        assert(root.dataset.targetDate==="2024-02-11" &&
+          root.dataset.wheelJumpOffset==="60",
+          "strict same-name next occurrence must reverse the 60-day jump");
+        const priorIndex=(Number(freeWheel.dataset.selectedIndex)+59)%60;
+        hits[priorIndex].dispatchEvent(new MouseEvent("click",{bubbles:true}));
+        assert(freeWheel.dataset.previousOffset==="-1","previous adjacent Ganzhi should be only one day back");
+        doc.getElementById("research-free-wheel-previous").click();
+        await wait(0);
+        assert(root.dataset.targetDate==="2024-02-10" &&
+          root.dataset.dayPhase==="9" && root.dataset.yearPhase==="0" &&
+          root.dataset.baseDate==="2024-02-01" &&
+          frame.contentWindow.location.search.includes("compare=2024-02-10"),
+          "wheel date preview and both jump directions must round-trip exact date, phases and URL");
+        assert(legacy.dataset.baseDate===initialLegacyBase &&
+          legacy.dataset.deltaYears===initialLegacyDelta,
+          "free Day wheel must never mutate the annual-only recurrence authority");
+        record("wheel-select-preview-not-commit",true);
+        record("wheel-strict-same-day-sixty",true);
+        record("wheel-next-previous-roundtrip",true);
+        record("wheel-annual-isolation",true);
+        freeWheel.open=false;
+        
         const step = days => doc.querySelector('[data-explorer-step-days="' + days + '"]')?.click();
         const initialTargetDay = root.dataset.targetDayPillar;
         step(1);
