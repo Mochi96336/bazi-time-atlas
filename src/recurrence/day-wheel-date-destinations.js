@@ -27,7 +27,7 @@ export function dayWheelDateDestinations(date, selectionIndex) {
   const selected = cycleItem(selectionIndex);
   const forward = mod60(selected.index - current.index);
   const nextDays = forward === 0 ? 60 : forward;
-  const previousDays = nextDays - 60;
+  const previousDays = forward === 0 ? -60 : forward - 60;
   const before = Object.freeze({
     offsetDays:previousDays,
     date:existingDestination(date,previousDays)
