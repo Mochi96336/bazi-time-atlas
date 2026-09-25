@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   FIXED_LIGHT_DIRECTION,
+  MATERIAL_PROBES,
   MATERIAL_MODES,
   MATERIAL_RING_IDS,
   ROUGHNESS_FIELD_SIZE,
@@ -11,6 +12,7 @@ import {
   fillRenderedRotations,
   materialGeometry,
   renderedSolarRotation,
+  resolveMaterialProbe,
   resolveMaterialMode,
   solarMaterialGeometry,
   zodiacMaterialGeometry
@@ -23,6 +25,24 @@ test("roughness is the production default while explicit invalid modes fail clos
   assert.equal(resolveMaterialMode("?material=roughness"), MATERIAL_MODES.ROUGHNESS);
   assert.equal(resolveMaterialMode("?material=roughness-normal"), MATERIAL_MODES.SVG);
   assert.equal(resolveMaterialMode("?material=glitter"), MATERIAL_MODES.SVG);
+});
+
+test("H2.0 material ablations are explicit roughness-only diagnostics", () => {
+  const labels = [
+    "none", "solar-no-oxidation", "solar-no-scratches", "solar-no-reflection",
+    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response"
+  ];
+  assert.deepEqual(Object.keys(MATERIAL_PROBES), labels);
+  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6]);
+  assert.equal(resolveMaterialProbe(""), null);
+  assert.equal(resolveMaterialProbe("?material=roughness"), null);
+  assert.equal(resolveMaterialProbe("?material=svg&materialProbe=solar-no-scratches"), null);
+  assert.equal(resolveMaterialProbe("?materialProbe=solar-no-scratches"), null);
+  assert.equal(resolveMaterialProbe("?material=roughness&materialProbe=bogus"), null);
+  assert.equal(resolveMaterialProbe("?material=roughness&materialProbe=__proto__"), null);
+  for (const label of labels) {
+    assert.equal(resolveMaterialProbe("?material=roughness&materialProbe=" + label), MATERIAL_PROBES[label]);
+  }
 });
 
 test("material geometry is borrowed from the canonical ring model and excludes Solar/Zodiac", () => {
@@ -162,6 +182,11 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /uniform float u_zodiac_outer_radius/);
   assert.match(material, /renderSolarBrass\(point, u_solar_rotation, pixelFootprint\)/);
   assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
+  assert.ok(material.includes("uniform int u_material_probe;"));
+  assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0)"));
+  for (const id of [1, 2, 3, 4, 5, 6]) {
+    assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
+  }
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
   // broad oxide-island read in favor of high-frequency low-contrast variation.
   // repeating 128×128 graphite texture for oxidation. It owns a deterministic
