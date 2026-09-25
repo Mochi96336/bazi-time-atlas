@@ -127,6 +127,49 @@
             <p class="research-date-explorer-note">每日依公曆連續日數前進；不依賴立春天文時間。</p>
           </article>
         </div>
+        <details id="research-free-day-wheel" class="research-free-day-wheel" data-ready="false" data-selection-linked="true" aria-label="六十干支反向選日">
+          <summary><span>六十日轉盤</span><strong>選一個干支，再跳往前一次／後一次出現的日期</strong><i aria-hidden="true">展開 ↗</i></summary>
+          <div class="research-free-day-wheel-body">
+            <div class="research-free-day-wheel-stage">
+              <svg id="research-free-day-wheel-svg" viewBox="0 0 640 640" role="group" aria-label="可選擇六十日干支的轉盤；鍵盤左右鍵切換">
+                <g data-free-cycle-group="guides"></g>
+                <g data-free-cycle-group="stems"></g>
+                <g data-free-cycle-group="branches"></g>
+                <g data-free-cycle-group="cycle"></g>
+                <g data-free-cycle-group="selection"></g>
+                <g data-free-cycle-group="center">
+                  <circle class="research-cycle-center" cx="320" cy="320" r="112"></circle>
+                  <text id="research-free-wheel-center-name" class="research-cycle-center-value" x="320" y="314">—</text>
+                  <text id="research-free-wheel-center-count" class="research-cycle-center-note" x="320" y="345">— / 60</text>
+                </g>
+              </svg>
+            </div>
+            <div class="research-free-day-wheel-inspector" aria-live="polite">
+              <span class="research-free-day-wheel-eyebrow">探索日干支</span>
+              <h3 id="research-free-wheel-name">—</h3>
+              <p id="research-free-wheel-status">目前跟隨比較日期</p>
+              <div class="research-free-day-wheel-current">
+                <span>目前比較日</span>
+                <strong id="research-free-wheel-current-date">—</strong>
+                <small id="research-free-wheel-current-name">—</small>
+              </div>
+              <div class="research-free-day-wheel-destinations">
+                <button type="button" id="research-free-wheel-previous" disabled>
+                  <span>前一次出現</span>
+                  <strong id="research-free-wheel-previous-date">—</strong>
+                  <small id="research-free-wheel-previous-delta">—</small>
+                </button>
+                <button type="button" id="research-free-wheel-next" disabled>
+                  <span>後一次出現</span>
+                  <strong id="research-free-wheel-next-date">—</strong>
+                  <small id="research-free-wheel-next-delta">—</small>
+                </button>
+              </div>
+              <button id="research-free-wheel-return" class="research-free-day-wheel-return" type="button" hidden>回到目前比較日</button>
+              <small class="research-free-day-wheel-explanation">同一干支每 60 天再次出現。選擇轉盤只預覽日期；按「前一次」或「後一次」才會修改比較日。兩個方向都不包含今天。</small>
+            </div>
+          </div>
+        </details>
         <p id="research-explorer-closure" class="research-date-explorer-closure">—</p>
         <p class="research-date-explorer-boundary">本模式只顯示兩日期的離散年、日循環。即使名義年序與日序重合，也不代表公曆結構、十二節或四柱完成回歸；需要這些判定請切回「跨年回歸」。</p>
       </div>
@@ -374,6 +417,7 @@
 
   <script type="module" src="./src/recurrence-view.js"></script>
   <script type="module" src="./src/research-date-explorer-view.js"></script>
+  <script type="module" src="./src/research-free-day-wheel-view.js"></script>
   <script type="module" src="./src/research-year-strip-view.js"></script>
   <script type="module" src="./src/research-cycle-comparison-view.js"></script>
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
