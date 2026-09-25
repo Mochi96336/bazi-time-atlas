@@ -102,3 +102,31 @@
   .research-date-explorer-inputs { grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr)); gap:7px; }
   .research-date-explorer-card { padding:12px; }
 }
+
+
+/* Date exploration remains one owner: these controls commit only the target civil date. */
+.research-date-step-controls {
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:8px 12px; margin:10px 0 1px; padding:8px 12px;
+  border:1px solid var(--hairline); border-radius:13px;
+  background:rgba(255,255,255,.009);
+}
+.research-date-step-controls > span { color:#adbaae; font-size:10px; font-weight:670; letter-spacing:.025em; }
+.research-date-step-controls > small { color:#89988d; font-size:10px; }
+.research-date-step-buttons { display:flex; flex-wrap:nowrap; gap:6px; }
+.research-date-step-buttons button {
+  min-width:61px; min-height:40px; padding:6px 10px;
+  border:1px solid rgba(238,242,237,.19); border-radius:10px;
+  color:#d7e4d8; background:rgba(210,226,212,.035);
+  font-size:11px; font-weight:675; font-variant-numeric:tabular-nums; cursor:pointer;
+}
+.research-date-step-buttons button:hover {
+  border-color:var(--day); background:rgba(120,153,165,.12);
+}
+.research-date-step-buttons button:active { transform:translateY(1px); }
+@media (max-width:680px) {
+  .research-date-step-controls { padding:7px 8px; gap:6px; }
+  .research-date-step-controls > small { display:none; }
+  .research-date-step-buttons { width:100%; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+  .research-date-step-buttons button { width:100%; min-width:0; min-height:42px; padding:7px 3px; font-size:11px; }
+}

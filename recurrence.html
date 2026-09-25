@@ -72,6 +72,16 @@
           <button type="button" id="research-explorer-swap">交換日期</button>
         </div>
       </form>
+      <div class="research-date-step-controls" role="group" aria-label="比較日期快速位移">
+        <span>移動比較日</span>
+        <div class="research-date-step-buttons">
+          <button type="button" data-explorer-step-days="-60" aria-label="比較日期往前 60 天">−60 日</button>
+          <button type="button" data-explorer-step-days="-1" aria-label="比較日期往前 1 天">−1 日</button>
+          <button type="button" data-explorer-step-days="1" aria-label="比較日期往後 1 天">＋1 日</button>
+          <button type="button" data-explorer-step-days="60" aria-label="比較日期往後 60 天">＋60 日</button>
+        </div>
+        <small>只移動比較日期 · 基準日固定</small>
+      </div>
       <p class="research-date-explorer-error" id="research-explorer-error" role="status" aria-live="polite" hidden></p>
 
       <div id="research-explorer-results" class="research-date-explorer-results" aria-live="polite">
