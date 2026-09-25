@@ -182,6 +182,22 @@ if (
   throw new Error(`Year and Day labels / interactive 60-day wheel must follow the same comparison date: ${local.url}`);
 }
 console.log(`[recurrence] PASS paired absolute identities + day-wheel sync at +1980: ${local.url}`);
+const yearTape = tagById(local.dom,"research-cycles-year-tape");
+const dayTape = tagById(local.dom,"research-cycles-day-tape");
+for (const tape of [yearTape,dayTape]) {
+  if (
+    attr(tape,"data-positions") !== "60" ||
+    !attr(tape,"data-base-index") ||
+    attr(tape,"data-base-index") !== attr(tape,"data-target-index")
+  ) {
+    throw new Error(`60-position Year/Day phase tapes must visibly coincide on local closure: ${local.url}`);
+  }
+}
+if (!local.dom.includes('href="#research-sexagenary-cycle"')) {
+  throw new Error(`Interactive 60-day wheel must be discoverable from the visible Day comparison: ${local.url}`);
+}
+console.log(`[recurrence] PASS visible 60-tick Year/Day tracks and direct Day-wheel navigation: ${local.url}`);
+
 
 expectFixedGauge(local.dom, local.url);
 expectDiscreteComprehension(local.dom, local.url);
