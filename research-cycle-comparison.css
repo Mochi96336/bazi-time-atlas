@@ -99,10 +99,31 @@
   .research-cycles-identities { gap:8px; }
 }
 @media (max-width:620px) {
-  .research-cycles-grid { grid-template-columns:1fr; }
-  .research-cycle-comparison { padding:14px; margin-top:11px; }
-  .research-cycles-identities strong { font-size:clamp(27px,8vw,36px); }
-  .research-cycles-identities span { min-height:auto; }
+  /* Both cycles must be visible together on an ordinary 390px phone. */
+  .research-cycles-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .research-cycle-comparison { padding:11px; margin-top:11px; }
+  .research-cycles-head { gap:6px; margin-bottom:10px; }
+  .research-cycles-head strong { font-size:15px; }
+  .research-cycles-dates { gap:5px; font-size:9px; }
+  .research-cycles-card { padding:9px 8px; border-radius:12px; }
+  .research-cycles-card-head h3 { font-size:13px; }
+  .research-cycles-card-head span { font-size:9px; }
+  .research-cycles-identities { gap:3px; margin:9px 0; }
+  .research-cycles-identities strong { font-size:clamp(18px,5.1vw,25px); }
+  .research-cycles-identities small { font-size:9px; }
+  .research-cycles-identities span { min-height:auto; font-size:9px; }
+  .research-cycles-identities > i { font-size:10px; }
+  .research-cycles-tape-basis, .research-cycles-tape-legend { font-size:8px; }
+  .research-cycles-phase { gap:4px; flex-wrap:wrap; }
+  .research-cycles-phase span { font-size:9px; }
+  .research-cycles-phase strong { font-size:13px; }
+  .research-cycle-open { min-height:42px; font-size:9px; }
+  .research-cycles-closure { margin-top:8px; font-size:10px; }
+  .research-cycles-convention { font-size:9px; line-height:1.4; }
   .delta-dock > .research-base-date { gap:9px; }
   .delta-dock > .research-base-date input { min-height:44px; font-size:15px; }
+}
+@media (max-width:360px) {
+  .research-cycles-grid { grid-template-columns:1fr; }
+  .research-cycles-identities strong { font-size:25px; }
 }
