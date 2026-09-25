@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./four-pillar-determinacy.css">
   <link rel="stylesheet" href="./near-recurrence.css">
   <link rel="stylesheet" href="./research-cycle-comparison.css">
+  <link rel="stylesheet" href="./research-date-explorer.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -30,7 +31,85 @@
         <h1>回歸研究</h1>
         <p class="lede">離散週期重新對齊，四柱也會回到同一狀態嗎？</p>
       </div>
+      <div class="research-mode-switch" role="group" aria-label="研究操作模式">
+        <button type="button" id="research-mode-annual" aria-pressed="true">跨年回歸</button>
+        <button type="button" id="research-mode-dates" aria-pressed="false">日期探索</button>
+      </div>
       <p class="scope-note">天文外圈採 Berger 1978 長期近似；只比較季節形狀，不作遠未來民用時刻預報。</p>
+    </section>
+
+
+    <section id="research-free-explorer" class="research-date-explorer" aria-labelledby="research-date-explorer-title" hidden data-ready="false" data-astronomy-applicability="not-evaluated" data-four-pillars-applicability="not-evaluated">
+      <header class="research-date-explorer-head">
+        <div>
+          <span class="eyebrow">Cycle explorer</span>
+          <h2 id="research-date-explorer-title">兩個日期，兩組干支循環</h2>
+          <p>分別選定基準日與比較日，觀察名義年序、實際年柱與連續日序；年界資料不足時不猜測年柱。</p>
+        </div>
+        <span class="research-date-explorer-scope">僅離散日期探索<br>天文與四柱未評估</span>
+      </header>
+
+      <form id="research-date-explorer-form" class="research-date-explorer-form" novalidate>
+        <fieldset aria-label="基準日期">
+          <legend>基準日期</legend>
+          <div class="research-date-explorer-inputs">
+            <label>年 <input id="research-explorer-base-year" type="number" min="1" max="10000000" step="1" required value="2024"></label>
+            <label>月 <input id="research-explorer-base-month" type="number" min="1" max="12" step="1" required value="2"></label>
+            <label>日 <input id="research-explorer-base-day" type="number" min="1" max="31" step="1" required value="1"></label>
+          </div>
+        </fieldset>
+        <div class="research-date-explorer-divider" aria-hidden="true">→</div>
+        <fieldset aria-label="比較日期">
+          <legend>比較日期</legend>
+          <div class="research-date-explorer-inputs">
+            <label>年 <input id="research-explorer-target-year" type="number" min="1" max="10000000" step="1" required value="2024"></label>
+            <label>月 <input id="research-explorer-target-month" type="number" min="1" max="12" step="1" required value="2"></label>
+            <label>日 <input id="research-explorer-target-day" type="number" min="1" max="31" step="1" required value="10"></label>
+          </div>
+        </fieldset>
+        <div class="research-date-explorer-actions">
+          <button type="submit" id="research-explorer-apply">比較日期</button>
+          <button type="button" id="research-explorer-swap">交換日期</button>
+        </div>
+      </form>
+      <p class="research-date-explorer-error" id="research-explorer-error" role="status" aria-live="polite" hidden></p>
+
+      <div id="research-explorer-results" class="research-date-explorer-results" aria-live="polite">
+        <div class="research-explorer-elapsed">
+          <span id="research-explorer-date-range">2024/02/01 → 2024/02/10</span>
+          <strong id="research-explorer-elapsed-days">實際經過 9 天</strong>
+        </div>
+        <div class="research-date-explorer-cards">
+          <article class="research-date-explorer-card research-date-explorer-year" aria-labelledby="research-explorer-year-title">
+            <div class="research-date-explorer-card-title"><h3 id="research-explorer-year-title">干支年</h3><small>名義年序 · 60 年</small></div>
+            <div class="research-date-explorer-values">
+              <div><small>基準 · 名義年標</small><strong id="research-explorer-year-base">—</strong></div>
+              <span aria-hidden="true">→</span>
+              <div><small>比較 · 名義年標</small><strong id="research-explorer-year-target">—</strong></div>
+            </div>
+            <div id="research-explorer-year-tape" class="research-date-explorer-tape" role="img" aria-label="名義 60 年序位置"></div>
+            <div class="research-date-explorer-phase"><span>名義年序位移</span><strong id="research-explorer-year-phase">—</strong></div>
+            <div class="research-explorer-active-year">
+              <span>立春年柱（獨立判定）</span>
+              <p><span id="research-explorer-year-active-base">—</span> <i aria-hidden="true">→</i> <span id="research-explorer-year-active-target">—</span></p>
+              <small id="research-explorer-year-active-status">—</small>
+            </div>
+          </article>
+          <article class="research-date-explorer-card research-date-explorer-day" aria-labelledby="research-explorer-day-title">
+            <div class="research-date-explorer-card-title"><h3 id="research-explorer-day-title">干支日</h3><small>公曆連續日 · 60 日</small></div>
+            <div class="research-date-explorer-values">
+              <div><small>基準</small><strong id="research-explorer-day-base">—</strong></div>
+              <span aria-hidden="true">→</span>
+              <div><small>比較</small><strong id="research-explorer-day-target">—</strong></div>
+            </div>
+            <div id="research-explorer-day-tape" class="research-date-explorer-tape" role="img" aria-label="60 日序位置"></div>
+            <div class="research-date-explorer-phase"><span>日序位移</span><strong id="research-explorer-day-phase">—</strong></div>
+            <p class="research-date-explorer-note">每日依公曆連續日數前進；不依賴立春天文時間。</p>
+          </article>
+        </div>
+        <p id="research-explorer-closure" class="research-date-explorer-closure">—</p>
+        <p class="research-date-explorer-boundary">本模式只顯示兩日期的離散年、日循環。即使名義年序與日序重合，也不代表公曆結構、十二節或四柱完成回歸；需要這些判定請切回「跨年回歸」。</p>
+      </div>
     </section>
 
     <nav class="research-outline" aria-label="研究項目">
@@ -274,6 +353,7 @@
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
+  <script type="module" src="./src/research-date-explorer-view.js"></script>
   <script type="module" src="./src/research-year-strip-view.js"></script>
   <script type="module" src="./src/research-cycle-comparison-view.js"></script>
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
