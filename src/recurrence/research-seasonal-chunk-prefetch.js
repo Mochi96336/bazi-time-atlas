@@ -64,7 +64,7 @@ export const researchSeasonalEvidencePrefetch = typeof document === "undefined"
       const detail = freeze({
         status:"error",
         year:10026,
-        transport:"pinned-js-fallback",
+        transport:"pinned-js-li-chun-summary",
         message:error instanceof Error ? error.message : String(error),
         productionAuthorityGranted:false
       });
@@ -77,7 +77,7 @@ export const RESEARCH_SEASONAL_PREFETCH_CONTRACT = freeze({
   targetYear:10026,
   assetLoad:"lazy-browser-fetch",
   readyEvent:RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,
-  errorFallback:"pinned-js-evidence",
+  errorFallback:"pinned-js-li-chun-summary",
   payloadIntegrityRequired:true,
   productionAuthorityGranted:false
 });
