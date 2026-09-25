@@ -166,6 +166,39 @@ const local = expectCase(
   },
   "1980-year local recurrence"
 );
+const linkedCycles = tagById(local.dom, "research-cycle-comparison");
+const linkedDayWheel = tagById(local.dom, "research-sexagenary-wheel");
+if (
+  attr(linkedCycles, "data-ready") !== "true" ||
+  attr(linkedCycles, "data-base-date") !== "2026-09-13" ||
+  attr(linkedCycles, "data-target-date") !== "4006-09-13" ||
+  attr(linkedCycles, "data-year-phase") !== "0" ||
+  attr(linkedCycles, "data-day-phase") !== "0" ||
+  !attr(linkedCycles, "data-base-day-pillar") ||
+  attr(linkedCycles, "data-base-day-pillar") !== attr(linkedCycles, "data-target-day-pillar") ||
+  attr(linkedDayWheel, "data-selected-date-linked") !== "true" ||
+  attr(linkedDayWheel, "data-research-date") !== "4006-09-13"
+) {
+  throw new Error(`Year and Day labels / interactive 60-day wheel must follow the same comparison date: ${local.url}`);
+}
+console.log(`[recurrence] PASS paired absolute identities + day-wheel sync at +1980: ${local.url}`);
+const yearTape = tagById(local.dom,"research-cycles-year-tape");
+const dayTape = tagById(local.dom,"research-cycles-day-tape");
+for (const tape of [yearTape,dayTape]) {
+  if (
+    attr(tape,"data-positions") !== "60" ||
+    !attr(tape,"data-base-index") ||
+    attr(tape,"data-base-index") !== attr(tape,"data-target-index")
+  ) {
+    throw new Error(`60-position Year/Day phase tapes must visibly coincide on local closure: ${local.url}`);
+  }
+}
+if (!local.dom.includes('href="#research-sexagenary-cycle"')) {
+  throw new Error(`Interactive 60-day wheel must be discoverable from the visible Day comparison: ${local.url}`);
+}
+console.log(`[recurrence] PASS visible 60-tick Year/Day tracks and direct Day-wheel navigation: ${local.url}`);
+
+
 expectFixedGauge(local.dom, local.url);
 expectDiscreteComprehension(local.dom, local.url);
 if (!/此起點 60 年序＋60 日序首次重遇/.test(local.dom) || !/1,980 年/.test(local.dom)) {
@@ -212,6 +245,52 @@ if (
   throw new Error(`26026 global discrete closure must remain separate from unavailable absolute Li Chun authority: ${global.url}`);
 }
 console.log(`[recurrence] PASS 26026 keeps exact discrete closure separate from absolute seasonal source coverage: ${global.url}`);
+
+const futureCycles = tagById(global.dom, "research-cycle-comparison");
+if (
+  attr(futureCycles, "data-target-date") !== "26026-09-13" ||
+  attr(futureCycles, "data-year-tape-basis") !== "nominal-or-unresolved" ||
+  attr(futureCycles, "data-day-phase") !== "0" ||
+  attr(futureCycles, "data-base-day-pillar") !== attr(futureCycles, "data-target-day-pillar") ||
+  !global.dom.includes('id="research-cycles-year-target-note">僅名義立春後年標 · 當日待判')
+) {
+  throw new Error(`26026 must display computable discrete Year/Day labels without inventing the active Li Chun birth pillar: ${global.url}`);
+}
+
+const beforeLiChun = expectCase("recurrence.html?date=2024-02-01&delta=0", {"data-target-date":"2024-02-01"}, "pre-Li Chun year identity");
+const afterLiChun = expectCase("recurrence.html?date=2024-02-10&delta=0", {"data-target-date":"2024-02-10"}, "post-Li Chun year identity");
+if (
+  !beforeLiChun.dom.includes('id="research-cycles-year-base">癸卯') ||
+  !afterLiChun.dom.includes('id="research-cycles-year-base">甲辰') ||
+  attr(tagById(beforeLiChun.dom,"research-sexagenary-wheel"), "data-research-date") !== "2024-02-01" ||
+  attr(tagById(afterLiChun.dom,"research-sexagenary-wheel"), "data-research-date") !== "2024-02-10"
+) {
+  throw new Error("The two named cycles must follow selected date, not the nominal Li Chun year or an independent 甲子 default");
+}
+console.log("[recurrence] PASS active year boundary and linked day identity for two independent calendar dates");
+const beforeYearTape = tagById(beforeLiChun.dom,"research-cycles-year-tape");
+const afterYearTape = tagById(afterLiChun.dom,"research-cycles-year-tape");
+if (attr(beforeYearTape,"data-base-index") !== "39" || attr(afterYearTape,"data-base-index") !== "40") {
+  throw new Error("Visible Year cycle markers must match the displayed active 癸卯 / 甲辰 identity, not a misleading nominal index");
+}
+const shiftedOneYear = expectCase(
+  "recurrence.html?date=2026-09-13&delta=1",
+  {"data-target-date":"2027-09-13","data-year-sequence-phase":"1","data-day-phase":"5"},
+  "one-year Year/Day displacement"
+);
+const shiftedPair = tagById(shiftedOneYear.dom,"research-cycle-comparison");
+if (
+  attr(shiftedPair,"data-ready") !== "true" ||
+  attr(shiftedPair,"data-year-phase") !== "1" ||
+  attr(shiftedPair,"data-day-phase") !== "5" ||
+  attr(shiftedPair,"data-base-day-pillar") === attr(shiftedPair,"data-target-day-pillar") ||
+  attr(tagById(shiftedOneYear.dom,"research-sexagenary-wheel"),"data-research-date") !== "2027-09-13"
+) {
+  throw new Error("Moving one calendar year must move the nominal Year by one but the Day by 365 mod 60");
+}
+console.log("[recurrence] PASS pre/post Li Chun active positions and unequal 1-year / 365-day phases");
+
+
 
 const sourceDerived8000 = expectCase(
   "recurrence.html?date=2026-09-13&delta=8000",
