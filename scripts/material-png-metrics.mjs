@@ -56,7 +56,39 @@ export function decodePngRgb(bytes) {
   return { width, height, rgb };
 }
 
-// Exact SVG.getScreenCTM() from the screenshot viewport, never hand-picked pixel boxes.
+// The screenshot process itself encodes its SVG CTM in the first 96x4 pixels.
+// Chromium --dump-dom has been observed to use a 100px-different vertical
+// viewport origin than --screenshot; DOM-only CTM yields INVALID material ROIs.
+export function readScreenshotCtm(png) {
+  if (png.width < 96 || png.height < 4) throw new Error("screenshot too small for CTM marker");
+  const bytes = new Uint8Array(24);
+  for (let i = 0; i < 24; i += 1) {
+    const x = i * 4 + 2, center = (2 * png.width + x) * 3;
+    const byte = png.rgb[center];
+    if (png.rgb[center + 1] !== byte || png.rgb[center + 2] !== byte) {
+      throw new Error("CTM fiducial lost grayscale channel alignment");
+    }
+    for (let dy = 1; dy <= 2; dy += 1) for (let dx = 1; dx <= 2; dx += 1) {
+      const offset = (dy * png.width + i * 4 + dx) * 3;
+      if (Math.abs(png.rgb[offset] - byte) > 1
+        || Math.abs(png.rgb[offset + 1] - byte) > 1
+        || Math.abs(png.rgb[offset + 2] - byte) > 1) {
+        throw new Error("CTM fiducial has nonuniform screenshot pixels");
+      }
+    }
+    bytes[i] = byte;
+  }
+  const values = new DataView(bytes.buffer);
+  const ctm = Array.from({ length: 6 }, (_, i) => values.getInt32(i * 4, false) / 1e6);
+  const [a, b, c, d] = ctm;
+  if (ctm.some(v => !Number.isFinite(v)) || Math.abs(a * d - b * c) < 1e-8
+    || Math.abs(a) > 10 || Math.abs(d) > 10) {
+    throw new Error("decoded screenshot CTM is invalid");
+  }
+  return ctm;
+}
+
+// Use the screenshot-embedded CTM, NEVER one acquired by a separate --dump-dom launch.
 export function materialMasks(width, height, ctm) {
   if (ctm.length !== 6 || ctm.some(v => !Number.isFinite(v))) throw new Error("invalid screen CTM");
   const [a, b, c, d, e, f] = ctm, det = a * d - b * c;
