@@ -50,7 +50,7 @@ test("proof gates root stability without converting it into a production-authori
   assert.equal(root.maxBracketHalfWidthDays, 16);
 });
 
-test("successful proof is pinned with all 24 source-derived TT crossings", () => {
+test("successful proof summary points at the sole compact 24-crossing runtime payload", () => {
   const evidence = DE441_10026_SEASONAL_CROSSING_EVIDENCE;
   assert.equal(evidence.validationKind, "source-derived-reconstruction");
   assert.equal(evidence.researchRun.pullRequest, 456);
@@ -60,15 +60,19 @@ test("successful proof is pinned with all 24 source-derived TT crossings", () =>
     evidence.researchRun.artifactDigest,
     "sha256:b68b3d9d8fd2ca28f65d8d6d3f41dba93b674e2089478745e55fd83f582224dc"
   );
-  assert.equal(evidence.terms.length, 24);
-  assert.equal(new Set(evidence.terms.map(term => term.longitudeDegrees)).size, 24);
+  assert.equal("terms" in evidence, false);
   assert.equal(evidence.proofResult.solvedCrossings, 24);
   assert.ok(evidence.proofResult.maxRootResidualArcsec < 0.001);
   assert.ok(evidence.proofResult.maxAlternateSeedParitySeconds < 0.02);
-  const liChun = evidence.terms.find(term => term.longitudeDegrees === 315);
-  assert.equal(liChun.name, "立春");
-  assert.equal(liChun.ttJulianDay, 5383013.532143416);
-  assert.equal(evidence.liChun.ttJulianDay, liChun.ttJulianDay);
+  assert.equal(evidence.liChun.longitudeDegrees, 315);
+  assert.equal(evidence.liChun.ttJulianDay, 5383013.532143416);
+  assert.equal(evidence.compactRuntimeAsset.crossings, 24);
+  assert.equal(evidence.compactRuntimeAsset.longitudeStepDegrees, 15);
+  assert.equal(
+    evidence.compactRuntimeAsset.payloadSha256,
+    "742723de83e87d66ce866666827644b7ba74fb4f20f96b0c14f63d4a04809219"
+  );
+  assert.equal(evidence.compactRuntimeAsset.runtimeDataCopy, "compact-binary-only");
 });
 
 test("pinned 10026 evidence remains explicitly weaker than independent 4006 truth", () => {

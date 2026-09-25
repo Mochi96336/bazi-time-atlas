@@ -37,8 +37,12 @@ export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees })
   const evidence = EVIDENCE.find(item => item.catalogueYear === year);
   if (!evidence) return null;
 
-  const term = evidence.terms.find(item => item.longitudeDegrees === longitude);
-  if (!term) return null;
+  if (longitude !== evidence.liChun.longitudeDegrees) return null;
+  const term = Object.freeze({
+    name:"立春",
+    longitudeDegrees:evidence.liChun.longitudeDegrees,
+    ttJulianDay:evidence.liChun.ttJulianDay
+  });
 
   return freeze({
     id:`${evidence.id}:${longitude}`,
@@ -59,7 +63,7 @@ export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees })
     productionAuthorityGranted:evidence.claimBoundary.productionAuthorityGranted,
     civilTimeResolved:evidence.claimBoundary.civilTimeResolved,
     researchRun:evidence.researchRun,
-    transport:"pinned-js-evidence",
+    transport:"pinned-js-li-chun-summary",
     payloadIntegrityVerified:false,
     payloadSha256:null,
     chunkId:null
@@ -71,7 +75,8 @@ export const RESEARCH_SEASONAL_EVIDENCE_REGISTRY = freeze({
   evidenceIds:freeze(EVIDENCE.map(item => item.id)),
   cachePreferred:true,
   binaryTransport:"verified-binary-chunk",
-  fallbackTransport:"pinned-js-evidence",
+  fallbackTransport:"pinned-js-li-chun-summary",
+  fallbackCoverage:"li-chun-only",
   productionAuthorityGranted:false,
   independentTargetYearTruthRequiredForProductionPromotion:true
 });
