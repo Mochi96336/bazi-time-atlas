@@ -55,6 +55,8 @@ const expected={
   "data-mobile-viewport":"390",
   "data-mobile-tabs-in-bounds":"true",
   "data-mobile-form-in-bounds":"true",
+  "data-mobile-glance-visible":"true",
+  "data-mobile-glance-first-screen":"true",
   "data-changed-day-phase":"10",
   "data-reversed-day-phase":"50",
   "data-reversed-elapsed-days":"-10",
