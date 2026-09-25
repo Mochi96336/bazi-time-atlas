@@ -700,7 +700,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
     shell?.removeAttribute("data-material-probe-transform");
-    shell?.removeAttribute("data-material-bench");
+    if (shell) delete shell.__h21MaterialDraw;
     materialEvidenceStamp?.remove();
     materialEvidenceStamp = null;
     if (shell) {
@@ -819,49 +819,6 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
 
-  function benchmarkScratchLighting() {
-    if (!diagnosticBench || !active || !shell || canvas.width <= 1 || canvas.height <= 1) return;
-    // Compare identical shader/program/geometry in the SAME GL context.
-    // probe 7 disables only scratch-light. gl.finish gives GPU-inclusive
-    // wall time, not a hardware-independent fragment cost or FPS claim.
-    const samples = { disabled: [], enabled: [] };
-    const drawAndTime = (probe, key) => {
-      const start = globalThis.performance.now();
-      draw(probe, true);
-      gl.finish();
-      if (key) samples[key].push(globalThis.performance.now() - start);
-    };
-    gl.finish();
-    for (let i = 0; i < 4; i += 1) {
-      drawAndTime(7, null);
-      drawAndTime(0, null);
-    }
-    for (let i = 0; i < 10; i += 1) {
-      if (i % 2 === 0) {
-        drawAndTime(7, "disabled");
-        drawAndTime(0, "enabled");
-      } else {
-        drawAndTime(0, "enabled");
-        drawAndTime(7, "disabled");
-      }
-    }
-    const median = values => {
-      const sorted = [...values].sort((a, b) => a - b);
-      return (sorted[4] + sorted[5]) / 2;
-    };
-    const off = median(samples.disabled);
-    const on = median(samples.enabled);
-    // Restore diagnostic baseline; the benchmark does not change screenshots.
-    draw();
-    shell.dataset.materialBench = [
-      "offMs=" + off.toFixed(4),
-      "onMs=" + on.toFixed(4),
-      "ratio=" + (on / Math.max(off, 0.0001)).toFixed(4),
-      "samples=10",
-      "width=" + canvas.width,
-      "height=" + canvas.height
-    ].join(";");
-  }
 
   function activateShader() {
     if (active || !canvas || !svg || !SHADER_MODES.has(requestedMode)) return active;
@@ -919,7 +876,22 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
 
       sizeDirty = true;
       draw();
-      benchmarkScratchLighting();
+      // Only an explicit diagnostic URL can expose a test-only drawing hook.
+      // Timing is performed in Node's monotonic clock around a real CDP call;
+      // headless page clocks have returned 0ms even with a live debugger.
+      if (diagnosticBench && shell) {
+        Object.defineProperty(shell, "__h21MaterialDraw", {
+          configurable: true,
+          value: probe => {
+            if (!active || (probe !== 0 && probe !== 7)) {
+              throw new Error("H2.1 performance probe accepts only 0 or 7");
+            }
+            draw(probe, true);
+            gl.finish();
+            return [canvas.width, canvas.height];
+          }
+        });
+      }
       return true;
     } catch (error) {
       const forced = error?.message === "forced WebGL fallback";
