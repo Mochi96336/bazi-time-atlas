@@ -26,6 +26,7 @@ function chunk(minYear, maxYear, overrides = {}) {
     timeScale:"TT",
     referenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
     payloadSha256:overrides.payloadSha256 ?? SHA_A,
+    payloadIntegrityVerified:overrides.payloadIntegrityVerified ?? true,
     byteLength:de441SeasonalChunkByteLength(maxYear - minYear + 1),
     evidenceIds:Object.freeze(overrides.evidenceIds ?? ["de441-derived-proof"]),
     ...overrides
@@ -170,6 +171,20 @@ test("full DE441-range promotion scales interior evidence instead of inheriting 
   assert.equal(result.productionPromotionEligible, false);
   assert.equal(result.status, "validation-plan-incomplete");
   assert.equal(result.blocker, "range-validation-plan");
+});
+
+test("Research-load eligibility requires the binary payload digest to have been verified", () => {
+  const result = assessDe441SeasonalRangePromotion({
+    minYear:10026,
+    maxYear:10026,
+    sourceCoverage:SOURCE_COVERAGE,
+    chunks:[chunk(10026,10026,{ payloadIntegrityVerified:false })],
+    validationSamples:[]
+  });
+
+  assert.equal(result.researchLoadEligible, false);
+  assert.equal(result.status, "chunk-contract-failed");
+  assert.ok(result.chunkFailures.includes("chunk-payload-integrity:de441-seasonal-10026-10026"));
 });
 
 test("chunk gaps, oversized chunks and source-range overflow fail before promotion evidence is considered", () => {
