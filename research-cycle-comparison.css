@@ -58,6 +58,24 @@
 .research-cycles-day .research-cycles-identities strong { color:#b4d0d8; }
 .research-cycles-identities span { min-height:2.6em; font-size:10px; line-height:1.4; color:var(--muted); overflow-wrap:anywhere; }
 .research-cycles-identities > i { font-size:17px; color:var(--faint); font-style:normal; }
+.research-cycles-tape {
+  --cycle-active:var(--year);
+  display:grid;
+  grid-template-columns:repeat(60,minmax(0,1fr));
+  align-items:end;
+  gap:clamp(1px,.15vw,3px);
+  width:100%;
+  height:25px;
+  margin:5px 0 2px;
+  overflow:visible;
+}
+.research-cycles-day .research-cycles-tape { --cycle-active:var(--day); }
+.research-cycles-tape span { min-width:1px; height:5px; border-radius:2px 2px 0 0; background:rgba(225,237,229,.17); }
+.research-cycles-tape span:nth-child(5n+1) { height:8px; background:rgba(225,237,229,.26); }
+.research-cycles-tape span[data-base="true"] { height:14px; background:var(--cursor); }
+.research-cycles-tape span[data-target="true"] { height:23px; background:var(--cycle-active); box-shadow:0 0 6px color-mix(in srgb,var(--cycle-active) 55%,transparent); }
+.research-cycles-tape span[data-both="true"] { height:23px; background:var(--cursor); outline:2px solid var(--cycle-active); outline-offset:1px; }
+.research-cycles-tape-legend { display:block; margin:0 0 10px; color:var(--faint); font-size:9px; }
 .research-cycles-phase { padding-top:11px; border-top:1px solid var(--hairline); display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
 .research-cycles-phase span { color:var(--muted); font-size:11px; }
 .research-cycles-phase strong { font-size:17px; font-variant-numeric:tabular-nums; white-space:nowrap; }
