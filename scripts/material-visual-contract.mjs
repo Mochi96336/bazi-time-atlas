@@ -13,7 +13,8 @@ export const MATERIAL_PROBE_NAMES = Object.freeze([
   "solar-no-reflection",
   "zodiac-no-patina",
   "zodiac-no-reflection",
-  "graphite-no-response"
+  "graphite-no-response",
+  "solar-no-scratch-light"
 ]);
 export const MATERIAL_PROBE_REGION = Object.freeze({
   none: "all",
@@ -22,5 +23,6 @@ export const MATERIAL_PROBE_REGION = Object.freeze({
   "solar-no-reflection": "solar",
   "zodiac-no-patina": "zodiac",
   "zodiac-no-reflection": "zodiac",
-  "graphite-no-response": "graphite"
+  "graphite-no-response": "graphite",
+  "solar-no-scratch-light": "solar"
 });
