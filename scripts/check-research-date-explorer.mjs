@@ -128,6 +128,14 @@ if(
   attr(linkedPanel,"data-current-date")!=="2024-02-10" ||
   !/\\sopen(?:=|\\s|>)/.test(linkedPanel) ||
   !wheelLink.dom.includes('id="research-free-day-wheel-svg"')
-) throw new Error("Free-date wheel deep link must open linked to the chosen target date, not the annual wheel: "+wheelLink.url);
+) throw new Error("Free-date wheel deep link failed: "+JSON.stringify({
+  rootReady:attr(linkedRoot,"data-ready"),
+  panelReady:attr(linkedPanel,"data-ready"),
+  linked:attr(linkedPanel,"data-selection-linked"),
+  date:attr(linkedPanel,"data-current-date"),
+  opened:/\\sopen(?:=|\\s|>)/.test(linkedPanel),
+  svg:wheelLink.dom.includes('id="research-free-day-wheel-svg"'),
+  panelTag:linkedPanel.slice(0,450)
+})+": "+wheelLink.url);
 console.log("[explorer] PASS explicit free-wheel deep link initializes the separate selectable wheel");
 
