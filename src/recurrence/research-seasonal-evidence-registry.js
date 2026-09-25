@@ -1,10 +1,8 @@
-import {
-  DE441_10026_SEASONAL_CROSSING_EVIDENCE
-} from "../astronomy/de441-10026-seasonal-crossing-evidence.js";
-
-const EVIDENCE = Object.freeze([
-  DE441_10026_SEASONAL_CROSSING_EVIDENCE
+const CATALOGUED_EVIDENCE_IDS = Object.freeze([
+  "de441-10026-source-derived-seasonal-crossing-evidence-v1"
 ]);
+
+const loadedByYear = new Map();
 
 function normalizedLongitude(value) {
   if (!Number.isFinite(value)) throw new RangeError("longitudeDegrees must be finite");
@@ -15,47 +13,112 @@ function freeze(value) {
   return Object.freeze(value);
 }
 
+function assertResearchOnlyManifest(manifest) {
+  if (!manifest || typeof manifest !== "object") throw new TypeError("manifest is required");
+  if (manifest.sourceEphemeris !== "DE441") throw new RangeError("Research seasonal manifest must be DE441");
+  if (manifest.timeScale !== "TT") throw new RangeError("Research seasonal manifest must use TT");
+  if (manifest.productionAuthorityGranted !== false) {
+    throw new RangeError("Research seasonal manifest must not grant production authority");
+  }
+  if (manifest.productionIntegrated !== false) {
+    throw new RangeError("Research seasonal manifest must not claim production integration");
+  }
+  if (manifest.independentTargetYearTruth !== false) {
+    throw new RangeError("source-derived Research manifest must not claim independent target-year truth");
+  }
+  if (manifest.sourceDerivedTargetYear !== true) {
+    throw new RangeError("Research seasonal manifest must declare source-derived target-year semantics");
+  }
+  if (!Array.isArray(manifest.evidenceIds) || manifest.evidenceIds.length < 1) {
+    throw new RangeError("Research seasonal manifest must pin evidence ids");
+  }
+  if (!manifest.evidenceIds.every(id => CATALOGUED_EVIDENCE_IDS.includes(id))) {
+    throw new RangeError("Research seasonal manifest references uncatalogued evidence");
+  }
+}
+
+export function installResearchSeasonalEvidenceChunk({ manifest, chunk }) {
+  assertResearchOnlyManifest(manifest);
+  if (!chunk || typeof chunk.ttJulianDayFor !== "function") {
+    throw new TypeError("decoded seasonal chunk is required");
+  }
+  if (
+    chunk.minYear !== manifest.minYear
+    || chunk.maxYear !== manifest.maxYear
+    || chunk.yearCount !== manifest.yearCount
+    || chunk.eventsPerYear !== manifest.eventsPerYear
+    || chunk.encoding !== manifest.encoding
+  ) {
+    throw new RangeError("Research seasonal chunk does not match its manifest");
+  }
+
+  for (let year = manifest.minYear; year <= manifest.maxYear; year += 1) {
+    loadedByYear.set(year, freeze({ manifest, chunk }));
+  }
+
+  return freeze({
+    status:"installed",
+    minYear:manifest.minYear,
+    maxYear:manifest.maxYear,
+    evidenceIds:freeze([...manifest.evidenceIds])
+  });
+}
+
+export function researchSeasonalEvidenceLoadedForYear(year) {
+  if (!Number.isInteger(year)) throw new RangeError("year must be an integer");
+  return loadedByYear.has(year);
+}
+
+export function clearResearchSeasonalEvidenceForTests() {
+  loadedByYear.clear();
+}
+
 /**
  * Research-only seasonal-event evidence.
  *
- * This registry exists so Research views can consume a pinned, reproducible
- * source-derived TT crossing without registering it as a production provider.
- * Every returned event carries the evidence claim boundary unchanged.
+ * Browser runtime data is installed only after a compact binary chunk has
+ * passed manifest, SHA-256 and chunk-format validation. Merely having a pinned
+ * proof module in the repository does not make the epoch available at runtime.
  */
 export function researchSeasonalEvidenceForLongitude({ year, longitudeDegrees }) {
   if (!Number.isInteger(year)) throw new RangeError("year must be an integer");
   const longitude = normalizedLongitude(longitudeDegrees);
-  const evidence = EVIDENCE.find(item => item.catalogueYear === year);
-  if (!evidence) return null;
+  const loaded = loadedByYear.get(year);
+  if (!loaded) return null;
 
-  const term = evidence.terms.find(item => item.longitudeDegrees === longitude);
-  if (!term) return null;
+  const { manifest, chunk } = loaded;
+  const ttJulianDay = chunk.ttJulianDayFor({ year, longitudeDegrees:longitude });
+  const evidenceId = manifest.evidenceIds[0];
 
   return freeze({
-    id:`${evidence.id}:${longitude}`,
-    evidenceId:evidence.id,
-    validationKind:evidence.validationKind,
-    authority:evidence.authority,
-    sourceEphemeris:evidence.sourceEphemeris,
+    id:`${evidenceId}:${longitude}`,
+    evidenceId,
+    validationKind:manifest.validationKind,
+    authority:manifest.authority,
+    sourceEphemeris:manifest.sourceEphemeris,
     year,
-    name:term.name,
+    name:manifest.termNamesByLongitude?.[String(longitude)] ?? `${longitude}°`,
     longitudeDegrees:longitude,
-    timeScale:evidence.timeScale,
-    ttJulianDay:term.ttJulianDay,
-    independentTargetYearTruth:evidence.claimBoundary.independentTargetYearTruth,
-    sourceDerivedTargetYear:evidence.claimBoundary.sourceDerivedTargetYear,
+    timeScale:manifest.timeScale,
+    ttJulianDay,
+    independentTargetYearTruth:manifest.independentTargetYearTruth,
+    sourceDerivedTargetYear:manifest.sourceDerivedTargetYear,
     frameIndependentlyValidatedAtTargetYear:
-      evidence.claimBoundary.frameIndependentlyValidatedAtTargetYear,
-    productionIntegrated:evidence.claimBoundary.productionIntegrated,
-    productionAuthorityGranted:evidence.claimBoundary.productionAuthorityGranted,
-    civilTimeResolved:evidence.claimBoundary.civilTimeResolved,
-    researchRun:evidence.researchRun
+      manifest.frameIndependentlyValidatedAtTargetYear,
+    productionIntegrated:manifest.productionIntegrated,
+    productionAuthorityGranted:manifest.productionAuthorityGranted,
+    civilTimeResolved:manifest.civilTimeResolved,
+    researchRun:manifest.researchRun,
+    runtimePayloadId:manifest.id,
+    runtimePayloadSha256:manifest.payloadSha256
   });
 }
 
 export const RESEARCH_SEASONAL_EVIDENCE_REGISTRY = freeze({
-  id:"research-source-derived-seasonal-evidence-registry-v1",
-  evidenceIds:freeze(EVIDENCE.map(item => item.id)),
+  id:"research-source-derived-seasonal-evidence-registry-v2",
+  evidenceIds:CATALOGUED_EVIDENCE_IDS,
+  runtimePayloadMode:"verified-lazy-binary-chunk",
+  staticEpochPayloadBundled:false,
   productionAuthorityGranted:false,
   independentTargetYearTruthRequiredForProductionPromotion:true
 });
