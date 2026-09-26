@@ -21,3 +21,14 @@ A correct, screenshot-process-CTM geometry mask showed the existing Zodiac cloud
 3. Inspect Zodiac at normal screen scale: a hard surface should be distinct from graphite without bright blue paint, decorative uniform rings, stars, carbon-fiber look or distracting luminosity. Check actual 390 contrast near low-value Zodiac text and the ivory Selected Instant.
 4. No automatic merge based on test green, mean RGB, changed fraction or file presence. If real visual improvement is absent, close this diagnostic PR unmerged and redirect effort toward genuine layout/typographic readability rather than escalating shader complexity.
 5. Any planned production adoption separately compares runtime drawing cost on real devices; screenshot image delta alone cannot prove acceptable GPU cost.
+
+
+## Final independent optical audit — hardcoat candidate rejected
+
+Current exact-head [Quality 36265967030](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36265967030) and [Visual 36265966933](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36265966933) both **success** at `1221883a`; Visual artifact ID `10914416585` includes original WebGL / actual SVG / forced fallback and diagnostic hardcoat at 1440, 2047 and real 390.
+
+Corrected 1440 screenshot-process-CTM masks are stable: Zodiac 88,120 pixels. Default vs explicit baseline and baseline replay have zero pixel changes across all material ROIs; diagnostic hardcoat reports **zero** outside-Zodiac pixel changes. Compared with default, hardcoat changes 10.0601% of Zodiac mask pixels by ≥3 RGB8 levels, mean absolute RGB8/channel 1.01235, max channel delta 4 and mean encoded display luma 27.135→28.104. Removing Zodiac cloud patina alone changes only 0.1566% (mean RGB8 0.03047).
+
+Actual unamplified desktop 1440 and mobile 390 screenshots and 1:1 crops were manually examined next to H2.0 and true SVG: the harder coat **does not read as substantially more tangible** at ordinary viewing size. It adds code and raises distributed low-level brightness without an obvious material-identity benefit. The underlying dark Zodiac ring and tiny low-contrast labels remain the more salient readability problem. A pixel-count result is not a perceptual quality score.
+
+**Decision: reject and archive H2.2; close PR unmerged.** Keep H2.0 production visuals unchanged and pivot to a separately scoped Zodiac reading contrast/semantic hierarchy audit. Do not compensate by increasing blue saturation, adding clouds or raising specular caps again.
