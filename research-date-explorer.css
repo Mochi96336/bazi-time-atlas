@@ -288,3 +288,9 @@ body[data-research-mode="dates"] .recurrence-intro .lede {max-width:660px;}
     gap:8px;margin:4px 0 10px;
   }
 }
+
+.research-one-year-example-note {
+  display:inline-block; color:#bac99e; background:rgba(186,206,154,.065);
+  border:1px solid rgba(186,206,154,.18); border-radius:7px;
+  padding:4px 8px; margin-top:7px; font-size:10px; line-height:1.4;
+}
