@@ -107,6 +107,8 @@
             </div>
             <div id="research-one-year-track" class="research-one-year-track" role="img" aria-label="公曆一年、實際立春及目前日期的位置">
               <div class="research-one-year-track-line" aria-hidden="true"></div>
+              <div id="research-one-year-before-segment" class="research-one-year-era research-one-year-era-before" hidden aria-hidden="true"></div>
+              <div id="research-one-year-after-segment" class="research-one-year-era research-one-year-era-after" hidden aria-hidden="true"></div>
               <div class="research-one-year-track-marker research-one-year-track-start" aria-hidden="true"></div>
               <div id="research-one-year-lichun-marker" class="research-one-year-track-marker research-one-year-track-lichun" hidden aria-hidden="true"></div>
               <div id="research-one-year-selected-marker" class="research-one-year-track-marker research-one-year-track-selected" aria-hidden="true"></div>
@@ -115,6 +117,27 @@
             <div class="research-one-year-milestones" aria-hidden="true">
               <span>1/1 <small>公曆換年</small></span>
               <span>12/31 <small>公曆年末</small></span>
+            </div>
+            <div id="research-one-year-era-legend" class="research-one-year-era-legend" hidden>
+              <span><i class="research-one-year-era-swatch-before" aria-hidden="true"></i><b id="research-one-year-before-label">立春前 · —</b></span>
+              <span><i class="research-one-year-era-swatch-after" aria-hidden="true"></i><b id="research-one-year-after-label">立春後 · —</b></span>
+            </div>
+            <div id="research-one-year-boundary-zoom" class="research-one-year-boundary-zoom" hidden>
+              <div class="research-one-year-zoom-heading">
+                <strong>立春附近 · 放大觀察</strong>
+                <small>以下局部放大，與上方全年時間線使用不同尺度</small>
+              </div>
+              <div class="research-one-year-zoom-track" id="research-one-year-zoom-track" role="img" aria-label="立春前後共28天的放大時間線">
+                <div class="research-one-year-zoom-before" aria-hidden="true"></div>
+                <div class="research-one-year-zoom-after" aria-hidden="true"></div>
+                <div class="research-one-year-zoom-event" id="research-one-year-zoom-event" aria-hidden="true"></div>
+                <div class="research-one-year-zoom-selected-day" id="research-one-year-zoom-selected-day" aria-hidden="true"></div>
+              </div>
+              <div class="research-one-year-zoom-labels">
+                <span>立春前 14 天</span>
+                <span id="research-one-year-zoom-center">立春</span>
+                <span>立春後 14 天</span>
+              </div>
             </div>
             <div class="research-one-year-marker-key" aria-label="動態時間線圖例">
               <span class="research-one-year-marker-key-selected"><i aria-hidden="true"></i><b id="research-one-year-selected-label">選定日 —</b></span>
