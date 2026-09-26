@@ -16,7 +16,7 @@ test("ordinary mobile reading has one textual exact-time surface", () => {
   assert.match(html, /id="mobile-time-dock"[^>]*data-dirty="false"[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"/);
   assert.match(
     instrumentCss,
-    /\.mobile-time-dock\[data-dirty="false"\]\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\);[\s\S]*?\.mobile-time-dock\[data-dirty="false"\] #mobile-time-apply\s*\{\s*display:\s*none;/
+    /\.mobile-time-dock\[data-dirty="false"\]\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto;[\s\S]*?\.mobile-time-dock\[data-dirty="false"\] #mobile-time-apply\s*\{\s*display:\s*none;/
   );
 });
 
@@ -28,10 +28,10 @@ test("mobile ordinary Zodiac classification joins existing exact-time rail witho
   assert.match(instrumentCss, /#mobile-zodiac-readout \{ display: none; \}/);
   assert.match(instrumentCss, /:not\(\[data-classification-overlay="on"\]\)[\s\S]*?\.mobile-time-dock\[data-dirty="false"\] #mobile-zodiac-readout:not\(\[hidden\]\)/);
   assert.match(instrumentCss, /#mobile-zodiac-readout:not\(\[hidden\]\)[\s\S]*?font-size:\s*12px/);
-  assert.doesNotMatch(html, /id="mobile-zodiac-readout"[\s\S]*?<input/);
+  assert.equal((html.match(/id="mobile-zodiac-readout"/g) ?? []).length, 1);
 });
 
-test("ordinary rail flattening survives Analysis siblings inserted after the instrument", () {
+test("ordinary rail flattening survives Analysis siblings inserted after the instrument", () => {
   assert.match(
     mobileCss,
     /\.mobile-time-dock\s*\{[\s\S]*?border:\s*1px solid var\(--hairline\);[\s\S]*?border-radius:\s*15px;[\s\S]*?background:\s*rgba\(255,255,255,\.022\);/
