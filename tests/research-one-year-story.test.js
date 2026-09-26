@@ -21,6 +21,15 @@ test("selected-year narrative shows genuine 2024 Li Chun position and keeps the 
   assert.ok(Math.abs(a.liChun.position-b.liChun.position)<0.01);
   assert.equal(a.liChun.before,"癸卯");
   assert.equal(a.liChun.after,"甲辰");
+  // The full-year strip is proportional to 366 days; the explicitly separate
+  // local view expands only ±14 days about this year's sourced Li Chun event.
+  assert.ok(a.boundaryZoom && b.boundaryZoom);
+  assert.ok(a.boundaryZoom.selectedDayStartPercent<50);
+  assert.ok(b.boundaryZoom.selectedDayStartPercent>50);
+  assert.equal(a.boundaryZoom.eventPercent,50);
+  assert.equal(b.boundaryZoom.eventPercent,50);
+  assert.equal(a.boundaryZoom.selectedDayWidthPercent,100/28);
+  assert.ok(Object.isFrozen(a.boundaryZoom));
 });
 
 test("a Li Chun boundary calendar date must remain explicitly unresolved without a selected time",()=>{
@@ -30,6 +39,8 @@ test("a Li Chun boundary calendar date must remain explicitly unresolved without
   assert.equal(s.activeYear.name,null);
   assert.ok(s.liChun);
   assert.ok(s.selectedPosition>=0&&s.selectedPosition<=100);
+  assert.ok(s.boundaryZoom && s.boundaryZoom.selectedDayContainsEvent,
+    "a date-only boundary day is a 24-hour interval overlapping the Li Chun event");
 });
 
 test("365 vs 366 days advances the continuous Day cycle by five vs six independent of Year",()=>{
@@ -56,6 +67,7 @@ test("no seasonal evidence never draws a guessed Li Chun marker or invents an ac
   assert.equal(s.activeYear.status,"not-evaluated");
   assert.equal(s.activeYear.name,null);
   assert.ok(s.liChunUnavailable);
+  assert.equal(s.boundaryZoom,null);
   assert.ok(Object.isFrozen(s));
   assert.ok(Object.isFrozen(s.selectedDate));
 });
@@ -64,4 +76,11 @@ test("evidence for a different calendar date must not be attached to the selecte
   const date={year:2024,month:2,day:1};
   assert.throws(()=>researchOneYearStory(date,researchYearStripState({year:2024,month:2,day:10})),RangeError);
   assert.throws(()=>researchOneYearStory({year:2025,month:2,day:29}),RangeError);
+});
+
+test("the close-up disappears outside the sourced boundary window rather than suggesting a shifted Li Chun",()=>{
+  const near={year:2024,month:2,day:10};
+  const far={year:2024,month:6,day:10};
+  assert.ok(researchOneYearStory(near,researchYearStripState(near)).boundaryZoom);
+  assert.equal(researchOneYearStory(far,researchYearStripState(far)).boundaryZoom,null);
 });
