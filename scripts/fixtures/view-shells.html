@@ -27,7 +27,9 @@
     const probe = document.querySelector("#probe");
     const specs = [
       ["atlas-mobile", "../../"],
-      ["recurrence-mobile", "../../recurrence.html"],
+      // This shell regression asserts the preexisting full annual research UI;
+      // bare Research entry now has its own beginner story regression.
+      ["recurrence-mobile", "../../recurrence.html?mode=annual"],
       ["birth-mobile", "../../birth.html"],
       ["sexagenary-mobile", "../../sexagenary.html?ganzhi=丁卯"],
       ["sexagenary-desktop", "../../sexagenary.html"]
