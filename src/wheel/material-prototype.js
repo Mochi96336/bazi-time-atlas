@@ -26,7 +26,8 @@ export const MATERIAL_PROBES = Object.freeze({
   "zodiac-no-patina": 4,
   "zodiac-no-reflection": 5,
   "graphite-no-response": 6,
-  "solar-shoulder-preview": 7
+  "solar-shoulder-preview": 7,
+  "solar-satin-preview": 8
 });
 
 export function resolveMaterialProbe(search = "") {
@@ -257,6 +258,17 @@ const FRAGMENT_SHADER = [
   "    ? mix(brassLight, brassMid, bodyCoordinate / 0.46)",
   "    : mix(brassMid, brassDark, (bodyCoordinate - 0.46) / 0.54);",
   "  float warmCatch = 1.0 - smoothstep(0.0, 0.22, abs(bodyCoordinate - 0.18));",
+  "  // H2.1C second A/B: redistribute (not stack) the existing world-fixed catch",
+  "  // into a narrower oblique satin lobe with a broad radial falloff.",
+  "  if (u_material_probe == 8) {",
+  "    float across = clamp((length(worldPoint) - u_solar_inner_radius)",
+  "      / max(u_solar_outer_radius - u_solar_inner_radius, 1.0), 0.0, 1.0);",
+  "    float focused = 1.0 - smoothstep(0.01, 0.120, abs(bodyCoordinate - 0.19));",
+  "    float radialResponse = mix(0.44, 1.0, smoothstep(0.15, 0.86, across));",
+  "    float focusedStrength = focused * (0.035 + 0.063 * radialResponse)",
+  "      + warmCatch * 0.012;",
+  "    return mix(body, vec3(0.80, 0.75, 0.66), focusedStrength);",
+  "  }",
   "  return mix(body, vec3(0.930, 0.880, 0.760), u_material_probe == 3 ? 0.0 : warmCatch * 0.047);",
   "}",
   "",
