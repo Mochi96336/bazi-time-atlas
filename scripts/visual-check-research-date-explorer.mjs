@@ -6,7 +6,9 @@ const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
 const captures = [
   { name:"research-date-explorer-1440x1250.png",width:1440,height:1250 },
-  { name:"research-date-explorer-390x1900.png",width:390,height:1900 }
+  { name:"research-date-explorer-390x1900.png",width:390,height:1900 },
+  { name:"research-free-day-wheel-1440x1800.png",width:1440,height:1800,wheelOpen:true },
+  { name:"research-free-day-wheel-390x2800.png",width:390,height:2800,wheelOpen:true }
 ];
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -20,7 +22,9 @@ await mkdir(outputDir,{recursive:true});
 const binary=findBrowser();
 for (const item of captures) {
   const destination=path.join(outputDir,item.name);
-  const url=new URL("recurrence.html?mode=dates&base=2024-02-01&compare=2024-02-10",baseURL).href;
+  const page=new URL("recurrence.html?mode=dates&base=2024-02-01&compare=2024-02-10",baseURL);
+  if(item.wheelOpen)page.searchParams.set("wheel","open");
+  const url=page.href;
   const result=spawnSync(binary,[
     "--headless=new","--no-sandbox","--disable-gpu","--hide-scrollbars",
     "--run-all-compositor-stages-before-draw","--force-device-scale-factor=1",

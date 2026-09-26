@@ -46,6 +46,12 @@ if(attr(probe,"data-ready")!=="true") throw new Error(
 );
 const expected={
   "data-initial-mode":"dates",
+  "data-wheel-select-preview-not-commit":"true",
+  "data-wheel-keyboard-and-return":"true",
+  "data-wheel-same-date-refresh-preserves-exploration":"true",
+  "data-wheel-strict-same-day-sixty":"true",
+  "data-wheel-next-previous-roundtrip":"true",
+  "data-wheel-annual-isolation":"true",
   "data-day-step-forward-and-back":"true",
   "data-day-step-sixty-cycle":"true",
   "data-day-step-share-url":"true",
@@ -111,3 +117,25 @@ if(
   [tag(annual.dom,"research-discrete"),tag(annual.dom,"research-astronomy"),tag(annual.dom,"research-evidence")].some(value=>value.includes(" hidden"))
 ) throw new Error("Existing annual URL must keep its original recurrence and evidence sections visible: "+annual.url);
 console.log("[explorer] PASS legacy annual deep link remains authoritative and unchanged");
+
+const wheelLink=dump("recurrence.html?mode=dates&base=2024-02-01&compare=2024-02-10&wheel=open");
+const linkedPanel=tag(wheelLink.dom,"research-free-day-wheel","details");
+const linkedRoot=tag(wheelLink.dom,"research-free-explorer");
+if(
+  attr(linkedRoot,"data-ready")!=="true" ||
+  attr(linkedPanel,"data-ready")!=="true" ||
+  attr(linkedPanel,"data-selection-linked")!=="true" ||
+  attr(linkedPanel,"data-current-date")!=="2024-02-10" ||
+  !/\sopen(?:=|\s|>)/.test(linkedPanel) ||
+  !wheelLink.dom.includes('id="research-free-day-wheel-svg"')
+) throw new Error("Free-date wheel deep link failed: "+JSON.stringify({
+  rootReady:attr(linkedRoot,"data-ready"),
+  panelReady:attr(linkedPanel,"data-ready"),
+  linked:attr(linkedPanel,"data-selection-linked"),
+  date:attr(linkedPanel,"data-current-date"),
+  opened:/\sopen(?:=|\s|>)/.test(linkedPanel),
+  svg:wheelLink.dom.includes('id="research-free-day-wheel-svg"'),
+  panelTag:linkedPanel.slice(0,450)
+})+": "+wheelLink.url);
+console.log("[explorer] PASS explicit free-wheel deep link initializes the separate selectable wheel");
+
