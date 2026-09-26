@@ -38,6 +38,33 @@ function attr(opening,name) {
   return opening.match(new RegExp(name+'="([^"]*)"'))?.[1] ?? null;
 }
 
+const beginner=dump("recurrence.html");
+const beginnerRoot=tag(beginner.dom,"research-free-explorer");
+const beginnerStory=tag(beginner.dom,"research-one-year-story");
+const beginnerMode=/<body[^>]*>/.exec(beginner.dom)?.[0]??"";
+if(
+  !beginnerMode.includes('data-research-mode="dates"') ||
+  beginnerRoot.includes(" hidden") ||
+  attr(beginnerStory,"data-ready")!=="true" ||
+  attr(beginnerStory,"data-active-year-name")!=="甲辰" ||
+  !beginner.dom.includes("起始示範：2024 年立春附近")
+) throw new Error("Bare Research entry must open an explicitly labeled one-year learning story: "+beginner.url);
+console.log("[explorer] PASS bare Research route learns one selected day before annual recurrence");
+
+for(const path of [
+  "recurrence.html?delta=0",
+  "recurrence.html?mode=annual",
+  "recurrence.html#research-discrete"
+]){
+  const legacy=dump(path);
+  if(
+    !(/<body[^>]*data-research-mode="annual"/.test(legacy.dom)) ||
+    !tag(legacy.dom,"research-free-explorer").includes(" hidden") ||
+    tag(legacy.dom,"research-discrete").includes(" hidden")
+  ) throw new Error("Existing annual deep link must remain inside the annual-only evidence mode: "+legacy.url);
+}
+console.log("[explorer] PASS explicit annual/query/hash deep links retain original recurrence authority");
+
 const interaction=dump("scripts/fixtures/research-date-explorer-390.html",15000);
 const probe=tag(interaction.dom,"probe","output");
 if(attr(probe,"data-ready")!=="true") throw new Error(
@@ -70,8 +97,13 @@ const expected={
   "data-mobile-viewport":"390",
   "data-mobile-tabs-in-bounds":"true",
   "data-mobile-form-in-bounds":"true",
-  "data-mobile-glance-visible":"true",
-  "data-mobile-glance-first-screen":"true",
+  "data-one-year-story-first-screen":"true",
+  "data-one-year-actual-not-nominal":"true",
+  "data-one-year-dynamic-lichun":"true",
+  "data-one-year-leap-motion":"true",
+  "data-one-year-switches-at-lichun":"true",
+  "data-one-year-365-vs-366":"true",
+  "data-one-year-advanced-evidence-retained":"true",
   "data-changed-day-phase":"10",
   "data-reversed-day-phase":"50",
   "data-reversed-elapsed-days":"-10",

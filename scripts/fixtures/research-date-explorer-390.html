@@ -52,21 +52,33 @@
         assert(viewport===390,"fixture must use real 390px iframe viewport");
         assert(tabsRect.left>=0 && tabsRect.right<=391,"research mode switch overflows 390px");
         assert(formRect.left>=0 && formRect.right<=391,"free-date form overflows 390px");
-        const glance = doc.querySelector(".research-explorer-mobile-glance");
-        const glanceRect = glance.getBoundingClientRect();
-        assert(doc.defaultView.getComputedStyle(glance).display==="grid",
-          "the mobile first-screen Year/Day readhead is not visible");
-        assert(glanceRect.left>=0 && glanceRect.right<=391 && glanceRect.bottom<=844,
-          "both named cycles must be visible together within the first 844px mobile viewport");
-        for (const [quick,detail] of [
-          ["research-explorer-glance-year-base","research-explorer-year-base"],
-          ["research-explorer-glance-year-target","research-explorer-year-target"],
-          ["research-explorer-glance-day-base","research-explorer-day-base"],
-          ["research-explorer-glance-day-target","research-explorer-day-target"]
-        ]) {
-          assert(doc.getElementById(quick).textContent===doc.getElementById(detail).textContent,
-            "first-screen readhead diverged from the common Year/Day comparison model");
-        }
+        const story = doc.getElementById("research-one-year-story");
+        const yearTrack = doc.getElementById("research-one-year-track");
+        const comparisonDetail = doc.getElementById("research-explorer-advanced-cycle");
+        const baseDetail = doc.getElementById("research-explorer-advanced-base");
+        assert(story.dataset.ready==="true" && !comparisonDetail.open && !baseDetail.open,
+          "selected-year story must be primary; both duplicate comparison layers stay closed");
+        assert(story.dataset.activeYearName==="甲辰" &&
+          story.dataset.activeYearStatus==="model-estimated" &&
+          doc.getElementById("research-one-year-active-pillar").textContent==="甲辰" &&
+          doc.getElementById("research-one-year-day-pillar").textContent===root.dataset.targetDayPillar,
+          "the primary visible named Year must follow actual Li Chun evidence, not the nominal year");
+        assert(story.dataset.liChunPosition!=="unavailable" &&
+          Number(story.dataset.liChunPosition)<Number(story.dataset.selectedPosition) &&
+          !doc.getElementById("research-one-year-lichun-marker").hidden,
+          "the dynamic Li Chun mark must precede Feb 10 and never use a hard-coded year position");
+        assert(story.dataset.civilYearDays==="366" &&
+          story.dataset.dayCycleYearAdvance==="6" &&
+          doc.getElementById("research-one-year-day-motion").textContent.includes("366"),
+          "leap-year continuous Day movement must be explained before periodic diagnostics");
+        const storyRect=story.getBoundingClientRect();
+        assert(storyRect.left>=0 && storyRect.right<=391 && storyRect.bottom<=844,
+          "the selected Year, continuous Day and true year strip must fit within the 390px first viewport; story bottom="+Math.round(storyRect.bottom)+", top="+Math.round(storyRect.top)+", viewport="+viewport);
+        assert(doc.defaultView.getComputedStyle(doc.querySelector(".research-explorer-mobile-glance")).display==="none",
+          "the duplicate old nominal-first Year/Day glance must no longer occupy the first screen");
+        assert(yearTrack.getAttribute("aria-label").includes("2024") &&
+          yearTrack.getAttribute("aria-label").includes("立春"),
+          "the dynamically positioned year strip must have a meaningful accessible explanation");
 
         const baseDay = root.dataset.baseDayPillar;
         const targetDay = root.dataset.targetDayPillar;
@@ -80,8 +92,10 @@
         record("mobile-viewport",viewport);
         record("mobile-tabs-in-bounds",tabsRect.left>=0 && tabsRect.right<=391);
         record("mobile-form-in-bounds",formRect.left>=0 && formRect.right<=391);
-        record("mobile-glance-visible",doc.defaultView.getComputedStyle(glance).display==="grid");
-        record("mobile-glance-first-screen",glanceRect.bottom<=844);
+        record("one-year-story-first-screen",storyRect.bottom<=844);
+        record("one-year-actual-not-nominal",story.dataset.activeYearName==="甲辰");
+        record("one-year-dynamic-lichun",story.dataset.liChunPosition!=="unavailable");
+        record("one-year-leap-motion",story.dataset.dayCycleYearAdvance==="6");
 
         const freeWheel = doc.getElementById("research-free-day-wheel");
         const freeWheelSvg = doc.getElementById("research-free-day-wheel-svg");
@@ -218,13 +232,59 @@
           "inverse 60-day jump lost the selected target or phase");
         assert(frame.contentWindow.location.search.includes("compare=2024-02-10"),
           "date-step commit did not persist a consistent shareable date");
-        const afterSteps = glance.getBoundingClientRect();
+        const afterSteps = story.getBoundingClientRect();
         assert(afterSteps.bottom<=844,
-          "day-step controls displaced both named cycles below the 390px first viewport");
+          "day-step controls displaced the year boundary story below the 390px first viewport");
         record("day-step-forward-and-back",true);
         record("day-step-sixty-cycle",true);
         record("day-step-share-url",true);
         record("mobile-glance-after-step",afterSteps.bottom<=844);
+
+        // The year story must track the chosen Gregorian year and actual
+        // Li Chun side. Jan 1 is not the Ganzhi year boundary.
+        const initialTargetInputs=dateFields(doc,"target");
+        dateValues(doc,"target",[2024,2,1]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        assert(story.dataset.activeYearName==="癸卯" &&
+          Number(story.dataset.selectedPosition)<Number(story.dataset.liChunPosition),
+          "Feb 1 must show the PRE-Li-Chun Year on the very top story");
+        dateValues(doc,"target",[2024,2,4]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        assert(story.dataset.activeYearStatus==="unresolved" &&
+          doc.getElementById("research-one-year-active-pillar").textContent.includes("癸卯") &&
+          doc.getElementById("research-one-year-active-pillar").textContent.includes("甲辰"),
+          "the ambiguous Li Chun civil day must not be promoted to one certain year");
+        dateValues(doc,"target",[2023,12,31]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        assert(story.dataset.civilYearDays==="365" &&
+          story.dataset.dayCycleYearAdvance==="5",
+          "non-leap year must explain that 365 days advances Day by 5 modulo 60");
+        dateValues(doc,"target",[2024,2,10]);
+        doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
+          {bubbles:true,cancelable:true}));
+        assert(story.dataset.activeYearName==="甲辰" &&
+          story.dataset.dayCycleYearAdvance==="6",
+          "returning to a selected post-Li-Chun day must restore its true Year story");
+        record("one-year-switches-at-lichun",true);
+        record("one-year-365-vs-366",true);
+        // Comparison remains present on demand, without reentering data.
+        comparisonDetail.open=true;
+        baseDetail.open=true;
+        const advancedGlance=doc.querySelector(".research-explorer-mobile-glance");
+        assert(doc.defaultView.getComputedStyle(advancedGlance).display==="grid" &&
+          advancedGlance.getBoundingClientRect().width>100,
+          "opening mobile research diagnostics must restore the named Year/Day pair instead of showing phases alone");
+        assert(doc.getElementById("research-explorer-year-base").textContent==="甲辰" &&
+          doc.getElementById("research-explorer-year-target").textContent==="甲辰" &&
+          doc.getElementById("research-explorer-year-active-base").textContent.includes("癸卯") &&
+          doc.getElementById("research-explorer-year-active-target").textContent.includes("甲辰"),
+          "advanced nominal comparison must retain the distinguishable actual Li Chun year evidence");
+        record("one-year-advanced-evidence-retained",true);
+        comparisonDetail.open=false;
+        baseDetail.open=false;
 
         const targetInputs = dateFields(doc,"target");
         targetInputs[2].value = "11";
@@ -251,7 +311,7 @@
         await wait(0);
         assert(root.dataset.ready==="false" &&
           doc.getElementById("research-explorer-results").hidden===true &&
-          picker.disabled,
+          story.hidden===true && picker.disabled,
           "invalid leap day must hide stale result and disable the direct Ganzhi picker");
         assert(root.dataset.targetDate==="2024-02-01","invalid date mutated the committed pair");
         record("invalid-hidden",doc.getElementById("research-explorer-results").hidden);
@@ -260,7 +320,7 @@
           {bubbles:true,cancelable:true}));
         await wait(0);
         assert(root.dataset.ready==="true" && root.dataset.targetDate==="2024-02-29" &&
-          !picker.disabled && picker.value===freeWheel.dataset.selectedIndex,
+          !story.hidden && !picker.disabled && picker.value===freeWheel.dataset.selectedIndex,
           "correcting invalid leap day did not restore the explorer and its named Day picker");
         record("wheel-direct-picker-invalid-recovery",true);
         record("recovered",root.dataset.ready);
