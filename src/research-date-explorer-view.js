@@ -22,8 +22,17 @@ const annualSections = [
 const annualInstrument = document.querySelector("#recurrence-instrument");
 const lede = document.querySelector(".recurrence-intro .lede");
 const annualLede = lede?.textContent ?? "";
+const heading = document.querySelector(".recurrence-intro h1");
+const annualHeading = heading?.textContent ?? "回歸研究";
 const searchOnEntry = new URL(location.href).searchParams;
-const freeFromLink = searchOnEntry.get("mode") === "dates";
+// A bare Research visit should teach the relationship first. Every existing
+// recurrence deep link (?delta, ?date, clock conventions, or research anchors)
+// remains annual-only. Explicit mode takes precedence over implicit entry.
+const explicitMode = searchOnEntry.get("mode");
+const plainLearningEntry = searchOnEntry.size === 0 &&
+  (!location.hash || location.hash === "#research-free-explorer");
+const freeFromLink = explicitMode === "dates" ||
+  (explicitMode !== "annual" && plainLearningEntry);
 const fields = {
   base:["year","month","day"].map(name => document.querySelector("#research-explorer-base-" + name)),
   target:["year","month","day"].map(name => document.querySelector("#research-explorer-target-" + name))
@@ -382,6 +391,7 @@ function setMode(next,{updateUrl=true}={}) {
   if (lede) lede.textContent = dates
     ? "先看選定日落在立春哪一側，再探索年序與日序不同的前進速度。"
     : annualLede;
+  if (heading) heading.textContent = dates ? "時間循環" : annualHeading;
   if (dates) {
     if (!hasExplorerSelection) {
       const annualBase = readDateString(annualInstrument?.dataset.baseDate);
