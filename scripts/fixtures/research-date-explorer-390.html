@@ -311,7 +311,7 @@
         await wait(0);
         assert(root.dataset.ready==="false" &&
           doc.getElementById("research-explorer-results").hidden===true &&
-          picker.disabled,
+          story.hidden===true && picker.disabled,
           "invalid leap day must hide stale result and disable the direct Ganzhi picker");
         assert(root.dataset.targetDate==="2024-02-01","invalid date mutated the committed pair");
         record("invalid-hidden",doc.getElementById("research-explorer-results").hidden);
@@ -320,7 +320,7 @@
           {bubbles:true,cancelable:true}));
         await wait(0);
         assert(root.dataset.ready==="true" && root.dataset.targetDate==="2024-02-29" &&
-          !picker.disabled && picker.value===freeWheel.dataset.selectedIndex,
+          !story.hidden && !picker.disabled && picker.value===freeWheel.dataset.selectedIndex,
           "correcting invalid leap day did not restore the explorer and its named Day picker");
         record("wheel-direct-picker-invalid-recovery",true);
         record("recovered",root.dataset.ready);
