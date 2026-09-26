@@ -166,6 +166,7 @@ function renderYearStory(comparison, seasonal) {
     base.month===defaultBase.month && base.day===defaultBase.day
   );
   setText("research-one-year-selected-date",dateKey(target).replaceAll("-","/"));
+  setText("research-one-year-selected-label","選定日 "+target.month+"/"+target.day);
   setText("research-one-year-calendar-year",year.toLocaleString("en-US")+" 年");
   setText("research-one-year-active-pillar",name);
   setText("research-one-year-active-evidence",yearCertainty);
