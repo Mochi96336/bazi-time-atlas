@@ -1,6 +1,7 @@
 import { compareResearchDates } from "./recurrence/research-date-pair.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
 import { dayWheelDateDestinations } from "./recurrence/day-wheel-date-destinations.js";
+import { researchOneYearStory } from "./recurrence/research-one-year-story.js";
 import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
 import {
@@ -125,12 +126,84 @@ function activeStatus(comparison) {
   return "實際年柱相位 " + state.phase + " / 60（" + certainty + "）" + difference;
 }
 
+function renderYearStory(comparison, seasonal) {
+  // Year authority comes from researchYearStripState for the SELECTED year,
+  // not from the nominal post-Li-Chun label used by 60-year recurrence.
+  const story=researchOneYearStory(target,seasonal);
+  const panel=document.getElementById("research-one-year-story");
+  const active=comparison.target.activeYear;
+  const name=active.pillar?.name ?? (active.possiblePillars?.map(p=>p.name).join("／") ?? "年柱待判");
+  const yearCertainty=active.status==="exact"?"已有年界依據":
+    active.status==="model-estimated"?"年界模型估計（非精確時刻）":
+    active.status==="unresolved"?"立春邊界附近：未指定時間，兩種年柱皆可能":"尚無可用年界證據";
+  const day=comparison.target.day;
+  const year=target.year;
+  panel.dataset.ready="true";
+  panel.dataset.year=String(year);
+  panel.dataset.activeYearStatus=active.status;
+  panel.dataset.activeYearName=active.pillar?.name ?? "unresolved";
+  panel.dataset.dayName=day.name;
+  panel.dataset.selectedPosition=story.selectedPosition.toFixed(4);
+  panel.dataset.liChunPosition=story.liChun?story.liChun.position.toFixed(4):"unavailable";
+  panel.dataset.liChunStatus=story.liChun?.status ?? "unavailable";
+  panel.dataset.civilYearDays=String(story.yearLength);
+  panel.dataset.dayCycleYearAdvance=String(story.dayPhaseAcrossCivilYear);
+
+  setText("research-one-year-selected-date",dateKey(target).replaceAll("-","/"));
+  setText("research-one-year-calendar-year",year.toLocaleString("en-US")+" 年");
+  setText("research-one-year-active-pillar",name);
+  setText("research-one-year-active-evidence",yearCertainty);
+  setText("research-one-year-day-pillar",day.name);
+  setText("research-one-year-day-position","60 日序 · 第 "+(day.index+1)+" 位");
+  setText("research-one-year-day-motion",
+    story.yearLength+" 天 = 60 日 × "+Math.floor(story.yearLength/60)+" 輪 + "+story.dayPhaseAcrossCivilYear+" 天，干支日推進 "+story.dayPhaseAcrossCivilYear+" 位");
+
+  const marker=document.getElementById("research-one-year-selected-marker");
+  marker.style.left=story.selectedPosition.toFixed(4)+"%";
+  const liChun=document.getElementById("research-one-year-lichun-marker");
+  const dateText=story.liChun?story.liChun.date.month+"/"+story.liChun.date.day:null;
+  if(story.liChun){
+    liChun.hidden=false;
+    liChun.style.left=story.liChun.position.toFixed(4)+"%";
+    liChun.dataset.status=story.liChun.status;
+    setText("research-one-year-lichun-label",
+      (story.liChun.status==="estimated"?"約 ":"")+"立春 "+dateText+
+      " · "+(story.liChun.before??"？")+" → "+(story.liChun.after??"？"));
+  } else {
+    liChun.hidden=true;
+    setText("research-one-year-lichun-label","立春位置待查 · 未繪製推測刻度");
+  }
+  const boundaryMeaning=active.status==="unresolved"
+    ? "選定日位於立春判定邊界；沒有可用時刻時，不指定其中一個干支年。"
+    : !story.liChun
+      ? "立春天文位置無法確認：只呈現公曆日期與連續干支日，不推測年界刻度。"
+      : "公曆 1/1 並不是干支年界。"+
+        (active.side==="before"?"這一天仍在立春之前。":
+         active.side==="after"?"這一天已經跨過立春。":"這一天的立春前後關係仍待確認。");
+  setText("research-one-year-boundary-meaning",boundaryMeaning);
+  setText("research-one-year-source",
+    story.liChun
+      ? "立春位置："+(story.liChun.status==="estimated"?"模型估計":"來源解析")+
+        (story.liChun.label?" · "+story.liChun.label:"")+" · 研究顯示基準 UT1+"+
+        (seasonal?.displayOffset?.hours??8)+"（非民用時區預報）"
+      : story.liChunUnavailable);
+
+  const track=document.getElementById("research-one-year-track");
+  track.setAttribute("aria-label",year+" 年公曆時間線，1/1 起點，12/31 終點，"+
+    dateKey(target)+" 選定日位於 "+story.selectedPosition.toFixed(1)+"%；"+
+    (story.liChun?(story.liChun.status==="estimated"?"模型估計 ":"")+"立春 "+
+      dateText+" 位於 "+story.liChun.position.toFixed(1)+"%":"立春實際位置尚未取得")+"；"+
+    "目前年柱 "+name+"，"+yearCertainty);
+}
+
 function render() {
   let comparison;
+  let targetSeasonal;
   try {
+    targetSeasonal=seasonalEvidence(target);
     comparison = compareResearchDates(base,target,{
       baseYearEvidence:seasonalEvidence(base),
-      targetYearEvidence:seasonalEvidence(target)
+      targetYearEvidence:targetSeasonal
     });
   } catch (error) {
     root.dataset.ready = "false";
@@ -154,6 +227,7 @@ function render() {
   root.dataset.annualRecurrenceEligible = String(comparison.applicability.annualRecurrenceEligible);
   root.dataset.astronomyApplicability = comparison.applicability.astronomy;
   root.dataset.fourPillarsApplicability = comparison.applicability.fourPillars;
+  renderYearStory(comparison,targetSeasonal);
   document.querySelector("#research-explorer-results").hidden = false;
 
   const elapsed = comparison.daySequence.elapsedDays;
@@ -306,7 +380,7 @@ function setMode(next,{updateUrl=true}={}) {
   annualButton.setAttribute("aria-pressed",String(!dates));
   datesButton.setAttribute("aria-pressed",String(dates));
   if (lede) lede.textContent = dates
-    ? "自由選擇兩個日期，直接觀察干支年與干支日如何各自前進。"
+    ? "先看選定日落在立春哪一側，再探索年序與日序不同的前進速度。"
     : annualLede;
   if (dates) {
     if (!hasExplorerSelection) {
