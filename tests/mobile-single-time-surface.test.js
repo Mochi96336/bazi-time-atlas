@@ -39,7 +39,7 @@ test("real 390 browser fixture tests applied, dirty and categorical visibility s
     "zodiacApplyRestored", "zodiacClassificationHidden", "zodiacAnalysisHidden"]) {
     assert.ok(mobileFixture.includes("probe.dataset." + field), field);
     const htmlAttribute = field.replace(/[A-Z]/g, letter => "-" + letter.toLowerCase());
-    assert.ok(mobileProbe.includes("data-" + htmlAttribute), htmlAttribute);
+    assert.ok(mobileProbe.includes('"' + htmlAttribute + '"'), htmlAttribute);
   }
 });
 
