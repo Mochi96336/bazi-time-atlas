@@ -6,6 +6,7 @@ import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 const root = document.querySelector("#research-free-explorer");
 const panel = document.querySelector("#research-free-day-wheel");
 const svg = document.querySelector("#research-free-day-wheel-svg");
+const directSelect = document.querySelector("#research-free-wheel-direct-select");
 const NS = "http://www.w3.org/2000/svg";
 const cx = 320;
 const cy = 320;
@@ -47,6 +48,16 @@ function text(id,value) {
 }
 
 function drawWheel() {
+  // The native picker and circular geometry share the SAME canonical cycle.
+  // Do not create a second hard-coded list of 60 labels.
+  const options=document.createDocumentFragment();
+  sexagenaryCycle.forEach(day=>{
+    const option=document.createElement("option");
+    option.value=String(day.index);
+    option.textContent=String(day.ordinal).padStart(2,"0")+" · "+day.name;
+    options.append(option);
+  });
+  directSelect.replaceChildren(options);
   for(const radius of [150,205,275]) svgEl(groups.guides,"circle",{
     cx,cy,r:radius,class:"research-cycle-guide"
   });
@@ -143,6 +154,7 @@ function setSelected(index,linked) {
   selectedIndex=wrapCycleIndex(index);
   panel.dataset.selectedIndex=String(selectedIndex);
   panel.dataset.selectionLinked=String(linked);
+  directSelect.value=String(selectedIndex);
   const date=getDate(root.dataset.targetDate);
   preview=dayWheelDateDestinations(date,selectedIndex);
   panel.dataset.currentDate=root.dataset.targetDate;
@@ -170,6 +182,7 @@ function setSelected(index,linked) {
 function followCommittedDate(force=false) {
   if(!root || root.dataset.ready!=="true"){
     if(panel)panel.dataset.ready="false";
+    if(directSelect)directSelect.disabled=true;
     for(const direction of ["previous","next"]) {
       const button=document.getElementById("research-free-wheel-"+direction);
       if(button)button.disabled=true;
@@ -178,6 +191,7 @@ function followCommittedDate(force=false) {
   }
   const date=getDate(root.dataset.targetDate);
   if(!date)return;
+  directSelect.disabled=false;
   // Li Chun chunk refinement can rerender the same free-date model. It must
   // not discard a deliberately explored Day position unless the committed
   // calendar date genuinely changed or invalid input has just recovered.
@@ -203,8 +217,19 @@ function pointIndex(event) {
   return wrapCycleIndex(Math.floor((angle+3)/6));
 }
 
-if(root && panel && svg){
+if(root && panel && svg && directSelect){
   drawWheel();
+  directSelect.addEventListener("change",()=>{
+    const raw=directSelect.value;
+    if(!/^(?:[0-9]|[1-5][0-9])$/.test(raw))return;
+    const index=Number(raw);
+    if(root.dataset.ready!=="true"){
+      // An uncommitted or invalid date must never leave a false selection.
+      if(selectedIndex!==null)directSelect.value=String(selectedIndex);
+      return;
+    }
+    setSelected(index,false);
+  });
   svg.addEventListener("pointerdown",event=>{
     if(event.pointerType==="mouse"&&event.button!==0)return;
     const index=pointIndex(event);
