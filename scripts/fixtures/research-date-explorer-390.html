@@ -71,6 +71,24 @@
           story.dataset.dayCycleYearAdvance==="6" &&
           doc.getElementById("research-one-year-day-motion").textContent.includes("366"),
           "leap-year continuous Day movement must be explained before periodic diagnostics");
+        const beforeEra=doc.getElementById("research-one-year-before-segment");
+        const afterEra=doc.getElementById("research-one-year-after-segment");
+        const eraLegend=doc.getElementById("research-one-year-era-legend");
+        const nearZoom=doc.getElementById("research-one-year-boundary-zoom");
+        const selectedBand=doc.getElementById("research-one-year-zoom-selected-day");
+        assert(!beforeEra.hidden && !afterEra.hidden && !eraLegend.hidden &&
+          Math.abs(Number.parseFloat(beforeEra.style.width)-Number(story.dataset.liChunPosition))<.01 &&
+          Math.abs(Number.parseFloat(afterEra.style.left)-Number(story.dataset.liChunPosition))<.01 &&
+          doc.getElementById("research-one-year-before-label").textContent.includes("癸卯") &&
+          doc.getElementById("research-one-year-after-label").textContent.includes("甲辰"),
+          "full-year band must be divided by the sourced Li Chun instant and label BOTH actual year identities");
+        assert(!nearZoom.hidden && story.dataset.boundaryZoomVisible==="true" &&
+          Number.parseFloat(selectedBand.style.left)>50 &&
+          doc.getElementById("research-one-year-zoom-track").getAttribute("aria-label")
+            .includes("尺度不同"),
+          "near-Li-Chun date should have an explicitly separately scaled inset with selected whole day AFTER Li Chun");
+        record("one-year-two-era-band",true);
+        record("one-year-zoom-after-lichun",true);
         const storyRect=story.getBoundingClientRect();
         assert(storyRect.left>=0 && storyRect.right<=391 && storyRect.bottom<=844,
           "the selected Year, continuous Day and true year strip must fit within the 390px first viewport; story bottom="+Math.round(storyRect.bottom)+", top="+Math.round(storyRect.top)+", viewport="+viewport);
@@ -249,6 +267,9 @@
         assert(story.dataset.activeYearName==="癸卯" &&
           Number(story.dataset.selectedPosition)<Number(story.dataset.liChunPosition),
           "Feb 1 must show the PRE-Li-Chun Year on the very top story");
+        assert(!nearZoom.hidden && Number.parseFloat(selectedBand.style.left)<50 &&
+          selectedBand.dataset.includesEvent==="false",
+          "Feb 1 whole-day band must appear BEFORE the same year-specific Li Chun event");
         dateValues(doc,"target",[2024,2,4]);
         doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
           {bubbles:true,cancelable:true}));
@@ -256,12 +277,20 @@
           doc.getElementById("research-one-year-active-pillar").textContent.includes("癸卯") &&
           doc.getElementById("research-one-year-active-pillar").textContent.includes("甲辰"),
           "the ambiguous Li Chun civil day must not be promoted to one certain year");
+        assert(!nearZoom.hidden && selectedBand.dataset.includesEvent==="true" &&
+          doc.getElementById("research-one-year-zoom-track").getAttribute("aria-label")
+            .includes("須另有時刻"),
+          "boundary-date visualization must show a whole day SPANNING Li Chun, not a falsely certain point");
+        record("one-year-zoom-boundary-day-band",true);
         dateValues(doc,"target",[2023,12,31]);
         doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
           {bubbles:true,cancelable:true}));
         assert(story.dataset.civilYearDays==="365" &&
           story.dataset.dayCycleYearAdvance==="5",
           "non-leap year must explain that 365 days advances Day by 5 modulo 60");
+        assert(nearZoom.hidden && story.dataset.boundaryZoomVisible==="false",
+          "an unrelated date far from Li Chun must not retain or invent the previous zoom");
+        record("one-year-zoom-hides-far-date",true);
         dateValues(doc,"target",[2024,2,10]);
         doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
           {bubbles:true,cancelable:true}));
