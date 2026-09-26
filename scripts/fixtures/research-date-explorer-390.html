@@ -273,6 +273,10 @@
         // Comparison remains present on demand, without reentering data.
         comparisonDetail.open=true;
         baseDetail.open=true;
+        const advancedGlance=doc.querySelector(".research-explorer-mobile-glance");
+        assert(doc.defaultView.getComputedStyle(advancedGlance).display==="grid" &&
+          advancedGlance.getBoundingClientRect().width>100,
+          "opening mobile research diagnostics must restore the named Year/Day pair instead of showing phases alone");
         assert(doc.getElementById("research-explorer-year-base").textContent==="甲辰" &&
           doc.getElementById("research-explorer-year-target").textContent==="甲辰" &&
           doc.getElementById("research-explorer-year-active-base").textContent.includes("癸卯") &&
