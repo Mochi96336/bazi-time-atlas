@@ -360,9 +360,20 @@
   stroke: none;
 }
 #zodiac-track .zodiac-label {
-  fill: color-mix(in srgb, var(--zodiac) 66%, var(--muted));
-  font-size: 10px;
-  font-weight: 680;
+  /* Derived classification remains secondary, but should not dissolve into
+     its own dark night-indigo bed on normal desktop reading. */
+  fill: color-mix(in srgb, var(--zodiac) 57%, var(--muted));
+  font-size: 10.5px;
+  font-weight: 690;
+}
+
+/* The selected Zodiac identity is a datum label, NOT another dim context label.
+   Protect Classification's separate categorical authority, avoid blue glow or
+   a brighter surface, and keep Solar/Selected Instant above this label. */
+#kinetic-instrument:not([data-classification-overlay="on"]) #zodiac-track .active-cycle-label {
+  fill: color-mix(in srgb, var(--zodiac) 42%, var(--ink));
+  font-size: 11.25px;
+  font-weight: 780;
 }
 
 /* Selected Instant is the only luminous material cue. Keep the ivory line thin,
