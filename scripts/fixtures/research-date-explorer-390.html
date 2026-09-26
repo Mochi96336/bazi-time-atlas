@@ -95,8 +95,10 @@
         const nextIndex=(wheelOrigin+1)%60;
         const picker=doc.getElementById("research-free-wheel-direct-select");
         assert(picker && !picker.disabled && picker.options.length===60 &&
+          picker.options[0].textContent.startsWith("甲子") &&
+          picker.options[59].textContent.startsWith("癸亥") &&
           picker.value===String(wheelOrigin),
-          "the native picker must expose the same full canonical 60-name cycle");
+          "the native picker must expose the exact 60 Ganzhi names first, for keyboard typeahead");
         picker.value=String(nextIndex);
         change(picker);
         assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
