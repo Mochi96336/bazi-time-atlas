@@ -73,7 +73,7 @@
           "leap-year continuous Day movement must be explained before periodic diagnostics");
         const storyRect=story.getBoundingClientRect();
         assert(storyRect.left>=0 && storyRect.right<=391 && storyRect.bottom<=844,
-          "the selected Year, continuous Day and true year strip must fit within the 390px first viewport");
+          "the selected Year, continuous Day and true year strip must fit within the 390px first viewport; story bottom="+Math.round(storyRect.bottom)+", top="+Math.round(storyRect.top)+", viewport="+viewport);
         assert(doc.defaultView.getComputedStyle(doc.querySelector(".research-explorer-mobile-glance")).display==="none",
           "the duplicate old nominal-first Year/Day glance must no longer occupy the first screen");
         assert(yearTrack.getAttribute("aria-label").includes("2024") &&
