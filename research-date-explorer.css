@@ -279,3 +279,12 @@ body[data-research-mode="dates"] .recurrence-intro .lede {max-width:660px;}
   .research-one-year-motion > strong {font-size:11px;line-height:1.45;}
   .research-explorer-mobile-glance {display:none!important;}
 }
+
+/* Expanded diagnostics are still readable on phones; duplication remains hidden
+   on the beginner screen until the comparison is deliberately opened. */
+@media(max-width:680px) {
+  .research-explorer-advanced-cycle[open] .research-explorer-mobile-glance {
+    display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;margin:4px 0 10px;
+  }
+}
