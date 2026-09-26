@@ -62,7 +62,22 @@
         <div class="research-date-explorer-actions">
           <button type="submit" id="research-explorer-apply">套用日期</button>
         </div>
-        </form>
+          <details id="research-explorer-advanced-base" class="research-explorer-advanced-base">
+          <summary>進階 · 指定另一個日期作為比較基準</summary>
+    <fieldset aria-label="基準日期">
+              <legend>基準日期</legend>
+              <div class="research-date-explorer-inputs">
+                <label>年 <input id="research-explorer-base-year" type="number" min="1" max="10000000" step="1" required value="2024"></label>
+                <label>月 <input id="research-explorer-base-month" type="number" min="1" max="12" step="1" required value="2"></label>
+                <label>日 <input id="research-explorer-base-day" type="number" min="1" max="31" step="1" required value="1"></label>
+              </div>
+            </fieldset>
+          <div class="research-explorer-advanced-actions">
+            <button type="button" id="research-explorer-swap">交換基準日與選定日</button>
+            <small>展開後可另外編輯基準日期；這不是改變立春年界的控制。</small>
+          </div>
+        </details>
+      </form>
       <div class="research-date-step-controls" role="group" aria-label="比較日期快速位移">
         <span>移動比較日</span>
         <div class="research-date-step-buttons">
@@ -126,21 +141,6 @@
             <small>公曆元旦不會直接切換干支年；干支年要看當年立春。</small>
           </div>
         </section>
-        <details id="research-explorer-advanced-base" class="research-explorer-advanced-base">
-          <summary>進階 · 指定另一個日期作為比較基準</summary>
-    <fieldset aria-label="基準日期">
-              <legend>基準日期</legend>
-              <div class="research-date-explorer-inputs">
-                <label>年 <input id="research-explorer-base-year" form="research-date-explorer-form" type="number" min="1" max="10000000" step="1" required value="2024"></label>
-                <label>月 <input id="research-explorer-base-month" form="research-date-explorer-form" type="number" min="1" max="12" step="1" required value="2"></label>
-                <label>日 <input id="research-explorer-base-day" form="research-date-explorer-form" type="number" min="1" max="31" step="1" required value="1"></label>
-              </div>
-            </fieldset>
-          <div class="research-explorer-advanced-actions">
-            <button type="button" id="research-explorer-swap">交換基準日與選定日</button>
-            <small>展開後可另外編輯基準日期；這不是改變立春年界的控制。</small>
-          </div>
-        </details>
         <details id="research-explorer-advanced-cycle" class="research-explorer-advanced-cycle">
           <summary>進階 · 比較兩日期的 60 年與 60 日循環</summary>
         <div class="research-explorer-elapsed">
