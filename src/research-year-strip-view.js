@@ -44,9 +44,16 @@ function offsetLabel(offsetHours) {
   return `UT1${offsetHours >= 0 ? "+" : ""}${offsetHours}`;
 }
 
-function seasonalAuthorityLabel(boundary) {
+export function seasonalAuthorityLabel(boundary) {
   if (boundary.authorityClass === "source-derived-research-evidence") {
-    return "DE441-derived · source-derived";
+    if (boundary.event?.transport === "pinned-js-li-chun-summary") {
+      return "DE441-derived · JS 立春摘要（binary 未驗證）";
+    }
+    if (boundary.event?.transport === "verified-binary-chunk"
+      && boundary.event?.payloadIntegrityVerified === true) {
+      return "DE441-derived · SHA-256 已驗證";
+    }
+    return "DE441-derived · source-derived（傳輸來源待確認）";
   }
   if (boundary.authorityClass === "reviewed-production-direct-event") {
     return boundary.providerId?.includes("de441")
