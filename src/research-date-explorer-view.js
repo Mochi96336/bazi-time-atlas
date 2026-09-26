@@ -135,11 +135,20 @@ function activeStatus(comparison) {
   return "實際年柱相位 " + state.phase + " / 60（" + certainty + "）" + difference;
 }
 
+function hideYearStory() {
+  const story=document.getElementById("research-one-year-story");
+  if(story){
+    story.hidden=true;
+    story.dataset.ready="false";
+  }
+}
+
 function renderYearStory(comparison, seasonal) {
   // Year authority comes from researchYearStripState for the SELECTED year,
   // not from the nominal post-Li-Chun label used by 60-year recurrence.
   const story=researchOneYearStory(target,seasonal);
   const panel=document.getElementById("research-one-year-story");
+  panel.hidden=false;
   const active=comparison.target.activeYear;
   const name=active.pillar?.name ?? (active.possiblePillars?.map(p=>p.name).join("／") ?? "年柱待判");
   const yearCertainty=active.status==="exact"?"已有年界依據":
@@ -224,6 +233,7 @@ function render() {
     });
   } catch (error) {
     root.dataset.ready = "false";
+    hideYearStory();
     document.querySelector("#research-explorer-results").hidden = true;
     setError("無法比較這兩個日期：" + error.message);
     return;
@@ -295,6 +305,7 @@ function applyDates(writeUrl=true) {
   const nextTarget = readFields("target");
   if (!nextBase || !nextTarget) {
     root.dataset.ready = "false";
+    hideYearStory();
     document.querySelector("#research-explorer-results").hidden = true;
     setError("請輸入兩個真實存在的公曆日期（西元 1–10,000,000 年）。");
     return false;
@@ -333,6 +344,7 @@ function stepComparisonDate(days) {
     // values beside that failed edit; keep the fields so a reverse step can
     // recover without retyping.
     root.dataset.ready = "false";
+    hideYearStory();
     document.querySelector("#research-explorer-results").hidden = true;
     setError("比較日期位移超出可用公曆範圍，未更新已選日期。請修改日期或改用反方向位移。");
     return;
@@ -365,6 +377,7 @@ function jumpToSelectedDay(event) {
     dateKey(inputBase)!==dateKey(base) || dateKey(inputTarget)!==dateKey(target) ||
     fromDate!==dateKey(target)) {
     root.dataset.ready="false";
+    hideYearStory();
     document.querySelector("#research-explorer-results").hidden=true;
     setError("日期輸入尚未確認，請先按「比較日期」，再用轉盤跳轉。");
     root.dataset.wheelJumpOutcome="stale-input";
