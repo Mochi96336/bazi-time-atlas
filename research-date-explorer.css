@@ -317,3 +317,23 @@ body[data-research-mode="dates"] .recurrence-intro .lede {max-width:660px;}
   .research-one-year-marker-key {gap:5px 10px;margin-top:5px;}
   .research-one-year-marker-key > span {font-size:9px;}
 }
+
+/* Do not repeat the Research heading above the actual learning surface.
+   The route's mode title and lede already introduce the selected-date task. */
+body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
+.research-explorer-advanced-base {
+  margin:10px 0 7px;padding:5px 13px;
+  border:1px solid var(--hairline);border-radius:13px;
+  background:rgba(255,255,255,.012);
+}
+.research-explorer-advanced-base > summary {
+  min-height:36px;margin:0;
+}
+.research-one-year-example-note {
+  flex-basis:100%;
+  margin-top:0;
+}
+@media(max-width:680px) {
+  .research-explorer-advanced-base {margin:7px 0;padding:5px 9px;}
+  .research-one-year-example-note {font-size:9px;padding:2px 7px;}
+}
