@@ -6,7 +6,7 @@ import { MATERIAL_FIXED_INSTANT, MATERIAL_VIEWPORTS } from "./material-visual-co
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
 const instant = MATERIAL_FIXED_INSTANT;
-const modes = ["svg", "roughness", "fallback"];
+const modes = ["svg", "roughness", "fallback", "shoulder-preview"];
 const viewports = MATERIAL_VIEWPORTS;
 
 function findBrowser() {
@@ -19,6 +19,7 @@ function findBrowser() {
 }
 
 function materialPath(mode) {
+  if (mode === "shoulder-preview") return "?material=roughness&materialProbe=solar-shoulder-preview&instant=" + instant;
   return mode === "fallback"
     ? "?material=roughness&materialWebgl=off&instant=" + instant
     : "?material=" + encodeURIComponent(mode) + "&instant=" + instant;
@@ -70,6 +71,14 @@ function probeMode(browser, mode) {
     if (!result.stdout.includes('data-material-prototype-fallback="forced"')
       || result.stdout.includes('data-material-prototype="roughness"')) {
       throw new Error("Forced SVG fallback did not activate for visual evidence");
+    }
+    return;
+  }
+
+  if (mode === "shoulder-preview") {
+    if (!result.stdout.includes('data-material-prototype="roughness"')
+      || !result.stdout.includes('data-material-probe="solar-shoulder-preview"')) {
+      throw new Error("Experimental Solar shoulder material did not activate");
     }
     return;
   }

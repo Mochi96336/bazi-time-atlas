@@ -25,7 +25,8 @@ export const MATERIAL_PROBES = Object.freeze({
   "solar-no-reflection": 3,
   "zodiac-no-patina": 4,
   "zodiac-no-reflection": 5,
-  "graphite-no-response": 6
+  "graphite-no-response": 6,
+  "solar-shoulder-preview": 7
 });
 
 export function resolveMaterialProbe(search = "") {
@@ -283,6 +284,25 @@ const FRAGMENT_SHADER = [
   "",
   "  float radius = length(worldPoint);",
   "  float edgeDistance = min(radius - u_solar_inner_radius, u_solar_outer_radius - radius);",
+  "  // H2.1C: experimental, bounded oblique light on machined Solar shoulders.",
+  "  // Explicit preview only: default material mode and H2.0 remain byte-equivalent.",
+  "  if (u_material_probe == 7) {",
+  "    float innerInset = radius - u_solar_inner_radius;",
+  "    float outerInset = u_solar_outer_radius - radius;",
+  "    float shoulderWidth = max(8.0, pixelFootprint * 6.5);",
+  "    float shoulderStart = max(2.5, pixelFootprint * 1.5);",
+  "    float innerRidge = smoothstep(shoulderStart, shoulderStart + 2.5, innerInset)",
+  "      * (1.0 - smoothstep(shoulderWidth + 2.5, shoulderWidth + 8.0, innerInset));",
+  "    float outerRidge = smoothstep(shoulderStart, shoulderStart + 2.5, outerInset)",
+  "      * (1.0 - smoothstep(shoulderWidth + 2.5, shoulderWidth + 8.0, outerInset));",
+  "    // Glancing response is localized in world-space; never a uniform bright ring.",
+  "    float facing = dot(normalize(worldPoint), normalize(vec2(-0.42, -0.56)));",
+  "    float lightWindow = smoothstep(0.05, 0.82, facing);",
+  "    float shadowWindow = smoothstep(0.10, 0.75, -facing);",
+  "    float signedRelief = (outerRidge * 0.030 - innerRidge * 0.018) * lightWindow",
+  "      - outerRidge * 0.007 * shadowWindow;",
+  "    body = clamp(body + vec3(0.52, 0.46, 0.38) * signedRelief, 0.0, 1.0);",
+  "  }",
   "  float edgeMask = smoothstep(0.0, 1.35, edgeDistance);",
   "  float bodyAlpha = edgeMask * 0.90;",
   "  return vec4(body * bodyAlpha, bodyAlpha);",

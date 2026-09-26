@@ -30,10 +30,11 @@ test("roughness is the production default while explicit invalid modes fail clos
 test("H2.0 material ablations are explicit roughness-only diagnostics", () => {
   const labels = [
     "none", "solar-no-oxidation", "solar-no-scratches", "solar-no-reflection",
-    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response"
+    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response",
+    "solar-shoulder-preview"
   ];
   assert.deepEqual(Object.keys(MATERIAL_PROBES), labels);
-  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6]);
+  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6, 7]);
   assert.equal(resolveMaterialProbe(""), null);
   assert.equal(resolveMaterialProbe("?material=roughness"), null);
   assert.equal(resolveMaterialProbe("?material=svg&materialProbe=solar-no-scratches"), null);
@@ -184,7 +185,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
   assert.ok(material.includes("uniform int u_material_probe;"));
   assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0)"));
-  for (const id of [1, 2, 3, 4, 5, 6]) {
+  for (const id of [1, 2, 3, 4, 5, 6, 7]) {
     assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
   }
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
@@ -241,6 +242,8 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /body = mix\(body, body \* oxideMultiplier, oxideStrength\)/);
   assert.match(material, /primaryStrength = abs\(primaryScratch\.x\) \* 0\.012 \* fineAttenuation/);
   assert.match(material, /handlingStrength = abs\(handlingScratch\.x\) \* 0\.007 \* fineAttenuation/);
+  assert.match(material, /u_material_probe == 7[\s\S]*?signedRelief = \(outerRidge \* 0\.030 - innerRidge \* 0\.018\)/);
+  assert.match(material, /lightWindow = smoothstep\(0\.05, 0\.82, facing\)/);
   assert.match(material, /bodyAlpha = edgeMask \* 0\.90/);
   assert.match(material, /return vec4\(body \* bodyAlpha, bodyAlpha\)/);
   assert.match(material, /solarRotation = renderedSolarRotation\(renderedRotations\)/);
