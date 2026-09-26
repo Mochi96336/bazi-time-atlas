@@ -20,11 +20,13 @@
     const exerciseDrag = params.get("exerciseDrag") === "1";
     const exerciseLinkedDrag = params.get("exerciseLinkedDrag") === "1";
     const exerciseHourDrag = params.get("exerciseHourDrag") === "1";
+    const exerciseZodiac = params.get("exerciseZodiac") === "1";
     const frame = document.querySelector("#stage");
     const probe = document.querySelector("#probe");
     let dragExercised = false;
     let linkedDragExercised = false;
     let hourDragExercised = false;
+    let zodiacExercised = false;
     frame.style.height = `${requestedHeight}px`;
     document.documentElement.style.height = `${requestedHeight}px`;
     document.body.style.height = `${requestedHeight}px`;
@@ -254,6 +256,41 @@
       probe.dataset.dragLinkedReset = dayTrack.dataset.linked ?? "";
     }
 
+    function exerciseMobileZodiacDatum(childWindow, doc, instrument) {
+      // Test only when explicitly requested by the browser diagnostic runner.
+      // Default screenshot fixtures remain byte-for-byte free of this mutation.
+      if (!exerciseZodiac || zodiacExercised || !instrument?.dataset.zodiac) return;
+      const label = doc.querySelector("#mobile-zodiac-readout");
+      const dock = doc.querySelector("#mobile-time-dock");
+      const input = doc.querySelector("#mobile-instant-input");
+      const apply = doc.querySelector("#mobile-time-apply");
+      if (!label || !dock || !input?.value || !apply ||
+          childWindow.getComputedStyle(label).display === "none") return;
+      zodiacExercised = true;
+      const current = instrument.dataset.zodiac;
+      probe.dataset.zodiacInitialMatches = String(label.textContent === "黃道 · " + current);
+      probe.dataset.zodiacInitialVisible = String(!label.hidden
+        && childWindow.getComputedStyle(label).display !== "none");
+      probe.dataset.zodiacFontSize = childWindow.getComputedStyle(label).fontSize;
+      input.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
+      probe.dataset.zodiacDirtyHidden = String(dock.dataset.dirty === "true"
+        && childWindow.getComputedStyle(label).display === "none");
+      apply.click();
+      probe.dataset.zodiacApplyRestored = String(dock.dataset.dirty === "false"
+        && childWindow.getComputedStyle(label).display !== "none"
+        && label.textContent === "黃道 · " + instrument.dataset.zodiac);
+      const classificationWas = instrument.getAttribute("data-classification-overlay");
+      instrument.setAttribute("data-classification-overlay", "on");
+      probe.dataset.zodiacClassificationHidden = String(childWindow.getComputedStyle(label).display === "none");
+      if (classificationWas === null) instrument.removeAttribute("data-classification-overlay");
+      else instrument.setAttribute("data-classification-overlay", classificationWas);
+      const analysisWas = instrument.getAttribute("data-analysis-open");
+      instrument.setAttribute("data-analysis-open", "true");
+      probe.dataset.zodiacAnalysisHidden = String(childWindow.getComputedStyle(label).display === "none");
+      if (analysisWas === null) instrument.removeAttribute("data-analysis-open");
+      else instrument.setAttribute("data-analysis-open", analysisWas);
+    }
+
     function snapshot() {
       const childWindow = frame.contentWindow;
       const doc = frame.contentDocument;
@@ -308,6 +345,7 @@
         Boolean(solarTrack && zodiacTrack && solarTrack.getAttribute("transform") === zodiacTrack.getAttribute("transform"))
       );
       probe.dataset.target = frame.src;
+      exerciseMobileZodiacDatum(childWindow, doc, instrument);
       exerciseLinkedHourDrag(childWindow, doc, instrument);
       exerciseLinkedDayDrag(childWindow, doc, instrument);
       exerciseIndependentDrag(childWindow, doc, instrument);

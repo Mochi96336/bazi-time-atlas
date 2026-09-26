@@ -6,6 +6,8 @@ const mobileCss = readFileSync(new URL("../mobile-time.css", import.meta.url), "
 const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 const solarAnalysis = readFileSync(new URL("../src/atlas-solar-time-analysis.js", import.meta.url), "utf8");
 const mobileController = readFileSync(new URL("../src/mobile-time-control.js", import.meta.url), "utf8");
+const mobileFixture = readFileSync(new URL("../scripts/fixtures/mobile-390.html", import.meta.url), "utf8");
+const mobileProbe = readFileSync(new URL("../scripts/check-mobile-zodiac-datum.mjs", import.meta.url), "utf8");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 test("ordinary mobile reading has one textual exact-time surface", () => {
@@ -29,6 +31,16 @@ test("mobile ordinary Zodiac classification joins existing exact-time rail witho
   assert.match(instrumentCss, /:not\(\[data-classification-overlay="on"\]\)[\s\S]*?\.mobile-time-dock\[data-dirty="false"\] #mobile-zodiac-readout:not\(\[hidden\]\)/);
   assert.match(instrumentCss, /#mobile-zodiac-readout:not\(\[hidden\]\)[\s\S]*?font-size:\s*12px/);
   assert.equal((html.match(/id="mobile-zodiac-readout"/g) ?? []).length, 1);
+});
+
+test("real 390 browser fixture tests applied, dirty and categorical visibility states", () => {
+  assert.match(mobileFixture, /exerciseZodiac = params\.get\("exerciseZodiac"\) === "1"/);
+  for (const field of ["zodiacInitialMatches", "zodiacInitialVisible", "zodiacDirtyHidden",
+    "zodiacApplyRestored", "zodiacClassificationHidden", "zodiacAnalysisHidden"]) {
+    assert.ok(mobileFixture.includes("probe.dataset." + field), field);
+    const htmlAttribute = field.replace(/[A-Z]/g, letter => "-" + letter.toLowerCase());
+    assert.ok(mobileProbe.includes("data-" + htmlAttribute), htmlAttribute);
+  }
 });
 
 test("ordinary rail flattening survives Analysis siblings inserted after the instrument", () => {
