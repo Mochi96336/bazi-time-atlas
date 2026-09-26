@@ -25,12 +25,30 @@ export function researchOneYearStory(date, evidence = null) {
     ["estimated","resolved"].includes(event.positionStatus);
   const transition = evidence?.liChunTransition;
   const membership = evidence?.selectedYearMembership;
+  // The long strip always measures the real civil year. Only when the selected
+  // date is within 12 days of a sourced Li Chun event do we additionally draw
+  // a *separately labeled* ±14-day local zoom. The selected CIVIL DAY occupies
+  // a full 24-hour band; it is not silently treated as a chosen time of day.
+  const offsetFromLiChunDays = hasEvent
+    ? (position - event.position) * (length - 1) / 100
+    : null;
+  const boundaryZoom = offsetFromLiChunDays !== null &&
+    Math.abs(offsetFromLiChunDays) <= 12
+    ? Object.freeze({
+        selectedDayStartPercent:50 + offsetFromLiChunDays * 100 / 28,
+        selectedDayWidthPercent:100 / 28,
+        eventPercent:50,
+        selectedDayContainsEvent:
+          offsetFromLiChunDays <= 0 && offsetFromLiChunDays + 1 >= 0
+      })
+    : null;
   return Object.freeze({
     selectedDate:Object.freeze({...date}),
     yearLength:length,
     dayPhaseAcrossCivilYear:length%60,
     selectedDayOrdinal:selected+1,
     selectedPosition:position,
+    boundaryZoom,
     activeYear:Object.freeze({
       status:membership?.status ?? "not-evaluated",
       name:membership?.pillar?.name ?? null,
