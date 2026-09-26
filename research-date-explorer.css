@@ -337,3 +337,16 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-explorer-advanced-base {margin:7px 0;padding:5px 9px;}
   .research-one-year-example-note {font-size:9px;padding:2px 7px;}
 }
+
+/* Advanced base inputs belong to the always-visible form so invalid-date
+   errors never leave users unable to correct their comparison baseline. */
+.research-date-explorer-form .research-explorer-advanced-base {
+  margin:1px 0 0;padding:1px 0 0;
+  border:0;border-top:1px solid var(--hairline);
+  border-radius:0;background:transparent;
+}
+.research-date-explorer-form .research-explorer-advanced-base > summary {min-height:28px;}
+@media(max-width:680px) {
+  .research-one-year-motion > small {display:none;}
+  .research-one-year-boundary-meaning {margin:8px 0 3px;}
+}
