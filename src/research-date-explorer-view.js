@@ -158,6 +158,13 @@ function renderYearStory(comparison, seasonal) {
   panel.dataset.civilYearDays=String(story.yearLength);
   panel.dataset.dayCycleYearAdvance=String(story.dayPhaseAcrossCivilYear);
 
+  const exampleNote=document.getElementById("research-one-year-example-note");
+  if(exampleNote) exampleNote.hidden=!(
+    plainLearningEntry &&
+    target.year===defaultTarget.year && target.month===defaultTarget.month &&
+    target.day===defaultTarget.day && base.year===defaultBase.year &&
+    base.month===defaultBase.month && base.day===defaultBase.day
+  );
   setText("research-one-year-selected-date",dateKey(target).replaceAll("-","/"));
   setText("research-one-year-calendar-year",year.toLocaleString("en-US")+" 年");
   setText("research-one-year-active-pillar",name);
