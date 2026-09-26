@@ -30,10 +30,11 @@ test("roughness is the production default while explicit invalid modes fail clos
 test("H2.0 material ablations are explicit roughness-only diagnostics", () => {
   const labels = [
     "none", "solar-no-oxidation", "solar-no-scratches", "solar-no-reflection",
-    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response"
+    "zodiac-no-patina", "zodiac-no-reflection", "graphite-no-response",
+    "zodiac-hardcoat-preview"
   ];
   assert.deepEqual(Object.keys(MATERIAL_PROBES), labels);
-  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6]);
+  assert.deepEqual(Object.values(MATERIAL_PROBES), [0, 1, 2, 3, 4, 5, 6, 7]);
   assert.equal(resolveMaterialProbe(""), null);
   assert.equal(resolveMaterialProbe("?material=roughness"), null);
   assert.equal(resolveMaterialProbe("?material=svg&materialProbe=solar-no-scratches"), null);
@@ -184,7 +185,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /renderZodiacMicroResponse\(point, u_solar_rotation\)/);
   assert.ok(material.includes("uniform int u_material_probe;"));
   assert.ok(material.includes("gl.uniform1i(uniforms.materialProbe, requestedProbe ?? 0)"));
-  for (const id of [1, 2, 3, 4, 5, 6]) {
+  for (const id of [1, 2, 3, 4, 5, 6, 7]) {
     assert.ok(material.includes("u_material_probe == " + id), "ablation shader branch " + id);
   }
   // Material K4.3 keeps the K2 procedural language, but removes the remaining
@@ -261,13 +262,16 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.match(material, /out_color = vec4\(overlayColor \* edgeMask, overlayAlpha\)/);
   assert.match(material, /vec4 renderZodiacMicroResponse\(vec2 worldPoint, float rotationDegrees\)/);
   assert.match(material, /edgeDistance = min\(radius - u_zodiac_inner_radius, u_zodiac_outer_radius - radius\)/);
-  assert.match(material, /specularAlpha = u_material_probe == 5 \? 0\.0 : clamp\(specular \* environmentResponse \* 0\.22, 0\.0, 0\.006\)/);
-  assert.match(material, /microAlpha = u_material_probe == 5 \? 0\.0 : clamp\(abs\(microLightDelta\) \* 0\.31 \+ abs\(fieldCentered\) \* 0\.009, 0\.0, 0\.024\)/);
+  assert.match(material, /specularAlpha = u_material_probe == 5 \? 0\.0 : clamp\(/);
+  assert.match(material, /specular \* environmentResponse \* mix\(0\.22, 0\.70, hardcoat\)/);
+  assert.match(material, /microAlpha = u_material_probe == 5 \? 0\.0 : clamp\(/);
+  assert.match(material, /abs\(microLightDelta\) \* mix\(0\.31, 0\.93, hardcoat\)/);
   // Night-indigo pigment tints are owned by the Zodiac renderer; do not reintroduce blue glow.
   assert.ok(material.includes("reflectionTint = vec3(0.37, 0.44, 0.51)"));
   assert.ok(material.includes("microLightTint = vec3(0.30, 0.37, 0.44)"));
   assert.ok(material.includes("nebulaLightTint = vec3(0.18, 0.26, 0.35)"));
   assert.match(material, /float zodiacNebulaField\(vec2 localPoint\)/);
+  assert.match(material, /u_material_probe == 4 \|\| u_material_probe == 7/);
   assert.match(material, /localPoint\.x \/ 128\.0, localPoint\.y \/ 112\.0/);
   assert.match(material, /low \* 0\.24 \+ mid \* 0\.50 \+ fine \* 0\.26/);
   assert.match(material, /nebulaLightAlpha = smoothstep\(0\.57, 0\.76, nebula\) \* 0\.060/);

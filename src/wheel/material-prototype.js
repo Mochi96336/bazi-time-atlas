@@ -25,7 +25,8 @@ export const MATERIAL_PROBES = Object.freeze({
   "solar-no-reflection": 3,
   "zodiac-no-patina": 4,
   "zodiac-no-reflection": 5,
-  "graphite-no-response": 6
+  "graphite-no-response": 6,
+  "zodiac-hardcoat-preview": 7
 });
 
 export function resolveMaterialProbe(search = "") {
@@ -338,10 +339,18 @@ const FRAGMENT_SHADER = [
   "  vec3 reflectionTint = vec3(0.37, 0.44, 0.51);",
   "  vec3 microLightTint = vec3(0.30, 0.37, 0.44);",
   "  vec3 microDarkTint = vec3(0.020, 0.027, 0.035);",
-  "  float specularAlpha = u_material_probe == 5 ? 0.0 : clamp(specular * environmentResponse * 0.22, 0.0, 0.006);",
-  "  float microAlpha = u_material_probe == 5 ? 0.0 : clamp(abs(microLightDelta) * 0.31 + abs(fieldCentered) * 0.009, 0.0, 0.024);",
+  "  // H2.2: explicit material preview. The default micro-response is untouched.",
+  "  // Reuse existing rotated normal and fixed-world light instead of star/noise texture.",
+  "  float hardcoat = u_material_probe == 7 ? 1.0 : 0.0;",
+  "  float specularAlpha = u_material_probe == 5 ? 0.0 : clamp(",
+  "    specular * environmentResponse * mix(0.22, 0.70, hardcoat),",
+  "    0.0, mix(0.006, 0.014, hardcoat));",
+  "  float microAlpha = u_material_probe == 5 ? 0.0 : clamp(",
+  "    abs(microLightDelta) * mix(0.31, 0.93, hardcoat)",
+  "      + abs(fieldCentered) * mix(0.009, 0.015, hardcoat),",
+  "    0.0, mix(0.024, 0.039, hardcoat));",
   "  vec3 microTint = microLightDelta >= 0.0 ? microLightTint : microDarkTint;",
-  "  float nebula = u_material_probe == 4 ? 0.5 : zodiacNebulaField(localPoint);",
+  "  float nebula = (u_material_probe == 4 || u_material_probe == 7) ? 0.5 : zodiacNebulaField(localPoint);",
   "  float nebulaLightAlpha = smoothstep(0.57, 0.76, nebula) * 0.060;",
   "  float nebulaDarkAlpha = smoothstep(0.58, 0.77, 1.0 - nebula) * 0.080;",
   "  vec3 nebulaLightTint = vec3(0.18, 0.26, 0.35);",
