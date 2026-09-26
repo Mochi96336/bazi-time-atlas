@@ -188,7 +188,19 @@ function renderYearStory(comparison, seasonal) {
   marker.style.left=story.selectedPosition.toFixed(4)+"%";
   const liChun=document.getElementById("research-one-year-lichun-marker");
   const dateText=story.liChun?story.liChun.date.month+"/"+story.liChun.date.day:null;
+  const beforeSegment=document.getElementById("research-one-year-before-segment");
+  const afterSegment=document.getElementById("research-one-year-after-segment");
+  const eraLegend=document.getElementById("research-one-year-era-legend");
   if(story.liChun){
+    beforeSegment.hidden=false;
+    afterSegment.hidden=false;
+    eraLegend.hidden=false;
+    beforeSegment.style.width=story.liChun.position.toFixed(4)+"%";
+    afterSegment.style.left=story.liChun.position.toFixed(4)+"%";
+    afterSegment.style.width=(100-story.liChun.position).toFixed(4)+"%";
+    const estimate=story.liChun.status==="estimated"?"約 ":"";
+    setText("research-one-year-before-label","立春前 · "+(story.liChun.before??"未判"));
+    setText("research-one-year-after-label",estimate+"立春後 · "+(story.liChun.after??"未判"));
     liChun.hidden=false;
     liChun.style.left=story.liChun.position.toFixed(4)+"%";
     liChun.dataset.status=story.liChun.status;
@@ -197,7 +209,34 @@ function renderYearStory(comparison, seasonal) {
       " · "+(story.liChun.before??"？")+" → "+(story.liChun.after??"？"));
   } else {
     liChun.hidden=true;
+    beforeSegment.hidden=true;
+    afterSegment.hidden=true;
+    eraLegend.hidden=true;
     setText("research-one-year-lichun-label","立春位置待查 · 未繪製推測刻度");
+  }
+
+  const zoom=document.getElementById("research-one-year-boundary-zoom");
+  const near=story.boundaryZoom;
+  zoom.hidden=!near;
+  panel.dataset.boundaryZoomVisible=String(Boolean(near));
+  if(near){
+    const daySpan=document.getElementById("research-one-year-zoom-selected-day");
+    const eventTick=document.getElementById("research-one-year-zoom-event");
+    daySpan.style.left=near.selectedDayStartPercent.toFixed(4)+"%";
+    daySpan.style.width=near.selectedDayWidthPercent.toFixed(4)+"%";
+    daySpan.dataset.includesEvent=String(near.selectedDayContainsEvent);
+    eventTick.dataset.status=story.liChun.status;
+    setText("research-one-year-zoom-center",
+      (story.liChun.status==="estimated"?"約 ":"")+"立春 "+
+      story.liChun.date.month+"/"+story.liChun.date.day);
+    zoom.querySelector(".research-one-year-zoom-track").setAttribute(
+      "aria-label","立春附近前後各14天的局部放大，立春刻度在中央；"+
+      "選定民用日期 "+target.month+"/"+target.day+
+      " 標示完整24小時，"+
+      (near.selectedDayContainsEvent?"包含立春事件，須另有時刻才能判定年柱":
+       near.selectedDayStartPercent<50?"位於立春前":"位於立春後")+
+      "；這段放大圖與上方全年時間線的尺度不同"
+    );
   }
   const boundaryMeaning=active.status==="unresolved"
     ? "選定日位於立春判定邊界；沒有可用時刻時，不指定其中一個干支年。"
