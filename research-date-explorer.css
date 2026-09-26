@@ -350,3 +350,79 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-one-year-motion > small {display:none;}
   .research-one-year-boundary-meaning {margin:8px 0 3px;}
 }
+
+
+/* Explain the actual year transition visually, rather than showing two nearly
+   coincident markers on a monochrome one-year line. Neither the old/new
+   pillars nor the Li Chun position is hard-coded; the source owns the cutoff. */
+.research-one-year-era {
+  position:absolute; top:20px; height:4px; border-radius:3px;
+  pointer-events:none;
+}
+.research-one-year-era-before {left:0;background:#887e60;}
+.research-one-year-era-after {background:#d2ba83;}
+.research-one-year-era-legend {
+  display:flex;align-items:center;gap:8px 19px;flex-wrap:wrap;
+  margin:5px 0 2px;font-size:11px;color:#d8c9a9;
+}
+.research-one-year-era-legend > span {display:inline-flex;align-items:center;gap:7px;}
+.research-one-year-era-legend b {font-size:11px;font-weight:615;}
+.research-one-year-era-legend i {
+  display:inline-block;width:16px;height:4px;flex-shrink:0;border-radius:4px;
+}
+.research-one-year-era-swatch-before {background:#887e60;}
+.research-one-year-era-swatch-after {background:#d2ba83;}
+
+.research-one-year-boundary-zoom {
+  margin:9px 0 7px;padding:10px 12px;
+  border:1px solid rgba(200,187,142,.18);border-radius:10px;
+  background:rgba(201,187,144,.035);
+}
+.research-one-year-zoom-heading {
+  display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;gap:3px 10px;
+}
+.research-one-year-zoom-heading strong {color:#e1d3b0;font-size:11px;font-weight:680;}
+.research-one-year-zoom-heading small {color:#9ba8a0;font-size:9px;line-height:1.45;}
+.research-one-year-zoom-track {
+  position:relative;height:24px;margin:4px 4px 0;
+  overflow:visible;
+}
+.research-one-year-zoom-before,.research-one-year-zoom-after {
+  position:absolute;top:11px;height:5px;border-radius:3px;
+  pointer-events:none;
+}
+.research-one-year-zoom-before {left:0;width:50%;background:#887e60;}
+.research-one-year-zoom-after {left:50%;right:0;background:#d2ba83;}
+.research-one-year-zoom-event {
+  position:absolute;left:50%;top:4px;height:20px;width:2px;
+  background:#efdbac;transform:translateX(-50%);z-index:3;pointer-events:none;
+}
+.research-one-year-zoom-event[data-status="estimated"] {
+  background:repeating-linear-gradient(to bottom,#efdbac 0 3px,transparent 3px 6px);
+}
+.research-one-year-zoom-selected-day {
+  position:absolute;top:0;height:24px;min-width:4px;
+  border:1px solid #bfe4e0;border-radius:3px;z-index:2;
+  background:rgba(173,225,221,.25);pointer-events:none;
+}
+.research-one-year-zoom-selected-day[data-includes-event="true"] {
+  border-style:dashed;
+}
+.research-one-year-zoom-labels {
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
+  font-size:10px;color:#b8c2b8;align-items:start;
+}
+.research-one-year-zoom-labels span:nth-child(2) {
+  text-align:center;color:#e8d19b;font-weight:660;
+}
+.research-one-year-zoom-labels span:nth-child(3) {text-align:right;}
+@media(max-width:680px) {
+  .research-one-year-era {top:16px;}
+  .research-one-year-era-legend {gap:4px 13px;margin-top:4px;}
+  .research-one-year-era-legend b {font-size:10px;}
+  .research-one-year-boundary-zoom {padding:7px 9px;margin:6px 0;}
+  .research-one-year-zoom-heading small {font-size:9px;}
+  .research-one-year-zoom-labels {font-size:9px;}
+  .research-one-year-boundary-meaning {margin:5px 0 2px;}
+}
