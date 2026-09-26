@@ -54,7 +54,9 @@ function drawWheel() {
   sexagenaryCycle.forEach(day=>{
     const option=document.createElement("option");
     option.value=String(day.index);
-    option.textContent=String(day.ordinal).padStart(2,"0")+" · "+day.name;
+    // Name-first labels let native keyboard typeahead locate the Ganzhi,
+    // instead of matching the ordinal prefix for every option.
+    option.textContent=day.name+" · "+String(day.ordinal).padStart(2,"0");
     options.append(option);
   });
   directSelect.replaceChildren(options);
