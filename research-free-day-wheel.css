@@ -51,6 +51,24 @@
   color:#d4e6e6; margin:7px 0 3px;
 }
 #research-free-wheel-status {font-size:11px;color:#a4b4a9;margin:0 0 17px;line-height:1.5;}
+.research-free-day-wheel-direct {
+  display:grid; gap:7px; margin:3px 0 3px; color:#aec8c5;
+  font-size:11px; font-weight:620;
+}
+.research-free-day-wheel-direct select {
+  display:block; width:100%; min-height:46px; padding:9px 13px;
+  border:1px solid rgba(170,202,200,.42); border-radius:12px;
+  background:#16211e; color:#e3f0eb; font-size:16px; font-weight:650;
+  cursor:pointer;
+}
+.research-free-day-wheel-direct select:focus-visible {
+  outline:2px solid #bcdedc; outline-offset:2px;
+}
+.research-free-day-wheel-direct select:disabled {opacity:.55;cursor:not-allowed;}
+.research-free-day-wheel-direct-hint {
+  display:block; font-size:10px; line-height:1.55; color:#93aaa4;
+  margin-bottom:12px;
+}
 .research-free-day-wheel-current {
   display:grid; gap:4px; border-top:1px solid var(--hairline); padding-top:12px;
 }

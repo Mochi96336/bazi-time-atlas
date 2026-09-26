@@ -93,11 +93,31 @@
         assert(hits.length===60,"free Day wheel must expose 60 independently selectable sectors");
         const wheelOrigin=Number(freeWheel.dataset.selectedIndex);
         const nextIndex=(wheelOrigin+1)%60;
+        const picker=doc.getElementById("research-free-wheel-direct-select");
+        assert(picker && !picker.disabled && picker.options.length===60 &&
+          picker.options[0].textContent.startsWith("甲子") &&
+          picker.options[59].textContent.startsWith("癸亥") &&
+          picker.value===String(wheelOrigin),
+          "the native picker must expose the exact 60 Ganzhi names first, for keyboard typeahead");
+        picker.value=String(nextIndex);
+        change(picker);
+        assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
+          freeWheel.dataset.selectionLinked==="false" &&
+          picker.value===String(nextIndex) &&
+          root.dataset.targetDate==="2024-02-10" &&
+          frame.contentWindow.location.search.includes("compare=2024-02-10"),
+          "native select must preview the chosen Ganzhi without committing a date");
+        doc.getElementById("research-free-wheel-return").click();
+        assert(picker.value===String(wheelOrigin) &&
+          freeWheel.dataset.selectionLinked==="true",
+          "returning to comparison date must synchronize the native selector");
+        record("wheel-direct-picker-preview",true);
         freeWheelSvg.dispatchEvent(new KeyboardEvent("keydown",{
           key:"ArrowRight",bubbles:true,cancelable:true
         }));
         assert(freeWheel.dataset.selectedIndex===String(nextIndex) &&
           freeWheel.dataset.selectionLinked==="false" &&
+          picker.value===String(nextIndex) &&
           root.dataset.targetDate==="2024-02-10",
           "keyboard arrow must preview adjacent Ganzhi without committing a civil date");
         doc.getElementById("research-free-wheel-return").click();
@@ -131,7 +151,8 @@
           root.dataset.wheelJumpOutcome==="applied" &&
           root.dataset.wheelJumpDirection==="next" && root.dataset.wheelJumpOffset==="1" &&
           freeWheel.dataset.selectionLinked==="true" &&
-          Number(freeWheel.dataset.selectedIndex)===nextIndex,
+          Number(freeWheel.dataset.selectedIndex)===nextIndex &&
+          picker.value===String(nextIndex),
           "next occurrence must commit exactly one day through the single free-date owner");
         const sameIndex=Number(freeWheel.dataset.selectedIndex);
         hits[sameIndex].dispatchEvent(new MouseEvent("click",{bubbles:true}));
@@ -227,16 +248,21 @@
         dateValues(doc,"target",[2025,2,29]);
         doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
           {bubbles:true,cancelable:true}));
+        await wait(0);
         assert(root.dataset.ready==="false" &&
-          doc.getElementById("research-explorer-results").hidden===true,
-          "invalid leap day must hide stale result");
+          doc.getElementById("research-explorer-results").hidden===true &&
+          picker.disabled,
+          "invalid leap day must hide stale result and disable the direct Ganzhi picker");
         assert(root.dataset.targetDate==="2024-02-01","invalid date mutated the committed pair");
         record("invalid-hidden",doc.getElementById("research-explorer-results").hidden);
         dateValues(doc,"target",[2024,2,29]);
         doc.getElementById("research-date-explorer-form").dispatchEvent(new Event("submit",
           {bubbles:true,cancelable:true}));
-        assert(root.dataset.ready==="true" && root.dataset.targetDate==="2024-02-29",
-          "correcting invalid leap day did not restore the explorer");
+        await wait(0);
+        assert(root.dataset.ready==="true" && root.dataset.targetDate==="2024-02-29" &&
+          !picker.disabled && picker.value===freeWheel.dataset.selectedIndex,
+          "correcting invalid leap day did not restore the explorer and its named Day picker");
+        record("wheel-direct-picker-invalid-recovery",true);
         record("recovered",root.dataset.ready);
 
         doc.getElementById("research-mode-annual").click();

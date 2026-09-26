@@ -48,6 +48,8 @@ const expected={
   "data-initial-mode":"dates",
   "data-wheel-select-preview-not-commit":"true",
   "data-wheel-keyboard-and-return":"true",
+  "data-wheel-direct-picker-preview":"true",
+  "data-wheel-direct-picker-invalid-recovery":"true",
   "data-wheel-same-date-refresh-preserves-exploration":"true",
   "data-wheel-strict-same-day-sixty":"true",
   "data-wheel-next-previous-roundtrip":"true",
