@@ -47,9 +47,10 @@
         <span class="research-date-explorer-scope">先理解年界與日序<br>天文及四柱回歸另行驗證</span>
       </header>
 
+      <div class="research-single-surface" aria-label="選定日期與唯一年度時間軸">
       <form id="research-date-explorer-form" class="research-date-explorer-form" novalidate>
         <fieldset aria-label="比較日期">
-          <legend>選定日期 · 先看這一天</legend>
+          <legend>選定日期</legend>
           <div class="research-date-explorer-inputs">
             <label>年 <input id="research-explorer-target-year" type="number" min="1" max="10000000" step="1" required value="2024"></label>
             <label>月 <input id="research-explorer-target-month" type="number" min="1" max="12" step="1" required value="2"></label>
@@ -76,11 +77,7 @@
         </details>
       </form>
       <p class="research-date-explorer-error" id="research-explorer-error" role="status" aria-live="polite" hidden></p>
-      <section id="research-one-year-story" class="research-one-year-story" aria-labelledby="research-one-year-heading" data-ready="false">
-          <header class="research-one-year-head">
-            <h3 id="research-one-year-heading">同一日期，兩種週期</h3>
-            <span id="research-one-year-selected-date" class="research-one-year-selected-date">—</span>
-          </header>
+      <section id="research-one-year-story" class="research-one-year-story" aria-label="立春年界與全年干支日位移" data-ready="false">
           <div class="research-one-year-identities" aria-label="目前選定日期的兩種干支">
             <div class="research-one-year-identity research-one-year-identity-year">
               <span>年</span><strong id="research-one-year-active-pillar">—</strong>
@@ -146,6 +143,7 @@
 
           </div>
         </section>
+      </div>
       <div class="research-date-step-controls" role="group" aria-label="選定日期逐日位移">
         <span>逐日調整</span>
         <div class="research-date-step-buttons research-date-step-buttons-daily">
