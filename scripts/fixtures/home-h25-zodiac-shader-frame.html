@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home H2.5 Zodiac shader tint isolation</title>
+  <style>
+    html, body { margin:0; width:100%; min-height:100%; overflow:hidden; background:#090b0f; }
+    iframe { display:block; border:0; background:#090b0f; }
+    #status { position:fixed; z-index:9; top:6px; right:6px; padding:4px 8px;
+      color:white; background:#b12323; font:12px sans-serif; }
+    #status[hidden], output { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="H2.5 opt-in Zodiac shader tint study over exact same A2 CSS candidate"></iframe>
+  <div id="status">H2.5 CAPTURE NOT READY</div>
+  <output id="proof" data-ready="false"></output>
+  <!-- Start the target before asynchronous module imports in this harness. -->
+  <script>
+    (function() {
+      const p = new URLSearchParams(location.search);
+      const target = new URL("../../", location.href);
+      const mode = p.get("material") || "roughness";
+      const shader = p.get("shader") || "legacy";
+      target.searchParams.set("instant", p.get("instant") || "2026-09-13T23:43:42.000Z");
+      target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
+      if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
+    if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
+      if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
+      if (p.get("classification") === "1") target.searchParams.set("classification", "1");
+      window.__h25PreloadedTarget = target.href;
+      document.querySelector("#stage").src = target.href;
+    }());
+  </script>
+  <script type="module">
+    import { H25_VARIANTS, h25ExpectedColors, h25OverrideCss } from "../home-h25-color-contract.js";
+    const params = new URLSearchParams(location.search);
+    const key = params.get("variant") ?? "A2";
+    const shader = params.get("shader") ?? "legacy";
+    const mode = params.get("material") ?? "roughness";
+    const width = Number(params.get("width") ?? 390);
+    const height = Number(params.get("height") ?? 844);
+    const instant = params.get("instant") ?? "2026-09-13T23:43:42.000Z";
+    const classification = params.get("classification") === "1";
+    const frame = document.querySelector("#stage");
+    const proof = document.querySelector("#proof");
+    const status = document.querySelector("#status");
+    function invalid(message) {
+      proof.dataset.error = message;
+      status.textContent = "H2.5 INVALID: " + message;
+      throw new Error(message);
+    }
+    if (!["A2", "B3"].includes(key) || !["legacy", "indigo"].includes(shader) ||
+      !["svg", "roughness", "fallback"].includes(mode) ||
+      ![320, 390, 1440, 2047].includes(width) || height < 600 || height > 1500 ||
+      !Number.isFinite(Date.parse(instant))) invalid("invalid fixture parameters");
+    frame.style.width = width + "px";
+    frame.style.height = height + "px";
+    const target = new URL("../../", location.href);
+    target.searchParams.set("instant", instant);
+    target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
+    if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
+    if (classification) target.searchParams.set("classification", "1");
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+    function isCorrectMode(instrument) {
+      if (mode === "roughness") return instrument.dataset.materialPrototype === "roughness";
+      if (mode === "fallback") return instrument.dataset.materialPrototypeFallback === "forced" &&
+        instrument.dataset.materialPrototype !== "roughness";
+      return instrument.dataset.materialPrototype !== "roughness";
+    }
+    async function inspect() {
+      const doc = frame.contentDocument;
+      const win = frame.contentWindow;
+      let instrument;
+      for (let i = 0; i < 90; i += 1) {
+        instrument = doc?.querySelector("#kinetic-instrument");
+        if (instrument?.dataset.selectedInstantMs === String(Date.parse(instant)) &&
+          instrument?.dataset.zodiac && isCorrectMode(instrument) &&
+          (!classification || instrument.dataset.classificationOverlay === "on")) break;
+        await sleep(70);
+      }
+      if (!instrument?.dataset.zodiac ||
+        instrument.dataset.selectedInstantMs !== String(Date.parse(instant)) ||
+        !isCorrectMode(instrument)) return invalid("render or selected-instant timeout " + JSON.stringify({
+          source:frame.src, ready:doc?.readyState, innerWidth:win?.innerWidth,
+          selected:instrument?.dataset.selectedInstantMs,
+          zodiac:instrument?.dataset.zodiac,
+          material:instrument?.dataset.materialPrototype,
+          fallback:instrument?.dataset.materialPrototypeFallback,
+          body:doc?.body?.textContent?.slice(0,180)
+        }));
+
+      // A0 must not inject any style. Other variants change only root colors
+      // and/or the page environment; no production CSS, DOM or shader is edited.
+      const css = h25OverrideCss(key);
+      if (css) {
+        const style = doc.createElement("style");
+        style.id = "home-h25-color-only-experiment";
+        style.textContent = css;
+        doc.head.append(style);
+      }
+      await sleep(70);
+      const root = win.getComputedStyle(doc.documentElement);
+      const expected = h25ExpectedColors(key);
+      const expectedField = expected.field;
+      const expectedRaised = expected.raised;
+      const expectedZodiac = expected.zodiac;
+      const read = name => root.getPropertyValue(name).trim().toLowerCase();
+      const actual = {
+        field:read("--field"), raised:read("--field-raised"), zodiac:read("--zodiac"),
+        hour:read("--hour"), day:read("--day"), month:read("--month"), year:read("--year"),
+        solar:read("--solar"), cursor:read("--cursor")
+      };
+      const unmodified = actual.hour === "#555d62" && actual.day === "#646c71" &&
+        actual.month === "#777f84" && actual.year === "#90989d" &&
+        actual.solar === "#ac906e" && actual.cursor === "#f4dda0";
+      if (actual.field !== expectedField || actual.raised !== expectedRaised ||
+        actual.zodiac !== expectedZodiac || !unmodified) return invalid("palette contract mismatch");
+      if (Boolean(doc.querySelector("#home-h25-color-only-experiment")) === (key === "A0")) {
+        return invalid("injection isolation mismatch");
+      }
+      const expectedShaderActive = shader === "indigo" && mode === "roughness";
+      const actualShaderActive = instrument.dataset.h25ZodiacTintProbe === "indigo";
+      if (actualShaderActive !== expectedShaderActive) {
+        return invalid("opt-in shader activated incorrectly");
+      }
+      proof.dataset.shader = shader;
+      proof.dataset.shaderActive = String(actualShaderActive);
+      proof.dataset.variant = key;
+      proof.dataset.mode = mode;
+      proof.dataset.width = String(width);
+      proof.dataset.innerWidth = String(win.innerWidth);
+      proof.dataset.instantMs = instrument.dataset.selectedInstantMs;
+      proof.dataset.selectedZodiac = instrument.dataset.zodiac;
+      proof.dataset.palette = [actual.field, actual.raised, actual.zodiac].join(",");
+      proof.dataset.environment = H25_VARIANTS[key].environment;
+      proof.dataset.untouched = String(unmodified);
+      proof.dataset.materialActive = instrument.dataset.materialPrototype || "svg";
+      proof.dataset.materialFallback = instrument.dataset.materialPrototypeFallback || "none";
+      if (classification && instrument.dataset.classificationOverlay !== "on") {
+        return invalid("classification overlay did not activate");
+      }
+      proof.dataset.classification = String(classification);
+      const classified = doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
+      proof.dataset.classificationFill = classification && classified ?
+        win.getComputedStyle(classified).fill : "not-applicable";
+      proof.dataset.ready = "true";
+      status.hidden = true;
+    }
+    if (window.__h25PreloadedTarget !== target.href) invalid("preload URL mismatch");
+    let inspectionStarted = false;
+    const startInspection = () => {
+      if (inspectionStarted) return;
+      inspectionStarted = true;
+      void inspect().catch(e => {
+        proof.dataset.error = String(e);
+        status.textContent = "H2.5 ERROR: " + String(e);
+      });
+    };
+    frame.addEventListener("load", startInspection);
+    if (frame.contentDocument?.readyState === "complete" &&
+      frame.contentWindow?.location?.href === target.href) startInspection();
+  </script>
+</body>
+</html>
