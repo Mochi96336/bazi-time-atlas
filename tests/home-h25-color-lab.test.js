@@ -56,3 +56,10 @@ test("native screenshot fixture has screenshot-visible readiness and genuine wid
   for (const mode of ["svg","roughness","fallback"]) assert.ok(script.includes('"'+mode+'"'));
   for (const width of ["320","390","1440","2047"]) assert.ok(script.includes(width));
 });
+
+test("H2.5 CI prepares the local Tyme vendor before loading the real Atlas", () => {
+  const flow = readFileSync(new URL("../.github/workflows/home-h25-color-lab.yml", import.meta.url), "utf8");
+  const vendor = flow.indexOf("npm run vendor:prepare");
+  const capture = flow.indexOf("node scripts/visual-check-home-h25-color-lab.mjs");
+  assert.ok(vendor >= 0 && capture > vendor, "native browser evidence requires local Tyme ESM");
+});
