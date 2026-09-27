@@ -83,6 +83,8 @@ const expected={
   "data-wheel-annual-isolation":"true",
   "data-day-step-forward-and-back":"true",
   "data-day-step-sixty-cycle":"true",
+  "data-day-step-advanced-sixty-hidden":"true",
+  "data-day-step-advanced-reveals-sixty":"true",
   "data-day-step-share-url":"true",
   "data-mobile-glance-after-step":"true",
   "data-newyear-nominal-vs-active":"true",
