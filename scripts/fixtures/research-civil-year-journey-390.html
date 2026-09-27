@@ -41,13 +41,18 @@ frame.addEventListener("load",async()=>{
     restore:d.getElementById("research-year-journey-restore")
   };
   const band=d.getElementById("research-one-year-track");
-  const ring=d.getElementById("research-one-year-day-phase-dial");
+  const oneSentence=d.getElementById("research-one-year-day-motion");
   const stageId=()=>root.dataset.yearJourneyStep;
   const now=()=>root.dataset.targetDate;
   const beforeRect=story.getBoundingClientRect();
   if(!desktop)ok(beforeRect.bottom<=844,
     "unexpanded guide pushed first-screen Year/Day below 844: "+beforeRect.bottom);
-  ok(controls.guide.hidden && !controls.start.hidden && band&&ring,
+  ok(controls.guide.hidden && !controls.start.hidden && band && oneSentence &&
+    !d.getElementById("research-one-year-day-phase") &&
+    !d.getElementById("research-year-journey-loops") &&
+    !d.getElementById("research-year-journey-progress") &&
+    oneSentence.textContent.includes(year===2024?"6 圈，再走 6 天":"6 圈，再走 5 天") &&
+    !d.getElementById("research-one-year-evidence-details").open,
     "initial page exposed an unnecessary second date calculator");
   record("firstScreen",true);
   const originalPath=w.location.pathname+w.location.search+w.location.hash;
@@ -57,7 +62,7 @@ frame.addEventListener("load",async()=>{
       "guide did not start at the committed civil Jan 1");
     ok(now()===date(year,1,1),"guide start lost the original civil year");
     ok(controls.previous.disabled && !controls.next.disabled,"guide stage ownership buttons incorrect");
-    const startIndex=Number(d.getElementById("research-one-year-day-phase-index").textContent);
+    const startIndex=Number(story.dataset.dayIndex);
     const initialStartDay=d.getElementById("research-one-year-day-pillar").textContent;
     record("start",true);
     if(state==="proof"){
@@ -90,8 +95,8 @@ frame.addEventListener("load",async()=>{
       ok(steps<=12,"journey loop stalled");
       ok(root.dataset.yearJourneyActive==="true","next step created phantom selection");
       ok(w.location.search.includes("compare="+now()),"stage changed date without shareable URL");
-      ok(ring.getAttribute("aria-label").includes(d.getElementById("research-one-year-day-pillar").textContent),
-        "main Day ring and selected Day differ");
+      ok(story.dataset.dayName===d.getElementById("research-one-year-day-pillar").textContent,
+        "compact Day label differs from canonical selected Day");
       if(stageId()==="li-chun-date"){
         boundarySeen=true;
         if(year===2024){
@@ -105,8 +110,8 @@ frame.addEventListener("load",async()=>{
         const turn=Number(stageId().slice(5));
         visitedTurns.add(turn);
         ok(root.dataset.yearJourneyElapsed===String(turn*60) &&
-          Number(d.getElementById("research-one-year-day-phase-index").textContent)===startIndex &&
-          d.querySelector('[data-journey-turn="'+turn+'"]').dataset.complete==="true",
+          Number(story.dataset.dayIndex)===startIndex &&
+          oneSentence.textContent.includes(turn+" 圈，再走 0 天"),
           "each full 60-day turn must visibly close and restore the same named Day");
       }
       if(stageId()==="after-li-chun"){
@@ -126,18 +131,19 @@ frame.addEventListener("load",async()=>{
       ok(now()===date(year+1,1,1),"journey conflated next Jan 1 with next Li Chun");
       ok(story.dataset.year===String(year+1),"the existing Year strip must visibly switch to next Gregorian year");
       const remainder=year===2024?6:5;
-      const finalIndex=Number(d.getElementById("research-one-year-day-phase-index").textContent);
+      const finalIndex=Number(story.dataset.dayIndex);
       ok((finalIndex-startIndex+60)%60===remainder,"six loops remainder wrong");
       ok(root.dataset.yearJourneyElapsed===String(year===2024?366:365),
         "year days must include 2024 leap day");
       ok(root.dataset.yearJourneyRemainder===String(remainder),"year remainder wrong");
-      ok([...d.querySelectorAll("[data-journey-turn]")]
-        .every(node=>node.dataset.complete==="true"),"six Day circles did not complete");
-      ok(controls.finish.hidden && d.getElementById("research-year-journey-remainder").textContent==="+"+remainder,
-        "remainder circle is not +5/+6");
-      ok(d.getElementById("research-year-journey-day-names").textContent.includes(initialStartDay),
-        "graphical guide lost canonical origin Day identity");
-      ok(d.getElementById("research-year-journey-meaning").textContent.includes("不代表又過了一次立春"),
+      ok(!d.querySelector("[data-journey-turn], #research-year-journey-loops") &&
+        oneSentence.textContent.includes("走滿 6 圈，再走 "+remainder+" 天"),
+        "single full-year sentence lost 6 circles +5/+6 after removing seven-ring view");
+      ok(controls.finish.hidden && story.dataset.dayName===root.dataset.targetDayPillar,
+        "final compact Day label lost canonical identity");
+      ok(originalDate && initialStartDay,
+        "guided test must retain the canonical start Day identity");
+      ok(d.getElementById("research-year-journey-meaning").textContent.includes("下一次立春"),
         "next Gregorian Jan 1 incorrectly shown as next Li Chun transition");
       record("end",true);
       record("elapsed",root.dataset.yearJourneyElapsed);
