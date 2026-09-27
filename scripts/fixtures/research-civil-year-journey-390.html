@@ -181,6 +181,18 @@ frame.addEventListener("load",async()=>{
     record("stage","initial");
     record("currentDate",now());
   }
+  if(!desktop && !controls.guide.hidden){
+    const visible=[controls.previous,controls.next,controls.finish]
+      .filter(button=>!button.hidden);
+    const ys=visible.map(button=>button.getBoundingClientRect().top);
+    ok(Math.max(...ys)-Math.min(...ys)<3,
+      "three principal guided actions should share one 390px touch row");
+    ok(visible.every(button=>button.getBoundingClientRect().height>=40),
+      "guided controls have sub-40px touch height");
+    ok(controls.restore.parentElement===d.querySelector(".research-year-journey-head") &&
+      controls.restore.getBoundingClientRect().height>=38,
+      "return-to-original should be directly discoverable in guide heading");
+  }
   const bounds=story.getBoundingClientRect();
   ok(bounds.left>=0 && bounds.right<=(desktop?1441:391),"Year/Day story overflows");
   probe.dataset.error="none";probe.dataset.ready="true";
