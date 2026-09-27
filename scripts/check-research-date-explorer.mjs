@@ -47,7 +47,9 @@ if(
   beginnerRoot.includes(" hidden") ||
   attr(beginnerStory,"data-ready")!=="true" ||
   attr(beginnerStory,"data-active-year-name")!=="甲辰" ||
-  !beginner.dom.includes("起始示範：2024 年立春附近")
+  !beginner.dom.includes("同一日期，兩種週期") ||
+  beginner.dom.includes('id="research-year-journey-loops"') ||
+  beginner.dom.includes('id="research-one-year-day-phase-dial"')
 ) throw new Error("Bare Research entry must open an explicitly labeled one-year learning story: "+beginner.url);
 console.log("[explorer] PASS bare Research route learns one selected day before annual recurrence");
 
