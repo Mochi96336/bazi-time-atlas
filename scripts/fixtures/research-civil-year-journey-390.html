@@ -1,120 +1,119 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Research 01 · one annual band / +5 +6 browser proof</title>
-<style>html,body{margin:0;width:500px;min-height:1650px;overflow:hidden;background:#101713}iframe{width:390px;height:1610px;border:0;display:block}#probe{display:none}</style></head><body>
-<iframe id="stage" title="390px 年度時間帶驗收"></iframe><output id="probe" data-ready="false" data-error="initializing"></output>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Research 01 · one page, one annual band</title>
+<style>html,body{margin:0;width:500px;min-height:1650px;overflow:hidden;background:#101713}
+iframe{width:390px;height:1610px;border:0;display:block}#probe{display:none}</style>
+</head><body>
+<iframe id="stage" title="真實390px單一年度時間軸驗收"></iframe>
+<output id="probe" data-ready="false" data-error="initializing"></output>
 <script>
-const p=new URLSearchParams(location.search);
-const year=Number(p.get("year")??"2024"),state=p.get("state")??"initial",desktop=p.get("desktop")==="1";
+const q=new URLSearchParams(location.search),year=Number(q.get("year")??"2024");
+const state=q.get("state")??"initial",desktop=q.get("desktop")==="1";
 const frame=document.getElementById("stage"),probe=document.getElementById("probe");
 const pad=n=>String(n).padStart(2,"0");
 const date=(y,m,d)=>y+"-"+pad(m)+"-"+pad(d);
-const originalDate=state==="boundary"?date(year,2,4):
- year===2024?date(year,2,10):date(year,6,1);
-if(desktop){document.documentElement.style.width="1440px";document.body.style.width="1440px";
- frame.style.width="1440px";frame.style.height="1330px";}
-const url="../../recurrence.html?mode=dates&base="+encodeURIComponent(date(year,1,1))+
- "&compare="+encodeURIComponent(originalDate);
-const ok=(yes,why)=>{if(!yes)throw Error(why)};
+const first=state==="boundary"?date(2024,2,4):
+ year===2024?date(2024,2,10):date(2023,6,1);
+const url="../../recurrence.html?mode=dates&base="+
+ encodeURIComponent(date(year,1,1))+"&compare="+encodeURIComponent(first);
+if(desktop){document.documentElement.style.width="1440px";
+ document.body.style.width="1440px";frame.style.width="1440px";frame.style.height="1330px";}
+const ok=(v,msg)=>{if(!v)throw Error(msg)};
 const record=(key,value)=>probe.dataset[key]=String(value);
-const wait=ms=>new Promise(done=>setTimeout(done,ms));
+const sleep=ms=>new Promise(done=>setTimeout(done,ms));
 frame.addEventListener("load",async()=>{
  try{
-  const doc=frame.contentDocument,w=frame.contentWindow;
-  for(let n=0;n<150;n++){if(doc.getElementById("research-free-explorer")?.dataset.ready==="true")break;await wait(40)}
-  const root=doc.getElementById("research-free-explorer"),story=doc.getElementById("research-one-year-story");
-  ok(root?.dataset.ready==="true","research never loaded");
-  ok(doc.documentElement.clientWidth===(desktop?1440:390),"actual 390/1440 iframe size missing");
-  const start=doc.getElementById("research-year-journey-start");
-  const restore=doc.getElementById("research-year-journey-restore");
-  const line=doc.getElementById("research-one-year-day-motion");
-  const band=doc.getElementById("research-one-year-track");
-  const source=doc.getElementById("research-one-year-evidence-details");
-  ok(band&&start&&restore&&line&&source,"single-band elements missing");
-  ok(!doc.getElementById("research-one-year-day-phase") &&
-    !doc.getElementById("research-year-journey") &&
-    !doc.getElementById("research-year-journey-loops"),
-    "redundant Day or seven-turn graphics returned");
-  ok(!source.open && !source.querySelector(".research-one-year-boundary-zoom").checkVisibility(),
-    "28-day zoom should be behind one voluntary disclosure");
-  ok(start.checkVisibility()&&!restore.checkVisibility(),"one-click annual action is missing");
-  ok(start.textContent.includes("公曆年") && start.getAttribute("aria-label").includes("1 月 1 日"),
-    "annual action must not misrepresent a Feb10-to-next-Jan1 jump as a one-year date anniversary");
-  const box=story.getBoundingClientRect(),viewport=desktop?1441:391;
-  ok(box.left>=0&&box.right<=viewport,"story overflows viewport");
-  if(!desktop)ok(box.bottom<=844,"single-band story exceeds first 390x844 viewport "+box.bottom);
-  const names=[...doc.querySelectorAll(".research-one-year-identity strong")];
-  ok(names.length===2 && names.every(node=>node.getBoundingClientRect().height<28),
-    "old oversized Ganzhi results returned");
+  const d=frame.contentDocument,w=frame.contentWindow;
+  for(let t=0;t<150;t++){if(d.getElementById("research-free-explorer")?.dataset.ready==="true")break;await sleep(40)}
+  const root=d.getElementById("research-free-explorer");
+  const story=d.getElementById("research-one-year-story");
+  const advanced=d.getElementById("research-advanced-details");
+  const band=d.getElementById("research-one-year-track");
+  const slider=d.getElementById("research-one-year-scrub");
+  const sentence=d.getElementById("research-one-year-day-motion");
+  const form=d.getElementById("research-date-explorer-form");
+  const inputs=["year","month","day"].map(k=>d.getElementById("research-explorer-target-"+k));
+  const yearLabel=d.getElementById("research-one-year-active-pillar");
+  const dayLabel=d.getElementById("research-one-year-day-pillar");
+  ok(root?.dataset.ready==="true"&&d.documentElement.clientWidth===(desktop?1440:390),
+    "single Research route failed to initialize with a real viewport");
+  ok(!root.hidden&&advanced&&!advanced.open&&band&&slider&&sentence,
+    "one public Year band must be visible, advanced proof closed");
+  ok(!d.querySelector(".research-mode-switch")&&
+    !d.querySelector("#research-mode-dates, #research-mode-annual, #research-year-journey-start, #research-year-journey, #research-one-year-day-phase, #research-year-journey-loops"),
+    "an obsolete parallel Year menu, wizard, or ring survived the redesign");
+  record("noTabs",true);record("noTour",true);
+  ok(!d.querySelector("#research-discrete").checkVisibility()&&
+    !d.querySelector("#research-year-strip").checkVisibility(),
+    "old annual duplicate is visible beside primary Year band");
+  const box=story.getBoundingClientRect(),limit=desktop?1441:391;
+  ok(box.left>=0&&box.right<=limit,"primary Year panel exceeds viewport");
+  if(!desktop)ok(box.bottom<=844,"one-band mobile first screen exceeds 844: "+box.bottom);
+  const names=[...story.querySelectorAll(".research-one-year-identity strong")];
+  ok(names.length===2&&names.every(n=>n.getBoundingClientRect().height<28),
+    "oversized Ganzhi cards returned");
   record("firstScreen",true);
-  const extra=year===2024?6:5;
+  const extra=year===2024?6:5,days=year===2024?366:365;
+  const text=()=>sentence.textContent;
+  ok(text().includes(year+" 年共 "+days+" 天")&&
+    text().includes("走滿 6 圈，再走 "+extra+" 天"),
+    "single sentence failed to explain exact 365/366 +5/+6");
+  record("yearSentence",true);record("remainder",extra);
   if(state==="boundary"){
-    ok(year===2024&&story.dataset.activeYearStatus==="unresolved" &&
-      names[0].textContent.includes("癸卯")&&names[0].textContent.includes("甲辰") &&
-      !doc.getElementById("research-one-year-lichun-marker").hidden,
-      "date-only Li Chun cannot be promoted to a certain active Year");
-    record("boundary",true);record("stage","boundary");
-  }else{
-    ok(line.textContent.includes("走滿 6 圈，再走 "+extra+" 天"),
-      "plain six turns plus leap/nonleap remainder must appear on one line");
-    record("stage","initial");
+    ok(year===2024&&story.dataset.activeYearStatus==="unresolved"&&
+      yearLabel.textContent.includes("癸卯")&&yearLabel.textContent.includes("甲辰")&&
+      !d.getElementById("research-one-year-lichun-marker").hidden,
+      "Li Chun date-only must show both Year identities and sourced marker");
+    record("boundary",true);
   }
-  const originalPath=w.location.pathname+w.location.search+w.location.hash;
-  const originalDay=story.dataset.dayName,originalIndex=story.dataset.dayIndex;
-  if(state==="proof"){
-    const day=doc.getElementById("research-explorer-target-day");
-    const month=doc.getElementById("research-explorer-target-month");
-    for(const trial of [{m:"2",d:"12"},{m:"2",d:"30"}]){
-      month.value=trial.m;day.value=trial.d;
-      start.click();
-      ok(root.dataset.yearJourneyOutcome==="stale-input" && root.dataset.targetDate===originalDate &&
-        w.location.pathname+w.location.search+w.location.hash===originalPath &&
-        month.value===trial.m&&day.value===trial.d,
-        "dirty or invalid edit was overwritten by annual jump");
-      month.value=year===2024?"2":"6";day.value=year===2024?"10":"1";
-      doc.getElementById("research-date-explorer-form").dispatchEvent(
-        new Event("submit",{bubbles:true,cancelable:true}));
-    }
-    record("dirtyGuard",true);
-  }
+  const originalUrl=w.location.pathname+w.location.search+w.location.hash;
+  const originalName=story.dataset.dayName,originalIndex=story.dataset.dayIndex;
+  const originalYearName=yearLabel.textContent;
+  const changeTo=(y,m,day)=>{
+    inputs[0].value=String(y);inputs[1].value=String(m);inputs[2].value=String(day);
+    form.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}));
+  };
   if(state==="end"||state==="proof"){
-    start.click();
-    const after=date(year+1,1,1);
-    ok(root.dataset.yearJourneyOutcome==="started" &&
-      root.dataset.yearJourneyActive==="true" &&
-      root.dataset.yearJourneyStep==="next-jan-1" &&
-      root.dataset.targetDate===after &&
-      root.dataset.yearJourneyElapsed===String(year===2024?366:365) &&
-      root.dataset.yearJourneyRemainder===String(extra),
-      "one click did not commit following Gregorian Jan 1 and correct +5/+6");
-    ok(w.location.search.includes("compare="+after)&&story.dataset.year===String(year+1) &&
-      start.hidden&&!restore.hidden &&
-      line.textContent.includes("走滿 6 圈，再走 "+extra+" 天") &&
-      names[1].textContent===root.dataset.targetDayPillar,
-      "one band, compact Day name, one sentence and shareable URL diverged");
-    ok(year===2024?story.dataset.activeYearName==="甲辰":story.dataset.activeYearName==="癸卯",
-      "the following Gregorian Jan 1 must NOT pretend next Li Chun occurred");
-    record("start",true);record("end",true);
-    record("elapsed",root.dataset.yearJourneyElapsed);record("remainder",root.dataset.yearJourneyRemainder);
-    record("stage","next-jan-1");record("currentDate",after);
+    slider.value=String(days-1);
+    slider.dispatchEvent(new Event("input",{bubbles:true}));
+    ok(root.dataset.targetDate===date(year,12,31)&&
+      sentence.textContent.includes("走滿 6 圈，再走 "+extra+" 天")&&
+      w.location.search.includes("compare="+date(year,12,31))&&
+      story.dataset.year===String(year)&&
+      dayLabel.textContent===root.dataset.targetDayPillar,
+      "Dec31 must retain the same Year strip, canonical Day and six-turn sentence");
+    record("end",true);record("elapsed",days);
   }
   if(state==="proof"){
-    restore.click();
-    ok(root.dataset.yearJourneyActive==="false" && root.dataset.yearJourneyOutcome==="restored" &&
-      root.dataset.targetDate===originalDate && story.dataset.dayName===originalDay &&
-      story.dataset.dayIndex===originalIndex && !start.hidden && restore.hidden &&
-      w.location.pathname+w.location.search+w.location.hash===originalPath,
-      "explicit return must restore original canonical Day/date/URL");
-    record("restored",true);record("oneClickOverview",true);
-    start.click();
-    const slider=doc.getElementById("research-one-year-scrub");
-    slider.value="20";slider.dispatchEvent(new Event("input",{bubbles:true}));
-    ok(root.dataset.yearJourneyActive==="false" &&
-      root.dataset.yearJourneyOutcome==="interrupted-by-manual-date" &&
-      restore.hidden && !start.hidden,"manual scrub left a phantom journey selection");
+    changeTo(year,first.includes("-02-")?2:6,first.endsWith("-10")?10:1);
+    ok(root.dataset.targetDate===first&&
+      story.dataset.dayName===originalName&&story.dataset.dayIndex===originalIndex&&
+      yearLabel.textContent===originalYearName&&
+      w.location.pathname+w.location.search+w.location.hash===originalUrl,
+      "form did not restore original name/date/permalink");
+    record("restored",true);
+    const before=w.location.search;
+    inputs[2].value="30";inputs[1].value="2";
+    slider.value=String(Math.min(days-1,60));
+    slider.dispatchEvent(new Event("input",{bubbles:true}));
+    ok(root.dataset.scrubOutcome==="stale-input"&&root.dataset.targetDate===first&&
+      inputs[2].value==="30"&&w.location.search===before,
+      "invalid dirty edit was overwritten by the Year slider");
+    record("dirtyGuard",true);
+    changeTo(year+1,1,1);
+    ok(root.dataset.targetDate===date(year+1,1,1)&&
+      story.dataset.year===String(year+1)&&
+      story.dataset.dayName===root.dataset.targetDayPillar&&
+      sentence.textContent.includes("走滿 6 圈，再走 "+(year===2024?5:6)+" 天"),
+      "next Gregorian Jan1 must start its own 365/366 year without faking Li Chun");
+    ok(story.dataset.activeYearName===(year===2024?"甲辰":"癸卯"),
+      "following Gregorian Jan1 incorrectly shown as next Li Chun");
+    changeTo(year,first.includes("-02-")?2:6,first.endsWith("-10")?10:1);
     record("manualOwnership",true);
   }
+  record("stage",state);record("currentDate",root.dataset.targetDate);
   probe.dataset.ready="true";probe.dataset.error="none";
- }catch(err){probe.dataset.error=err?.stack??String(err);probe.dataset.ready="error";}
+ }catch(err){probe.dataset.ready="error";probe.dataset.error=err?.stack??String(err);}
 },{once:true});
 frame.src=url;
 </script></body></html>
