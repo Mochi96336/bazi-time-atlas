@@ -637,3 +637,16 @@ body[data-research-mode="dates"] #research-year-strip {display:none!important}
   .research-advanced-details > summary {font-size:12px;gap:2px 10px}
   .research-advanced-details > summary > span {font-size:10px}
 }
+
+
+/* Deep-link compatibility: the long-standing ?delta and explicit annual
+   research URLs retain their original full research shell geometry. The native
+   progressive disclosure is visible ONLY on the unified beginner entry. */
+body[data-research-mode="annual"] .research-advanced-details {
+  width:auto;max-width:none;
+  margin:0;padding:0;border:0;
+}
+body[data-research-mode="annual"] .research-advanced-details > summary,
+body[data-research-mode="annual"] .research-beginner-link {
+  display:none!important;
+}
