@@ -129,25 +129,6 @@ await mkdir(outputDir, { recursive:true });
 // Factorial four-way comparison under identical reference time and viewport.
 // The SVG run isolates color; roughness intentionally retains old GLSL tints;
 // fallback documents a forced no-WebGL outcome.
-// Minimal load diagnostics distinguish a CSS experiment fixture fault from
-// the original page and the pre-existing H2.4 iframe contract.
-for (const mode of ["svg","roughness"]) {
-  const requested = new URL("?material=" + mode + "&instant=" +
-    encodeURIComponent(H25_INSTANTS[0]), baseURL).href;
-  const target = "../../?material=" + mode + "&instant=" + encodeURIComponent(H25_INSTANTS[0]);
-  const h24 = new URL("scripts/fixtures/home-h24-responsive.html?" +
-    new URLSearchParams({width:"390",height:"844",audit:"1",target}),baseURL).href;
-  for (const [label,url] of [["direct",requested],["h24-iframe",h24]]) {
-    const r=spawnSync(browser,[...args,"--window-size=600,844","--dump-dom",url],
-      {encoding:"utf8",timeout:55_000,maxBuffer:16*1024*1024});
-    const output=r.stdout || "";
-    const match=output.match(/data-selected-instant-ms="([^"]*)"/);
-    const ready=output.match(/<output id="proof"[^>]*data-ready="([^"]*)"/)?.[1] || "?";
-    const error=output.match(/data-error="([^"]*)"/)?.[1] || "none";
-    console.log("[h25-smoke] "+label+"/"+mode+" code="+r.status+
-      " selected="+(match?.[1] ?? "missing")+" ready="+ready+" error="+error.slice(0,200));
-  }
-}
 const matrix=[];
 for (const variant of Object.keys(H25_VARIANTS)) {
   for (const mode of ["svg","roughness","fallback"]) {
