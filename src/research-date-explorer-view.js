@@ -2,7 +2,7 @@ import { compareResearchDates } from "./recurrence/research-date-pair.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
 import { dayWheelDateDestinations } from "./recurrence/day-wheel-date-destinations.js";
 import { researchOneYearStory } from "./recurrence/research-one-year-story.js";
-import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
+import { gregorianOrdinal, validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
 import {
   RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,
@@ -183,6 +183,20 @@ function renderYearStory(comparison, seasonal) {
   setText("research-one-year-day-position","60 日序 · 第 "+(day.index+1)+" 位");
   setText("research-one-year-day-motion",
     story.yearLength+" 天 = 60 日 × "+Math.floor(story.yearLength/60)+" 輪 + "+story.dayPhaseAcrossCivilYear+" 天，干支日推進 "+story.dayPhaseAcrossCivilYear+" 位");
+
+  // Keep the only date playhead and the Day cycle tied to the same committed
+  // selected civil date. No second Year or Day computation authority is used.
+  const scrub=document.getElementById("research-one-year-scrub");
+  scrub.max=String(story.yearLength-1);
+  scrub.value=String(story.selectedDayOrdinal-1);
+  scrub.setAttribute("aria-valuetext",dateKey(target)+"，年柱 "+name+"，干支日 "+day.name);
+  const dayDial=document.getElementById("research-one-year-day-phase-dial");
+  dayDial.style.setProperty("--phase-deg",String((day.index+1)*6)+"deg");
+  dayDial.setAttribute("aria-label","干支日 "+day.name+"，六十日循環第 "+(day.index+1)+" 位");
+  setText("research-one-year-day-phase-index",String(day.index+1));
+  setText("research-one-year-day-phase-message",day.index===59
+    ? "第 60 位 · 明天回到第 1 位"
+    : "第 "+(day.index+1)+" 位 · 再 "+(59-day.index)+" 天走到第 60 位");
 
   const marker=document.getElementById("research-one-year-selected-marker");
   marker.style.left=story.selectedPosition.toFixed(4)+"%";
@@ -501,6 +515,38 @@ if (root && form && annualButton && datesButton) {
     const displacement = Number(button.dataset.explorerStepDays);
     if (![-60,-1,1,60].includes(displacement)) throw new Error("unsupported date-explorer step");
     button.addEventListener("click",() => stepComparisonDate(displacement));
+  });
+  document.getElementById("research-one-year-scrub")?.addEventListener("input",event => {
+    if (mode!=="dates" || root.dataset.ready!=="true") return;
+    // A dirty or invalid form must never be replaced by a speculative drag.
+    // This matches the existing free-wheel stale-input protection.
+    const typedBase=readFields("base"),typedTarget=readFields("target");
+    if(!typedBase || !typedTarget ||
+      dateKey(typedBase)!==dateKey(base) || dateKey(typedTarget)!==dateKey(target)){
+      root.dataset.scrubOutcome="stale-input";
+      setError("日期尚未確認，請先套用日期，再拖動年度時間線。");
+      event.currentTarget.value=String(gregorianOrdinal(target)-
+        gregorianOrdinal({year:target.year,month:1,day:1}));
+      return;
+    }
+    const offset=Number(event.currentTarget.value);
+    if(!Number.isInteger(offset)||offset<0||offset>=
+      (researchOneYearStory(target).yearLength)){
+      root.dataset.scrubOutcome="invalid-step";
+      return;
+    }
+    try{
+      const chosen=shiftGregorianDate({year:target.year,month:1,day:1},offset);
+      if(chosen.year!==target.year) throw new RangeError("outside selected civil year");
+      target=chosen;
+      hasExplorerSelection=true;
+      root.dataset.scrubOutcome="applied";
+      root.dataset.lastScrubDate=dateKey(target);
+      syncInputs();setError(null);render();syncFreeQuery();
+    }catch{
+      root.dataset.scrubOutcome="out-of-range";
+      setError("年度時間線無法移到這個日期，原選定日期已保留。");
+    }
   });
   root.addEventListener("research-free-wheel:jump",jumpToSelectedDay);
   // Existing Research-only source loads asynchronously. A new verified chunk
