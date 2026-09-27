@@ -606,3 +606,9 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
  .research-one-year-story[data-active-year-status="unresolved"]
    .research-one-year-identity-year strong{font-size:15px}
 }
+
+/* The six-turn sentence is the actual teaching result: legible, still compact. */
+.research-one-year-motion{font-size:13px;line-height:1.5}
+@media(max-width:680px){
+ .research-one-year-motion{font-size:12.5px;line-height:1.5}
+}
