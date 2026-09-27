@@ -32,10 +32,7 @@
         <h1>回歸研究</h1>
         <p class="lede">離散週期重新對齊，四柱也會回到同一狀態嗎？</p>
       </div>
-      <div class="research-mode-switch" role="group" aria-label="研究操作模式">
-        <button type="button" id="research-mode-annual" aria-controls="research-discrete" aria-pressed="true">跨年回歸</button>
-        <button type="button" id="research-mode-dates" aria-controls="research-free-explorer" aria-pressed="false">一年怎麼走</button>
-      </div>
+
       <p class="scope-note">天文外圈採 Berger 1978 長期近似；只比較季節形狀，不作遠未來民用時刻預報。</p>
     </section>
 
@@ -96,10 +93,7 @@
           <div class="research-one-year-timeline">
             <div class="research-one-year-timeline-head">
               <strong id="research-one-year-calendar-year">— 年的一年</strong>
-              <div class="research-year-journey-shortcuts">
-                <button id="research-year-journey-start" class="research-year-journey-start" type="button" aria-label="查看本公曆年 1 月 1 日到下一年 1 月 1 日的六十日循環結果">看整個公曆年 →</button>
-                <button id="research-year-journey-restore" class="research-year-journey-return" type="button" hidden>回原日期</button>
-              </div>
+
             </div>
             <div id="research-one-year-track" class="research-one-year-track" role="group" aria-label="公曆一年、實際立春及目前日期的位置">
               <div class="research-one-year-track-line" aria-hidden="true"></div>
@@ -269,6 +263,9 @@
       </div>
     </section>
 
+    <details id="research-advanced-details" class="research-advanced-details">
+      <summary>進階研究 <span>跨年回歸 · 天文偏移 · 四柱判定</span></summary>
+      <a class="research-beginner-link" href="./recurrence.html">← 返回年度時間軸</a>
     <nav class="research-outline" aria-label="研究項目">
       <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>離散閉合</strong><small id="research-spine-discrete">等待狀態</small></a>
       <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>天文偏移</strong><small id="research-spine-astronomy">等待狀態</small></a>
@@ -507,6 +504,7 @@
 
       <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。天文外圈使用 André Berger 1978 長期軌道參數；本頁只做春分錨定、365.2422 日正規化的十二節形狀比較，不處理 ΔT、短週期行星攝動或歷史民用曆法，也不把搜尋結果當成遠未來精確節氣時刻或真正週期。</p></details>
     </section>
+    </details>
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
