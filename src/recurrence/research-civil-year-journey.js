@@ -72,6 +72,15 @@ export function researchCivilYearJourney(date, {
     const following=shiftGregorianDate(atBoundary,1);
     if (following.year===year) stages.push(stage("after-li-chun",following));
   }
+  // Exactly six meaningful checkpoints: one click may show one completed
+  // Day circuit (60 days), not sixty clicks. Skipping to the end stays optional.
+  for(let turn=1;turn<=turns;turn++){
+    const finish=shiftGregorianDate(start,turn*60);
+    const finishOrdinal=gregorianOrdinal(finish);
+    if(stages.some(item=>gregorianOrdinal(item.date)===finishOrdinal))continue;
+    stages.push(stage("turn-"+turn,finish));
+  }
+  stages.sort((a,b)=>a.elapsedDays-b.elapsedDays);
   stages.push(stage("next-jan-1",next));
   const startDay=stages[0].day, endDay=stages.at(-1).day;
   if (((endDay.index-startDay.index+60)%60)!==remainder) {
