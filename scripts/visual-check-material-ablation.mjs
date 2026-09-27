@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { MATERIAL_FIXED_INSTANT, MATERIAL_PROBE_NAMES, MATERIAL_PROBE_REGION } from "./material-visual-contract.mjs";
 import { decodePngRgb, materialMasks, compareMaterialPng, readScreenshotCtm } from "./material-png-metrics.mjs";
+import { solarRegionWarmth, assertDirectPageSolarProjection } from "./material-direct-solar-projection.mjs";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const outputDir = path.resolve("tmp/visual-check");
@@ -108,11 +109,33 @@ for (const shot of screenshots.slice(1).concat(replay)) {
   }
 }
 const { masks, counts } = materialMasks(viewport.width, viewport.height, ctm);
+// Compare only genuinely independent *direct full-page* material captures.
+// The experimental nested H2.7 iframe was able to return an apparently valid
+// post-layout SVG CTM while its WebGL canvas had an older GPU projection; a
+// Solar warmth check against authentic SVG catches that exact false positive.
+const svgFile = path.join(outputDir, "material-svg-1440x900.png");
+const svgPng = decodePngRgb(await readFile(svgFile));
+if (svgPng.width !== viewport.width || svgPng.height !== viewport.height) {
+  throw new Error("Direct SVG Solar control dimensions differ from WebGL");
+}
+const directPageSolarProjection = assertDirectPageSolarProjection(
+  solarRegionWarmth(defaultPng, masks.solar),
+  solarRegionWarmth(svgPng, masks.solar)
+);
+const explicitSolarProjection = assertDirectPageSolarProjection(
+  solarRegionWarmth(baseline.png, masks.solar),
+  solarRegionWarmth(svgPng, masks.solar)
+);
 const metrics = {
   defaultVsExplicit: compareMaterialPng(defaultPng, baseline.png, masks.all),
   baselineReplay: compareMaterialPng(baseline.png, replay.png, masks.all),
   ablations: []
 };
+// A diagnostic probe must not produce a different real Solar material than
+// the uninstrumented full-page capture, beyond measured Chromium replay noise.
+if (metrics.defaultVsExplicit.meanAbsoluteRgb8 > metrics.baselineReplay.meanAbsoluteRgb8 + 0.15) {
+  throw new Error("Explicit material diagnostic altered uninstrumented material rendering");
+}
 for (const shot of screenshots.slice(1)) {
   const region = MATERIAL_PROBE_REGION[shot.name];
   const outside = new Uint8Array(masks.all.length);
@@ -136,16 +159,20 @@ const report = {
   materialMode: "roughness",
   captures: [...screenshots, { name: "none-replay", ...replay }].map(({ png, ...meta }) => meta),
   metrics,
+  directPageSolarProjection,
+  explicitSolarProjection,
   notes: [
     "Scores are RGB-channel pixel differences, NOT a material-realism or beauty judgment.",
     "ROI authority is the CTM embedded by the screenshot process, NOT a separate dump-dom browser process.",
     "Canonical radii and the screenshot CTM define ROIs; nonmatching screenshot probes fail closed.",
     "Text/sector semantics remain in screenshots; inspect actual PNGs before aesthetic conclusions.",
     "Repeated baseline measures Chromium timing/raster noise. No minimum visible-change threshold is imposed.",
+    "The direct full-page WebGL Solar warm-band signal is independently checked against matching SVG; this detects stale GPU layout even when the SVG CTM marker looks valid.",
     "Run the pre-existing 2047/1440/390 SVG/roughness evidence matrix for fallback and responsive checks."
   ]
 };
 await writeFile(path.join(outputDir, "material-probe-evidence.json"), JSON.stringify(report, null, 2) + "\n", "utf8");
+console.log("[material-ablation] direct-page Solar projection: " + JSON.stringify(directPageSolarProjection));
 console.log("[material-ablation] evidence: " + JSON.stringify({
   baselineReplay: metrics.baselineReplay,
   probes: metrics.ablations.map(v => ({ name: v.name, inside: v.inside.meanAbsoluteRgb8,
