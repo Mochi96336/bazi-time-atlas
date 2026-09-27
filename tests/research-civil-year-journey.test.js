@@ -32,7 +32,8 @@ test("2024 leap-year path retains date-only 2024 Li Chun uncertainty and +6 days
   assert.equal(result.available,true);
   assert.deepEqual([result.yearLength,result.turns,result.remainder],[366,6,6]);
   assert.deepEqual(result.milestones.map(x=>x.id),
-    ["start","li-chun-date","after-li-chun","next-jan-1"]);
+    ["start","li-chun-date","after-li-chun",
+      "turn-1","turn-2","turn-3","turn-4","turn-5","turn-6","next-jan-1"]);
   assert.equal(result.milestones[0].activeYear.pillar?.name,"癸卯");
   const boundary=result.milestones[1];
   assert.deepEqual(boundary.date,result.boundary.date);
@@ -57,11 +58,27 @@ test("every stage is one canonical date with elapsed days, not a nominal Year la
   }
 });
 
+test("each 60-day checkpoint closes one visible Day circuit without moving the Year authority",()=>{
+  const result=evidenced(2024);
+  const start=result.milestones[0];
+  for(let n=1;n<=6;n++){
+    const turn=result.milestones.find(s=>s.id==="turn-"+n);
+    assert.ok(turn);
+    assert.equal(turn.elapsedDays,60*n);
+    assert.equal(turn.completedTurns,n);
+    assert.equal(turn.partialDays,0);
+    assert.equal(turn.day.name,start.day.name,
+      "each full 60-day turn must return to the exact canonical Day name");
+    assert.equal(turn.day.index,start.day.index);
+  }
+});
+
 test("missing seasonal evidence must omit the boundary stage and leave actual Year not evaluated",()=>{
   const result=researchCivilYearJourney(d(10026,7,1));
   assert.equal(result.available,true);
   assert.equal(result.boundary,null);
-  assert.deepEqual(result.milestones.map(stage=>stage.id),["start","next-jan-1"]);
+  assert.deepEqual(result.milestones.map(stage=>stage.id),
+    ["start","turn-1","turn-2","turn-3","turn-4","turn-5","turn-6","next-jan-1"]);
   assert.ok(result.milestones.every(stage=>stage.activeYear.status==="not-evaluated" &&
     stage.activeYear.pillar===null));
   assert.equal(result.milestones.at(-1).elapsedDays,result.yearLength);
