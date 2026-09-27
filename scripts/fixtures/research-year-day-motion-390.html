@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Coupled Year/Day visual scenarios</title><style>html,body{margin:0;width:500px;min-height:1600px;background:#101713}iframe{width:390px;height:1560px;border:0;display:block}output{display:none}</style></head><body>
+<iframe title="Real 390px Year/Day prototype" id="stage" src="../../docs/prototypes/research01-coupled-year-day-motion.html"></iframe>
+<output id="probe" data-ready="false"></output>
+<script>
+const stage=document.getElementById("stage"),probe=document.getElementById("probe"),p=new URLSearchParams(location.search);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+stage.addEventListener("load",async()=>{
+ try{
+ const d=stage.contentDocument;
+ for(let n=0;n<120;n++){if(d.getElementById("dayname")?.textContent!=="—" && d.getElementById("yearname")?.textContent!=="—")break;await wait(60);}
+ if(d.getElementById("dayname")?.textContent==="—")throw Error("prototype module did not resolve");
+ const setYear=Number(p.get("year")||2024);d.getElementById("year").value=String(setYear);d.getElementById("year").dispatchEvent(new Event("change",{bubbles:true}));
+ const action=p.get("action")||"before";
+ if(["before","boundary","after"].includes(action)){d.getElementById(action).click();}
+ else if(action==="far"){d.getElementById("scrub").value="180";d.getElementById("scrub").dispatchEvent(new Event("input",{bubbles:true}));}
+ else if(action==="step"){d.getElementById("stepyear").click();}
+ await wait(200);
+ const y=d.getElementById("yearname").textContent,day=d.getElementById("dayname").textContent;
+ const rect=d.getElementById("yeartrack").getBoundingClientRect();
+ if(rect.right>391||rect.left<0)throw Error("annual band overflows 390 viewport");
+ probe.dataset.ready="true";probe.dataset.yearName=y;probe.dataset.dayName=day;probe.dataset.zoom=String(!d.getElementById("zoom").hidden);probe.dataset.year=String(d.getElementById("year").value);probe.dataset.date=d.getElementById("date").textContent;
+ }catch(error){probe.dataset.ready="error";probe.dataset.error=error.message;}
+});
+</script></body></html>
