@@ -426,3 +426,59 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-one-year-zoom-labels {font-size:9px;}
   .research-one-year-boundary-meaning {margin:5px 0 2px;}
 }
+
+
+/* Research 01: the proportionate Gregorian Year band IS the one date control.
+   Do not add another horizontal date slider beneath it. */
+.research-one-year-track-line{height:8px;top:19px;background:#566d5f}
+.research-one-year-era{height:8px;top:19px}
+.research-one-year-track-selected{display:none}
+#research-one-year-scrub{
+  -webkit-appearance:none;appearance:none;position:absolute;inset:0;
+  width:100%;height:46px;margin:0;padding:0;z-index:5;
+  background:transparent;cursor:pointer;touch-action:pan-y;
+}
+#research-one-year-scrub::-webkit-slider-runnable-track{height:8px;background:transparent}
+#research-one-year-scrub::-moz-range-track{height:8px;background:transparent}
+#research-one-year-scrub::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:19px;height:30px;
+  margin-top:-11px;border:3px solid #e6f4ec;border-radius:10px;
+  background:rgba(24,34,29,.65);box-shadow:0 0 0 2px #213229
+}
+#research-one-year-scrub::-moz-range-thumb{
+  width:13px;height:24px;border:3px solid #e6f4ec;border-radius:10px;
+  background:rgba(24,34,29,.65)
+}
+#research-one-year-scrub:focus-visible{outline:2px solid #e6ce88;outline-offset:4px}
+.research-one-year-scrub-hint{display:block;color:#b5c7b8;font-size:11px;margin:3px 0 7px;cursor:pointer}
+.research-one-year-day-phase{
+  margin:10px 0 8px;padding:11px 0 0;
+  border-top:1px solid var(--hairline)
+}
+.research-one-year-day-phase-heading{display:block;font-size:12px;color:#d3e3dc;margin-bottom:8px}
+.research-one-year-day-phase-content{display:flex;gap:13px;align-items:center}
+.research-one-year-day-phase-dial{
+  width:68px;height:68px;flex:0 0 68px;border-radius:50%;
+  background:conic-gradient(#b6d2dc var(--phase-deg,0deg),#344a52 0);
+  display:grid;place-items:center;position:relative
+}
+.research-one-year-day-phase-dial::before{
+  content:"";position:absolute;inset:9px;background:#18221c;border-radius:50%
+}
+.research-one-year-day-phase-dial span{
+  z-index:1;color:#c0e0e8;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums
+}
+.research-one-year-day-phase-explanation{display:grid;gap:3px;min-width:0}
+.research-one-year-day-phase-explanation strong{font-size:12px;color:#d5e3e0;line-height:1.45}
+.research-one-year-day-phase-explanation span{font-size:10px;color:#9bad9f;line-height:1.4}
+@media(max-width:680px){
+ .research-one-year-track-line{top:15px}
+ .research-one-year-era{top:15px}
+ #research-one-year-scrub{height:39px}
+ .research-one-year-scrub-hint{font-size:10px}
+ .research-one-year-day-phase{padding-top:9px;margin-top:8px}
+ .research-one-year-day-phase-dial{width:58px;height:58px;flex-basis:58px}
+ .research-one-year-day-phase-dial::before{inset:8px}
+ .research-one-year-day-phase-dial span{font-size:19px}
+ .research-one-year-day-phase-content{gap:10px}
+}
