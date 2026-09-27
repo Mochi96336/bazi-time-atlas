@@ -10,11 +10,11 @@ const mobile = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf
 const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
 
 test("Home Art H0 gives page and edge surfaces one reference-field authority", () => {
-  assert.match(atlas, /--field:\s*#090b0f;/);
-  assert.match(atlas, /--field-raised:\s*#0e1116;/);
+  assert.match(atlas, /--field:\s*#0a0d13;/);
+  assert.match(atlas, /--field-raised:\s*#0e121a;/);
   assert.match(atlas, /--bg:\s*var\(--field\);/);
   assert.match(atlas, /html \{ background: var\(--field\); \}/);
-  assert.match(atlas, /linear-gradient\(180deg, #0d1015 0%, var\(--field\) 68%, #07090d 100%\)/);
+  assert.match(atlas, /linear-gradient\(180deg, #0e141d 0%, var\(--field\) 68%, #080a10 100%\)/);
   for (const css of [tools, inverse]) {
     assert.doesNotMatch(css, /rgba\(9,10,11,/);
     assert.match(css, /color-mix\(in srgb, var\(--field\)/);
