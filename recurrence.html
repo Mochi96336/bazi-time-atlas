@@ -103,7 +103,7 @@
           <div class="research-one-year-timeline">
             <div class="research-one-year-timeline-head">
               <strong id="research-one-year-calendar-year">— 年的一年</strong>
-              <span>同一條公曆時間線</span>
+              <button id="research-year-journey-start" class="research-year-journey-start" type="button">走完這一年 <span aria-hidden="true">→</span></button>
             </div>
             <div id="research-one-year-track" class="research-one-year-track" role="group" aria-label="公曆一年、實際立春及目前日期的位置">
               <div class="research-one-year-track-line" aria-hidden="true"></div>
@@ -134,6 +134,31 @@
                 </div>
               </div>
             </div>
+            <section id="research-year-journey" class="research-year-journey" aria-label="干支年與干支日的一年導覽" hidden>
+              <div class="research-year-journey-head">
+                <strong id="research-year-journey-heading">一年怎麼走</strong>
+                <span id="research-year-journey-step">—</span>
+              </div>
+              <p id="research-year-journey-meaning" class="research-year-journey-meaning">—</p>
+              <div class="research-year-journey-cycles">
+                <strong id="research-year-journey-progress">—</strong>
+                <div id="research-year-journey-loops" class="research-year-journey-loops" role="img" aria-label="六十日循環進度，六圈及剩餘日">
+                  <span data-journey-turn="1" aria-hidden="true">1</span>
+                  <span data-journey-turn="2" aria-hidden="true">2</span>
+                  <span data-journey-turn="3" aria-hidden="true">3</span>
+                  <span data-journey-turn="4" aria-hidden="true">4</span>
+                  <span data-journey-turn="5" aria-hidden="true">5</span>
+                  <span data-journey-turn="6" aria-hidden="true">6</span>
+                  <span id="research-year-journey-remainder" class="research-year-journey-remainder" aria-hidden="true">＋</span>
+                </div>
+                <small id="research-year-journey-day-names">—</small>
+              </div>
+              <div class="research-year-journey-actions" role="group" aria-label="逐步查看一年與返回">
+                <button id="research-year-journey-previous" type="button">上一步</button>
+                <button id="research-year-journey-next" type="button">下一步</button>
+                <button id="research-year-journey-restore" type="button">回原日期</button>
+              </div>
+            </section>
             <div id="research-one-year-boundary-zoom" class="research-one-year-boundary-zoom" hidden>
               <div class="research-one-year-zoom-heading">
                 <strong>立春附近 · 放大觀察</strong>
