@@ -48,7 +48,7 @@ jobs:
           done
           cat /tmp/h25-http.log
           exit 1
-      - name: Capture A0–A3 genuine-width SVG/WebGL/fallback PNG matrix
+      - name: Capture A0–A3 and restrained B1–B3 genuine-width SVG/WebGL/fallback PNG matrix
         run: node scripts/visual-check-home-h25-color-lab.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
