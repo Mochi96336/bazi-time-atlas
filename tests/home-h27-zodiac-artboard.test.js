@@ -45,7 +45,7 @@ test("C0 is byte-for-byte unmodified substrate; C1 and C2 clone real Zodiac mate
     const {doc,svg,defs,bed}=fakeDocument(),before=bed.getAttribute("d");
     const result=applyH27Prototype(doc,variant);
     const paths=svg.children.filter(x=>x.dataset.h27StructuralProbe);
-    assert.equal(paths.length,variant==="C0"?0:variant==="C1"?1:2);
+    assert.equal(paths.length,variant==="C0"?0:variant==="C2"?2:1);
     assert.equal(result.inserted,paths.length);
     assert.equal(result.gradients,paths.length);
     if(variant==="C3")assert.equal(paths[0]?.getAttribute("opacity"),"0.54");
