@@ -100,6 +100,8 @@ const expected={
   "data-one-year-story-first-screen":"true",
   "data-one-year-linked-playhead-first-screen":"true",
   "data-one-year-scrub-daily-and-boundary":"true",
+  "data-one-year-scrub-dirty-edit-protected":"true",
+  "data-one-year-scrub-burst-synchronized":"true",
   "data-one-year-actual-not-nominal":"true",
   "data-one-year-dynamic-lichun":"true",
   "data-one-year-two-era-band":"true",
