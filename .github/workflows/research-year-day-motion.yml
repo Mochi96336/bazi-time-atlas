@@ -1,0 +1,45 @@
+name: Research Year-Day motion visual proof
+on:
+  pull_request:
+    paths:
+      - 'docs/prototypes/research01-coupled-year-day-motion.html'
+      - 'scripts/fixtures/research-year-day-motion-390.html'
+      - 'scripts/visual-check-research-year-day-motion.mjs'
+      - '.github/workflows/research-year-day-motion.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-motion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run vendor:prepare
+      - run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/bazi-research-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/bazi-research-http.log
+          exit 1
+      - name: Capture actual motion prototype states
+        run: node scripts/visual-check-research-year-day-motion.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload motion PNG screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: research-year-day-motion-png
+          path: tmp/visual-check/motion-*.png
+          if-no-files-found: warn
+          retention-days: 7
