@@ -52,7 +52,8 @@ function probe(spec){
   const conditions={
     ready:"true",variant:spec.variant,mode:spec.mode,
     "inner-width":String(spec.width),"instant-ms":String(Date.parse(spec.instant)),
-    palette:wantPalette,classification:String(!!spec.classification)
+    palette:wantPalette,classification:String(!!spec.classification),
+    "ctm-source":"post-layout-screenshot-process"
   };
   for(const [key,expected] of Object.entries(conditions))if(attribute(tag,key)!==expected)
     throw Error("H2.6 invalid probe "+key+" got "+attribute(tag,key)+
