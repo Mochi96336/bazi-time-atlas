@@ -159,6 +159,55 @@
         record("one-year-linked-playhead-first-screen",true);
         record("one-year-scrub-daily-and-boundary",true);
 
+        // Dirty-form fence: the year scrub must never silently destroy either
+        // a valid but uncommitted date or a malformed in-progress edit.
+        const urlBeforeDirty=frame.contentWindow.location.search;
+        const targetFields=dateFields(doc,"target");
+        const assertRejectedDrag=(draftValue)=>{
+          const committed=root.dataset.targetDate;
+          targetFields[2].value=String(draftValue); // do not dispatch change/submit
+          nativeInput(42);
+          assert(root.dataset.scrubOutcome==="stale-input" &&
+            root.dataset.targetDate===committed &&
+            frame.contentWindow.location.search===urlBeforeDirty &&
+            targetFields[2].value===String(draftValue) &&
+            !doc.getElementById("research-explorer-error").hidden &&
+            scrub.value==="40",
+            "dirty target edit was overwritten or URL changed when scrub was rejected");
+          targetFields[2].value="10";
+          doc.getElementById("research-date-explorer-form").dispatchEvent(
+            new Event("submit",{bubbles:true,cancelable:true}));
+          assert(root.dataset.ready==="true" &&
+            root.dataset.targetDate==="2024-02-10" &&
+            doc.getElementById("research-explorer-error").hidden,
+            "form must recover cleanly after a blocked year scrub");
+        };
+        assertRejectedDrag(12); // valid but not yet committed
+        assertRejectedDrag(30); // invalid Gregorian February 30
+        record("one-year-scrub-dirty-edit-protected",true);
+
+        // Burst-scrub through Li Chun and leave the same canonical Year/Day
+        // owner in charge. The observed time is recorded for performance audit.
+        const burstStarted=performance.now();
+        for(let ordinal=27;ordinal<=75;ordinal++) nativeInput(ordinal);
+        const burstMs=performance.now()-burstStarted;
+        assert(root.dataset.targetDate==="2024-03-16" &&
+          story.dataset.activeYearName==="甲辰" &&
+          story.dataset.dayName===root.dataset.targetDayPillar &&
+          doc.getElementById("research-one-year-day-phase-dial")
+            .getAttribute("aria-label").includes(root.dataset.targetDayPillar) &&
+          frame.contentWindow.location.search.includes("compare=2024-03-16"),
+          "burst scrub desynchronized selected date, true Year, 60-Day phase or URL");
+        nativeInput(40);
+        assert(root.dataset.targetDate==="2024-02-10" &&
+          doc.getElementById("research-explorer-error").hidden,
+          "return drag after burst failed to recover original shared date");
+        record("one-year-scrub-burst-synchronized",true);
+        record("one-year-scrub-burst-milliseconds",Math.round(burstMs));
+        // This is an extremely loose catastrophic-regression guard, not
+        // proof of natural finger tracking or a 60fps animation.
+        assert(burstMs<8000,"49 synchronous drag updates exceeded 8-second audit ceiling: "+burstMs);
+
         const freeWheel = doc.getElementById("research-free-day-wheel");
         const freeWheelSvg = doc.getElementById("research-free-day-wheel-svg");
         assert(freeWheel && freeWheel.dataset.ready==="true" &&
