@@ -59,6 +59,8 @@ function probe(spec){
       ", want "+expected+"; "+attribute(tag,"error"));
   if(Number(attribute(tag,"injected"))!==injected)
     throw Error("H2.7 structural presentation path count mismatch");
+  if(spec.mode==="roughness"&&attribute(tag,"gpu-projection-aligned")!=="true")
+    throw Error("H2.7 screenshot GPU projection was not aligned to final layout");
   if(spec.mode==="roughness"&&attribute(tag,"material")!=="roughness")
     throw Error("H2.7 WebGL not active");
   if(spec.mode==="fallback"&&attribute(tag,"fallback")!=="forced")
