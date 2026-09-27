@@ -1,0 +1,61 @@
+name: Research guided civil-year proof
+
+on:
+  pull_request:
+    paths:
+      - 'src/recurrence/research-civil-year-journey.js'
+      - 'src/research-date-explorer-view.js'
+      - 'recurrence.html'
+      - 'research-date-explorer.css'
+      - 'tests/research-civil-year-journey.test.js'
+      - 'scripts/fixtures/research-civil-year-journey-390.html'
+      - 'scripts/check-research-civil-year-journey.mjs'
+      - '.github/workflows/research-guided-year.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guided-year-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guided-year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Prepare pinned browser calendar engine
+        run: npm run vendor:prepare
+      - name: Run pure journey/authority tests
+        run: node --test tests/research-civil-year-journey.test.js
+      - name: Install CJK font for real screenshots
+        run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Serve repository over local HTTP
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/research-journey-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/research-journey-http.log
+          exit 1
+      - name: Verify 390px guided steps and native-size screenshot matrix
+        run: node scripts/check-research-civil-year-journey.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Archive actual guided-year PNGs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: research-guided-year-png
+          path: tmp/research-journey/*.png
+          if-no-files-found: warn
+          retention-days: 7
