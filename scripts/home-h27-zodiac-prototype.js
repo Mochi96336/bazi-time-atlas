@@ -9,7 +9,8 @@ export const H27_INSTANTS = Object.freeze([
 export const H27_VARIANTS = Object.freeze({
   C0: "unmodified production control",
   C1: "recessed neutral slate annulus with broad radial chamfer",
-  C2: "C1 plus fixed-world broad brushed-satin directional response"
+  C2: "C1 plus fixed-world broad brushed-satin directional response",
+  C3: "C1 recessed geometry, only 54% opacity for a less autonomous annual band"
 });
 export const H27_TOKENS = Object.freeze({
   field:"#0a0d13",raised:"#0e121a",zodiac:"#424b59",solar:"#ac906e",
@@ -67,7 +68,8 @@ export function applyH27Prototype(doc,variant) {
     return path;
   };
   const first=makeSurface("recess",band.id);
-  if(variant==="C1")return Object.freeze({inserted:1,gradients:1,canonicalPath:first.getAttribute("d")});
+  if(variant==="C3")first.setAttribute("opacity","0.54");
+  if(variant==="C1"||variant==="C3")return Object.freeze({inserted:1,gradients:1,canonicalPath:first.getAttribute("d")});
   // C2 deliberately builds on exactly C1. Satin follows the existing fixed-
   // world upper-left lighting direction; it does NOT rotate with Zodiac signs.
   const satin=add(defs,"linearGradient",{
