@@ -37,6 +37,8 @@ frame.addEventListener("load",async()=>{
   ok(!source.open && !source.querySelector(".research-one-year-boundary-zoom").checkVisibility(),
     "28-day zoom should be behind one voluntary disclosure");
   ok(start.checkVisibility()&&!restore.checkVisibility(),"one-click annual action is missing");
+  ok(start.textContent.includes("公曆年") && start.getAttribute("aria-label").includes("1 月 1 日"),
+    "annual action must not misrepresent a Feb10-to-next-Jan1 jump as a one-year date anniversary");
   const box=story.getBoundingClientRect(),viewport=desktop?1441:391;
   ok(box.left>=0&&box.right<=viewport,"story overflows viewport");
   if(!desktop)ok(box.bottom<=844,"single-band story exceeds first 390x844 viewport "+box.bottom);
