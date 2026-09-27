@@ -96,6 +96,33 @@
         return fail("substrate stop mismatch: "+kind+" "+actual[kind]);
       if(Boolean(doc.querySelector("#h26-zodiac-isolated-substrate"))===(variant==="V0"))
         return fail("control isolation violated");
+      // The original material shader's first-frame CTM stamp can go stale when
+      // web fonts and layout settle AFTER its initial draw without ResizeObserver
+      // seeing a width change. Re-encode this screenshot process's own FINAL
+      // SVG CTM on top of the old 96x4 stamp. Never substitute separate --dump-dom
+      // geometry or suppress an actual cross-material leak.
+      if(doc.fonts?.ready) await doc.fonts.ready;
+      await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+      const svg=doc.querySelector("#kinetic-wheel");
+      const matrix=svg?.getScreenCTM?.();
+      if(!matrix)return fail("missing final screenshot-process CTM");
+      const values=[matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f];
+      if(values.some(n=>!Number.isFinite(n)))return fail("invalid final screenshot-process CTM");
+      const data=new DataView(new ArrayBuffer(24));
+      values.forEach((n,i)=>data.setInt32(i*4,Math.round(n*1e6),false));
+      const marker=document.createElement("canvas");
+      marker.width=96;marker.height=4;
+      marker.style.cssText="position:fixed;left:0;top:0;width:96px;height:4px;"+
+        "pointer-events:none;z-index:2147483647;image-rendering:pixelated";
+      const context=marker.getContext("2d");
+      if(!context)return fail("final CTM marker canvas unavailable");
+      for(let i=0;i<24;i++){
+        const byte=data.getUint8(i);
+        context.fillStyle="rgb("+byte+","+byte+","+byte+")";
+        context.fillRect(i*4,0,4,4);
+      }
+      document.body.append(marker);
+      proof.dataset.ctmSource="post-layout-screenshot-process";
       const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
       proof.dataset.ready="true";
       proof.dataset.variant=variant;
