@@ -18,23 +18,27 @@ const specs=[
  {year:2024,action:"after",name:"motion-2024-after-390.png"},
  {year:2024,action:"far",name:"motion-2024-far-390.png"},
  {year:2023,action:"step",name:"motion-2023-to-2024-390.png"},
- {year:2024,action:"step",name:"motion-2024-to-2025-390.png"}
+ {year:2024,action:"step",name:"motion-2024-to-2025-390.png"},
+ {year:2024,action:"interaction",name:"motion-2024-interaction-390.png"},
+ {desktop:true,name:"motion-2024-default-1440.png"}
 ];
 const browser=find();
 await mkdir(out,{recursive:true});
 for(const spec of specs){
- const url=new URL("scripts/fixtures/research-year-day-motion-390.html",base);
- url.searchParams.set("year",String(spec.year));url.searchParams.set("action",spec.action);
+ const url=new URL(spec.desktop?"docs/prototypes/research01-coupled-year-day-motion.html":"scripts/fixtures/research-year-day-motion-390.html",base);
+ if(!spec.desktop){url.searchParams.set("year",String(spec.year));url.searchParams.set("action",spec.action);}
  const destination=path.join(out,spec.name);
  const result=spawnSync(browser,["--headless=new","--no-sandbox","--disable-gpu","--hide-scrollbars",
  "--run-all-compositor-stages-before-draw","--force-device-scale-factor=1","--virtual-time-budget=6500",
- "--window-size=500,1650","--screenshot="+destination,url.href],{encoding:"utf8",timeout:35000});
+ "--window-size="+(spec.desktop?"1440,1000":"500,1650"),"--screenshot="+destination,url.href],{encoding:"utf8",timeout:35000});
  if(result.status!==0)throw Error(spec.name+" Chromium failed: "+result.stderr?.slice(-1200));
  const data=await stat(destination);
  if(data.size<10000)throw Error("Suspiciously small screenshot: "+spec.name);
+ if(spec.desktop){console.log("[motion-png] "+spec.name+" "+data.size+" bytes; desktop screenshot");continue;}
  const dom=spawnSync(browser,["--headless=new","--no-sandbox","--disable-gpu",
  "--virtual-time-budget=6500","--window-size=500,1650","--dump-dom",url.href],{encoding:"utf8",timeout:35000,maxBuffer:10_000_000});
  const m=dom.stdout.match(/<output[^>]*id="probe"[^>]*>/);
  if(dom.status!==0||!m||!m[0].includes('data-ready="true"'))throw Error("Motion prototype fixture failed "+spec.name+" "+(m?.[0]??dom.stderr?.slice(-300)));
+ if(spec.action==="interaction"&&!m[0].includes('data-interaction="true"'))throw Error("Motion interaction checks missing");
  console.log("[motion-png] "+spec.name+" "+data.size+" bytes; "+m[0].slice(0,350));
 }
