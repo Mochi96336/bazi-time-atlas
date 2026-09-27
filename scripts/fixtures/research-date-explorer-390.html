@@ -330,12 +330,8 @@
         const sixty=doc.querySelector(".research-date-step-buttons-sixty");
         assert(stepAdvanced && !stepAdvanced.open && daily?.children.length===2 &&
           sixty?.children.length===2 &&
-          [...sixty.children].every(btn=>btn.getClientRects().length===0),
-          "the original noisy ±60 controls must be initially collapsed: "+JSON.stringify({
-            advancedPresent:Boolean(stepAdvanced),advancedOpen:stepAdvanced?.open,
-            dailyCount:daily?.children.length,sixtyCount:sixty?.children.length,
-            rectangles:[...(sixty?.children??[])].map(btn=>({length:btn.getClientRects().length,visible:btn.checkVisibility(),rect:btn.getBoundingClientRect().toJSON()}))
-          }));
+          [...sixty.children].every(btn=>!btn.checkVisibility()),
+          "the original noisy ±60 controls must be initially collapsed, not just recolored");
         const dailyButtons=[...daily.querySelectorAll("button")];
         const dailyBoxes=dailyButtons.map(btn=>btn.getBoundingClientRect());
         assert(dailyBoxes.every(box=>box.width>=76 && box.height>=42 &&
@@ -359,7 +355,8 @@
         assert(stepAdvanced.querySelector("summary").getBoundingClientRect().height>=40,
           "advanced keyboard disclosure must preserve its touch target");
         stepAdvanced.open=true;
-        assert([...sixty.children].every(btn=>btn.getBoundingClientRect().height>=42),
+        assert([...sixty.children].every(btn=>btn.checkVisibility() &&
+          btn.getBoundingClientRect().height>=42),
           "opened ±60 controls must remain fully accessible");
         record("day-step-advanced-sixty-hidden",true);
         record("day-step-advanced-reveals-sixty",true);
@@ -377,7 +374,7 @@
         assert(frame.contentWindow.location.search.includes("compare=2024-02-10"),
           "date-step commit did not persist a consistent shareable date");
         stepAdvanced.open=false;
-        assert([...sixty.children].every(btn=>btn.getClientRects().length===0),
+        assert([...sixty.children].every(btn=>!btn.checkVisibility()),
           "legacy sixty-day buttons must fold away again after use");
         const afterSteps = story.getBoundingClientRect();
         assert(afterSteps.bottom<=844,
