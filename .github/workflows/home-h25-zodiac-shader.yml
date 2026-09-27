@@ -1,0 +1,62 @@
+name: H2.5 Zodiac shader hue isolation
+
+on:
+  pull_request:
+    paths:
+      - 'src/wheel/material-prototype.js'
+      - 'scripts/fixtures/home-h25-zodiac-shader-frame.html'
+      - 'scripts/visual-check-home-h25-zodiac-shader.mjs'
+      - 'tests/home-h25-zodiac-shader.test.js'
+      - 'docs/home-art-h25-zodiac-shader.md'
+      - '.github/workflows/home-h25-zodiac-shader.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h25-zodiac-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zodiac-shader-tint-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Prepare Atlas dependency for browser initialization
+        run: npm run vendor:prepare
+      - name: Verify exact opt-in GLSL substitution
+        run: node --test tests/home-h25-zodiac-shader.test.js
+      - name: Install CJK screenshot font
+        run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Locate system Chromium
+        run: command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable
+      - name: Start original Atlas locally
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/h25-zodiac-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/h25-zodiac-http.log
+          exit 1
+      - name: Run same-CSS legacy-versus-indigo shader captures with screenshot CTM isolation
+        run: node scripts/visual-check-home-h25-zodiac-shader.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload Zodiac shader optical evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: home-h25-zodiac-shader-evidence
+          path: tmp/visual-check/home-h25-zodiac/
+          if-no-files-found: warn
+          retention-days: 7
