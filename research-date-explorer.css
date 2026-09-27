@@ -493,3 +493,14 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
  .research-one-year-boundary-zoom{padding:6px 8px;margin:4px 0}
  .research-one-year-marker-key{margin:3px 0 1px}
 }
+
+/* On a time-unbound Li Chun civil date the correct result is TWO candidates.
+   Fit both in the existing Year datum instead of forcing an awkward line wrap. */
+.research-one-year-story[data-active-year-status="unresolved"] .research-one-year-identity-year strong{
+  font-size:clamp(20px,5.5vw,27px);letter-spacing:-.035em;white-space:nowrap;
+}
+@media(max-width:680px){
+  /* The selected date is already the primary editable datum immediately above. */
+  .research-one-year-selected-date{display:none}
+  .research-one-year-marker-key-selected{display:none}
+}
