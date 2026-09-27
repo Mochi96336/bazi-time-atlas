@@ -563,9 +563,41 @@ function compileShader(gl, type, source) {
   return shader;
 }
 
-function createProgram(gl) {
+// H2.5 shader COLOR STUDY only. No runtime effect without the explicit exact
+// ?material=roughness&h25ZodiacTint=indigo query pair. Keep all alpha,
+// micro-normal, texture, light and solar values byte-for-byte unchanged.
+export function resolveH25ZodiacTintStudy(search = "") {
+  try {
+    const params = new URLSearchParams(search);
+    return params.get("material") === "roughness" &&
+      params.get("h25ZodiacTint") === "indigo";
+  } catch {
+    return false;
+  }
+}
+export function h25ZodiacFragmentSource(enabled = false) {
+  if (!enabled) return FRAGMENT_SHADER;
+  const substitutions = [
+    ["vec3 reflectionTint = vec3(0.37, 0.44, 0.51);",
+      "vec3 reflectionTint = vec3(0.34, 0.42, 0.54);"],
+    ["vec3 microLightTint = vec3(0.30, 0.37, 0.44);",
+      "vec3 microLightTint = vec3(0.275, 0.36, 0.47);"],
+    ["vec3 nebulaLightTint = vec3(0.18, 0.26, 0.35);",
+      "vec3 nebulaLightTint = vec3(0.16, 0.25, 0.39);"]
+  ];
+  let shader = FRAGMENT_SHADER;
+  for (const [before, after] of substitutions) {
+    if (shader.split(before).length !== 2) {
+      throw new Error("H2.5 Zodiac tint source no longer matches original shader");
+    }
+    shader = shader.replace(before, after);
+  }
+  return shader;
+}
+
+function createProgram(gl, fragmentSource = FRAGMENT_SHADER) {
   const vertex = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
+  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
   const program = gl.createProgram();
   if (!program) throw new Error("unable to create material shader program");
   gl.attachShader(program, vertex);
@@ -647,6 +679,7 @@ function setupRoughnessTexture(gl) {
 export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.location?.search ?? "" }) {
   const requestedMode = resolveMaterialMode(search);
   const requestedProbe = resolveMaterialProbe(search);
+  const h25ZodiacStudy = resolveH25ZodiacTintStudy(search);
   let materialWasExplicit = false;
   try {
     materialWasExplicit = new URLSearchParams(search).has("material");
@@ -675,6 +708,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
     shell?.removeAttribute("data-material-probe-transform");
+    shell?.removeAttribute("data-h25-zodiac-tint-probe");
     materialEvidenceStamp?.remove();
     materialEvidenceStamp = null;
     if (shell) {
@@ -811,7 +845,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       });
       if (!gl) throw new Error("WebGL2 unavailable");
 
-      program = createProgram(gl);
+      program = createProgram(gl, h25ZodiacFragmentSource(h25ZodiacStudy));
       uniforms = uniformLocations(gl, program);
       gl.useProgram(program);
       setupQuad(gl, program);
@@ -823,6 +857,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       shell?.removeAttribute("data-material-prototype-error");
       if (shell) {
         shell.dataset.materialPrototype = requestedMode;
+        if (h25ZodiacStudy) shell.dataset.h25ZodiacTintProbe = "indigo";
         if (requestedProbe !== null) {
           const name = Object.keys(MATERIAL_PROBES).find(key => MATERIAL_PROBES[key] === requestedProbe);
           shell.dataset.materialProbe = name;
