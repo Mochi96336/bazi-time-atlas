@@ -99,9 +99,9 @@ function probe(spec) {
     classificationFill:attribute(tag,"classification-fill")
   };
 }
-async function screenshot(spec, proof) {
+async function screenshot(spec, proof, suffix="") {
   const stamp = spec.instant === H25_INSTANTS[0] ? "reference" : "changed-instant";
-  const name = ["h25",spec.variant,spec.mode,spec.width + "x" + viewports[spec.width].height,stamp].join("-") + ".png";
+  const name = ["h25",spec.variant,spec.mode,spec.width + "x" + viewports[spec.width].height,stamp].join("-") + suffix + ".png";
   const file = path.join(outputDir, name);
   runBrowser(spec, "--screenshot=" + file);
   const bytes = await readFile(file), info = await stat(file);
@@ -158,7 +158,7 @@ if (!ordinary.classificationFill || ordinary.classificationFill === "not-applica
 const referenceSpec = { variant:"A0",mode:"svg",width:1440,instant:H25_INSTANTS[0] };
 const reference = captures.find(c => c.variant==="A0" && c.mode==="svg" &&
   c.width===1440 && c.instant===H25_INSTANTS[0]);
-const replay = await screenshot(referenceSpec, probe(referenceSpec));
+const replay = await screenshot(referenceSpec, probe(referenceSpec), "-replay");
 // Do not silently attribute browser nondeterminism to a palette change.
 const report = {
   kind:"h25-evidence-only-background-zodiac-factorial",
