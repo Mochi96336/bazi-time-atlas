@@ -99,3 +99,23 @@ the global Zodiac stripe brighter. Classification is categorically separate.
 5. Exact-head Quality, Visual and full native screenshots across
    320/390/1440/2047, multiple selected instants, normal/Classification/
    Analysis and SVG/WebGL/fallback precede any production integration.
+
+## H2.5-B — reducing the field before any production color decision
+
+The first native A0–A3 matrix succeeded on [run 36338388498](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36338388498). It confirmed A1's cooler environment affects almost the entire composition; A2 Zodiac is subtle at native size, and the hard-coded WebGL reflection tint remains independent. These are descriptive observations, not approval of A3.
+
+Keep the ORIGINAL A0–A3 captures fully reproducible. Add three narrower *diagnostic* conditions; no production CSS or shader is changed:
+
+| Case | CSS reference field | Raised field | Environmental lighting | Zodiac |
+| --- | --- | --- | --- | --- |
+| A0 baseline | `#090b0f` | `#0e1116` | Original gray | `#424b59` |
+| A1 prior comparison | `#0b1019` | `#101824` | Original A1 broad blue | `#424b59` |
+| B1 ambient only | `#090b0f` | `#0e1116` | Narrower, weaker cool ambient; subtle gradient | `#424b59` |
+| B2 restrained field | `#0a0d13` | `#0e121a` | Narrower, weaker cool ambient | `#424b59` |
+| B3 restrained + Zodiac | `#0a0d13` | `#0e121a` | Same as B2 | `#47556c` |
+
+Interpret B1 against A0 and B2 against both A0/A1 **before** inspecting B3; otherwise a cool Zodiac may be credited for a background-only change. B1 deliberately keeps the underlying black authority unchanged. None of B1/B2/B3 may modify ring color, shader tint, camera, cursor, active fill, semantic state or layout.
+
+The A/B capture workflow uses real 390px and 1440px SVG, WebGL, forced fallback, plus A0 and B2 320/2047 extremes and a second selected instant for A0/A3/B2/B3 at 390px. Compare at actual physical pixel dimensions. A0 repeated raster screenshots had a small nonzero difference in the first run, so tiny per-channel differences must be considered against A0 replay noise. Treat a green CI as an evidence-generation result, NOT final visual sign-off.
+
+**Decision gate:** Reject B1/B2 if their cool cast occupies too much negative space, if readable graphite and warmer Solar relationships deteriorate, or if the change is imperceptible at original scale. If one restrained field option helps, pursue a separate production CSS authority update with H0 test changes. The B-series still keeps the original Zodiac shader unchanged; color parity belongs to a separate isolated shader trial, never inferred from this matrix. Leave #486 in Draft until native visual review.
