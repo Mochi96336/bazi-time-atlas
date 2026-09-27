@@ -3,7 +3,7 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import {
-  H25_COLORS, H25_INSTANTS, H25_REFERENCE_SHA, H25_VARIANTS
+  H25_INSTANTS, H25_REFERENCE_SHA, H25_VARIANTS, h25ExpectedColors
 } from "./home-h25-color-contract.js";
 import { decodePngRgb } from "./material-png-metrics.mjs";
 
@@ -68,18 +68,15 @@ function probe(spec) {
     throw new Error("H2.5 proof not ready " + JSON.stringify(spec) +
       " / " + attribute(tag,"error"));
   }
-  const colors = H25_VARIANTS[variant];
-  const expected = [
-    colors.background ? H25_COLORS.candidate.field : H25_COLORS.current.field,
-    colors.background ? H25_COLORS.candidate.raised : H25_COLORS.current.raised,
-    colors.zodiac ? H25_COLORS.candidate.zodiac : H25_COLORS.current.zodiac
-  ].join(",");
+  const colors = h25ExpectedColors(variant);
+  const expected = [colors.field, colors.raised, colors.zodiac].join(",");
   if (attribute(tag,"variant") !== variant || attribute(tag,"mode") !== mode ||
     attribute(tag,"palette") !== expected ||
     attribute(tag,"inner-width") !== String(width) ||
     attribute(tag,"instant-ms") !== String(Date.parse(instant)) ||
     attribute(tag,"untouched") !== "true" ||
-    attribute(tag,"classification") !== String(classification)) {
+    attribute(tag,"classification") !== String(classification) ||
+    attribute(tag,"environment") !== H25_VARIANTS[variant].environment) {
     throw new Error("H2.5 proof state mismatch " + JSON.stringify(spec) + " / " + tag);
   }
   if (mode === "roughness" && attribute(tag,"material-active") !== "roughness") {
@@ -94,7 +91,8 @@ function probe(spec) {
   }
   return {
     variant, mode, width, instant, selectedZodiac:attribute(tag,"selected-zodiac"),
-    palette:attribute(tag,"palette"), materialActive:attribute(tag,"material-active"),
+    palette:attribute(tag,"palette"), environment:attribute(tag,"environment"),
+    materialActive:attribute(tag,"material-active"),
     materialFallback:attribute(tag,"material-fallback"),
     classificationFill:attribute(tag,"classification-fill")
   };
@@ -137,12 +135,18 @@ for (const variant of Object.keys(H25_VARIANTS)) {
     }
   }
 }
+// The B-series is a reduction study. B1 keeps the old field and changes
+// ambient light only; B2 moves the field by a smaller amount than A1.
+// B3 tests the B2 background with A2 Zodiac WITHOUT changing the shader.
+// All 7 variants are captured in SVG, roughness and forced fallback.
 // Edge-width baseline: do not infer native 320 or 2047 legibility from 390/1440.
-for (const width of [320,2047]) for (const mode of ["svg","roughness"]) {
-  matrix.push({ variant:"A0",mode,width,instant:H25_INSTANTS[0] });
+for (const variant of ["A0","B2"]) for (const width of [320,2047]) {
+  for (const mode of ["svg","roughness"]) {
+    matrix.push({ variant,mode,width,instant:H25_INSTANTS[0] });
+  }
 }
 // A new real instant ensures the experiment is not secretly pose-specific.
-for (const variant of ["A0","A3"]) for (const mode of ["svg","roughness"]) {
+for (const variant of ["A0","A3","B2","B3"]) for (const mode of ["svg","roughness"]) {
   matrix.push({ variant,mode,width:390,instant:H25_INSTANTS[1] });
 }
 const captures=[];
@@ -161,13 +165,14 @@ const reference = captures.find(c => c.variant==="A0" && c.mode==="svg" &&
 const replay = await screenshot(referenceSpec, probe(referenceSpec), "-replay");
 // Do not silently attribute browser nondeterminism to a palette change.
 const report = {
-  kind:"h25-evidence-only-background-zodiac-factorial",
+  kind:"h25-evidence-only-background-zodiac-factorial-and-restrained-field",
   pinnedProductionSha:H25_REFERENCE_SHA, fixedInstants:H25_INSTANTS,
   variants:H25_VARIANTS, baselineReplayIdentical:reference.sha256===replay.sha256,
   classificationUnchanged:{ baseline:ordinary.classificationFill, candidate:candidate.classificationFill },
   captures, replay:{ file:replay.file,sha256:replay.sha256 },
   constraints:[
-    "A0 is unmodified production; A1–A3 are same-origin CSS-only iframe overrides, never production file edits.",
+    "A0 is unmodified production; A1–A3 and B1–B3 are same-origin CSS-only iframe overrides, never production file edits.",
+    "B1 holds reference field constant and changes only environmental gradient; B2 modestly shifts the field; B3 pairs B2 with the unchanged A2 Zodiac color.",
     "Background is one grouped environment change: field, raised field and page gradient.",
     "SVG isolates color effects. Roughness intentionally keeps old independent GLSL Zodiac tints; any mismatch is diagnostic, not renderer parity.",
     "Screenshot readiness is checked from screenshot pixels; DOM proof cannot substitute for its screenshot-process geometry.",
