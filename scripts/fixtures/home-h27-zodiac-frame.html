@@ -109,7 +109,6 @@
       await sleep(80);
       const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
       proof.dataset.ctmSource="post-layout-screenshot-process";
-      proof.dataset.ready="true";
       proof.dataset.variant=variant;
       proof.dataset.mode=mode;
       proof.dataset.width=String(width);
@@ -184,6 +183,7 @@
         context.fillRect(i*4,0,4,4);
       }
       document.body.append(marker);
+      proof.dataset.ready="true";
       status.hidden=true;
     }
     let started=false;
