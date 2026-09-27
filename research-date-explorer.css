@@ -531,9 +531,9 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   background:linear-gradient(145deg,rgba(141,174,159,.085),rgba(142,174,163,.015));
 }
 .research-year-journey[hidden]{display:none}
-.research-year-journey-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.research-year-journey-head{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
 .research-year-journey-head strong{font-size:14px;color:#dce8d9}
-.research-year-journey-head span{font-size:11px;color:#b0c4b7;font-variant-numeric:tabular-nums}
+.research-year-journey-head span{font-size:11px;color:#b0c4b7;font-variant-numeric:tabular-nums;margin-left:auto}
 .research-year-journey-meaning{font-size:12px;color:#d4e4db;line-height:1.55;margin:7px 0 10px}
 .research-year-journey-cycles{border-top:1px solid rgba(178,199,184,.16);padding-top:9px}
 .research-year-journey-cycles>strong{
@@ -577,7 +577,14 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
 #research-year-journey-next{background:#c7d5c5;color:#203027;border-color:#c7d5c5}
 #research-year-journey-finish{background:transparent;color:#d8c6a6;border-color:#6c6654}
 #research-year-journey-finish[hidden]{display:none}
-.research-year-journey-actions button:last-child{margin-left:auto;border-color:#736d5d;color:#deceb7;background:transparent}
+.research-year-journey-head #research-year-journey-restore{
+  color:#deceb7;background:transparent;border:1px solid #736d5d;
+  border-radius:8px;min-height:32px;padding:5px 9px;white-space:nowrap;
+  font:inherit;font-weight:660;font-size:11px;cursor:pointer
+}
+.research-year-journey-head #research-year-journey-restore:focus-visible{
+  outline:2px solid #e6d09d;outline-offset:3px
+}
 .research-one-year-story[data-journey-active="true"] .research-one-year-motion{display:none}
 @media(max-width:680px){
   .research-year-journey-start{min-height:29px;padding:4px 8px;font-size:10px}
@@ -586,4 +593,6 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-year-journey-loops{gap:5px}
   .research-year-journey-loops span{width:30px;height:30px;flex-basis:30px}
   .research-year-journey-actions button{min-height:38px;padding:7px 9px}
+  .research-year-journey-head #research-year-journey-restore{padding:4px 7px;font-size:10px}
+  .research-year-journey-head span{font-size:10px}
 }
