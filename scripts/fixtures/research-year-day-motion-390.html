@@ -20,7 +20,7 @@ stage.addEventListener("load",async()=>{
  const sr=slider.getBoundingClientRect(),br=band.getBoundingClientRect();
  if(sr.bottom<br.top||sr.top>br.bottom)throw Error("playhead is not physically overlaying annual band");
  if(action==="before"&&d.getElementById("yearname").textContent!=="癸卯")throw Error("pre-Li Chun Year incorrect");
- if(action==="boundary"&&!d.getElementById("yearname").textContent.includes("癸卯 / 甲辰"))throw Error("unbound Li Chun day erased one candidate");
+ if(action==="boundary"&&!d.getElementById("yearname").textContent.includes("癸卯／甲辰"))throw Error("unbound Li Chun day erased one candidate");
  if(action==="after"&&d.getElementById("yearname").textContent!=="甲辰")throw Error("post-Li Chun Year incorrect");
  if(action==="far"&&!d.getElementById("zoom").hidden)throw Error("unnecessary second zoom track retained");
  if(action==="step"){
