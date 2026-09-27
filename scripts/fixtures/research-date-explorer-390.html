@@ -123,6 +123,15 @@
           dayDial?.getAttribute("aria-label").includes(root.dataset.targetDayPillar) &&
           doc.querySelectorAll("#research-one-year-story input[type=range]").length===1,
           "year-band range and 60-Day phase must share the one canonical selected date");
+        const bandGeom=yearTrack.getBoundingClientRect();
+        const sliderGeom=scrub.getBoundingClientRect();
+        const thumbHalf=9.5; // production WebKit 19px native range thumb
+        assert(
+          Math.abs((sliderGeom.left+thumbHalf)-bandGeom.left)<2 &&
+          Math.abs((sliderGeom.right-thumbHalf)-bandGeom.right)<2,
+          "native date thumb would misalign with the sourced Li Chun and calendar-end tick positions"
+        );
+        record("one-year-slider-calendar-aligned",true);
         const dialRect=dayDial.getBoundingClientRect();
         assert(dialRect.left>=0 && dialRect.right<=391 && dialRect.bottom<=844,
           "the actual 60-Day phase graphic must be visible above the 390px first viewport fold");
