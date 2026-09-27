@@ -1,0 +1,62 @@
+name: H2.7 Zodiac structural material artboard
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/home-h27-zodiac-prototype.js'
+      - 'scripts/fixtures/home-h27-zodiac-frame.html'
+      - 'scripts/visual-check-home-h27-zodiac.mjs'
+      - 'tests/home-h27-zodiac-artboard.test.js'
+      - 'docs/home-art-h27-zodiac-structure.md'
+      - '.github/workflows/home-h27-zodiac.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h27-zodiac-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structural-artboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Prepare original Atlas Tyme dependency
+        run: npm run vendor:prepare
+      - name: Check isolated canonical Zodiac surface structure
+        run: node --test tests/home-h27-zodiac-artboard.test.js
+      - name: Install CJK screenshot font
+        run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Locate Chromium
+        run: command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable
+      - name: Start unmodified production Atlas locally
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/h27-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/h27-http.log
+          exit 1
+      - name: Capture C0 C1 C2 true-width SVG WebGL and forced fallback
+        run: node scripts/visual-check-home-h27-zodiac.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload unscaled optical comparisons
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: home-h27-zodiac-structural-artboard
+          path: tmp/visual-check/home-h27-zodiac/
+          if-no-files-found: warn
+          retention-days: 7
