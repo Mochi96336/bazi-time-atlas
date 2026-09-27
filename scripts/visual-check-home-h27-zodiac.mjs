@@ -113,6 +113,30 @@ const replayCtm=readScreenshotCtm(rp);
 if(replayCtm.some((v,i)=>Math.abs(v-ctm[i])>.001))
   throw Error("H2.7 repeated baseline CTM drift");
 const {masks,counts}=materialMasks(p0.width,p0.height,ctm);
+// A post-layout SVG CTM marker alone is insufficient: the WebGL shader may
+// have initialized while the iframe was still at its 300px default viewport,
+// leaving Solar shader pixels projected in the *wrong ring*. This caught a
+// serious false-positive in our prior same-fixture V0/V1 optical comparisons.
+// Compare solar warmth in C0 true WebGL against the SAME-CSS C0 SVG control.
+const controlSvg=captures.find(x=>x.variant==="C0"&&x.mode==="svg"&&
+  x.width===1440&&x.instant===H27_INSTANTS[0]);
+if(!controlSvg)throw Error("H2.7 SVG Solar reference missing");
+const ps=await load(controlSvg);
+const svgCtm=readScreenshotCtm(ps);
+if(svgCtm.some((v,i)=>Math.abs(v-ctm[i])>.001))
+  throw Error("WebGL and SVG final geometry disagree before material comparison");
+function solarWarmth(png){
+  let red=0,blue=0,n=0;
+  for(let i=0;i<masks.solar.length;i++)if(masks.solar[i]){
+    red+=png.rgb[i*3];blue+=png.rgb[i*3+2];n++;
+  }
+  return {count:n,redMean:red/n,blueMean:blue/n,redMinusBlue:(red-blue)/n};
+}
+const webglSolar=solarWarmth(p0),svgSolar=solarWarmth(ps);
+if(webglSolar.redMinusBlue<Math.max(8,svgSolar.redMinusBlue*.5) ||
+  webglSolar.redMean<svgSolar.redMean*.72)
+  throw Error("WebGL Solar was captured with stale/pre-layout GPU material transform"+
+    JSON.stringify({webglSolar,svgSolar}));
 const nonZodiac=new Uint8Array(masks.all.length);
 for(let i=0;i<nonZodiac.length;i++)nonZodiac[i]=masks.all[i]&&!masks.zodiac[i]?1:0;
 const replayZ=compareMaterialPng(p0,rp,masks.zodiac);
@@ -133,7 +157,7 @@ const result={
   kind:"H2.7 isolated geometric Zodiac substrate concepts; no production edits",
   reference:H27_REFERENCE_SHA,variants:H27_VARIANTS,tokens:H27_TOKENS,
   captures,classificationControls:classControls,
-  metrics:{ctm,counts,baselineReplayIdentical:v0.sha256===replay.sha256,
+  metrics:{ctm,counts,webglSolar,svgSolar,baselineReplayIdentical:v0.sha256===replay.sha256,
     replayNoiseZodiac:replayZ,replayNoiseNonZodiac:replayOther,
     alternatives:variantMetrics},
   interpretation:[
