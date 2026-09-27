@@ -1,27 +1,39 @@
-# H2.7 — one restrained recessed Zodiac inset
+# H2.7 — restrained Zodiac inset: production evidence and limits
 
-**Production candidate only; not a claim that a complete new metal texture has been achieved.** This change ports the single native-tested **C3** material surface from [experiment PR #494](https://github.com/Mochi96336/bazi-time-atlas/pull/494) and [design audit #492](https://github.com/Mochi96336/bazi-time-atlas/issues/492) into the existing canonical Zodiac annulus.
+**One bounded material adjustment, not a new time coordinate or a full rough-metal redesign.** H2.5 B2 remains the approved page/background authority. The existing Zodiac band still derives from the Solar annual longitude.
 
-## Why this material and not the other variants
+## Important correction: retired nested-artboard WebGL proof
 
-The original C0 Zodiac band was so dark that a separate surface was hard to notice at real phone size. The hue-only GLSL prototype #488 was invisible; a weak three-stop-alpha revision #493 was also inconclusive. H2.7 then generated **36 real SVG/WebGL/fallback capture conditions** at 320, 390, 1440 and 2047px plus a second actual instant.
+The original nested experiment [#494](https://github.com/Mochi96336/bazi-time-atlas/pull/494) placed the WebGL canvas in an iframe that could initialize at a stale default width. Even the later, correctly measured SVG screenshot CTM could not repair an already misprojected GPU surface. Its original WebGL-specific masked statistics (including **4.50170 RGB8/channel**, **88,120** apparent Zodiac pixels and **0** non-Zodiac pixels) **must not be cited as proof of real production renderer parity**. A corrected independent Solar-warmth check caught the discrepancy. That artboard is archived without merging.
 
-Full-resolution 390/1440 review:
-- **C1:** material structure now visible, but too independent: a wide cold-blue belt.
-- **C2:** a large bright satin/gray band; rejected for conflicting with the warm Solar and selected ivory datum.
-- **C3:** **same C1 recessed shape/gradient, blended at 0.54 opacity**. Recognizable tonal recession at true 390, less of an autonomous bright band. Moves the overall appearance modestly while preserving the muted graphite/cool-night family.
+We instead compared independent **genuine-page** screenshots from the repository's ordinary Material Visual workflow, using matching viewport, mode and Selected Instant. The baseline `6c594e37…` and later Research-integrated `6b7953fa…` have identical home material sources:
 
-The real 1440 screenshot-process CTM mask reports **88,120 Zodiac pixels** and **804,528 non-Zodiac material pixels**. Relative to original C0, C3 changes the Zodiac mean absolute encoded RGB8/channel by **4.50170** with 85.9986% changing by max-channel ≥3; the rest of the Solar/graphite material mask has **exactly zero** RGB difference, including no baseline replay drift. Classification's categorical computed fill remained exactly identical for C0/C1/C2/C3. These figures show scope/strength only, *not* artistic quality or a pixel-level renderer-equivalence promise.
+- [Unmodified B2 production Visual](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36344954544), artifact **10939783954**.
+- [C3 exact-head production-style Visual](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36349373114), artifact **10941757669**.
+- [H2.8 C4 alternative direct-page Visual](https://github.com/Mochi96336/bazi-time-atlas/actions/runs/36354657188), artifact **10943965612**, [experimental PR #496](https://github.com/Mochi96336/bazi-time-atlas/pull/496) closed unmerged.
+
+All three are independent real-site capture outputs; the 1440 WebGL views are direct full-page browser captures, while the normal project's standard mobile Visual procedure supplies native 390px screenshots.
+
+### Native review — why C3, not C1/C2 or the later C4 joint
+
+The full-resolution original-sized **390 SVG/WebGL/fallback, 1440 SVG/WebGL and 2047 WebGL** views were compared. C1 is an obvious independent blue belt; C2 produces an oversized silvery satin band and competes with Solar. The true production C3 appears as a **moderate, diffuse cool recess** that keeps the original warm Solar and ivory Selected Instant legible, without C2's glare.
+
+The deliberately different H2.8 C4 attempted to add only tiny engraved joints at *both* sides of the existing Zodiac strip, leaving its center untouched. Real-phone and desktop native screenshots showed its **two dark outlines made the strip look more independently bounded**, contrary to the shared-annual-material goal. Therefore C4 was rejected without another opacity sweep.
+
+Whole-frame direct capture **descriptive** differences for C3 relative to real B2:
+- Native **390px cropped WebGL**: mean absolute encoded RGB8/channel **0.22177**, **4.593%** pixels with maximum channel delta at least 3; strongest changed pixels x=8–381/y=365–437.
+- Native **390px cropped SVG**: **0.22808**, **4.633%**, changes y=365–440.
+- **1440×900 direct WebGL**: **0.34172**, **6.386%**; changes x=0–1439/y=411–877.
+- **1440×900 direct SVG**: **0.33510**, **6.415%**; changes y=411–879.
+
+These are *whole-frame comparisons with no artboard-derived material mask*. The changed-pixel bounds coincide with the visible Zodiac annulus, and the independent real visual comparison shows no incidental layout, Solar, graphite or cursor change. Percentages and RGB magnitudes describe image extent, **not** a visual-quality score or a substitute for native review. Classification's existing categorical appearances were inspected independently and remained visually consistent; static regression tests lock the color authorities.
 
 ## Precisely bounded implementation
 
-The original canonical `#m2-zodiac-hard-surface` and its independent `#m2-zodiac-hard-response` are unchanged. `index.html` introduces one fixed-world radial gradient (center `WHEEL_CENTER = 600,1360`, radius `RADII.solarOuter = 900`) with six broad stops spanning exactly **`RADII.solarTermOuter = 840` through `RADII.solarOuter = 900`**. `src/wheel/kinetic-renderer.js` draws one more inert presentation path with the **identical `d` string as the existing Zodiac substrate**, in the same base layer immediately after the bed, rather than computing a new position/phase. `radial-hierarchy.css` fills that path with the new gradient at exactly **0.54** opacity. The existing material shader and browser fallback are untouched.
+The original canonical `#m2-zodiac-hard-surface` and `#m2-zodiac-hard-response` remain unchanged. `index.html` adds just one fixed-world radial gradient (center `600,1360`, radius `900`), six broad stops along canonical radii `840–900`. The renderer places exactly one extra **presentation-only** path with the *same existing Zodiac bed `d`*, immediately after that bed in its original material layer. `radial-hierarchy.css` draws the new recess at **0.54** compositing opacity.
 
-No new orbit, independent clock, selection state, CSS pigment token, glow, white rim, pattern, roughness-frequency increase, sound, typography, screen layout or extra panel. Do not bring #494's 36-screenshot harness into the production branch.
+No new clock/phase, longitude calculation, layout, independent ring geometry, Zodiac base pigment, Solar material, shader, cursor, active sector, categorical palette, texture frequency or typography change.
 
-## Final acceptance gates
+## Release gate and residual work
 
-- Run exact-head Quality, complete Visual and inspect its full native 390, 1440 and 2047 PNGs after the latest Research integration; inspect forced fallback/SVG separately from WebGL. Compare ordinary and Classification and another selected instant where captured.
-- Confirm there is still ONE real shared Solar longitude coordinate. Inspect normal-scale screenshots for whether the inset remains modest rather than a blue third belt; retain warm Solar and ivory Selected Instant hierarchy. Make no claim of genuine roughness geometry, scratched metal or parallax where the implementation only adds low-frequency optical recession.
-- If the production port differs substantially from the approved true-size C3 artboard, close this PR unmerged. Do not increase C3 opacity to compensate for an unrelated screen-space typography problem.
-- When the narrow inset has landed, close and archive experimental PR #494 **unmerged**; H2.6 issue #492 should record the residual limits and stop repeating micro-hue/shader trials.
+Merge only after current-head Quality plus the full Visual are green, final genuine native screenshots agree with the direct-source images above, PR is conflict-free on current main, and the post-merge Pages deployment is verified. Do **not** merge either exploratory #494 or #496. This change establishes modest visibly readable material recession; it does not establish scratched-metal microtexture, optical renderer pixel equality, or solve the mobile wheel's small physically projected text. Do not reintroduce hue-only shader trials or blanket opacity changes to address those unrelated problems.
