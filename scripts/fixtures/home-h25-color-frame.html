@@ -16,6 +16,20 @@
   <iframe id="stage" title="Unmodified Atlas with isolated H2.5 palette override"></iframe>
   <div id="status">H2.5 CAPTURE NOT READY</div>
   <output id="proof" data-ready="false"></output>
+  <!-- Start the target before asynchronous module imports in this harness. -->
+  <script>
+    (function() {
+      const p = new URLSearchParams(location.search);
+      const target = new URL("../../", location.href);
+      const mode = p.get("material") || "svg";
+      target.searchParams.set("instant", p.get("instant") || "2026-09-13T23:43:42.000Z");
+      target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
+      if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
+      if (p.get("classification") === "1") target.searchParams.set("classification", "1");
+      window.__h25PreloadedTarget = target.href;
+      document.querySelector("#stage").src = target.href;
+    }());
+  </script>
   <script type="module">
     import { H25_COLORS, H25_VARIANTS, h25OverrideCss } from "../home-h25-color-contract.js";
     const params = new URLSearchParams(location.search);
@@ -121,11 +135,19 @@
       proof.dataset.ready = "true";
       status.hidden = true;
     }
-    frame.addEventListener("load", () => { void inspect().catch(e => {
-      proof.dataset.error = String(e);
-      status.textContent = "H2.5 ERROR: " + String(e);
-    }); });
-    frame.src = target.href;
+    if (window.__h25PreloadedTarget !== target.href) invalid("preload URL mismatch");
+    let inspectionStarted = false;
+    const startInspection = () => {
+      if (inspectionStarted) return;
+      inspectionStarted = true;
+      void inspect().catch(e => {
+        proof.dataset.error = String(e);
+        status.textContent = "H2.5 ERROR: " + String(e);
+      });
+    };
+    frame.addEventListener("load", startInspection);
+    if (frame.contentDocument?.readyState === "complete" &&
+      frame.contentWindow?.location?.href === target.href) startInspection();
   </script>
 </body>
 </html>
