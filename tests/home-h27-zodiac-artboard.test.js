@@ -81,8 +81,14 @@ test("native optical harness retains genuine widths and screenshot-process post-
   assert.match(fixture,/doc\.fonts\?\.ready/);
   assert.match(fixture,/getScreenCTM/);
   assert.match(fixture,/stage\.style\.width=width\+"px"/);
+  assert.match(fixture,/frame\.style\.width=nativeWidth\+"px"/);
+  assert.match(fixture,/frame\.src=page\.href/);
+  assert.ok(fixture.indexOf("frame.style.width=nativeWidth") < fixture.indexOf("frame.src=page.href"));
+  assert.match(fixture,/__h27BootstrapWidth/);
   assert.match(runner,/readScreenshotCtm/);
   assert.match(runner,/materialMasks/);
+  assert.match(runner,/webglSolar\.redMinusBlue/);
+  assert.match(runner,/svgSolar=solarWarmth/);
   assert.match(runner,/baselineReplayIdentical/);
   assert.match(runner,/nonZodiac/);
   assert.match(runner,/C0.*C1.*C2|Object\.keys\(H27_VARIANTS\)/s);
