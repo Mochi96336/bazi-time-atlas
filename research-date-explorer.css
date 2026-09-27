@@ -592,7 +592,7 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-year-journey-meaning{font-size:11px}
   .research-year-journey-loops{gap:5px}
   .research-year-journey-loops span{width:30px;height:30px;flex-basis:30px}
-  .research-year-journey-actions button{min-height:38px;padding:7px 9px}
-  .research-year-journey-head #research-year-journey-restore{padding:4px 7px;font-size:10px}
+  .research-year-journey-actions button{min-height:44px;padding:7px 9px}
+  .research-year-journey-head #research-year-journey-restore{min-height:40px;padding:4px 7px;font-size:10px}
   .research-year-journey-head span{font-size:10px}
 }
