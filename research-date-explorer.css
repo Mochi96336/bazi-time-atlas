@@ -650,3 +650,30 @@ body[data-research-mode="annual"] .research-advanced-details > summary,
 body[data-research-mode="annual"] .research-beginner-link {
   display:none!important;
 }
+
+
+/* Final subtractive hierarchy: the date form and its ONE yearly visualization
+   are one physical panel, not two stacked result cards. */
+.research-single-surface {
+  border:1px solid rgba(210,226,211,.19);
+  border-radius:16px;
+  padding:3px 12px 12px;
+  background:linear-gradient(145deg,rgba(210,224,201,.022),rgba(168,188,172,.009));
+}
+.research-single-surface .research-date-explorer-form {
+  border:0;border-radius:0;background:transparent;
+  margin:0;padding:10px 0 11px;
+}
+.research-single-surface .research-one-year-story {
+  border:0;border-top:1px solid rgba(210,226,211,.16);
+  border-radius:0;background:transparent;
+  margin:0;padding:11px 0 0;
+}
+.research-single-surface .research-one-year-identities{margin:0 0 7px}
+.research-single-surface .research-one-year-timeline{padding-top:4px}
+@media(max-width:680px){
+ .research-single-surface{border-radius:12px;padding:2px 11px 10px}
+ .research-single-surface .research-date-explorer-form{padding:7px 0 9px}
+ .research-single-surface .research-one-year-story{padding:9px 0 0}
+ .research-single-surface .research-one-year-identities{margin-bottom:5px}
+}
