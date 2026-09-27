@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H2.7 Zodiac native substrate A/B optical proof</title>
+  <style>
+    html,body{margin:0;width:100%;min-height:100%;overflow:hidden;background:#0a0d13}
+    iframe{display:block;border:0;background:#0a0d13}
+    #status{position:fixed;z-index:2147483646;top:6px;right:6px;padding:4px 8px;
+      background:#be1e23;color:#fff;font:12px sans-serif}
+    #status[hidden],output{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Exact Atlas with isolated H2.7 Zodiac substrate comparison"></iframe>
+  <div id="status">H2.7 SCREENSHOT NOT READY</div>
+  <output id="proof" data-ready="false"></output>
+  <script>
+    // Start the authentic project before the parent ESM import; do not let
+    // Chromium virtual time advance while the wheel has not yet initialized.
+    (() => {
+      const p=new URLSearchParams(location.search);
+      const mode=p.get("material")||"roughness";
+      const page=new URL("../../",location.href);
+      page.searchParams.set("instant",p.get("instant")||"2026-09-13T23:43:42.000Z");
+      page.searchParams.set("material",mode==="fallback"?"roughness":mode);
+      if(mode==="fallback") page.searchParams.set("materialWebgl","off");
+      if(mode==="roughness") page.searchParams.set("materialProbe","none");
+      if(p.get("classification")==="1")page.searchParams.set("classification","1");
+      window.__h27Page=page.href;
+      document.querySelector("#stage").src=page.href;
+    })();
+  </script>
+  <script type="module">
+    import { H27_VARIANTS,H27_TOKENS,applyH27Prototype }
+      from "../home-h27-zodiac-prototype.js";
+    const p=new URLSearchParams(location.search);
+    const variant=p.get("variant")||"C0";
+    const mode=p.get("material")||"roughness";
+    const width=Number(p.get("width")||390),height=Number(p.get("height")||844);
+    const instant=p.get("instant")||"2026-09-13T23:43:42.000Z";
+    const classification=p.get("classification")==="1";
+    const stage=document.querySelector("#stage"),proof=document.querySelector("#proof");
+    const status=document.querySelector("#status");
+    const fail=message=>{proof.dataset.error=message;status.textContent="H2.7 INVALID: "+message;throw Error(message)};
+    if(!(variant in H27_VARIANTS)||!["svg","roughness","fallback"].includes(mode)||
+       ![320,390,1440,2047].includes(width)||height<600||height>1500||
+       !Number.isFinite(Date.parse(instant)))fail("invalid query inputs");
+    stage.style.width=width+"px";stage.style.height=height+"px";
+    const target=new URL("../../",location.href);
+    target.searchParams.set("instant",instant);
+    target.searchParams.set("material",mode==="fallback"?"roughness":mode);
+    if(mode==="fallback")target.searchParams.set("materialWebgl","off");
+    if(mode==="roughness")target.searchParams.set("materialProbe","none");
+    if(classification)target.searchParams.set("classification","1");
+    if(window.__h27Page!==target.href)fail("bootstrap URL differs from verified URL");
+    const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    const modeReady=instrument=>mode==="roughness"?
+      instrument.dataset.materialPrototype==="roughness"&&instrument.dataset.materialProbe==="none":
+      mode==="fallback"?
+        instrument.dataset.materialPrototypeFallback==="forced"&&instrument.dataset.materialPrototype!=="roughness":
+        instrument.dataset.materialPrototype!=="roughness";
+    async function inspect(){
+      const doc=stage.contentDocument,win=stage.contentWindow;
+      let instrument;
+      for(let i=0;i<90;i++){
+        instrument=doc?.querySelector("#kinetic-instrument");
+        if(instrument?.dataset.selectedInstantMs===String(Date.parse(instant))&&
+          instrument?.dataset.zodiac&&modeReady(instrument)&&
+          (!classification||instrument.dataset.classificationOverlay==="on"))break;
+        await sleep(70);
+      }
+      if(!instrument?.dataset.zodiac||instrument.dataset.selectedInstantMs!==String(Date.parse(instant))||
+        !modeReady(instrument)||(classification&&instrument.dataset.classificationOverlay!=="on"))
+        return fail("real wheel did not initialize "+JSON.stringify({
+          ready:doc?.readyState,selected:instrument?.dataset.selectedInstantMs,
+          mode:instrument?.dataset.materialPrototype,fallback:instrument?.dataset.materialPrototypeFallback}));
+      const root=win.getComputedStyle(doc.documentElement);
+      const token=name=>root.getPropertyValue(name==="raised"?"--field-raised":"--"+name).trim().toLowerCase();
+      for(const [name,expected] of Object.entries(H27_TOKENS))
+        if(token(name)!==expected)return fail("production color authority changed: "+name);
+      const currentStops=["light","mid","dark"].map(kind=>{
+        const n=doc.querySelector("#m2-zodiac-hard-surface .m2-zodiac-"+kind);
+        return n?Number(win.getComputedStyle(n).stopOpacity):NaN;
+      });
+      if(currentStops.some((value,i)=>Math.abs(value-[.25,.19,.18][i])>.001))
+        return fail("original Zodiac substrate was modified");
+      const applied=applyH27Prototype(doc,variant);
+      const visible=doc.querySelectorAll("[data-h27-structural-probe]");
+      const expected=variant==="C0"?0:variant==="C1"?1:2;
+      if(applied.inserted!==expected||visible.length!==expected||
+         [...visible].some(n=>n.getAttribute("d")!==applied.canonicalPath))
+         return fail("H2.7 presentation paths differ from canonical Zodiac geometry");
+      await sleep(80);
+      const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
+      proof.dataset.ctmSource="post-layout-screenshot-process";
+      proof.dataset.ready="true";
+      proof.dataset.variant=variant;
+      proof.dataset.mode=mode;
+      proof.dataset.width=String(width);
+      proof.dataset.innerWidth=String(win.innerWidth);
+      proof.dataset.instantMs=instrument.dataset.selectedInstantMs;
+      proof.dataset.selectedZodiac=instrument.dataset.zodiac;
+      proof.dataset.material=instrument.dataset.materialPrototype||"svg";
+      proof.dataset.fallback=instrument.dataset.materialPrototypeFallback||"none";
+      proof.dataset.palette=Object.values(H27_TOKENS).join(",");
+      proof.dataset.injected=String(applied.inserted);
+      proof.dataset.classification=String(classification);
+      proof.dataset.classificationFill=classification&&classNode?
+        win.getComputedStyle(classNode).fill:"not-applicable";
+      // The original material shader's first-frame CTM stamp can go stale when
+      // web fonts and layout settle AFTER its initial draw without ResizeObserver
+      // seeing a width change. Re-encode this screenshot process's own FINAL
+      // SVG CTM on top of the old 96x4 stamp. Never substitute separate --dump-dom
+      // geometry or suppress an actual cross-material leak.
+      if(doc.fonts?.ready) await doc.fonts.ready;
+      await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+      const svg=doc.querySelector("#kinetic-wheel");
+      const matrix=svg?.getScreenCTM?.();
+      if(!matrix)return fail("missing final screenshot-process CTM");
+      const values=[matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f];
+      if(values.some(n=>!Number.isFinite(n)))return fail("invalid final screenshot-process CTM");
+      const data=new DataView(new ArrayBuffer(24));
+      values.forEach((n,i)=>data.setInt32(i*4,Math.round(n*1e6),false));
+      const marker=document.createElement("canvas");
+      marker.width=96;marker.height=4;
+      marker.style.cssText="position:fixed;left:0;top:0;width:96px;height:4px;"+
+        "pointer-events:none;z-index:2147483647;image-rendering:pixelated";
+      const context=marker.getContext("2d");
+      if(!context)return fail("final CTM marker canvas unavailable");
+      for(let i=0;i<24;i++){
+        const byte=data.getUint8(i);
+        context.fillStyle="rgb("+byte+","+byte+","+byte+")";
+        context.fillRect(i*4,0,4,4);
+      }
+      document.body.append(marker);
+      status.hidden=true;
+    }
+    let started=false;
+    const start=()=>{if(started)return;started=true;
+      void inspect().catch(e=>{proof.dataset.error=String(e);
+        status.textContent="H2.7 ERROR: "+String(e)})};
+    stage.addEventListener("load",start);
+    if(stage.contentDocument?.readyState==="complete"&&stage.contentWindow?.location?.href===target.href)start();
+  </script>
+</body>
+</html>
