@@ -331,7 +331,11 @@
         assert(stepAdvanced && !stepAdvanced.open && daily?.children.length===2 &&
           sixty?.children.length===2 &&
           [...sixty.children].every(btn=>btn.getClientRects().length===0),
-          "the original noisy ±60 controls must be initially collapsed, not just recolored");
+          "the original noisy ±60 controls must be initially collapsed: "+JSON.stringify({
+            advancedPresent:Boolean(stepAdvanced),advancedOpen:stepAdvanced?.open,
+            dailyCount:daily?.children.length,sixtyCount:sixty?.children.length,
+            rectangles:[...(sixty?.children??[])].map(btn=>({length:btn.getClientRects().length,visible:btn.checkVisibility(),rect:btn.getBoundingClientRect().toJSON()}))
+          }));
         const dailyButtons=[...daily.querySelectorAll("button")];
         const dailyBoxes=dailyButtons.map(btn=>btn.getBoundingClientRect());
         assert(dailyBoxes.every(box=>box.width>=76 && box.height>=42 &&
