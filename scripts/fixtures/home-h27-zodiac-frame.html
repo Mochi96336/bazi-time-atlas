@@ -88,10 +88,12 @@
         return fail("original Zodiac substrate was modified");
       const applied=applyH27Prototype(doc,variant);
       const visible=doc.querySelectorAll("[data-h27-structural-probe]");
-      const expected=variant==="C0"?0:variant==="C1"?1:2;
+      const expected=variant==="C0"?0:variant==="C2"?2:1;
       if(applied.inserted!==expected||visible.length!==expected||
          [...visible].some(n=>n.getAttribute("d")!==applied.canonicalPath))
          return fail("H2.7 presentation paths differ from canonical Zodiac geometry");
+      if(variant==="C3"&&visible[0]?.getAttribute("opacity")!=="0.54")
+        return fail("restrained recess opacity mismatch");
       await sleep(80);
       const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
       proof.dataset.ctmSource="post-layout-screenshot-process";
