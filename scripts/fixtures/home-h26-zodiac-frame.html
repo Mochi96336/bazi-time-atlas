@@ -96,6 +96,22 @@
         return fail("substrate stop mismatch: "+kind+" "+actual[kind]);
       if(Boolean(doc.querySelector("#h26-zodiac-isolated-substrate"))===(variant==="V0"))
         return fail("control isolation violated");
+      const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
+      proof.dataset.ctmSource="post-layout-screenshot-process";
+      proof.dataset.ready="true";
+      proof.dataset.variant=variant;
+      proof.dataset.mode=mode;
+      proof.dataset.width=String(width);
+      proof.dataset.innerWidth=String(win.innerWidth);
+      proof.dataset.instantMs=instrument.dataset.selectedInstantMs;
+      proof.dataset.selectedZodiac=instrument.dataset.zodiac;
+      proof.dataset.material=instrument.dataset.materialPrototype||"svg";
+      proof.dataset.fallback=instrument.dataset.materialPrototypeFallback||"none";
+      proof.dataset.palette=Object.values(H26_EXPECTED_TOKENS).join(",");
+      proof.dataset.stopAlpha=Object.values(actual).join(",");
+      proof.dataset.classification=String(classification);
+      proof.dataset.classificationFill=classification&&classNode?
+        win.getComputedStyle(classNode).fill:"not-applicable";
       // The original material shader's first-frame CTM stamp can go stale when
       // web fonts and layout settle AFTER its initial draw without ResizeObserver
       // seeing a width change. Re-encode this screenshot process's own FINAL
@@ -122,22 +138,6 @@
         context.fillRect(i*4,0,4,4);
       }
       document.body.append(marker);
-      proof.dataset.ctmSource="post-layout-screenshot-process";
-      const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
-      proof.dataset.ready="true";
-      proof.dataset.variant=variant;
-      proof.dataset.mode=mode;
-      proof.dataset.width=String(width);
-      proof.dataset.innerWidth=String(win.innerWidth);
-      proof.dataset.instantMs=instrument.dataset.selectedInstantMs;
-      proof.dataset.selectedZodiac=instrument.dataset.zodiac;
-      proof.dataset.material=instrument.dataset.materialPrototype||"svg";
-      proof.dataset.fallback=instrument.dataset.materialPrototypeFallback||"none";
-      proof.dataset.palette=Object.values(H26_EXPECTED_TOKENS).join(",");
-      proof.dataset.stopAlpha=Object.values(actual).join(",");
-      proof.dataset.classification=String(classification);
-      proof.dataset.classificationFill=classification&&classNode?
-        win.getComputedStyle(classNode).fill:"not-applicable";
       status.hidden=true;
     }
     let started=false;
