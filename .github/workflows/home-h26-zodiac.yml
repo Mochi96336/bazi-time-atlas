@@ -1,0 +1,62 @@
+name: H2.6 Zodiac substrate native optical experiment
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/home-h26-zodiac-contract.js'
+      - 'scripts/fixtures/home-h26-zodiac-frame.html'
+      - 'scripts/visual-check-home-h26-zodiac.mjs'
+      - 'tests/home-h26-zodiac.test.js'
+      - 'docs/home-art-h26-zodiac-v1.md'
+      - '.github/workflows/home-h26-zodiac.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h26-zodiac-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  substrate-optical-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Prepare real Atlas Tyme dependency
+        run: npm run vendor:prepare
+      - name: Verify V0 and V1 CSS-only Zodiac substrate contract
+        run: node --test tests/home-h26-zodiac.test.js
+      - name: Install CJK screenshot font
+        run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Locate Chromium
+        run: command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable
+      - name: Start authentic Atlas locally
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/h26-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/h26-http.log
+          exit 1
+      - name: Capture V0 and V1 native SVG, WebGL and forced-fallback material evidence
+        run: node scripts/visual-check-home-h26-zodiac.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload H2.6 Zodiac optical images and data
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: home-h26-zodiac-native-optical-evidence
+          path: tmp/visual-check/home-h26-zodiac/
+          if-no-files-found: warn
+          retention-days: 7
