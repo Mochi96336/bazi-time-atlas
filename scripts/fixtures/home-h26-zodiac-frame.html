@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H2.6 Zodiac native substrate A/B optical proof</title>
+  <style>
+    html,body{margin:0;width:100%;min-height:100%;overflow:hidden;background:#0a0d13}
+    iframe{display:block;border:0;background:#0a0d13}
+    #status{position:fixed;z-index:2147483646;top:6px;right:6px;padding:4px 8px;
+      background:#be1e23;color:#fff;font:12px sans-serif}
+    #status[hidden],output{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Exact Atlas with isolated H2.6 Zodiac substrate comparison"></iframe>
+  <div id="status">H2.6 SCREENSHOT NOT READY</div>
+  <output id="proof" data-ready="false"></output>
+  <script>
+    // Start the authentic project before the parent ESM import; do not let
+    // Chromium virtual time advance while the wheel has not yet initialized.
+    (() => {
+      const p=new URLSearchParams(location.search);
+      const mode=p.get("material")||"roughness";
+      const page=new URL("../../",location.href);
+      page.searchParams.set("instant",p.get("instant")||"2026-09-13T23:43:42.000Z");
+      page.searchParams.set("material",mode==="fallback"?"roughness":mode);
+      if(mode==="fallback") page.searchParams.set("materialWebgl","off");
+      if(mode==="roughness") page.searchParams.set("materialProbe","none");
+      if(p.get("classification")==="1")page.searchParams.set("classification","1");
+      window.__h26Page=page.href;
+      document.querySelector("#stage").src=page.href;
+    })();
+  </script>
+  <script type="module">
+    import {
+      H26_VARIANTS,H26_EXPECTED_TOKENS,H26_ZODIAC_STOP_OPACITY,h26OverrideCss
+    } from "../home-h26-zodiac-contract.js";
+    const p=new URLSearchParams(location.search);
+    const variant=p.get("variant")||"V0";
+    const mode=p.get("material")||"roughness";
+    const width=Number(p.get("width")||390),height=Number(p.get("height")||844);
+    const instant=p.get("instant")||"2026-09-13T23:43:42.000Z";
+    const classification=p.get("classification")==="1";
+    const stage=document.querySelector("#stage"),proof=document.querySelector("#proof");
+    const status=document.querySelector("#status");
+    const fail=message=>{proof.dataset.error=message;status.textContent="H2.6 INVALID: "+message;throw Error(message)};
+    if(!(variant in H26_VARIANTS)||!["svg","roughness","fallback"].includes(mode)||
+       ![320,390,1440,2047].includes(width)||height<600||height>1500||
+       !Number.isFinite(Date.parse(instant)))fail("invalid query inputs");
+    stage.style.width=width+"px";stage.style.height=height+"px";
+    const target=new URL("../../",location.href);
+    target.searchParams.set("instant",instant);
+    target.searchParams.set("material",mode==="fallback"?"roughness":mode);
+    if(mode==="fallback")target.searchParams.set("materialWebgl","off");
+    if(mode==="roughness")target.searchParams.set("materialProbe","none");
+    if(classification)target.searchParams.set("classification","1");
+    if(window.__h26Page!==target.href)fail("bootstrap URL differs from verified URL");
+    const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    const modeReady=instrument=>mode==="roughness"?
+      instrument.dataset.materialPrototype==="roughness"&&instrument.dataset.materialProbe==="none":
+      mode==="fallback"?
+        instrument.dataset.materialPrototypeFallback==="forced"&&instrument.dataset.materialPrototype!=="roughness":
+        instrument.dataset.materialPrototype!=="roughness";
+    async function inspect(){
+      const doc=stage.contentDocument,win=stage.contentWindow;
+      let instrument;
+      for(let i=0;i<90;i++){
+        instrument=doc?.querySelector("#kinetic-instrument");
+        if(instrument?.dataset.selectedInstantMs===String(Date.parse(instant))&&
+          instrument?.dataset.zodiac&&modeReady(instrument)&&
+          (!classification||instrument.dataset.classificationOverlay==="on"))break;
+        await sleep(70);
+      }
+      if(!instrument?.dataset.zodiac||instrument.dataset.selectedInstantMs!==String(Date.parse(instant))||
+        !modeReady(instrument)||(classification&&instrument.dataset.classificationOverlay!=="on"))
+        return fail("real wheel did not initialize "+JSON.stringify({
+          ready:doc?.readyState,selected:instrument?.dataset.selectedInstantMs,
+          mode:instrument?.dataset.materialPrototype,fallback:instrument?.dataset.materialPrototypeFallback}));
+      const css=h26OverrideCss(variant);
+      if(css){const style=doc.createElement("style");style.id="h26-zodiac-isolated-substrate";
+        style.textContent=css;doc.head.append(style);}
+      await sleep(80);
+      const root=win.getComputedStyle(doc.documentElement);
+      const token=name=>root.getPropertyValue("--"+name).trim().toLowerCase();
+      for(const [name,expected] of Object.entries(H26_EXPECTED_TOKENS))
+        if(token(name)!==expected)return fail("non-Zodiac palette changed "+name+
+          " got "+token(name)+" expected "+expected);
+      const opacity=(kind)=>{
+        const node=doc.querySelector("#m2-zodiac-hard-surface .m2-zodiac-"+kind);
+        return node?String(win.getComputedStyle(node).stopOpacity):"missing";
+      };
+      const actual={light:opacity("light"),mid:opacity("mid"),dark:opacity("dark")};
+      const expected=H26_ZODIAC_STOP_OPACITY[variant];
+      for(const kind of ["light","mid","dark"])if(Math.abs(Number(actual[kind])-Number(expected[kind]))>0.001)
+        return fail("substrate stop mismatch: "+kind+" "+actual[kind]);
+      if(Boolean(doc.querySelector("#h26-zodiac-isolated-substrate"))===(variant==="V0"))
+        return fail("control isolation violated");
+      const classNode=doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
+      proof.dataset.ready="true";
+      proof.dataset.variant=variant;
+      proof.dataset.mode=mode;
+      proof.dataset.width=String(width);
+      proof.dataset.innerWidth=String(win.innerWidth);
+      proof.dataset.instantMs=instrument.dataset.selectedInstantMs;
+      proof.dataset.selectedZodiac=instrument.dataset.zodiac;
+      proof.dataset.material=instrument.dataset.materialPrototype||"svg";
+      proof.dataset.fallback=instrument.dataset.materialPrototypeFallback||"none";
+      proof.dataset.palette=Object.values(H26_EXPECTED_TOKENS).join(",");
+      proof.dataset.stopAlpha=Object.values(actual).join(",");
+      proof.dataset.classification=String(classification);
+      proof.dataset.classificationFill=classification&&classNode?
+        win.getComputedStyle(classNode).fill:"not-applicable";
+      status.hidden=true;
+    }
+    let started=false;
+    const start=()=>{if(started)return;started=true;
+      void inspect().catch(e=>{proof.dataset.error=String(e);
+        status.textContent="H2.6 ERROR: "+String(e)})};
+    stage.addEventListener("load",start);
+    if(stage.contentDocument?.readyState==="complete"&&stage.contentWindow?.location?.href===target.href)start();
+  </script>
+</body>
+</html>
