@@ -103,6 +103,9 @@
       proof.dataset.untouched = String(unmodified);
       proof.dataset.materialActive = instrument.dataset.materialPrototype || "svg";
       proof.dataset.materialFallback = instrument.dataset.materialPrototypeFallback || "none";
+      if (classification && instrument.dataset.classificationOverlay !== "on") {
+        return invalid("classification overlay did not activate");
+      }
       proof.dataset.classification = String(classification);
       const classified = doc.querySelector("#zodiac-track .zodiac-sector[data-zodiac-element]");
       proof.dataset.classificationFill = classification && classified ?
