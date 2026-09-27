@@ -192,17 +192,30 @@ body[data-research-mode="dates"] .recurrence-intro .lede {max-width:660px;}
 .research-one-year-head .eyebrow {font-size:9px;color:#809184;}
 .research-one-year-head h3 {font-size:clamp(16px,1.7vw,22px);font-weight:655;color:#e7eee5;margin:3px 0 0;}
 .research-one-year-selected-date {font-size:clamp(13px,1.5vw,18px);font-variant-numeric:tabular-nums;color:#c5d7c6;white-space:nowrap;}
-.research-one-year-identities {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 18px;}
-.research-one-year-identity {min-width:0;display:flex;flex-direction:column;gap:4px;border-left:2px solid #c4b17f;padding:1px 0 1px 14px;}
-.research-one-year-identity-day {border-left-color:#96c1cf;}
-.research-one-year-identity > span {font-size:11px;color:#a8b7a9;line-height:1.35;}
-.research-one-year-identity strong {
-  color:#eddec1;font-size:clamp(31px,3.8vw,54px);font-weight:660;line-height:1.18;
-  letter-spacing:.07em;
+.research-one-year-identities{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:7px 16px;margin:8px 0 10px;
 }
-.research-one-year-identity-day strong {color:#b7d6e2;}
-.research-one-year-identity small {color:#9daa9f;font-size:10px;line-height:1.5;min-height:15px;}
-.research-one-year-identity-year strong {overflow-wrap:anywhere;}
+.research-one-year-identity{
+  display:inline-flex;align-items:baseline;flex-direction:row;
+  flex-wrap:wrap;gap:5px;min-width:0;padding:0;
+  border:0;background:transparent;
+}
+.research-one-year-identity > span{
+  color:#90a299;font-size:11px;line-height:1.5;
+}
+.research-one-year-identity strong{
+  color:#e6dbc0;font-size:16px;font-weight:690;line-height:1.4;
+  letter-spacing:0;overflow-wrap:normal;
+}
+.research-one-year-identity-day strong{color:#bfdae1}
+.research-one-year-identity small{
+  color:#9eafa2;font-size:10px;line-height:1.45;min-height:0;
+}
+.research-one-year-identity-year strong{
+  overflow-wrap:anywhere;white-space:normal;
+}
+.research-one-year-identity-year{max-width:100%}
 .research-one-year-timeline {
   border-top:1px solid var(--hairline);padding-top:13px;
 }
@@ -239,9 +252,6 @@ body[data-research-mode="dates"] .recurrence-intro .lede {max-width:660px;}
   display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;
   border-top:1px solid var(--hairline);padding-top:12px;margin-top:12px;
 }
-.research-one-year-motion > span {font-size:11px;color:#b3c1b4;}
-.research-one-year-motion > strong {color:#c1dbe0;font-weight:660;font-size:13px;}
-.research-one-year-motion > small {flex-basis:100%;font-size:10px;color:#91a398;line-height:1.4;}
 .research-explorer-advanced-cycle {
   border:1px solid var(--hairline);border-radius:13px;
   margin:10px 0;padding:5px 13px;background:rgba(255,255,255,.012);
@@ -264,19 +274,12 @@ body[data-research-mode="dates"] .recurrence-intro .lede {max-width:660px;}
   .research-date-step-controls {margin:6px 0;padding:6px;}
   .research-one-year-story {padding:12px;border-radius:12px;}
   .research-one-year-head h3 {font-size:16px;}
-  .research-one-year-identities {gap:7px;margin:10px 0 12px;}
-  .research-one-year-identity {padding-left:9px;}
-  .research-one-year-identity > span {font-size:10px;}
-  .research-one-year-identity strong {font-size:clamp(29px,8.2vw,38px);}
-  .research-one-year-identity small {font-size:9px;}
   .research-one-year-timeline {padding-top:9px;}
   .research-one-year-track {height:39px;}
   .research-one-year-track-line {top:16px;}
   .research-one-year-track-marker {top:9px;height:19px;}
   .research-one-year-track-selected {top:3px;height:26px;}
   .research-one-year-track-lichun {top:11px;height:14px;}
-  .research-one-year-motion {gap:5px 10px;margin-top:10px;padding-top:10px;}
-  .research-one-year-motion > strong {font-size:11px;line-height:1.45;}
   .research-explorer-mobile-glance {display:none!important;}
 }
 
@@ -347,7 +350,6 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
 }
 .research-date-explorer-form .research-explorer-advanced-base > summary {min-height:28px;}
 @media(max-width:680px) {
-  .research-one-year-motion > small {display:none;}
   .research-one-year-boundary-meaning {margin:8px 0 3px;}
 }
 
@@ -450,37 +452,10 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   background:rgba(24,34,29,.65)
 }
 #research-one-year-scrub:focus-visible{outline:2px solid #e6ce88;outline-offset:4px}
-.research-one-year-scrub-hint{display:block;color:#b5c7b8;font-size:11px;margin:3px 0 7px;cursor:pointer}
-.research-one-year-day-phase{
-  margin:10px 0 8px;padding:11px 0 0;
-  border-top:1px solid var(--hairline)
-}
-.research-one-year-day-phase-heading{display:block;font-size:12px;color:#d3e3dc;margin-bottom:8px}
-.research-one-year-day-phase-content{display:flex;gap:13px;align-items:center}
-.research-one-year-day-phase-dial{
-  width:68px;height:68px;flex:0 0 68px;border-radius:50%;
-  background:conic-gradient(#b6d2dc var(--phase-deg,0deg),#344a52 0);
-  display:grid;place-items:center;position:relative
-}
-.research-one-year-day-phase-dial::before{
-  content:"";position:absolute;inset:9px;background:#18221c;border-radius:50%
-}
-.research-one-year-day-phase-dial span{
-  z-index:1;color:#c0e0e8;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums
-}
-.research-one-year-day-phase-explanation{display:grid;gap:3px;min-width:0}
-.research-one-year-day-phase-explanation strong{font-size:12px;color:#d5e3e0;line-height:1.45}
-.research-one-year-day-phase-explanation span{font-size:10px;color:#9bad9f;line-height:1.4}
 @media(max-width:680px){
  .research-one-year-track-line{top:15px}
  .research-one-year-era{top:15px}
  #research-one-year-scrub{height:39px}
- .research-one-year-scrub-hint{font-size:10px}
- .research-one-year-day-phase{padding-top:9px;margin-top:8px}
- .research-one-year-day-phase-dial{width:58px;height:58px;flex-basis:58px}
- .research-one-year-day-phase-dial::before{inset:8px}
- .research-one-year-day-phase-dial span{font-size:19px}
- .research-one-year-day-phase-content{gap:10px}
 }
 
 /* The extra Day phase is real first-screen teaching content. Recover its
@@ -488,8 +463,6 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
 @media(max-width:680px){
  .research-one-year-story{padding:9px 11px}
  .research-one-year-identities{margin:7px 0 8px}
- .research-one-year-day-phase{padding-top:6px;margin:6px 0 5px}
- .research-one-year-day-phase-heading{margin-bottom:5px}
  .research-one-year-boundary-zoom{padding:6px 8px;margin:4px 0}
  .research-one-year-marker-key{margin:3px 0 1px}
 }
@@ -513,91 +486,18 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
 }
 
 
-/* One civil year, two linked cycles. The guide reuses the existing date owner
-   and the existing Year strip + Day ring; it is not another date calculator. */
-.research-year-journey-start{
-  color:#d9e4d4;background:rgba(158,188,169,.045);
-  border:1px solid rgba(177,210,189,.22);border-radius:9px;
-  font:inherit;font-size:11px;line-height:1.3;font-weight:680;
-  min-height:31px;padding:5px 10px;cursor:pointer;white-space:nowrap;
+/* One optional action commits next Gregorian Jan 1 through the existing
+   date owner; both buttons occupy the same header slot, never a second card. */
+.research-year-journey-shortcuts{display:flex;justify-content:flex-end;gap:6px;align-items:center}
+.research-year-journey-start,.research-year-journey-return{
+  min-height:38px;min-width:92px;padding:6px 10px;
+  border:1px solid rgba(177,210,189,.25);border-radius:9px;
+  color:#d9e4d4;background:rgba(158,188,169,.06);
+  font:inherit;font-weight:660;font-size:11px;cursor:pointer;
 }
-.research-year-journey-start:hover{border-color:#b7d5c4;background:rgba(177,210,189,.10)}
-.research-year-journey-start:focus-visible,
-.research-year-journey-actions button:focus-visible{outline:2px solid #e6d09d;outline-offset:3px}
-.research-year-journey-start:disabled{opacity:.5;cursor:not-allowed}
-.research-year-journey{
-  border:1px solid rgba(168,204,187,.22);border-radius:12px;
-  margin:10px 0 5px;padding:11px 12px 12px;
-  background:linear-gradient(145deg,rgba(141,174,159,.085),rgba(142,174,163,.015));
-}
-.research-year-journey[hidden]{display:none}
-.research-year-journey-head{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
-.research-year-journey-head strong{font-size:14px;color:#dce8d9}
-.research-year-journey-head span{font-size:11px;color:#b0c4b7;font-variant-numeric:tabular-nums;margin-left:auto}
-.research-year-journey-meaning{font-size:12px;color:#d4e4db;line-height:1.55;margin:7px 0 10px}
-.research-year-journey-cycles{border-top:1px solid rgba(178,199,184,.16);padding-top:9px}
-.research-year-journey-cycles>strong{
-  display:block;color:#d6e9e6;font-size:13px;line-height:1.4;
-  font-variant-numeric:tabular-nums
-}
-.research-year-journey-cycles>small{
-  display:block;color:#9fb5aa;font-size:11px;line-height:1.45;margin-top:5px
-}
-.research-year-journey-loops{
-  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
-  padding-top:9px;
-}
-.research-year-journey-loops span{
-  --fill-deg:0deg;
-  width:32px;height:32px;border-radius:50%;flex:0 0 32px;
-  position:relative;display:grid;place-items:center;
-  background:conic-gradient(#a3ccd1 var(--fill-deg),#3b4f4d 0);
-  color:#d7e6dd;font-size:10px;font-weight:720;
-}
-.research-year-journey-loops span::before{
-  content:"";position:absolute;inset:5px;border-radius:50%;background:#1b2a25
-}
-.research-year-journey-loops span{isolation:isolate}
-.research-year-journey-loops span::before{z-index:-1}
-.research-year-journey-loops .research-year-journey-remainder{
-  margin-left:3px;
-  background:conic-gradient(#d9c184 var(--fill-deg),#5a5342 0);
-  color:#e6d59d
-}
-.research-year-journey-actions{
-  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-  margin-top:11px
-}
-.research-year-journey-actions button{
-  background:#2b3e34;color:#dae8dc;border:1px solid #51695d;
-  border-radius:8px;min-height:36px;padding:6px 12px;
-  font:inherit;font-size:11px;font-weight:650;cursor:pointer;
-}
-.research-year-journey-actions button:disabled{opacity:.35;cursor:default}
-#research-year-journey-next{background:#c7d5c5;color:#203027;border-color:#c7d5c5}
-#research-year-journey-finish{background:transparent;color:#d8c6a6;border-color:#6c6654}
-#research-year-journey-finish[hidden]{display:none}
-.research-year-journey-head #research-year-journey-restore{
-  color:#deceb7;background:transparent;border:1px solid #736d5d;
-  border-radius:8px;min-height:32px;padding:5px 9px;white-space:nowrap;
-  font:inherit;font-weight:660;font-size:11px;cursor:pointer
-}
-.research-year-journey-head #research-year-journey-restore:focus-visible{
-  outline:2px solid #e6d09d;outline-offset:3px
-}
-.research-one-year-story[data-journey-active="true"] .research-one-year-motion{display:none}
-@media(max-width:680px){
-  .research-year-journey-start{min-height:29px;padding:4px 8px;font-size:10px}
-  .research-year-journey{padding:10px 9px;margin:7px 0 5px}
-  .research-year-journey-meaning{font-size:11px}
-  .research-year-journey-loops{gap:5px}
-  .research-year-journey-loops span{width:30px;height:30px;flex-basis:30px}
-  .research-year-journey-actions button{min-height:44px;padding:7px 9px}
-  .research-year-journey-head #research-year-journey-restore{min-height:40px;padding:4px 7px;font-size:10px}
-  .research-year-journey-head span{font-size:10px}
-}
-
-
+.research-year-journey-return{color:#e0cda5;border-color:#786f57;background:transparent}
+.research-year-journey-shortcuts button:focus-visible{outline:2px solid #e6ce88;outline-offset:2px}
+.research-year-journey-shortcuts button:disabled{opacity:.4;cursor:not-allowed}
 /* Research 01: daily nudges stay next to the single real Year playhead.
    The old 60-day diagnostic jumps are still functional and keyboard reachable,
    but no longer compete with the guided six-turn explanation on first view. */
@@ -642,4 +542,73 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
     width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))
   }
   .research-date-step-buttons-sixty button{min-width:0;min-height:44px}
+}
+
+
+/* Research 01 subtractive surface: one timeline, inline names, one sentence.
+   Guided steps change the SAME datum and line; no ring or extra info card. */
+.research-one-year-story{
+  background:rgba(177,194,170,.018);
+  border-color:rgba(210,226,211,.15);
+}
+.research-one-year-head{align-items:center;gap:5px 16px}
+.research-one-year-head h3{font-weight:625;font-size:15px}
+.research-one-year-selected-date{font-size:11px;color:#a5b9a9}
+.research-one-year-timeline{padding-top:8px}
+.research-one-year-motion{
+  display:block;margin:8px 0 0;padding:8px 0 0;
+  border-top:1px solid rgba(205,225,211,.11);
+  font-size:12px;line-height:1.5;color:#c7dfd3;
+}
+#research-one-year-day-motion{font-weight:620;font-variant-numeric:tabular-nums}
+.research-one-year-evidence-details{
+  border-top:1px solid rgba(188,204,190,.1);margin:8px 0 0;padding:1px 0 0;
+}
+.research-one-year-evidence-details>summary{
+  display:list-item;cursor:pointer;max-width:max-content;
+  color:#9bafa1;font-size:11px;line-height:1.5;min-height:38px;
+  padding-top:10px;
+}
+.research-one-year-evidence-details>summary:focus-visible{
+  outline:2px solid #e6ce88;outline-offset:2px;border-radius:4px;
+}
+.research-one-year-evidence-details:not([open]) .research-one-year-boundary-zoom{
+  display:none;
+}
+.research-one-year-evidence-details .research-one-year-boundary-meaning{
+  font-size:11px;margin:4px 0;
+}
+.research-one-year-marker-key{margin:1px 0 0}
+.research-one-year-era-legend{margin:2px 0 0;gap:5px 13px}
+.research-one-year-era-legend b{font-weight:550;font-size:10px}
+@media(max-width:680px){
+ .research-one-year-story{padding:10px 11px}
+ .research-one-year-head h3{font-size:14px}
+ .research-one-year-identities{gap:4px 14px;margin:7px 0 8px}
+ .research-one-year-identity{gap:4px}
+ .research-one-year-identity strong{font-size:15px}
+ .research-one-year-identity small{font-size:9px}
+ .research-one-year-identity-year strong{font-size:15px;white-space:normal}
+ .research-one-year-timeline{padding-top:7px}
+ .research-one-year-motion{font-size:11px;margin-top:6px;padding-top:6px}
+ .research-one-year-marker-key{margin:2px 0 0}
+}
+
+/* The year has one identity line. Avoid displaying the same current/era
+   names as both a legend and a second selected-date caption. */
+.research-one-year-marker-key{justify-content:flex-start}
+.research-one-year-marker-key-selected{display:none!important}
+.research-one-year-identity small{max-width:100%}
+.research-one-year-story[data-active-year-status="unresolved"]
+  .research-one-year-identity-year strong{font-size:16px;letter-spacing:0}
+@media(max-width:680px){
+ .research-year-journey-shortcuts button{min-height:40px;min-width:90px;padding:6px 8px;font-size:10px}
+ .research-one-year-story[data-active-year-status="unresolved"]
+   .research-one-year-identity-year strong{font-size:15px}
+}
+
+/* The six-turn sentence is the actual teaching result: legible, still compact. */
+.research-one-year-motion{font-size:13px;line-height:1.5}
+@media(max-width:680px){
+ .research-one-year-motion{font-size:12.5px;line-height:1.5}
 }

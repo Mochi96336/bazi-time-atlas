@@ -73,9 +73,9 @@ try{
       if(!root||root.dataset.ready!=="true"||!slider)return {ready:false};
       const fr=f.getBoundingClientRect(),sr=slider.getBoundingClientRect();
       return {ready:true, viewport:d.documentElement.clientWidth, target:root.dataset.targetDate,
-        phase:Number(d.getElementById("research-one-year-day-phase-index").textContent),
+        phase:Number(d.getElementById("research-one-year-story").dataset.dayIndex),
         year:root.dataset.targetActiveYearStatus, name:root.dataset.targetDayPillar,
-        aria:d.getElementById("research-one-year-day-phase-dial").getAttribute("aria-label"),
+        aria:d.getElementById("research-one-year-day-pillar").textContent,
         outcome:root.dataset.scrubOutcome||"", url:f.contentWindow.location.search,
         rect:{x:fr.left+sr.left,y:fr.top+sr.top,w:sr.width,h:sr.height},
         min:Number(slider.min),max:Number(slider.max),index:Number(slider.value)};
@@ -115,7 +115,7 @@ try{
   assert.equal(moved.outcome,"applied","touch did not commit through the canonical Research owner");
   assert.ok(moved.url.includes("compare="+moved.target),
     "native touch did not synchronize the selected URL");
-  assert.ok(moved.aria.includes(moved.name),"Day dial did not follow native touch");
+  assert.ok(moved.aria.includes(moved.name),"compact Day label did not follow native touch");
   assert.equal(moved.year,"model-estimated","supported post-Li Chun touch changed true Year authority");
 
   // Native keyboard event is delivered to the actual focused input. Unlike
