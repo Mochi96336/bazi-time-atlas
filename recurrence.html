@@ -105,7 +105,7 @@
               <strong id="research-one-year-calendar-year">— 年的一年</strong>
               <span>同一條公曆時間線</span>
             </div>
-            <div id="research-one-year-track" class="research-one-year-track" role="img" aria-label="公曆一年、實際立春及目前日期的位置">
+            <div id="research-one-year-track" class="research-one-year-track" role="group" aria-label="公曆一年、實際立春及目前日期的位置">
               <div class="research-one-year-track-line" aria-hidden="true"></div>
               <div id="research-one-year-before-segment" class="research-one-year-era research-one-year-era-before" hidden aria-hidden="true"></div>
               <div id="research-one-year-after-segment" class="research-one-year-era research-one-year-era-after" hidden aria-hidden="true"></div>
@@ -113,6 +113,7 @@
               <div id="research-one-year-lichun-marker" class="research-one-year-track-marker research-one-year-track-lichun" hidden aria-hidden="true"></div>
               <div id="research-one-year-selected-marker" class="research-one-year-track-marker research-one-year-track-selected" aria-hidden="true"></div>
               <div class="research-one-year-track-marker research-one-year-track-end" aria-hidden="true"></div>
+              <input id="research-one-year-scrub" type="range" min="0" max="365" value="0" step="1" aria-label="拖動公曆日期，同步查看干支年及干支日" aria-describedby="research-one-year-boundary-meaning">
             </div>
             <div class="research-one-year-milestones" aria-hidden="true">
               <span>1/1 <small>公曆換年</small></span>
@@ -121,6 +122,17 @@
             <div id="research-one-year-era-legend" class="research-one-year-era-legend" hidden>
               <span><i class="research-one-year-era-swatch-before" aria-hidden="true"></i><b id="research-one-year-before-label">立春前 · —</b></span>
               <span><i class="research-one-year-era-swatch-after" aria-hidden="true"></i><b id="research-one-year-after-label">立春後 · —</b></span>
+            </div>
+            <label class="research-one-year-scrub-hint" for="research-one-year-scrub">直接拖動上方年度色帶；鍵盤方向鍵每天一步</label>
+            <div id="research-one-year-day-phase" class="research-one-year-day-phase" aria-label="連續 60 日循環">
+              <strong class="research-one-year-day-phase-heading">干支日 · 60 天繞一圈</strong>
+              <div class="research-one-year-day-phase-content">
+                <div id="research-one-year-day-phase-dial" class="research-one-year-day-phase-dial" role="img" aria-label="干支日目前所處的六十日循環位置"><span id="research-one-year-day-phase-index">—</span></div>
+                <div class="research-one-year-day-phase-explanation">
+                  <strong id="research-one-year-day-phase-message">—</strong>
+                  <span>每天前進一位，立春與公曆換年都不歸零。</span>
+                </div>
+              </div>
             </div>
             <div id="research-one-year-boundary-zoom" class="research-one-year-boundary-zoom" hidden>
               <div class="research-one-year-zoom-heading">
