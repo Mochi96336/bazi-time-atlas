@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Research 01 · Year × Day motion · isolated prototype</title>
+<style>
+:root{color-scheme:dark;--bg:#101713;--fg:#e5e9dd;--muted:#9ca99d;--line:#35463d;--year:#d8c48d;--day:#9ebfc8;font:15px/1.55 system-ui,"Noto Sans TC",sans-serif}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);margin:0}.wrap{max-width:910px;margin:auto;padding:25px 20px 65px}
+h1{font-size:clamp(25px,4vw,39px);letter-spacing:-.04em;line-height:1.2;margin:8px 0}h2{font-size:18px;margin:0 0 13px}p{margin:6px 0}small,.muted{color:var(--muted)}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:10px;color:#bcc6b6}
+.flag{display:inline-block;border:1px solid #80704b;color:#d9c392;padding:3px 8px;border-radius:20px;font-size:11px}
+.card{background:#18221c;border:1px solid var(--line);border-radius:18px;padding:21px;margin:18px 0}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;align-items:end}.top strong{display:block;font-size:clamp(27px,6vw,42px);font-weight:650;letter-spacing:-.05em}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:15px 0}.controls label{font-size:12px;color:var(--muted)}button,select{border:1px solid #506456;border-radius:10px;padding:9px 12px;min-height:43px;background:#25342b;color:var(--fg);font:inherit}
+button{cursor:pointer}button:hover{background:#33493a}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e6c983;outline-offset:3px}
+input[type=range]{width:100%;accent-color:#dec992;touch-action:pan-y;cursor:pointer;height:38px}
+.major{display:grid;grid-template-columns:1fr 1fr;gap:12px}.identity{padding:13px;border:1px solid #3d4a40;border-radius:13px;min-width:0}.identity b{display:block;font-size:clamp(22px,6vw,34px);line-height:1.3}.identity small{display:block;font-size:11px}
+.identity.year b{color:var(--year)}.identity.day b{color:var(--day)}
+.track-wrap{padding:28px 0 4px}.yeartrack{height:22px;border-radius:20px;position:relative;background:repeating-linear-gradient(90deg,#2c3831 0 12px,#29362f 12px 14px);border:1px solid #627364}
+.segment{position:absolute;top:0;bottom:0}.before{left:0;background:rgba(141,156,145,.55);border-radius:20px 0 0 20px}.after{background:#a18c5f;border-radius:0 20px 20px 0}.mark{position:absolute;top:-14px;bottom:-12px;width:2px;background:#fff;pointer-events:none}.mark:after{content:"";position:absolute;top:-3px;left:-4px;width:10px;height:10px;border-radius:50%;background:#fff}.event{width:1px;background:var(--year)}.event:after{background:var(--year)}
+.ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding-top:10px}.legend{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#d7ccab;font-size:12px;margin:8px 0}
+.zoom{padding:12px;background:#212b23;border:1px dashed #8b815f;border-radius:12px;margin-top:15px}.zoomtrack{position:relative;margin:22px 0 13px;height:8px;background:linear-gradient(90deg,#6c8073 50%,#ae9970 50%);border-radius:8px}.zoomevent{position:absolute;left:50%;top:-7px;height:23px;border-left:2px solid var(--year)}.zoomselected{position:absolute;top:-8px;height:24px;background:#eff6dd83;border:1px solid white;min-width:2px}
+.cycle{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:16px}.dial{width:90px;height:90px;border-radius:50%;display:grid;place-items:center;position:relative}.dial:before{content:"";position:absolute;inset:11px;border-radius:50%;background:#18221c}.dial strong{z-index:1;font-size:25px;color:var(--day)}.dayline{height:7px;border-radius:9px;background:#374d51;overflow:hidden}.dayline>span{height:100%;display:block;background:var(--day)}.footnote{font-size:12px;color:var(--muted);line-height:1.65}
+.comparison{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}.comparison[hidden],.zoom[hidden],.segment[hidden],.mark[hidden]{display:none}
+@media(max-width:420px){.wrap{padding:18px 13px 42px}.card{padding:15px}.cycle{grid-template-columns:75px 1fr}.dial{width:75px;height:75px}.dial:before{inset:9px}.legend{font-size:11px}}
+</style></head>
+<body><main class="wrap">
+<span class="eyebrow">Research 01 / Interaction study</span> <span class="flag">獨立原型，未接管正式介面</span>
+<h1>一個日期，兩個循環</h1>
+<p class="muted">拖動一年內的日期，同時看立春年界與每天前進的干支日。原型限定 2023／2024，直接讀取專案既有日期與節氣證據，沒有另造干支表。</p>
+<section class="card" aria-label="日期與兩個循環">
+ <div class="top"><div><span class="eyebrow">選定日期</span><strong id="date">2024 / 02 / 01</strong></div><div class="controls">
+ <label for="year">公曆年份 <select id="year"><option value="2023">2023</option><option value="2024" selected>2024</option></select></label>
+ <button id="before" type="button">立春前</button><button id="boundary" type="button">立春當天</button><button id="after" type="button">立春後</button></div></div>
+ <div class="major">
+  <div class="identity year"><small>現在的干支年 · 立春才切換</small><b id="yearname" aria-live="polite">—</b><small id="authority"></small></div>
+  <div class="identity day"><small>現在的干支日 · 每天進一位</small><b id="dayname" aria-live="polite">—</b><small id="dayposition">—</small></div>
+ </div>
+ <div class="track-wrap"><h2>這一年怎麼走？</h2><div class="yeartrack" id="yeartrack" role="img" aria-label="2024 年度時間軸">
+   <span class="segment before" id="beforeseg"></span><span class="segment after" id="afterseg"></span>
+   <span class="mark event" id="eventmark"></span><span class="mark" id="selectedmark"></span>
+  </div><div class="ends"><span>1/1 · 公曆年起點</span><span>12/31</span></div>
+  <div class="legend"><span id="beforelabel">立春前</span><span id="afterlabel">立春後</span></div>
+  <label class="muted" for="scrub">移動日期（鍵盤方向鍵每日一步）</label><input id="scrub" type="range" min="0" max="365" value="31" aria-describedby="scopeline"/>
+  <p id="scopeline" class="footnote" aria-live="polite"></p>
+  <div class="zoom" id="zoom" hidden><strong>立春附近 · 28 天局部放大</strong><small style="display:block">注意：這不是第二條全年時間軸；亮帶代表選定的完整一天，而非未指定的時刻。</small>
+   <div class="zoomtrack" aria-hidden="true"><span class="zoomevent"></span><span class="zoomselected" id="zoomselected"></span></div>
+   <div class="ends"><span>立春前 14 天</span><span>立春後 14 天</span></div></div>
+ </div>
+</section>
+<section class="card" aria-label="六十日循環"><h2>干支日怎麼走？</h2>
+ <div class="cycle"><div class="dial" id="dial" role="img" aria-label="六十日循環位置"><strong id="phase">—</strong></div>
+ <div><strong id="daymotion">一天走一格，六十天繞一圈</strong><div class="dayline" aria-hidden="true"><span id="dayfill"></span></div>
+  <p class="footnote">這條循環每天連續前進，不會在立春或 1 月 1 日歸零。</p></div></div>
+ <div class="comparison"><button type="button" id="stepyear">演示：從本年 1/1 走到下年 1/1</button><p id="yearstep" class="footnote" aria-live="polite">選擇上方年份後即可演示兩個循環的不同速度。</p></div>
+</section>
+<details class="card"><summary>證據範圍與原型限制</summary><p class="footnote">干支日採用 repo 已有的公曆日期／本地正午離散日序；年柱及立春位置呼叫同一個 researchYearStripState 和 researchOneYearStory。模型估計依原狀標記，無節氣證據則不畫年界，立春當天沒有時間則保留兩個候選。此原型不宣稱精確立春時刻、天文／四柱回歸，也不修改既有正式頁面或網址。</p></details>
+</main>
+<script type="module">
+import { gregorianOrdinal } from "../../src/recurrence/gregorian-cycle.js";
+import { shiftGregorianDate } from "../../src/recurrence/gregorian-date-navigation.js";
+import { sexagenaryDayForGregorianDate } from "../../src/recurrence/ganzhi-cycle-comparison.js";
+import { activeYearIdentityForDate } from "../../src/recurrence/research-date-pair.js";
+import { researchOneYearStory } from "../../src/recurrence/research-one-year-story.js";
+import { researchYearStripState } from "../../src/research-year-strip-view.js";
+const $=id=>document.getElementById(id);
+const fmt=d=>d.year+" / "+String(d.month).padStart(2,"0")+" / "+String(d.day).padStart(2,"0");
+const toDay=(y,index)=>shiftGregorianDate({year:y,month:1,day:1},index);
+const cache=new Map();
+let year=2024,index=31;
+function get(d){const k=d.year+"-"+d.month+"-"+d.day;if(!cache.has(k)){try{cache.set(k,researchYearStripState(d));}catch(e){cache.set(k,null);}}return cache.get(k);}
+function render(){
+ const d=toDay(year,index), evidence=get(d), story=researchOneYearStory(d,evidence), active=activeYearIdentityForDate(d,evidence), day=sexagenaryDayForGregorianDate(d);
+ $("date").textContent=fmt(d);$("year").value=String(year);$("scrub").max=String(story.yearLength-1);$("scrub").value=String(index);
+ $("yearname").textContent=active.pillar?.name??(active.possiblePillars?.map(x=>x.name).join("／")||"待查");
+ $("authority").textContent=active.status==="model-estimated"?"模型估計（非精確時刻）":active.status==="exact"?"已解析":active.status==="unresolved"?"年界待判；沒有指定時刻":"缺少可用年界證據";
+ $("dayname").textContent=day.name;$("dayposition").textContent="第 "+(day.index+1)+" / 60 位";$("phase").textContent=String(day.index+1);
+ $("dial").style.background="conic-gradient(var(--day) "+(day.index+1)*6+"deg,#394f50 0)";
+ $("dial").setAttribute("aria-label","干支日 "+day.name+"，六十格循環中第 "+(day.index+1)+" 位");
+ $("dayfill").style.width=((day.index+1)/60*100)+"%";
+ $("daymotion").textContent="第 "+(day.index+1)+" 格 → 再 "+(60-day.index)+" 天回到同一干支日";
+ $("selectedmark").style.left=story.selectedPosition+"%";
+ const lc=story.liChun;
+ $("beforeseg").hidden=$("afterseg").hidden=$("eventmark").hidden=!lc;
+ $("beforelabel").textContent=lc?"立春前 · "+lc.before:"立春前 · 尚無證據";
+ $("afterlabel").textContent=lc?(lc.status==="estimated"?"約 ":"")+"立春後 · "+lc.after:"立春後 · 尚無證據";
+ if(lc){$("beforeseg").style.width=lc.position+"%";$("afterseg").style.left=lc.position+"%";$("afterseg").style.width=(100-lc.position)+"%";$("eventmark").style.left=lc.position+"%";}
+ $("yeartrack").setAttribute("aria-label",year+" 年全年時間軸，所選 "+fmt(d)+(lc?"，立春 "+lc.date.month+"/"+lc.date.day+"，"+lc.before+" 轉 "+lc.after:"，立春位置無可用證據"));
+ $("scopeline").textContent=lc?"選定 "+d.month+"/"+d.day+"；"+(active.status==="unresolved"?"立春當日：年柱待判":active.side==="before"?"在立春前":"在立春後")+"。全年比例不會把二月放大。":"立春位置缺少證據；僅顯示選定公曆日及連續日序。";
+ $("zoom").hidden=!story.boundaryZoom;
+ if(story.boundaryZoom){$("zoomselected").style.left=story.boundaryZoom.selectedDayStartPercent+"%";$("zoomselected").style.width=story.boundaryZoom.selectedDayWidthPercent+"%";}
+ $("stepyear").disabled=year!==2023;$("stepyear").textContent=year===2023?"演示：2023/1/1 → 2024/1/1":"切換至 2023 以演示相鄰兩年";
+}
+$("year").addEventListener("change",e=>{year=Number(e.target.value);index=Math.min(index,year===2024?365:364);$("yearstep").textContent="選擇全年時間線上的日期，觀察兩條循環同步更新。";render();});
+$("scrub").addEventListener("input",e=>{index=Number(e.target.value);render();});
+for(const [id,delta] of [["before",-3],["boundary",0],["after",3]])$(id).addEventListener("click",()=>{const evidence=get({year,month:2,day:1});const day=evidence?.liChun?.date;if(!day){$("scopeline").textContent="本年無可用立春日期，無法導航到年界。";return;}const selected=shiftGregorianDate(day,delta);index=gregorianOrdinal(selected)-gregorianOrdinal({year,month:1,day:1});render();});
+$("stepyear").addEventListener("click",()=>{if(year!==2023)return;const a={year:2023,month:1,day:1},b={year:2024,month:1,day:1};const aa=activeYearIdentityForDate(a,get(a)),bb=activeYearIdentityForDate(b,get(b)),da=sexagenaryDayForGregorianDate(a),db=sexagenaryDayForGregorianDate(b);const diff=gregorianOrdinal(b)-gregorianOrdinal(a);const yearNote=aa.pillar&&bb.pillar?(aa.pillar.name+" → "+bb.pillar.name+"（實際年柱；依各年立春證據）"):"實際年柱證據不足，不能宣稱已切換";$("yearstep").textContent="2023/1/1 → 2024/1/1：經過 "+diff+" 天，干支日 "+da.name+" → "+db.name+"（+"+diff%60+" 格）；"+yearNote+"。";year=2024;index=0;render();});
+render();
+</script></body></html>
