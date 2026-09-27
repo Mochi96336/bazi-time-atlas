@@ -105,6 +105,20 @@
             <stop offset=".54" class="m2-zodiac-mid"></stop>
             <stop offset="1" class="m2-zodiac-dark"></stop>
           </linearGradient>
+          <!-- H2.8 isolated candidate: a *joint*, not a second annual band.
+               Stops are physical radii (840..900)/900 in fixed SVG world space;
+               center remains transparent to preserve the original Zodiac body. -->
+          <radialGradient id="m2-zodiac-shared-joint" gradientUnits="userSpaceOnUse"
+            cx="600" cy="1360" fx="600" fy="1360" r="900">
+            <stop offset=".933333" stop-color="#544237" stop-opacity=".24"></stop>
+            <stop offset=".938889" stop-color="#352e2b" stop-opacity=".24"></stop>
+            <stop offset=".947778" stop-color="#0e1822" stop-opacity=".15"></stop>
+            <stop offset=".958889" stop-color="#0e1822" stop-opacity="0"></stop>
+            <stop offset=".977778" stop-color="#121e2b" stop-opacity="0"></stop>
+            <stop offset=".988889" stop-color="#101820" stop-opacity=".14"></stop>
+            <stop offset=".995556" stop-color="#56636b" stop-opacity=".12"></stop>
+            <stop offset="1" stop-color="#13191f" stop-opacity=".05"></stop>
+          </radialGradient>
           <radialGradient id="m2-zodiac-hard-response" gradientUnits="userSpaceOnUse" cx="395" cy="330" r="920" fx="395" fy="330">
             <stop offset="0" class="m2-zodiac-response-light"></stop>
             <stop offset=".55" class="m2-zodiac-response-mid"></stop>
