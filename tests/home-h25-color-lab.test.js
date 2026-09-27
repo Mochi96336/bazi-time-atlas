@@ -40,13 +40,13 @@ test("H2.5 B-series tests less-invasive environments without changing original A
   const ambient = h25OverrideCss("B1");
   const restrained = h25OverrideCss("B2");
   const paired = h25OverrideCss("B3");
-  assert.match(ambient, /--field:\\s*#090b0f/);
-  assert.match(ambient, /rgba\\(123, 145, 171, \\.043\\)/);
-  assert.doesNotMatch(ambient, /--zodiac\\s*:/);
-  assert.match(restrained, /--field:\\s*#0a0d13/);
-  assert.match(restrained, /--field-raised:\\s*#0e121a/);
-  assert.match(paired, /--zodiac:\\s*#47556c/);
-  assert.ok(paired.includes(restrained.replace("/* H2.5 isolated color-only experiment: B2 */\\n","").trim()));
+  assert.match(ambient, /--field:\s*#090b0f/);
+  assert.match(ambient, /rgba\(123, 145, 171, \.043\)/);
+  assert.doesNotMatch(ambient, /--zodiac\s*:/);
+  assert.match(restrained, /--field:\s*#0a0d13/);
+  assert.match(restrained, /--field-raised:\s*#0e121a/);
+  assert.match(paired, /--zodiac:\s*#47556c/);
+  assert.ok(paired.includes(restrained.replace("/* H2.5 isolated color-only experiment: B2 */\n","").trim()));
   for (const id of ["B1","B2","B3"]) assert.doesNotMatch(h25OverrideCss(id),
     /--solar|--cursor|--hour|--day|--month|--year|--classification|filter:|glow|opacity/i);
 });
