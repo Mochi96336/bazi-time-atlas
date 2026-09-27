@@ -482,3 +482,14 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
  .research-one-year-day-phase-dial span{font-size:19px}
  .research-one-year-day-phase-content{gap:10px}
 }
+
+/* The extra Day phase is real first-screen teaching content. Recover its
+   footprint from redundant chrome/spacing, never by hiding the phase. */
+@media(max-width:680px){
+ .research-one-year-story{padding:9px 11px}
+ .research-one-year-identities{margin:7px 0 8px}
+ .research-one-year-day-phase{padding-top:6px;margin:6px 0 5px}
+ .research-one-year-day-phase-heading{margin-bottom:5px}
+ .research-one-year-boundary-zoom{padding:6px 8px;margin:4px 0}
+ .research-one-year-marker-key{margin:3px 0 1px}
+}
