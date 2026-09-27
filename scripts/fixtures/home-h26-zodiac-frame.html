@@ -82,7 +82,7 @@
         style.textContent=css;doc.head.append(style);}
       await sleep(80);
       const root=win.getComputedStyle(doc.documentElement);
-      const token=name=>root.getPropertyValue("--"+name).trim().toLowerCase();
+      const token=name=>root.getPropertyValue(name==="raised"?"--field-raised":"--"+name).trim().toLowerCase();
       for(const [name,expected] of Object.entries(H26_EXPECTED_TOKENS))
         if(token(name)!==expected)return fail("non-Zodiac palette changed "+name+
           " got "+token(name)+" expected "+expected);
