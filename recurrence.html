@@ -96,7 +96,10 @@
           <div class="research-one-year-timeline">
             <div class="research-one-year-timeline-head">
               <strong id="research-one-year-calendar-year">— 年的一年</strong>
-              <button id="research-year-journey-start" class="research-year-journey-start" type="button">走完這一年 <span aria-hidden="true">→</span></button>
+              <div class="research-year-journey-shortcuts">
+                <button id="research-year-journey-start" class="research-year-journey-start" type="button">看一年後 →</button>
+                <button id="research-year-journey-restore" class="research-year-journey-return" type="button" hidden>回原日期</button>
+              </div>
             </div>
             <div id="research-one-year-track" class="research-one-year-track" role="group" aria-label="公曆一年、實際立春及目前日期的位置">
               <div class="research-one-year-track-line" aria-hidden="true"></div>
@@ -112,28 +115,20 @@
               <span>1/1 <small>公曆換年</small></span>
               <span>12/31 <small>公曆年末</small></span>
             </div>
+            <div class="research-one-year-motion" role="status" aria-live="polite">
+              <span id="research-one-year-day-motion">—</span>
+            </div>
+            <div class="research-one-year-marker-key" aria-label="動態時間線圖例">
+              <span class="research-one-year-marker-key-selected"><i aria-hidden="true"></i><b id="research-one-year-selected-label">選定日 —</b></span>
+              <span class="research-one-year-marker-key-lichun"><i aria-hidden="true"></i><b id="research-one-year-lichun-label">立春位置待查</b></span>
+            </div>
+            <details id="research-one-year-evidence-details" class="research-one-year-evidence-details">
+              <summary>立春附近與來源說明</summary>
             <div id="research-one-year-era-legend" class="research-one-year-era-legend" hidden>
               <span><i class="research-one-year-era-swatch-before" aria-hidden="true"></i><b id="research-one-year-before-label">立春前 · —</b></span>
               <span><i class="research-one-year-era-swatch-after" aria-hidden="true"></i><b id="research-one-year-after-label">立春後 · —</b></span>
             </div>
-            <div class="research-one-year-motion" role="status" aria-live="polite">
-              <span id="research-one-year-day-motion">—</span>
-            </div>
-            <section id="research-year-journey" class="research-year-journey" aria-label="干支年與干支日的一年導覽" hidden>
-              <div class="research-year-journey-head">
-                <strong id="research-year-journey-heading">一年怎麼走</strong>
-                <span id="research-year-journey-step">—</span>
-                <button id="research-year-journey-restore" type="button">回原日期</button>
-              </div>
-              <p id="research-year-journey-meaning" class="research-year-journey-meaning">—</p>
-              <div class="research-year-journey-actions" role="group" aria-label="逐步查看一年與返回">
-                <button id="research-year-journey-previous" type="button">上一步</button>
-                <button id="research-year-journey-next" type="button">下一步</button>
-                <button id="research-year-journey-finish" type="button">直接看全年結果</button>
-              </div>
-            </section>
-            <details id="research-one-year-evidence-details" class="research-one-year-evidence-details">
-              <summary>立春附近與來源說明</summary>
+
             <div id="research-one-year-boundary-zoom" class="research-one-year-boundary-zoom" hidden>
               <div class="research-one-year-zoom-heading">
                 <strong>立春附近 · 放大觀察</strong>
@@ -154,10 +149,7 @@
             <p id="research-one-year-boundary-meaning" class="research-one-year-boundary-meaning">—</p>
             <small id="research-one-year-source" class="research-one-year-source">—</small>
             </details>
-            <div class="research-one-year-marker-key" aria-label="動態時間線圖例">
-              <span class="research-one-year-marker-key-selected"><i aria-hidden="true"></i><b id="research-one-year-selected-label">選定日 —</b></span>
-              <span class="research-one-year-marker-key-lichun"><i aria-hidden="true"></i><b id="research-one-year-lichun-label">立春位置待查</b></span>
-            </div>
+
           </div>
         </section>
       <div class="research-date-step-controls" role="group" aria-label="選定日期逐日位移">
