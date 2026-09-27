@@ -190,15 +190,20 @@
             <small>這是整個公曆年的日數，不是任意選定日跨到明年同日的差值；干支年另以立春切換。</small>
           </div>
         </section>
-      <div class="research-date-step-controls" role="group" aria-label="比較日期快速位移">
-        <span>移動比較日</span>
-        <div class="research-date-step-buttons">
-          <button type="button" data-explorer-step-days="-60" aria-label="比較日期往前 60 天">−60 日</button>
-          <button type="button" data-explorer-step-days="-1" aria-label="比較日期往前 1 天">−1 日</button>
-          <button type="button" data-explorer-step-days="1" aria-label="比較日期往後 1 天">＋1 日</button>
-          <button type="button" data-explorer-step-days="60" aria-label="比較日期往後 60 天">＋60 日</button>
+      <div class="research-date-step-controls" role="group" aria-label="選定日期逐日位移">
+        <span>逐日調整</span>
+        <div class="research-date-step-buttons research-date-step-buttons-daily">
+          <button type="button" data-explorer-step-days="-1" aria-label="選定日期往前一天">← 前一天</button>
+          <button type="button" data-explorer-step-days="1" aria-label="選定日期往後一天">後一天 →</button>
         </div>
-        <small>只移動比較日期 · 基準日固定</small>
+        <details id="research-date-step-advanced" class="research-date-step-advanced">
+          <summary>進階 · 跳轉 60 天</summary>
+          <div class="research-date-step-buttons research-date-step-buttons-sixty" role="group" aria-label="進階六十日位移">
+            <button type="button" data-explorer-step-days="-60" aria-label="選定日期往前六十天">−60 日</button>
+            <button type="button" data-explorer-step-days="60" aria-label="選定日期往後六十天">＋60 日</button>
+          </div>
+          <small>只移動選定日期，基準日不變。</small>
+        </details>
       </div>
       <div id="research-explorer-results" class="research-date-explorer-results" aria-live="polite">
         <details id="research-explorer-advanced-cycle" class="research-explorer-advanced-cycle">
