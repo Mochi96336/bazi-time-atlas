@@ -37,6 +37,7 @@ frame.addEventListener("load",async()=>{
     guide:d.getElementById("research-year-journey"),
     previous:d.getElementById("research-year-journey-previous"),
     next:d.getElementById("research-year-journey-next"),
+    finish:d.getElementById("research-year-journey-finish"),
     restore:d.getElementById("research-year-journey-restore")
   };
   const band=d.getElementById("research-one-year-track");
@@ -62,14 +63,16 @@ frame.addEventListener("load",async()=>{
     if(state==="proof"){
       // Dirty and invalid edits must remain untouched when a guided NEXT step is blocked.
       const field=d.getElementById("research-explorer-target-day");
-      for(const value of ["12","30"]){
+      const monthField=d.getElementById("research-explorer-target-month");
+      for(const draft of [{month:"1",day:"12"},{month:"2",day:"30"}]){
         const urlBefore=w.location.search,dayBefore=now();
-        field.value=value;
+        monthField.value=draft.month;field.value=draft.day;
         controls.next.click();
         ok(root.dataset.yearJourneyOutcome==="stale-input" &&
-          field.value===value && now()===dayBefore && w.location.search===urlBefore,
+          monthField.value===draft.month && field.value===draft.day &&
+          now()===dayBefore && w.location.search===urlBefore,
           "guided next overwrote a dirty or invalid civil day");
-        field.value="1";
+        monthField.value="1";field.value="1";
       }
       record("dirtyGuard",true);
     }
@@ -79,10 +82,12 @@ frame.addEventListener("load",async()=>{
       end:"next-jan-1"
     }[state];
     let boundarySeen=false,afterSeen=false,steps=0;
+    const visitedTurns=new Set();
+    if(state==="end")controls.finish.click(); // opt-in one-click overview
     while(state==="proof" || (requested && stageId()!==requested)){
       if(controls.next.disabled)break;
       controls.next.click();steps++;
-      ok(steps<=5,"journey loop stalled");
+      ok(steps<=12,"journey loop stalled");
       ok(root.dataset.yearJourneyActive==="true","next step created phantom selection");
       ok(w.location.search.includes("compare="+now()),"stage changed date without shareable URL");
       ok(ring.getAttribute("aria-label").includes(d.getElementById("research-one-year-day-pillar").textContent),
@@ -96,6 +101,14 @@ frame.addEventListener("load",async()=>{
             "2024 date-only Li Chun must retain both active Year candidates");
         }
       }
+      if(stageId().startsWith("turn-")){
+        const turn=Number(stageId().slice(5));
+        visitedTurns.add(turn);
+        ok(root.dataset.yearJourneyElapsed===String(turn*60) &&
+          Number(d.getElementById("research-one-year-day-phase-index").textContent)===startIndex &&
+          d.querySelector('[data-journey-turn="'+turn+'"]').dataset.complete==="true",
+          "each full 60-day turn must visibly close and restore the same named Day");
+      }
       if(stageId()==="after-li-chun"){
         afterSeen=true;
         if(year===2024)ok(story.dataset.activeYearName==="甲辰",
@@ -103,6 +116,11 @@ frame.addEventListener("load",async()=>{
       }
     }
     const ended=stageId()==="next-jan-1";
+    if(state==="proof"){
+      ok(visitedTurns.size===6,
+        "user-stepped guide must expose each of six distinct 60-day checkpoints");
+      record("turns",visitedTurns.size);
+    }
     if(state==="proof"||state==="end"){
       ok(ended,"journey did not reach next Gregorian Jan 1");
       ok(now()===date(year+1,1,1),"journey conflated next Jan 1 with next Li Chun");
@@ -115,7 +133,7 @@ frame.addEventListener("load",async()=>{
       ok(root.dataset.yearJourneyRemainder===String(remainder),"year remainder wrong");
       ok([...d.querySelectorAll("[data-journey-turn]")]
         .every(node=>node.dataset.complete==="true"),"six Day circles did not complete");
-      ok(d.getElementById("research-year-journey-remainder").textContent==="+"+remainder,
+      ok(controls.finish.hidden && d.getElementById("research-year-journey-remainder").textContent==="+"+remainder,
         "remainder circle is not +5/+6");
       ok(d.getElementById("research-year-journey-day-names").textContent.includes(initialStartDay),
         "graphical guide lost canonical origin Day identity");
@@ -134,6 +152,18 @@ frame.addEventListener("load",async()=>{
         w.location.pathname+w.location.search+w.location.hash===originalPath,
         "explicit return failed to restore original date and exact permalink");
       record("restored",true);
+      // An optional one-click jump must use the very same committed target and
+      // its restore action (not a second preview-only Day source).
+      controls.start.click();
+      controls.finish.click();
+      ok(root.dataset.yearJourneyStep==="next-jan-1" &&
+        now()===date(year+1,1,1) && controls.finish.hidden,
+        "one-click overview must follow the canonical next-year boundary");
+      controls.restore.click();
+      ok(now()===originalDate &&
+        w.location.pathname+w.location.search+w.location.hash===originalPath,
+        "one-click overview did not restore the original date/URL");
+      record("oneClickOverview",true);
       // An unrelated deliberate manual slider action must dismiss the guide.
       controls.start.click();
       const scrub=d.getElementById("research-one-year-scrub");
