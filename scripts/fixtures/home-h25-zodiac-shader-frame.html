@@ -26,7 +26,6 @@
       target.searchParams.set("instant", p.get("instant") || "2026-09-13T23:43:42.000Z");
       target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
       if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
-    if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
       if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
       if (p.get("classification") === "1") target.searchParams.set("classification", "1");
       window.__h25PreloadedTarget = target.href;
@@ -61,6 +60,7 @@
     target.searchParams.set("instant", instant);
     target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
     if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
+    if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
     if (classification) target.searchParams.set("classification", "1");
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     function isCorrectMode(instrument) {
