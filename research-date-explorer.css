@@ -504,3 +504,10 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-one-year-selected-date{display:none}
   .research-one-year-marker-key-selected{display:none}
 }
+
+/* Native range thumbs reserve half their diameter at either end. Extend the
+   transparent input by exactly one thumb width so its *center* travels from
+   the 1/1 tick to the 12/31 tick, matching sourced Li Chun positions. */
+#research-one-year-scrub{
+  left:-9.5px;right:auto;width:calc(100% + 19px);
+}
