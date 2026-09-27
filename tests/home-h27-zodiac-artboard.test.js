@@ -34,20 +34,21 @@ function fakeDocument(){
 }
 test("H2.7 retains canonical palette and meaningful three-way experimental scope",()=>{
   assert.match(H27_REFERENCE_SHA,/^[0-9a-f]{40}$/);
-  assert.deepEqual(Object.keys(H27_VARIANTS),["C0","C1","C2"]);
+  assert.deepEqual(Object.keys(H27_VARIANTS),["C0","C1","C2","C3"]);
   assert.equal(H27_TOKENS.field,"#0a0d13");
   assert.equal(H27_TOKENS.zodiac,"#424b59");
   assert.deepEqual(H27_INSTANTS.length,2);
   assert.throws(()=>applyH27Prototype(fakeDocument().doc,"__proto__"));
 });
 test("C0 is byte-for-byte unmodified substrate; C1 and C2 clone real Zodiac material geometry",()=>{
-  for(const variant of ["C0","C1","C2"]){
+  for(const variant of ["C0","C1","C2","C3"]){
     const {doc,svg,defs,bed}=fakeDocument(),before=bed.getAttribute("d");
     const result=applyH27Prototype(doc,variant);
     const paths=svg.children.filter(x=>x.dataset.h27StructuralProbe);
     assert.equal(paths.length,variant==="C0"?0:variant==="C1"?1:2);
     assert.equal(result.inserted,paths.length);
     assert.equal(result.gradients,paths.length);
+    if(variant==="C3")assert.equal(paths[0]?.getAttribute("opacity"),"0.54");
     assert.equal(bed.getAttribute("d"),before);
     assert.ok(paths.every(x=>x.getAttribute("d")===before));
     assert.ok(paths.every(x=>x.getAttribute("pointer-events")==="none"));
