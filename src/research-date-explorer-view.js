@@ -3,7 +3,6 @@ import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
 import { dayWheelDateDestinations } from "./recurrence/day-wheel-date-destinations.js";
 import { researchOneYearStory } from "./recurrence/research-one-year-story.js";
 import { researchCivilYearJourney } from "./recurrence/research-civil-year-journey.js";
-import { activeYearIdentityForDate } from "./recurrence/research-date-pair.js";
 import { gregorianOrdinal, validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
 import {
@@ -148,123 +147,48 @@ function hideYearStory() {
   }
 }
 
-const JOURNEY_STAGE_LABELS=Object.freeze({
-  start:"1/1 · 公曆年開始",
-  "li-chun-date":"立春當天 · 日期尚不足以判斷前後",
-  "after-li-chun":"立春翌日 · 查看年柱切換",
-  "next-jan-1":"明年 1/1 · 完成一整年"
-});
-
-function journeyStageLabel(id) {
-  if(id.startsWith("turn-"))return "第 "+Number(id.slice(5))+" 圈完成";
-  return JOURNEY_STAGE_LABELS[id]??id;
-}
-
-
 function journeyFormIsClean() {
   const typedBase=readFields("base"),typedTarget=readFields("target");
   return Boolean(typedBase && typedTarget &&
     dateKey(typedBase)===dateKey(base) && dateKey(typedTarget)===dateKey(target));
 }
 
-function journeyYearText(stage) {
-  // Re-read the existing date-scoped source when seasonal chunks have arrived.
-  // A milestone Year is never copied from the nominal year label.
-  const active=activeYearIdentityForDate(stage.date,seasonalEvidence(stage.date));
-  if (active.status==="unresolved") {
-    const candidates=active.possiblePillars?.map(x=>x.name).join("／");
-    return "實際年柱："+(candidates?candidates+"（年界待判）":"來源不足，年柱待判");
-  }
-  if (!active.pillar) return "實際年柱尚無年界證據，不能判定";
-  return "實際年柱："+active.pillar.name+
-    (active.status==="model-estimated"?"（模型估計）":"（已有判定依據）");
-}
-
-function journeyStepMeaning(model, stage) {
-  // Status labels already name the currently sourced Year and canonical Day.
-  // Explain only what CHANGED at this stop rather than repeating their names.
-  if(stage.id==="start") return model.boundary
-    ? "公曆換年不是立春；沿著同一條時間軸觀察年柱和日柱。"
-    : "本年無可用立春位置，省略年界站點；干支日仍連續前進。";
-  if(stage.id==="li-chun-date")return "立春所在日期：未指定時刻，年柱可能有兩種結果。";
-  if(stage.id==="after-li-chun")return "已過本年的立春；日柱不因年界而歸零。";
-  if(stage.id.startsWith("turn-"))return "走滿 "+Number(stage.id.slice(5))*60+
-    " 天，干支日回到起點同一位；日期繼續往前。";
-  return "抵達明年 1/1，並不代表又跨過下一次立春。";
-}
-
 function renderYearJourney() {
   const panel=document.getElementById("research-one-year-story");
-  const guide=document.getElementById("research-year-journey");
   const start=document.getElementById("research-year-journey-start");
-  if(!panel || !guide || !start)return;
+  const restore=document.getElementById("research-year-journey-restore");
+  if(!panel || !start || !restore)return;
+  // One click commits the following civil Jan 1, not a competing preview.
+  // A manual form, slider or free wheel update cancels the temporary journey.
   if(yearJourney && (
     dateKey(base)!==dateKey(yearJourney.originalBase) ||
-    dateKey(target)!==dateKey(yearJourney.model.milestones[yearJourney.index].date)
+    dateKey(target)!==dateKey(yearJourney.model.milestones.at(-1).date)
   )){
-    // A manual form/slider/wheel/date-step commit takes ownership immediately.
-    // Never keep a stale guided selection next to the newly chosen date.
     yearJourney=null;
     root.dataset.yearJourneyOutcome="interrupted-by-manual-date";
   }
   const active=Boolean(yearJourney);
   panel.dataset.journeyActive=String(active);
-  guide.hidden=!active;
   start.hidden=active;
   start.disabled=target.year>=10_000_000;
+  restore.hidden=!active;
+  root.dataset.yearJourneyActive=String(active);
   if(!active){
-    if(start.disabled)start.title="此年份已達支援上限，沒有下一年的 1/1";
+    if(start.disabled)start.title="本年已達公曆支援上限";
     else start.removeAttribute("title");
-    root.dataset.yearJourneyActive="false";
+    root.dataset.yearJourneyStep="none";
     return;
   }
-  const {model,index}=yearJourney;
-  const milestone=model.milestones[index];
-  root.dataset.yearJourneyActive="true";
+  const {model,originalTarget}=yearJourney;
   root.dataset.yearJourneyOriginYear=String(model.year);
-  root.dataset.yearJourneyStep=milestone.id;
-  root.dataset.yearJourneyElapsed=String(milestone.elapsedDays);
+  root.dataset.yearJourneyStep="next-jan-1";
+  root.dataset.yearJourneyElapsed=String(model.yearLength);
   root.dataset.yearJourneyRemainder=String(model.remainder);
-  setText("research-year-journey-heading",model.year+" 年");
-  setText("research-year-journey-step",journeyStageLabel(milestone.id));
-  setText("research-year-journey-meaning",journeyStepMeaning(model,milestone));
-  // The ONE formula/progress line lives immediately below the ONE year strip.
-  // Do not construct a second Day dial or any per-turn progress circles.
-  const elapsed=milestone.elapsedDays;
-  const completed=milestone.completedTurns;
-  const rest=milestone.partialDays;
   setText("research-one-year-day-motion",
-    milestone.id==="next-jan-1"
-      ? model.year+" 年共 "+model.yearLength+" 天：干支日走滿 6 圈，再走 "+model.remainder+" 天。"
-      : "自 "+model.year+"/1/1 已走 "+elapsed+" / "+model.yearLength+
-        " 天 · "+completed+" 圈，再走 "+rest+" 天");
-  const prev=document.getElementById("research-year-journey-previous");
-  const next=document.getElementById("research-year-journey-next");
-  const finish=document.getElementById("research-year-journey-finish");
-  const restore=document.getElementById("research-year-journey-restore");
-  const finished=index===model.milestones.length-1;
-  prev.disabled=index===0;
-  next.disabled=finished;
-  next.textContent=finished?"已走完一年":"下一步："+journeyStageLabel(model.milestones[index+1].id).split(" · ")[0];
-  finish.hidden=finished;
-  restore.textContent="回 "+yearJourney.originalTarget.month+"/"+yearJourney.originalTarget.day;
-  restore.setAttribute("aria-label","返回原選定日期 "+dateKey(yearJourney.originalTarget));
-}
-
-function commitJourneyStage(index) {
-  if(!yearJourney || mode!=="dates" || root.dataset.ready!=="true")return;
-  if(!journeyFormIsClean()){
-    root.dataset.yearJourneyOutcome="stale-input";
-    setError("日期尚未確認，請先套用或復原輸入；導覽不會覆蓋未儲存的日期。");
-    return;
-  }
-  const stage=yearJourney.model.milestones[index];
-  if(!stage)return;
-  yearJourney.index=index;
-  target={...stage.date};
-  hasExplorerSelection=true;
-  root.dataset.yearJourneyOutcome="applied";
-  syncInputs();setError(null);render();syncFreeQuery();
+    model.year+"/1/1 → "+(model.year+1)+"/1/1："+
+    model.yearLength+" 天，干支日走滿 6 圈，再走 "+model.remainder+" 天。");
+  restore.textContent="回 "+originalTarget.month+"/"+originalTarget.day;
+  restore.setAttribute("aria-label","回原選定日期 "+dateKey(originalTarget));
 }
 
 function restoreYearJourney({restoreUrl=true}={}) {
@@ -298,12 +222,12 @@ function startYearJourney() {
     yearEvidenceForDate:seasonalEvidence
   });
   yearJourney={
-    model,index:0,
+    model,
     originalBase:{...base},originalTarget:{...target},
     originalPath:location.pathname+location.search+location.hash
   };
   root.dataset.yearJourneyOutcome="started";
-  target={...model.milestones[0].date};
+  target={...model.milestones.at(-1).date};
   syncInputs();setError(null);render();syncFreeQuery();
 }
 
@@ -315,9 +239,9 @@ function renderYearStory(comparison, seasonal) {
   panel.hidden=false;
   const active=comparison.target.activeYear;
   const name=active.pillar?.name ?? (active.possiblePillars?.map(p=>p.name).join("／") ?? "年柱待判");
-  const yearCertainty=active.status==="exact"?"已有年界依據":
-    active.status==="model-estimated"?"年界模型估計（非精確時刻）":
-    active.status==="unresolved"?"立春邊界附近：未指定時間，兩種年柱皆可能":"尚無可用年界證據";
+  const yearCertainty=active.status==="exact"?"已判定":
+    active.status==="model-estimated"?"模型估計":
+    active.status==="unresolved"?"年界待判 · 須時刻":"年界證據不足";
   const day=comparison.target.day;
   const year=target.year;
   panel.dataset.ready="true";
@@ -712,15 +636,6 @@ if (root && form && annualButton && datesButton) {
     }
   });
   document.getElementById("research-year-journey-start")?.addEventListener("click",startYearJourney);
-  document.getElementById("research-year-journey-previous")?.addEventListener("click",()=>{
-    if(yearJourney)commitJourneyStage(yearJourney.index-1);
-  });
-  document.getElementById("research-year-journey-next")?.addEventListener("click",()=>{
-    if(yearJourney)commitJourneyStage(yearJourney.index+1);
-  });
-  document.getElementById("research-year-journey-finish")?.addEventListener("click",()=>{
-    if(yearJourney)commitJourneyStage(yearJourney.model.milestones.length-1);
-  });
   document.getElementById("research-year-journey-restore")?.addEventListener("click",()=>restoreYearJourney());
   root.addEventListener("research-free-wheel:jump",jumpToSelectedDay);
   // Existing Research-only source loads asynchronously. A new verified chunk
