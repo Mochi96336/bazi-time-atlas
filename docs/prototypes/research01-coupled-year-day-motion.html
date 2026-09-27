@@ -24,10 +24,10 @@ input[type=range]{width:100%;accent-color:#dec992;touch-action:pan-y;cursor:poin
 <body><main class="wrap">
 <span class="eyebrow">Research 01 / Interaction study</span> <span class="flag">獨立原型，未接管正式介面</span>
 <h1>一個日期，兩個循環</h1>
-<p class="muted">拖動一年內的日期，同時看立春年界與每天前進的干支日。原型限定 2023／2024，直接讀取專案既有日期與節氣證據，沒有另造干支表。</p>
+<p class="muted">拖動一年內的日期，同時看立春年界與每天前進的干支日。原型限定 2023–2025，直接讀取專案既有日期與節氣證據，沒有另造干支表。</p>
 <section class="card" aria-label="日期與兩個循環">
  <div class="top"><div><span class="eyebrow">選定日期</span><strong id="date">2024 / 02 / 01</strong></div><div class="controls">
- <label for="year">公曆年份 <select id="year"><option value="2023">2023</option><option value="2024" selected>2024</option></select></label>
+ <label for="year">公曆年份 <select id="year"><option value="2023">2023</option><option value="2024" selected>2024</option><option value="2025">2025</option></select></label>
  <button id="before" type="button">立春前</button><button id="boundary" type="button">立春當天</button><button id="after" type="button">立春後</button></div></div>
  <div class="major">
   <div class="identity year"><small>現在的干支年 · 立春才切換</small><b id="yearname" aria-live="polite">—</b><small id="authority"></small></div>
@@ -75,7 +75,7 @@ function render(){
  $("dial").style.background="conic-gradient(var(--day) "+(day.index+1)*6+"deg,#394f50 0)";
  $("dial").setAttribute("aria-label","干支日 "+day.name+"，六十格循環中第 "+(day.index+1)+" 位");
  $("dayfill").style.width=((day.index+1)/60*100)+"%";
- $("daymotion").textContent="第 "+(day.index+1)+" 格 → 再 "+(60-day.index)+" 天回到同一干支日";
+ $("daymotion").textContent="現在第 "+(day.index+1)+" 格；再 "+(59-day.index)+" 天到第 60 格，隔天回到第 1 格";
  $("selectedmark").style.left=story.selectedPosition+"%";
  const lc=story.liChun;
  $("beforeseg").hidden=$("afterseg").hidden=$("eventmark").hidden=!lc;
@@ -86,11 +86,11 @@ function render(){
  $("scopeline").textContent=lc?"選定 "+d.month+"/"+d.day+"；"+(active.status==="unresolved"?"立春當日：年柱待判":active.side==="before"?"在立春前":"在立春後")+"。全年比例不會把二月放大。":"立春位置缺少證據；僅顯示選定公曆日及連續日序。";
  $("zoom").hidden=!story.boundaryZoom;
  if(story.boundaryZoom){$("zoomselected").style.left=story.boundaryZoom.selectedDayStartPercent+"%";$("zoomselected").style.width=story.boundaryZoom.selectedDayWidthPercent+"%";}
- $("stepyear").disabled=year!==2023;$("stepyear").textContent=year===2023?"演示：2023/1/1 → 2024/1/1":"切換至 2023 以演示相鄰兩年";
+ $("stepyear").disabled=year===2025;$("stepyear").textContent=year===2025?"請切換至 2023 或 2024":"演示："+year+"/1/1 → "+(year+1)+"/1/1";
 }
-$("year").addEventListener("change",e=>{year=Number(e.target.value);index=Math.min(index,year===2024?365:364);$("yearstep").textContent="選擇全年時間線上的日期，觀察兩條循環同步更新。";render();});
+$("year").addEventListener("change",e=>{year=Number(e.target.value);index=Math.min(index,(year===2024?365:364));$("yearstep").textContent="選擇全年時間線上的日期，觀察兩條循環同步更新。";render();});
 $("scrub").addEventListener("input",e=>{index=Number(e.target.value);render();});
 for(const [id,delta] of [["before",-3],["boundary",0],["after",3]])$(id).addEventListener("click",()=>{const evidence=get({year,month:2,day:1});const day=evidence?.liChun?.date;if(!day){$("scopeline").textContent="本年無可用立春日期，無法導航到年界。";return;}const selected=shiftGregorianDate(day,delta);index=gregorianOrdinal(selected)-gregorianOrdinal({year,month:1,day:1});render();});
-$("stepyear").addEventListener("click",()=>{if(year!==2023)return;const a={year:2023,month:1,day:1},b={year:2024,month:1,day:1};const aa=activeYearIdentityForDate(a,get(a)),bb=activeYearIdentityForDate(b,get(b)),da=sexagenaryDayForGregorianDate(a),db=sexagenaryDayForGregorianDate(b);const diff=gregorianOrdinal(b)-gregorianOrdinal(a);const yearNote=aa.pillar&&bb.pillar?(aa.pillar.name+" → "+bb.pillar.name+"（實際年柱；依各年立春證據）"):"實際年柱證據不足，不能宣稱已切換";$("yearstep").textContent="2023/1/1 → 2024/1/1：經過 "+diff+" 天，干支日 "+da.name+" → "+db.name+"（+"+diff%60+" 格）；"+yearNote+"。";year=2024;index=0;render();});
+$("stepyear").addEventListener("click",()=>{if(year===2025)return;const a={year,month:1,day:1},b={year:year+1,month:1,day:1};const aa=activeYearIdentityForDate(a,get(a)),bb=activeYearIdentityForDate(b,get(b)),da=sexagenaryDayForGregorianDate(a),db=sexagenaryDayForGregorianDate(b);const diff=gregorianOrdinal(b)-gregorianOrdinal(a);const yearNote=aa.pillar&&bb.pillar?(aa.pillar.name+" → "+bb.pillar.name+"（實際年柱；依各年立春證據）"):"實際年柱證據不足，不能宣稱已切換";$("yearstep").textContent=a.year+"/1/1 → "+b.year+"/1/1：經過 "+diff+" 天，干支日 "+da.name+" → "+db.name+"（+"+diff%60+" 格）；"+yearNote+"。";year=b.year;index=0;render();});
 render();
 </script></body></html>
