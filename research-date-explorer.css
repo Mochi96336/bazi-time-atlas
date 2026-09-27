@@ -596,3 +596,50 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
   .research-year-journey-head #research-year-journey-restore{min-height:40px;padding:4px 7px;font-size:10px}
   .research-year-journey-head span{font-size:10px}
 }
+
+
+/* Research 01: daily nudges stay next to the single real Year playhead.
+   The old 60-day diagnostic jumps are still functional and keyboard reachable,
+   but no longer compete with the guided six-turn explanation on first view. */
+.research-date-step-controls{align-items:center;gap:7px 12px}
+.research-date-step-controls>.research-date-step-buttons-daily{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
+}
+.research-date-step-buttons-daily button{min-width:94px;min-height:42px}
+.research-date-step-advanced{
+  flex-basis:100%;min-width:0;border-top:1px solid var(--hairline);
+  padding-top:3px;
+}
+.research-date-step-advanced>summary{
+  display:flex;align-items:center;min-height:40px;
+  color:#a9bdad;font-size:11px;font-weight:650;
+  cursor:pointer;list-style:none;max-width:max-content;
+}
+.research-date-step-advanced>summary::-webkit-details-marker{display:none}
+.research-date-step-advanced>summary:before{
+  content:"＋";color:#9ac4b4;margin-right:8px;
+}
+.research-date-step-advanced[open]>summary:before{content:"−"}
+.research-date-step-advanced>summary:focus-visible{
+  outline:2px solid #e6d09d;outline-offset:3px;border-radius:4px;
+}
+.research-date-step-buttons-sixty{display:flex;gap:8px;margin:3px 0 5px}
+.research-date-step-buttons-sixty button{min-height:42px;min-width:95px}
+.research-date-step-advanced>small{
+  display:block;color:#89988d;font-size:10px;line-height:1.45;
+}
+@media(max-width:680px){
+  .research-date-step-controls{padding:6px 8px;gap:4px 8px}
+  .research-date-step-controls>.research-date-step-buttons-daily{
+    width:auto;flex:1 1 180px;grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .research-date-step-buttons-daily button{
+    width:100%;min-width:0;min-height:44px;padding:7px 5px;
+  }
+  .research-date-step-advanced{flex-basis:100%;padding-top:1px}
+  .research-date-step-advanced>summary{min-height:40px}
+  .research-date-step-buttons-sixty{
+    width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+  .research-date-step-buttons-sixty button{min-width:0;min-height:44px}
+}
