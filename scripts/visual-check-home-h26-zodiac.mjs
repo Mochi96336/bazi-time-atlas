@@ -94,7 +94,10 @@ for(const variant of Object.keys(H26_VARIANTS))for(const width of [320,2047])
 for(const variant of Object.keys(H26_VARIANTS))
   specs.push({variant,mode:"roughness",width:390,instant:H26_INSTANTS[1]});
 const captures=[];
-for(const spec of specs)captures.push({...await screenshot(spec),...probe(spec)});
+for(const spec of specs){
+  const proofState=probe(spec);
+  captures.push({...await screenshot(spec),...proofState});
+}
 const c0=probe({variant:"V0",mode:"svg",width:390,instant:H26_INSTANTS[0],classification:true});
 const c1=probe({variant:"V1",mode:"svg",width:390,instant:H26_INSTANTS[0],classification:true});
 if(!c0.categoryFill||c0.categoryFill==="not-applicable"||c0.categoryFill!==c1.categoryFill)
