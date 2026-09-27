@@ -41,6 +41,8 @@ Start a local static server rooted at the repository, e.g.
 `python3 -m http.server 4173 --bind 127.0.0.1`. In another shell run:
 
 ```sh
+npm ci
+npm run vendor:prepare
 node --test tests/home-h25-color-lab.test.js
 BASE_URL=http://127.0.0.1:4173/ node scripts/visual-check-home-h25-color-lab.mjs
 ```
