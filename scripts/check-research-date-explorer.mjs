@@ -48,6 +48,10 @@ if(
   attr(beginnerStory,"data-ready")!=="true" ||
   attr(beginnerStory,"data-active-year-name")!=="甲辰" ||
   !beginner.dom.includes("同一日期，兩種週期") ||
+  beginner.dom.includes('class="research-mode-switch"') ||
+  beginner.dom.includes('id="research-year-journey-start"') ||
+  attr(beginnerRoot,"data-advanced-open")!=="false" ||
+  !tag(beginner.dom,"research-advanced-details","details").includes('class="research-advanced-details"') ||
   beginner.dom.includes('id="research-year-journey-loops"') ||
   beginner.dom.includes('id="research-one-year-day-phase-dial"')
 ) throw new Error("Bare Research entry must open an explicitly labeled one-year learning story: "+beginner.url);
@@ -62,6 +66,7 @@ for(const path of [
   if(
     !(/<body[^>]*data-research-mode="annual"/.test(legacy.dom)) ||
     !tag(legacy.dom,"research-free-explorer").includes(" hidden") ||
+    !tag(legacy.dom,"research-advanced-details","details").includes(" open") ||
     tag(legacy.dom,"research-discrete").includes(" hidden")
   ) throw new Error("Existing annual deep link must remain inside the annual-only evidence mode: "+legacy.url);
 }
@@ -135,16 +140,15 @@ console.log("[explorer] PASS 390px real interactions, date edits, swap, invalid 
 
 const direct=dump("recurrence.html?mode=dates&base=2024-02-04&compare=2024-02-10");
 const root=tag(direct.dom,"research-free-explorer");
-const hiddenAnnual=tag(direct.dom,"research-discrete");
-const hiddenAstronomy=tag(direct.dom,"research-astronomy");
-const hiddenEvidence=tag(direct.dom,"research-evidence");
+const closedAdvanced=tag(direct.dom,"research-advanced-details","details");
 if(
   attr(root,"data-ready")!=="true" ||
   attr(root,"data-base-active-year-status")!=="unresolved" ||
   attr(root,"data-target-active-year-status")!=="model-estimated" ||
   attr(root,"data-active-year-phase")!=="unavailable" ||
   attr(root,"data-day-phase")!=="6" ||
-  ![hiddenAnnual,hiddenAstronomy,hiddenEvidence].every(value=>value.includes(" hidden"))
+  closedAdvanced.includes(" open") ||
+  attr(root,"data-advanced-open")!=="false"
 ) throw new Error("Direct Li Chun boundary day must leave active year unresolved and hide annual-only evidence: "+direct.url);
 console.log("[explorer] PASS Li Chun date-only uncertainty and separated nominal/day phases");
 
