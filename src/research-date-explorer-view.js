@@ -155,6 +155,12 @@ const JOURNEY_STAGE_LABELS=Object.freeze({
   "next-jan-1":"明年 1/1 · 完成一整年"
 });
 
+function journeyStageLabel(id) {
+  if(id.startsWith("turn-"))return "第 "+Number(id.slice(5))+" 圈完成";
+  return JOURNEY_STAGE_LABELS[id]??id;
+}
+
+
 function journeyFormIsClean() {
   const typedBase=readFields("base"),typedTarget=readFields("target");
   return Boolean(typedBase && typedTarget &&
@@ -182,7 +188,9 @@ function journeyStepMeaning(model, stage) {
       ? "這是來源給出的立春日期，並非選定節氣的精確時刻；沒有指定時刻就保留可能的兩種年柱。"
       : stage.id==="after-li-chun"
         ? "立春日期已過，干支年依當日獨立證據更新；干支日仍只前進一天。"
-        : "已跨入下一個公曆年的 1/1。上方時間帶切換為新公曆年，不代表又過了一次立春。";
+        : stage.id.startsWith("turn-")
+          ? "已走滿第 "+Number(stage.id.slice(5))+" 個六十日循環。今天的干支日回到起點同一位，公曆日期卻仍在前進。"
+          : "已跨入下一個公曆年的 1/1。上方時間帶切換為新公曆年，不代表又過了一次立春。";
   const missing=!model.boundary&&stage.id==="start"
     ? " 本次未取得立春位置，因此不插入猜測的立春站點；只演示連續干支日。"
     : "";
@@ -221,9 +229,9 @@ function renderYearJourney() {
   root.dataset.yearJourneyStep=milestone.id;
   root.dataset.yearJourneyElapsed=String(milestone.elapsedDays);
   root.dataset.yearJourneyRemainder=String(model.remainder);
-  setText("research-year-journey-heading",model.year+" 年 · 一個公曆年怎麼走");
+  setText("research-year-journey-heading",model.year+" 年 · 一年怎麼走");
   setText("research-year-journey-step",String(index+1)+" / "+model.milestones.length+
-    " · "+JOURNEY_STAGE_LABELS[milestone.id]);
+    " · "+journeyStageLabel(milestone.id).split(" · ")[0]);
   setText("research-year-journey-meaning",journeyStepMeaning(model,milestone));
   const completed=milestone.completedTurns;
   const rest=milestone.partialDays;
@@ -248,9 +256,15 @@ function renderYearJourney() {
     (milestone.id==="next-jan-1"?" → 六圈後再前進 "+model.remainder+" 位":""));
   const prev=document.getElementById("research-year-journey-previous");
   const next=document.getElementById("research-year-journey-next");
+  const finish=document.getElementById("research-year-journey-finish");
+  const restore=document.getElementById("research-year-journey-restore");
+  const finished=index===model.milestones.length-1;
   prev.disabled=index===0;
-  next.disabled=index===model.milestones.length-1;
-  next.textContent=next.disabled?"已走完一年":"下一步："+JOURNEY_STAGE_LABELS[model.milestones[index+1].id].split(" · ")[0];
+  next.disabled=finished;
+  next.textContent=finished?"已走完一年":"下一步："+journeyStageLabel(model.milestones[index+1].id).split(" · ")[0];
+  finish.hidden=finished;
+  restore.textContent="回 "+yearJourney.originalTarget.month+"/"+yearJourney.originalTarget.day;
+  restore.setAttribute("aria-label","返回原選定日期 "+dateKey(yearJourney.originalTarget));
 }
 
 function commitJourneyStage(index) {
@@ -722,6 +736,9 @@ if (root && form && annualButton && datesButton) {
   });
   document.getElementById("research-year-journey-next")?.addEventListener("click",()=>{
     if(yearJourney)commitJourneyStage(yearJourney.index+1);
+  });
+  document.getElementById("research-year-journey-finish")?.addEventListener("click",()=>{
+    if(yearJourney)commitJourneyStage(yearJourney.model.milestones.length-1);
   });
   document.getElementById("research-year-journey-restore")?.addEventListener("click",()=>restoreYearJourney());
   root.addEventListener("research-free-wheel:jump",jumpToSelectedDay);
