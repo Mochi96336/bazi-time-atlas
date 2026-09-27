@@ -28,8 +28,19 @@
       if(mode==="fallback") page.searchParams.set("materialWebgl","off");
       if(mode==="roughness") page.searchParams.set("materialProbe","none");
       if(p.get("classification")==="1")page.searchParams.set("classification","1");
+      // MUST assign the native child viewport before navigation. Starting
+      // WebGL in the default 300px iframe and resizing only after ESM import
+      // leaves an old GPU canvas transform even when SVG CTM is updated.
+      const frame=document.querySelector("#stage");
+      const nativeWidth=Number(p.get("width")||390);
+      const nativeHeight=Number(p.get("height")||844);
+      if(![320,390,1440,2047].includes(nativeWidth)||nativeHeight<600||nativeHeight>1500)
+        throw Error("invalid H2.7 bootstrap viewport");
+      frame.style.width=nativeWidth+"px";
+      frame.style.height=nativeHeight+"px";
+      window.__h27BootstrapWidth=frame.getBoundingClientRect().width;
       window.__h27Page=page.href;
-      document.querySelector("#stage").src=page.href;
+      frame.src=page.href;
     })();
   </script>
   <script type="module">
@@ -55,6 +66,7 @@
     if(mode==="roughness")target.searchParams.set("materialProbe","none");
     if(classification)target.searchParams.set("classification","1");
     if(window.__h27Page!==target.href)fail("bootstrap URL differs from verified URL");
+    if(window.__h27BootstrapWidth!==width)fail("bootstrap must establish native child viewport BEFORE loading WebGL");
     const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     const modeReady=instrument=>mode==="roughness"?
       instrument.dataset.materialPrototype==="roughness"&&instrument.dataset.materialProbe==="none":
