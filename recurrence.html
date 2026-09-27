@@ -81,23 +81,16 @@
       <p class="research-date-explorer-error" id="research-explorer-error" role="status" aria-live="polite" hidden></p>
       <section id="research-one-year-story" class="research-one-year-story" aria-labelledby="research-one-year-heading" data-ready="false">
           <header class="research-one-year-head">
-            <div>
-              <span class="eyebrow">One selected date</span>
-              <h3 id="research-one-year-heading">這一天在哪個干支年？</h3>
-            </div>
-            <strong id="research-one-year-selected-date" class="research-one-year-selected-date">—</strong>
-            <small id="research-one-year-example-note" class="research-one-year-example-note" hidden>起始示範：2024 年立春附近。你可以直接修改下方日期。</small>
+            <h3 id="research-one-year-heading">同一日期，兩種週期</h3>
+            <span id="research-one-year-selected-date" class="research-one-year-selected-date">—</span>
           </header>
-          <div class="research-one-year-identities">
+          <div class="research-one-year-identities" aria-label="目前選定日期的兩種干支">
             <div class="research-one-year-identity research-one-year-identity-year">
-              <span>當下干支年 · 立春為界</span>
-              <strong id="research-one-year-active-pillar">—</strong>
+              <span>年</span><strong id="research-one-year-active-pillar">—</strong>
               <small id="research-one-year-active-evidence">尚未判定</small>
             </div>
             <div class="research-one-year-identity research-one-year-identity-day">
-              <span>當下干支日 · 每天一位</span>
-              <strong id="research-one-year-day-pillar">—</strong>
-              <small id="research-one-year-day-position">—</small>
+              <span>日</span><strong id="research-one-year-day-pillar">—</strong>
             </div>
           </div>
           <div class="research-one-year-timeline">
@@ -123,16 +116,8 @@
               <span><i class="research-one-year-era-swatch-before" aria-hidden="true"></i><b id="research-one-year-before-label">立春前 · —</b></span>
               <span><i class="research-one-year-era-swatch-after" aria-hidden="true"></i><b id="research-one-year-after-label">立春後 · —</b></span>
             </div>
-            <label class="research-one-year-scrub-hint" for="research-one-year-scrub">直接拖動上方年度色帶；鍵盤方向鍵每天一步</label>
-            <div id="research-one-year-day-phase" class="research-one-year-day-phase" aria-label="連續 60 日循環">
-              <strong class="research-one-year-day-phase-heading">干支日 · 60 天繞一圈</strong>
-              <div class="research-one-year-day-phase-content">
-                <div id="research-one-year-day-phase-dial" class="research-one-year-day-phase-dial" role="img" aria-label="干支日目前所處的六十日循環位置"><span id="research-one-year-day-phase-index">—</span></div>
-                <div class="research-one-year-day-phase-explanation">
-                  <strong id="research-one-year-day-phase-message">—</strong>
-                  <span>每天前進一位，立春與公曆換年都不歸零。</span>
-                </div>
-              </div>
+            <div class="research-one-year-motion" role="status" aria-live="polite">
+              <span id="research-one-year-day-motion">—</span>
             </div>
             <section id="research-year-journey" class="research-year-journey" aria-label="干支年與干支日的一年導覽" hidden>
               <div class="research-year-journey-head">
@@ -141,25 +126,14 @@
                 <button id="research-year-journey-restore" type="button">回原日期</button>
               </div>
               <p id="research-year-journey-meaning" class="research-year-journey-meaning">—</p>
-              <div class="research-year-journey-cycles">
-                <strong id="research-year-journey-progress">—</strong>
-                <div id="research-year-journey-loops" class="research-year-journey-loops" role="img" aria-label="六十日循環進度，六圈及剩餘日">
-                  <span data-journey-turn="1" aria-hidden="true">1</span>
-                  <span data-journey-turn="2" aria-hidden="true">2</span>
-                  <span data-journey-turn="3" aria-hidden="true">3</span>
-                  <span data-journey-turn="4" aria-hidden="true">4</span>
-                  <span data-journey-turn="5" aria-hidden="true">5</span>
-                  <span data-journey-turn="6" aria-hidden="true">6</span>
-                  <span id="research-year-journey-remainder" class="research-year-journey-remainder" aria-hidden="true">＋</span>
-                </div>
-                <small id="research-year-journey-day-names">—</small>
-              </div>
               <div class="research-year-journey-actions" role="group" aria-label="逐步查看一年與返回">
                 <button id="research-year-journey-previous" type="button">上一步</button>
                 <button id="research-year-journey-next" type="button">下一步</button>
                 <button id="research-year-journey-finish" type="button">直接看全年結果</button>
               </div>
             </section>
+            <details id="research-one-year-evidence-details" class="research-one-year-evidence-details">
+              <summary>立春附近與來源說明</summary>
             <div id="research-one-year-boundary-zoom" class="research-one-year-boundary-zoom" hidden>
               <div class="research-one-year-zoom-heading">
                 <strong>立春附近 · 放大觀察</strong>
@@ -177,17 +151,13 @@
                 <span>立春後 14 天</span>
               </div>
             </div>
+            <p id="research-one-year-boundary-meaning" class="research-one-year-boundary-meaning">—</p>
+            <small id="research-one-year-source" class="research-one-year-source">—</small>
+            </details>
             <div class="research-one-year-marker-key" aria-label="動態時間線圖例">
               <span class="research-one-year-marker-key-selected"><i aria-hidden="true"></i><b id="research-one-year-selected-label">選定日 —</b></span>
               <span class="research-one-year-marker-key-lichun"><i aria-hidden="true"></i><b id="research-one-year-lichun-label">立春位置待查</b></span>
             </div>
-            <p id="research-one-year-boundary-meaning" class="research-one-year-boundary-meaning">—</p>
-            <small id="research-one-year-source" class="research-one-year-source">—</small>
-          </div>
-          <div class="research-one-year-motion" aria-live="polite">
-            <span>從今年 1/1 到明年 1/1</span>
-            <strong id="research-one-year-day-motion">—</strong>
-            <small>這是整個公曆年的日數，不是任意選定日跨到明年同日的差值；干支年另以立春切換。</small>
           </div>
         </section>
       <div class="research-date-step-controls" role="group" aria-label="選定日期逐日位移">
