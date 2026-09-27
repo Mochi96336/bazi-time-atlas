@@ -131,6 +131,41 @@
       if(doc.fonts?.ready) await doc.fonts.ready;
       await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
       const svg=doc.querySelector("#kinetic-wheel");
+      // In a nested-frame optical proof, the post-font SVG can move without
+      // changing its size. A ResizeObserver of the SVG then does not wake the
+      // existing production WebGL draw function: the shader keeps the OLD
+      // canvas-to-SVG transform. Explicitly stimulate a reversible ONE PIXEL
+      // resize in this evidence iframe only, after fonts/layout stabilize.
+      // We still independently FAIL on the exact Solar WebGL warm-band ROI;
+      // merely reporting the final SVG CTM cannot certify a correct GPU draw.
+      if(mode==="roughness"){
+        const before=svg.getBoundingClientRect(),originalWidth=svg.style.width;
+        svg.style.width="calc(100% - 1px)";
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+        const changed=svg.getBoundingClientRect();
+        if(Math.abs(changed.width-before.width)<.5)
+          return fail("one-pixel diagnostic SVG resize did not trigger");
+        svg.style.width=originalWidth;
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+        const restored=svg.getBoundingClientRect();
+        if(Math.abs(restored.width-before.width)>.05 ||
+           Math.abs(restored.left-before.left)>.05)
+          return fail("diagnostic geometry was not restored");
+        let aligned=false;
+        for(let attempt=0;attempt<8;attempt++){
+          const final=svg.getScreenCTM?.(),raw=instrument.dataset.materialProbeTransform;
+          const drawn=raw?.split(",").map(Number);
+          if(final && drawn?.length===6 && drawn.every(Number.isFinite)){
+            const actual=[final.a,final.b,final.c,final.d,final.e,final.f];
+            if(actual.every((v,i)=>Math.abs(v-drawn[i])<.001)){
+              aligned=true;break;
+            }
+          }
+          await sleep(45);
+        }
+        if(!aligned)return fail("GPU draw did not acquire post-layout SVG projection");
+        proof.dataset.gpuProjectionAligned="true";
+      }
       const matrix=svg?.getScreenCTM?.();
       if(!matrix)return fail("missing final screenshot-process CTM");
       const values=[matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f];
