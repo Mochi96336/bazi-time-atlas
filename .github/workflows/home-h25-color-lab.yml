@@ -1,0 +1,61 @@
+name: H2.5 isolated color experiment
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/home-h25-color-contract.js'
+      - 'scripts/fixtures/home-h25-color-frame.html'
+      - 'scripts/visual-check-home-h25-color-lab.mjs'
+      - 'tests/home-h25-color-lab.test.js'
+      - 'docs/home-art-h25-color-lab.md'
+      - '.github/workflows/home-h25-color-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: home-h25-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-color-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify isolated color contract
+        run: node --test tests/home-h25-color-lab.test.js
+      - name: Install CJK screenshot font
+        run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Locate Chromium
+        run: command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable
+      - name: Start the original production homepage locally
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/h25-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/h25-http.log
+          exit 1
+      - name: Capture A0–A3 genuine-width SVG/WebGL/fallback PNG matrix
+        run: node scripts/visual-check-home-h25-color-lab.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload H2.5 standalone color evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: home-h25-color-lab
+          path: tmp/visual-check/home-h25/
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
