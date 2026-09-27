@@ -1,0 +1,53 @@
+name: Research Year-Day production visual
+on:
+  pull_request:
+    paths:
+      - 'recurrence.html'
+      - 'research-date-explorer.css'
+      - 'src/research-date-explorer-view.js'
+      - 'scripts/fixtures/research-date-explorer-390.html'
+      - 'scripts/visual-check-research-year-day-live.mjs'
+      - '.github/workflows/research-year-day-live.yml'
+permissions:
+  contents: read
+concurrency:
+  group: research-live-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  year-day-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run vendor:prepare
+      - run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/bazi-research-live-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/bazi-research-live-http.log
+          exit 1
+      - name: Exercise true 390px year/day integration
+        run: node scripts/check-research-date-explorer.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Capture native production views
+        run: node scripts/visual-check-research-year-day-live.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Upload actual integration PNG
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: research-year-day-production-png
+          path: tmp/research-live-visual/
+          if-no-files-found: warn
+          retention-days: 7
