@@ -47,7 +47,8 @@ if(
   beginnerRoot.includes(" hidden") ||
   attr(beginnerStory,"data-ready")!=="true" ||
   attr(beginnerStory,"data-active-year-name")!=="甲辰" ||
-  !beginner.dom.includes("同一日期，兩種週期") ||
+  !beginnerStory.includes('aria-label="立春年界與全年干支日位移"') ||
+  !beginner.dom.includes('class="research-single-surface"') ||
   beginner.dom.includes('class="research-mode-switch"') ||
   beginner.dom.includes('id="research-year-journey-start"') ||
   attr(beginnerRoot,"data-advanced-open")!=="false" ||
