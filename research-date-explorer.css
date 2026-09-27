@@ -575,6 +575,8 @@ body[data-research-mode="dates"] .research-date-explorer-head {display:none;}
 }
 .research-year-journey-actions button:disabled{opacity:.35;cursor:default}
 #research-year-journey-next{background:#c7d5c5;color:#203027;border-color:#c7d5c5}
+#research-year-journey-finish{background:transparent;color:#d8c6a6;border-color:#6c6654}
+#research-year-journey-finish[hidden]{display:none}
 .research-year-journey-actions button:last-child{margin-left:auto;border-color:#736d5d;color:#deceb7;background:transparent}
 .research-one-year-story[data-journey-active="true"] .research-one-year-motion{display:none}
 @media(max-width:680px){
