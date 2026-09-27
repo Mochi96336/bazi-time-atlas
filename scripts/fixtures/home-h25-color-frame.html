@@ -63,7 +63,14 @@
       }
       if (!instrument?.dataset.zodiac ||
         instrument.dataset.selectedInstantMs !== String(Date.parse(instant)) ||
-        !isCorrectMode(instrument)) return invalid("render or selected-instant timeout");
+        !isCorrectMode(instrument)) return invalid("render or selected-instant timeout " + JSON.stringify({
+          source:frame.src, ready:doc?.readyState, innerWidth:win?.innerWidth,
+          selected:instrument?.dataset.selectedInstantMs,
+          zodiac:instrument?.dataset.zodiac,
+          material:instrument?.dataset.materialPrototype,
+          fallback:instrument?.dataset.materialPrototypeFallback,
+          body:doc?.body?.textContent?.slice(0,180)
+        }));
 
       // A0 must not inject any style. Other variants change only root colors
       // and/or the page environment; no production CSS, DOM or shader is edited.
