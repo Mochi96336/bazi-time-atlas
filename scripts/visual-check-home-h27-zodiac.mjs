@@ -47,7 +47,7 @@ function probe(spec){
   const tag=browser(spec,"--dump-dom").stdout.match(/<output id="proof"[^>]*>/)?.[0];
   if(!tag)throw Error("H2.7 missing semantic proof");
   const wantPalette=Object.values(H27_TOKENS).join(",");
-  const injected=spec.variant==="C0"?0:spec.variant==="C1"?1:2;
+  const injected=spec.variant==="C0"?0:spec.variant==="C2"?2:1;
   const conditions={
     ready:"true",variant:spec.variant,mode:spec.mode,
     "inner-width":String(spec.width),"instant-ms":String(Date.parse(spec.instant)),
@@ -118,7 +118,7 @@ for(let i=0;i<nonZodiac.length;i++)nonZodiac[i]=masks.all[i]&&!masks.zodiac[i]?1
 const replayZ=compareMaterialPng(p0,rp,masks.zodiac);
 const replayOther=compareMaterialPng(p0,rp,nonZodiac);
 const variantMetrics={};
-for(const variant of ["C1","C2"]) {
+for(const variant of ["C1","C2","C3"]) {
   const p=await load(get(variant));
   const otherCtm=readScreenshotCtm(p);
   if(otherCtm.some((v,i)=>Math.abs(v-ctm[i])>.001))
@@ -147,5 +147,6 @@ const result={
 await writeFile(path.join(out,"h27-structural-artboard-evidence.json"),
   JSON.stringify(result,null,2)+"\n","utf8");
 console.log("[h27] "+captures.length+" native conditions; C1="+variantMetrics.C1.zodiac.meanAbsoluteRgb8+
-  " C2="+variantMetrics.C2.zodiac.meanAbsoluteRgb8+"; nonZodiac="+
-  variantMetrics.C1.nonZodiac.meanAbsoluteRgb8+"/"+variantMetrics.C2.nonZodiac.meanAbsoluteRgb8);
+  " C2="+variantMetrics.C2.zodiac.meanAbsoluteRgb8+
+  " C3="+variantMetrics.C3.zodiac.meanAbsoluteRgb8+"; nonZodiac="+
+  ["C1","C2","C3"].map(v=>variantMetrics[v].nonZodiac.meanAbsoluteRgb8).join("/"));
