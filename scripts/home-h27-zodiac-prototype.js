@@ -55,7 +55,7 @@ export function applyH27Prototype(doc,variant) {
     [0.89,"#131d27",0.49],
     [1.00,"#080e16",0.55]
   ].forEach(([t,color,alpha])=>addStop(band,pct(t),color,alpha));
-  const makeSurface=(id,gradient)=>{
+  const makeSurface=(id,gradient,after=original)=>{
     const path=doc.createElementNS(SVG,"path");
     path.setAttribute("d",original.getAttribute("d"));
     path.setAttribute("fill","url(#"+gradient+")");
@@ -63,7 +63,7 @@ export function applyH27Prototype(doc,variant) {
     path.setAttribute("pointer-events","none");
     path.setAttribute("aria-hidden","true");
     path.dataset.h27StructuralProbe=id;
-    original.after(path);
+    after.after(path);
     return path;
   };
   const first=makeSurface("recess",band.id);
@@ -83,7 +83,7 @@ export function applyH27Prototype(doc,variant) {
   ].forEach(([offset,color,alpha])=>addStop(satin,offset,color,alpha));
   // Appending after the recessed surface makes the response read as a
   // material property, not a floating stroke or a separate rotating ring.
-  const second=makeSurface("satin",satin.id);
+  const second=makeSurface("satin",satin.id,first);
   if(second.getAttribute("d")!==first.getAttribute("d"))throw Error("prototype geometry changed");
   return Object.freeze({inserted:2,gradients:2,canonicalPath:first.getAttribute("d")});
 }
