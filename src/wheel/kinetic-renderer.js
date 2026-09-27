@@ -136,6 +136,18 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         "data-annual-material-ring": id,
         "aria-hidden": "true"
       }, baseLayer);
+      // H2.8 experimental shared annual *joint*: reuses the same canonical
+      // Zodiac material path and fixed-world lighting coordinates. The middle
+      // stays transparent; no independent ring, sign rotation or annual clock.
+      if (id === "zodiac") {
+        el("path", {
+          d,
+          class: "m2-zodiac-shared-joint",
+          "data-annual-material-joint": id,
+          "aria-hidden": "true",
+          "pointer-events": "none"
+        }, baseLayer);
+      }
       el("path", {
         d,
         class: responseClass,
