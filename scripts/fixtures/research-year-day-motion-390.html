@@ -15,6 +15,29 @@ stage.addEventListener("load",async()=>{
  else if(action==="far"){d.getElementById("scrub").value="180";d.getElementById("scrub").dispatchEvent(new Event("input",{bubbles:true}));}
  else if(action==="step"){d.getElementById("stepyear").click();}
  await wait(200);
+ const slider=d.getElementById("scrub"),band=d.getElementById("yeartrack");
+ if(slider.parentElement!==band||d.querySelectorAll('input[type="range"]').length!==1)throw Error("two independent date timelines remain");
+ const sr=slider.getBoundingClientRect(),br=band.getBoundingClientRect();
+ if(sr.bottom<br.top||sr.top>br.bottom)throw Error("playhead is not physically overlaying annual band");
+ if(action==="before"&&d.getElementById("yearname").textContent!=="癸卯")throw Error("pre-Li Chun Year incorrect");
+ if(action==="boundary"&&!d.getElementById("yearname").textContent.includes("癸卯 / 甲辰"))throw Error("unbound Li Chun day erased one candidate");
+ if(action==="after"&&d.getElementById("yearname").textContent!=="甲辰")throw Error("post-Li Chun Year incorrect");
+ if(action==="far"&&!d.getElementById("zoom").hidden)throw Error("unnecessary second zoom track retained");
+ if(action==="step"){
+   const step=d.getElementById("yearstep").textContent;
+   const expected=setYear===2023?"+5 格":"+6 格";
+   if(!step.includes(expected))throw Error("wrong Jan-to-Jan Day phase: "+step);
+ }
+ if(action==="interaction"){
+   d.getElementById("after").click();
+   const initialPhase=Number(d.getElementById("phase").textContent),initialYear=d.getElementById("yearname").textContent;
+   slider.stepUp();slider.dispatchEvent(new Event("input",{bubbles:true}));
+   const nextPhase=Number(d.getElementById("phase").textContent);
+   if((nextPhase-initialPhase+60)%60!==1||d.getElementById("yearname").textContent!==initialYear)throw Error("moving one civil day did not synchronously update day phase");
+   slider.stepDown();slider.dispatchEvent(new Event("input",{bubbles:true}));
+   if(Number(d.getElementById("phase").textContent)!==initialPhase)throw Error("reverse playhead does not restore canonical Day");
+   probe.dataset.interaction="true";
+ }
  const y=d.getElementById("yearname").textContent,day=d.getElementById("dayname").textContent;
  const rect=d.getElementById("yeartrack").getBoundingClientRect();
  if(rect.right>391||rect.left<0)throw Error("annual band overflows 390 viewport");
