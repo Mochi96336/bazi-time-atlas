@@ -40,9 +40,10 @@ for(const item of cases){
       (tag??dump.stderr?.slice(-1300)));
   }
   if(item.state==="proof"){
-    for(const key of ["first-screen","start","dirty-guard","end","restored","manual-ownership"]){
+    for(const key of ["first-screen","start","dirty-guard","end","restored","one-click-overview","manual-ownership"]){
       if(!tag.includes('data-'+key+'="true"'))throw Error("Missing guided proof "+key+": "+tag);
     }
+    if(!tag.includes('data-turns="6"'))throw Error("Missing six actual turn checkpoints: "+tag);
     const remainder=item.year===2024?6:5;
     if(!tag.includes('data-remainder="'+remainder+'"'))throw Error("Wrong Day remainder: "+tag);
   }
