@@ -22,7 +22,7 @@ root.searchParams.set("target","../../recurrence.html?mode=dates&base=2024-02-01
 root.searchParams.set("height","1050");
 const dir=await mkdtemp(path.join(tmpdir(),"research-touch-"));
 const browser=spawn(findBrowser(),[
-  "--headless=new","--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+  "--headless=new","--no-sandbox","--disable-gpu","--disable-dev-shm-usage","--hide-scrollbars",
   "--no-first-run","--no-default-browser-check","--remote-allow-origins=*",
   "--remote-debugging-port="+port,"--user-data-dir="+dir,"--window-size=500,1050",root.href
 ],{stdio:["ignore","ignore","pipe"]});
