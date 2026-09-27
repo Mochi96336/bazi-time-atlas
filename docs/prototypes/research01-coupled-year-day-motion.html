@@ -60,6 +60,7 @@ import { sexagenaryDayForGregorianDate } from "../../src/recurrence/ganzhi-cycle
 import { activeYearIdentityForDate } from "../../src/recurrence/research-date-pair.js";
 import { researchOneYearStory } from "../../src/recurrence/research-one-year-story.js";
 import { researchYearStripState } from "../../src/research-year-strip-view.js";
+import { RESEARCH_SEASONAL_EVIDENCE_READY_EVENT } from "../../src/recurrence/research-seasonal-chunk-prefetch.js";
 const $=id=>document.getElementById(id);
 const fmt=d=>d.year+" / "+String(d.month).padStart(2,"0")+" / "+String(d.day).padStart(2,"0");
 const toDay=(y,index)=>shiftGregorianDate({year:y,month:1,day:1},index);
@@ -92,5 +93,6 @@ $("year").addEventListener("change",e=>{year=Number(e.target.value);index=Math.m
 $("scrub").addEventListener("input",e=>{index=Number(e.target.value);render();});
 for(const [id,delta] of [["before",-3],["boundary",0],["after",3]])$(id).addEventListener("click",()=>{const evidence=get({year,month:2,day:1});const day=evidence?.liChun?.date;if(!day){$("scopeline").textContent="本年無可用立春日期，無法導航到年界。";return;}const selected=shiftGregorianDate(day,delta);index=gregorianOrdinal(selected)-gregorianOrdinal({year,month:1,day:1});render();});
 $("stepyear").addEventListener("click",()=>{if(year===2025)return;const a={year,month:1,day:1},b={year:year+1,month:1,day:1};const aa=activeYearIdentityForDate(a,get(a)),bb=activeYearIdentityForDate(b,get(b)),da=sexagenaryDayForGregorianDate(a),db=sexagenaryDayForGregorianDate(b);const diff=gregorianOrdinal(b)-gregorianOrdinal(a);const yearNote=aa.pillar&&bb.pillar?(aa.pillar.name+" → "+bb.pillar.name+"（實際年柱；依各年立春證據）"):"實際年柱證據不足，不能宣稱已切換";$("yearstep").textContent=a.year+"/1/1 → "+b.year+"/1/1：經過 "+diff+" 天，干支日 "+da.name+" → "+db.name+"（+"+diff%60+" 格）；"+yearNote+"。";year=b.year;index=0;render();});
+document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,()=>{cache.clear();render();});
 render();
 </script></body></html>
