@@ -57,7 +57,8 @@
       for (let i = 0; i < 90; i += 1) {
         instrument = doc?.querySelector("#kinetic-instrument");
         if (instrument?.dataset.selectedInstantMs === String(Date.parse(instant)) &&
-          instrument?.dataset.zodiac && isCorrectMode(instrument)) break;
+          instrument?.dataset.zodiac && isCorrectMode(instrument) &&
+          (!classification || instrument.dataset.classificationOverlay === "on")) break;
         await sleep(70);
       }
       if (!instrument?.dataset.zodiac ||
