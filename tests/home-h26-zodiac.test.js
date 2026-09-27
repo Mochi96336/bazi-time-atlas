@@ -57,6 +57,6 @@ test("H2.6 screenshots are native-width and proof includes screenshot-process CT
   for(const width of ["320","390","1440","2047"])assert.ok(script.includes(width));
   for(const mode of ["roughness","svg","fallback"])assert.ok(script.includes('"'+mode+'"'));
   const prep=workflow.indexOf("npm run vendor:prepare");
-  const capture=workflow.indexOf("visual-check-home-h26-zodiac.mjs");
+  const capture=workflow.indexOf("run: node scripts/visual-check-home-h26-zodiac.mjs");
   assert.ok(prep>=0&&capture>prep);
 });
