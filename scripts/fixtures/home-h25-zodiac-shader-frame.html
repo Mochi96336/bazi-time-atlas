@@ -25,6 +25,7 @@
       const shader = p.get("shader") || "legacy";
       target.searchParams.set("instant", p.get("instant") || "2026-09-13T23:43:42.000Z");
       target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
+      if (mode === "roughness") target.searchParams.set("materialProbe", "none");
       if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
       if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
       if (p.get("classification") === "1") target.searchParams.set("classification", "1");
@@ -59,6 +60,7 @@
     const target = new URL("../../", location.href);
     target.searchParams.set("instant", instant);
     target.searchParams.set("material", mode === "fallback" ? "roughness" : mode);
+      if (mode === "roughness") target.searchParams.set("materialProbe", "none");
     if (mode === "fallback") target.searchParams.set("materialWebgl", "off");
     if (shader === "indigo") target.searchParams.set("h25ZodiacTint", "indigo");
     if (classification) target.searchParams.set("classification", "1");
@@ -124,6 +126,9 @@
       const actualShaderActive = instrument.dataset.h25ZodiacTintProbe === "indigo";
       if (actualShaderActive !== expectedShaderActive) {
         return invalid("opt-in shader activated incorrectly");
+      }
+      if (mode === "roughness" && instrument.dataset.materialProbe !== "none") {
+        return invalid("roughness screenshot CTM diagnostic did not activate");
       }
       proof.dataset.shader = shader;
       proof.dataset.shaderActive = String(actualShaderActive);
