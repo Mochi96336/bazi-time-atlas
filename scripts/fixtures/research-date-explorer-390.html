@@ -115,6 +115,50 @@
         record("one-year-dynamic-lichun",story.dataset.liChunPosition!=="unavailable");
         record("one-year-leap-motion",story.dataset.dayCycleYearAdvance==="6");
 
+        // #483: the visible Year band itself owns the one Day/Year playhead.
+        // It must not leave a duplicate slider elsewhere or use a second Day table.
+        const scrub=doc.getElementById("research-one-year-scrub");
+        const dayDial=doc.getElementById("research-one-year-day-phase-dial");
+        assert(scrub?.parentElement===yearTrack && scrub.type==="range" &&
+          dayDial?.getAttribute("aria-label").includes(root.dataset.targetDayPillar) &&
+          doc.querySelectorAll("#research-one-year-story input[type=range]").length===1,
+          "year-band range and 60-Day phase must share the one canonical selected date");
+        const dialRect=dayDial.getBoundingClientRect();
+        assert(dialRect.left>=0 && dialRect.right<=391 && dialRect.bottom<=844,
+          "the actual 60-Day phase graphic must be visible above the 390px first viewport fold");
+        const nativeInput=(ordinal)=>{
+          scrub.value=String(ordinal);
+          scrub.dispatchEvent(new Event("input",{bubbles:true}));
+        };
+        const initialDayIndex=Number(doc.getElementById("research-one-year-day-phase-index").textContent);
+        scrub.stepUp();scrub.dispatchEvent(new Event("input",{bubbles:true}));
+        assert(root.dataset.targetDate==="2024-02-11" &&
+          root.dataset.scrubOutcome==="applied" &&
+          (Number(doc.getElementById("research-one-year-day-phase-index").textContent)-initialDayIndex+60)%60===1,
+          "one day slider step must advance the canonical Day identity once");
+        scrub.stepDown();scrub.dispatchEvent(new Event("input",{bubbles:true}));
+        assert(root.dataset.targetDate==="2024-02-10" &&
+          Number(doc.getElementById("research-one-year-day-phase-index").textContent)===initialDayIndex,
+          "reversing the playhead must restore canonical Day phase");
+        nativeInput(31); // Feb 1, 2024
+        assert(root.dataset.targetDate==="2024-02-01" && story.dataset.activeYearName==="癸卯",
+          "year-band playhead before Li Chun must show the actual previous Ganzhi Year");
+        nativeInput(34); // Feb 4, calendar boundary day with no bound time
+        assert(root.dataset.targetDate==="2024-02-04" &&
+          story.dataset.activeYearStatus==="unresolved" &&
+          doc.getElementById("research-one-year-active-pillar").textContent.includes("癸卯") &&
+          doc.getElementById("research-one-year-active-pillar").textContent.includes("甲辰"),
+          "date-only Li Chun playhead must not invent an exact active Year");
+        nativeInput(180);
+        assert(doc.getElementById("research-one-year-boundary-zoom").hidden,
+          "far dates must automatically dismiss the local ±14-day magnification");
+        nativeInput(40);
+        assert(root.dataset.targetDate==="2024-02-10" && story.dataset.activeYearName==="甲辰" &&
+          frame.contentWindow.location.search.includes("compare=2024-02-10"),
+          "returning the playhead must restore date, true Year, Day and permalink");
+        record("one-year-linked-playhead-first-screen",true);
+        record("one-year-scrub-daily-and-boundary",true);
+
         const freeWheel = doc.getElementById("research-free-day-wheel");
         const freeWheelSvg = doc.getElementById("research-free-day-wheel-svg");
         assert(freeWheel && freeWheel.dataset.ready==="true" &&
