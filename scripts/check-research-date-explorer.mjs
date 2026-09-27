@@ -102,6 +102,7 @@ const expected={
   "data-one-year-scrub-daily-and-boundary":"true",
   "data-one-year-scrub-dirty-edit-protected":"true",
   "data-one-year-scrub-burst-synchronized":"true",
+  "data-one-year-slider-calendar-aligned":"true",
   "data-one-year-actual-not-nominal":"true",
   "data-one-year-dynamic-lichun":"true",
   "data-one-year-two-era-band":"true",
@@ -125,6 +126,7 @@ for(const [name,value] of Object.entries(expected)){
     "Unexpected explorer fixture "+name+"="+attr(probe,name)+" expected "+value+": "+interaction.url
   );
 }
+console.log("[explorer] 49 year-playhead updates: "+attr(probe,"data-one-year-scrub-burst-milliseconds")+" ms (Chromium fixture)");
 console.log("[explorer] PASS 390px real interactions, date edits, swap, invalid leap, mode isolation and URL restoration");
 
 const direct=dump("recurrence.html?mode=dates&base=2024-02-04&compare=2024-02-10");
