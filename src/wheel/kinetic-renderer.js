@@ -136,6 +136,17 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
         "data-annual-material-ring": id,
         "aria-hidden": "true"
       }, baseLayer);
+      // Presentation-only H2.7 recessed material belongs to the *same*
+      // canonical annulus and fixed-world base layer, below semantics.
+      // Never derive an independent Zodiac phase or extra ring geometry.
+      if (id === "zodiac") {
+        el("path", {
+          d,
+          class: "m2-zodiac-inset-recess",
+          "data-annual-material-inset": "zodiac",
+          "aria-hidden": "true"
+        }, baseLayer);
+      }
       el("path", {
         d,
         class: responseClass,
