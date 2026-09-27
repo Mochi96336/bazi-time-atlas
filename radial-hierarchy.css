@@ -209,6 +209,14 @@
   stop-opacity: .014;
 }
 .m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
+/* H2.7: quiet fixed-world enamel relief, 54% of the native-tested C1
+   structure. One shared annual annulus, not a freestanding bright ring. */
+.m2-zodiac-inset-recess {
+  fill: url(#m2-zodiac-inset-recess);
+  opacity: .54;
+  stroke: none;
+  pointer-events: none;
+}
 .m2-zodiac-hard-response { fill: url(#m2-zodiac-hard-response); opacity: .68; }
 
 /* Material L3 deepens the L2 night-indigo body and lets the procedural layer add
