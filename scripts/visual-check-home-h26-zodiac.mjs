@@ -3,7 +3,7 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import {
-  H26_INSTANTS,H26_VARIANTS,H26_EXPECTED_TOKENS,H26_ZODIAC_STOP_OPACITY
+  H26_REFERENCE_SHA,H26_INSTANTS,H26_VARIANTS,H26_EXPECTED_TOKENS,H26_ZODIAC_STOP_OPACITY
 } from "./home-h26-zodiac-contract.js";
 import {
   decodePngRgb,readScreenshotCtm,materialMasks,compareMaterialPng
