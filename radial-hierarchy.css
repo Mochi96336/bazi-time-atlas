@@ -209,6 +209,16 @@
   stop-opacity: .014;
 }
 .m2-zodiac-hard-bed { fill: url(#m2-zodiac-hard-surface); }
+/* H2.8 isolated fixed-world junction proposal: two very narrow, subdued
+   boundary transitions into Solar brass and outer graphite, zero added tint
+   over the central derived Zodiac body. No standalone enamel/satin belt. */
+.m2-zodiac-shared-joint {
+  fill: url(#m2-zodiac-shared-joint);
+  opacity: .82;
+  stroke: none;
+  pointer-events: none;
+}
+
 .m2-zodiac-hard-response { fill: url(#m2-zodiac-hard-response); opacity: .68; }
 
 /* Material L3 deepens the L2 night-indigo body and lets the procedural layer add
