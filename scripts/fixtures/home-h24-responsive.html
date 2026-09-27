@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H2.4 responsive hierarchy audit</title>
+<style>
+  html, body { margin: 0; width: 600px; min-height: 100%; overflow: hidden; background: #090b0f; }
+  iframe { display: block; border: 0; background: #090b0f; }
+  output { display: none; }
+</style>
+</head>
+<body>
+<iframe id="stage" title="Responsive Atlas audit frame"></iframe>
+<output id="proof" data-ready="false"></output>
+<script>
+  const params = new URLSearchParams(location.search);
+  const width = Number(params.get("width")) || 390;
+  const height = Number(params.get("height")) || 844;
+  const runAudit = params.get("audit") === "1";
+  const target = params.get("target") || "../../?instant=2026-09-13T23%3A43%3A42.000Z";
+  const stage = document.querySelector("#stage");
+  const proof = document.querySelector("#proof");
+  if (!Number.isInteger(width) || width < 320 || width > 481
+    || !Number.isInteger(height) || height < 600 || height > 1400) {
+    proof.dataset.error = "invalid-responsive-fixture-viewport";
+    throw new Error("Invalid H2.4 fixture viewport");
+  }
+  stage.style.width = width + "px";
+  stage.style.height = height + "px";
+  document.documentElement.style.height = height + "px";
+  document.body.style.height = height + "px";
+  stage.src = new URL(target, location.href).href;
+
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const visible = (win, el) => Boolean(el && !el.hidden &&
+    win.getComputedStyle(el).display !== "none" &&
+    win.getComputedStyle(el).visibility !== "hidden");
+  const bounds = el => {
+    const r = el.getBoundingClientRect();
+    return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width };
+  };
+
+  async function collectAudit() {
+    if (!runAudit) return;
+    const win = stage.contentWindow, doc = stage.contentDocument;
+    let instrument, dock, input, label, timestamp;
+    for (let retries = 0; retries < 60; retries += 1) {
+      instrument = doc?.querySelector("#kinetic-instrument");
+      dock = doc?.querySelector("#mobile-time-dock");
+      input = doc?.querySelector("#mobile-instant-input");
+      label = doc?.querySelector("#mobile-zodiac-readout");
+      timestamp = doc?.querySelector(".instrument-readout");
+      if (instrument?.dataset.selectedInstantMs && instrument?.dataset.zodiac &&
+        (width > 480 || (input?.value && visible(win, label)))) break;
+      await sleep(75);
+    }
+    if (!instrument?.dataset.selectedInstantMs || !instrument?.dataset.zodiac || !dock || !label) {
+      proof.dataset.error = "selected-instant-did-not-initialize";
+      return;
+    }
+    const mobile = width <= 480;
+    proof.dataset.innerWidth = String(win.innerWidth);
+    proof.dataset.mobile = String(win.matchMedia("(max-width: 480px)").matches);
+    proof.dataset.bodyOverflow = String(Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth) > width + 2);
+    proof.dataset.initialInstant = instrument.dataset.selectedInstantMs;
+    proof.dataset.initialZodiac = instrument.dataset.zodiac;
+    if (!mobile) {
+      proof.dataset.desktopDockHidden = String(!visible(win, dock));
+      proof.dataset.desktopReadoutVisible = String(visible(win, timestamp));
+      proof.dataset.ready = "true";
+      return;
+    }
+
+    const rDock = bounds(dock), rInput = bounds(input), rCaption = bounds(label);
+    proof.dataset.initialMatches = String(label.textContent === "黃道 · " + instrument.dataset.zodiac);
+    proof.dataset.initialVisible = String(visible(win, label));
+    proof.dataset.fontPx = win.getComputedStyle(label).fontSize;
+    proof.dataset.railBounds = [rDock.left, rDock.right].map(v => v.toFixed(2)).join(",");
+    proof.dataset.inputBounds = [rInput.left, rInput.right].map(v => v.toFixed(2)).join(",");
+    proof.dataset.captionBounds = [rCaption.left, rCaption.right].map(v => v.toFixed(2)).join(",");
+    proof.dataset.sameRow = String(Math.abs(rInput.bottom - rCaption.bottom) <= 12);
+    proof.dataset.noOverlap = String(rCaption.left >= rInput.right + 2);
+    proof.dataset.notClipped = String(rCaption.right <= Math.min(width, rDock.right) + 1 &&
+      rCaption.left >= Math.max(0, rDock.left) - 1 &&
+      label.scrollWidth <= label.clientWidth + 1);
+    proof.dataset.inputUsable = String(rInput.width >= 130);
+
+    // A dirty, unapplied editor must not display an apparently applied Zodiac.
+    input.dispatchEvent(new win.Event("input", { bubbles: true }));
+    proof.dataset.dirtyHidden = String(dock.dataset.dirty === "true" && !visible(win, label));
+    doc.querySelector("#mobile-time-apply")?.click();
+    await sleep(60);
+    proof.dataset.reapplied = String(dock.dataset.dirty === "false" &&
+      visible(win, label) && label.textContent === "黃道 · " + instrument.dataset.zodiac);
+
+    // Cross an actual Zodiac boundary through the ONLY selected-instant command.
+    // Do not infer the expected sign by name or by an independent ephemeris.
+    const previous = instrument.dataset.zodiac;
+    const future = Date.parse("2026-11-15T07:43:42.000Z");
+    instrument.dispatchEvent(new win.CustomEvent("atlas:set-selected-instant", {
+      detail: { instantMs: future, source: "h24-responsive-browser-proof" }
+    }));
+    for (let wait = 0; wait < 20; wait += 1) {
+      if (instrument.dataset.selectedInstantMs === String(future)
+        && label.textContent === "黃道 · " + instrument.dataset.zodiac) break;
+      await sleep(55);
+    }
+    proof.dataset.futureSelected = String(instrument.dataset.selectedInstantMs === String(future));
+    proof.dataset.futureZodiacChanged = String(instrument.dataset.zodiac !== previous);
+    proof.dataset.futureCaptionSynced = String(label.textContent === "黃道 · " + instrument.dataset.zodiac);
+    proof.dataset.futureInputSynced = String(input.value.includes("2026/11/15") || input.value.includes("2026/11/15".replaceAll("/", "-")));
+    proof.dataset.futureNoOverlap = String(bounds(label).left >= bounds(input).right + 2
+      && bounds(label).right <= Math.min(width, bounds(dock).right) + 1);
+
+    // Class/Analysis belong to their own screens. The same caption never duplicates.
+    instrument.dataset.classificationOverlay = "on";
+    proof.dataset.classificationHidden = String(!visible(win, label));
+    delete instrument.dataset.classificationOverlay;
+    instrument.dataset.analysisOpen = "true";
+    proof.dataset.analysisHidden = String(!visible(win, label));
+    instrument.dataset.analysisOpen = "false";
+    proof.dataset.ready = "true";
+  }
+  stage.addEventListener("load", () => { void collectAudit().catch(e => { proof.dataset.error = String(e); }); });
+</script>
+</body>
+</html>
