@@ -31,6 +31,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
+      - name: Prepare required local Tyme ESM vendor (same as repository Visual gate)
+        run: npm run vendor:prepare
       - name: Verify isolated color contract
         run: node --test tests/home-h25-color-lab.test.js
       - name: Install CJK screenshot font
