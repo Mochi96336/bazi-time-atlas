@@ -31,7 +31,7 @@
     }());
   </script>
   <script type="module">
-    import { H25_COLORS, H25_VARIANTS, h25OverrideCss } from "../home-h25-color-contract.js";
+    import { H25_VARIANTS, h25ExpectedColors, h25OverrideCss } from "../home-h25-color-contract.js";
     const params = new URLSearchParams(location.search);
     const key = params.get("variant") ?? "A0";
     const mode = params.get("material") ?? "svg";
@@ -97,10 +97,10 @@
       }
       await sleep(70);
       const root = win.getComputedStyle(doc.documentElement);
-      const expected = H25_VARIANTS[key];
-      const expectedField = expected.background ? H25_COLORS.candidate.field : H25_COLORS.current.field;
-      const expectedRaised = expected.background ? H25_COLORS.candidate.raised : H25_COLORS.current.raised;
-      const expectedZodiac = expected.zodiac ? H25_COLORS.candidate.zodiac : H25_COLORS.current.zodiac;
+      const expected = h25ExpectedColors(key);
+      const expectedField = expected.field;
+      const expectedRaised = expected.raised;
+      const expectedZodiac = expected.zodiac;
       const read = name => root.getPropertyValue(name).trim().toLowerCase();
       const actual = {
         field:read("--field"), raised:read("--field-raised"), zodiac:read("--zodiac"),
@@ -122,6 +122,7 @@
       proof.dataset.instantMs = instrument.dataset.selectedInstantMs;
       proof.dataset.selectedZodiac = instrument.dataset.zodiac;
       proof.dataset.palette = [actual.field, actual.raised, actual.zodiac].join(",");
+      proof.dataset.environment = H25_VARIANTS[key].environment;
       proof.dataset.untouched = String(unmodified);
       proof.dataset.materialActive = instrument.dataset.materialPrototype || "svg";
       proof.dataset.materialFallback = instrument.dataset.materialPrototypeFallback || "none";
