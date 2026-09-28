@@ -27,9 +27,10 @@
       const apply = doc?.querySelector("#time-context-apply");
       const timeline = doc?.querySelector(".timeline-dock");
       const readout = doc?.querySelector("#instant-readout");
+      const readoutTimezone = doc?.querySelector("#readout-timezone");
       const hourTrack = doc?.querySelector("#hour-track");
       const dayTrack = doc?.querySelector("#day-track");
-      if (!win || !instrument || !trigger || !panel || !utc || !boundary || !apply || !timeline || !readout || !hourTrack || !dayTrack) return;
+      if (!win || !instrument || !trigger || !panel || !utc || !boundary || !apply || !timeline || !readout || !readoutTimezone || !hourTrack || !dayTrack) return;
 
       const selectedBefore = instrument.dataset.selectedInstantMs ?? "";
       const timelineTopBefore = timeline.getBoundingClientRect().top;
@@ -55,7 +56,8 @@
         probe.dataset.boundaryCustom = instrument.dataset.dayBoundary ?? "";
         probe.dataset.sourceCustom = instrument.dataset.lastTimeContextSource ?? "";
         probe.dataset.triggerTextCustom = trigger.textContent.trim();
-        probe.dataset.readoutCustom = readout.textContent.trim();
+        // The timestamp and its subordinate timezone must both re-render.
+        probe.dataset.readoutCustom = readout.textContent.trim() + " · " + readoutTimezone.textContent.trim();
         probe.dataset.urlUtcCustom = customUrl.searchParams.get("utc") ?? "";
         probe.dataset.urlBoundaryCustom = customUrl.searchParams.get("dayBoundary") ?? "";
         probe.dataset.urlInstantCustom = customUrl.searchParams.get("instant") ?? "";
