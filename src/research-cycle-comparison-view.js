@@ -77,6 +77,27 @@ function visibleYear(date, nominal) {
     note:"僅名義立春後年標 · 當日待判"};
 }
 
+function displayedYearName(item) {
+  if (!item) return "—";
+  return item.positionBasis === "active" ? item.name : "約" + item.name;
+}
+
+function displayedYearOrdinal(item,date) {
+  if (!item) return "—/60";
+  if (Number.isInteger(item.cycleIndex))
+    return String(item.cycleIndex+1).padStart(2,"0")+"/60";
+  // A civil date falling on an unresolved Li Chun day has TWO possible
+  // active Year identities. Show BOTH ordinals; do not invent one index.
+  if (item.positionBasis==="unresolved" && date) {
+    const state=researchYearStripState(date);
+    const before=state.liChunTransition.before.cycleIndex+1;
+    const after=state.liChunTransition.after.cycleIndex+1;
+    return String(before).padStart(2,"0")+"/60／"+
+      String(after).padStart(2,"0")+"/60";
+  }
+  return "—/60";
+}
+
 function render() {
   if (!panel || !instrument) return;
   const baseDate = parseDate(instrument.dataset.baseDate);
@@ -122,14 +143,18 @@ function render() {
         ? "刻度＝實際年柱位置" : "刻度＝可判年柱，資料不足處僅顯示名義年標");
   setText("research-cycles-base-date",displayDate(model.base.date));
   setText("research-cycles-target-date",displayDate(model.target?.date));
-  setText("research-cycles-year-base",baseYear.name);
-  setText("research-cycles-year-target",targetYear?.name ?? "—");
+  setText("research-cycles-year-base",displayedYearName(baseYear));
+  setText("research-cycles-year-target",displayedYearName(targetYear));
+  setText("research-cycles-year-base-ordinal",displayedYearOrdinal(baseYear,model.base.date));
+  setText("research-cycles-year-target-ordinal",displayedYearOrdinal(targetYear,model.target?.date));
   setText("research-cycles-year-base-note",baseYear.note);
   setText("research-cycles-year-target-note",targetYear?.note ?? "公曆日期不存在");
   setText("research-cycles-day-base",model.base.day.name);
   setText("research-cycles-day-target",model.target?.day.name ?? "—");
-  setText("research-cycles-day-base-ordinal",`${model.base.day.ordinal} / 60`);
-  setText("research-cycles-day-target-ordinal",model.target ? `${model.target.day.ordinal} / 60` : "—");
+  setText("research-cycles-day-base-ordinal",
+    String(model.base.day.ordinal).padStart(2,"0")+"/60");
+  setText("research-cycles-day-target-ordinal",
+    model.target ? String(model.target.day.ordinal).padStart(2,"0")+"/60" : "—/60");
   setText("research-cycles-year-phase",`${model.yearPhase} / 60`);
   setText("research-cycles-day-phase",model.dayPhase === null ? "—" : `${model.dayPhase} / 60`);
   setText(
