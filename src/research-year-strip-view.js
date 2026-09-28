@@ -530,8 +530,8 @@ function render() {
     state.selectedYearMembership.status==="model-estimated" ? "模型估計" :
     yearIsBoundary ? "需提供時刻" : "年界證據不足");
   setText("research-year-full-cycle",
-    "每一道甲子刻線相隔 60 天；走到明年元旦，日序已輪轉"+
-    state.civilYearFullDayCycles+" 次，接著再向前 "+state.civilYearDayRemainder+" 位。");
+    "甲子日每隔 60 天重現；到明年元旦，日序走過 "+
+    state.civilYearFullDayCycles+" 輪，再向前 "+state.civilYearDayRemainder+" 位。");
   setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
