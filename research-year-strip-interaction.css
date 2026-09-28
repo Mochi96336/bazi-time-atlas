@@ -11,7 +11,7 @@
   padding:0;margin:0;
   border:0;background:transparent;
   outline:none;cursor:ew-resize;
-  touch-action:pan-y;
+  touch-action:none;
 }
 .research-year-scrub::-webkit-slider-runnable-track{
   height:43px;border:0;background:transparent;box-shadow:none;
