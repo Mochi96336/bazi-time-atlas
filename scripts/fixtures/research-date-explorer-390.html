@@ -35,8 +35,10 @@
         const initialLegacyBase = legacy.dataset.baseDate;
         const initialLegacyDelta = legacy.dataset.deltaYears;
         assert(doc.body.dataset.researchMode==="dates","mode did not initialize from permalink");
-        assert(root.hidden===false && annual.hidden && astronomy.hidden && evidence.hidden,
-          "free-date mode leaked annual-only results");
+        const advanced=doc.getElementById("research-advanced-details");
+        assert(root.hidden===false && !advanced.open &&
+          !annual.checkVisibility() && !astronomy.checkVisibility() && !evidence.checkVisibility(),
+          "closed advanced Research must not duplicate the annual story");
         assert(root.dataset.astronomyApplicability==="not-evaluated" &&
           root.dataset.fourPillarsApplicability==="not-evaluated","free-date authority leaked");
         assert(root.dataset.baseDate==="2024-02-01" && root.dataset.targetDate==="2024-02-10",
@@ -45,12 +47,16 @@
           "two independent dates have wrong initial phases");
         assert(root.dataset.baseActiveYearStatus==="model-estimated" &&
           root.dataset.targetActiveYearStatus==="model-estimated","year-boundary model status lost");
-        const tabs = doc.querySelector(".research-mode-switch");
+        const advancedSummary=advanced.querySelector("summary");
+        assert(!doc.querySelector(".research-mode-switch") &&
+          !doc.getElementById("research-mode-dates") &&
+          !doc.getElementById("research-year-journey-start"),
+          "obsolete top-level Year tab or one-click wizard survived the merger");
         const viewport = doc.documentElement.clientWidth;
-        const tabsRect = tabs.getBoundingClientRect();
+        const tabsRect = advancedSummary.getBoundingClientRect();
         const formRect = doc.getElementById("research-date-explorer-form").getBoundingClientRect();
         assert(viewport===390,"fixture must use real 390px iframe viewport");
-        assert(tabsRect.left>=0 && tabsRect.right<=391,"research mode switch overflows 390px");
+        assert(tabsRect.left>=0 && tabsRect.right<=391,"advanced disclosure overflows 390px");
         assert(formRect.left>=0 && formRect.right<=391,"free-date form overflows 390px");
         const story = doc.getElementById("research-one-year-story");
         const yearTrack = doc.getElementById("research-one-year-track");
@@ -108,8 +114,8 @@
         record("initial-year-phase",root.dataset.yearPhase);
         record("initial-year-status",root.dataset.baseActiveYearStatus);
         record("initial-day-changed",baseDay!==targetDay);
-        record("initial-astronomy-hidden",astronomy.hidden);
-        record("initial-four-pillars-hidden",evidence.hidden);
+        record("initial-astronomy-hidden",!advanced.open && !astronomy.checkVisibility());
+        record("initial-four-pillars-hidden",!advanced.open && !evidence.checkVisibility());
         record("mobile-viewport",viewport);
         record("mobile-tabs-in-bounds",tabsRect.left>=0 && tabsRect.right<=391);
         record("mobile-form-in-bounds",formRect.left>=0 && formRect.right<=391);
@@ -486,24 +492,26 @@
         record("wheel-direct-picker-invalid-recovery",true);
         record("recovered",root.dataset.ready);
 
-        doc.getElementById("research-mode-annual").click();
-        assert(doc.body.dataset.researchMode==="annual" && root.hidden &&
-          !annual.hidden && !astronomy.hidden && !evidence.hidden,
-          "annual mode did not restore every annual-only section");
+        const originalUrl=frame.contentWindow.location.pathname+
+          frame.contentWindow.location.search+frame.contentWindow.location.hash;
+        advanced.open=true;
+        assert(doc.body.dataset.researchMode==="dates" && !root.hidden &&
+          annual.checkVisibility() && astronomy.checkVisibility() && evidence.checkVisibility() &&
+          doc.defaultView.getComputedStyle(doc.getElementById("research-year-strip")).display==="none",
+          "expanding advanced research must keep the same main Year strip without a duplicate");
         assert(legacy.dataset.baseDate===initialLegacyBase &&
           legacy.dataset.deltaYears===initialLegacyDelta,
-          "free-date changes rewrote the annual recurrence calculation");
-        assert(!frame.contentWindow.location.search.includes("mode=dates") &&
-          !frame.contentWindow.location.search.includes("compare="),
-          "annual mode retained stale free-date query values");
+          "basic date edits rewrote unrelated long-period recurrence");
+        assert(frame.contentWindow.location.pathname+
+          frame.contentWindow.location.search+frame.contentWindow.location.hash===originalUrl,
+          "expanding advanced evidence changed the shareable selected-date URL");
         record("annual-preserved",true);
 
-        doc.getElementById("research-mode-dates").click();
+        advanced.open=false;
         assert(doc.body.dataset.researchMode==="dates" &&
-          root.dataset.baseDate==="2024-02-11" && root.dataset.targetDate==="2024-02-29",
-          "returning to free-date mode lost the chosen pair");
-        assert(annual.hidden && astronomy.hidden && evidence.hidden,
-          "returning to free-date mode exposed stale annual-only evidence");
+          root.dataset.baseDate==="2024-02-11" && root.dataset.targetDate==="2024-02-29" &&
+          !annual.checkVisibility() && !astronomy.checkVisibility() && !evidence.checkVisibility(),
+          "collapsing advanced research must retain the same canonical selected date");
         record("free-restored",true);
         // Midnight civil-year transition is NOT the Li Chun active-year switch.
         dateValues(doc,"base",[2023,12,31]);

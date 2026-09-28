@@ -2,7 +2,6 @@ import { compareResearchDates } from "./recurrence/research-date-pair.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
 import { dayWheelDateDestinations } from "./recurrence/day-wheel-date-destinations.js";
 import { researchOneYearStory } from "./recurrence/research-one-year-story.js";
-import { researchCivilYearJourney } from "./recurrence/research-civil-year-journey.js";
 import { gregorianOrdinal, validateGregorianDate } from "./recurrence/gregorian-cycle.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
 import {
@@ -12,8 +11,7 @@ import {
 
 const root = document.querySelector("#research-free-explorer");
 const form = document.querySelector("#research-date-explorer-form");
-const annualButton = document.querySelector("#research-mode-annual");
-const datesButton = document.querySelector("#research-mode-dates");
+const advancedDetails = document.querySelector("#research-advanced-details");
 const annualSections = [
   document.querySelector(".research-outline"),
   document.querySelector("#research-discrete"),
@@ -45,12 +43,7 @@ const defaultTarget = {year:2024,month:2,day:10};
 let base = defaultBase;
 let target = defaultTarget;
 let mode = "annual";
-let annualQuery = freeFromLink ? "" : location.search;
-let annualHash = freeFromLink ? "" : location.hash;
 let hasExplorerSelection = freeFromLink;
-// Guided steps ONLY commit the same canonical target date as the existing form.
-// An explicit return restores the original date and URL; no second selection.
-let yearJourney=null;
 
 function readDateString(value) {
   const match = datePattern.exec(value ?? "");
@@ -145,90 +138,6 @@ function hideYearStory() {
     story.hidden=true;
     story.dataset.ready="false";
   }
-}
-
-function journeyFormIsClean() {
-  const typedBase=readFields("base"),typedTarget=readFields("target");
-  return Boolean(typedBase && typedTarget &&
-    dateKey(typedBase)===dateKey(base) && dateKey(typedTarget)===dateKey(target));
-}
-
-function renderYearJourney() {
-  const panel=document.getElementById("research-one-year-story");
-  const start=document.getElementById("research-year-journey-start");
-  const restore=document.getElementById("research-year-journey-restore");
-  if(!panel || !start || !restore)return;
-  // One click commits the following civil Jan 1, not a competing preview.
-  // A manual form, slider or free wheel update cancels the temporary journey.
-  if(yearJourney && (
-    dateKey(base)!==dateKey(yearJourney.originalBase) ||
-    dateKey(target)!==dateKey(yearJourney.model.milestones.at(-1).date)
-  )){
-    yearJourney=null;
-    root.dataset.yearJourneyOutcome="interrupted-by-manual-date";
-  }
-  const active=Boolean(yearJourney);
-  panel.dataset.journeyActive=String(active);
-  start.hidden=active;
-  start.disabled=target.year>=10_000_000;
-  restore.hidden=!active;
-  root.dataset.yearJourneyActive=String(active);
-  if(!active){
-    if(start.disabled)start.title="本年已達公曆支援上限";
-    else start.removeAttribute("title");
-    root.dataset.yearJourneyStep="none";
-    return;
-  }
-  const {model,originalTarget}=yearJourney;
-  root.dataset.yearJourneyOriginYear=String(model.year);
-  root.dataset.yearJourneyStep="next-jan-1";
-  root.dataset.yearJourneyElapsed=String(model.yearLength);
-  root.dataset.yearJourneyRemainder=String(model.remainder);
-  setText("research-one-year-day-motion",
-    model.year+"/1/1 → "+(model.year+1)+"/1/1："+
-    model.yearLength+" 天，干支日走滿 6 圈，再走 "+model.remainder+" 天。");
-  restore.textContent="回 "+originalTarget.month+"/"+originalTarget.day;
-  restore.setAttribute("aria-label","回原選定日期 "+dateKey(originalTarget));
-}
-
-function restoreYearJourney({restoreUrl=true}={}) {
-  if(!yearJourney)return;
-  const {originalTarget,originalBase,originalPath}=yearJourney;
-  yearJourney=null;
-  target={...originalTarget};base={...originalBase};
-  root.dataset.yearJourneyOutcome="restored";
-  syncInputs();setError(null);render();
-  if(restoreUrl){
-    history.replaceState(null,"",originalPath);
-    root.dataset.urlValid="true";
-  }
-}
-
-function startYearJourney() {
-  if(mode!=="dates" || root.dataset.ready!=="true")return;
-  if(!journeyFormIsClean()){
-    root.dataset.yearJourneyOutcome="stale-input";
-    setError("請先確認日期，才能開始一年導覽；未儲存的輸入仍保留。");
-    return;
-  }
-  const cap=researchCivilYearJourney(target);
-  if(!cap.available){
-    root.dataset.yearJourneyOutcome=cap.reason;
-    setError("目前日期已到達支援年份上限，無法前進至下一年 1/1。");
-    return;
-  }
-  const model=researchCivilYearJourney(target,{
-    boundaryEvidence:seasonalEvidence(target),
-    yearEvidenceForDate:seasonalEvidence
-  });
-  yearJourney={
-    model,
-    originalBase:{...base},originalTarget:{...target},
-    originalPath:location.pathname+location.search+location.hash
-  };
-  root.dataset.yearJourneyOutcome="started";
-  target={...model.milestones.at(-1).date};
-  syncInputs();setError(null);render();syncFreeQuery();
 }
 
 function renderYearStory(comparison, seasonal) {
@@ -358,7 +267,6 @@ function renderYearStory(comparison, seasonal) {
     (story.liChun?(story.liChun.status==="estimated"?"模型估計 ":"")+"立春 "+
       dateText+" 位於 "+story.liChun.position.toFixed(1)+"%":"立春實際位置尚未取得")+"；"+
     "目前年柱 "+name+"，"+yearCertainty);
-  renderYearJourney();
 }
 
 function render() {
@@ -540,49 +448,35 @@ function jumpToSelectedDay(event) {
   syncFreeQuery();
 }
 
-function setMode(next,{updateUrl=true}={}) {
-  if(next==="annual" && yearJourney) restoreYearJourney({restoreUrl:false});
-  mode = next;
-  const dates = next === "dates";
-  document.body.dataset.researchMode = next;
-  root.hidden = !dates;
-  annualSections.forEach(node => { if (node) node.hidden = dates; });
-  annualButton.setAttribute("aria-pressed",String(!dates));
-  datesButton.setAttribute("aria-pressed",String(dates));
-  if (lede) lede.textContent = dates
-    ? "先看選定日落在立春哪一側，再探索年序與日序不同的前進速度。"
+// One public Research surface. Old ?delta / #research-discrete permalinks
+// continue to expand their advanced research material without an extra tab.
+function setMode(next) {
+  mode=next;
+  const dates=next==="dates";
+  document.body.dataset.researchMode=next;
+  root.hidden=!dates;
+  // Section nodes live INSIDE the native details element. Never hide them
+  // individually or the reader would open an empty "進階研究" disclosure.
+  annualSections.forEach(node=>{ if(node)node.hidden=false; });
+  advancedDetails.open=!dates;
+  if (lede) lede.textContent=dates
+    ? "選定日期，觀察立春年界；一個公曆年，干支日走完六圈，再多走 5 或 6 天。"
     : annualLede;
-  if (heading) heading.textContent = dates ? "時間循環" : annualHeading;
-  if (dates) {
-    if (!hasExplorerSelection) {
-      const annualBase = readDateString(annualInstrument?.dataset.baseDate);
-      const annualTarget = readDateString(annualInstrument?.dataset.targetDate);
-      if (annualBase && annualTarget) {
-        base = annualBase;
-        target = annualTarget;
-      }
-      hasExplorerSelection = true;
+  if (heading) heading.textContent=annualHeading;
+  if(dates){
+    if(!hasExplorerSelection){
+      const previousBase=readDateString(annualInstrument?.dataset.baseDate);
+      const previousTarget=readDateString(annualInstrument?.dataset.targetDate);
+      if(previousBase && previousTarget){base=previousBase;target=previousTarget;}
+      hasExplorerSelection=true;
     }
     syncInputs();
     setError(null);
     render();
-    if (updateUrl) syncFreeQuery();
-  } else if (updateUrl) {
-    const url = new URL(location.href);
-    if (annualQuery) {
-      url.search = annualQuery;
-    } else {
-      url.search = "";
-      url.searchParams.set("date",annualInstrument?.dataset.baseDate ?? "2026-09-13");
-      url.searchParams.set("delta",annualInstrument?.dataset.deltaYears ?? "0");
-    }
-    url.hash = annualHash;
-    history.replaceState(null,"",url.pathname + url.search + url.hash);
-    if (annualHash) window.dispatchEvent(new Event("hashchange"));
   }
 }
 
-if (root && form && annualButton && datesButton) {
+if (root && form && advancedDetails) {
   const linkedBase = readDateString(searchOnEntry.get("base"));
   const linkedTarget = readDateString(searchOnEntry.get("compare"));
   const linkError = freeFromLink && (searchOnEntry.has("base") || searchOnEntry.has("compare"))
@@ -635,8 +529,6 @@ if (root && form && annualButton && datesButton) {
       setError("年度時間線無法移到這個日期，原選定日期已保留。");
     }
   });
-  document.getElementById("research-year-journey-start")?.addEventListener("click",startYearJourney);
-  document.getElementById("research-year-journey-restore")?.addEventListener("click",()=>restoreYearJourney());
   root.addEventListener("research-free-wheel:jump",jumpToSelectedDay);
   // Existing Research-only source loads asynchronously. A new verified chunk
   // may refine Year identities but must never change the discrete date phases.
@@ -648,15 +540,11 @@ if (root && form && annualButton && datesButton) {
   };
   document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,refreshYearEvidence);
   document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_ERROR_EVENT,refreshYearEvidence);
-  annualButton.addEventListener("click",() => setMode("annual"));
-  datesButton.addEventListener("click",() => {
-    if (mode==="annual") {
-      annualQuery = location.search;
-      annualHash = location.hash;
-    }
-    setMode("dates");
+  setMode(freeFromLink?"dates":"annual");
+  root.dataset.advancedOpen=String(advancedDetails.open);
+  advancedDetails.addEventListener("toggle",()=>{
+    root.dataset.advancedOpen=String(advancedDetails.open);
   });
-  setMode(freeFromLink ? "dates" : "annual",{updateUrl:false});
   if (linkError) {
     root.dataset.urlValid = "false";
     setError("分享網址日期不合法，已改用預設示範日期。");

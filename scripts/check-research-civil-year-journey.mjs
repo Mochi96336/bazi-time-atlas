@@ -42,23 +42,23 @@ for(const item of cases){
     tag=dump.stdout?.match(/<output[^>]*id="probe"[^>]*>/)?.[0];
     if(attempt===1 && item===cases[0] && !tag &&
       (dump.error?.code==="ETIMEDOUT" || dump.status===null)){
-      console.warn("[year-journey] cold Chromium failed before fixture output; one bounded retry");
+      console.warn("[research-single-page] cold Chromium failed before fixture output; one bounded retry");
       continue;
     }
     break;
   }
   if(dump.status!==0 || !tag?.includes('data-ready="true"')){
-    throw Error("Guided Year/Day "+item.year+"/"+item.state+" failed: "+
+    throw Error("Single-surface Research "+item.year+"/"+item.state+" failed: "+
       (tag??dump.stderr?.slice(-1300)));
   }
   if(item.state==="proof"){
-    for(const key of ["first-screen","start","dirty-guard","end","restored","one-click-overview","manual-ownership"]){
-      if(!tag.includes('data-'+key+'="true"'))throw Error("Missing guided proof "+key+": "+tag);
+    for(const key of ["first-screen","no-tabs","no-tour","year-sentence","dirty-guard","end","restored","manual-ownership"]){
+      if(!tag.includes('data-'+key+'="true"'))throw Error("Missing single-surface proof "+key+": "+tag);
     }
     const remainder=item.year===2024?6:5;
     if(!tag.includes('data-remainder="'+remainder+'"'))throw Error("Wrong Day remainder: "+tag);
   }
-  console.log("[year-journey] PASS "+item.year+" "+item.state+
+  console.log("[research-single-page] PASS "+item.year+" "+item.state+
     (item.desktop?" desktop":" 390px")+" "+(tag?.slice(0,250)??""));
   if(item.name){
     const dest=path.join(output,item.name);
@@ -67,6 +67,6 @@ for(const item of cases){
     if(shot.status!==0)throw Error("Screenshot failed "+item.name+": "+shot.stderr?.slice(-1300));
     const st=await stat(dest);
     if(st.size<10000)throw Error(item.name+" screenshot unexpectedly small ("+st.size+" bytes)");
-    console.log("[year-journey-png] "+item.name+" "+st.size+" bytes");
+    console.log("[research-single-page-png] "+item.name+" "+st.size+" bytes");
   }
 }
