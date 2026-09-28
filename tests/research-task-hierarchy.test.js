@@ -28,6 +28,12 @@ const astronomy = html.slice(astronomyStart, evidenceStart);
 const evidence = html.slice(evidenceStart);
 
 test("Research keeps three ordered evidence owners without task-card navigation", () => {
+  // #500 navigation is an intentional LAST cascade layer. Moving the same
+  // CSS link above recurrence layout shrinks the original mobile comparison
+  // row below the 844px fold without changing any Research source file.
+  assert.ok(html.indexOf('href="./navigation-workspace.css"') >
+    html.indexOf('href="./research-free-day-wheel.css"'),
+    "latest navigation stylesheet must stay last in Research CSS cascade");
   assert.ok(discreteStart >= 0);
   assert.ok(astronomyStart > discreteStart);
   assert.ok(evidenceStart > astronomyStart);
