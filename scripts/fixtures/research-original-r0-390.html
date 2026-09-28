@@ -96,7 +96,7 @@ iframe.addEventListener("load",async()=>{
     [...d.styleSheets].map(sheet=>sheet.href??"inline").join(","));
   check(full?.checkVisibility() && selectedDay?.checkVisibility() &&
     selectedYear?.checkVisibility() && transition?.checkVisibility() &&
-    full.textContent.includes("輪轉6 次") &&
+    full.textContent.includes("走過 6 輪") &&
     full.textContent.includes("再向前 "+extra+" 位") &&
     strip.dataset.civilYearDays===String(days) &&
     strip.dataset.civilYearDayRemainder===String(extra) &&
