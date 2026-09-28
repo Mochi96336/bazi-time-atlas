@@ -182,22 +182,22 @@ if (
   throw new Error(`Year and Day labels / interactive 60-day wheel must follow the same comparison date: ${local.url}`);
 }
 console.log(`[recurrence] PASS paired absolute identities + day-wheel sync at +1980: ${local.url}`);
-const yearTape = tagById(local.dom,"research-cycles-year-tape");
-const dayTape = tagById(local.dom,"research-cycles-day-tape");
-for (const tape of [yearTape,dayTape]) {
-  if (
-    attr(tape,"data-positions") !== "60" ||
-    !attr(tape,"data-base-index") ||
-    attr(tape,"data-base-index") !== attr(tape,"data-target-index")
-  ) {
-    throw new Error(`60-position Year/Day phase tapes must visibly coincide on local closure: ${local.url}`);
-  }
+for (const id of ["research-cycles-year-base-ordinal","research-cycles-year-target-ordinal",
+  "research-cycles-day-base-ordinal","research-cycles-day-target-ordinal"]) {
+  const rendered=local.dom.match(new RegExp('id="'+id+'">([^<]+)</'))?.[1]??"";
+  if (!/^\\d{2}\\/60$/.test(rendered))
+    throw new Error("inline comparison must show both base/target named xx/60: "+id+": "+local.url);
 }
-if (!local.dom.includes('href="#research-sexagenary-cycle"')) {
-  throw new Error(`Interactive 60-day wheel must be discoverable from the visible Day comparison: ${local.url}`);
+if (local.dom.includes('class="research-cycles-card') ||
+    !local.dom.includes('href="#discrete-sexagenary-details"')) {
+  throw new Error("oversized duplicate Year/Day cards remain or Day wheel is inaccessible: "+local.url);
 }
-console.log(`[recurrence] PASS visible 60-tick Year/Day tracks and direct Day-wheel navigation: ${local.url}`);
-
+const jiazi=tagById(local.dom,"research-year-strip");
+if (Number(attr(jiazi,"data-jiazi-tick-count"))<6 ||
+    !local.dom.includes('class="research-year-jiazi-tick"')) {
+  throw new Error("original annual band does not show real 甲子 cycle boundaries: "+local.url);
+}
+console.log("[recurrence] PASS named Year/Day base+target xx/60 inside ORIGINAL one Jiazi-anchored strip: "+local.url);
 
 expectFixedGauge(local.dom, local.url);
 expectDiscreteComprehension(local.dom, local.url);
@@ -252,7 +252,8 @@ if (
   attr(futureCycles, "data-year-tape-basis") !== "nominal-or-unresolved" ||
   attr(futureCycles, "data-day-phase") !== "0" ||
   attr(futureCycles, "data-base-day-pillar") !== attr(futureCycles, "data-target-day-pillar") ||
-  !global.dom.includes('id="research-cycles-year-target-note">僅名義立春後年標 · 當日待判')
+  !/id="research-cycles-year-target">約[^<]+<\/strong>/.test(global.dom) ||
+  !/id="research-cycles-year-target-ordinal">[0-9]{2}\/60<\/small>/.test(global.dom)
 ) {
   throw new Error(`26026 must display computable discrete Year/Day labels without inventing the active Li Chun birth pillar: ${global.url}`);
 }
@@ -268,10 +269,9 @@ if (
   throw new Error("The two named cycles must follow selected date, not the nominal Li Chun year or an independent 甲子 default");
 }
 console.log("[recurrence] PASS active year boundary and linked day identity for two independent calendar dates");
-const beforeYearTape = tagById(beforeLiChun.dom,"research-cycles-year-tape");
-const afterYearTape = tagById(afterLiChun.dom,"research-cycles-year-tape");
-if (attr(beforeYearTape,"data-base-index") !== "39" || attr(afterYearTape,"data-base-index") !== "40") {
-  throw new Error("Visible Year cycle markers must match the displayed active 癸卯 / 甲辰 identity, not a misleading nominal index");
+if (!beforeLiChun.dom.includes('id="research-cycles-year-base-ordinal">40/60') ||
+    !afterLiChun.dom.includes('id="research-cycles-year-base-ordinal">41/60')) {
+  throw new Error("Inline Year xx/60 must follow actual active 癸卯 / 甲辰 identity on either side of Li Chun");
 }
 const shiftedOneYear = expectCase(
   "recurrence.html?date=2026-09-13&delta=1",
