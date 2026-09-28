@@ -33,7 +33,7 @@ test("H2.4 detects real layout collisions and avoids reporting a subjective beau
   assert.match(mobileCss, /font-size:\s*12px/);
   assert.match(fixture, /const rDock = bounds\(dock\), rInput = bounds\(input\), rCaption = bounds\(label\), rNow = bounds\(nowButton\)/);
   assert.match(fixture, /rNow\.left >= rInput\.right \+ 2/);
-  assert.match(fixture, /rCaption\.left >= rNow\.right \+ 2/);
+  assert.match(fixture, /rCaption\.top >= Math\.max\(rInput\.bottom, rNow\.bottom\) - 1/);
   assert.match(runner, /"home-h24-responsive-evidence\.json"/);
   assert.doesNotMatch(runner, /beautyScore|aestheticRating/);
 });
