@@ -23,7 +23,8 @@ test("ordinary mobile reading has one textual exact-time surface", () => {
 });
 
 test("mobile ordinary Zodiac classification joins existing exact-time rail without duplicating it", () => {
-  assert.match(html, /id="mobile-time-dock"[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"[\s\S]*?id="mobile-zodiac-readout" aria-live="off" hidden/);
+  // Classification lives above the input/action row, without a duplicate clock.
+  assert.match(html, /id="mobile-time-dock"[\s\S]*?id="mobile-zodiac-readout" aria-live="off" hidden[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"/);
   assert.match(mobileController, /const activeZodiac = instrument\.dataset\.zodiac\?\.trim\(\) \?\? ""/);
   assert.match(mobileController, /zodiacReadout\.textContent = activeZodiac \? `黃道 · \$\{activeZodiac\}`/);
   assert.match(mobileController, /attributeFilter:\[[^\]]*"data-zodiac"\]/);
