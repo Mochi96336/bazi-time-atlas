@@ -110,8 +110,12 @@
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
       const recurrenceComparison = recurrenceDoc.querySelector("#research-cycle-comparison");
-      const recurrenceYearCard = recurrenceDoc.querySelector(".research-cycles-year");
-      const recurrenceDayCard = recurrenceDoc.querySelector(".research-cycles-day");
+      const recurrenceYearCard = recurrenceDoc.querySelector(".research-cycles-card");
+      const recurrenceDayCard = recurrenceDoc.querySelector(".research-date-explorer-card");
+      const baseRow = recurrenceDoc.querySelector('.research-cycle-inline-row[data-side="base"]');
+      const targetRow = recurrenceDoc.querySelector('.research-cycle-inline-row[data-side="target"]');
+      const originalYearStrip = recurrenceDoc.querySelector("#research-year-strip");
+      const compactControls = recurrenceDoc.querySelector("#research-controls");
       const recurrenceToolbar = recurrenceDoc.querySelector(".recurrence-toolbar");
       const deltaDock = recurrenceDoc.querySelector(".delta-dock");
       const candidateButtons = recurrenceDoc.querySelector("#candidate-buttons");
@@ -131,8 +135,14 @@
       const modelBoundarySummary = recurrenceDoc.querySelector(".model-boundary summary");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
       const comparisonRect = recurrenceComparison?.getBoundingClientRect();
-      const yearCardRect = recurrenceYearCard?.getBoundingClientRect();
-      const dayCardRect = recurrenceDayCard?.getBoundingClientRect();
+      const yearCardRect = baseRow?.getBoundingClientRect();
+      const dayCardRect = targetRow?.getBoundingClientRect();
+      const originalStripRect = originalYearStrip?.getBoundingClientRect();
+      const controlsRect = compactControls?.getBoundingClientRect();
+      const controlsClosedOnEntry = Boolean(compactControls && !compactControls.open);
+      // Measure the existing 44px+ original controls INSIDE the optional
+      // drawer. Measuring their closed rectangles would incorrectly read 0.
+      if (compactControls)compactControls.open=true;
       const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
       const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
@@ -145,6 +155,7 @@
       const deltaSliderRect = deltaSlider?.getBoundingClientRect();
       const baseDateInputRect = baseDateInput?.getBoundingClientRect();
       const modelBoundarySummaryRect = modelBoundarySummary?.getBoundingClientRect();
+      if (compactControls)compactControls.open=false;
       const viewportHeight = recurrenceWin.innerHeight;
       const visibleInstrumentHeight = recurrenceRect
         ? Math.max(0, Math.min(recurrenceRect.bottom, viewportHeight) - Math.max(recurrenceRect.top, 0))
@@ -171,9 +182,10 @@
       probe.dataset.recurrencePrimaryComparisonReady = recurrenceComparison?.dataset.ready ?? "missing";
       probe.dataset.recurrencePrimaryComparisonTop = String(Math.round(comparisonRect?.top ?? -1));
       probe.dataset.recurrencePrimaryComparisonBottom = String(Math.round(comparisonRect?.bottom ?? -1));
-      probe.dataset.recurrenceYearDaySameRow = String(Boolean(
-        yearCardRect && dayCardRect && Math.abs(yearCardRect.top - dayCardRect.top) < 15
-      ));
+      probe.dataset.recurrenceNoGiantCards = String(
+        !recurrenceYearCard && !recurrenceDayCard &&
+        Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
+      );
       probe.dataset.recurrenceYearDayFullyVisible = String(Boolean(
         yearCardRect && dayCardRect && yearCardRect.top >= 0 && dayCardRect.top >= 0
         && yearCardRect.bottom <= viewportHeight && dayCardRect.bottom <= viewportHeight
@@ -198,16 +210,18 @@
       probe.dataset.recurrenceDeltaSliderHeight = String(Math.round(deltaSliderRect?.height ?? -1));
       probe.dataset.recurrenceBaseDateInputHeight = String(Math.round(baseDateInputRect?.height ?? -1));
       probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
-      probe.dataset.recurrenceDeltaDockTop = String(Math.round(deltaDockRect?.top ?? -1));
-      probe.dataset.recurrenceDeltaDockBottom = String(Math.round(deltaDockRect?.bottom ?? -1));
       probe.dataset.recurrenceDeltaDockBeforeInstrument = String(Boolean(
-        recurrenceRect && deltaDockRect && deltaDockRect.bottom <= recurrenceRect.top
+        recurrenceRect && controlsRect && originalStripRect &&
+        controlsRect.bottom <= originalStripRect.top && originalStripRect.bottom <= recurrenceRect.top
       ));
       probe.dataset.recurrenceDeltaDockInFirstViewport = String(Boolean(
-        deltaDockRect && deltaDockRect.top >= 0 && deltaDockRect.bottom <= viewportHeight
+        controlsRect && controlsClosedOnEntry && controlsRect.top >= 0 &&
+        controlsRect.bottom <= viewportHeight
       ));
+      probe.dataset.recurrenceDeltaDockTop = String(Math.round(controlsRect?.top??-1));
+      probe.dataset.recurrenceDeltaDockBottom = String(Math.round(controlsRect?.bottom??-1));
       probe.dataset.recurrenceDeltaDockGap = String(Math.round(
-        comparisonRect && deltaDockRect ? comparisonRect.top - deltaDockRect.bottom : -1
+        originalStripRect && controlsRect ? originalStripRect.top - controlsRect.bottom : -1
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];

@@ -6,6 +6,7 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
+import { jiaziAnchoredCivilYear } from "./recurrence/jiazi-year-geometry.js";
 import { sexagenaryDayForGregorianDate } from "./recurrence/ganzhi-cycle-comparison.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import {
@@ -415,6 +416,7 @@ function render() {
   const baseMarker = document.querySelector("#research-year-base-marker");
   const liChunMarker = document.querySelector("#research-year-li-chun-marker");
   const liChunBand = document.querySelector("#research-year-li-chun-band");
+  const approximateLiChun = document.querySelector("#research-year-approx-li-chun");
   const liChunUnavailable = document.querySelector("#research-year-li-chun-unavailable");
 
   strip.dataset.ready = "true";
@@ -447,6 +449,31 @@ function render() {
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
   strip.dataset.civilYearDays = String(state.civilYearDays);
   strip.dataset.civilYearDayRemainder = String(state.civilYearDayRemainder);
+  const dayGeometry = jiaziAnchoredCivilYear(state.selectedDate.year);
+  const jiaziLayer = document.getElementById("research-year-jiazi-ticks");
+  strip.dataset.firstJiaziDate = formatDate(dayGeometry.ticks[0].date);
+  strip.dataset.jiaziTickCount = String(dayGeometry.ticks.length);
+  strip.dataset.inYearCompleteJiaziSpans = String(dayGeometry.completeInYearSpans);
+  strip.dataset.jiaziHeadDays = String(dayGeometry.headDays);
+  strip.dataset.jiaziTailDays = String(dayGeometry.tailDays);
+  strip.dataset.newYearDayName = dayGeometry.nextJan1Pillar.name;
+  if (jiaziLayer) {
+    const nodes = document.createDocumentFragment();
+    dayGeometry.ticks.forEach((item,index) => {
+      const tick = document.createElement("span");
+      tick.className = "research-year-jiazi-tick";
+      tick.style.setProperty("--jiazi-x",item.percent.toFixed(5)+"%");
+      tick.dataset.dayOffset = String(item.offset);
+      tick.dataset.pillar = item.pillar;
+      tick.dataset.first = String(index===0);
+      tick.title = "甲子日 "+formatDate(item.date);
+      const label = document.createElement("small");
+      label.textContent = "甲子";
+      tick.appendChild(label);
+      nodes.appendChild(tick);
+    });
+    jiaziLayer.replaceChildren(nodes);
+  }
   // The one visible slider follows the existing instrument's selected
   // target. It never creates or persists another selected-date state.
   const scrub=document.querySelector("#research-year-scrub");
@@ -503,12 +530,12 @@ function render() {
     state.selectedYearMembership.status==="model-estimated" ? "模型估計" :
     yearIsBoundary ? "需提供時刻" : "年界證據不足");
   setText("research-year-full-cycle",
-    state.selectedDate.year+" 公曆年共 "+state.civilYearDays+
-    " 天：干支日走滿 "+state.civilYearFullDayCycles+
-    " 圈，再多 "+state.civilYearDayRemainder+" 天。");
+    "甲子日每隔 60 天重現；到明年元旦，日序走過 "+
+    state.civilYearFullDayCycles+" 輪，再向前 "+state.civilYearDayRemainder+" 位。");
   setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
+    if (approximateLiChun) approximateLiChun.hidden = true;
     liChunMarker.hidden = false;
     liChunMarker.dataset.positionStatus = state.liChun.positionStatus;
     liChunMarker.style.setProperty("--year-x", `${state.liChun.position.toFixed(4)}%`);
@@ -548,6 +575,15 @@ function render() {
     setText("research-year-transition-note",
       state.liChun.positionStatus==="estimated" ? "民用日期為模型估計" : "依現有立春來源定位");
   } else {
+    // A soft early-Feb guide is visually distinguishable from an authoritative
+    // event marker. It NEVER changes source coverage or Year resolution.
+    if (approximateLiChun) {
+      const start=positionForDate({year:state.selectedDate.year,month:2,day:2});
+      const end=positionForDate({year:state.selectedDate.year,month:2,day:6});
+      approximateLiChun.hidden=false;
+      approximateLiChun.style.left=start.toFixed(4)+"%";
+      approximateLiChun.style.width=(end-start).toFixed(4)+"%";
+    }
     liChunMarker.hidden = true;
     if (liChunBand) liChunBand.hidden = true;
     liChunUnavailable.hidden = false;
@@ -557,7 +593,7 @@ function render() {
     );
     setText("research-year-li-chun-unavailable-copy", state.liChunUnavailableMessage);
     setText("research-year-transition",
-      "立春位置待查 · "+state.liChunTransition.before.name+
+      "約 2 月初立春 · "+state.liChunTransition.before.name+
       " → "+state.liChunTransition.after.name);
     setText("research-year-transition-note",state.liChunUnavailableMessage);
   }

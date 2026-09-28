@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./near-recurrence.css">
   <link rel="stylesheet" href="./research-cycle-comparison.css">
   <link rel="stylesheet" href="./research-year-strip-interaction.css">
+  <link rel="stylesheet" href="./research-compact-surface.css">
   <link rel="stylesheet" href="./navigation-workspace.css">
 </head>
 <body>
@@ -57,6 +58,8 @@
       </header>
       <p class="research-discrete-scope">先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定。</p>
 
+      <details id="research-controls" class="research-controls-compact">
+        <summary><span>基準 <b id="research-controls-base">2026/09/13</b></span><span>Δ <b id="research-controls-delta">0 年</b></span><span class="research-controls-action">調整</span></summary>
       <section class="delta-dock" aria-label="時間位移控制">
         <div class="base-date research-base-date" aria-label="基準日期">
           <label>基準年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
@@ -74,44 +77,85 @@
         </div>
         <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
       </section>
+      </details>
 
-      <section id="research-cycle-comparison" class="research-cycle-comparison" aria-label="選定日期的干支年與干支日雙週期對照" data-ready="false">
-        <header class="research-cycles-head">
-          <div><strong>同一日期，兩個六十循環</strong><small>年序與日序同步比較；立春精度不是循環的前提</small></div>
-          <div class="research-cycles-dates">
-            <span>基準 <b id="research-cycles-base-date">—</b></span>
-            <i aria-hidden="true">→</i>
-            <span>比較 <b id="research-cycles-target-date">—</b></span>
-          </div>
+      <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
+        <header>
+          <strong id="research-year-strip-title">年度時間條</strong>
+          <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
         </header>
-        <div class="research-cycles-grid">
-          <article class="research-cycles-card research-cycles-year" aria-labelledby="research-cycles-year-title">
-            <div class="research-cycles-card-head"><h3 id="research-cycles-year-title">干支年</h3><span>60 年一輪</span></div>
-            <div class="research-cycles-identities">
-              <div><small>基準</small><strong id="research-cycles-year-base">—</strong><span id="research-cycles-year-base-note">—</span></div>
-              <i aria-hidden="true">→</i>
-              <div><small>比較</small><strong id="research-cycles-year-target">—</strong><span id="research-cycles-year-target-note">—</span></div>
-            </div>
-            <div id="research-cycles-year-tape" class="research-cycles-tape" role="img" aria-label="60 年序基準與比較位置"></div>
-            <small id="research-cycles-year-tape-basis" class="research-cycles-tape-basis">刻度＝可判年柱</small>
-            <small class="research-cycles-tape-legend">淡色＝基準 · 亮色＝比較 · 重疊＝同步</small>
-            <div class="research-cycles-phase"><span>名義年序位移</span><strong id="research-cycles-year-phase">—</strong></div>
-          </article>
-          <article class="research-cycles-card research-cycles-day" aria-labelledby="research-cycles-day-title">
-            <div class="research-cycles-card-head"><h3 id="research-cycles-day-title">干支日</h3><span>60 日一輪</span></div>
-            <div class="research-cycles-identities">
-              <div><small>基準</small><strong id="research-cycles-day-base">—</strong><span id="research-cycles-day-base-ordinal">—</span></div>
-              <i aria-hidden="true">→</i>
-              <div><small>比較</small><strong id="research-cycles-day-target">—</strong><span id="research-cycles-day-target-ordinal">—</span></div>
-            </div>
-            <div id="research-cycles-day-tape" class="research-cycles-tape" role="img" aria-label="60 日序基準與比較位置"></div>
-            <small class="research-cycles-tape-legend">淡色＝基準 · 亮色＝比較 · 重疊＝同步</small>
-            <a class="research-cycle-open" href="#research-sexagenary-cycle">展開可拖動的六十日轉盤 ↗</a>
-            <div class="research-cycles-phase"><span id="research-cycles-day-elapsed">實際經過 — 日</span><strong id="research-cycles-day-phase">—</strong></div>
-          </article>
+        <div class="research-year-track" role="group" aria-label="原本年度時間條：公曆全年、立春年界及日期拖曳">
+          <div class="research-year-line" aria-hidden="true"></div>
+          <div id="research-year-jiazi-ticks" class="research-year-jiazi-ticks" aria-hidden="true"></div>
+          <div id="research-year-li-chun-band" class="research-year-li-chun-band" hidden aria-hidden="true"></div>
+          <div id="research-year-approx-li-chun" class="research-year-approx-li-chun" hidden aria-hidden="true" title="立春通常在 2 月初，此標記只是概略位置，不是已驗證的節氣時刻"></div>
+          <div class="research-year-marker research-year-start" style="--year-x:0%">
+            <i aria-hidden="true"></i><strong>1/1</strong><small>公曆換年</small>
+          </div>
+          <div id="research-year-li-chun-marker" class="research-year-marker research-year-li-chun" hidden>
+            <i aria-hidden="true"></i><strong id="research-year-li-chun-title">立春 · — → —</strong><small id="research-year-li-chun-label">節氣年界</small>
+          </div>
+          <div id="research-year-base-marker" class="research-year-marker research-year-base" style="--year-x:70%">
+            <i aria-hidden="true"></i><strong id="research-year-base-title">選定日 · —年</strong><small id="research-year-base-label">2026/09/13</small>
+          </div>
+          <div class="research-year-marker research-year-end" style="--year-x:100%">
+            <i aria-hidden="true"></i><strong>12/31</strong><small>公曆年末</small>
+          </div>
+          <!-- This slider is a gesture surface for the EXISTING base+Δ date
+               owner, not another date form, timeline or selected-date model. -->
+          <input id="research-year-scrub" class="research-year-scrub"
+            type="range" min="0" max="364" value="0" step="1"
+            aria-label="沿原本年度時間條選擇日期"
+            aria-describedby="research-year-scrub-hint">
         </div>
-        <p id="research-cycles-closure" class="research-cycles-closure" aria-live="polite">載入兩組離散相位…</p>
-        <p class="research-cycles-convention">日序：選定公曆日期的連續日數（以當地中午作錨點）；年序：公曆年份 mod 60 的立春後年標。實際年柱若無年界資料會另行標示，不冒充確定結果。</p>
+        <small id="research-year-scrub-hint" class="research-year-scrub-hint">拖動時間條選擇日期，放開後套用至原本的日期控制。</small>
+        <small id="research-year-scrub-feedback" class="research-year-scrub-feedback" role="status" aria-live="polite" hidden></small>
+        <div id="research-year-li-chun-unavailable" class="research-year-li-chun-unavailable" hidden>
+          <strong id="research-year-li-chun-unavailable-title">立春 · — → —</strong>
+          <span id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析</span>
+        </div>
+        <!-- All three readouts describe THIS original year strip, not a
+             second timeline or independently selected date. -->
+        <div id="research-cycle-comparison" class="research-cycle-inline" data-ready="false" aria-label="基準與比較干支對照">
+          <div class="research-cycle-inline-row" data-side="base">
+            <span class="research-cycle-inline-date">基準 <strong id="research-cycles-base-date">—</strong></span>
+            <span class="research-cycle-inline-year">年 <strong id="research-cycles-year-base">—</strong> <small id="research-cycles-year-base-ordinal">—/60</small></span>
+            <span class="research-cycle-inline-day">日 <strong id="research-cycles-day-base">—</strong> <small id="research-cycles-day-base-ordinal">—/60</small></span>
+          </div>
+          <div class="research-cycle-inline-row" data-side="target">
+            <span class="research-cycle-inline-date">比較 <strong id="research-cycles-target-date">—</strong></span>
+            <span class="research-cycle-inline-year">年 <strong id="research-cycles-year-target">—</strong> <small id="research-cycles-year-target-ordinal">—/60</small></span>
+            <span class="research-cycle-inline-day">日 <strong id="research-cycles-day-target">—</strong> <small id="research-cycles-day-target-ordinal">—/60</small></span>
+          </div>
+          <span id="research-cycles-closure" class="research-cycle-inline-closure" hidden>—</span>
+          <a class="research-cycle-inline-lookup" href="#discrete-sexagenary-details">六十日轉盤 ↗</a>
+        </div>
+        <div class="research-year-key-data" role="status" aria-live="polite">
+          <p class="research-year-transition-line">
+            <span id="research-year-transition">立春年界待查</span>
+            <small id="research-year-transition-note">—</small>
+          </p>
+          <p class="research-year-selection-line">
+            <span>選定 <strong id="research-year-selected-date">—</strong></span>
+            <span>年 <strong id="research-year-selected-year">—</strong>
+              <small id="research-year-selected-certainty">—</small></span>
+            <span>日 <strong id="research-year-selected-day">—</strong></span>
+          </p>
+          <p class="research-year-full-cycle" id="research-year-full-cycle">—</p>
+        </div>
+        <details class="research-year-same-date-details">
+          <summary>同月同日的比較參考（非全年日數）</summary>
+        <div class="research-year-relations" aria-label="三種一年關係">
+          <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
+          <div><strong>60 年序</strong><span>Δ 年 mod 60 的名義序號；不決定立春前後的年柱</span></div>
+          <div><strong>60 日序</strong><span>看兩日期間實際經過 <b id="research-year-day-count">—</b> 日</span></div>
+        </div>
+        <div class="research-year-continuation" aria-label="選定日到下一年同月同日">
+          <strong id="research-year-base-date">2026/09/13</strong>
+          <span><i aria-hidden="true"></i><em>實際經過 <b id="research-year-elapsed-days">—</b> 日</em></span>
+          <strong id="research-year-next-date">2027/09/13</strong>
+        </div>
+        </details>
       </section>
 
       <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散相位與十二節形狀比較">
@@ -148,68 +192,7 @@
         </div>
       </section>
 
-      <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
-        <header>
-          <strong id="research-year-strip-title">年度時間條</strong>
-          <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
-        </header>
-        <div class="research-year-track" role="group" aria-label="原本年度時間條：公曆全年、立春年界及日期拖曳">
-          <div class="research-year-line" aria-hidden="true"></div>
-          <div id="research-year-li-chun-band" class="research-year-li-chun-band" hidden aria-hidden="true"></div>
-          <div class="research-year-marker research-year-start" style="--year-x:0%">
-            <i aria-hidden="true"></i><strong>1/1</strong><small>公曆換年</small>
-          </div>
-          <div id="research-year-li-chun-marker" class="research-year-marker research-year-li-chun" hidden>
-            <i aria-hidden="true"></i><strong id="research-year-li-chun-title">立春 · — → —</strong><small id="research-year-li-chun-label">節氣年界</small>
-          </div>
-          <div id="research-year-base-marker" class="research-year-marker research-year-base" style="--year-x:70%">
-            <i aria-hidden="true"></i><strong id="research-year-base-title">選定日 · —年</strong><small id="research-year-base-label">2026/09/13</small>
-          </div>
-          <div class="research-year-marker research-year-end" style="--year-x:100%">
-            <i aria-hidden="true"></i><strong>12/31</strong><small>公曆年末</small>
-          </div>
-          <!-- This slider is a gesture surface for the EXISTING base+Δ date
-               owner, not another date form, timeline or selected-date model. -->
-          <input id="research-year-scrub" class="research-year-scrub"
-            type="range" min="0" max="364" value="0" step="1"
-            aria-label="沿原本年度時間條選擇日期"
-            aria-describedby="research-year-scrub-hint">
-        </div>
-        <small id="research-year-scrub-hint" class="research-year-scrub-hint">拖動時間條選擇日期，放開後套用至原本的日期控制。</small>
-        <small id="research-year-scrub-feedback" class="research-year-scrub-feedback" role="status" aria-live="polite" hidden></small>
-        <div id="research-year-li-chun-unavailable" class="research-year-li-chun-unavailable" hidden>
-          <strong id="research-year-li-chun-unavailable-title">立春 · — → —</strong>
-          <span id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析</span>
-        </div>
-        <!-- All three readouts describe THIS original year strip, not a
-             second timeline or independently selected date. -->
-        <div class="research-year-key-data" role="status" aria-live="polite">
-          <p class="research-year-transition-line">
-            <span id="research-year-transition">立春年界待查</span>
-            <small id="research-year-transition-note">—</small>
-          </p>
-          <p class="research-year-selection-line">
-            <span>選定 <strong id="research-year-selected-date">—</strong></span>
-            <span>年 <strong id="research-year-selected-year">—</strong>
-              <small id="research-year-selected-certainty">—</small></span>
-            <span>日 <strong id="research-year-selected-day">—</strong></span>
-          </p>
-          <p class="research-year-full-cycle" id="research-year-full-cycle">—</p>
-        </div>
-        <details class="research-year-same-date-details">
-          <summary>同月同日的比較參考（非全年日數）</summary>
-        <div class="research-year-relations" aria-label="三種一年關係">
-          <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
-          <div><strong>60 年序</strong><span>Δ 年 mod 60 的名義序號；不決定立春前後的年柱</span></div>
-          <div><strong>60 日序</strong><span>看兩日期間實際經過 <b id="research-year-day-count">—</b> 日</span></div>
-        </div>
-        <div class="research-year-continuation" aria-label="選定日到下一年同月同日">
-          <strong id="research-year-base-date">2026/09/13</strong>
-          <span><i aria-hidden="true"></i><em>實際經過 <b id="research-year-elapsed-days">—</b> 日</em></span>
-          <strong id="research-year-next-date">2027/09/13</strong>
-        </div>
-        </details>
-      </section>
+
 
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
         <header class="research-cycle-head">

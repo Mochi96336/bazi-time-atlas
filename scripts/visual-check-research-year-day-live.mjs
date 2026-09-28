@@ -10,6 +10,8 @@ const cases=[
  {route:"original-frame",width:320,height:2250,name:"research-original-320.png"},
  {route:"original-frame",width:768,height:2250,name:"research-original-768.png"},
  {route:"original",date:"2024-02-10",width:1440,height:2300,name:"research-original-1440.png"},
+ {route:"original",date:"2026-09-13",delta:400,width:390,height:1700,name:"research-original-400y-390.png"},
+ {route:"original",date:"2026-09-13",delta:400,width:1440,height:1700,name:"research-original-400y-1440.png"},
  {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-original-lichun-day-390.png"},
  {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-original-normal-2023-390.png"},
  {route:"bare",width:390,height:2000,name:"research-original-default-390.png"}
@@ -28,7 +30,7 @@ for(const item of cases){
  const u=new URL("recurrence.html",base);
  if(item.route==="original"){
    u.searchParams.set("date",item.date??"2024-02-10");
-   u.searchParams.set("delta","0");
+   u.searchParams.set("delta",String(item.delta??0));
  }
  const frame=new URL("scripts/fixtures/mobile-390.html",base);
  frame.searchParams.set("target","../../recurrence.html"+u.search);

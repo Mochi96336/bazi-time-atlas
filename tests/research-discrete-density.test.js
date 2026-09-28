@@ -45,9 +45,12 @@ test("baseline date and displacement share one top control dock ahead of both na
   const candidateStart = recurrenceHtml.indexOf('id="candidate-buttons"');
   const comparisonStart = recurrenceHtml.indexOf('id="research-cycle-comparison"');
   const instrumentStart = recurrenceHtml.indexOf('id="recurrence-instrument"');
+  const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const instrumentEnd = recurrenceHtml.indexOf("</section>", instrumentStart);
   assert.ok(dockStart >= 0 && baseStart > dockStart && candidateStart > baseStart
-    && comparisonStart > candidateStart && instrumentStart > comparisonStart);
+    && stripStart > candidateStart && comparisonStart > stripStart &&
+    instrumentStart > comparisonStart);
+  assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact"/);
   assert.doesNotMatch(recurrenceHtml.slice(instrumentStart,instrumentEnd), /id="base-year"|id="candidate-buttons"/);
   for (const id of ["base-year","delta-number","candidate-buttons","delta-slider"]) assert.ok(recurrenceHtml.slice(dockStart).includes(`id="${id}"`));
   assert.ok(recurrenceCss.includes(".delta-dock {"));
@@ -190,8 +193,10 @@ test("reading order leads with paired names before the phase wheel and puts the 
   const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
-  assert.ok(comparisonStart >= 0 && stateStart > comparisonStart && stripStart > stateStart
-    && cycleStart > stripStart && derivationStart > cycleStart);
+  assert.ok(stripStart >= 0 && comparisonStart > stripStart &&
+    stateStart > comparisonStart && cycleStart > stateStart && derivationStart > cycleStart);
+  assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
+  assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 閉合"));
 });

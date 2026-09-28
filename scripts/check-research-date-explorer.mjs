@@ -42,7 +42,9 @@ if(
   attr(instrument,"data-target-date")===null ||
   attr(strip,"data-ready")!=="true" ||
   !home.dom.includes('id="research-year-full-cycle"') ||
-  !home.dom.includes("走滿 6 圈")
+  !home.dom.includes("日序走過 6 輪") ||
+  home.dom.includes('class="research-cycles-card') ||
+  !home.dom.includes('id="research-cycle-comparison" class="research-cycle-inline"')
 ) throw Error("R3 public Research still exposes or depends on the retired parallel UI: "+home.url);
 console.log("[research-r3] PASS public Research has one original instrument + one original Year strip");
 
