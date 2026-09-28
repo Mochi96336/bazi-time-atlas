@@ -37,7 +37,7 @@ function sample(){
    if(++tries>140){probe.dataset.error="waiting-for-live-readout";probe.dataset.ready="error";finished=true;}
    return;
  }
- if(edit&&!startedEditor){startedEditor=true;readout.click();return;}
+ if(edit&&!startedEditor){if(readout.getAttribute("role")!=="button")return;startedEditor=true;readout.click();return;}
  if(edit&&doc.querySelector("#selected-instant-editor")?.hidden)return;
  if(longYear&&!usedLong){usedLong=true;civil.textContent="+10026-09-14 · 07:43:42";return;}
  const R=rect(readout),C=rect(civil),Z=rect(zone),N=rect(now),L=rect(line),I=rect(inst);
