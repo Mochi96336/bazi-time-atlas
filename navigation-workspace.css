@@ -122,6 +122,10 @@ body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
   .recurrence-shell { padding-top:4px; }
   .recurrence-intro { margin-top:6px; }
   .kinetic-topbar .brand, .recurrence-topbar .brand { display:none; }
+  /* The 42px native Tools/Done target must contribute to the grid row height.
+     Without this explicit minimum, the 100dvh mobile shell can squeeze its
+     header to 28px and render the button outside the header hit area. */
+  .kinetic-topbar { min-height:42px !important; }
   .kinetic-topbar, .recurrence-topbar { justify-content:space-between !important; gap:8px; }
   .kinetic-topbar .topbar-actions { gap:11px; margin:0; width:100%; }
   .kinetic-topbar .site-nav, .recurrence-topbar .site-nav { gap:14px; margin-right:auto; }
