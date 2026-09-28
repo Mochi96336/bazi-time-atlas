@@ -85,11 +85,10 @@
     proof.dataset.inputBounds = [rInput.left, rInput.right].map(v => v.toFixed(2)).join(",");
     proof.dataset.captionBounds = [rCaption.left, rCaption.right].map(v => v.toFixed(2)).join(",");
     proof.dataset.nowBounds = [rNow.left, rNow.right, rNow.top, rNow.bottom].map(v => v.toFixed(2)).join(",");
-    // A 42px centered native Now target and a 38px time input have different
-    // bottom edges from the centered text caption. Compare their visual centers
-    // rather than enforcing the obsolete no-Now shared-bottom geometry.
+    // Only the native Now control and editable time share the primary row.
+    // Derived Zodiac context belongs to a separate ordinary flow row.
     proof.dataset.sameRow = String(Math.abs(
-      (rInput.top + rInput.bottom) / 2 - (rCaption.top + rCaption.bottom) / 2
+      (rInput.top + rInput.bottom) / 2 - (rNow.top + rNow.bottom) / 2
     ) <= 5);
     proof.dataset.nowVisible = String(visible(win, nowButton));
     proof.dataset.nowFits = String(rNow.width >= 42 && rNow.bottom - rNow.top >= 42 &&
@@ -99,7 +98,7 @@
       (rNow.top + rNow.bottom) / 2 - (rInput.top + rInput.bottom) / 2
     ) <= 5);
     proof.dataset.noOverlap = String(rNow.left >= rInput.right + 2
-      && rCaption.left >= rNow.right + 2);
+      && rCaption.top >= Math.max(rInput.bottom, rNow.bottom) + 1);
     proof.dataset.notClipped = String(rCaption.right <= Math.min(width, rDock.right) + 1 &&
       rCaption.left >= Math.max(0, rDock.left) - 1 &&
       label.scrollWidth <= label.clientWidth + 1);
@@ -130,7 +129,7 @@
     proof.dataset.futureCaptionSynced = String(label.textContent === "黃道 · " + instrument.dataset.zodiac);
     proof.dataset.futureInputSynced = String(input.value.includes("2026/11/15") || input.value.includes("2026/11/15".replaceAll("/", "-")));
     proof.dataset.futureNoOverlap = String(bounds(nowButton).left >= bounds(input).right + 2
-      && bounds(label).left >= bounds(nowButton).right + 2
+      && bounds(label).top >= Math.max(bounds(input).bottom, bounds(nowButton).bottom) + 1
       && bounds(label).right <= Math.min(width, bounds(dock).right) + 1);
 
     // Class/Analysis belong to their own screens. The same caption never duplicates.
