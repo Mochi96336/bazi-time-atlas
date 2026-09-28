@@ -64,7 +64,10 @@ for(const spec of [
   {suffix:"?bare=1",width:"390",bare:"true",boundary:"false"},
   {suffix:"",width:"390",bare:"false",boundary:"false"},
   {suffix:"?boundary=1",width:"390",bare:"false",boundary:"true"},
-  {suffix:"?desktop=1",width:"1440",bare:"false",boundary:"false"}
+  {suffix:"?desktop=1",width:"1440",bare:"false",boundary:"false"},
+  {suffix:"?interactive=1",width:"390",bare:"false",boundary:"false",proof:["boundary-scrub","scrub-roundtrip","dirty-guard"]},
+  {suffix:"?deep=1",width:"390",bare:"false",boundary:"false",proof:["leap-guard"]},
+  {suffix:"?precise=1",width:"390",bare:"false",boundary:"false",proof:["precise-guard"]}
 ]){
   const originalView=dump("scripts/fixtures/research-original-r0-390.html"+spec.suffix,13000);
   const originalProbe=tag(originalView.dom,"probe","output");
@@ -76,7 +79,8 @@ for(const spec of [
     attr(originalProbe,"data-original-strip")!=="visible" ||
     attr(originalProbe,"data-original-cycle")!=="visible" ||
     attr(originalProbe,"data-original-evidence")!=="visible" ||
-    attr(originalProbe,"data-duplicate-story")!=="hidden"
+    attr(originalProbe,"data-duplicate-story")!=="hidden" ||
+    (spec.proof??[]).some(key=>attr(originalProbe,"data-"+key)!=="true")
   ){
     throw new Error("R0 true viewport original Research failed: "+originalView.url+
       " "+(attr(originalProbe,"data-error")??"missing browser fixture output"));
