@@ -254,7 +254,7 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
      the calculated Zodiac is a genuine second line, not a third control. */
   #kinetic-instrument ~ .mobile-time-dock,
   #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock[data-dirty="false"] {
-    grid-template-columns:minmax(0,max-content) max-content !important;
+    grid-template-columns:minmax(0,max-content) max-content minmax(0,1fr) !important;
     column-gap:8px;
     row-gap:3px;
     justify-content:start;
@@ -299,7 +299,8 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   .mobile-time-dock .mobile-time-context:has(#mobile-zodiac-readout[hidden]) {
     display:none;
   }
-  .mobile-time-dock .mobile-time-context #mobile-zodiac-readout:not([hidden]) {
+  #kinetic-instrument:not([data-analysis-open="true"]):not([data-classification-overlay="on"])
+    ~ .mobile-time-dock[data-dirty="false"] .mobile-time-context #mobile-zodiac-readout:not([hidden]) {
     margin:0;
     padding:0;
     border-left:0;
