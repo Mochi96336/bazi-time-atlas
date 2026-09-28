@@ -65,6 +65,7 @@ const trackNodes = new Map([
 ]);
 const textNodes = new Map([
   "instant-readout",
+  "readout-timezone",
   "solar-readout",
   "term-readout",
   "hour-active",
