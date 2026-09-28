@@ -1,0 +1,47 @@
+/* R2 — one accessible gesture overlay on the ORIGINAL year strip.
+   The existing marker remains the only visible playhead; the transparent
+   native input only captures pointer/keyboard intent and never owns a date. */
+.research-year-track{isolation:isolate}
+.research-year-scrub{
+  -webkit-appearance:none;
+  appearance:none;
+  position:absolute;z-index:4;
+  top:5px;left:0;right:0;
+  display:block;width:100%;height:43px;
+  padding:0;margin:0;
+  border:0;background:transparent;
+  outline:none;cursor:ew-resize;
+  touch-action:pan-y;
+}
+.research-year-scrub::-webkit-slider-runnable-track{
+  height:43px;border:0;background:transparent;box-shadow:none;
+}
+.research-year-scrub::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  height:43px;width:19px;border:0;border-radius:0;
+  background:transparent;box-shadow:none;cursor:ew-resize;
+}
+.research-year-scrub::-moz-range-track{
+  height:43px;border:0;background:transparent;
+}
+.research-year-scrub::-moz-range-thumb{
+  height:43px;width:19px;border:0;background:transparent;cursor:ew-resize;
+}
+.research-year-track:focus-within .research-year-line{
+  outline:2px solid #e7d097;outline-offset:5px;
+}
+.research-year-scrub:disabled{cursor:not-allowed;pointer-events:none}
+.research-year-scrub-hint{
+  display:block;margin:0 16px 6px;
+  font-size:10.5px;line-height:1.5;color:#9eada4;
+}
+.research-year-scrub-feedback{
+  display:block;min-height:17px;margin:0 16px 5px;
+  font-size:11px;line-height:1.55;color:#d8b884;
+}
+.research-year-scrub-feedback[hidden]{display:none}
+@media(max-width:480px){
+ .research-year-scrub-hint,.research-year-scrub-feedback{
+  font-size:10.5px;margin-left:8px;margin-right:8px;
+ }
+}
