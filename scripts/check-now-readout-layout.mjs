@@ -61,10 +61,13 @@ for(const c of cases){
     assert(num(dom,"mobile-now-gap")>=2&&num(dom,"mobile-now-gap")<=16,
       "Now not attached to the mobile time input",c);
     assert(num(dom,"mobile-same-baseline")<=5,"time and Now are not aligned",c);
-    assert(attribute(dom,"mobile-caption-above")==="true","Zodiac still crowds action row",c);
-    assert(attribute(dom,"mobile-caption-within-dock")==="true","Zodiac clipped",c);
+    assert(attribute(dom,"mobile-caption-above")==="true",c.tools?"Zodiac leaked into Tools":"Zodiac still crowds action row",c);
+    if(!c.tools){
+      assert(attribute(dom,"mobile-caption-visible")==="true","derived Zodiac disappeared",c);
+      assert(attribute(dom,"mobile-caption-within-dock")==="true","Zodiac clipped",c);
+      assert(Math.abs(num(dom,"mobile-zodiac-font")-12)<=.25,"Zodiac type shrunk",c);
+    }
     assert(num(dom,"mobile-input-width")>=130,"exact-time input squeezed",c);
-    assert(Math.abs(num(dom,"mobile-zodiac-font")-12)<=.25,"Zodiac type shrunk",c);
   }
   const label=`${c.width}x${c.height}${c.long?"-long":""}${c.edit?"-edit":""}${c.tools?"-tools":""}`;
   if(["320x844","390x844","481x844","1440x900","1440x900-edit"].includes(label)){
