@@ -333,7 +333,7 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
     padding:0;
     border:0;
     color:color-mix(in srgb,var(--zodiac) 23%,var(--ink));
-    font-size:11px;
+    font-size:12px;
     font-weight:580;
     line-height:1.2;
     letter-spacing:.02em;
