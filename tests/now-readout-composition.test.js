@@ -21,6 +21,14 @@ test("desktop Now uses balanced grid columns, never absolute positioning", () =>
   assert.ok(!rail.slice(0,350).includes("↺"), "Now does not need a lone floating reset glyph");
 });
 
+test("UTC basis is subordinate to, not inside, the centered timestamp", () => {
+  const renderer = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
+  assert.ok(page.includes('id="readout-timezone" class="readout-timezone"'));
+  assert.ok(renderer.includes('setText("instant-readout", formatAtlasCivil(fields));'));
+  assert.ok(renderer.includes('setText("readout-timezone", offsetLabel);'));
+  assert.ok(css.includes('.instrument-readout .readout-timezone'));
+});
+
 test("editing keeps the balanced read-head and reserved Now cell", () => {
   assert.ok(editor.includes('readout.closest(".selected-instant-line") ?? readout'));
   assert.ok(css.includes('data-instant-editor-open="true"] .selected-instant-line #now-button.readout-now'));
