@@ -406,6 +406,8 @@ function renderState() {
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.targetDate = state.targetValid ? formatDate(state.targetDate) : "invalid";
   instrument.dataset.deltaYears = String(currentDelta);
+  setText("research-controls-base", formatDate(currentBase).replaceAll("-","/"));
+  setText("research-controls-delta", currentDelta.toLocaleString("en-US")+" 年");
   instrument.dataset.phaseDisplay = "signed-shortest";
   instrument.dataset.gregorianPhase = String(state.phases.gregorian);
   instrument.dataset.yearSequencePhase = String(state.phases.yearSequence);
