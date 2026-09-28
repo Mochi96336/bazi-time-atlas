@@ -57,6 +57,31 @@ if(
 ) throw new Error("Bare Research entry MUST show original full Research and original year strip: "+original.url);
 console.log("[explorer] PASS public Research entry restores original full research and year strip");
 
+// Unlike the previous gates, this proof checks actual CSS visibility in a
+// native 390/1440 iframe. It must fail if anyone hides the ORIGINAL Research
+// sections or just swaps to a competing replacement Year band again.
+for(const spec of [
+  {suffix:"?bare=1",width:"390",bare:"true"},
+  {suffix:"",width:"390",bare:"false"},
+  {suffix:"?desktop=1",width:"1440",bare:"false"}
+]){
+  const originalView=dump("scripts/fixtures/research-original-r0-390.html"+spec.suffix,13000);
+  const originalProbe=tag(originalView.dom,"probe","output");
+  if(
+    attr(originalProbe,"data-ready")!=="true" ||
+    attr(originalProbe,"data-width")!==spec.width ||
+    attr(originalProbe,"data-bare")!==spec.bare ||
+    attr(originalProbe,"data-original-strip")!=="visible" ||
+    attr(originalProbe,"data-original-evidence")!=="visible" ||
+    attr(originalProbe,"data-duplicate-story")!=="hidden"
+  ){
+    throw new Error("R0 true viewport original Research failed: "+originalView.url+
+      " "+(attr(originalProbe,"data-error")??"missing browser fixture output"));
+  }
+}
+console.log("[explorer] PASS default/2024 native mobile and 1440 original Research visual hierarchy");
+
+
 for(const path of [
   "recurrence.html?delta=0",
   "recurrence.html?mode=annual",
