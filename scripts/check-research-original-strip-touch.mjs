@@ -98,12 +98,21 @@ try{
     return result.result.value;
   };
   let original;
+  // Nested-iframe JS may publish ready before the final CSS layout pass.
+  // Touch coordinates MUST be measured only after the original in-flow Year
+  // strip has reached its real below-the-instrument y coordinate (not 0,5).
   for(let n=0;n<180;n++){
     const p=await inspect();
-    if(p.ready&&p.target==="2024-02-10"&&p.day&&p.slider===40){
-      original=p;break;
+    if(p.ready&&p.target==="2024-02-10"&&p.day&&p.slider===40 &&
+       p.rect.y>200&&p.rect.w>280&&p.rect.h>=40){
+      await sleep(90);
+      const settled=await inspect();
+      if(settled.ready&&Math.abs(settled.rect.y-p.rect.y)<4 &&
+        Math.abs(settled.rect.w-p.rect.w)<1){
+        original=settled;break;
+      }
     }
-    await sleep(60);
+    await sleep(70);
   }
   assert.ok(original,"original Year strip did not initialize");
   assert.equal(original.viewport,390,"must target a real 390px iframe");
