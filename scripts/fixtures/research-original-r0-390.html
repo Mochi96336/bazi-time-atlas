@@ -9,6 +9,9 @@ iframe{display:block;width:390px;height:1300px;border:0}output{display:none}</st
 <script>
 const query=new URLSearchParams(location.search);
 const desktop=query.get("desktop")==="1";
+const requestedWidth=Number(query.get("width"));
+const width=desktop?1440:
+  ([320,390,768].includes(requestedWidth)?requestedWidth:390);
 const bare=query.get("bare")==="1";
 const boundary=query.get("boundary")==="1";
 const interactive=query.get("interactive")==="1";
@@ -16,8 +19,13 @@ const deep=query.get("deep")==="1";
 const precise=query.get("precise")==="1";
 const iframe=document.getElementById("research");
 const probe=document.getElementById("probe");
-if(desktop){document.documentElement.style.width="1440px";document.body.style.width="1440px";
-iframe.style.width="1440px";iframe.style.height="1600px";}
+if(width!==390){
+  const outer=Math.max(500,width);
+  document.documentElement.style.width=outer+"px";
+  document.body.style.width=outer+"px";
+  iframe.style.width=width+"px";
+  iframe.style.height="2200px";
+}
 const check=(yes,why)=>{if(!yes)throw Error(why)};
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 iframe.addEventListener("load",async()=>{
@@ -30,7 +38,7 @@ iframe.addEventListener("load",async()=>{
      instrument.dataset.targetDate!=="invalid")break;
    await wait(40);
   }
-  const width=desktop?1440:390;
+
   check(d.documentElement.clientWidth===width,"not a real "+width+"px Research viewport");
   check(d.body.dataset.researchMode==="annual" &&
     d.getElementById("research-free-explorer").hidden &&
