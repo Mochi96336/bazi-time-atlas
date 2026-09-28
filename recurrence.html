@@ -374,7 +374,7 @@
           <strong id="research-year-strip-title">年度時間條</strong>
           <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
         </header>
-        <div class="research-year-track" role="img" aria-label="公曆全年、來源判定的立春年界、所選日期與連續干支日">
+        <div class="research-year-track" role="group" aria-label="原本年度時間條：公曆全年、立春年界及日期拖曳">
           <div class="research-year-line" aria-hidden="true"></div>
           <div id="research-year-li-chun-band" class="research-year-li-chun-band" hidden aria-hidden="true"></div>
           <div class="research-year-marker research-year-start" style="--year-x:0%">
@@ -389,7 +389,15 @@
           <div class="research-year-marker research-year-end" style="--year-x:100%">
             <i aria-hidden="true"></i><strong>12/31</strong><small>公曆年末</small>
           </div>
+          <!-- This slider is a gesture surface for the EXISTING base+Δ date
+               owner, not another date form, timeline or selected-date model. -->
+          <input id="research-year-scrub" class="research-year-scrub"
+            type="range" min="0" max="364" value="0" step="1"
+            aria-label="沿原本年度時間條選擇日期"
+            aria-describedby="research-year-scrub-hint">
         </div>
+        <small id="research-year-scrub-hint" class="research-year-scrub-hint">拖動時間條選擇日期，放開後套用至原本的日期控制。</small>
+        <small id="research-year-scrub-feedback" class="research-year-scrub-feedback" role="status" aria-live="polite" hidden></small>
         <div id="research-year-li-chun-unavailable" class="research-year-li-chun-unavailable" hidden>
           <strong id="research-year-li-chun-unavailable-title">立春 · — → —</strong>
           <span id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析</span>
