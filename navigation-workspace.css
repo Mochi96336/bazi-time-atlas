@@ -116,6 +116,11 @@ body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
   }
 }
 @media (max-width:480px) {
+  /* Keep Research 01 Year/Day story within its proven first viewport while
+     upgrading header links to a genuine 42px touch target. Remove inherited
+     vertical whitespace, never shrink the research timeline or label text. */
+  .recurrence-shell { padding-top:4px; }
+  .recurrence-intro { margin-top:6px; }
   .kinetic-topbar .brand, .recurrence-topbar .brand { display:none; }
   .kinetic-topbar, .recurrence-topbar { justify-content:space-between !important; gap:8px; }
   .kinetic-topbar .topbar-actions { gap:11px; margin:0; width:100%; }
