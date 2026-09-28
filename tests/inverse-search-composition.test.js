@@ -83,7 +83,8 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
 
 test("desktop Find Time leads the action row instead of sitting between Classification and Now", () => {
   assert.match(view, /querySelector\("#classification-overlay-button"\)/);
-  assert.match(view, /insertBefore\(button, classificationButton \?\? nowButton\)/);
+  assert.match(view, /insertBefore\(button, classificationButton \?\? null\)/);
+  assert.ok(view.includes('.instrument-toolbar > .toolbar-group:last-child'), "Find Time must not follow relocated Now");
 });
 
 test("390px find-time keeps one readable single-task surface", () => {
