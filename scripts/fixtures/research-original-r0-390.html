@@ -81,8 +81,9 @@ iframe.addEventListener("load",async()=>{
   const leap=(civilYear%4===0 && civilYear%100!==0)||civilYear%400===0;
   const days=leap?366:365,extra=leap?6:5;
   const full=d.getElementById("research-year-full-cycle");
-  const selectedDay=d.getElementById("research-year-selected-day");
-  const selectedYear=d.getElementById("research-year-selected-year");
+  const selectedDay=d.getElementById("research-cycles-day-target");
+  const selectedYear=d.getElementById("research-cycles-year-target");
+  const cycleCompare=d.getElementById("research-cycle-comparison");
   const transition=d.getElementById("research-year-transition");
   const track=d.querySelector("#research-year-strip .research-year-track");
   const line=d.querySelector("#research-year-strip .research-year-line");
@@ -95,11 +96,15 @@ iframe.addEventListener("load",async()=>{
     [...d.styleSheets].map(sheet=>sheet.href??"inline").join(","));
   check(full?.checkVisibility() && selectedDay?.checkVisibility() &&
     selectedYear?.checkVisibility() && transition?.checkVisibility() &&
-    full.textContent.includes(days+" 天") &&
-    full.textContent.includes("走滿 6 圈，再多 "+extra+" 天") &&
+    full.textContent.includes("輪轉6 次") &&
+    full.textContent.includes("再向前 "+extra+" 位") &&
     strip.dataset.civilYearDays===String(days) &&
     strip.dataset.civilYearDayRemainder===String(extra) &&
-    selectedDay.textContent===strip.dataset.selectedDayPillar,
+    selectedDay.textContent===strip.dataset.selectedDayPillar &&
+    cycleCompare.checkVisibility() &&
+    d.querySelectorAll(".research-cycles-card").length===0 &&
+    /[0-9]{2}\/60/.test(d.getElementById("research-cycles-day-base-ordinal").textContent) &&
+    /[0-9]{2}\/60/.test(d.getElementById("research-cycles-day-target-ordinal").textContent),
     "R1 must use the original year strip's 365/366 and canonical Day");
   if(!bare && !boundary){
     check(selectedYear.textContent==="甲辰" &&
@@ -108,7 +113,7 @@ iframe.addEventListener("load",async()=>{
       "2024 source-based original Year transition or current Year differs");
   }
   if(boundary){
-    check(selectedYear.textContent==="癸卯／甲辰" &&
+    check(selectedYear.textContent==="約癸卯／甲辰" &&
       d.getElementById("research-year-selected-certainty").textContent.includes("需提供時刻") &&
       transition.textContent.includes("癸卯 → 甲辰") &&
       track.dataset.liChunAvailable==="true",
@@ -119,8 +124,19 @@ iframe.addEventListener("load",async()=>{
   check(w.getComputedStyle(d.getElementById("research-year-base-title")).display==="none" &&
     w.getComputedStyle(d.getElementById("research-year-li-chun-title")).display==="none",
     "old floating marker labels can still collide near Li Chun");
+  const ticks=[...d.querySelectorAll("#research-year-jiazi-ticks .research-year-jiazi-tick")];
+  check(ticks.length===Number(strip.dataset.jiaziTickCount) && ticks.length>=6 &&
+    ticks.every(t=>t.dataset.pillar==="甲子") &&
+    ticks.every((t,i)=>i===0 ||
+      Number(t.dataset.dayOffset)-Number(ticks[i-1].dataset.dayOffset)===60),
+    "original Year bar must have genuine 甲子 days at exactly 60-day intervals");
+  const controls=d.getElementById("research-controls");
+  check(controls && !controls.open &&
+    d.getElementById("research-controls-base").textContent.includes("/") &&
+    d.getElementById("research-controls-delta").textContent.includes("年"),
+    "original base control must default to a tiny live-updating closed button");
   for(const selector of [".research-year-key-data",".research-year-transition-line",
-    ".research-year-selection-line",".research-year-full-cycle"]){
+    ".research-cycle-inline",".research-year-full-cycle"]){
     const box=d.querySelector(selector)?.getBoundingClientRect();
     check(box && box.left>=-1 && box.right<=width+1,
       "new ORIGINAL status line overflows "+width+"px: "+selector);
