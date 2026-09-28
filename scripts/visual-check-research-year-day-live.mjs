@@ -7,7 +7,7 @@ const out=path.resolve("tmp/research-live-visual");
 const cases=[
  // R0: actual ORIGINAL Research, not an image of the legacy replacement tab.
  {route:"original",width:390,height:2000,name:"research-r0-original-390.png"},
- {route:"original",width:1440,height:1400,name:"research-r0-original-1440.png"},
+ {route:"original",width:1440,height:2300,name:"research-r0-original-1440.png"},
  {route:"bare",width:390,height:2000,name:"research-r0-default-390.png"},
  // Retain captures of the older explicit-date permalink for compatibility.
  {date:"2024-02-01",width:390,height:1250,name:"research-live-before-390.png"},
