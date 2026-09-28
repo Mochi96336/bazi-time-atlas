@@ -91,16 +91,16 @@ body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
 }
 
 /* Now resets the selected instant; it never starts wall-clock following. */
-.instrument-readout .readout-now {
+#kinetic-instrument .instrument-readout #now-button.readout-now {
   display:inline-flex; align-items:center; justify-content:center;
   min-width:72px; min-height:32px; margin:0 auto 4px; padding:0 8px;
   border:0; border-radius:0; background:transparent;
   color:#b9b29e; font-size:11px; font-weight:620; letter-spacing:.03em;
   cursor:pointer; pointer-events:auto;
 }
-.instrument-readout .readout-now:hover,
-.instrument-readout .readout-now:focus-visible { color:#efe1b7; }
-#kinetic-instrument[data-inverse-time-search="active"] .readout-now { display:none; }
+#kinetic-instrument .instrument-readout #now-button.readout-now:hover,
+#kinetic-instrument .instrument-readout #now-button.readout-now:focus-visible { color:#efe1b7; }
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-readout #now-button.readout-now { display:none; }
 #mobile-now-button { display:none; }
 
 @media (min-width:481px) {
@@ -137,7 +137,7 @@ body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
     inset:4px 9px auto auto !important; min-height:42px !important;
   }
-  .instrument-readout .readout-now { display:none; }
+  #kinetic-instrument .instrument-readout #now-button.readout-now { display:none; }
   .mobile-time-dock .mobile-time-actions {
     display:flex; align-items:center; justify-content:flex-end;
     gap:4px; min-width:0; white-space:nowrap;
