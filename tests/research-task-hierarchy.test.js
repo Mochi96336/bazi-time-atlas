@@ -72,7 +72,9 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
   assert.match(discrete, /先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定/);
-  assert.match(discrete, /一年怎麼走/);
+  assert.match(discrete, /id="research-year-strip-title">年度時間條/);
+  assert.match(discrete, /id="research-year-full-cycle"/);
+  assert.match(discrete, /id="research-year-selected-day"/);
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
   assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
   assert.match(discrete, /id="research-cycle-comparison"/);
