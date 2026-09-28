@@ -80,9 +80,8 @@ iframe.addEventListener("load",async()=>{
       track.dataset.liChunAvailable==="true",
       "2024 source-based original Year transition or current Year differs");
   }
-  check(!d.querySelector("#research-year-same-date-details") ||
-    !d.querySelector("#research-year-same-date-details").open,
-    "optional next-same-date evidence should not compete with the one-year fact");
+  check(d.querySelector(".research-year-same-date-details")?.open===false,
+    "optional next-same-date comparison should not compete with the one-year fact");
   check(w.getComputedStyle(d.getElementById("research-year-base-title")).display==="none" &&
     w.getComputedStyle(d.getElementById("research-year-li-chun-title")).display==="none",
     "old floating marker labels can still collide near Li Chun");
@@ -92,7 +91,7 @@ iframe.addEventListener("load",async()=>{
     check(box && box.left>=-1 && box.right<=width+1,
       "new ORIGINAL status line overflows "+width+"px: "+selector);
   }
-  record("originalCycle","visible");
+  probe.dataset.originalCycle="visible";
   const bounds=strip.getBoundingClientRect();
   check(bounds.left>=-1 && bounds.right<=width+1,
     "restored original strip overflows the "+width+"px viewport");
