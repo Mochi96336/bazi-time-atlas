@@ -289,7 +289,18 @@ function updateReadout(display) {
   const basisLabel = timeContext.dayBoundary === DEFAULT_ATLAS_TIME_CONTEXT.dayBoundary
     ? offsetLabel
     : `${offsetLabel} · 00:00`;
-  setText("instant-readout", `${formatAtlasCivil(fields)} · ${offsetLabel}`);
+  // Keep the same complete textContent contract for temporal probes, while
+  // giving the civil instant and its basis separate visual typography.
+  const instantReadout = textNodes.get("instant-readout");
+  if (instantReadout) {
+    const civil = document.createElement("span");
+    civil.className = "readout-civil";
+    civil.textContent = formatAtlasCivil(fields);
+    const zone = document.createElement("span");
+    zone.className = "readout-zone";
+    zone.textContent = ` · ${offsetLabel}`;
+    instantReadout.replaceChildren(civil, zone);
+  }
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
   setText("hour-active", pillars.hour.name);
