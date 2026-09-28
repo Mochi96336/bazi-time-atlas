@@ -507,8 +507,9 @@ function installRingDrag() {
   });
   compareController = createFreeCompareController({
     instrument,
-    controlGroup:nowButton?.parentElement,
-    insertBefore:nowButton,
+    // The Now shortcut now belongs to the Selected Instant, not the tool rail.
+    controlGroup:document.querySelector(".instrument-toolbar > .toolbar-group:last-child"),
+    insertBefore:document.querySelector("#classification-overlay-button"),
     rings:RINGS,
     ringStates,
     dragController,
