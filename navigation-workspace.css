@@ -231,6 +231,14 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 @media (max-width:480px) {
   /* Keep the time input and its reset next to each other. The Zodiac value is
      secondary context after a clear gap, not the label of the reset button. */
+  /* This field used to consume all spare width, leaving Now visually distant
+     from the digits despite being in the next grid cell. Size the field to
+     the actual 19-character readout; let Zodiac occupy the remaining right edge. */
+  #kinetic-instrument ~ .mobile-time-dock { grid-template-columns:max-content minmax(0,1fr) !important; }
+  .mobile-time-dock .mobile-time-field { width:max-content; max-width:100%; }
+  .mobile-time-dock #mobile-instant-input { width:144px; max-width:100%; }
+  .mobile-time-dock .mobile-time-actions { justify-content:flex-start; }
+  .mobile-time-dock .mobile-time-actions #mobile-zodiac-readout:not([hidden]) { margin-left:auto; }
   .mobile-time-dock .mobile-time-actions { gap:5px; }
   .mobile-time-dock .mobile-time-actions #mobile-now-button { margin-right:4px; }
   .mobile-time-dock .mobile-time-actions #mobile-zodiac-readout:not([hidden]) {
