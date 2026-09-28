@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
+const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const view = readFileSync(new URL("../src/inverse-time-search-view.js", import.meta.url), "utf8");
 
 test("find-time has no detached form panel or range picker", () => {
@@ -46,6 +47,11 @@ test("the annual solar band is visually demoted while four pillar rings stay dir
 
 
 test("find-time owns one task surface instead of inheriting Tools chrome", () => {
+  assert.ok(
+    navigation.includes('body:has(#kinetic-instrument[data-inverse-time-search="active"])')
+      && navigation.includes('.kinetic-topbar #analysis-close { display:none !important; }'),
+    "the global Done control must hide during Find Time; the contextual exit is the only completion action"
+  );
   assert.match(
     css,
     /data-inverse-time-search="active"\] \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-end;/
@@ -83,7 +89,8 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
 
 test("desktop Find Time leads the action row instead of sitting between Classification and Now", () => {
   assert.match(view, /querySelector\("#classification-overlay-button"\)/);
-  assert.match(view, /insertBefore\(button, classificationButton \?\? nowButton\)/);
+  assert.match(view, /insertBefore\(button, classificationButton \?\? null\)/);
+  assert.ok(view.includes('.instrument-toolbar > .toolbar-group:last-child'), "Find Time must not follow relocated Now");
 });
 
 test("390px find-time keeps one readable single-task surface", () => {

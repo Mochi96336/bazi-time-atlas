@@ -6,6 +6,7 @@ const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta
 const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
 const instrumentFirst = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const analysisFirst = readFileSync(new URL("../analysis-first-screen.css", import.meta.url), "utf8");
 const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
 
@@ -90,7 +91,9 @@ test("instrument-first and Analysis controls keep neutral Graphite M2 chrome", (
     analysisFirst,
     /#kinetic-instrument\[data-analysis-open="true"\] \.scale-button\.active,[\s\S]*?color:\s*#e2e4e3;[\s\S]*?box-shadow:\s*inset 0 -1px rgba\(235,238,236,\.48\);/
   );
-  assert.match(instrumentFirst, /#now-button \{[\s\S]*?color:\s*#7a7f80;/);
+  assert.ok(navigation.includes("#kinetic-instrument .instrument-readout #now-button.readout-now"));
+  assert.ok(navigation.includes("color:#b9b29e"));
+  assert.ok(navigation.includes("background:transparent"));
 });
 
 test("neutral chrome does not disturb the matte material or warm semantic channels", () => {

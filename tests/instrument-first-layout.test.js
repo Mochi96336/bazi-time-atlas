@@ -25,7 +25,7 @@ test("desktop wheel owns the viewport instead of a capped document column", () =
   assert.doesNotMatch(css, /\.kinetic-shell\s*\{[^}]*width:\s*min\(1760px,\s*100%\)/s);
   assert.match(
     css,
-    /\.instrument-shell\s*\{[\s\S]*?height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);[\s\S]*?container-type:\s*size;/
+    /\.instrument-shell\s*\{[\s\S]*?height:\s*max\(720px,\s*calc\(100dvh - 64px\)\);[\s\S]*?container-type:\s*size;/
   );
   assert.match(
     css,
@@ -123,24 +123,20 @@ test("ordinary reading hides observation-window presets and analysis transport c
   );
 });
 
-test("ordinary time navigation leaves Now as the only toolbar shortcut", () => {
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-start;[\s\S]*?align-items:\s*center;[\s\S]*?gap:\s*2px;/
-  );
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar > \.toolbar-group\s*\{[\s\S]*?flex-wrap:\s*nowrap;/
-  );
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*1px;/
-  );
-  assert.doesNotMatch(
-    css,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar\s*\{[^}]*justify-content:\s*flex-start;/s
-  );
+test("Now follows the selected-time surface instead of the retired top-left toolbar", () => {
+  const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
+  const kinetic = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
+  const mobile = readFileSync(new URL("../src/mobile-time-control.js", import.meta.url), "utf8");
+  assert.ok(html.includes('id="instant-readout"'));
+  assert.ok(html.includes('id="now-button" class="readout-now"'));
+  assert.ok(html.includes('id="mobile-time-apply"'));
+  assert.ok(html.includes('id="mobile-now-button"'));
+  assert.ok(navigation.includes("#kinetic-instrument .instrument-readout #now-button.readout-now"));
+  assert.ok(navigation.includes('data-analysis-open="true"') && navigation.includes(".instrument-toolbar { display:none !important;"));
+  assert.ok(mobile.includes('source:"mobile-now"'));
+  assert.ok(kinetic.includes('controlGroup:document.querySelector(".instrument-toolbar > .toolbar-group:last-child")'));
 });
+
 
 test("ordinary reading retires the duplicate Selected Instant caption", () => {
   assert.match(

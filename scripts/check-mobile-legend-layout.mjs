@@ -130,31 +130,27 @@ function validateNormal(run, probe, { edited = false } = {}) {
     );
   }
 
-  if (
-    Math.abs(open.top - toolbar.top) > 3
-    || open.height < 30
-    || !Number.isFinite(openFontSize)
-    || openFontSize < 8.5
-  ) {
+  const dock = rect(probe, "mobile-time-dock", "normal", run.url);
+  const timeInput = rect(probe, "mobile-time-input", "normal", run.url);
+  const openCenter = (open.top + open.bottom) / 2;
+  if (Math.abs(openCenter - topbarCenter) > 2.5 ||
+    open.height < 40 || !Number.isFinite(openFontSize) || openFontSize < 10 ||
+    open.left < researchNav.right + 3) {
     throw new Error(
-      "normal: Tools entry fell out of the primary mobile action row " +
-      "(toolbarTop=" + toolbar.top.toFixed(1) +
-      ", open=" + open.top.toFixed(1) + ".." + open.bottom.toFixed(1) +
-      ", font=" + openFontSize + "): " + run.url
+      "normal: flat Tools header is not centered or overlaps Research " +
+      "(ResearchRight=" + researchNav.right.toFixed(1) +
+      ", Tools=" + open.left.toFixed(1) + ".." + open.right.toFixed(1) +
+      "/h" + open.height.toFixed(1) + "/" + openFontSize + "px): " + run.url
     );
   }
-  if (
-    Math.abs(now.top - open.top) > 2
-    || Math.abs(now.bottom - open.bottom) > 2
-    || now.height < 30
-    || !Number.isFinite(nowFontSize)
-    || nowFontSize < 8.5
-  ) {
+  if (requireAttr(probe, "data-now-visible", "normal", run.url) !== "true" ||
+    now.height < 40 || !Number.isFinite(nowFontSize) || nowFontSize < 9.5 ||
+    now.left < timeInput.right + 2 || now.right > dock.right + 1 ||
+    Math.abs(now.bottom - timeInput.bottom) > 16) {
     throw new Error(
-      "normal: Now and Tools no longer share one readable action row " +
-      "(now=" + now.top.toFixed(1) + ".." + now.bottom.toFixed(1) + "/" + nowFontSize +
-      "px, tools=" + open.top.toFixed(1) + ".." + open.bottom.toFixed(1) + "/" + openFontSize +
-      "px): " + run.url
+      "normal: Now is not a separate, usable action next to selected mobile time " +
+      "(now=" + JSON.stringify(now) + "/" + nowFontSize + "px, input=" +
+      JSON.stringify(timeInput) + ", dock=" + JSON.stringify(dock) + "): " + run.url
     );
   }
 
@@ -227,12 +223,16 @@ function validateClassification(run, probe) {
 function validateAnalysis(run, probe) {
   const toolbar = rect(probe, "toolbar", "analysis", run.url);
   const close = rect(probe, "close", "analysis", run.url);
-  const actionBoxes = ["find-time", "classification", "solar-time", "now"].map(name => ({
+  const actionBoxes = ["find-time", "classification", "solar-time"].map(name => ({
     name,
     box:rect(probe, name, "analysis", run.url),
     fontSize:Number.parseFloat(requireAttr(probe, `data-${name}-font-size`, "analysis", run.url))
   }));
   const fourPillars = rect(probe, "four-pillars", "analysis", run.url);
+  const topbar = rect(probe, "topbar", "analysis", run.url);
+  const now = rect(probe, "now", "analysis", run.url);
+  const dock = rect(probe, "mobile-time-dock", "analysis", run.url);
+  const timeInput = rect(probe, "mobile-time-input", "analysis", run.url);
   const fourPillarCells = Array.from({ length:4 }, (_, index) =>
     rect(probe, `four-pillar-cell${index}`, "analysis", run.url)
   );
@@ -261,24 +261,29 @@ function validateAnalysis(run, probe) {
     throw new Error("analysis: retired mobile dashboard controls resurfaced: " + run.url);
   }
 
-  for (const name of ["find-time", "classification", "solar-time", "now"]) {
+  for (const name of ["find-time", "classification", "solar-time"]) {
     if (requireAttr(probe, `data-${name}-visible`, "analysis", run.url) !== "true") {
       throw new Error("analysis: primary mobile Tools action disappeared (" + name + "): " + run.url);
     }
+  }
+  const nowFont = Number.parseFloat(requireAttr(probe, "data-now-font-size", "analysis", run.url));
+  if (requireAttr(probe, "data-now-visible", "analysis", run.url) !== "true" ||
+    now.height < 40 || !Number.isFinite(nowFont) || nowFont < 9.5 ||
+    now.left < timeInput.right + 2 || now.right > dock.right + 1) {
+    throw new Error("analysis: Now disappeared from the selected-time dock or overlaps its input: " + run.url);
   }
   if (requireAttr(probe, "data-cursor-note-visible", "analysis", run.url) !== "false") {
     throw new Error("analysis: duplicate Selected Instant caption resurfaced: " + run.url);
   }
 
-  if (
-    Math.abs(close.top - toolbar.top) > 2
-    || Math.abs(close.bottom - toolbar.bottom) > 3
-    || close.height < 40
-  ) {
+  const headerCenter = (topbar.top + topbar.bottom) / 2;
+  const closeCenter = (close.top + close.bottom) / 2;
+  if (Math.abs(closeCenter - headerCenter) > 2.5 || close.height < 40 ||
+    close.bottom > toolbar.top - 3) {
     throw new Error(
-      "analysis: Done did not return to the primary mobile action row " +
-      "(toolbar=" + toolbar.top.toFixed(1) + ".." + toolbar.bottom.toFixed(1) +
-      ", close=" + close.top.toFixed(1) + ".." + close.bottom.toFixed(1) + "): " + run.url
+      "analysis: Done must stay in the primary header above contextual Tools " +
+      "(header=" + JSON.stringify(topbar) + ", Done=" + JSON.stringify(close) +
+      ", secondary=" + JSON.stringify(toolbar) + "): " + run.url
     );
   }
 

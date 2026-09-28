@@ -78,7 +78,7 @@
       const classificationWarning = classificationLegend?.querySelector(".classification-warning") ?? null;
       const findTime = doc.querySelector("#inverse-time-search-button");
       const solarTime = doc.querySelector("#solar-time-tool-button");
-      const now = doc.querySelector("#now-button");
+      const now = doc.querySelector("#mobile-now-button");
       const play = doc.querySelector("#play-button");
       const cursorNote = doc.querySelector("#cursor-layer .cursor-note");
       const mobileTimeDock = doc.querySelector("#mobile-time-dock");
@@ -106,6 +106,8 @@
       writeRect("classificationLegend", classificationLegend?.getBoundingClientRect());
       writeRect("solarTime", solarTime?.getBoundingClientRect());
       writeRect("now", now?.getBoundingClientRect());
+      writeRect("mobileTimeDock", mobileTimeDock?.getBoundingClientRect());
+      writeRect("mobileTimeInput", mobileTimeInput?.getBoundingClientRect());
       writeRect("fourPillars", fourPillars?.getBoundingClientRect());
       fourPillarCells.forEach((cell, index) => writeRect(`fourPillarCell${index}`, cell.getBoundingClientRect()));
 

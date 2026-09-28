@@ -86,9 +86,9 @@ export function installAtlasSolarTimeAnalysis(
   const existing = document.querySelector("#atlas-solar-time-analysis");
   if (existing) return existing;
 
-  const nowButton = document.querySelector("#now-button");
   const classificationButton = document.querySelector("#classification-overlay-button");
-  const actionGroup = nowButton?.parentElement ?? null;
+  // Tools are owned by the secondary toolbar, never by the relocated Now.
+  const actionGroup = document.querySelector(".instrument-toolbar > .toolbar-group:last-child");
   const toolButton = document.createElement("button");
   toolButton.id = "solar-time-tool-button";
   toolButton.className = "control-button";
@@ -97,7 +97,7 @@ export function installAtlasSolarTimeAnalysis(
   toolButton.title = "輸入實際經度，比較民用、平太陽與視太陽時計時";
   toolButton.setAttribute("aria-pressed", "false");
   toolButton.setAttribute("aria-controls", "atlas-solar-time-analysis");
-  actionGroup?.insertBefore(toolButton, nowButton ?? null);
+  actionGroup?.insertBefore(toolButton, classificationButton ?? null);
 
   const panel = document.createElement("section");
   panel.id = "atlas-solar-time-analysis";

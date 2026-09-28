@@ -93,6 +93,7 @@ const evidenceBottom = numberAttr(probe, "data-evidence-bottom", page.url);
 const evidenceLeft = numberAttr(probe, "data-evidence-left", page.url);
 const evidenceRight = numberAttr(probe, "data-evidence-right", page.url);
 const evidenceGridWidth = numberAttr(probe, "data-evidence-grid-width", page.url);
+const closeLeft = numberAttr(probe, "data-close-left", page.url);
 const closeTop = numberAttr(probe, "data-close-top", page.url);
 const closeBottom = numberAttr(probe, "data-close-bottom", page.url);
 const closeRight = numberAttr(probe, "data-close-right", page.url);
@@ -135,8 +136,8 @@ if (scrollHeight > height + 90) {
 if (requireAttr(probe, "data-site-nav-display", page.url) === "none") {
   throw new Error(`wide desktop: global Research exit disappeared in focused Tools mode: ${page.url}`);
 }
-if (siteNavRight > toolbarLeft - 24) {
-  throw new Error(`wide desktop: global Research exit collides with Tools actions (navRight=${siteNavRight}, toolbarLeft=${toolbarLeft}): ${page.url}`);
+if (siteNavRight > closeLeft - 4) {
+  throw new Error(`wide desktop: Research exit collides with the fixed Tools/Done slot (navRight=${siteNavRight}, closeLeft=${closeLeft}): ${page.url}`);
 }
 const topbarCenter = (topbarTop + topbarBottom) / 2;
 const researchCenter = (researchTop + researchBottom) / 2;
@@ -146,8 +147,10 @@ if (researchHeight < 28 || Math.abs(researchCenter - topbarCenter) > 2) {
     `(research=${researchTop}-${researchBottom}/h${researchHeight}, topbar=${topbarTop}-${topbarBottom}): ${page.url}`
   );
 }
-if (toolbarTop < topbarTop || toolbarBottom > topbarBottom + 2) {
-  throw new Error(`wide desktop: primary actions did not converge into the global top row (topbar=${topbarTop}-${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
+// Deliberate F1 hierarchy: global Research and Tools/Done share the header;
+ // contextual analysis actions form a second rail over the instrument below it.
+if (toolbarTop < topbarBottom + 2 || toolbarBottom > topbarBottom + 58) {
+  throw new Error(`wide desktop: analysis actions are not in their dedicated secondary row (topbarBottom=${topbarBottom}, toolbar=${toolbarTop}-${toolbarBottom}): ${page.url}`);
 }
 if (
   requireAttr(probe, "data-legend-display", page.url) !== "none"
@@ -171,8 +174,8 @@ if (evidenceRight < width - 2 || evidenceRight > width + 1 || evidenceLeft < wid
 if (evidenceGridWidth < 240) {
   throw new Error(`wide desktop: Four Pillars summary is squeezed inside the right rail (gridWidth=${evidenceGridWidth}): ${page.url}`);
 }
-if (Math.abs(closeTop - toolbarTop) > 2 || Math.abs(closeBottom - toolbarBottom) > 3 || closeRight < width - 60) {
-  throw new Error(`wide desktop: Done action is not integrated into the primary action row (toolbar=${toolbarTop}-${toolbarBottom}, close=${closeTop}-${closeBottom}@${closeRight}): ${page.url}`);
+if (Math.abs((closeTop + closeBottom) / 2 - topbarCenter) > 2 || closeRight < width - 60) {
+  throw new Error(`wide desktop: Done is not fixed in the same global header as Research (header=${topbarTop}-${topbarBottom}, close=${closeTop}-${closeBottom}@${closeRight}): ${page.url}`);
 }
 
 if (scaleVisible !== 0 || requireAttr(probe, "data-play-display", page.url) !== "none" || ringToggleVisible !== 0) {
