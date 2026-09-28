@@ -41,3 +41,19 @@ test("mobile semantics separate derived Zodiac from the input/Now control row", 
   assert.match(design, /\.mobile-time-dock \.mobile-time-field\s*\{[^}]*grid-row:2;/);
   assert.match(design, /\.mobile-time-dock \.mobile-time-actions\s*\{[^}]*grid-row:2;/);
 });
+
+test("browser gate measures the real time center, rail ownership, mobile hitbox and long-year case", () => {
+  const browser = readFileSync(new URL("../scripts/check-now-readout-layout.mjs", import.meta.url), "utf8");
+  const fixture = readFileSync(new URL("../scripts/fixtures/now-readout-layout.html", import.meta.url), "utf8");
+  const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert.match(packageJson.scripts["visual:check"], /check-now-readout-layout\.mjs/);
+  assert.match(browser, /--dump-dom/);
+  assert.match(browser, /civil-center-error/);
+  assert.match(browser, /now-position/);
+  assert.match(browser, /mobile-caption-above/);
+  assert.match(browser, /mobile-input-width/);
+  assert.match(browser, /long:true/);
+  assert.match(browser, /edit:true/);
+  assert.match(fixture, /getBoundingClientRect/);
+  assert.match(fixture, /readout\.click\(\)/);
+});
