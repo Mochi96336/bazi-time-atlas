@@ -19,7 +19,9 @@ const frames = [
 ];
 const get = (markup,key) => markup.match(new RegExp('data-'+key+'="([^"]*)"'))?.[1] ?? null;
 for (const frame of frames) {
-  const args = new URLSearchParams(Object.fromEntries(Object.entries(frame).map(([k,v])=>[k,String(v)])));
+  const args = new URLSearchParams(Object.fromEntries(
+    Object.entries(frame).map(([k,v])=>[k,v === true ? "1" : String(v)])
+  ));
   const url = new URL("scripts/fixtures/now-readhead-geometry.html?"+args,root).href;
   const process = spawnSync(browser,[
     "--headless=new","--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
