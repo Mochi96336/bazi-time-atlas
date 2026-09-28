@@ -6,24 +6,27 @@ const page = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const css = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const editor = readFileSync(new URL("../src/selected-instant-editor.js", import.meta.url), "utf8");
 
-test("desktop Now shares a visual line while Selected Instant stays centered", () => {
+test("desktop Selected Instant owns the center and Now stays in normal flow", () => {
   assert.match(page, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"/);
-  assert.match(css, /\.selected-instant-line\s*\{\s*position:relative;[\s\S]*?width:max-content;[\s\S]*?margin:0 auto;/);
-  assert.match(css, /\.selected-instant-line #now-button\.readout-now\s*\{\s*position:absolute;[\s\S]*?left:calc\(100% \+ 10px\);[\s\S]*?transform:translateY\(-50%\);/);
-  assert.match(css, /\.instrument-readout\s*\{[\s\S]*?padding-bottom:28px;/);
+  assert.match(css, /\.selected-instant-line\s*\{\s*display:grid;[\s\S]*?grid-template-columns:72px max-content 72px;[\s\S]*?justify-content:center;/);
+  assert.match(css, /\.selected-instant-line::before\s*\{[\s\S]*?grid-column:1;[\s\S]*?width:72px;/);
+  assert.match(css, /#instant-readout\s*\{[\s\S]*?grid-column:2;/);
+  assert.match(css, /#now-button\.readout-now\s*\{[\s\S]*?grid-column:3;[\s\S]*?position:static;[\s\S]*?transform:none;/);
+  assert.doesNotMatch(css, /left:calc\(100% \+/);
+  assert.doesNotMatch(css, /position:absolute;[\s\S]{0,220}#now-button/);
 });
 
-test("opening inline editor does not split the timestamp and Now action", () => {
+test("editor hides Now without changing the symmetric grid geometry", () => {
   assert.match(editor, /readout\.closest\("\.selected-instant-line"\) \?\? readout/);
   assert.match(css, /data-instant-editor-open="true"\] \.selected-instant-line #now-button\.readout-now\s*\{\s*visibility:hidden;/);
-  assert.match(css, /@media \(min-width:481px\) and \(max-width:820px\)/);
+  assert.match(css, /grid-template-columns:72px max-content 72px/);
 });
 
-test("mobile Now is adjacent to its time input and precedes Zodiac context", () => {
-  const mobile = page.match(/<div class="mobile-time-actions">([\s\S]*?)<\/div>/)?.[1];
-  assert.ok(mobile);
-  const apply = mobile.indexOf('id="mobile-time-apply"');
-  const now = mobile.indexOf('id="mobile-now-button"');
-  const zodiac = mobile.indexOf('id="mobile-zodiac-readout"');
-  assert.ok(apply >= 0 && apply < now && now < zodiac);
+test("mobile keeps time and Now in the control row and moves Zodiac below", () => {
+  const actions = page.match(/<div class="mobile-time-actions">([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(actions);
+  assert.match(actions, /id="mobile-time-apply"[\s\S]*id="mobile-now-button"/);
+  assert.doesNotMatch(actions, /mobile-zodiac-readout/);
+  assert.ok(page.indexOf('id="mobile-zodiac-readout"') > page.indexOf('class="mobile-time-actions"'));
+  assert.match(css, /#mobile-zodiac-readout:not\(\[hidden\]\)\s*\{[\s\S]*?grid-column:1 \/ -1;[\s\S]*?justify-self:end;/);
 });
