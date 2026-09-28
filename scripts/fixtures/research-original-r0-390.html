@@ -32,14 +32,21 @@ iframe.addEventListener("load",async()=>{
     d.getElementById("research-free-explorer").hidden &&
     !d.getElementById("research-advanced-details"),
     "R0 public route still prioritizes a replacement Year story or folds main content");
+  // Restore the long-range Research chapters. Preserve the ORIGINAL small
+  // within-chapter disclosure around the optional 60-day wheel; R0 only
+  // removes the NEW top-level wrapper that hid ALL Research content.
   const ids=["research-discrete","research-cycle-comparison","recurrence-instrument",
-    "research-year-strip","research-sexagenary-cycle","research-astronomy",
+    "research-year-strip","research-astronomy",
     "research-evidence","four-pillar-determinacy"];
   for(const id of ids){
     const el=d.getElementById(id);
     check(el&&!el.hidden&&el.checkVisibility(),
       "ORIGINAL Research module absent or hidden: "+id);
   }
+  const optionalWheel=d.getElementById("research-sexagenary-cycle");
+  check(optionalWheel && (optionalWheel.checkVisibility() ||
+    optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),
+    "original 60-day wheel was deleted instead of retaining its original optional disclosure");
   check(strip.dataset.ready==="true" &&
     instrument.dataset.targetDate!=="invalid" &&
     strip.dataset.selectedYearPillar!=="unavailable",
