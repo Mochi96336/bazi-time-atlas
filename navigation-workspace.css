@@ -22,6 +22,12 @@
 .kinetic-topbar .site-nav a:hover,
 .recurrence-topbar .site-nav a:hover,
 .topbar .site-nav a:hover { color:#e3e8e6 !important; }
+/* Legacy Birth CSS has a higher-specificity 9px mobile override. Keep primary
+   navigation visibly stronger than its Research destination at all widths. */
+body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
+  font-size:12px !important;
+}
+
 .kinetic-topbar .site-nav a[aria-current="page"],
 .recurrence-topbar .site-nav a[aria-current="page"] {
   color:#d6e1de !important; opacity:1 !important;
