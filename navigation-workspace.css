@@ -90,6 +90,13 @@ body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
   align-items:center; justify-content:flex-end;
 }
 
+/* Find Time owns a single completion action in its contextual rail.
+   Legacy CSS hid Done while it lived inside the instrument; after moving
+   Done to the global topbar that descendant selector no longer reaches it.
+   Reserve the fixed slot to prevent page navigation from jumping. */
+body:has(#kinetic-instrument[data-inverse-time-search="active"])
+  .kinetic-topbar #analysis-close { display:none !important; }
+
 /* Now resets the selected instant; it never starts wall-clock following. */
 #kinetic-instrument .instrument-readout #now-button.readout-now {
   display:inline-flex; align-items:center; justify-content:center;
