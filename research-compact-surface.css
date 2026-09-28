@@ -107,3 +107,13 @@
   }
   .research-year-jiazi-tick>small{font-size:8px}
 }
+
+/* Approximate seasonal POSITION (Feb 2–6), deliberately not the real Li Chun epoch. */
+.research-year-approx-li-chun{
+  position:absolute;top:23px;height:14px;
+  background:rgba(202,178,121,.11);
+  border-left:1px dashed rgba(208,182,129,.65);
+  border-right:1px dashed rgba(208,182,129,.3);
+  pointer-events:none;z-index:1;
+}
+.research-year-approx-li-chun[hidden]{display:none}
