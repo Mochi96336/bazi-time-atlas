@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Now read-head geometry probe</title>
+  <style>
+    html,body{margin:0;min-height:100%;background:#090b0f}
+    #stage{display:block;border:0}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Actual Atlas read-head"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const query = new URLSearchParams(location.search);
+    const width = Number(query.get("width")) || 1440;
+    const height = Number(query.get("height")) || 900;
+    const editing = query.get("editor") === "1";
+    const tools = query.get("tools") === "1";
+    const stage = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    stage.style.width = width + "px";
+    stage.style.height = height + "px";
+    stage.src = new URL("../../?instant=2026-09-13T23%3A43%3A42.000Z" + (tools ? "&tools=1" : ""), location.href).href;
+    const box = node => node.getBoundingClientRect();
+    const rounded = x => Number(x.toFixed(2));
+    let attempts = 0, clicked = false;
+    function measure() {
+      const win = stage.contentWindow;
+      const doc = stage.contentDocument;
+      const instrument = doc?.querySelector("#kinetic-instrument");
+      const readout = doc?.querySelector(".instrument-readout");
+      const line = doc?.querySelector(".selected-instant-line");
+      const balance = doc?.querySelector(".selected-instant-balance");
+      const time = doc?.querySelector("#instant-readout");
+      const now = doc?.querySelector("#now-button");
+      if (!instrument?.dataset.selectedInstantMs || !readout || !line || !balance || !time || !now || time.textContent === "—") {
+        if (attempts++ < 100) return setTimeout(measure, 75);
+        probe.dataset.error = "read-head did not initialize";
+        return;
+      }
+      if (editing && !clicked) {
+        if (readout.dataset.instantEditorAvailable !== "true") {
+          if (attempts++ < 100) return setTimeout(measure, 75);
+          probe.dataset.error = "inline editor unavailable";
+          return;
+        }
+        time.click();
+        clicked = true;
+      }
+      if (editing && instrument.dataset.instantEditorOpen !== "true") {
+        if (attempts++ < 100) return setTimeout(measure, 75);
+        probe.dataset.error = "inline editor did not open";
+        return;
+      }
+      const ir = box(instrument), tr = box(time), nr = box(now), br = box(balance), rr = box(readout);
+      const cs = win.getComputedStyle(now), grid = win.getComputedStyle(line);
+      probe.dataset.width = String(win.innerWidth);
+      probe.dataset.analysisOpen = instrument.dataset.analysisOpen ?? "";
+      probe.dataset.timeCenter = String(rounded((tr.left + tr.right) / 2));
+      probe.dataset.axisCenter = String(rounded((ir.left + ir.right) / 2));
+      probe.dataset.nowGap = String(rounded(nr.left - tr.right));
+      probe.dataset.nowY = String(rounded((nr.top + nr.bottom) / 2 - (tr.top + tr.bottom) / 2));
+      probe.dataset.nowWidth = String(rounded(nr.width));
+      probe.dataset.balanceWidth = String(rounded(br.width));
+      probe.dataset.nowPosition = cs.position;
+      probe.dataset.nowVisibility = cs.visibility;
+      probe.dataset.lineLayout = grid.display;
+      probe.dataset.readoutBottom = String(rounded(rr.bottom));
+      probe.dataset.instrumentBottom = String(rounded(ir.bottom));
+      probe.dataset.bodyOverflow = String(Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth) > width + 2);
+      probe.dataset.editorOpen = String(instrument.dataset.instantEditorOpen === "true");
+      probe.dataset.ready = "true";
+    }
+    stage.addEventListener("load", measure);
+  </script>
+</body>
+</html>
