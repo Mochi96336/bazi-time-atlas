@@ -90,7 +90,7 @@ if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('clas
 if (discrete.includes('class="closure-grid"') || discrete.includes('class="milestone-table"') || discrete.includes('id="milestone-rows"')) {
   throw new Error(`retired duplicate closure/milestone UI returned: ${probe.url}`);
 }
-const cycleComparison = discrete.match(/<section[^>]*id="research-cycle-comparison"[^>]*>/)?.[0] ?? "";
+const cycleComparison = discrete.match(/<div[^>]*id="research-cycle-comparison"[^>]*>/)?.[0] ?? "";
 const dayWheel = discrete.match(/<svg[^>]*id="research-sexagenary-wheel"[^>]*>/)?.[0] ?? "";
 const targetPillar = cycleComparison.match(/data-target-day-pillar="([^"]*)"/)?.[1] ?? "";
 const activeIndex = Number(dayWheel.match(/data-active-index="([^"]*)"/)?.[1]);
