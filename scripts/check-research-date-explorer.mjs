@@ -72,6 +72,7 @@ for(const spec of [
     attr(originalProbe,"data-width")!==spec.width ||
     attr(originalProbe,"data-bare")!==spec.bare ||
     attr(originalProbe,"data-original-strip")!=="visible" ||
+    attr(originalProbe,"data-original-cycle")!=="visible" ||
     attr(originalProbe,"data-original-evidence")!=="visible" ||
     attr(originalProbe,"data-duplicate-story")!=="hidden"
   ){
