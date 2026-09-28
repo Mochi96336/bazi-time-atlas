@@ -153,8 +153,10 @@
 
       <div class="instrument-readout" aria-live="polite">
         <div class="readout-kicker">Selected instant</div>
-        <div id="instant-readout">—</div>
-        <button id="now-button" class="readout-now" type="button" aria-label="將選定時間回到現在">↺ 現在</button>
+        <div class="selected-instant-line">
+          <div id="instant-readout">—</div>
+          <button id="now-button" class="readout-now" type="button" aria-label="將選定時間回到現在" title="回到現在"><span aria-hidden="true">↺</span><span class="now-label">現在</span></button>
+        </div>
         <div class="readout-meta">
           <span>太陽黃經 <strong id="solar-readout">—</strong></span>
           <span>所在節氣區段 <strong id="term-readout">—</strong></span>
@@ -179,9 +181,9 @@
       </label>
       <div class="mobile-time-actions">
         <button id="mobile-time-apply" type="button">套用</button>
-        <!-- Preserve the current-Zodiac datum next to the mobile time input. -->
-        <span id="mobile-zodiac-readout" aria-live="off" hidden></span>
         <button id="mobile-now-button" type="button" aria-label="將選定時間回到現在">現在</button>
+        <!-- Classification remains informational and follows the time action. -->
+        <span id="mobile-zodiac-readout" aria-live="off" hidden></span>
       </div>
     </section>
 

@@ -52,7 +52,9 @@ export function installSelectedInstantEditor(
       <button type="submit" data-selected-instant-editor-apply>套用</button>
     </div>
   `;
-  readout.insertAdjacentElement("afterend", form);
+  // The date and its Now shortcut share one visual line. Insert the edit
+  // form after that line, not between the date and the shortcut.
+  (readout.closest(".selected-instant-line") ?? readout).insertAdjacentElement("afterend", form);
 
   const input = form.querySelector("[data-selected-instant-editor-input]");
   const basis = form.querySelector("[data-selected-instant-editor-basis]");
