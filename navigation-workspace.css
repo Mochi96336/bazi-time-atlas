@@ -172,6 +172,21 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   #kinetic-instrument .instrument-readout {
     padding-bottom:0;
   }
+  #kinetic-instrument .instrument-readout .readout-timezone {
+    display:block;
+    margin:-2px auto 0;
+    padding:0;
+    color:#838f8c;
+    font-size:9px;
+    line-height:1.2;
+    font-weight:550;
+    letter-spacing:.035em;
+    text-align:center;
+    font-variant-numeric:tabular-nums;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-readout .readout-timezone {
+    display:none;
+  }
   #kinetic-instrument .instrument-readout .selected-instant-line {
     display:grid;
     grid-template-columns:60px minmax(0,max-content) 60px;
