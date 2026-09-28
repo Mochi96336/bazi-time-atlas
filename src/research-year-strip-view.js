@@ -1,9 +1,11 @@
 import {
   gregorianOrdinal,
+  isGregorianLeapYear,
   recurrenceState,
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
+import { sexagenaryDayForGregorianDate } from "./recurrence/ganzhi-cycle-comparison.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import {
   RESEARCH_SEASONAL_EVIDENCE_READY_EVENT
@@ -307,6 +309,10 @@ export function researchYearStripState(selectedDate, { targetInstant = null } = 
   if (!validateGregorianDate(selectedDate)) throw new RangeError("invalid selectedDate");
 
   const next = recurrenceState(selectedDate, 1);
+  // Whole-calendar-year arithmetic is NOT the existing same-month/same-day
+  // next-year dayDelta. A civil year always contains 365 or 366 days.
+  const civilYearDays = isGregorianLeapYear(selectedDate.year) ? 366 : 365;
+  const selectedDayPillar = sexagenaryDayForGregorianDate(selectedDate);
   const displayOffset = yearStripOffset(targetInstant);
   const liChunBoundary = resolveResearchSeasonalBoundary({
     year:selectedDate.year,
@@ -356,6 +362,10 @@ export function researchYearStripState(selectedDate, { targetInstant = null } = 
   return freeze({
     selectedDate:freeze({ ...selectedDate }),
     selectedPosition,
+    selectedDayPillar,
+    civilYearDays,
+    civilYearFullDayCycles:Math.floor(civilYearDays/60),
+    civilYearDayRemainder:civilYearDays%60,
     displayOffset,
     liChunBoundary,
     liChunProjection,
@@ -432,6 +442,9 @@ function render() {
   strip.dataset.selectedBeforeLiChun = state.selectedBeforeLiChun === null ? "unknown" : String(state.selectedBeforeLiChun);
   strip.dataset.baseEdge = state.selectedPosition < 20 ? "start" : state.selectedPosition > 80 ? "end" : "none";
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
+  strip.dataset.civilYearDays = String(state.civilYearDays);
+  strip.dataset.civilYearDayRemainder = String(state.civilYearDayRemainder);
+  strip.dataset.selectedDayPillar = state.selectedDayPillar.name;
   strip.dataset.selectedYearMembershipStatus = state.selectedYearMembership.status;
   strip.dataset.selectedYearMembershipReason = state.selectedYearMembership.reason;
   strip.dataset.selectedYearPillar = state.selectedYearPillar?.name ?? "unavailable";
@@ -458,6 +471,22 @@ function render() {
         : "選定日 · 年柱待節氣判定"
   );
   setText("research-year-base-label", formatDate(state.selectedDate));
+  setText("research-year-selected-date", formatDate(state.selectedDate));
+  setText("research-year-selected-day", state.selectedDayPillar.name);
+  const yearIsBoundary = ["boundary-day","boundary-uncertain"].includes(state.selectedCivilLiChunRelation);
+  setText("research-year-selected-year",
+    state.selectedYearPillar?.name ??
+    (yearIsBoundary
+      ? state.liChunTransition.before.name+"／"+state.liChunTransition.after.name
+      : "尚待判定"));
+  setText("research-year-selected-certainty",
+    state.selectedYearMembership.status==="exact" ? "來源已判定" :
+    state.selectedYearMembership.status==="model-estimated" ? "模型估計" :
+    yearIsBoundary ? "需提供時刻" : "年界證據不足");
+  setText("research-year-full-cycle",
+    state.selectedDate.year+" 公曆年："+state.civilYearDays+
+    " 天＝"+state.civilYearFullDayCycles+" × 60 天＋"+
+    state.civilYearDayRemainder+" 天");
   setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
@@ -493,6 +522,12 @@ function render() {
       `${state.liChun.label} · ${offsetLabel(state.displayOffset.hours)} · ${seasonalAuthorityLabel(state.liChunBoundary)}`
     );
     liChunUnavailable.hidden = true;
+    setText("research-year-transition",
+      (state.liChun.positionStatus==="estimated" ? "約 " : "")+
+      "立春 "+state.liChun.date.month+"/"+state.liChun.date.day+
+      " · "+state.liChunTransition.before.name+" → "+state.liChunTransition.after.name);
+    setText("research-year-transition-note",
+      state.liChun.positionStatus==="estimated" ? "民用日期為模型估計" : "依現有立春來源定位");
   } else {
     liChunMarker.hidden = true;
     if (liChunBand) liChunBand.hidden = true;
@@ -502,12 +537,26 @@ function render() {
       `立春 · ${state.liChunTransition.before.name} → ${state.liChunTransition.after.name}`
     );
     setText("research-year-li-chun-unavailable-copy", state.liChunUnavailableMessage);
+    setText("research-year-transition",
+      "立春位置待查 · "+state.liChunTransition.before.name+
+      " → "+state.liChunTransition.after.name);
+    setText("research-year-transition-note",state.liChunUnavailableMessage);
   }
 
   const elapsed = state.elapsedDays === null ? "—" : String(state.elapsedDays);
   setText("research-year-day-count", elapsed);
   setText("research-year-elapsed-days", elapsed);
   setText("research-year-next-date", state.nextDate ? formatDate(state.nextDate) : "下一年同月同日不存在");
+  const track=document.querySelector(".research-year-track");
+  if(track)track.setAttribute("aria-label",
+    state.selectedDate.year+" 公曆年；選定 "+formatDate(state.selectedDate)+
+    "；年柱 "+(state.selectedYearPillar?.name??"未確認")+
+    "，日柱 "+state.selectedDayPillar.name+"；"+
+    (state.liChun
+      ? "立春 "+state.liChun.date.month+"/"+state.liChun.date.day+
+        "，"+state.liChunTransition.before.name+"轉"+state.liChunTransition.after.name
+      : "本年立春位置證據不足")+"；"+
+    state.civilYearDays+" 天＝6圈再多 "+state.civilYearDayRemainder+" 天");
 }
 
 if (strip && instrument) {
