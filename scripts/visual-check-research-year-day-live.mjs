@@ -7,6 +7,8 @@ const out=path.resolve("tmp/research-live-visual");
 const cases=[
  // R0: actual ORIGINAL Research, not an image of the legacy replacement tab.
  {route:"original",date:"2024-02-10",width:390,height:2000,name:"research-r1-original-390.png"},
+ {route:"original-frame",width:320,height:2250,name:"research-r2-original-320.png"},
+ {route:"original-frame",width:768,height:2250,name:"research-r2-original-768.png"},
  {route:"original",date:"2024-02-10",width:1440,height:2300,name:"research-r1-original-1440.png"},
  {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-r1-lichun-day-390.png"},
  {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-r1-normal-2023-390.png"},
@@ -40,11 +42,14 @@ for(const item of cases){
  const frame=new URL("scripts/fixtures/mobile-390.html",base);
  frame.searchParams.set("target","../../recurrence.html"+u.search);
  frame.searchParams.set("height",String(item.height));
- const url=item.width===390?frame:u;
+ const responsive=new URL("scripts/fixtures/research-original-r0-390.html",base);
+ responsive.searchParams.set("width",String(item.width));
+ const url=item.route==="original-frame"?responsive:
+   item.width===390?frame:u;
  const result=spawnSync(browser,["--headless=new","--no-sandbox","--disable-gpu",
   "--hide-scrollbars","--run-all-compositor-stages-before-draw",
   "--force-device-scale-factor=1","--virtual-time-budget=4100",
-  "--window-size="+(item.width===390?500:item.width)+","+item.height,
+  "--window-size="+(item.width<=390?500:item.width)+","+item.height,
   "--screenshot="+path.join(out,item.name),url.href],
   {encoding:"utf8",timeout:35000});
  if(result.status!==0)throw Error(item.name+" browser failed: "+result.stderr?.slice(-1000));
