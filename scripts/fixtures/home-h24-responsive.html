@@ -72,14 +72,31 @@
       return;
     }
 
-    const rDock = bounds(dock), rInput = bounds(input), rCaption = bounds(label);
+    const nowButton = doc.querySelector("#mobile-now-button");
+    if (!nowButton) {
+      proof.dataset.error = "selected-time-now-missing";
+      return;
+    }
+    const rDock = bounds(dock), rInput = bounds(input), rCaption = bounds(label), rNow = bounds(nowButton);
     proof.dataset.initialMatches = String(label.textContent === "黃道 · " + instrument.dataset.zodiac);
     proof.dataset.initialVisible = String(visible(win, label));
     proof.dataset.fontPx = win.getComputedStyle(label).fontSize;
     proof.dataset.railBounds = [rDock.left, rDock.right].map(v => v.toFixed(2)).join(",");
     proof.dataset.inputBounds = [rInput.left, rInput.right].map(v => v.toFixed(2)).join(",");
     proof.dataset.captionBounds = [rCaption.left, rCaption.right].map(v => v.toFixed(2)).join(",");
-    proof.dataset.sameRow = String(Math.abs(rInput.bottom - rCaption.bottom) <= 12);
+    proof.dataset.nowBounds = [rNow.left, rNow.right, rNow.top, rNow.bottom].map(v => v.toFixed(2)).join(",");
+    // A 42px centered native Now target and a 38px time input have different
+    // bottom edges from the centered text caption. Compare their visual centers
+    // rather than enforcing the obsolete no-Now shared-bottom geometry.
+    proof.dataset.sameRow = String(Math.abs(
+      (rInput.top + rInput.bottom) / 2 - (rCaption.top + rCaption.bottom) / 2
+    ) <= 5);
+    proof.dataset.nowVisible = String(visible(win, nowButton));
+    proof.dataset.nowFits = String(rNow.width >= 42 && rNow.bottom - rNow.top >= 42 &&
+      rNow.left >= rCaption.right + 2 && rNow.right <= Math.min(width, rDock.right) + 1);
+    proof.dataset.nowAligned = String(Math.abs(
+      (rNow.top + rNow.bottom) / 2 - (rInput.top + rInput.bottom) / 2
+    ) <= 5);
     proof.dataset.noOverlap = String(rCaption.left >= rInput.right + 2);
     proof.dataset.notClipped = String(rCaption.right <= Math.min(width, rDock.right) + 1 &&
       rCaption.left >= Math.max(0, rDock.left) - 1 &&
