@@ -224,7 +224,18 @@ function clampDelta(value) {
 
 function applyQueryPreset() {
   const params = new URLSearchParams(location.search);
-  const queryDate = parseDateParam(params.get("date"));
+  const directDate = parseDateParam(params.get("date"));
+  // R3 compatibility only: old parallel ?mode=dates links no longer open a
+  // second UI. Preserve the user's former COMPARE date by promoting it to the
+  // original Research base date at Δ=0; retain the discarded old base in a
+  // dataset for audit instead of pretending both states still exist.
+  const legacyCompare = params.get("mode")==="dates"
+    ? parseDateParam(params.get("compare"))
+    : null;
+  const legacyBase = params.get("mode")==="dates"
+    ? parseDateParam(params.get("base"))
+    : null;
+  const queryDate = directDate ?? legacyCompare;
   if (queryDate) {
     currentBase = queryDate;
     yearInput.value = String(queryDate.year);
@@ -232,10 +243,22 @@ function applyQueryPreset() {
     dayInput.value = String(queryDate.day);
   }
 
-  const rawDelta = params.get("delta");
+  const rawDelta = legacyCompare ? "0" : params.get("delta");
   const parsedDelta = rawDelta === null ? 0 : Number(rawDelta);
   const queryDelta = Number.isFinite(parsedDelta) ? clampDelta(parsedDelta) : 0;
 
+  if (legacyCompare) {
+    instrument.dataset.legacyDateLinkMigrated = "compare-to-original-date";
+    instrument.dataset.legacyDateLinkBase = legacyBase ? formatDate(legacyBase) : "invalid";
+    const migrated = new URL(location.href);
+    migrated.searchParams.delete("mode");
+    migrated.searchParams.delete("base");
+    migrated.searchParams.delete("compare");
+    migrated.searchParams.delete("wheel");
+    migrated.searchParams.set("date",formatDate(queryDate));
+    migrated.searchParams.set("delta","0");
+    history.replaceState(null,"",migrated.pathname+migrated.search+migrated.hash);
+  }
   if (queryDate || rawDelta !== null) instrument.dataset.queryPreset = "1";
   return queryDelta;
 }
