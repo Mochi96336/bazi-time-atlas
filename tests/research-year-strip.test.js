@@ -27,6 +27,49 @@ test("year strip no longer treats the legacy civil solar-term helper as its auth
   assert.match(source, /projectSeasonalBoundaryToCivil/);
 });
 
+test("ORIGINAL strip: a whole Gregorian year is six full 60-day cycles plus five or six days", () => {
+  const normal=researchYearStripState({year:2023,month:12,day:31});
+  const leap=researchYearStripState({year:2024,month:12,day:31});
+  assert.deepEqual(
+    [normal.civilYearDays,normal.civilYearFullDayCycles,normal.civilYearDayRemainder],
+    [365,6,5]
+  );
+  assert.deepEqual(
+    [leap.civilYearDays,leap.civilYearFullDayCycles,leap.civilYearDayRemainder],
+    [366,6,6]
+  );
+  // A previous bug wrongly reused the next SAME-month/day interval for the
+  // whole-year statement. These numbers are intentionally different here.
+  assert.equal(normal.elapsedDays,366);
+  assert.equal(leap.elapsedDays,365);
+  assert.ok(normal.selectedDayPillar.name);
+  assert.ok(leap.selectedDayPillar.name);
+  assert.ok(normal.selectedDayPillar.index>=0 && normal.selectedDayPillar.index<60);
+});
+
+test("ORIGINAL strip: on date-only Li Chun, actual Year remains unresolved but Day remains defined", () => {
+  const day=researchYearStripState({year:2024,month:2,day:4});
+  assert.equal(day.selectedYearMembership.status,"unresolved");
+  assert.equal(day.selectedYearPillar,null);
+  assert.deepEqual([day.liChunTransition.before.name,day.liChunTransition.after.name],
+    ["癸卯","甲辰"]);
+  assert.ok(day.selectedDayPillar.name.length===2);
+  assert.equal(day.civilYearDayRemainder,6);
+});
+
+test("R1 in-place layout contract keeps the existing strip and existing Research",async()=>{
+  const html=await readFile(new URL("../recurrence.html",import.meta.url),"utf8");
+  const css=await readFile(new URL("../research-discrete-density.css",import.meta.url),"utf8");
+  assert.match(html,/id="research-year-strip"/);
+  assert.match(html,/id="research-year-full-cycle"/);
+  assert.match(html,/id="research-year-selected-day"/);
+  assert.match(html,/id="research-cycle-comparison"/);
+  assert.match(html,/id="research-astronomy"/);
+  assert.match(html,/id="research-evidence"/);
+  assert.doesNotMatch(html,/id="research-advanced-details"/);
+  assert.match(css,/\.research-year-track\[data-li-chun-available="true"\]/);
+});
+
 test("modern year strip orders selected dates before and after the resolved Li Chun boundary", () => {
   const before = researchYearStripState({ year:2024, month:2, day:1 });
   const after = researchYearStripState({ year:2024, month:2, day:10 });

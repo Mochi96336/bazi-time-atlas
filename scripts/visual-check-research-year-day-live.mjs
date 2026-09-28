@@ -6,9 +6,11 @@ const base=process.env.BASE_URL??"http://127.0.0.1:4173/";
 const out=path.resolve("tmp/research-live-visual");
 const cases=[
  // R0: actual ORIGINAL Research, not an image of the legacy replacement tab.
- {route:"original",width:390,height:2000,name:"research-r0-original-390.png"},
- {route:"original",width:1440,height:2300,name:"research-r0-original-1440.png"},
- {route:"bare",width:390,height:2000,name:"research-r0-default-390.png"},
+ {route:"original",date:"2024-02-10",width:390,height:2000,name:"research-r1-original-390.png"},
+ {route:"original",date:"2024-02-10",width:1440,height:2300,name:"research-r1-original-1440.png"},
+ {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-r1-lichun-day-390.png"},
+ {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-r1-normal-2023-390.png"},
+ {route:"bare",width:390,height:2000,name:"research-r1-default-390.png"},
  // Retain captures of the older explicit-date permalink for compatibility.
  {date:"2024-02-01",width:390,height:1250,name:"research-live-before-390.png"},
  {date:"2024-02-04",width:390,height:1250,name:"research-live-boundary-390.png"},
@@ -28,7 +30,7 @@ const browser=findBrowser();
 for(const item of cases){
  const u=new URL("recurrence.html",base);
  if(item.route==="original"){
-   u.searchParams.set("date","2024-02-10");
+   u.searchParams.set("date",item.date??"2024-02-10");
    u.searchParams.set("delta","0");
  } else if(item.route!=="bare"){
    u.searchParams.set("mode","dates");

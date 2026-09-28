@@ -10,6 +10,7 @@ iframe{display:block;width:390px;height:1300px;border:0}output{display:none}</st
 const query=new URLSearchParams(location.search);
 const desktop=query.get("desktop")==="1";
 const bare=query.get("bare")==="1";
+const boundary=query.get("boundary")==="1";
 const iframe=document.getElementById("research");
 const probe=document.getElementById("probe");
 if(desktop){document.documentElement.style.width="1440px";document.body.style.width="1440px";
@@ -49,14 +50,72 @@ iframe.addEventListener("load",async()=>{
     "original 60-day wheel was deleted instead of retaining its original optional disclosure");
   check(strip.dataset.ready==="true" &&
     instrument.dataset.targetDate!=="invalid" &&
-    strip.dataset.selectedYearPillar!=="unavailable",
-    "original year strip is not actually bound to Research-selected date");
-  if(!bare)check(instrument.dataset.targetDate==="2024-02-10" &&
+    strip.dataset.selectedDayPillar &&
+    (boundary
+      ? strip.dataset.selectedYearPillar==="unavailable" &&
+        strip.dataset.selectedYearMembershipStatus==="unresolved"
+      : strip.dataset.selectedYearPillar!=="unavailable"),
+    "original year strip must retain canonical Day and respect unresolved Li Chun Year on date-only boundary");
+  if(!bare && !boundary)check(instrument.dataset.targetDate==="2024-02-10" &&
     strip.dataset.selectedYearPillar==="甲辰",
     "original selected-date and source-backed 2024 Year identity drifted");
+  if(boundary)check(instrument.dataset.targetDate==="2024-02-04" &&
+    strip.dataset.selectedYearPillar==="unavailable" &&
+    strip.dataset.selectedYearMembershipStatus==="unresolved",
+    "R1 date-only Li Chun must keep unresolved Year identity");
   check(!d.getElementById("research-one-year-story").checkVisibility() &&
     d.querySelectorAll("#research-year-strip").length===1,
     "duplicate Year visualization appears alongside the original strip");
+  // R1 must change the ORIGINAL strip, not quietly pass based on old R0.
+  const civilYear=Number(instrument.dataset.targetDate.split("-")[0]);
+  const leap=(civilYear%4===0 && civilYear%100!==0)||civilYear%400===0;
+  const days=leap?366:365,extra=leap?6:5;
+  const full=d.getElementById("research-year-full-cycle");
+  const selectedDay=d.getElementById("research-year-selected-day");
+  const selectedYear=d.getElementById("research-year-selected-year");
+  const transition=d.getElementById("research-year-transition");
+  const track=d.querySelector("#research-year-strip .research-year-track");
+  const line=d.querySelector("#research-year-strip .research-year-line");
+  const renderedTrackCSS=w.getComputedStyle(track);
+  const renderedLineCSS=w.getComputedStyle(line);
+  check(renderedTrackCSS.position==="relative" &&
+    renderedLineCSS.backgroundImage.includes("linear-gradient"),
+    "R1 original track styles NOT ACTIVE: position="+renderedTrackCSS.position+
+    "; line="+renderedLineCSS.backgroundImage+"; styles="+
+    [...d.styleSheets].map(sheet=>sheet.href??"inline").join(","));
+  check(full?.checkVisibility() && selectedDay?.checkVisibility() &&
+    selectedYear?.checkVisibility() && transition?.checkVisibility() &&
+    full.textContent.includes(days+" 天") &&
+    full.textContent.includes("走滿 6 圈，再多 "+extra+" 天") &&
+    strip.dataset.civilYearDays===String(days) &&
+    strip.dataset.civilYearDayRemainder===String(extra) &&
+    selectedDay.textContent===strip.dataset.selectedDayPillar,
+    "R1 must use the original year strip's 365/366 and canonical Day");
+  if(!bare && !boundary){
+    check(selectedYear.textContent==="甲辰" &&
+      transition.textContent.includes("癸卯 → 甲辰") &&
+      track.dataset.liChunAvailable==="true",
+      "2024 source-based original Year transition or current Year differs");
+  }
+  if(boundary){
+    check(selectedYear.textContent==="癸卯／甲辰" &&
+      d.getElementById("research-year-selected-certainty").textContent.includes("需提供時刻") &&
+      transition.textContent.includes("癸卯 → 甲辰") &&
+      track.dataset.liChunAvailable==="true",
+      "Li Chun ambiguity must show both Year candidates without hiding the canonical Day");
+  }
+  check(d.querySelector(".research-year-same-date-details")?.open===false,
+    "optional next-same-date comparison should not compete with the one-year fact");
+  check(w.getComputedStyle(d.getElementById("research-year-base-title")).display==="none" &&
+    w.getComputedStyle(d.getElementById("research-year-li-chun-title")).display==="none",
+    "old floating marker labels can still collide near Li Chun");
+  for(const selector of [".research-year-key-data",".research-year-transition-line",
+    ".research-year-selection-line",".research-year-full-cycle"]){
+    const box=d.querySelector(selector)?.getBoundingClientRect();
+    check(box && box.left>=-1 && box.right<=width+1,
+      "new ORIGINAL status line overflows "+width+"px: "+selector);
+  }
+  probe.dataset.originalCycle="visible";
   const bounds=strip.getBoundingClientRect();
   check(bounds.left>=-1 && bounds.right<=width+1,
     "restored original strip overflows the "+width+"px viewport");
@@ -66,6 +125,7 @@ iframe.addEventListener("load",async()=>{
   probe.dataset.ready="true";
   probe.dataset.width=String(width);
   probe.dataset.bare=String(bare);
+  probe.dataset.boundary=String(boundary);
   probe.dataset.originalStrip="visible";
   probe.dataset.originalEvidence="visible";
   probe.dataset.duplicateStory="hidden";
@@ -73,5 +133,6 @@ iframe.addEventListener("load",async()=>{
   probe.dataset.error="none";
  }catch(err){probe.dataset.ready="error";probe.dataset.error=err?.stack??String(err);}
 },{once:true});
-iframe.src=bare?"../../recurrence.html":"../../recurrence.html?date=2024-02-10&delta=0";
+iframe.src=bare?"../../recurrence.html":
+  "../../recurrence.html?date="+(boundary?"2024-02-04":"2024-02-10")+"&delta=0";
 </script></body></html>
