@@ -45,15 +45,17 @@
       const apply = mobileDoc?.querySelector("#mobile-time-apply");
       const status = mobileDoc?.querySelector("#mobile-time-status");
       const mobileReadout = mobileDoc?.querySelector("#instant-readout");
+      const mobileReadoutZone = mobileDoc?.querySelector("#readout-timezone");
 
       const desktopWin = desktopFrame.contentWindow;
       const desktopDoc = desktopFrame.contentDocument;
       const desktopInstrument = desktopDoc?.querySelector("#kinetic-instrument");
       const desktopInput = desktopDoc?.querySelector("#instant-input");
       const desktopReadout = desktopDoc?.querySelector("#instant-readout");
+      const desktopReadoutZone = desktopDoc?.querySelector("#readout-timezone");
 
-      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply || !status || !mobileReadout ||
-          !desktopWin || !desktopDoc || !desktopInstrument || !desktopInput || !desktopReadout) return;
+      if (!mobileWin || !mobileDoc || !shell || !instrument || !dock || !input || !apply || !status || !mobileReadout || !mobileReadoutZone ||
+          !desktopWin || !desktopDoc || !desktopInstrument || !desktopInput || !desktopReadout || !desktopReadoutZone) return;
 
       const dockStyle = mobileWin.getComputedStyle(dock);
       const shellStyle = mobileWin.getComputedStyle(shell);
@@ -79,7 +81,8 @@
         probe.dataset.inputDisplayFormat = input.dataset.displayFormat ?? "";
         probe.dataset.inputPrecision = input.dataset.precision ?? "";
         probe.dataset.inputValue = input.value;
-        probe.dataset.mobileInitialReadout = mobileReadout.textContent.trim();
+        // The civil timestamp and timezone are independent visual lines.
+        probe.dataset.mobileInitialReadout = mobileReadout.textContent.trim() + " · " + mobileReadoutZone.textContent.trim();
         probe.dataset.mobileInitialUtc = instrument.dataset.utcOffsetHours ?? "";
         probe.dataset.mobileInitialBoundary = instrument.dataset.dayBoundary ?? "";
         probe.dataset.shellOverflowY = shellStyle.overflowY;
@@ -96,7 +99,7 @@
         probe.dataset.desktopInitialPrecision = desktopInput.dataset.precision ?? "";
         probe.dataset.desktopInitialValue = desktopInput.value;
         probe.dataset.desktopInitialValid = String(desktopInput.validity.valid);
-        probe.dataset.desktopInitialReadout = desktopReadout.textContent.trim();
+        probe.dataset.desktopInitialReadout = desktopReadout.textContent.trim() + " · " + desktopReadoutZone.textContent.trim();
         probe.dataset.desktopInitialUtc = desktopInstrument.dataset.utcOffsetHours ?? "";
         probe.dataset.desktopInitialBoundary = desktopInstrument.dataset.dayBoundary ?? "";
       }
