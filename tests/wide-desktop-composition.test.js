@@ -13,7 +13,7 @@ const visualCapture = readFileSync(new URL("../scripts/visual-check-wide-desktop
 test("wide Analysis fills the desktop viewport without leaking geometry into ordinary reading", () => {
   assert.match(
     polish,
-    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);/
+    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 64px\)\);/
   );
   assert.match(polish, /@media \(min-width: 1800px\) and \(min-aspect-ratio: 17\/9\)/);
   assert.doesNotMatch(polish, /height:\s*[^;]*(?:44vw|100dvh - 92px)/);
