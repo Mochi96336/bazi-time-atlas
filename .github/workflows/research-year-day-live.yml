@@ -3,13 +3,10 @@ on:
   pull_request:
     paths:
       - 'recurrence.html'
-      - 'research-date-explorer.css'
       - 'research-discrete-density.css'
       - 'src/recurrence-view.js'
       - 'src/research-year-strip-view.js'
       - 'src/recurrence/original-strip-date-projection.js'
-      - 'src/research-date-explorer-view.js'
-      - 'scripts/fixtures/research-date-explorer-390.html'
       - 'scripts/visual-check-research-year-day-live.mjs'
       - 'scripts/check-research-original-strip-touch.mjs'
       - 'scripts/fixtures/research-original-r0-390.html'
@@ -42,12 +39,8 @@ jobs:
           done
           cat /tmp/bazi-research-live-http.log
           exit 1
-      - name: Exercise true 390px year/day integration
+      - name: Exercise one original Research surface + legacy-link migration
         run: node scripts/check-research-date-explorer.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Exercise Chromium emulated 390px touch and real keyboard input
-        run: node scripts/check-research-year-day-touch.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Exercise ACTUAL 390px touch and native keyboard on ORIGINAL year strip

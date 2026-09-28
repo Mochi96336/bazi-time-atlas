@@ -142,7 +142,7 @@ jobs:
         run: node scripts/check-research-task-hierarchy.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
-      - name: Verify independent date explorer interactions
+      - name: Verify original Research + retired-link migration
         run: node scripts/check-research-date-explorer.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
@@ -174,10 +174,6 @@ jobs:
         run: |
           npm run visual:check
           node scripts/visual-check-determinacy.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Capture independent date explorer PNG evidence
-        run: node scripts/visual-check-research-date-explorer.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Upload visual evidence

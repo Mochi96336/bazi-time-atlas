@@ -40,10 +40,9 @@ iframe.addEventListener("load",async()=>{
   }
 
   check(d.documentElement.clientWidth===width,"not a real "+width+"px Research viewport");
-  check(d.body.dataset.researchMode==="annual" &&
-    d.getElementById("research-free-explorer").hidden &&
+  check(!d.getElementById("research-free-explorer") &&
     !d.getElementById("research-advanced-details"),
-    "R0 public route still prioritizes a replacement Year story or folds main content");
+    "R3 public route must contain no replacement Year story or top-level wrapper");
   // Restore the long-range Research chapters. Preserve the ORIGINAL small
   // within-chapter disclosure around the optional 60-day wheel; R0 only
   // removes the NEW top-level wrapper that hid ALL Research content.
@@ -74,7 +73,7 @@ iframe.addEventListener("load",async()=>{
     strip.dataset.selectedYearPillar==="unavailable" &&
     strip.dataset.selectedYearMembershipStatus==="unresolved",
     "R1 date-only Li Chun must keep unresolved Year identity");
-  check(!d.getElementById("research-one-year-story").checkVisibility() &&
+  check(!d.getElementById("research-one-year-story") &&
     d.querySelectorAll("#research-year-strip").length===1,
     "duplicate Year visualization appears alongside the original strip");
   // R1 must change the ORIGINAL strip, not quietly pass based on old R0.
@@ -231,7 +230,7 @@ iframe.addEventListener("load",async()=>{
   probe.dataset.boundary=String(boundary);
   probe.dataset.originalStrip="visible";
   probe.dataset.originalEvidence="visible";
-  probe.dataset.duplicateStory="hidden";
+  probe.dataset.duplicateStory="absent";
   probe.dataset.selectedDate=instrument.dataset.targetDate;
   probe.dataset.error="none";
  }catch(err){probe.dataset.ready="error";probe.dataset.error=err?.stack??String(err);}
