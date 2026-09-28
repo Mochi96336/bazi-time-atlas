@@ -93,10 +93,10 @@ requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "6
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-dock-before-instrument"), "true", "Recurrence displacement controls must precede the result instrument", url);
-requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Recurrence displacement controls must stay fully usable in the first viewport", url);
+requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Collapsed baseline button must be accessible in the first viewport", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
-requireEqual(attr(probe, "data-recurrence-year-day-same-row"), "true", "Named Year and Day cycles must share the 390px first-screen row", url);
-requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "Both named cycles must be fully visible in the mobile first viewport", url);
+requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
+requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "Both base/target inline readouts must be visible in the mobile first viewport", url);
 requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
@@ -160,11 +160,11 @@ if (
   || !Number.isFinite(deltaDockGap)
   || deltaDockTop <= taskHeadBottom
   || deltaDockBottom >= comparisonTop
-  || deltaDockGap < 8
-  || deltaDockGap > 20
+  || deltaDockGap < 4
+  || deltaDockGap > 32
 ) {
   throw new Error(
-    "Recurrence displacement dock must stay directly before the named cycle comparison " +
+    "Small baseline button must sit immediately above the original Year bar " +
     "(top=" + deltaDockTop + ", bottom=" + deltaDockBottom + ", gap=" + deltaDockGap + "): " + url
   );
 }
