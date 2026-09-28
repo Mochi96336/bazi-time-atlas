@@ -5,19 +5,14 @@ import path from "node:path";
 const base=process.env.BASE_URL??"http://127.0.0.1:4173/";
 const out=path.resolve("tmp/research-live-visual");
 const cases=[
- // R0: actual ORIGINAL Research, not an image of the legacy replacement tab.
- {route:"original",date:"2024-02-10",width:390,height:2000,name:"research-r1-original-390.png"},
- {route:"original-frame",width:320,height:2250,name:"research-r2-original-320.png"},
- {route:"original-frame",width:768,height:2250,name:"research-r2-original-768.png"},
- {route:"original",date:"2024-02-10",width:1440,height:2300,name:"research-r1-original-1440.png"},
- {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-r1-lichun-day-390.png"},
- {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-r1-normal-2023-390.png"},
- {route:"bare",width:390,height:2000,name:"research-r1-default-390.png"},
- // Retain captures of the older explicit-date permalink for compatibility.
- {date:"2024-02-01",width:390,height:1250,name:"research-live-before-390.png"},
- {date:"2024-02-04",width:390,height:1250,name:"research-live-boundary-390.png"},
- {date:"2024-02-10",width:390,height:1250,name:"research-live-after-390.png"},
- {date:"2024-02-10",width:1440,height:1100,name:"research-live-after-1440.png"}
+ // R3 captures ONLY the original Research surface.
+ {route:"original",date:"2024-02-10",width:390,height:2000,name:"research-original-390.png"},
+ {route:"original-frame",width:320,height:2250,name:"research-original-320.png"},
+ {route:"original-frame",width:768,height:2250,name:"research-original-768.png"},
+ {route:"original",date:"2024-02-10",width:1440,height:2300,name:"research-original-1440.png"},
+ {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-original-lichun-day-390.png"},
+ {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-original-normal-2023-390.png"},
+ {route:"bare",width:390,height:2000,name:"research-original-default-390.png"}
 ];
 function findBrowser(){
  if(process.env.CHROMIUM_BIN)return process.env.CHROMIUM_BIN;
@@ -34,10 +29,6 @@ for(const item of cases){
  if(item.route==="original"){
    u.searchParams.set("date",item.date??"2024-02-10");
    u.searchParams.set("delta","0");
- } else if(item.route!=="bare"){
-   u.searchParams.set("mode","dates");
-   u.searchParams.set("base","2024-02-01");
-   u.searchParams.set("compare",item.date);
  }
  const frame=new URL("scripts/fixtures/mobile-390.html",base);
  frame.searchParams.set("target","../../recurrence.html"+u.search);
