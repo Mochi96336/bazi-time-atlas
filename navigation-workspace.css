@@ -250,6 +250,10 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now:focus-visible {
     color:#efddb0;
   }
+  #kinetic-instrument[data-inverse-time-search="active"]
+    .instrument-readout .selected-instant-line #now-button.readout-now {
+    display:none;
+  }
   /* Reserve the now cell while editing; the datum never walks sideways. */
   #kinetic-instrument[data-instant-editor-open="true"] .selected-instant-line #now-button.readout-now {
     visibility:hidden;
