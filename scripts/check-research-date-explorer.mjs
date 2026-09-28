@@ -61,9 +61,10 @@ console.log("[explorer] PASS public Research entry restores original full resear
 // native 390/1440 iframe. It must fail if anyone hides the ORIGINAL Research
 // sections or just swaps to a competing replacement Year band again.
 for(const spec of [
-  {suffix:"?bare=1",width:"390",bare:"true"},
-  {suffix:"",width:"390",bare:"false"},
-  {suffix:"?desktop=1",width:"1440",bare:"false"}
+  {suffix:"?bare=1",width:"390",bare:"true",boundary:"false"},
+  {suffix:"",width:"390",bare:"false",boundary:"false"},
+  {suffix:"?boundary=1",width:"390",bare:"false",boundary:"true"},
+  {suffix:"?desktop=1",width:"1440",bare:"false",boundary:"false"}
 ]){
   const originalView=dump("scripts/fixtures/research-original-r0-390.html"+spec.suffix,13000);
   const originalProbe=tag(originalView.dom,"probe","output");
@@ -71,6 +72,7 @@ for(const spec of [
     attr(originalProbe,"data-ready")!=="true" ||
     attr(originalProbe,"data-width")!==spec.width ||
     attr(originalProbe,"data-bare")!==spec.bare ||
+    attr(originalProbe,"data-boundary")!==spec.boundary ||
     attr(originalProbe,"data-original-strip")!=="visible" ||
     attr(originalProbe,"data-original-cycle")!=="visible" ||
     attr(originalProbe,"data-original-evidence")!=="visible" ||
