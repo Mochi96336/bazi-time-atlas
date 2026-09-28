@@ -38,25 +38,24 @@ function attr(opening,name) {
   return opening.match(new RegExp(name+'="([^"]*)"'))?.[1] ?? null;
 }
 
-const beginner=dump("recurrence.html");
-const beginnerRoot=tag(beginner.dom,"research-free-explorer");
-const beginnerStory=tag(beginner.dom,"research-one-year-story");
-const beginnerMode=/<body[^>]*>/.exec(beginner.dom)?.[0]??"";
+// R0 regression: the default /recurrence.html MUST be the original Research
+// instrument, original year strip and original evidence. Never make the
+// replacement "一年怎麼走" story the public entry again.
+const original=dump("recurrence.html",8500);
+const originalRoot=tag(original.dom,"research-free-explorer");
+const originalYearStrip=tag(original.dom,"research-year-strip");
+const originalMode=/<body[^>]*>/.exec(original.dom)?.[0]??"";
 if(
-  !beginnerMode.includes('data-research-mode="dates"') ||
-  beginnerRoot.includes(" hidden") ||
-  attr(beginnerStory,"data-ready")!=="true" ||
-  attr(beginnerStory,"data-active-year-name")!=="甲辰" ||
-  !beginnerStory.includes('aria-label="立春年界與全年干支日位移"') ||
-  !beginner.dom.includes('class="research-single-surface"') ||
-  beginner.dom.includes('class="research-mode-switch"') ||
-  beginner.dom.includes('id="research-year-journey-start"') ||
-  attr(beginnerRoot,"data-advanced-open")!=="false" ||
-  !tag(beginner.dom,"research-advanced-details","details").includes('class="research-advanced-details"') ||
-  beginner.dom.includes('id="research-year-journey-loops"') ||
-  beginner.dom.includes('id="research-one-year-day-phase-dial"')
-) throw new Error("Bare Research entry must open an explicitly labeled one-year learning story: "+beginner.url);
-console.log("[explorer] PASS bare Research route learns one selected day before annual recurrence");
+  !originalMode.includes('data-research-mode="annual"') ||
+  !originalRoot.includes(" hidden") ||
+  attr(originalYearStrip,"data-ready")!=="true" ||
+  tag(original.dom,"research-discrete").includes(" hidden") ||
+  tag(original.dom,"research-astronomy").includes(" hidden") ||
+  tag(original.dom,"research-evidence").includes(" hidden") ||
+  original.dom.includes('id="research-advanced-details"') ||
+  original.dom.includes('class="research-mode-switch"')
+) throw new Error("Bare Research entry MUST show original full Research and original year strip: "+original.url);
+console.log("[explorer] PASS public Research entry restores original full research and year strip");
 
 for(const path of [
   "recurrence.html?delta=0",
@@ -67,8 +66,8 @@ for(const path of [
   if(
     !(/<body[^>]*data-research-mode="annual"/.test(legacy.dom)) ||
     !tag(legacy.dom,"research-free-explorer").includes(" hidden") ||
-    !tag(legacy.dom,"research-advanced-details","details").includes(" open") ||
-    tag(legacy.dom,"research-discrete").includes(" hidden")
+    tag(legacy.dom,"research-discrete").includes(" hidden") ||
+    attr(tag(legacy.dom,"research-year-strip"),"data-ready")!=="true"
   ) throw new Error("Existing annual deep link must remain inside the annual-only evidence mode: "+legacy.url);
 }
 console.log("[explorer] PASS explicit annual/query/hash deep links retain original recurrence authority");
@@ -141,15 +140,14 @@ console.log("[explorer] PASS 390px real interactions, date edits, swap, invalid 
 
 const direct=dump("recurrence.html?mode=dates&base=2024-02-04&compare=2024-02-10");
 const root=tag(direct.dom,"research-free-explorer");
-const closedAdvanced=tag(direct.dom,"research-advanced-details","details");
+const hiddenOriginal=tag(direct.dom,"research-discrete");
 if(
   attr(root,"data-ready")!=="true" ||
   attr(root,"data-base-active-year-status")!=="unresolved" ||
   attr(root,"data-target-active-year-status")!=="model-estimated" ||
   attr(root,"data-active-year-phase")!=="unavailable" ||
   attr(root,"data-day-phase")!=="6" ||
-  closedAdvanced.includes(" open") ||
-  attr(root,"data-advanced-open")!=="false"
+  !hiddenOriginal.includes(" hidden")
 ) throw new Error("Direct Li Chun boundary day must leave active year unresolved and hide annual-only evidence: "+direct.url);
 console.log("[explorer] PASS Li Chun date-only uncertainty and separated nominal/day phases");
 
