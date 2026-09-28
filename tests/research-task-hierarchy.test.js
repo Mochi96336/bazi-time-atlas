@@ -84,8 +84,8 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
   assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
   assert.match(discrete, /id="research-cycle-comparison"/);
-  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('id="research-year-strip"'));
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
+  assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('id="recurrence-instrument"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.ok(discrete.indexOf('id="research-sexagenary-cycle"') < discrete.indexOf('class="discrete-derivation"'));
