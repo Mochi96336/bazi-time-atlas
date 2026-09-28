@@ -61,7 +61,7 @@ function checkProof(markup, width) {
     }
   } else {
     for (const name of [
-      "initial-matches", "initial-visible", "same-row", "no-overlap",
+      "initial-matches", "initial-visible", "same-row", "now-visible", "now-fits", "now-aligned", "no-overlap",
       "not-clipped", "input-usable", "dirty-hidden", "reapplied",
       "future-selected", "future-zodiac-changed", "future-caption-synced",
       "future-input-synced", "future-no-overlap",
@@ -70,6 +70,7 @@ function checkProof(markup, width) {
       throw new Error("H2.4 " + width + "px failed " + name +
         " / input=" + attr(markup, "input-bounds") +
         " / caption=" + attr(markup, "caption-bounds") +
+        " / now=" + attr(markup, "now-bounds") +
         " / rail=" + attr(markup, "rail-bounds"));
     }
     if (Math.abs(Number.parseFloat(attr(markup, "font-px")) - 12) > .25) {
@@ -82,6 +83,7 @@ function checkProof(markup, width) {
     railBounds:attr(markup, "rail-bounds") || null,
     inputBounds:attr(markup, "input-bounds") || null,
     captionBounds:attr(markup, "caption-bounds") || null,
+    nowBounds:attr(markup, "now-bounds") || null,
     fontPx:attr(markup, "font-px") || null,
     dynamicSignSwitchPassed:width <= 480
   };

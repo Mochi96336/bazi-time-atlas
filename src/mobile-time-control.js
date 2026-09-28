@@ -15,6 +15,7 @@ const dock = document.querySelector("#mobile-time-dock");
 const input = document.querySelector("#mobile-instant-input");
 const inputLabel = document.querySelector(".mobile-time-field > span");
 const applyButton = document.querySelector("#mobile-time-apply");
+const nowButton = document.querySelector("#mobile-now-button");
 const status = document.querySelector("#mobile-time-status");
 const zodiacReadout = document.querySelector("#mobile-zodiac-readout");
 const mobileQuery = window.matchMedia("(max-width: 480px)");
@@ -118,6 +119,19 @@ function applyExactTime() {
 
 configureMobileInput();
 applyButton?.addEventListener("click", applyExactTime);
+nowButton?.addEventListener("click", () => {
+  if (!mobileQuery.matches || !instrument) return;
+  // The canonical selected-time command (not a second clock); a focused dirty
+  // input must not block our normal MutationObserver/UI synchronization.
+  input?.blur();
+  instrument.dispatchEvent(new CustomEvent(SELECTED_INSTANT_COMMAND, {
+    detail:{ instantMs:Date.now(), source:"mobile-now" }
+  }));
+  input?.removeAttribute("aria-invalid");
+  syncFromInstrument();
+  setDirty(false);
+  setStatus(`${formatAtlasUtcOffset(currentTimeContext().utcOffsetHours)} · 秒級`, "idle");
+});
 input?.addEventListener("keydown", event => {
   if (event.key !== "Enter") return;
   event.preventDefault();

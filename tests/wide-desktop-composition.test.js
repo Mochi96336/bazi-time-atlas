@@ -13,7 +13,7 @@ const visualCapture = readFileSync(new URL("../scripts/visual-check-wide-desktop
 test("wide Analysis fills the desktop viewport without leaking geometry into ordinary reading", () => {
   assert.match(
     polish,
-    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);/
+    /@media \(min-width: 821px\) \{[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\]\s*\{\s*height:\s*max\(720px,\s*calc\(100dvh - 64px\)\);/
   );
   assert.match(polish, /@media \(min-width: 1800px\) and \(min-aspect-ratio: 17\/9\)/);
   assert.doesNotMatch(polish, /height:\s*[^;]*(?:44vw|100dvh - 92px)/);
@@ -50,30 +50,19 @@ test("wide Analysis readability pass strengthens chrome and fast-ring context wi
   assert.doesNotMatch(polish, /(?:width|height|viewBox|transform):\s*[^;]*(?:wheel|track)/i);
 });
 
-test("wide Tools rows share one instrument header frame", () => {
-  assert.match(analysisMode, /installAnalysisFirstScreenPolishStyles\(\);[\s\S]*?installAnalysisToolsRailStyles\(\);/);
-  assert.match(toolsRail, /^@import "\.\/graphite-m2-material\.css";/);
-  assert.match(toolsRail, /@media \(min-width: 1600px\)/);
-  assert.match(
-    toolsRail,
-    /\.instrument-toolbar,[\s\S]*?\.ring-legend\s*\{[\s\S]*?left:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?max-width:\s*none;/
-  );
-  assert.match(
-    toolsRail,
-    /\.instrument-toolbar\s*\{[\s\S]*?min-height:\s*36px;[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
-  );
-  assert.match(
-    toolsRail,
-    /\.ring-legend\s*\{[\s\S]*?top:\s*48px;[\s\S]*?padding:\s*0 64px 4px 0;[\s\S]*?flex-wrap:\s*nowrap;[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*0 1px 0 var\(--m2-etched-light-soft\);/
-  );
-  assert.match(
-    toolsRail,
-    /\.analysis-close\s*\{[\s\S]*?top:\s*50px;[\s\S]*?right:\s*clamp\(18px, 2vw, 32px\);[\s\S]*?border-left:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:\s*inset 1px 0 0 var\(--m2-etched-light-soft\);/
-  );
-  assert.doesNotMatch(toolsRail, /border-(?:bottom|left):\s*1px solid rgba\(/);
-  assert.doesNotMatch(toolsRail, /(?:background|border-radius):\s*[^;]+;/);
-  assert.doesNotMatch(toolsRail, /(?:viewBox|#kinetic-wheel|#(?:year|month|day|hour|solar)-track)/);
+test("wide Tools preserves a stable topbar and uses a secondary action rail", () => {
+  const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('class="topbar-tool-slot"'));
+  assert.ok(html.includes('id="analysis-toggle" class="analysis-toggle" type="button"'));
+  assert.ok(html.includes('id="analysis-close" class="analysis-close" type="button"'));
+  assert.ok(navigation.includes(".kinetic-topbar .topbar-tool-slot"));
+  assert.ok(navigation.includes('.instrument-toolbar {'));
+  assert.ok(navigation.includes("position:absolute !important"));
+  assert.ok(navigation.includes(".instrument-toolbar { display:none !important;"));
+  assert.ok(analysisMode.includes("installAnalysisToolsRailStyles()"));
 });
+
 
 test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /width:\s*2047px/);
@@ -112,10 +101,10 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /scrollWidth > width \+ 1/);
   assert.match(browserGate, /scrollHeight > height \+ 90/);
   assert.match(browserGate, /data-site-nav-display/);
-  assert.match(browserGate, /siteNavRight > toolbarLeft - 24/);
+  assert.ok(browserGate.includes("siteNavRight > closeLeft - 4"));
   assert.match(browserGate, /researchHeight < 28/);
   assert.match(browserGate, /Math\.abs\(researchCenter - topbarCenter\) > 2/);
-  assert.match(browserGate, /toolbarBottom > topbarBottom \+ 2/);
+  assert.ok(browserGate.includes("toolbarBottom > topbarBottom + 58"));
   assert.match(browserGate, /data-legend-display/);
   assert.match(browserGate, /data-reference-display/);
   assert.match(browserGate, /data-timeline-display/);
@@ -125,7 +114,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /evidenceLeft < width - 430/);
   assert.match(browserGate, /evidenceGridWidth < 240/);
   assert.match(browserGate, /evidenceInfoMinFont < 9/);
-  assert.match(browserGate, /Math\.abs\(closeTop - toolbarTop\) > 2/);
+  assert.ok(browserGate.includes("Math.abs((closeTop + closeBottom) / 2 - topbarCenter) > 2"));
   assert.match(browserGate, /scaleVisible !== 0/);
   assert.match(browserGate, /ringToggleVisible !== 0/);
   assert.match(browserGate, /hourVisibleLabels !== 60 \|\| dayVisibleLabels !== 60/);
