@@ -71,13 +71,8 @@ function installSelectedInstantEditorStyles() {
 }
 
 function activate(control, handler) {
-  if (!control) return;
-  control.addEventListener("click", handler);
-  control.addEventListener("keydown", event => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    handler();
-  });
+  // Native buttons already dispatch click for Enter and Space.
+  control?.addEventListener("click", handler);
 }
 
 function setAnalysisOpen(open) {
