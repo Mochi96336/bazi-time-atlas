@@ -175,13 +175,13 @@
    internal bottom inset, not from removing height from the instrument. */
 @media (min-width: 821px) {
   #kinetic-instrument[data-analysis-open="true"] {
-    height: max(720px, calc(100dvh - 52px));
+    height: max(720px, calc(100dvh - 64px));
   }
 }
 
 @media (min-width: 1100px) {
   #kinetic-instrument[data-analysis-open="true"] {
-    height: max(760px, calc(100dvh - 52px));
+    height: max(760px, calc(100dvh - 64px));
   }
 }
 
