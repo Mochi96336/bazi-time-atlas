@@ -123,13 +123,15 @@ try{
     await sleep(22);
   }
   await touch("touchEnd",[]);
-  let moved;
+  let moved,last;
   for(let n=0;n<35;n++){
     const v=await inspect();
+    last=v;
     if(v.target!=="2024-02-10"&&v.status==="applied"){moved=v;break;}
     await sleep(70);
   }
-  assert.ok(moved,"real touch did not commit the original date owner");
+  assert.ok(moved,"real touch did not commit the original date owner: "+
+    JSON.stringify({original,last,start,end}));
   assert.equal(moved.delta,"0","native gesture reset the original delta");
   assert.equal(moved.base,moved.target,
     "native gesture created a second independent target owner");
