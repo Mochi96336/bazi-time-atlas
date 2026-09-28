@@ -5,6 +5,7 @@ import {
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
+import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
 import { sexagenaryDayForGregorianDate } from "./recurrence/ganzhi-cycle-comparison.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import {
@@ -398,6 +399,8 @@ function render() {
   const selectedDate = parseDate(instrument.dataset.targetDate);
   if (!selectedDate) {
     strip.dataset.ready = "false";
+    const scrub=document.querySelector("#research-year-scrub");
+    if(scrub)scrub.disabled=true;
     return;
   }
 
@@ -444,6 +447,22 @@ function render() {
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
   strip.dataset.civilYearDays = String(state.civilYearDays);
   strip.dataset.civilYearDayRemainder = String(state.civilYearDayRemainder);
+  // The one visible slider follows the existing instrument's selected
+  // target. It never creates or persists another selected-date state.
+  const scrub=document.querySelector("#research-year-scrub");
+  const hint=document.querySelector("#research-year-scrub-hint");
+  if(scrub){
+    const jan1=gregorianOrdinal({year:selectedDate.year,month:1,day:1});
+    scrub.disabled=false;
+    scrub.max=String(state.civilYearDays-1);
+    scrub.value=String(gregorianOrdinal(selectedDate)-jan1);
+    scrub.setAttribute("aria-valuetext",formatDate(selectedDate)+
+      "，年柱 "+(state.selectedYearPillar?.name??"待判")+
+      "，日柱 "+state.selectedDayPillar.name);
+    scrub.dataset.targetYear=String(selectedDate.year);
+    if(hint && strip.dataset.scrubStatus!=="preview")
+      hint.textContent="拖動時間條選擇日期，放開後套用至原本的日期控制。";
+  }
   strip.dataset.selectedDayPillar = state.selectedDayPillar.name;
   strip.dataset.selectedYearMembershipStatus = state.selectedYearMembership.status;
   strip.dataset.selectedYearMembershipReason = state.selectedYearMembership.reason;
@@ -565,7 +584,67 @@ function render() {
   }
 }
 
+function scrubPreview(event){
+  const input=event.currentTarget;
+  const target=parseDate(instrument?.dataset.targetDate);
+  if(!target || input.disabled)return;
+  const position=Number(input.value);
+  if(!Number.isInteger(position) || position<0 ||
+    position >= (isGregorianLeapYear(target.year)?366:365)) return;
+  const preview=shiftGregorianDate({year:target.year,month:1,day:1},position);
+  if(preview.year!==target.year)return;
+  const marker=document.querySelector("#research-year-base-marker");
+  if(marker)marker.style.setProperty("--year-x",
+    (position/(isGregorianLeapYear(target.year)?365:364)*100).toFixed(4)+"%");
+  const hint=document.querySelector("#research-year-scrub-hint");
+  if(hint)hint.textContent="預覽 "+formatDate(preview)+" · 放開套用";
+  input.setAttribute("aria-valuetext","預覽 "+formatDate(preview)+"，放開後套用");
+  strip.dataset.scrubStatus="preview";
+}
+
+function scrubCommit(event){
+  const input=event.currentTarget;
+  const selected=parseDate(instrument?.dataset.targetDate);
+  if(!selected || input.disabled)return;
+  const offset=Number(input.value);
+  const length=isGregorianLeapYear(selected.year)?366:365;
+  if(!Number.isInteger(offset)||offset<0||offset>=length){
+    render();
+    return;
+  }
+  const date=shiftGregorianDate({year:selected.year,month:1,day:1},offset);
+  // The ORIGINAL recurrence view receives one intent and owns all commits,
+  // including URL, base inputs, Δ, candidate states and the target data.
+  window.dispatchEvent(new CustomEvent("recurrence:select-strip-date",{
+    detail:{date,source:"original-year-strip"}
+  }));
+}
+
+function scrubOutcome(event){
+  const status=event.detail?.status??"invalid-request";
+  strip.dataset.scrubStatus=status;
+  render(); // also restores the ORIGINAL marker/slider when denied
+  const feedback=document.querySelector("#research-year-scrub-feedback");
+  if(!feedback)return;
+  const messages={
+    "stale-original-input":"基準日期或位移年數尚未套用，請先確認原本輸入。",
+    "target-instant-bound":"已綁定精確時刻；請先使用原本的時刻控制修改或解除綁定。",
+    "base-calendar-day-unavailable":"目前基準年份不能對應此日期（例如非閏年的 2/29）；保留原日期。",
+    "cannot-preserve-delta":"此日期無法保持目前的位移年數；保留原日期。",
+    "invalid-current-target":"原本的比較日期不存在，請先調整基準日期或位移。",
+    "outside-current-target-year":"只能在目前選定的公曆年內拖動。",
+    "invalid-date":"日期無效，原本的選定日期不變。",
+    "invalid-request":"無法套用日期，原本的選定日期不變。"
+  };
+  feedback.hidden=status==="applied";
+  feedback.textContent=messages[status]??"";
+}
+
 if (strip && instrument) {
+  const nativeScrub=document.querySelector("#research-year-scrub");
+  nativeScrub?.addEventListener("input",scrubPreview);
+  nativeScrub?.addEventListener("change",scrubCommit);
+  window.addEventListener("recurrence:strip-date-outcome",scrubOutcome);
   const targetInstantAttributes = [
     "data-selected-target-instant-basis",
     "data-selected-target-instant-bound",
