@@ -131,7 +131,7 @@ test("Now follows the selected-time surface instead of the retired top-left tool
   assert.ok(html.includes('id="now-button" class="readout-now"'));
   assert.ok(html.includes('id="mobile-time-apply"'));
   assert.ok(html.includes('id="mobile-now-button"'));
-  assert.ok(navigation.includes(".instrument-readout .readout-now"));
+  assert.ok(navigation.includes("#kinetic-instrument .instrument-readout #now-button.readout-now"));
   assert.ok(navigation.includes('data-analysis-open="true"') && navigation.includes(".instrument-toolbar { display:none !important;"));
   assert.ok(mobile.includes('source:"mobile-now"'));
   assert.ok(kinetic.includes('controlGroup:document.querySelector(".instrument-toolbar > .toolbar-group:last-child")'));
