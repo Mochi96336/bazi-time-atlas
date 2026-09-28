@@ -1,0 +1,144 @@
+/* Navigation F1: page navigation, temporary Tools and the selected-time Now
+   command are separate owners. Keep this final layer above old capsule/HUD CSS.
+   No wheel, material, or calendar rule belongs in this file. */
+.kinetic-topbar, .recurrence-topbar { align-items: center; }
+.kinetic-topbar { justify-content: space-between !important; padding-right: clamp(14px,2vw,32px) !important; }
+.kinetic-topbar .topbar-actions {
+  display:flex; align-items:center; justify-content:flex-end;
+  gap:16px; margin-left:auto; min-width:0;
+}
+.kinetic-topbar .site-nav, .recurrence-topbar .site-nav {
+  display:flex; align-items:center; gap:13px; margin:0; white-space:nowrap;
+}
+.kinetic-topbar .site-nav a,
+.recurrence-topbar .site-nav a,
+.topbar .site-nav a {
+  display:inline-flex; align-items:center; min-height:36px;
+  padding:0 1px !important; margin:0 !important; border:0 !important;
+  border-radius:0 !important; background:transparent !important;
+  box-shadow:none !important; color:#909b9d; font-size:12px;
+  line-height:1; font-weight:640; text-decoration:none; opacity:1;
+}
+.kinetic-topbar .site-nav a:hover,
+.recurrence-topbar .site-nav a:hover,
+.topbar .site-nav a:hover { color:#e3e8e6 !important; }
+.kinetic-topbar .site-nav a[aria-current="page"],
+.recurrence-topbar .site-nav a[aria-current="page"] {
+  color:#d6e1de !important; opacity:1 !important;
+}
+.kinetic-topbar .site-nav a[aria-current="page"]::after,
+.recurrence-topbar .site-nav a[aria-current="page"]::after {
+  bottom:0; height:1px; background:var(--cursor,#e4d9ad);
+}
+.kinetic-topbar .site-nav a.research-link[data-nav-role="research"],
+.recurrence-topbar .site-nav a.research-link[data-nav-role="research"],
+.topbar .site-nav a.research-link[data-nav-role="research"] {
+  font-size:10.5px; font-weight:620; color:#929b98; opacity:.87;
+}
+.kinetic-topbar .site-nav a.research-link::before,
+.recurrence-topbar .site-nav a.research-link::before { display:none; }
+.kinetic-topbar .site-nav a.research-link[aria-current="page"],
+.recurrence-topbar .site-nav a.research-link[aria-current="page"] {
+  color:#d7e2df !important; font-weight:700; opacity:1;
+}
+
+/* The fixed-size slot cannot shift when Tools changes to Done. */
+.kinetic-topbar .topbar-tool-slot {
+  display:flex; flex:0 0 60px; align-items:center; justify-content:flex-end;
+  min-height:36px; padding-left:12px;
+  border-left:1px solid rgba(185,198,199,.19);
+}
+.kinetic-topbar .topbar-tool-slot .analysis-toggle,
+.kinetic-topbar .topbar-tool-slot .analysis-close {
+  position:static !important; inset:auto !important; min-width:42px;
+  min-height:40px; margin:0; padding:0 2px;
+  border:0 !important; border-radius:0 !important; box-shadow:none !important;
+  background:transparent !important; backdrop-filter:none !important;
+  color:#c1cbcb; font-size:11px; font-weight:650;
+  line-height:1; letter-spacing:.035em;
+}
+.kinetic-topbar .topbar-tool-slot .analysis-close {
+  color:#e2e8e5; box-shadow:inset 0 -1px #8f9b99 !important;
+}
+.kinetic-topbar .topbar-tool-slot .analysis-toggle:hover,
+.kinetic-topbar .topbar-tool-slot .analysis-close:hover { color:#f0f3f0; }
+.kinetic-topbar .topbar-tool-slot .analysis-toggle::before,
+.kinetic-topbar .topbar-tool-slot .analysis-close::before { content:none !important; }
+.kinetic-topbar .topbar-tool-slot [hidden] { display:none !important; }
+
+/* Analysis actions are a second row inside the instrument, not another
+   header navigation item. The closed shell leaves no empty control bar. */
+#kinetic-instrument:not([data-analysis-open="true"]) .instrument-toolbar { display:none !important; }
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+  position:absolute !important; z-index:8;
+  inset:7px clamp(14px,2vw,32px) auto auto !important;
+  width:max-content !important; max-width:calc(100% - 28px) !important;
+  min-height:36px !important; display:flex !important;
+  justify-content:flex-end !important; align-items:center !important;
+  padding:0 !important; border:0 !important; box-shadow:none !important;
+}
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child,
+#kinetic-instrument[data-analysis-open="true"] #play-button { display:none !important; }
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child {
+  display:flex; flex-wrap:nowrap; gap:5px; margin:0;
+  align-items:center; justify-content:flex-end;
+}
+
+/* Now resets the selected instant; it never starts wall-clock following. */
+.instrument-readout .readout-now {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:72px; min-height:32px; margin:0 auto 4px; padding:0 8px;
+  border:0; border-radius:0; background:transparent;
+  color:#b9b29e; font-size:11px; font-weight:620; letter-spacing:.03em;
+  cursor:pointer; pointer-events:auto;
+}
+.instrument-readout .readout-now:hover,
+.instrument-readout .readout-now:focus-visible { color:#efe1b7; }
+#kinetic-instrument[data-inverse-time-search="active"] .readout-now { display:none; }
+#mobile-now-button { display:none; }
+
+@media (min-width:481px) {
+  .kinetic-topbar .site-nav a[aria-current="page"] { display:none; }
+}
+@media (max-width:820px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    inset:8px 10px auto auto !important;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button {
+    min-height:38px; border:0; border-radius:0; padding-inline:7px;
+    background:transparent; backdrop-filter:none; font-size:10px;
+  }
+}
+@media (max-width:480px) {
+  .kinetic-topbar .brand, .recurrence-topbar .brand { display:none; }
+  .kinetic-topbar, .recurrence-topbar { justify-content:space-between !important; gap:8px; }
+  .kinetic-topbar .topbar-actions { gap:11px; margin:0; width:100%; }
+  .kinetic-topbar .site-nav, .recurrence-topbar .site-nav { gap:14px; margin-right:auto; }
+  .kinetic-topbar .site-nav a[aria-current="page"] { display:inline-flex; }
+  .kinetic-topbar .site-nav a, .recurrence-topbar .site-nav a {
+    min-height:42px; font-size:12px;
+  }
+  .kinetic-topbar .site-nav a.research-link[data-nav-role="research"],
+  .recurrence-topbar .site-nav a.research-link[data-nav-role="research"] { font-size:10.5px; }
+  .kinetic-topbar .topbar-tool-slot { flex-basis:55px; min-height:42px; padding-left:8px; }
+  .kinetic-topbar .topbar-tool-slot .analysis-toggle,
+  .kinetic-topbar .topbar-tool-slot .analysis-close { min-height:42px; font-size:11px; }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    inset:4px 9px auto auto !important; min-height:42px !important;
+  }
+  .instrument-readout .readout-now { display:none; }
+  .mobile-time-dock .mobile-time-actions {
+    display:flex; align-items:center; justify-content:flex-end;
+    gap:4px; min-width:0; white-space:nowrap;
+  }
+  .mobile-time-dock .mobile-time-actions #mobile-now-button {
+    display:inline-flex; justify-content:center; align-items:center;
+    min-width:42px; min-height:42px; padding:0 4px;
+    border:0; border-radius:0; background:transparent;
+    color:#d1c3a0; font-size:10px; font-weight:690; cursor:pointer;
+  }
+  .mobile-time-dock .mobile-time-actions #mobile-now-button:hover { color:#f1dfb1; }
+  .mobile-time-dock .mobile-time-actions #mobile-zodiac-readout:not([hidden]) {
+    flex:0 0 auto; padding-left:6px; font-size:10px;
+  }
+}
