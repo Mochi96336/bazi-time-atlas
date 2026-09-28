@@ -6,6 +6,7 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
+import { jiaziAnchoredCivilYear } from "./recurrence/jiazi-year-geometry.js";
 import { sexagenaryDayForGregorianDate } from "./recurrence/ganzhi-cycle-comparison.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import {
@@ -447,6 +448,31 @@ function render() {
   strip.dataset.elapsedDays = state.elapsedDays === null ? "unavailable" : String(state.elapsedDays);
   strip.dataset.civilYearDays = String(state.civilYearDays);
   strip.dataset.civilYearDayRemainder = String(state.civilYearDayRemainder);
+  const dayGeometry = jiaziAnchoredCivilYear(state.selectedDate.year);
+  const jiaziLayer = document.getElementById("research-year-jiazi-ticks");
+  strip.dataset.firstJiaziDate = formatDate(dayGeometry.ticks[0].date);
+  strip.dataset.jiaziTickCount = String(dayGeometry.ticks.length);
+  strip.dataset.inYearCompleteJiaziSpans = String(dayGeometry.completeInYearSpans);
+  strip.dataset.jiaziHeadDays = String(dayGeometry.headDays);
+  strip.dataset.jiaziTailDays = String(dayGeometry.tailDays);
+  strip.dataset.newYearDayName = dayGeometry.nextJan1Pillar.name;
+  if (jiaziLayer) {
+    const nodes = document.createDocumentFragment();
+    dayGeometry.ticks.forEach((item,index) => {
+      const tick = document.createElement("span");
+      tick.className = "research-year-jiazi-tick";
+      tick.style.setProperty("--jiazi-x",item.percent.toFixed(5)+"%");
+      tick.dataset.dayOffset = String(item.offset);
+      tick.dataset.pillar = item.pillar;
+      tick.dataset.first = String(index===0);
+      tick.title = "甲子日 "+formatDate(item.date);
+      const label = document.createElement("small");
+      label.textContent = "甲子";
+      tick.appendChild(label);
+      nodes.appendChild(tick);
+    });
+    jiaziLayer.replaceChildren(nodes);
+  }
   // The one visible slider follows the existing instrument's selected
   // target. It never creates or persists another selected-date state.
   const scrub=document.querySelector("#research-year-scrub");
@@ -503,9 +529,8 @@ function render() {
     state.selectedYearMembership.status==="model-estimated" ? "模型估計" :
     yearIsBoundary ? "需提供時刻" : "年界證據不足");
   setText("research-year-full-cycle",
-    state.selectedDate.year+" 公曆年共 "+state.civilYearDays+
-    " 天：干支日走滿 "+state.civilYearFullDayCycles+
-    " 圈，再多 "+state.civilYearDayRemainder+" 天。");
+    "每一道甲子刻線相隔 60 天；走到明年元旦，日序已輪轉"+
+    state.civilYearFullDayCycles+" 次，接著再向前 "+state.civilYearDayRemainder+" 位。");
   setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
