@@ -13,9 +13,7 @@
   <link rel="stylesheet" href="./four-pillar-determinacy.css">
   <link rel="stylesheet" href="./near-recurrence.css">
   <link rel="stylesheet" href="./research-cycle-comparison.css">
-  <link rel="stylesheet" href="./research-date-explorer.css">
   <link rel="stylesheet" href="./research-year-strip-interaction.css">
-  <link rel="stylesheet" href="./research-free-day-wheel.css">
   <link rel="stylesheet" href="./navigation-workspace.css">
 </head>
 <body>
@@ -39,230 +37,10 @@
     </section>
 
 
-    <section id="research-free-explorer" class="research-date-explorer" aria-labelledby="research-date-explorer-title" hidden data-ready="false" data-astronomy-applicability="not-evaluated" data-four-pillars-applicability="not-evaluated">
-      <header class="research-date-explorer-head">
-        <div>
-          <span class="eyebrow">Cycle explorer</span>
-          <h2 id="research-date-explorer-title">看懂一年，才看得懂六十年</h2>
-          <p>先選一天，看它在公曆年與立春年界中的位置；干支日則從不停止，每天前進一位。雙日期比較收在進階研究。</p>
-        </div>
-        <span class="research-date-explorer-scope">先理解年界與日序<br>天文及四柱回歸另行驗證</span>
-      </header>
-
-      <div class="research-single-surface" aria-label="選定日期與唯一年度時間軸">
-      <form id="research-date-explorer-form" class="research-date-explorer-form" novalidate>
-        <fieldset aria-label="比較日期">
-          <legend>選定日期</legend>
-          <div class="research-date-explorer-inputs">
-            <label>年 <input id="research-explorer-target-year" type="number" min="1" max="10000000" step="1" required value="2024"></label>
-            <label>月 <input id="research-explorer-target-month" type="number" min="1" max="12" step="1" required value="2"></label>
-            <label>日 <input id="research-explorer-target-day" type="number" min="1" max="31" step="1" required value="10"></label>
-          </div>
-        </fieldset>
-        <div class="research-date-explorer-actions">
-          <button type="submit" id="research-explorer-apply">套用日期</button>
-        </div>
-          <details id="research-explorer-advanced-base" class="research-explorer-advanced-base">
-          <summary>進階 · 指定另一個日期作為比較基準</summary>
-    <fieldset aria-label="基準日期">
-              <legend>基準日期</legend>
-              <div class="research-date-explorer-inputs">
-                <label>年 <input id="research-explorer-base-year" type="number" min="1" max="10000000" step="1" required value="2024"></label>
-                <label>月 <input id="research-explorer-base-month" type="number" min="1" max="12" step="1" required value="2"></label>
-                <label>日 <input id="research-explorer-base-day" type="number" min="1" max="31" step="1" required value="1"></label>
-              </div>
-            </fieldset>
-          <div class="research-explorer-advanced-actions">
-            <button type="button" id="research-explorer-swap">交換基準日與選定日</button>
-            <small>展開後可另外編輯基準日期；這不是改變立春年界的控制。</small>
-          </div>
-        </details>
-      </form>
-      <p class="research-date-explorer-error" id="research-explorer-error" role="status" aria-live="polite" hidden></p>
-      <section id="research-one-year-story" class="research-one-year-story" aria-label="立春年界與全年干支日位移" data-ready="false">
-          <div class="research-one-year-identities" aria-label="目前選定日期的兩種干支">
-            <div class="research-one-year-identity research-one-year-identity-year">
-              <span>年</span><strong id="research-one-year-active-pillar">—</strong>
-              <small id="research-one-year-active-evidence">尚未判定</small>
-            </div>
-            <div class="research-one-year-identity research-one-year-identity-day">
-              <span>日</span><strong id="research-one-year-day-pillar">—</strong>
-            </div>
-          </div>
-          <div class="research-one-year-timeline">
-            <div class="research-one-year-timeline-head">
-              <strong id="research-one-year-calendar-year">— 年的一年</strong>
-
-            </div>
-            <div id="research-one-year-track" class="research-one-year-track" role="group" aria-label="公曆一年、實際立春及目前日期的位置">
-              <div class="research-one-year-track-line" aria-hidden="true"></div>
-              <div id="research-one-year-before-segment" class="research-one-year-era research-one-year-era-before" hidden aria-hidden="true"></div>
-              <div id="research-one-year-after-segment" class="research-one-year-era research-one-year-era-after" hidden aria-hidden="true"></div>
-              <div class="research-one-year-track-marker research-one-year-track-start" aria-hidden="true"></div>
-              <div id="research-one-year-lichun-marker" class="research-one-year-track-marker research-one-year-track-lichun" hidden aria-hidden="true"></div>
-              <div id="research-one-year-selected-marker" class="research-one-year-track-marker research-one-year-track-selected" aria-hidden="true"></div>
-              <div class="research-one-year-track-marker research-one-year-track-end" aria-hidden="true"></div>
-              <input id="research-one-year-scrub" type="range" min="0" max="365" value="0" step="1" aria-label="拖動公曆日期，同步查看干支年及干支日" aria-describedby="research-one-year-boundary-meaning">
-            </div>
-            <div class="research-one-year-milestones" aria-hidden="true">
-              <span>1/1 <small>公曆換年</small></span>
-              <span>12/31 <small>公曆年末</small></span>
-            </div>
-            <div class="research-one-year-motion" role="status" aria-live="polite">
-              <span id="research-one-year-day-motion">—</span>
-            </div>
-            <div class="research-one-year-marker-key" aria-label="動態時間線圖例">
-              <span class="research-one-year-marker-key-selected"><i aria-hidden="true"></i><b id="research-one-year-selected-label">選定日 —</b></span>
-              <span class="research-one-year-marker-key-lichun"><i aria-hidden="true"></i><b id="research-one-year-lichun-label">立春位置待查</b></span>
-            </div>
-            <details id="research-one-year-evidence-details" class="research-one-year-evidence-details">
-              <summary>立春附近與來源說明</summary>
-            <div id="research-one-year-era-legend" class="research-one-year-era-legend" hidden>
-              <span><i class="research-one-year-era-swatch-before" aria-hidden="true"></i><b id="research-one-year-before-label">立春前 · —</b></span>
-              <span><i class="research-one-year-era-swatch-after" aria-hidden="true"></i><b id="research-one-year-after-label">立春後 · —</b></span>
-            </div>
-
-            <div id="research-one-year-boundary-zoom" class="research-one-year-boundary-zoom" hidden>
-              <div class="research-one-year-zoom-heading">
-                <strong>立春附近 · 放大觀察</strong>
-                <small>以下局部放大，與上方全年時間線使用不同尺度</small>
-              </div>
-              <div class="research-one-year-zoom-track" id="research-one-year-zoom-track" role="img" aria-label="立春前後共28天的放大時間線">
-                <div class="research-one-year-zoom-before" aria-hidden="true"></div>
-                <div class="research-one-year-zoom-after" aria-hidden="true"></div>
-                <div class="research-one-year-zoom-event" id="research-one-year-zoom-event" aria-hidden="true"></div>
-                <div class="research-one-year-zoom-selected-day" id="research-one-year-zoom-selected-day" aria-hidden="true"></div>
-              </div>
-              <div class="research-one-year-zoom-labels">
-                <span>立春前 14 天</span>
-                <span id="research-one-year-zoom-center">立春</span>
-                <span>立春後 14 天</span>
-              </div>
-            </div>
-            <p id="research-one-year-boundary-meaning" class="research-one-year-boundary-meaning">—</p>
-            <small id="research-one-year-source" class="research-one-year-source">—</small>
-            </details>
-
-          </div>
-        </section>
-      </div>
-      <div class="research-date-step-controls" role="group" aria-label="選定日期逐日位移">
-        <span>逐日調整</span>
-        <div class="research-date-step-buttons research-date-step-buttons-daily">
-          <button type="button" data-explorer-step-days="-1" aria-label="選定日期往前一天">← 前一天</button>
-          <button type="button" data-explorer-step-days="1" aria-label="選定日期往後一天">後一天 →</button>
-        </div>
-        <details id="research-date-step-advanced" class="research-date-step-advanced">
-          <summary>進階 · 跳轉 60 天</summary>
-          <div class="research-date-step-buttons research-date-step-buttons-sixty" role="group" aria-label="進階六十日位移">
-            <button type="button" data-explorer-step-days="-60" aria-label="選定日期往前六十天">−60 日</button>
-            <button type="button" data-explorer-step-days="60" aria-label="選定日期往後六十天">＋60 日</button>
-          </div>
-          <small>只移動選定日期，基準日不變。</small>
-        </details>
-      </div>
-      <div id="research-explorer-results" class="research-date-explorer-results" aria-live="polite">
-        <details id="research-explorer-advanced-cycle" class="research-explorer-advanced-cycle">
-          <summary>進階 · 比較兩日期的 60 年與 60 日循環</summary>
-        <div class="research-explorer-elapsed">
-          <span id="research-explorer-date-range">2024/02/01 → 2024/02/10</span>
-          <strong id="research-explorer-elapsed-days">實際經過 9 天</strong>
-        </div>
-        <div class="research-explorer-mobile-glance" aria-label="名義干支年與干支日同步摘要">
-          <div>
-            <small>名義干支年</small>
-            <strong><span id="research-explorer-glance-year-base">—</span><i aria-hidden="true">→</i><span id="research-explorer-glance-year-target">—</span></strong>
-          </div>
-          <div>
-            <small>干支日</small>
-            <strong><span id="research-explorer-glance-day-base">—</span><i aria-hidden="true">→</i><span id="research-explorer-glance-day-target">—</span></strong>
-          </div>
-        </div>
-        <div class="research-date-explorer-cards">
-          <article class="research-date-explorer-card research-date-explorer-year" aria-labelledby="research-explorer-year-title">
-            <div class="research-date-explorer-card-title"><h3 id="research-explorer-year-title">干支年</h3><small>名義年序 · 60 年</small></div>
-            <div class="research-date-explorer-values">
-              <div><small>基準 · 名義年標</small><strong id="research-explorer-year-base">—</strong></div>
-              <span aria-hidden="true">→</span>
-              <div><small>比較 · 名義年標</small><strong id="research-explorer-year-target">—</strong></div>
-            </div>
-            <div id="research-explorer-year-tape" class="research-date-explorer-tape" role="img" aria-label="名義 60 年序位置"></div>
-            <div class="research-date-explorer-phase"><span>名義年序位移</span><strong id="research-explorer-year-phase">—</strong></div>
-            <div class="research-explorer-active-year">
-              <span>立春年柱（獨立判定）</span>
-              <p><span id="research-explorer-year-active-base">—</span> <i aria-hidden="true">→</i> <span id="research-explorer-year-active-target">—</span></p>
-              <small id="research-explorer-year-active-status">—</small>
-            </div>
-          </article>
-          <article class="research-date-explorer-card research-date-explorer-day" aria-labelledby="research-explorer-day-title">
-            <div class="research-date-explorer-card-title"><h3 id="research-explorer-day-title">干支日</h3><small>公曆連續日 · 60 日</small></div>
-            <div class="research-date-explorer-values">
-              <div><small>基準</small><strong id="research-explorer-day-base">—</strong></div>
-              <span aria-hidden="true">→</span>
-              <div><small>比較</small><strong id="research-explorer-day-target">—</strong></div>
-            </div>
-            <div id="research-explorer-day-tape" class="research-date-explorer-tape" role="img" aria-label="60 日序位置"></div>
-            <div class="research-date-explorer-phase"><span>日序位移</span><strong id="research-explorer-day-phase">—</strong></div>
-            <p class="research-date-explorer-note">每日依公曆連續日數前進；不依賴立春天文時間。</p>
-          </article>
-        </div>
-        <p id="research-explorer-closure" class="research-date-explorer-closure">—</p>
-        <p class="research-date-explorer-boundary">這裡比較的是離散的年序、日序位置。相同位置不代表公曆結構、節氣或四柱完成回歸；請使用「跨年回歸」做進階判定。</p>
-        </details>
-        <details id="research-free-day-wheel" class="research-free-day-wheel" data-ready="false" data-selection-linked="true" aria-label="六十干支反向選日">
-          <summary><span>六十日轉盤</span><strong>選一個干支，再跳往前一次／後一次出現的日期</strong><i aria-hidden="true">展開 ↗</i></summary>
-          <div class="research-free-day-wheel-body">
-            <div class="research-free-day-wheel-stage">
-              <svg id="research-free-day-wheel-svg" viewBox="0 0 640 640" role="group" aria-label="可選擇六十日干支的轉盤；鍵盤左右鍵切換">
-                <g data-free-cycle-group="guides"></g>
-                <g data-free-cycle-group="stems"></g>
-                <g data-free-cycle-group="branches"></g>
-                <g data-free-cycle-group="cycle"></g>
-                <g data-free-cycle-group="selection"></g>
-                <g data-free-cycle-group="center">
-                  <circle class="research-cycle-center" cx="320" cy="320" r="112"></circle>
-                  <text id="research-free-wheel-center-name" class="research-cycle-center-value" x="320" y="314">—</text>
-                  <text id="research-free-wheel-center-count" class="research-cycle-center-note" x="320" y="345">— / 60</text>
-                </g>
-              </svg>
-            </div>
-            <div class="research-free-day-wheel-inspector" aria-live="polite">
-              <span class="research-free-day-wheel-eyebrow">探索日干支</span>
-              <h3 id="research-free-wheel-name">—</h3>
-              <p id="research-free-wheel-status">目前跟隨比較日期</p>
-              <label class="research-free-day-wheel-direct" for="research-free-wheel-direct-select">
-                <span>直接選擇干支（可用鍵盤輸入）</span>
-                <select id="research-free-wheel-direct-select" aria-describedby="research-free-wheel-direct-hint" disabled>
-                  <option value="">載入六十干支…</option>
-                </select>
-              </label>
-              <small id="research-free-wheel-direct-hint" class="research-free-day-wheel-direct-hint">點選或拖動轉盤不易定位時，可以直接選擇名稱；不會立即改變比較日期。</small>
-              <div class="research-free-day-wheel-current">
-                <span>目前比較日</span>
-                <strong id="research-free-wheel-current-date">—</strong>
-                <small id="research-free-wheel-current-name">—</small>
-              </div>
-              <div class="research-free-day-wheel-destinations">
-                <button type="button" id="research-free-wheel-previous" disabled>
-                  <span>前一次出現</span>
-                  <strong id="research-free-wheel-previous-date">—</strong>
-                  <small id="research-free-wheel-previous-delta">—</small>
-                </button>
-                <button type="button" id="research-free-wheel-next" disabled>
-                  <span>後一次出現</span>
-                  <strong id="research-free-wheel-next-date">—</strong>
-                  <small id="research-free-wheel-next-delta">—</small>
-                </button>
-              </div>
-              <button id="research-free-wheel-return" class="research-free-day-wheel-return" type="button" hidden>回到目前比較日</button>
-              <small class="research-free-day-wheel-explanation">同一干支每 60 天再次出現。選擇轉盤只預覽日期；按「前一次」或「後一次」才會修改比較日。兩個方向都不包含今天。</small>
-            </div>
-          </div>
-        </details>
-
-      </div>
-    </section>
-
+    <!-- R3: retired the parallel ?mode=dates UI. The original Research
+         instrument and original interactive Year strip below are the only
+         public date/year interaction surface. Legacy URLs are normalized by
+         recurrence-view.js to this original owner. -->
     <!-- Original Research sections restored as first-class, directly visible content.
          Legacy ?mode=dates exploration remains available only for old deep links;
          its replacement timeline is NOT the public Research landing page. -->
@@ -533,8 +311,6 @@
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
-  <script type="module" src="./src/research-date-explorer-view.js"></script>
-  <script type="module" src="./src/research-free-day-wheel-view.js"></script>
   <script type="module" src="./src/research-year-strip-view.js"></script>
   <script type="module" src="./src/research-cycle-comparison-view.js"></script>
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
