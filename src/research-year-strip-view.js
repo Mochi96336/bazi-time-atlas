@@ -484,9 +484,9 @@ function render() {
     state.selectedYearMembership.status==="model-estimated" ? "模型估計" :
     yearIsBoundary ? "需提供時刻" : "年界證據不足");
   setText("research-year-full-cycle",
-    state.selectedDate.year+" 公曆年："+state.civilYearDays+
-    " 天＝"+state.civilYearFullDayCycles+" × 60 天＋"+
-    state.civilYearDayRemainder+" 天");
+    state.selectedDate.year+" 公曆年共 "+state.civilYearDays+
+    " 天：干支日走滿 "+state.civilYearFullDayCycles+
+    " 圈，再多 "+state.civilYearDayRemainder+" 天。");
   setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
@@ -548,7 +548,12 @@ function render() {
   setText("research-year-elapsed-days", elapsed);
   setText("research-year-next-date", state.nextDate ? formatDate(state.nextDate) : "下一年同月同日不存在");
   const track=document.querySelector(".research-year-track");
-  if(track)track.setAttribute("aria-label",
+  if(track){
+    track.dataset.liChunAvailable=String(Boolean(state.liChun));
+    if(state.liChun)track.style.setProperty(
+      "--li-chun-stop",state.liChun.position.toFixed(4)+"%");
+    else track.style.removeProperty("--li-chun-stop");
+    track.setAttribute("aria-label",
     state.selectedDate.year+" 公曆年；選定 "+formatDate(state.selectedDate)+
     "；年柱 "+(state.selectedYearPillar?.name??"未確認")+
     "，日柱 "+state.selectedDayPillar.name+"；"+
@@ -557,6 +562,7 @@ function render() {
         "，"+state.liChunTransition.before.name+"轉"+state.liChunTransition.after.name
       : "本年立春位置證據不足")+"；"+
     state.civilYearDays+" 天＝6圈再多 "+state.civilYearDayRemainder+" 天");
+  }
 }
 
 if (strip && instrument) {
