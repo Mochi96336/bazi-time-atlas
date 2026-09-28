@@ -25,7 +25,7 @@ test("desktop wheel owns the viewport instead of a capped document column", () =
   assert.doesNotMatch(css, /\.kinetic-shell\s*\{[^}]*width:\s*min\(1760px,\s*100%\)/s);
   assert.match(
     css,
-    /\.instrument-shell\s*\{[\s\S]*?height:\s*max\(720px,\s*calc\(100dvh - 52px\)\);[\s\S]*?container-type:\s*size;/
+    /\.instrument-shell\s*\{[\s\S]*?height:\s*max\(720px,\s*calc\(100dvh - 64px\)\);[\s\S]*?container-type:\s*size;/
   );
   assert.match(
     css,
@@ -123,23 +123,16 @@ test("ordinary reading hides observation-window presets and analysis transport c
   );
 });
 
-test("ordinary time navigation leaves Now as the only toolbar shortcut", () => {
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar\s*\{[\s\S]*?justify-content:\s*flex-start;[\s\S]*?align-items:\s*center;[\s\S]*?gap:\s*2px;/
-  );
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar > \.toolbar-group\s*\{[\s\S]*?flex-wrap:\s*nowrap;/
-  );
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-toolbar > \.toolbar-group:last-child\s*\{[\s\S]*?margin-left:\s*1px;/
-  );
-  assert.doesNotMatch(
-    css,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar\s*\{[^}]*justify-content:\s*flex-start;/s
-  );
+test("Now follows the selected-time surface instead of the retired top-left toolbar", () => {
+  const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
+  const kinetic = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
+  const mobile = readFileSync(new URL("../src/mobile-time-control.js", import.meta.url), "utf8");
+  assert.match(html, /id="instant-readout"[\\s\\S]*?id="now-button" class="readout-now"/);
+  assert.match(html, /id="mobile-time-apply"[\\s\\S]*?id="mobile-now-button"/);
+  assert.match(navigation, /#kinetic-instrument:not\\(\\[data-analysis-open="true"\\]\\) \\.instrument-toolbar \\{ display:none !important;/);
+  assert.match(navigation, /\\.instrument-readout \\.readout-now \\{/);
+  assert.match(mobile, /source:"mobile-now"/);
+  assert.match(kinetic, /controlGroup:document.querySelector\\("\\.instrument-toolbar > \\.toolbar-group:last-child"\\)/);
 });
 
 test("ordinary reading retires the duplicate Selected Instant caption", () => {
