@@ -114,7 +114,7 @@
   .kinetic-topbar, .recurrence-topbar { justify-content:space-between !important; gap:8px; }
   .kinetic-topbar .topbar-actions { gap:11px; margin:0; width:100%; }
   .kinetic-topbar .site-nav, .recurrence-topbar .site-nav { gap:14px; margin-right:auto; }
-  .kinetic-topbar .site-nav a[aria-current="page"] { display:inline-flex; }
+  .kinetic-topbar .site-nav a[aria-current="page"] { display:inline-flex; font-size:12px !important; }
   .kinetic-topbar .site-nav a, .recurrence-topbar .site-nav a {
     min-height:42px; font-size:12px;
   }
