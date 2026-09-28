@@ -79,40 +79,6 @@
       </section>
       </details>
 
-      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散相位與十二節形狀比較">
-
-        <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 閉合 · 左右為距 0 的最短循環位移</span></div>
-        <div class="recurrence-legend" aria-hidden="true">
-          <div><i class="gregorian-dot"></i><span>公曆結構</span><strong id="gregorian-phase-readout">—</strong></div>
-          <div><i class="year-dot"></i><span>60 年序</span><strong id="year-phase-readout">—</strong></div>
-          <div><i class="day-dot"></i><span>60 日序</span><strong id="day-phase-readout">—</strong></div>
-          <div><i class="astronomy-dot"></i><span>02 十二節</span><strong id="astronomy-legend-readout">—</strong></div>
-        </div>
-        <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
-          <span>超出滑桿範圍</span>
-          <strong id="deep-time-badge-value">—</strong>
-        </div>
-
-        <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆結構、60 年序與 60 日序距離閉合零點的相位扇形；外圈另顯示十二節形狀">
-          <g id="recurrence-guides"></g>
-          <g id="gregorian-ring"></g>
-          <g id="year-ring"></g>
-          <g id="day-ring"></g>
-          <g id="astronomy-residual-ring"></g>
-          <g id="recurrence-cursor"></g>
-        </svg>
-
-        <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
-          <div class="research-current-state-head"><span>目前 Δ</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
-          <div class="research-current-state-phases">
-            <span data-closure="gregorian"><small>公曆結構</small><strong id="gregorian-status">—</strong></span>
-            <span data-closure="year"><small>60 年序</small><strong id="year-status">—</strong></span>
-            <span data-closure="day"><small>60 日序</small><strong id="day-status">—</strong></span>
-          </div>
-          <p id="closure-summary">基準點：三層都在 0 相位。</p>
-        </div>
-      </section>
-
       <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
         <header>
           <strong id="research-year-strip-title">年度時間條</strong>
@@ -191,6 +157,42 @@
         </div>
         </details>
       </section>
+
+      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散相位與十二節形狀比較">
+
+        <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 閉合 · 左右為距 0 的最短循環位移</span></div>
+        <div class="recurrence-legend" aria-hidden="true">
+          <div><i class="gregorian-dot"></i><span>公曆結構</span><strong id="gregorian-phase-readout">—</strong></div>
+          <div><i class="year-dot"></i><span>60 年序</span><strong id="year-phase-readout">—</strong></div>
+          <div><i class="day-dot"></i><span>60 日序</span><strong id="day-phase-readout">—</strong></div>
+          <div><i class="astronomy-dot"></i><span>02 十二節</span><strong id="astronomy-legend-readout">—</strong></div>
+        </div>
+        <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
+          <span>超出滑桿範圍</span>
+          <strong id="deep-time-badge-value">—</strong>
+        </div>
+
+        <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆結構、60 年序與 60 日序距離閉合零點的相位扇形；外圈另顯示十二節形狀">
+          <g id="recurrence-guides"></g>
+          <g id="gregorian-ring"></g>
+          <g id="year-ring"></g>
+          <g id="day-ring"></g>
+          <g id="astronomy-residual-ring"></g>
+          <g id="recurrence-cursor"></g>
+        </svg>
+
+        <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
+          <div class="research-current-state-head"><span>目前 Δ</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
+          <div class="research-current-state-phases">
+            <span data-closure="gregorian"><small>公曆結構</small><strong id="gregorian-status">—</strong></span>
+            <span data-closure="year"><small>60 年序</small><strong id="year-status">—</strong></span>
+            <span data-closure="day"><small>60 日序</small><strong id="day-status">—</strong></span>
+          </div>
+          <p id="closure-summary">基準點：三層都在 0 相位。</p>
+        </div>
+      </section>
+
+
 
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
         <header class="research-cycle-head">
