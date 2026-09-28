@@ -28,6 +28,12 @@ const astronomy = html.slice(astronomyStart, evidenceStart);
 const evidence = html.slice(evidenceStart);
 
 test("Research keeps three ordered evidence owners without task-card navigation", () => {
+  // #500 navigation is an intentional LAST cascade layer. Moving the same
+  // CSS link above recurrence layout shrinks the original mobile comparison
+  // row below the 844px fold without changing any Research source file.
+  assert.ok(html.indexOf('href="./navigation-workspace.css"') >
+    html.indexOf('href="./research-free-day-wheel.css"'),
+    "latest navigation stylesheet must stay last in Research CSS cascade");
   assert.ok(discreteStart >= 0);
   assert.ok(astronomyStart > discreteStart);
   assert.ok(evidenceStart > astronomyStart);
@@ -72,7 +78,9 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
   assert.match(discrete, /先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定/);
-  assert.match(discrete, /一年怎麼走/);
+  assert.match(discrete, /id="research-year-strip-title">年度時間條/);
+  assert.match(discrete, /id="research-year-full-cycle"/);
+  assert.match(discrete, /id="research-year-selected-day"/);
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
   assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
   assert.match(discrete, /id="research-cycle-comparison"/);
