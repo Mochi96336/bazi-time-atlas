@@ -26,6 +26,7 @@ test("UTC basis is subordinate to, not inside, the centered timestamp", () => {
   assert.ok(page.includes('id="readout-timezone" class="readout-timezone"'));
   assert.ok(renderer.includes('setText("instant-readout", formatAtlasCivil(fields));'));
   assert.ok(renderer.includes('setText("readout-timezone", offsetLabel);'));
+  assert.ok(renderer.includes('"instant-readout",\\n  "readout-timezone"'), "subordinate zone must be registered in renderer text nodes");
   assert.ok(css.includes('.instrument-readout .readout-timezone'));
 });
 
