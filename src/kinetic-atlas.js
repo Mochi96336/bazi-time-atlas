@@ -289,7 +289,9 @@ function updateReadout(display) {
   const basisLabel = timeContext.dayBoundary === DEFAULT_ATLAS_TIME_CONTEXT.dayBoundary
     ? offsetLabel
     : `${offsetLabel} · 00:00`;
-  setText("instant-readout", `${formatAtlasCivil(fields)} · ${offsetLabel}`);
+  // Keep the measured civil timestamp centered independently of its zone.
+  setText("instant-readout", formatAtlasCivil(fields));
+  setText("readout-timezone", offsetLabel);
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
   setText("hour-active", pillars.hour.name);
