@@ -168,6 +168,7 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 /* Now/read-head F2: a real balanced three-column control, not an anchored
    ornament. The equally-sized outside columns keep the timestamp on the
    instrument's central cursor regardless of button visibility. */
+#kinetic-instrument .instrument-readout .readout-timezone { display:none; }
 @media (min-width:481px) {
   #kinetic-instrument .instrument-readout {
     padding-bottom:0;
