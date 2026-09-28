@@ -57,6 +57,42 @@ iframe.addEventListener("load",async()=>{
   check(!d.getElementById("research-one-year-story").checkVisibility() &&
     d.querySelectorAll("#research-year-strip").length===1,
     "duplicate Year visualization appears alongside the original strip");
+  // R1 must change the ORIGINAL strip, not quietly pass based on old R0.
+  const civilYear=Number(instrument.dataset.targetDate.split("-")[0]);
+  const leap=(civilYear%4===0 && civilYear%100!==0)||civilYear%400===0;
+  const days=leap?366:365,extra=leap?6:5;
+  const full=d.getElementById("research-year-full-cycle");
+  const selectedDay=d.getElementById("research-year-selected-day");
+  const selectedYear=d.getElementById("research-year-selected-year");
+  const transition=d.getElementById("research-year-transition");
+  const track=d.querySelector("#research-year-strip .research-year-track");
+  check(full?.checkVisibility() && selectedDay?.checkVisibility() &&
+    selectedYear?.checkVisibility() && transition?.checkVisibility() &&
+    full.textContent.includes(days+" 天") &&
+    full.textContent.includes("走滿 6 圈，再多 "+extra+" 天") &&
+    strip.dataset.civilYearDays===String(days) &&
+    strip.dataset.civilYearDayRemainder===String(extra) &&
+    selectedDay.textContent===strip.dataset.selectedDayPillar,
+    "R1 must use the original year strip's 365/366 and canonical Day");
+  if(!bare){
+    check(selectedYear.textContent==="甲辰" &&
+      transition.textContent.includes("癸卯 → 甲辰") &&
+      track.dataset.liChunAvailable==="true",
+      "2024 source-based original Year transition or current Year differs");
+  }
+  check(!d.querySelector("#research-year-same-date-details") ||
+    !d.querySelector("#research-year-same-date-details").open,
+    "optional next-same-date evidence should not compete with the one-year fact");
+  check(w.getComputedStyle(d.getElementById("research-year-base-title")).display==="none" &&
+    w.getComputedStyle(d.getElementById("research-year-li-chun-title")).display==="none",
+    "old floating marker labels can still collide near Li Chun");
+  for(const selector of [".research-year-key-data",".research-year-transition-line",
+    ".research-year-selection-line",".research-year-full-cycle"]){
+    const box=d.querySelector(selector)?.getBoundingClientRect();
+    check(box && box.left>=-1 && box.right<=width+1,
+      "new ORIGINAL status line overflows "+width+"px: "+selector);
+  }
+  record("originalCycle","visible");
   const bounds=strip.getBoundingClientRect();
   check(bounds.left>=-1 && bounds.right<=width+1,
     "restored original strip overflows the "+width+"px viewport");
