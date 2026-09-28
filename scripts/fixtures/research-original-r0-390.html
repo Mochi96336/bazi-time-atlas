@@ -75,6 +75,14 @@ iframe.addEventListener("load",async()=>{
   const selectedYear=d.getElementById("research-year-selected-year");
   const transition=d.getElementById("research-year-transition");
   const track=d.querySelector("#research-year-strip .research-year-track");
+  const line=d.querySelector("#research-year-strip .research-year-line");
+  const renderedTrackCSS=w.getComputedStyle(track);
+  const renderedLineCSS=w.getComputedStyle(line);
+  check(renderedTrackCSS.position==="relative" &&
+    renderedLineCSS.backgroundImage.includes("linear-gradient"),
+    "R1 original track styles NOT ACTIVE: position="+renderedTrackCSS.position+
+    "; line="+renderedLineCSS.backgroundImage+"; styles="+
+    [...d.styleSheets].map(sheet=>sheet.href??"inline").join(","));
   check(full?.checkVisibility() && selectedDay?.checkVisibility() &&
     selectedYear?.checkVisibility() && transition?.checkVisibility() &&
     full.textContent.includes(days+" 天") &&
