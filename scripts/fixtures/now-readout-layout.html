@@ -33,7 +33,7 @@ function sample(){
  const now=doc?.querySelector("#now-button"),readout=doc?.querySelector("#instant-readout");
  const dock=doc?.querySelector("#mobile-time-dock"),input=doc?.querySelector("#mobile-instant-input");
  const mnow=doc?.querySelector("#mobile-now-button"),zodiac=doc?.querySelector("#mobile-zodiac-readout");
- if(!inst?.dataset.selectedInstantMs||!civil||!zone||!now||(mobile&&(!input?.value||!visible(win,zodiac)))){
+ if(!inst?.dataset.selectedInstantMs||!civil||!zone||!now||(mobile&&(!input?.value||(!tools&&!visible(win,zodiac))))){
    if(++tries>140){probe.dataset.error="waiting-for-live-readout";probe.dataset.ready="error";finished=true;}
    return;
  }
@@ -69,7 +69,8 @@ function sample(){
   mobileNowHeight:mobile?M.height:null,
   mobileNowGap:mobile?M.x-G.right:null,
   mobileSameBaseline:mobile?Math.abs(M.cy-G.cy):null,
-  mobileCaptionAbove:mobile?O.bottom<=Math.min(M.y,G.y)-1:null,
+  mobileCaptionVisible:mobile?visible(win,zodiac):null,
+  mobileCaptionAbove:mobile?(tools?!visible(win,zodiac):O.bottom<=Math.min(M.y,G.y)-1):null,
   mobileCaptionWithinDock:mobile?O.right<=D.right+1:null,
   mobileInputWidth:mobile?G.width:null,
   mobileDockWidth:mobile?D.width:null,
