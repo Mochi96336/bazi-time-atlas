@@ -11,7 +11,6 @@ import {
 
 const root = document.querySelector("#research-free-explorer");
 const form = document.querySelector("#research-date-explorer-form");
-const advancedDetails = document.querySelector("#research-advanced-details");
 const annualSections = [
   document.querySelector(".research-outline"),
   document.querySelector("#research-discrete"),
@@ -24,14 +23,11 @@ const annualLede = lede?.textContent ?? "";
 const heading = document.querySelector(".recurrence-intro h1");
 const annualHeading = heading?.textContent ?? "回歸研究";
 const searchOnEntry = new URL(location.href).searchParams;
-// A bare Research visit should teach the relationship first. Every existing
-// recurrence deep link (?delta, ?date, clock conventions, or research anchors)
-// remains annual-only. Explicit mode takes precedence over implicit entry.
-const explicitMode = searchOnEntry.get("mode");
-const plainLearningEntry = searchOnEntry.size === 0 &&
-  (!location.hash || location.hash === "#research-free-explorer");
-const freeFromLink = explicitMode === "dates" ||
-  (explicitMode !== "annual" && plainLearningEntry);
+// The original Research instrument is ALWAYS the landing surface.
+// Legacy ?mode=dates URLs remain supported until their useful functionality
+// is migrated to the ORIGINAL year strip; do not silently rewrite those URLs.
+const freeFromLink = searchOnEntry.get("mode") === "dates";
+const plainLearningEntry = false;
 const fields = {
   base:["year","month","day"].map(name => document.querySelector("#research-explorer-base-" + name)),
   target:["year","month","day"].map(name => document.querySelector("#research-explorer-target-" + name))
@@ -448,20 +444,16 @@ function jumpToSelectedDay(event) {
   syncFreeQuery();
 }
 
-// One public Research surface. Old ?delta / #research-discrete permalinks
-// continue to expand their advanced research material without an extra tab.
+// Transitional URL compatibility: no user-facing top-level modes.
+// On all ordinary Research visits, show EVERY ORIGINAL section. Only an old
+// explicit ?mode=dates link opts into the legacy date-explorer surface.
 function setMode(next) {
   mode=next;
   const dates=next==="dates";
   document.body.dataset.researchMode=next;
   root.hidden=!dates;
-  // Section nodes live INSIDE the native details element. Never hide them
-  // individually or the reader would open an empty "進階研究" disclosure.
-  annualSections.forEach(node=>{ if(node)node.hidden=false; });
-  advancedDetails.open=!dates;
-  if (lede) lede.textContent=dates
-    ? "選定日期，觀察立春年界；一個公曆年，干支日走完六圈，再多走 5 或 6 天。"
-    : annualLede;
+  annualSections.forEach(node=>{if(node)node.hidden=dates;});
+  if (lede) lede.textContent=annualLede;
   if (heading) heading.textContent=annualHeading;
   if(dates){
     if(!hasExplorerSelection){
@@ -476,7 +468,7 @@ function setMode(next) {
   }
 }
 
-if (root && form && advancedDetails) {
+if (root && form) {
   const linkedBase = readDateString(searchOnEntry.get("base"));
   const linkedTarget = readDateString(searchOnEntry.get("compare"));
   const linkError = freeFromLink && (searchOnEntry.has("base") || searchOnEntry.has("compare"))
@@ -541,10 +533,6 @@ if (root && form && advancedDetails) {
   document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,refreshYearEvidence);
   document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_ERROR_EVENT,refreshYearEvidence);
   setMode(freeFromLink?"dates":"annual");
-  root.dataset.advancedOpen=String(advancedDetails.open);
-  advancedDetails.addEventListener("toggle",()=>{
-    root.dataset.advancedOpen=String(advancedDetails.open);
-  });
   if (linkError) {
     root.dataset.urlValid = "false";
     setError("分享網址日期不合法，已改用預設示範日期。");

@@ -37,15 +37,15 @@ frame.addEventListener("load",async()=>{
   const dayLabel=d.getElementById("research-one-year-day-pillar");
   ok(root?.dataset.ready==="true"&&d.documentElement.clientWidth===(desktop?1440:390),
     "single Research route failed to initialize with a real viewport");
-  ok(!root.hidden&&advanced&&!advanced.open&&band&&slider&&sentence,
-    "one public Year band must be visible, advanced proof closed");
+  ok(!root.hidden&&!advanced&&band&&slider&&sentence,
+    "explicit legacy dates route must still render its date band, with no wrapper");
   ok(!d.querySelector(".research-mode-switch")&&
     !d.querySelector("#research-mode-dates, #research-mode-annual, #research-year-journey-start, #research-year-journey, #research-one-year-day-phase, #research-year-journey-loops"),
     "an obsolete parallel Year menu, wizard, or ring survived the redesign");
   record("noTabs",true);record("noTour",true);
-  ok(!d.querySelector("#research-discrete").checkVisibility()&&
-    !d.querySelector("#research-year-strip").checkVisibility(),
-    "old annual duplicate is visible beside primary Year band");
+  ok(d.getElementById("research-discrete").hidden &&
+    !d.getElementById("research-year-strip").checkVisibility(),
+    "legacy explicit dates route must not render two concurrent year bands");
   const box=story.getBoundingClientRect(),limit=desktop?1441:391;
   ok(box.left>=0&&box.right<=limit,"primary Year panel exceeds viewport");
   if(!desktop)ok(box.bottom<=844,"one-band mobile first screen exceeds 844: "+box.bottom);
