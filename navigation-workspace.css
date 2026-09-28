@@ -289,7 +289,7 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
     padding:2px 0 0 !important;
     border-left:0 !important;
     color:color-mix(in srgb, var(--zodiac) 21%, var(--ink));
-    font-size:11px !important;
+    font-size:12px !important;
     font-weight:650;
     line-height:1.25;
   }
