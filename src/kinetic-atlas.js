@@ -274,6 +274,9 @@ function setText(id, value) {
   if (node) node.textContent = value;
 }
 
+const civilReadout = document.querySelector("#instant-readout .readout-civil");
+const zoneReadout = document.querySelector("#instant-readout .readout-zone");
+
 function updateReadout(display) {
   const {
     fields,
@@ -289,18 +292,11 @@ function updateReadout(display) {
   const basisLabel = timeContext.dayBoundary === DEFAULT_ATLAS_TIME_CONTEXT.dayBoundary
     ? offsetLabel
     : `${offsetLabel} · 00:00`;
-  // Keep the same complete textContent contract for temporal probes, while
-  // giving the civil instant and its basis separate visual typography.
-  const instantReadout = textNodes.get("instant-readout");
-  if (instantReadout) {
-    const civil = document.createElement("span");
-    civil.className = "readout-civil";
-    civil.textContent = formatAtlasCivil(fields);
-    const zone = document.createElement("span");
-    zone.className = "readout-zone";
-    zone.textContent = ` · ${offsetLabel}`;
-    instantReadout.replaceChildren(civil, zone);
-  }
+  // Retain the same full textContent contract. These two readout nodes are
+  // stable across high-frequency wheel drag/playback updates: never rebuild
+  // the DOM subtree on every animation frame just to style the time basis.
+  if (civilReadout) civilReadout.textContent = formatAtlasCivil(fields);
+  if (zoneReadout) zoneReadout.textContent = ` · ${offsetLabel}`;
   setText("solar-readout", `${longitude.toFixed(3)}°`);
   setText("term-readout", activeTerm.name);
   setText("hour-active", pillars.hour.name);
