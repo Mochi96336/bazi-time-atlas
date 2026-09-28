@@ -49,7 +49,7 @@
      a camera-relative cqh coordinate system. */
   .instrument-shell {
     margin-top: 6px;
-    height: max(720px, calc(100dvh - 52px));
+    height: max(720px, calc(100dvh - 64px));
     min-height: 0;
     container-type: size;
     border: 0;
@@ -337,6 +337,6 @@
 
 @media (min-width: 1100px) {
   .instrument-shell {
-    height: max(760px, calc(100dvh - 52px));
+    height: max(760px, calc(100dvh - 64px));
   }
 }
