@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Readout F2 browser geometry review</title>
+<style>
+  html,body{margin:0;overflow:hidden;background:#11171f}
+  #stage{display:block;border:0;background:#11171f}
+  #probe{display:none}
+</style></head>
+<body>
+<iframe id="stage" title="live Atlas readout under review"></iframe>
+<output id="probe" data-ready="false"></output>
+<script>
+const query=new URLSearchParams(location.search);
+const width=Number(query.get("width"))||1440;
+const height=Number(query.get("height"))||900;
+const mobile=width<=480;
+const edit=query.get("edit")==="1";
+const longYear=query.get("long")==="1";
+const tools=query.get("tools")==="1";
+const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
+frame.style.width=width+"px";frame.style.height=height+"px";
+const target=new URL("../../?instant=2026-09-13T23%3A43%3A42.000Z"+(tools?"&tools=1":""),location.href);
+frame.src=target.href;
+const rect=node=>{let a=node.getBoundingClientRect();return {x:a.left,y:a.top,right:a.right,bottom:a.bottom,width:a.width,height:a.height,cx:(a.left+a.right)/2,cy:(a.top+a.bottom)/2}};
+function visible(win,node){if(!node||node.hidden)return false;const s=win.getComputedStyle(node);return s.display!=="none"&&s.visibility!=="hidden"&&s.opacity!=="0";}
+let tries=0,finished=false,startedEditor=false,usedLong=false;
+function sample(){
+ if(finished)return;
+ const win=frame.contentWindow,doc=frame.contentDocument;
+ const inst=doc?.querySelector("#kinetic-instrument"),line=doc?.querySelector(".selected-instant-line");
+ const civil=doc?.querySelector("#instant-readout .readout-civil"),zone=doc?.querySelector("#instant-readout .readout-zone");
+ const now=doc?.querySelector("#now-button"),readout=doc?.querySelector("#instant-readout");
+ const dock=doc?.querySelector("#mobile-time-dock"),input=doc?.querySelector("#mobile-instant-input");
+ const mnow=doc?.querySelector("#mobile-now-button"),zodiac=doc?.querySelector("#mobile-zodiac-readout");
+ if(!inst?.dataset.selectedInstantMs||!civil||!zone||!now||(mobile&&(!input?.value||!visible(win,zodiac)))){
+   if(++tries>140){probe.dataset.error="waiting-for-live-readout";probe.dataset.ready="error";finished=true;}
+   return;
+ }
+ if(edit&&!startedEditor){startedEditor=true;readout.click();return;}
+ if(edit&&doc.querySelector("#selected-instant-editor")?.hidden)return;
+ if(longYear&&!usedLong){usedLong=true;civil.textContent="+10026-09-14 · 07:43:42";return;}
+ const R=rect(readout),C=rect(civil),Z=rect(zone),N=rect(now),L=rect(line),I=rect(inst);
+ const G=mobile&&input?rect(input):null;
+ const M=mobile&&mnow?rect(mnow):null;
+ const O=mobile&&zodiac?rect(zodiac):null;
+ const D=mobile&&dock?rect(dock):null;
+ const data={
+  innerWidth:win.innerWidth,
+  mobile:String(mobile),
+  edit:String(edit),
+  longYear:String(longYear),
+  tools:String(tools),
+  scrollWidth:Math.max(doc.documentElement.scrollWidth,doc.body.scrollWidth),
+  civilCenterError:Math.abs(C.cx-I.cx),
+  timeCenterError:Math.abs(R.cx-I.cx),
+  zoneCenterError:Math.abs(Z.cx-C.cx),
+  zoneBelow:C.bottom<=Z.y-1,
+  nowPosition:win.getComputedStyle(now).position,
+  nowVisible:visible(win,now),
+  nowHiddenForEdit:edit&&!visible(win,now),
+  nowHeight:N.height,
+  nowGap:N.x-R.right,
+  nowSameBaseline:Math.abs(N.cy-C.cy),
+  gridType:win.getComputedStyle(line).display,
+  railWidth:L.width,
+  editorOpen:doc.querySelector("#selected-instant-editor")?.hidden===false,
+  mobileNowVisible:mobile?visible(win,mnow):null,
+  mobileNowHeight:mobile?M.height:null,
+  mobileNowGap:mobile?M.x-G.right:null,
+  mobileSameBaseline:mobile?Math.abs(M.cy-G.cy):null,
+  mobileCaptionAbove:mobile?O.bottom<=Math.min(M.y,G.y)-1:null,
+  mobileCaptionWithinDock:mobile?O.right<=D.right+1:null,
+  mobileInputWidth:mobile?G.width:null,
+  mobileDockWidth:mobile?D.width:null,
+  mobileZodiacFont:mobile?Number.parseFloat(win.getComputedStyle(zodiac).fontSize):null
+ };
+ for(const [key,value] of Object.entries(data))probe.dataset[key]=String(value);
+ probe.dataset.ready="true";finished=true;
+}
+frame.addEventListener("load",()=>{const interval=setInterval(()=>{sample();if(finished)clearInterval(interval);},60);sample();});
+</script></body></html>
