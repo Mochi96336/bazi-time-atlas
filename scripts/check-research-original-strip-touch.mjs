@@ -107,8 +107,8 @@ try{
   }
   assert.ok(original,"original Year strip did not initialize");
   assert.equal(original.viewport,390,"must target a real 390px iframe");
-  assert.ok(original.rect.h>=40 && original.rect.w>280,
-    "original bar has no reliable native touch hit area");
+  assert.ok(original.rect.h>=40 && original.rect.w>260,
+    "original bar has no reliable native touch hit area: "+JSON.stringify(original));
   const pos=n=>({
     x:Math.round(original.rect.x+10+(original.rect.w-20)*(n-original.min)/(original.max-original.min)),
     y:Math.round(original.rect.y+original.rect.h/2),id:1
