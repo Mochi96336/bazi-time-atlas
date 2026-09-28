@@ -165,83 +165,177 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   }
 }
 
-/* Now/read-head F1.1: align the one-shot action with the actual timestamp.
-   The timestamp remains centered on the radial cursor; the action sits outside
-   its measured text width, without claiming a second centered line. */
+/* Readout F2: one measured instrument rail. Both flanking columns share
+   available space, so the actual time remains on the radial datum. Now has a
+   real grid cell and etched separator: no absolute positioning or glyph-only
+   breakpoint. The existing instrument shell still owns viewport placement. */
 @media (min-width:481px) {
-  #kinetic-instrument .instrument-readout {
-    /* Reserve the space formerly used by the orphan Now row so moving Now
-       inline does not push the timestamp into the bottom viewport edge. */
-    padding-bottom:28px;
-  }
+  #kinetic-instrument .instrument-readout { padding-bottom:0; }
   #kinetic-instrument .instrument-readout .selected-instant-line {
     position:relative;
-    width:max-content;
-    max-width:calc(100% - 96px);
+    display:grid;
+    grid-template-columns:minmax(48px,1fr) minmax(0,max-content) minmax(48px,1fr);
+    align-items:start;
+    width:min(640px,100%);
+    max-width:100%;
+    min-height:61px;
     margin:0 auto;
+    padding:8px 0 3px;
+    border-top:1px solid rgba(185,198,199,.22);
+  }
+  #kinetic-instrument .instrument-readout .selected-instant-line::before {
+    content:"";
+    position:absolute;
+    top:-2px;
+    left:50%;
+    width:3px;
+    height:3px;
+    transform:translateX(-50%);
+    background:#c7b183;
   }
   #kinetic-instrument .instrument-readout .selected-instant-line #instant-readout {
+    grid-column:2;
+    justify-self:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
     width:max-content;
+    min-width:0;
     max-width:100%;
-    margin:0 auto;
-    padding-inline:12px;
+    margin:0 !important;
+    padding:0 2px;
+    color:#e9eeed;
+    font-size:clamp(16px,1.5vw,22px);
+    line-height:1.22;
     text-align:center;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  #kinetic-instrument .instrument-readout .readout-zone {
+    display:block;
+    color:#929c9c;
+    font-size:10px;
+    font-weight:500;
+    line-height:1.15;
+    letter-spacing:.07em;
   }
   #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now {
-    position:absolute;
-    top:50%;
-    left:calc(100% + 10px);
-    transform:translateY(-50%);
+    position:static;
+    inset:auto;
+    transform:none;
+    grid-column:3;
+    justify-self:start;
+    align-self:start;
     display:inline-flex;
-    gap:5px;
     align-items:center;
-    min-width:0;
+    justify-content:center;
     min-height:36px;
+    min-width:44px;
     width:max-content;
-    margin:0;
-    padding:0 6px;
-    white-space:nowrap;
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:.01em;
-    color:#b7aa88;
+    margin:0 0 0 12px;
+    padding:0 10px;
     border:0;
+    border-left:1px solid rgba(185,198,199,.24);
     border-radius:0;
     background:transparent;
+    color:#baa981;
+    font-size:11px;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:.03em;
+    white-space:nowrap;
   }
   #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now:hover,
   #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now:focus-visible {
-    color:#f0dfb1;
+    color:#efddb0;
   }
+  /* Reserve the now cell while editing; the datum never walks sideways. */
   #kinetic-instrument[data-instant-editor-open="true"] .selected-instant-line #now-button.readout-now {
     visibility:hidden;
     pointer-events:none;
   }
 }
 @media (min-width:481px) and (max-width:820px) {
-  #kinetic-instrument .instrument-readout .selected-instant-line { max-width:calc(100% - 54px); }
-  #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now {
-    left:calc(100% + 3px);
-    min-width:36px;
-    padding:0 3px;
-    font-size:15px;
+  #kinetic-instrument .instrument-readout .selected-instant-line {
+    grid-template-columns:minmax(43px,1fr) minmax(0,max-content) minmax(43px,1fr);
+    width:100%;
+    padding-top:7px;
   }
-  #kinetic-instrument .instrument-readout .selected-instant-line .now-label { display:none; }
+  #kinetic-instrument .instrument-readout .selected-instant-line #instant-readout {
+    font-size:clamp(14px,2.4vw,16px);
+  }
+  #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now {
+    min-width:40px;
+    min-height:36px;
+    margin-left:5px;
+    padding:0 5px;
+    font-size:10px;
+  }
 }
 @media (max-width:480px) {
-  /* Keep the time input and its reset next to each other. The Zodiac value is
-     secondary context after a clear gap, not the label of the reset button. */
-  /* This field used to consume all spare width, leaving Now visually distant
-     from the digits despite being in the next grid cell. Size the field to
-     the actual 19-character readout; let Zodiac occupy the remaining right edge. */
-  #kinetic-instrument ~ .mobile-time-dock { grid-template-columns:max-content minmax(0,1fr) !important; }
-  .mobile-time-dock .mobile-time-field { width:max-content; max-width:100%; }
-  .mobile-time-dock #mobile-instant-input { width:144px; max-width:100%; }
-  .mobile-time-dock .mobile-time-actions { justify-content:flex-start; }
-  .mobile-time-dock .mobile-time-actions #mobile-zodiac-readout:not([hidden]) { margin-left:auto; }
-  .mobile-time-dock .mobile-time-actions { gap:5px; }
-  .mobile-time-dock .mobile-time-actions #mobile-now-button { margin-right:4px; }
-  .mobile-time-dock .mobile-time-actions #mobile-zodiac-readout:not([hidden]) {
-    padding-left:9px;
+  /* Mobile: derived Zodiac context is above the time rail, not crowded into
+     the same horizontal control group. The actual input and Now share one
+     bottom rule and two real grid cells; dirty Apply may join them. */
+  .mobile-time-dock {
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:2px 8px;
+  }
+  .mobile-time-dock .mobile-time-heading {
+    grid-column:1/-1;
+    grid-row:1;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    min-height:14px;
+    gap:8px;
+  }
+  .mobile-time-dock .mobile-time-field {
+    grid-column:1;
+    grid-row:2;
+    min-width:0;
+    width:100%;
+  }
+  .mobile-time-dock #mobile-instant-input {
+    min-width:0;
+    width:100%;
+    min-height:42px;
+  }
+  .mobile-time-dock .mobile-time-actions {
+    grid-column:2;
+    grid-row:2;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:4px;
+    min-width:0;
+    width:max-content;
+  }
+  .mobile-time-dock .mobile-time-actions #mobile-now-button {
+    margin:0;
+    min-width:48px;
+    min-height:42px;
+    padding:0 5px;
+    border-bottom:1px solid var(--m2-etched-dark-soft);
+    color:#c5b28b;
+    font-size:11px;
+    font-weight:650;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]):not([data-classification-overlay="on"])
+    ~ .mobile-time-dock[data-dirty="false"] .mobile-time-heading #mobile-zodiac-readout:not([hidden]) {
+    display:block;
+    flex:0 0 auto;
+    margin:0 0 1px auto;
+    padding:0;
+    border:0;
+    color:color-mix(in srgb,var(--zodiac) 23%,var(--ink));
+    font-size:11px;
+    font-weight:580;
+    line-height:1.2;
+    letter-spacing:.02em;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock {
+    margin-top:3px;
+    padding-block:5px 2px;
   }
 }
