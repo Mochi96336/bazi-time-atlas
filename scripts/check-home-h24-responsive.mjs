@@ -61,7 +61,7 @@ function checkProof(markup, width) {
     }
   } else {
     for (const name of [
-      "initial-matches", "initial-visible", "same-row", "now-visible", "now-fits", "now-aligned", "no-overlap",
+      "initial-matches", "initial-visible", "caption-above-time", "now-visible", "now-fits", "now-aligned", "no-overlap",
       "not-clipped", "input-usable", "dirty-hidden", "reapplied",
       "future-selected", "future-zodiac-changed", "future-caption-synced",
       "future-input-synced", "future-no-overlap",
