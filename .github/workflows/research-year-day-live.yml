@@ -4,9 +4,16 @@ on:
     paths:
       - 'recurrence.html'
       - 'research-date-explorer.css'
+      - 'research-discrete-density.css'
+      - 'src/recurrence-view.js'
+      - 'src/research-year-strip-view.js'
+      - 'src/recurrence/original-strip-date-projection.js'
       - 'src/research-date-explorer-view.js'
       - 'scripts/fixtures/research-date-explorer-390.html'
       - 'scripts/visual-check-research-year-day-live.mjs'
+      - 'scripts/check-research-original-strip-touch.mjs'
+      - 'scripts/fixtures/research-original-r0-390.html'
+      - 'tests/research-original-strip-date-projection.test.js'
       - '.github/workflows/research-year-day-live.yml'
 permissions:
   contents: read
@@ -41,6 +48,10 @@ jobs:
           BASE_URL: http://127.0.0.1:4173/
       - name: Exercise Chromium emulated 390px touch and real keyboard input
         run: node scripts/check-research-year-day-touch.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
+      - name: Exercise ACTUAL 390px touch and native keyboard on ORIGINAL year strip
+        run: node scripts/check-research-original-strip-touch.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Capture native production views

@@ -9,12 +9,23 @@ iframe{display:block;width:390px;height:1300px;border:0}output{display:none}</st
 <script>
 const query=new URLSearchParams(location.search);
 const desktop=query.get("desktop")==="1";
+const requestedWidth=Number(query.get("width"));
+const width=desktop?1440:
+  ([320,390,768].includes(requestedWidth)?requestedWidth:390);
 const bare=query.get("bare")==="1";
 const boundary=query.get("boundary")==="1";
+const interactive=query.get("interactive")==="1";
+const deep=query.get("deep")==="1";
+const precise=query.get("precise")==="1";
 const iframe=document.getElementById("research");
 const probe=document.getElementById("probe");
-if(desktop){document.documentElement.style.width="1440px";document.body.style.width="1440px";
-iframe.style.width="1440px";iframe.style.height="1600px";}
+if(width!==390){
+  const outer=Math.max(500,width);
+  document.documentElement.style.width=outer+"px";
+  document.body.style.width=outer+"px";
+  iframe.style.width=width+"px";
+  iframe.style.height="2200px";
+}
 const check=(yes,why)=>{if(!yes)throw Error(why)};
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 iframe.addEventListener("load",async()=>{
@@ -27,7 +38,7 @@ iframe.addEventListener("load",async()=>{
      instrument.dataset.targetDate!=="invalid")break;
    await wait(40);
   }
-  const width=desktop?1440:390;
+
   check(d.documentElement.clientWidth===width,"not a real "+width+"px Research viewport");
   check(d.body.dataset.researchMode==="annual" &&
     d.getElementById("research-free-explorer").hidden &&
@@ -115,7 +126,99 @@ iframe.addEventListener("load",async()=>{
     check(box && box.left>=-1 && box.right<=width+1,
       "new ORIGINAL status line overflows "+width+"px: "+selector);
   }
+  // R2 original OWNER proof: a preview does not commit; release updates
+  // the original base fields and existing delta-owned target/URL once.
+  if(interactive || deep || precise){
+    const slider=d.getElementById("research-year-scrub");
+    const baseDay=d.getElementById("base-day");
+    const originalURL=w.location.pathname+w.location.search;
+    const dayName=strip.dataset.selectedDayPillar;
+    check(slider && !slider.disabled && slider.max==="365" &&
+      slider.getBoundingClientRect().height>=36 &&
+      w.getComputedStyle(slider).position==="absolute" &&
+      slider.getAttribute("aria-valuetext").includes("2024/02/10"),
+      "original single Year-strip gesture input is unavailable");
+    if(precise){
+      for(let n=0;n<120&&instrument.dataset.selectedTargetInstantBound!=="true";n++)
+        await wait(40);
+      check(instrument.dataset.selectedTargetInstantBound==="true",
+        "precise-target test URL did not bind existing target instant");
+      slider.value="34";slider.dispatchEvent(new Event("input",{bubbles:true}));
+      slider.dispatchEvent(new Event("change",{bubbles:true}));
+      check(instrument.dataset.stripSelectionOutcome==="target-instant-bound" &&
+        instrument.dataset.targetDate==="2024-02-10" &&
+        strip.dataset.selectedDayPillar===dayName &&
+        slider.value==="40" &&
+        !d.getElementById("research-year-scrub-feedback").hidden,
+        "original Year strip incorrectly carried physical time to another date");
+      probe.dataset.preciseGuard="true";
+    }else if(deep){
+      check(instrument.dataset.baseDate==="2023-02-10" &&
+        instrument.dataset.targetDate==="2024-02-10" &&
+        instrument.dataset.deltaYears==="1","deep leap test needs 2023+1");
+      slider.value="59";slider.dispatchEvent(new Event("input",{bubbles:true}));
+      slider.dispatchEvent(new Event("change",{bubbles:true}));
+      check(instrument.dataset.stripSelectionOutcome==="base-calendar-day-unavailable" &&
+        instrument.dataset.baseDate==="2023-02-10" &&
+        instrument.dataset.targetDate==="2024-02-10" &&
+        strip.dataset.selectedDayPillar===dayName &&
+        w.location.pathname+w.location.search===originalURL &&
+        slider.value==="40" &&
+        !d.getElementById("research-year-scrub-feedback").hidden,
+        "2024 Feb29 cannot be represented by 2023+1; do not silently reset delta");
+      probe.dataset.leapGuard="true";
+    }else{
+      check(instrument.dataset.deltaYears==="0","original gesture must start at Δ 0");
+      slider.value="34";
+      slider.dispatchEvent(new Event("input",{bubbles:true}));
+      check(instrument.dataset.targetDate==="2024-02-10" &&
+        d.getElementById("research-year-scrub-hint").textContent.includes("2024/02/04"),
+        "input-preview must not create a second committed selected date");
+      slider.dispatchEvent(new Event("change",{bubbles:true}));
+      check(instrument.dataset.stripSelectionOutcome==="applied" &&
+        instrument.dataset.baseDate==="2024-02-04" &&
+        instrument.dataset.targetDate==="2024-02-04" &&
+        instrument.dataset.deltaYears==="0" &&
+        strip.dataset.selectedYearPillar==="unavailable" &&
+        strip.dataset.selectedYearMembershipStatus==="unresolved" &&
+        strip.dataset.selectedDayPillar!==dayName &&
+        w.location.search.includes("date=2024-02-04"),
+        "releasing original bar did not commit into original Year/Day/date/URL");
+      probe.dataset.boundaryScrub="true";
+      slider.value="40";slider.dispatchEvent(new Event("input",{bubbles:true}));
+      slider.dispatchEvent(new Event("change",{bubbles:true}));
+      check(instrument.dataset.targetDate==="2024-02-10" &&
+        baseDay.value==="10" &&
+        strip.dataset.selectedDayPillar===dayName &&
+        strip.dataset.selectedYearPillar==="甲辰" &&
+        w.location.search.includes("date=2024-02-10"),
+        "original date/Day/Year and URL did not roundtrip after slider return");
+      probe.dataset.scrubRoundtrip="true";
+      const settled=w.location.pathname+w.location.search;
+      baseDay.value="30"; // edited but NOT submitted — must never be discarded
+      slider.value="42";slider.dispatchEvent(new Event("input",{bubbles:true}));
+      slider.dispatchEvent(new Event("change",{bubbles:true}));
+      check(instrument.dataset.stripSelectionOutcome==="stale-original-input" &&
+        instrument.dataset.targetDate==="2024-02-10" &&
+        baseDay.value==="30" && slider.value==="40" &&
+        w.location.pathname+w.location.search===settled &&
+        !d.getElementById("research-year-scrub-feedback").hidden,
+        "gesture overwrote uncommitted original date input");
+      probe.dataset.dirtyGuard="true";
+    }
+  }
   probe.dataset.originalCycle="visible";
+  // Geometric proof of original tick coordinates: native thumb-center
+  // travel exactly spans the same 1/1 -> 12/31 width as the visible bar.
+  const range=d.getElementById("research-year-scrub");
+  const sliderBox=range.getBoundingClientRect();
+  const trackBox=track.getBoundingClientRect();
+  const minCenter=sliderBox.left+9.5;
+  const maxCenter=sliderBox.right-9.5;
+  check(Math.abs(minCenter-trackBox.left)<1.25 &&
+    Math.abs(maxCenter-trackBox.right)<1.25 &&
+    sliderBox.left>=-1 && sliderBox.right<=width+1,
+    "native Year slider must coincide with original Year ticks at both ends");
   const bounds=strip.getBoundingClientRect();
   check(bounds.left>=-1 && bounds.right<=width+1,
     "restored original strip overflows the "+width+"px viewport");
@@ -134,5 +237,7 @@ iframe.addEventListener("load",async()=>{
  }catch(err){probe.dataset.ready="error";probe.dataset.error=err?.stack??String(err);}
 },{once:true});
 iframe.src=bare?"../../recurrence.html":
-  "../../recurrence.html?date="+(boundary?"2024-02-04":"2024-02-10")+"&delta=0";
+  "../../recurrence.html?date="+(deep?"2023-02-10":boundary?"2024-02-04":"2024-02-10")+
+  "&delta="+(deep?"1":"0")+
+  (precise?"&targetClock=fixed-zone&targetTime=12%3A00%3A00&ut1Offset=8":"");
 </script></body></html>

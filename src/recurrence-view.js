@@ -6,6 +6,7 @@ import {
   validateGregorianDate
 } from "./recurrence/gregorian-cycle.js";
 import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
+import { projectOriginalStripSelection } from "./recurrence/original-strip-date-projection.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -422,10 +423,58 @@ function updateBaseDate() {
   setDelta(currentDelta, { source:"base-date" });
 }
 
+// Sole commit authority for a date chosen on the ORIGINAL annual strip.
+// The strip reports a target date only. This original controller converts it
+// to a representable base date while keeping the user's existing Δ unchanged.
+function handleOriginalYearStripSelection(event) {
+  const reply=(status)=> {
+    instrument.dataset.stripSelectionOutcome=status;
+    window.dispatchEvent(new CustomEvent("recurrence:strip-date-outcome",{
+      detail:{status,source:"original-year-strip"}
+    }));
+  };
+  const requested=event.detail?.date;
+  const typed=readBaseDate();
+  if (!validateGregorianDate(typed) ||
+      [typed.year,typed.month,typed.day].some((part,i)=>
+        part!==[currentBase.year,currentBase.month,currentBase.day][i]) ||
+      deltaNumber.value.trim()!==String(currentDelta)) {
+    reply("stale-original-input");
+    return;
+  }
+  // A physical/explicit target instant MUST NOT silently carry across to a
+  // different civil date. The existing target-clock controls own that choice.
+  if (instrument.dataset.selectedTargetInstantBound==="true") {
+    reply("target-instant-bound");
+    return;
+  }
+  let projection;
+  try {
+    projection=projectOriginalStripSelection(currentBase,currentDelta,requested);
+  } catch {
+    reply("invalid-request");
+    return;
+  }
+  if (projection.status!=="applied") {
+    reply(projection.status);
+    return;
+  }
+  currentBase=projection.baseDate;
+  yearInput.value=String(currentBase.year);
+  monthInput.value=String(currentBase.month);
+  dayInput.value=String(currentBase.day);
+  instrument.dataset.baseDateValid="true";
+  updateDeltaControlBounds();
+  rebuildCandidates();
+  setDelta(currentDelta,{source:"original-year-strip"});
+  reply("applied");
+}
+
 function bindControls() {
   [yearInput, monthInput, dayInput].forEach(input => input.addEventListener("change", updateBaseDate));
   deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value, { source:"number" }));
   deltaSlider.addEventListener("input", () => setDelta(deltaSlider.value, { source:"slider" }));
+  window.addEventListener("recurrence:select-strip-date",handleOriginalYearStripSelection);
   window.addEventListener("recurrence:select-delta", event => {
     const deltaYears = Number(event.detail?.deltaYears);
     if (!Number.isFinite(deltaYears)) return;
