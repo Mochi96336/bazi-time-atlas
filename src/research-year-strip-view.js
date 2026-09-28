@@ -416,6 +416,7 @@ function render() {
   const baseMarker = document.querySelector("#research-year-base-marker");
   const liChunMarker = document.querySelector("#research-year-li-chun-marker");
   const liChunBand = document.querySelector("#research-year-li-chun-band");
+  const approximateLiChun = document.querySelector("#research-year-approx-li-chun");
   const liChunUnavailable = document.querySelector("#research-year-li-chun-unavailable");
 
   strip.dataset.ready = "true";
@@ -534,6 +535,7 @@ function render() {
   setText("research-year-base-date", formatDate(state.selectedDate));
 
   if (state.liChun) {
+    if (approximateLiChun) approximateLiChun.hidden = true;
     liChunMarker.hidden = false;
     liChunMarker.dataset.positionStatus = state.liChun.positionStatus;
     liChunMarker.style.setProperty("--year-x", `${state.liChun.position.toFixed(4)}%`);
@@ -573,6 +575,15 @@ function render() {
     setText("research-year-transition-note",
       state.liChun.positionStatus==="estimated" ? "民用日期為模型估計" : "依現有立春來源定位");
   } else {
+    // A soft early-Feb guide is visually distinguishable from an authoritative
+    // event marker. It NEVER changes source coverage or Year resolution.
+    if (approximateLiChun) {
+      const start=positionForDate({year:state.selectedDate.year,month:2,day:2});
+      const end=positionForDate({year:state.selectedDate.year,month:2,day:6});
+      approximateLiChun.hidden=false;
+      approximateLiChun.style.left=start.toFixed(4)+"%";
+      approximateLiChun.style.width=(end-start).toFixed(4)+"%";
+    }
     liChunMarker.hidden = true;
     if (liChunBand) liChunBand.hidden = true;
     liChunUnavailable.hidden = false;
@@ -582,7 +593,7 @@ function render() {
     );
     setText("research-year-li-chun-unavailable-copy", state.liChunUnavailableMessage);
     setText("research-year-transition",
-      "立春位置待查 · "+state.liChunTransition.before.name+
+      "約 2 月初立春 · "+state.liChunTransition.before.name+
       " → "+state.liChunTransition.after.name);
     setText("research-year-transition-note",state.liChunUnavailableMessage);
   }
