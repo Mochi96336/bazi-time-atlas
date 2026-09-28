@@ -41,6 +41,13 @@
         probe.dataset.error = "read-head did not initialize";
         return;
       }
+      // Tool activation follows the initial atlas render asynchronously; never
+      // treat an uninitialized Tools state as a layout failure.
+      if (tools && instrument.dataset.analysisOpen !== "true") {
+        if (attempts++ < 100) return setTimeout(measure, 75);
+        probe.dataset.error = "Tools did not initialize";
+        return;
+      }
       if (editing && !clicked) {
         if (readout.dataset.instantEditorAvailable !== "true") {
           if (attempts++ < 100) return setTimeout(measure, 75);
