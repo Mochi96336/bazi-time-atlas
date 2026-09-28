@@ -50,8 +50,12 @@ iframe.addEventListener("load",async()=>{
     "original 60-day wheel was deleted instead of retaining its original optional disclosure");
   check(strip.dataset.ready==="true" &&
     instrument.dataset.targetDate!=="invalid" &&
-    strip.dataset.selectedYearPillar!=="unavailable",
-    "original year strip is not actually bound to Research-selected date");
+    strip.dataset.selectedDayPillar &&
+    (boundary
+      ? strip.dataset.selectedYearPillar==="unavailable" &&
+        strip.dataset.selectedYearMembershipStatus==="unresolved"
+      : strip.dataset.selectedYearPillar!=="unavailable"),
+    "original year strip must retain canonical Day and respect unresolved Li Chun Year on date-only boundary");
   if(!bare && !boundary)check(instrument.dataset.targetDate==="2024-02-10" &&
     strip.dataset.selectedYearPillar==="甲辰",
     "original selected-date and source-backed 2024 Year identity drifted");
