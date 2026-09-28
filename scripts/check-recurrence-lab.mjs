@@ -185,7 +185,7 @@ console.log(`[recurrence] PASS paired absolute identities + day-wheel sync at +1
 for (const id of ["research-cycles-year-base-ordinal","research-cycles-year-target-ordinal",
   "research-cycles-day-base-ordinal","research-cycles-day-target-ordinal"]) {
   const rendered=local.dom.match(new RegExp('id="'+id+'">([^<]+)</'))?.[1]??"";
-  if (!/^\\d{2}\\/60$/.test(rendered))
+  if (!new RegExp("^\\d{2}/60$").test(rendered))
     throw new Error("inline comparison must show both base/target named xx/60: "+id+": "+local.url);
 }
 if (local.dom.includes('class="research-cycles-card') ||
