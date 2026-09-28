@@ -71,10 +71,24 @@ function visibleYear(date, nominal) {
     };
   }
   if (["boundary-day","boundary-uncertain"].includes(state.selectedCivilLiChunRelation)) {
-    return {name:`${before}／${after}`,cycleIndex:null,positionBasis:"unresolved",note:"立春界日／區間待判"};
+    return {name:`${before}／${after}`,cycleIndex:null,positionBasis:"unresolved",note:"立春附近：未指定時刻，保留兩種年柱"};
   }
-  return {name:nominal.name,cycleIndex:nominal.cycleIndex,positionBasis:"nominal",
-    note:"僅名義立春後年標 · 當日待判"};
+  // Clearly labeled visual approximation if absolute seasonal epoch data is
+  // missing. Never promote the estimated Year to an authoritative pillar.
+  // Jan / early Feb precedes the usual early-Feb Li Chun; late Feb–Dec
+  // follows it. An uncertain Feb 3–6 shows BOTH possible names/ordinals.
+  if (!state.liChun && (date.month===1 || (date.month===2 && date.day<=2))) {
+    const previous=state.liChunTransition.before;
+    return {name:previous.name,cycleIndex:previous.cycleIndex,
+      positionBasis:"nominal-estimated",note:"約值：通常在立春之前；節氣時刻未驗證"};
+  }
+  if (!state.liChun && date.month===2 && date.day>=3 && date.day<=6) {
+    return {name:before+"／"+after,cycleIndex:null,
+      positionBasis:"unresolved",note:"約立春附近：兩種年柱皆有可能"};
+  }
+  return {name:nominal.name,cycleIndex:nominal.cycleIndex,
+    positionBasis:state.liChun?"nominal":"nominal-estimated",
+    note:state.liChun?"名義立春後年標":"約值：一般立春季節位置；節氣時刻未驗證"};
 }
 
 function displayedYearName(item) {
