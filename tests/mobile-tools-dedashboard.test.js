@@ -4,7 +4,8 @@ import { readFileSync } from "node:fs";
 
 const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
 const legendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
-const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const navigationCss = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
+const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 test("mobile Tools retires dashboard-era presets, transport and layer toggles", () => {
   assert.match(
@@ -17,54 +18,38 @@ test("mobile Tools retires dashboard-era presets, transport and layer toggles", 
   );
 });
 
-test("ordinary mobile Tools entry is readable and shares the first action row", () => {
-  assert.match(
-    analysisCss,
-    /@media \(max-width: 480px\)[\s\S]*?\.analysis-toggle,[\s\S]*?\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?min-height:\s*32px;[\s\S]*?font-size:\s*9px;/
-  );
+test("mobile Tools uses a native stable header slot, not a wheel capsule", () => {
+  assert.ok(html.includes('class="topbar-tool-slot"'));
+  assert.ok(html.includes('id="analysis-toggle" class="analysis-toggle" type="button"'));
+  assert.ok(navigationCss.includes(".kinetic-topbar .topbar-tool-slot"));
+  assert.ok(navigationCss.includes("flex-basis:55px"));
 });
 
-test("ordinary mobile Now matches the Tools entry action row", () => {
-  assert.match(
-    instrumentCss,
-    /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument:not\(\[data-analysis-open="true"\]\) #now-button\s*\{[\s\S]*?min-height:\s*32px;[\s\S]*?font-size:\s*9px;[\s\S]*?line-height:\s*1;/
-  );
+test("mobile Now belongs to the exact-time dock, not the navigation header", () => {
+  assert.ok(html.includes('id="mobile-now-button"'));
+  assert.ok(html.indexOf('id="mobile-now-button"') > html.indexOf('id="mobile-instant-input"'));
+  assert.ok(navigationCss.includes(".mobile-time-dock .mobile-time-actions #mobile-now-button"));
+  assert.ok(navigationCss.includes("min-height:42px"));
 });
 
-test("mobile Tools keeps one primary row after retiring the reference-frame rail", () => {
-  assert.match(
-    analysisCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar\s*\{[\s\S]*?display:\s*flex;[\s\S]*?justify-content:\s*flex-end;/
-  );
+test("mobile contextual Tools stay in one secondary rail", () => {
+  assert.ok(navigationCss.includes('.instrument-toolbar {'));
+  assert.ok(navigationCss.includes('display:none !important;'));
   assert.match(
     legendCss,
     /\.ring-legend-row\[data-ring-toggle\],[\s\S]*?\.reference-frame-control\s*\{\s*display:\s*none\s*!important;/
   );
-  assert.match(
-    legendCss,
-    /\.instrument-toolbar\s*\{\s*right:\s*56px;/
-  );
-  assert.match(
-    legendCss,
-    /\.analysis-close\s*\{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*9px;[\s\S]*?min-height:\s*42px;/
-  );
-  assert.match(
-    analysisCss,
-    /\.toolbar-group:last-child \.control-button\s*\{[\s\S]*?min-height:\s*42px;[\s\S]*?font-size:\s*10px;/
-  );
+  assert.ok(navigationCss.includes(".topbar-tool-slot .analysis-close"));
 });
 
-test("mobile Tools has one Selected Instant caption owner and larger invisible touch affordance", () => {
+test("mobile Tools keeps one Selected Instant caption and a full-size header action", () => {
   assert.match(
     analysisCss,
     /#kinetic-instrument\[data-analysis-open="true"\] #cursor-layer \.cursor-note\s*\{\s*display:\s*none;/
   );
-  assert.match(
-    analysisCss,
-    /\.analysis-toggle::before,[\s\S]*?\.analysis-close::before\s*\{[\s\S]*?inset:\s*-8px -6px;/
-  );
+  assert.ok(navigationCss.includes(".topbar-tool-slot .analysis-toggle"));
+  assert.ok(navigationCss.includes("min-height:42px"));
 });
-
 
 test("mobile Tools exposes Solar Time as a first-row action instead of an automatic panel", () => {
   assert.match(
