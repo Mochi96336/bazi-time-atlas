@@ -370,10 +370,10 @@
 
       <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
         <header>
-          <strong id="research-year-strip-title">一年怎麼走</strong>
+          <strong id="research-year-strip-title">年度時間條</strong>
           <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
         </header>
-        <div class="research-year-track" aria-label="公曆年、逐年實算立春年界、選定日與年柱位置">
+        <div class="research-year-track" role="img" aria-label="公曆全年、來源判定的立春年界、所選日期與連續干支日">
           <div class="research-year-line" aria-hidden="true"></div>
           <div id="research-year-li-chun-band" class="research-year-li-chun-band" hidden aria-hidden="true"></div>
           <div class="research-year-marker research-year-start" style="--year-x:0%">
@@ -393,6 +393,23 @@
           <strong id="research-year-li-chun-unavailable-title">立春 · — → —</strong>
           <span id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析</span>
         </div>
+        <!-- All three readouts describe THIS original year strip, not a
+             second timeline or independently selected date. -->
+        <div class="research-year-key-data" role="status" aria-live="polite">
+          <p class="research-year-transition-line">
+            <span id="research-year-transition">立春年界待查</span>
+            <small id="research-year-transition-note">—</small>
+          </p>
+          <p class="research-year-selection-line">
+            <span>選定 <strong id="research-year-selected-date">—</strong></span>
+            <span>年 <strong id="research-year-selected-year">—</strong>
+              <small id="research-year-selected-certainty">—</small></span>
+            <span>日 <strong id="research-year-selected-day">—</strong></span>
+          </p>
+          <p class="research-year-full-cycle" id="research-year-full-cycle">—</p>
+        </div>
+        <details class="research-year-same-date-details">
+          <summary>同月同日的比較參考（非全年日數）</summary>
         <div class="research-year-relations" aria-label="三種一年關係">
           <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
           <div><strong>60 年序</strong><span>Δ 年 mod 60 的名義序號；不決定立春前後的年柱</span></div>
@@ -403,6 +420,7 @@
           <span><i aria-hidden="true"></i><em>實際經過 <b id="research-year-elapsed-days">—</b> 日</em></span>
           <strong id="research-year-next-date">2027/09/13</strong>
         </div>
+        </details>
       </section>
 
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
