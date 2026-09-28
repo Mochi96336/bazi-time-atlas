@@ -16,15 +16,22 @@
   <link rel="stylesheet" href="./mobile-time.css">
   <link rel="stylesheet" href="./ganzhi-inspector.css">
   <link rel="stylesheet" href="./instrument-first.css">
+  <link rel="stylesheet" href="./navigation-workspace.css">
 </head>
 <body>
   <main class="kinetic-shell">
     <header class="kinetic-topbar">
       <div class="brand">BaZi Time Atlas</div>
-      <nav class="site-nav" aria-label="Atlas views">
-        <a class="active" href="./" aria-current="page">時間圖譜</a>
-        <a class="research-link" data-nav-role="research" href="./recurrence.html" aria-label="研究：回歸與深時間驗證">研究</a>
-      </nav>
+      <div class="topbar-actions">
+        <nav class="site-nav" aria-label="Atlas views">
+          <a class="active" href="./" aria-current="page">時間圖譜</a>
+          <a class="research-link" data-nav-role="research" href="./recurrence.html" aria-label="研究：回歸與深時間驗證">研究</a>
+        </nav>
+        <div class="topbar-tool-slot" aria-label="工具">
+          <button id="analysis-toggle" class="analysis-toggle" type="button" aria-expanded="false" aria-controls="kinetic-instrument" title="顯示分析工具">工具</button>
+          <button id="analysis-close" class="analysis-close" type="button" hidden>完成</button>
+        </div>
+      </div>
     </header>
 
     <section class="atlas-intro">
@@ -45,13 +52,9 @@
         </div>
         <div class="toolbar-group">
           <button id="classification-overlay-button" class="control-button" type="button" aria-pressed="false" aria-controls="classification-overlay-legend" title="並列查看干支五行與黃道四元素／模式；不建立兩套系統的等價關係">分類</button>
-          <button id="now-button" class="control-button" type="button">現在</button>
           <button id="play-button" class="control-button primary" type="button" aria-pressed="false">播放</button>
         </div>
       </div>
-
-      <span id="analysis-toggle" class="analysis-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="kinetic-instrument" title="顯示比較、分類、圖層與參考系等分析工具">分析</span>
-      <span id="analysis-close" class="analysis-close" role="button" tabindex="0" hidden>完成分析</span>
 
       <div class="ring-legend" aria-hidden="true">
         <div class="ring-legend-row ring-hour"><i></i><span>時柱</span><strong id="hour-active">—</strong></div>
@@ -151,6 +154,7 @@
       <div class="instrument-readout" aria-live="polite">
         <div class="readout-kicker">Selected instant</div>
         <div id="instant-readout">—</div>
+        <button id="now-button" class="readout-now" type="button" aria-label="將選定時間回到現在">↺ 現在</button>
         <div class="readout-meta">
           <span>太陽黃經 <strong id="solar-readout">—</strong></span>
           <span>所在節氣區段 <strong id="term-readout">—</strong></span>
@@ -173,9 +177,12 @@
         <span>選定時間，UTC+08:00，秒級</span>
         <input id="mobile-instant-input" type="datetime-local" step="1" aria-label="選定時間，UTC+8，秒級">
       </label>
-      <button id="mobile-time-apply" type="button">套用</button>
-      <!-- Derived classification for the selected instant; no second time control. -->
-      <span id="mobile-zodiac-readout" aria-live="off" hidden></span>
+      <div class="mobile-time-actions">
+        <button id="mobile-time-apply" type="button">套用</button>
+        <!-- Preserve the current-Zodiac datum next to the mobile time input. -->
+        <span id="mobile-zodiac-readout" aria-live="off" hidden></span>
+        <button id="mobile-now-button" type="button" aria-label="將選定時間回到現在">現在</button>
+      </div>
     </section>
 
     <section class="timeline-dock" aria-label="時間游標">
