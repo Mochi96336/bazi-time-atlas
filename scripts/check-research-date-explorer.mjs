@@ -65,6 +65,8 @@ for(const spec of [
   {suffix:"",width:"390",bare:"false",boundary:"false"},
   {suffix:"?boundary=1",width:"390",bare:"false",boundary:"true"},
   {suffix:"?desktop=1",width:"1440",bare:"false",boundary:"false"},
+  {suffix:"?width=320",width:"320",bare:"false",boundary:"false"},
+  {suffix:"?width=768",width:"768",bare:"false",boundary:"false"},
   {suffix:"?interactive=1",width:"390",bare:"false",boundary:"false",proof:["boundary-scrub","scrub-roundtrip","dirty-guard"]},
   {suffix:"?deep=1",width:"390",bare:"false",boundary:"false",proof:["leap-guard"]},
   {suffix:"?precise=1",width:"390",bare:"false",boundary:"false",proof:["precise-guard"]}
