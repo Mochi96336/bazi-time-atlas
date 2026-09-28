@@ -208,6 +208,17 @@ iframe.addEventListener("load",async()=>{
     }
   }
   probe.dataset.originalCycle="visible";
+  // Geometric proof of original tick coordinates: native thumb-center
+  // travel exactly spans the same 1/1 -> 12/31 width as the visible bar.
+  const range=d.getElementById("research-year-scrub");
+  const sliderBox=range.getBoundingClientRect();
+  const trackBox=track.getBoundingClientRect();
+  const minCenter=sliderBox.left+9.5;
+  const maxCenter=sliderBox.right-9.5;
+  check(Math.abs(minCenter-trackBox.left)<1.25 &&
+    Math.abs(maxCenter-trackBox.right)<1.25 &&
+    sliderBox.left>=-1 && sliderBox.right<=width+1,
+    "native Year slider must coincide with original Year ticks at both ends");
   const bounds=strip.getBoundingClientRect();
   check(bounds.left>=-1 && bounds.right<=width+1,
     "restored original strip overflows the "+width+"px viewport");
