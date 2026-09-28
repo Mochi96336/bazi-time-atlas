@@ -10,7 +10,7 @@ const design = css.slice(css.indexOf("/* Readout F2:"));
 assert.ok(design.length > 2500, "the single final F2 layout layer must exist");
 
 test("desktop time is the actual center column of a balanced grid", () => {
-  assert.match(html, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"/);
+  assert.match(html, /class="selected-instant-line"\s*>\s*<div id="instant-readout"><span class="readout-civil">—<\/span><span class="readout-zone"> · UTC\+08:00<\/span><\/div>\s*<button id="now-button"/);
   assert.match(design, /\.selected-instant-line\s*\{[^}]*display:grid;[^}]*grid-template-columns:minmax\(48px,1fr\) minmax\(0,max-content\) minmax\(48px,1fr\);/);
   assert.match(design, /#instant-readout\s*\{[^}]*grid-column:2;[^}]*justify-self:center;/);
   assert.match(design, /#now-button\.readout-now\s*\{[^}]*position:static;[^}]*grid-column:3;/);
@@ -18,9 +18,9 @@ test("desktop time is the actual center column of a balanced grid", () => {
 });
 
 test("time basis is subordinate but remains inside the same authoritative readout", () => {
-  assert.match(wheel, /civil\.textContent = formatAtlasCivil\(fields\)/);
-  assert.match(wheel, /zone\.textContent = ` · \$\{offsetLabel\}`/);
-  assert.match(wheel, /instantReadout\.replaceChildren\(civil, zone\)/);
+  assert.match(wheel, /civilReadout\.textContent = formatAtlasCivil\(fields\)/);
+  assert.match(wheel, /zoneReadout\.textContent = ` · \$\{offsetLabel\}`/);
+  assert.doesNotMatch(wheel, /instantReadout\.replaceChildren/);
   assert.match(design, /\.instrument-readout \.readout-zone\s*\{[^}]*display:block;[^}]*font-size:10px;/);
 });
 
