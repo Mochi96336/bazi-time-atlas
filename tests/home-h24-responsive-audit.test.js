@@ -26,14 +26,14 @@ test("H2.4 exercises the canonical selected-instant update instead of recalculat
 
 test("H2.4 detects real layout collisions and avoids reporting a subjective beauty score", () => {
   for (const key of ["no-overlap", "not-clipped", "input-usable", "future-no-overlap",
-    "same-row", "now-visible", "now-fits", "now-aligned",
+    "caption-above-time", "now-visible", "now-fits", "now-aligned",
     "dirty-hidden", "classification-hidden", "analysis-hidden"]) {
     assert.ok(runner.includes('"' + key + '"'), key);
   }
   assert.match(mobileCss, /font-size:\s*12px/);
   assert.match(fixture, /const rDock = bounds\(dock\), rInput = bounds\(input\), rCaption = bounds\(label\), rNow = bounds\(nowButton\)/);
   assert.match(fixture, /rNow\.left >= rInput\.right \+ 2/);
-  assert.match(fixture, /rCaption\.left >= rNow\.right \+ 2/);
+  assert.match(fixture, /rCaption\.bottom <= Math\.min\(rNow\.top, rInput\.top\) - 1/);
   assert.match(runner, /"home-h24-responsive-evidence\.json"/);
   assert.doesNotMatch(runner, /beautyScore|aestheticRating/);
 });
