@@ -1,0 +1,77 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R0 proof: original Research, no hidden sections</title>
+<style>html,body{margin:0;width:500px;background:#0a100d}
+iframe{display:block;width:390px;height:1300px;border:0}output{display:none}</style>
+</head><body>
+<iframe id="research" title="Restored original Research"></iframe>
+<output id="probe" data-ready="false" data-error="initializing"></output>
+<script>
+const query=new URLSearchParams(location.search);
+const desktop=query.get("desktop")==="1";
+const bare=query.get("bare")==="1";
+const iframe=document.getElementById("research");
+const probe=document.getElementById("probe");
+if(desktop){document.documentElement.style.width="1440px";document.body.style.width="1440px";
+iframe.style.width="1440px";iframe.style.height="1600px";}
+const check=(yes,why)=>{if(!yes)throw Error(why)};
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+iframe.addEventListener("load",async()=>{
+ try{
+  const d=iframe.contentDocument,w=iframe.contentWindow;
+  const strip=d.getElementById("research-year-strip");
+  const instrument=d.getElementById("recurrence-instrument");
+  for(let i=0;i<180;i++){
+   if(strip?.dataset.ready==="true" && instrument?.dataset.targetDate &&
+     instrument.dataset.targetDate!=="invalid")break;
+   await wait(40);
+  }
+  const width=desktop?1440:390;
+  check(d.documentElement.clientWidth===width,"not a real "+width+"px Research viewport");
+  check(d.body.dataset.researchMode==="annual" &&
+    d.getElementById("research-free-explorer").hidden &&
+    !d.getElementById("research-advanced-details"),
+    "R0 public route still prioritizes a replacement Year story or folds main content");
+  // Restore the long-range Research chapters. Preserve the ORIGINAL small
+  // within-chapter disclosure around the optional 60-day wheel; R0 only
+  // removes the NEW top-level wrapper that hid ALL Research content.
+  const ids=["research-discrete","research-cycle-comparison","recurrence-instrument",
+    "research-year-strip","research-astronomy",
+    "research-evidence","four-pillar-determinacy"];
+  for(const id of ids){
+    const el=d.getElementById(id);
+    check(el&&!el.hidden&&el.checkVisibility(),
+      "ORIGINAL Research module absent or hidden: "+id);
+  }
+  const optionalWheel=d.getElementById("research-sexagenary-cycle");
+  check(optionalWheel && (optionalWheel.checkVisibility() ||
+    optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),
+    "original 60-day wheel was deleted instead of retaining its original optional disclosure");
+  check(strip.dataset.ready==="true" &&
+    instrument.dataset.targetDate!=="invalid" &&
+    strip.dataset.selectedYearPillar!=="unavailable",
+    "original year strip is not actually bound to Research-selected date");
+  if(!bare)check(instrument.dataset.targetDate==="2024-02-10" &&
+    strip.dataset.selectedYearPillar==="甲辰",
+    "original selected-date and source-backed 2024 Year identity drifted");
+  check(!d.getElementById("research-one-year-story").checkVisibility() &&
+    d.querySelectorAll("#research-year-strip").length===1,
+    "duplicate Year visualization appears alongside the original strip");
+  const bounds=strip.getBoundingClientRect();
+  check(bounds.left>=-1 && bounds.right<=width+1,
+    "restored original strip overflows the "+width+"px viewport");
+  check(w.getComputedStyle(strip).display!=="none" &&
+    w.getComputedStyle(strip).visibility!=="hidden",
+    "old erroneous forced-hidden original Year strip CSS survived R0");
+  probe.dataset.ready="true";
+  probe.dataset.width=String(width);
+  probe.dataset.bare=String(bare);
+  probe.dataset.originalStrip="visible";
+  probe.dataset.originalEvidence="visible";
+  probe.dataset.duplicateStory="hidden";
+  probe.dataset.selectedDate=instrument.dataset.targetDate;
+  probe.dataset.error="none";
+ }catch(err){probe.dataset.ready="error";probe.dataset.error=err?.stack??String(err);}
+},{once:true});
+iframe.src=bare?"../../recurrence.html":"../../recurrence.html?date=2024-02-10&delta=0";
+</script></body></html>
