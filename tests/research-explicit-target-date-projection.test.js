@@ -17,7 +17,7 @@ test("visible selector refuses unrepresentable baseline leap day or underflow",(
     {year:2023,month:9,day:13},1,{year:2024,month:2,day:29}
   ).status,"unrepresentable-baseline-date");
   assert.equal(projectExplicitResearchTargetDate(
-    {year:2026,month:9,day:13},400,{year:2024,month:2,day:10}
+    {year:2026,month:9,day:13},400,{year:200,month:2,day:10}
   ).status,"baseline-year-out-of-range");
   assert.equal(projectExplicitResearchTargetDate(
     {year:2026,month:9,day:13},0,{year:2025,month:2,day:29}
