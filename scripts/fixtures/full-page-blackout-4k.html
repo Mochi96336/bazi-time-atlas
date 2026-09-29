@@ -102,6 +102,7 @@
   }
   stage.addEventListener("load",()=>{
     const current=CASES[mode.value];
+    if(current.kind==="minimal" && !stage.contentDocument?.getElementById("surface")) return;
     if(current.kind==="app") {
       const doc=stage.contentDocument;
       if(!doc?.getElementById("kinetic-wheel")||!doc.getElementById("play-button")) {
