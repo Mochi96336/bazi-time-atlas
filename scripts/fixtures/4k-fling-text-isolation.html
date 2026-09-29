@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4K 快甩閃黑｜SVG 文字與軌跡隔離測試</title>
+<style>
+html,body{margin:0;height:100%;width:100%;overflow:hidden;background:#0a0d13;color:#ecebea;font:12px system-ui,sans-serif}
+#stage{position:fixed;inset:0;border:0;width:100%;height:100%;background:#0a0d13}
+#panel{position:fixed;top:8px;right:8px;z-index:20;box-sizing:border-box;width:min(354px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow:auto;background:rgba(13,20,29,.97);border:1px solid #717983;padding:12px}
+#panel>*{display:block;margin:0 0 9px}
+select,button{box-sizing:border-box;width:100%;min-height:37px;background:#1a2937;color:#f5f2ea;border:1px solid #858d93;padding:5px}
+button:disabled{opacity:.4}
+button:focus-visible,select:focus-visible{outline:2px solid #dfc68c;outline-offset:2px}
+small{color:#b6c1c7;line-height:1.45}
+pre{font-size:10px;max-height:16vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:#d2d8d5}
+</style>
+</head>
+<body>
+<iframe id="stage" title="真實轉盤手動快甩測試"></iframe>
+<aside id="panel">
+  <strong>4K 快甩｜是不是 SVG 文字？</strong>
+  <small>保持 Chrome 圖形加速開啟、4K、最大化。每組用滑鼠在<strong>同一個環</strong>用力甩 3～5 次；不要用播放代替拖曳。</small>
+  <label>測試模式
+    <select id="mode">
+      <option value="baseline">A｜原始純 SVG（對照組）</option>
+      <option value="static-text-off">B｜只隱藏環上固定文字</option>
+      <option value="active-text-off">C｜只隱藏移動的讀取文字</option>
+      <option value="all-text-off">D｜隱藏轉盤全部 SVG 文字</option>
+      <option value="motion-off">E｜只隱藏運動軌跡</option>
+      <option value="effects-off">F｜保留文字，關閉 SVG filter 與動畫過渡</option>
+      <option value="webgl-text-off">G｜WebGL 保留，隱藏全部 SVG 文字</option>
+    </select>
+  </label>
+  <button id="start" disabled>開始記錄，手動快甩 10 秒</button>
+  <label>肉眼觀察
+    <select id="observation">
+      <option value="">請選擇結果</option>
+      <option value="none">完全沒有閃</option>
+      <option value="less">仍會閃，但明顯減少</option>
+      <option value="same">與原本一樣會整頁閃黑</option>
+      <option value="more">比原本更容易閃</option>
+      <option value="not-tested">這組尚未測試</option>
+    </select>
+  </label>
+  <button id="copy" disabled>複製這組結果</button>
+  <small id="status" aria-live="polite">初始化…</small>
+  <pre id="report" aria-label="本次快甩指標"></pre>
+  <small>面板在 iframe 外。記錄滑鼠事件與畫格間隔，無法自動辨識 GPU 黑畫面；請以肉眼回報為準。</small>
+</aside>
+<script>
+const MODES=Object.freeze({
+  baseline:{material:"svg",rule:""},
+  "static-text-off":{material:"svg",rule:"#kinetic-wheel .cycle-label:not(.active-cycle-label),#kinetic-wheel .term-label:not(.active-annual-label),#kinetic-wheel .zodiac-label:not(.active-annual-label){display:none!important}"},
+  "active-text-off":{material:"svg",rule:"#kinetic-wheel .active-cycle-label,#kinetic-wheel .active-annual-label{display:none!important}"},
+  "all-text-off":{material:"svg",rule:"#kinetic-wheel text{display:none!important}"},
+  "motion-off":{material:"svg",rule:"#kinetic-wheel .motion-trace{display:none!important}"},
+  "effects-off":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{filter:none!important;transition:none!important;animation:none!important}"},
+  "webgl-text-off":{material:"roughness",rule:"#kinetic-wheel text{display:none!important}"}
+});
+const $=x=>document.getElementById(x);
+const stage=$("stage"),mode=$("mode"),start=$("start"),status=$("status"),observation=$("observation"),copy=$("copy"),report=$("report");
+let ready=false,recording=false,last=null,generation=0;
+const fixedInstant="2026-09-13T23%3A43%3A42.000Z";
+const summarize=values=>{
+  if(!values.length)return {samples:0};
+  const sorted=[...values].sort((a,b)=>a-b);
+  const q=p=>Number(sorted[Math.floor((sorted.length-1)*p)].toFixed(2));
+  return {samples:sorted.length,medianMs:q(.5),p95Ms:q(.95),p99Ms:q(.99),over33ms:values.filter(n=>n>33.34).length,over50ms:values.filter(n=>n>50).length,over100ms:values.filter(n=>n>100).length};
+};
+function load(){
+  generation++;
+  ready=false;recording=false;last=null;
+  start.disabled=true;copy.disabled=true;observation.value="";report.textContent="";
+  const config=MODES[mode.value];
+  status.textContent="載入隔離模式…";
+  stage.src=new URL("../../?material="+config.material+"&instant="+fixedInstant+"&flingAudit="+encodeURIComponent(mode.value),location.href).href;
+}
+stage.addEventListener("load",()=>{
+  const doc=stage.contentDocument,win=stage.contentWindow,svg=doc?.getElementById("kinetic-wheel");
+  if(!svg||!doc.getElementById("kinetic-instrument")?.dataset.selectedInstantMs||!win){status.textContent="轉盤尚未正確載入";return;}
+  const config=MODES[mode.value];
+  if(config.rule){
+    const style=doc.createElement("style");
+    style.id="fling-isolation-only";
+    style.textContent=config.rule;
+    doc.head.appendChild(style);
+  }
+  ready=true;start.disabled=false;
+  status.textContent="就緒：直接在轉盤上甩，或開始 10 秒記錄";
+});
+mode.addEventListener("change",load);
+observation.addEventListener("change",()=>{
+  if(last){last.visualObservation=observation.value;report.textContent=JSON.stringify(last,null,2);}
+});
+start.addEventListener("click",async()=>{
+  if(!ready||recording)return;
+  const run=generation,doc=stage.contentDocument,win=stage.contentWindow,svg=doc?.getElementById("kinetic-wheel");
+  if(!svg)return;
+  recording=true;start.disabled=true;copy.disabled=true;
+  const frames=[],data={pointerDown:0,pointerMove:0,coalescedSamples:0,pointerUp:0,coastingFrames:0,activeDragFrames:0};
+  let prior=null,rafId=null,completed=false;
+  const onDown=()=>{data.pointerDown++;};
+  const onMove=e=>{data.pointerMove++;data.coalescedSamples+=e.getCoalescedEvents?.().length||1;};
+  const onUp=()=>{data.pointerUp++;};
+  svg.addEventListener("pointerdown",onDown,{capture:true,passive:true});
+  svg.addEventListener("pointermove",onMove,{capture:true,passive:true});
+  svg.addEventListener("pointerup",onUp,{capture:true,passive:true});
+  const started=performance.now();
+  const durationMs=10000;
+  const frame=timestamp=>{
+    if(completed||run!==generation)return;
+    if(prior!==null)frames.push(timestamp-prior);
+    prior=timestamp;
+    if(svg.dataset.activeRing)data.activeDragFrames++;
+    if(svg.dataset.coastingRing)data.coastingFrames++;
+    if(performance.now()-started<durationMs)rafId=win.requestAnimationFrame(frame);
+    else finish();
+  };
+  function finish(){
+    if(completed)return;
+    completed=true;
+    if(rafId!==null)win.cancelAnimationFrame(rafId);
+    svg.removeEventListener("pointerdown",onDown,true);
+    svg.removeEventListener("pointermove",onMove,true);
+    svg.removeEventListener("pointerup",onUp,true);
+    if(run!==generation)return;
+    last={
+      mode:mode.value,
+      material:MODES[mode.value].material,
+      disabledCssRule:MODES[mode.value].rule||null,
+      viewportCss:[win.innerWidth,win.innerHeight],
+      devicePixelRatio:win.devicePixelRatio,
+      browser:navigator.userAgent,
+      frameTiming:summarize(frames),
+      drag:data,
+      visualObservation:observation.value,
+      warning:"rAF measures pacing only, not GPU compositor black frames. Compare repeated physical manual flicks on the same ring, not just smooth autoplay."
+    };
+    report.textContent=JSON.stringify(last,null,2);
+    status.textContent="記錄完成；選擇肉眼觀察結果，再複製";
+    recording=false;start.disabled=false;copy.disabled=false;
+  }
+  status.textContent="開始甩動同一個環，記錄進行中…";
+  rafId=win.requestAnimationFrame(frame);
+  // Wall-clock backstop: some blackouts can suspend child requestAnimationFrame.
+  await new Promise(resolve=>setTimeout(resolve,durationMs+550));
+  finish();
+});
+copy.addEventListener("click",()=>{
+  if(!last)return;
+  last.visualObservation=observation.value;
+  const payload=JSON.stringify(last,null,2);
+  void navigator.clipboard.writeText(payload).then(
+    ()=>{status.textContent="已複製";},
+    ()=>{report.textContent=payload;status.textContent="無法自動複製，請手動複製結果";}
+  );
+});
+load();
+</script>
+</body>
+</html>
