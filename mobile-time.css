@@ -24,74 +24,82 @@
     display: none;
   }
 
+  /* One physical rail in idle and dirty modes; status is announced, not a
+     second visual row. Analysis still keeps its instrument diagnostic HUD. */
   .mobile-time-dock {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 7px 8px;
-    align-items: end;
+    grid-template-columns: minmax(0, 1fr) 48px;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 0;
     margin-top: 9px;
-    padding: 10px;
-    border: 1px solid var(--hairline);
-    border-radius: 15px;
-    background: rgba(255,255,255,.022);
+    padding: 8px 2px 4px;
+    border: 0;
+    border-top: 1px solid var(--hairline);
+    border-radius: 0;
+    background: transparent;
   }
-  .mobile-time-heading {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: baseline;
-  }
-  .mobile-time-heading strong {
-    color: #dce2dd;
-    font-size: 10px;
-    font-weight: 760;
-    letter-spacing: .05em;
-  }
-  .mobile-time-heading small,
-  #mobile-time-status {
-    color: #6f7972;
-    font-size: 8px;
-  }
-  #mobile-time-status[data-state="error"] { color: var(--danger); }
-  #mobile-time-status[data-state="pending"] { color: var(--cursor); }
-
   .mobile-time-field {
+    grid-column: 1;
     min-width: 0;
-    display: grid;
-    gap: 4px;
+    display: block;
   }
-  .mobile-time-field span {
+  .mobile-time-field span,
+  .mobile-time-dock #mobile-time-status {
     position: absolute;
     width: 1px;
     height: 1px;
+    padding: 0;
+    margin: -1px;
     overflow: hidden;
-    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
     white-space: nowrap;
   }
   #mobile-instant-input {
+    box-sizing: border-box;
     min-width: 0;
     width: 100%;
-    min-height: 38px;
-    border: 1px solid rgba(238,242,237,.16);
-    border-radius: 10px;
-    padding: 7px 9px;
+    min-height: 42px;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    border-radius: 0;
+    padding: 6px 3px;
     color: var(--ink);
-    background: var(--field-raised);
+    background: transparent;
     color-scheme: dark;
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
   }
-  #mobile-instant-input[aria-invalid="true"] { border-color: var(--danger); }
-  #mobile-time-apply {
-    min-height: 38px;
-    border: 1px solid var(--cursor);
-    border-radius: 10px;
-    padding: 0 12px;
-    color: #181d19;
-    background: var(--cursor);
-    font-size: 10px;
-    font-weight: 780;
+  #mobile-instant-input[aria-invalid="true"] {
+    border-bottom-color: var(--danger);
+  }
+  .mobile-time-actions {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+  .mobile-time-actions #mobile-time-apply,
+  .mobile-time-actions #mobile-now-button {
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    min-height: 42px;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    border-radius: 0;
+    color: var(--cursor);
+    background: transparent;
+    font-size: 12px;
+    font-weight: 650;
     cursor: pointer;
+  }
+  .mobile-time-dock[data-dirty="false"] #mobile-time-apply,
+  .mobile-time-dock[data-dirty="true"] #mobile-now-button {
+    display: none;
   }
 
   /* The original desktop timeline remains intentionally absent on phones.
