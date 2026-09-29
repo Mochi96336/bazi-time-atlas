@@ -434,3 +434,44 @@
     flex-wrap:wrap;
   }
 }
+
+/* R5: The default Δ=0 is one date, not two duplicate comparison
+   measurements. Only present paired columns for an actual comparison or
+   a bound exact instant, while retaining all underlying evidence nodes. */
+.research-task-primary .research-cycle-inline[data-readout-mode="single"] {
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:baseline;
+}
+.research-task-primary .research-cycle-inline[data-readout-mode="single"]
+.research-cycle-inline-row[data-side="base"] {display:none}
+.research-task-primary .research-cycle-inline[data-readout-mode="single"]
+.research-cycle-inline-row[data-side="target"] {
+  grid-column:1;grid-row:1;
+  padding:0;border:0;
+}
+.research-task-primary .research-cycle-inline[data-readout-mode="single"]
+.research-cycle-inline-lookup {
+  grid-column:2;grid-row:1;
+  justify-self:end;align-self:center;
+  margin:0;white-space:nowrap;
+}
+@media(max-width:640px) {
+  .research-task-primary .research-cycle-inline[data-readout-mode="single"] {
+    grid-template-columns:minmax(0,1fr);
+    row-gap:1px;
+  }
+  .research-task-primary .research-cycle-inline[data-readout-mode="single"]
+  .research-cycle-inline-lookup {
+    grid-column:1;grid-row:2;justify-self:start;
+    min-height:25px;align-self:center;
+  }
+}
+
+/* R5: fixed 465px mobile stage letterboxed the 1200:720 SVG at 320px.
+   Size the drawing stage to the available width; the result rail is already
+   in normal flow and follows it rather than leaving an empty card-shaped gap. */
+@media(max-width:480px) {
+  .research-task-primary .research-fan-graphic {
+    height:clamp(315px,calc(70vw + 85px),385px);
+  }
+}
