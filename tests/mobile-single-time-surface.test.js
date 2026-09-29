@@ -26,6 +26,14 @@ test("dirty input swaps Now for Apply within the same width and Escape can cance
   assert.match(mobileCss, /#mobile-instant-input\[aria-invalid="true"\]/);
 });
 
+test("invalid mobile input provides on-demand visible feedback without another row", () => {
+  assert.match(mobileController, /function showInputError\(message\)[\s\S]*?input\.setCustomValidity\(message\);[\s\S]*?input\.reportValidity\(\);/);
+  assert.match(mobileController, /if \(instantMs === null\)\s*\{\s*showInputError\(/);
+  assert.match(mobileController, /function clearInputError\(\)[\s\S]*?input\.setCustomValidity\(""\)/);
+  assert.match(mobileController, /input\?\.addEventListener\("input", \(\) => \{\s*clearInputError\(\);/);
+  assert.match(mobileCss, /\.mobile-time-dock #mobile-time-status\s*\{[\s\S]*?clip-path:\s*inset\(50%\);/);
+});
+
 test("Zodiac remains canonical wheel data, not a repeated second row", () => {
   assert.doesNotMatch(html, /id="mobile-zodiac-readout"/);
   assert.doesNotMatch(mobileController, /zodiacReadout/);
