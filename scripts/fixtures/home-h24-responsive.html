@@ -123,7 +123,8 @@
     }));
     for(let wait=0;wait<20;wait++) {
       if(instrument.dataset.selectedInstantMs===String(future) &&
-          wheelZodiac.textContent.trim()===instrument.dataset.zodiac) break;
+          wheelZodiac.textContent.trim()===instrument.dataset.zodiac &&
+          input.value.includes("2026-11-15")) break;
       await sleep(55);
     }
     proof.dataset.futureSelected = String(instrument.dataset.selectedInstantMs===String(future));
