@@ -131,10 +131,12 @@ iframe.addEventListener("load",async()=>{
     // Original outer Gregorian sector apex in canonical SVG space is
     // (600, 820 - 560) = (600, 260).
     const apexY=transform.d*260+transform.f;
-    check(Number.isFinite(apexY) &&
-      apexY>=legend.getBoundingClientRect().bottom+22,
-      "R5 fan now overlaps the four-line legend on a phone: apex="+
-      apexY+" legend="+legend.getBoundingClientRect().bottom);
+    const astronomyApexY=transform.d*195+transform.f;
+    const legendBottom=legend.getBoundingClientRect().bottom;
+    check(Number.isFinite(apexY) && Number.isFinite(astronomyApexY) &&
+      apexY>=legendBottom+22 && astronomyApexY>=legendBottom+32,
+      "R5 fan or outer astronomy orbit overlaps the mobile legend: "+
+      JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
   }
   const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
