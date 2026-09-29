@@ -433,6 +433,27 @@ const FRAGMENT_SHADER = [
   "}"
 ].join("\n");
 
+export function resolveMaterialAuditOptions(search = "") {
+  const normal = {
+    enabled:false,
+    powerPreference:"low-power",
+    preserveDrawingBuffer:false,
+    renderScale:1
+  };
+  try {
+    const params = new URLSearchParams(search);
+    if (params.get("renderAudit") !== "1") return normal;
+    return {
+      enabled:true,
+      powerPreference:params.get("materialGpu") === "high" ? "high-performance" : "low-power",
+      preserveDrawingBuffer:params.get("materialBuffer") === "preserve",
+      renderScale:params.get("materialScale") === "0.5" ? 0.5 : 1
+    };
+  } catch {
+    return normal;
+  }
+}
+
 function normalizeMode(value) {
   if (value === null || value === "") return MATERIAL_MODES.ROUGHNESS;
   if (value === MATERIAL_MODES.SVG) return MATERIAL_MODES.SVG;
@@ -647,6 +668,14 @@ function setupRoughnessTexture(gl) {
 export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.location?.search ?? "" }) {
   const requestedMode = resolveMaterialMode(search);
   const requestedProbe = resolveMaterialProbe(search);
+  // Diagnostic controls are inert unless renderAudit=1 is explicit. Normal
+  // material quality, GPU preference and drawing-buffer policy never change.
+  const {
+    enabled:auditEnabled,
+    powerPreference:auditPower,
+    preserveDrawingBuffer:auditPreserve,
+    renderScale:auditScale
+  } = resolveMaterialAuditOptions(search);
   let materialWasExplicit = false;
   try {
     materialWasExplicit = new URLSearchParams(search).has("material");
@@ -669,8 +698,47 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   let sizeDirty = true;
   let resizeObserver = null;
   let materialEvidenceStamp = null;
+  // No frame observer, DOM log or GPU readback in normal production. CPU
+  // submission time is not a GPU duration; the latter needs GPU timer queries.
+  const audit = auditEnabled ? {
+    requestedMode,
+    settings:{ powerPreference:auditPower, preserveDrawingBuffer:auditPreserve, renderScale:auditScale },
+    devicePixelRatio:globalThis.devicePixelRatio || 1,
+    frameCount:0,
+    resizeCount:0,
+    contextLost:0,
+    fallback:null,
+    canvasPixels:null,
+    cssPixels:null,
+    glAttributes:null,
+    glLimits:null,
+    renderer:null,
+    drawCpuMs:[],
+    drawGapMs:[],
+    lastDrawAt:null,
+    snapshot() {
+      return JSON.parse(JSON.stringify({
+        requestedMode:this.requestedMode,
+        settings:this.settings,
+        devicePixelRatio:this.devicePixelRatio,
+        frameCount:this.frameCount,
+        resizeCount:this.resizeCount,
+        contextLost:this.contextLost,
+        fallback:this.fallback,
+        canvasPixels:this.canvasPixels,
+        cssPixels:this.cssPixels,
+        glAttributes:this.glAttributes,
+        glLimits:this.glLimits,
+        renderer:this.renderer,
+        drawCpuMs:this.drawCpuMs,
+        drawGapMs:this.drawGapMs
+      }));
+    }
+  } : null;
+  if (audit) globalThis.__atlasRenderAudit = audit;
 
   function fallBack(reason, detail = "") {
+    if (audit) audit.fallback = { reason, detail };
     active = false;
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
@@ -696,10 +764,15 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     sizeDirty = false;
     const rect = svg.getBoundingClientRect();
     if (!(rect.width > 0 && rect.height > 0)) return;
-    const dpr = Math.min(globalThis.devicePixelRatio || 1, 2);
+    const dpr = Math.min(globalThis.devicePixelRatio || 1, 2) * auditScale;
     const width = Math.max(1, Math.round(rect.width * dpr));
     const height = Math.max(1, Math.round(rect.height * dpr));
+    if (audit) {
+      audit.cssPixels = [rect.width, rect.height];
+      audit.canvasPixels = [width, height];
+    }
     if (canvas.width !== width || canvas.height !== height) {
+      if (audit) audit.resizeCount += 1;
       canvas.width = width;
       canvas.height = height;
     }
@@ -708,6 +781,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
 
   function draw() {
     if (!active) return;
+    const drawStart = audit ? performance.now() : 0;
     resizeCanvas();
     if (!(canvas.width > 1 && canvas.height > 1)) return;
 
@@ -791,6 +865,14 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    if (audit) {
+      audit.frameCount += 1;
+      if (audit.lastDrawAt !== null) audit.drawGapMs.push(drawStart - audit.lastDrawAt);
+      audit.lastDrawAt = drawStart;
+      audit.drawCpuMs.push(performance.now() - drawStart);
+      if (audit.drawGapMs.length > 240) audit.drawGapMs.shift();
+      if (audit.drawCpuMs.length > 240) audit.drawCpuMs.shift();
+    }
   }
 
   function activateShader() {
@@ -806,10 +888,21 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
         depth: false,
         stencil: false,
         premultipliedAlpha: true,
-        preserveDrawingBuffer: false,
-        powerPreference: "low-power"
+        preserveDrawingBuffer: auditPreserve,
+        powerPreference: auditPower
       });
       if (!gl) throw new Error("WebGL2 unavailable");
+      if (audit) {
+        audit.glAttributes = gl.getContextAttributes();
+        audit.glLimits = {
+          maxRenderbufferSize:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+          maxViewportDims:Array.from(gl.getParameter(gl.MAX_VIEWPORT_DIMS))
+        };
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        audit.renderer = debugInfo
+          ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+          : gl.getParameter(gl.RENDERER);
+      }
 
       program = createProgram(gl);
       uniforms = uniformLocations(gl, program);
@@ -831,6 +924,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
 
       canvas.addEventListener("webglcontextlost", event => {
         event.preventDefault();
+        if (audit) audit.contextLost += 1;
         fallBack("context-lost");
       }, { once: true });
 
