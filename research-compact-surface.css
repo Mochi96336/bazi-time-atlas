@@ -130,6 +130,15 @@
   background:rgba(177,223,211,.3);
   box-shadow:none;
 }
+/* A leading fragment began in the PREVIOUS civil year. Fading its first
+   pixels makes the clipped Jan-1 viewport edge visually distinct from
+   an actual 甲子 tick, without adding another label or chart. */
+.research-year-day-progress[data-anchor-clipped="true"] {
+  background:linear-gradient(90deg,rgba(139,199,182,.10),rgba(139,199,182,.48));
+}
+.research-year-day-progress[data-preview="true"][data-anchor-clipped="true"] {
+  background:linear-gradient(90deg,rgba(177,223,211,.07),rgba(177,223,211,.30));
+}
 .research-year-jiazi-tick[data-current="true"] {
   border-color:#d9eee0;
   border-left-width:1.5px;
