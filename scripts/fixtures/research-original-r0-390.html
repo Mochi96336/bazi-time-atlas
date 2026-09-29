@@ -125,6 +125,16 @@ iframe.addEventListener("load",async()=>{
     check(fanGraphic.height<=stageLimit+1,
       "R5 mobile SVG drawing stage still wastes fixed 465px height: "+
       fanGraphic.height);
+    const wheel=d.getElementById("recurrence-wheel");
+    const legend=d.querySelector(".recurrence-legend");
+    const transform=wheel.getScreenCTM();
+    // Original outer Gregorian sector apex in canonical SVG space is
+    // (600, 820 - 560) = (600, 260).
+    const apexY=transform.d*260+transform.f;
+    check(Number.isFinite(apexY) &&
+      apexY>=legend.getBoundingClientRect().bottom+22,
+      "R5 fan now overlaps the four-line legend on a phone: apex="+
+      apexY+" legend="+legend.getBoundingClientRect().bottom);
   }
   const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
