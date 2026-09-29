@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { Script } from "node:vm";
 import {
   MATERIAL_MODES,
   resolveMaterialMode,
@@ -51,4 +52,19 @@ test("audit never forces GPU readback and exposes its metrics only by explicit o
   assert.match(source,/powerPreference: auditPower/);
   assert.match(source,/const dpr = Math\.min\(globalThis\.devicePixelRatio \|\| 1, 2\) \* auditScale;/);
   assert.doesNotMatch(source,/gl\.finish\(|gl\.readPixels\(/);
+});
+
+test("same-origin 4K harness parses and uses real wheel playback for its A/B matrix", () => {
+  const html=readFileSync(new URL("../scripts/fixtures/4k-rotation-flicker.html",import.meta.url),"utf8");
+  const source=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(source);
+  assert.doesNotThrow(()=>new Script(source,{filename:"4k-rotation-flicker.html"}));
+  for(const mode of ["default","svg","fallback","high","preserve","half"]) {
+    assert.match(html,new RegExp('value="'+mode+'"'));
+  }
+  assert.match(source,/win\.requestAnimationFrame\(step\)/);
+  assert.match(source,/win\.__atlasRenderAudit\.snapshot\(\)/);
+  assert.match(source,/button\.click\(\)/);
+  assert.match(source,/frameTiming:summarize\(intervals\)/);
+  assert.match(source,/actualDevicePixelRatio:win\.devicePixelRatio/);
 });
