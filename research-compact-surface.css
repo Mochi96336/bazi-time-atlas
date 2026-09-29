@@ -371,3 +371,66 @@
     gap:4px;padding:5px 5px;
   }
 }
+
+/* Target-date input is the primary action. The baseline is editable only
+   inside the smaller Δ disclosure and does not take an independent row. */
+.research-year-head .research-date-picker {
+  display:flex;align-items:center;flex-wrap:nowrap;
+  min-width:0;gap:5px;margin:0;
+}
+.research-year-head .research-date-picker label {
+  color:#aebfb4;font-size:10px;font-weight:660;white-space:nowrap;
+}
+.research-year-head .research-date-picker input {
+  width:117px;min-width:0;height:36px;padding:6px 9px;
+  border:1px solid rgba(206,230,212,.35);border-radius:6px;
+  color:#ecf3e9;background:rgba(9,16,12,.55);
+  font-size:12px;font-variant-numeric:tabular-nums;letter-spacing:.015em;
+}
+.research-year-head .research-date-picker button {
+  min-height:36px;padding:6px 8px;
+  border:1px solid rgba(206,230,212,.2);border-radius:6px;
+  color:#c8dacb;background:transparent;font-size:10.5px;cursor:pointer;
+}
+.research-year-head .research-date-picker button:hover {
+  color:#eef6ed;background:rgba(206,230,212,.075);
+}
+.research-target-date-feedback {
+  grid-column:1/-1;justify-self:end;
+  color:#dfbc86;font-size:10px;line-height:1.4;
+}
+.research-year-head .research-controls-compact .delta-dock,
+.research-year-head .research-controls-compact .delta-dock.research-delta-consolidated {
+  grid-template-areas:"base base" "number presets" "slider slider";
+}
+.research-year-head .research-controls-compact .delta-dock > .research-base-date {
+  display:flex;flex-wrap:wrap;gap:8px;padding-bottom:10px;
+  border-bottom:1px solid rgba(197,215,200,.13);
+}
+.research-year-head .research-controls-compact .delta-dock .research-base-date input {
+  min-height:36px;
+}
+.research-task-primary .research-cycle-inline-row strong {font-size:13px}
+.research-task-primary .research-cycle-inline-row small {font-size:10.5px}
+@media(max-width:640px){
+  .research-year-head .research-date-picker input {height:42px;width:108px}
+  .research-year-head .research-date-picker button {min-height:42px}
+  .research-year-head .research-controls-compact .delta-dock,
+  .research-year-head .research-controls-compact .delta-dock.research-delta-consolidated {
+    grid-template-areas:"base" "number" "presets" "slider";
+  }
+  .research-task-primary .research-cycle-inline-row strong {font-size:11px}
+  .research-task-primary .research-cycle-inline-row small {font-size:10px}
+}
+@media(max-width:360px){
+  .research-year-actions {gap:4px;flex-wrap:nowrap}
+  .research-year-head .research-date-picker {gap:3px}
+  .research-year-head .research-date-picker input {width:97px;padding:5px 5px}
+  .research-year-head .research-date-picker button {padding:5px 6px}
+  .research-year-head .research-controls-compact > summary {
+    font-size:10px;padding:5px 4px;gap:2px;
+  }
+  .research-year-actions:has(.research-controls-compact[open]) {
+    flex-wrap:wrap;
+  }
+}
