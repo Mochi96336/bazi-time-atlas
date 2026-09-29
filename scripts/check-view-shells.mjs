@@ -93,7 +93,7 @@ requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "6
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-dock-before-instrument"), "true", "Recurrence displacement controls must precede the result instrument", url);
-requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Collapsed baseline button must be accessible in the first viewport", url);
+requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Inline displacement button must be accessible in the first viewport", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
 requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "Both base/target inline readouts must be visible in the mobile first viewport", url);
@@ -113,6 +113,7 @@ for (const [label, dataName, minHeight] of [
   ["canonical candidate button", "data-recurrence-candidate-button-height", 42],
   ["numeric displacement input", "data-recurrence-delta-number-height", 42],
   ["base-date input", "data-recurrence-base-date-input-height", 42],
+  ["selected-date input", "data-recurrence-target-date-input-height", 42],
   ["model-boundary disclosure", "data-recurrence-model-boundary-summary-height", 42],
   ["displacement slider", "data-recurrence-delta-slider-height", 32]
 ]) {
@@ -148,8 +149,8 @@ if (
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}): ${url}`
   );
 }
-if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 600) {
-  throw new Error(`Recurrence mobile instrument became too shallow (${recurrenceHeight}px): ${url}`);
+if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 460) {
+  throw new Error(`Recurrence unboxed phase fan became too shallow (${recurrenceHeight}px): ${url}`);
 }
 if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
   throw new Error(`Named Year/Day comparison must begin within the first 844px mobile viewport (${comparisonTop}..${comparisonBottom}): ${url}`);
@@ -160,11 +161,10 @@ if (
   || !Number.isFinite(deltaDockGap)
   || deltaDockTop <= taskHeadBottom
   || deltaDockBottom >= comparisonTop
-  || deltaDockGap < 4
-  || deltaDockGap > 32
+  || deltaDockGap > 12
 ) {
   throw new Error(
-    "Small baseline button must sit immediately above the original Year bar " +
+    "Inline displacement settings and date inputs must share one header baseline " +
     "(top=" + deltaDockTop + ", bottom=" + deltaDockBottom + ", gap=" + deltaDockGap + "): " + url
   );
 }

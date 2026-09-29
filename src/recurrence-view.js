@@ -7,6 +7,7 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
 import { projectOriginalStripSelection } from "./recurrence/original-strip-date-projection.js";
+import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-date-projection.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -28,6 +29,9 @@ const instrument = document.querySelector("#recurrence-instrument");
 const yearInput = document.querySelector("#base-year");
 const monthInput = document.querySelector("#base-month");
 const dayInput = document.querySelector("#base-day");
+const selectedDateForm = document.querySelector("#research-target-date-form");
+const selectedDateInput = document.querySelector("#research-target-date-input");
+const selectedDateFeedback = document.querySelector("#research-target-date-feedback");
 const deltaNumber = document.querySelector("#delta-number");
 const deltaSlider = document.querySelector("#delta-slider");
 const candidateButtons = document.querySelector("#candidate-buttons");
@@ -405,6 +409,9 @@ function renderState() {
 
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.targetDate = state.targetValid ? formatDate(state.targetDate) : "invalid";
+  if (selectedDateInput && document.activeElement !== selectedDateInput) {
+    selectedDateInput.value = formatDate(state.targetDate).replaceAll("-", "/");
+  }
   instrument.dataset.deltaYears = String(currentDelta);
   setText("research-controls-base", formatDate(currentBase).replaceAll("-","/"));
   setText("research-controls-delta", currentDelta.toLocaleString("en-US")+" 年");
@@ -495,7 +502,74 @@ function handleOriginalYearStripSelection(event) {
   reply("applied");
 }
 
+// This is the primary *selected comparison date* input. The only model still
+// consists of the existing baseline and whole-year displacement.
+function submitSelectedDate(event) {
+  event.preventDefault();
+  const raw=selectedDateInput?.value.trim() ?? "";
+  const match=raw.match(/^(\d{1,8})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  const requested=match
+    ? {year:Number(match[1]),month:Number(match[2]),day:Number(match[3])}
+    : null;
+  const show=(message)=>{
+    if (!selectedDateFeedback)return;
+    selectedDateFeedback.hidden=!message;
+    selectedDateFeedback.textContent=message??"";
+  };
+  if (!requested || !validateGregorianDate(requested)) {
+    show("請輸入有效日期，例如 2026/09/13");
+    return;
+  }
+  const typed=readBaseDate();
+  if (!validateGregorianDate(typed) ||
+      [typed.year,typed.month,typed.day].some((part,i)=>
+        part!==[currentBase.year,currentBase.month,currentBase.day][i]) ||
+      deltaNumber.value.trim()!==String(currentDelta)) {
+    show("請先套用尚未確認的基準或位移設定");
+    return;
+  }
+  let existing;
+  try {
+    existing=recurrenceState(currentBase,currentDelta);
+  } catch {
+    show("目前基準或位移設定無效");
+    return;
+  }
+  if (instrument.dataset.selectedTargetInstantBound==="true" &&
+      (!existing.targetValid ||
+       [requested.year,requested.month,requested.day].some((part,i)=>
+         part!==[existing.targetDate.year,existing.targetDate.month,existing.targetDate.day][i]))) {
+    show("已綁定精確時刻，請先在時刻設定解除綁定");
+    return;
+  }
+  const projection=projectExplicitResearchTargetDate(currentBase,currentDelta,requested);
+  if (projection.status!=="applied") {
+    const messages={
+      "baseline-year-out-of-range":"保留目前位移後，基準年會超出可用範圍",
+      "unrepresentable-baseline-date":"保留目前位移後，基準年不存在此日期（例如 2/29）",
+      "cannot-preserve-delta":"此日期無法沿用目前的位移年數",
+      "invalid-target-date":"日期無效",
+      "out-of-range":"日期或位移超出模型範圍"
+    };
+    show(messages[projection.status]??"無法套用此日期");
+    return;
+  }
+  // Explicit input may cross years. The original annual scrub remains
+  // correctly limited to the current year and uses its own projection.
+  currentBase=projection.baseDate;
+  yearInput.value=String(currentBase.year);
+  monthInput.value=String(currentBase.month);
+  dayInput.value=String(currentBase.day);
+  instrument.dataset.baseDateValid="true";
+  selectedDateInput.value=formatDate(projection.targetDate).replaceAll("-", "/");
+  show(null);
+  updateDeltaControlBounds();
+  rebuildCandidates();
+  setDelta(currentDelta,{source:"explicit-selected-date"});
+}
+
 function bindControls() {
+  selectedDateForm?.addEventListener("submit",submitSelectedDate);
   [yearInput, monthInput, dayInput].forEach(input => input.addEventListener("change", updateBaseDate));
   deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value, { source:"number" }));
   deltaSlider.addEventListener("input", () => setDelta(deltaSlider.value, { source:"slider" }));

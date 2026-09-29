@@ -84,7 +84,7 @@
 }
 
 .research-year-strip {
-  width: min(980px,100%);
+  width: 100%;
   margin: 18px auto 0;
   padding-top: 13px;
   border-top: 1px solid rgba(238,242,237,.09);
@@ -513,7 +513,7 @@
    visualizes one Gregorian year; event and selected-day text live BELOW the
    bar so Li Chun and a nearby selected date cannot collide. */
 .research-year-strip {
-  width:min(980px,100%);
+  width: 100%;
   margin:21px auto 0;
   padding-top:13px;
 }
