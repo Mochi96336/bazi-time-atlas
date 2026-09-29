@@ -140,6 +140,7 @@
       const originalStripRect = originalYearStrip?.getBoundingClientRect();
       const controlsRect = compactControls?.getBoundingClientRect();
       const controlsClosedOnEntry = Boolean(compactControls && !compactControls.open);
+      const baseDateInputClosedRect=baseDateInput?.getBoundingClientRect();
       // Measure the existing 44px+ original controls INSIDE the optional
       // drawer. Measuring their closed rectangles would incorrectly read 0.
       if (compactControls)compactControls.open=true;
@@ -212,7 +213,10 @@
       probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
       probe.dataset.recurrenceDeltaDockBeforeInstrument = String(Boolean(
         recurrenceRect && controlsRect && originalStripRect &&
-        controlsRect.bottom <= originalStripRect.top && originalStripRect.bottom <= recurrenceRect.top
+        originalYearStrip.contains(compactControls) &&
+        originalYearStrip.contains(baseDateInput) &&
+        controlsRect.top >= originalStripRect.top && controlsRect.bottom <= recurrenceRect.top &&
+        originalStripRect.bottom <= recurrenceRect.top
       ));
       probe.dataset.recurrenceDeltaDockInFirstViewport = String(Boolean(
         controlsRect && controlsClosedOnEntry && controlsRect.top >= 0 &&
@@ -221,7 +225,8 @@
       probe.dataset.recurrenceDeltaDockTop = String(Math.round(controlsRect?.top??-1));
       probe.dataset.recurrenceDeltaDockBottom = String(Math.round(controlsRect?.bottom??-1));
       probe.dataset.recurrenceDeltaDockGap = String(Math.round(
-        originalStripRect && controlsRect ? originalStripRect.top - controlsRect.bottom : -1
+        controlsRect && baseDateInputClosedRect
+          ? Math.abs(baseDateInputClosedRect.bottom - controlsRect.bottom) : -1
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];
