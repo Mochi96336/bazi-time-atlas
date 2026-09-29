@@ -486,3 +486,9 @@
     height:calc(100% - 74px);
   }
 }
+
+/* The residual constellation sits outside the colored phase sectors.
+   Lift the four-line legend clear of these more distant orbit markers. */
+@media(max-width:480px) {
+  .research-task-primary .recurrence-legend {top:32px}
+}
