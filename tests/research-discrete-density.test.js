@@ -39,36 +39,30 @@ test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.remove\(\)/);
 });
 
-test("baseline date is visible in the annual rail and displacement is secondary", async () => {
-  const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
-  const baseStart = recurrenceHtml.indexOf('class="base-date research-base-date"');
-  const controlsStart = recurrenceHtml.indexOf('id="research-controls"');
-  const dockStart = recurrenceHtml.indexOf('<section class="delta-dock"');
-  const candidateStart = recurrenceHtml.indexOf('id="candidate-buttons"');
-  const comparisonStart = recurrenceHtml.indexOf('id="research-cycle-comparison"');
-  const instrumentStart = recurrenceHtml.indexOf('id="recurrence-instrument"');
-  const instrumentEnd = recurrenceHtml.indexOf("</section>", instrumentStart);
-  assert.ok(stripStart >= 0 && baseStart > stripStart && controlsStart > baseStart
-    && dockStart > controlsStart && candidateStart > dockStart
-    && comparisonStart > candidateStart && instrumentStart > comparisonStart);
+test("primary selected date stays visible and baseline/delta share one secondary header control", async () => {
+  const stripStart=recurrenceHtml.indexOf('id="research-year-strip"');
+  const selectedStart=recurrenceHtml.indexOf('id="research-target-date-form"');
+  const controlsStart=recurrenceHtml.indexOf('id="research-controls"');
+  const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
+  const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
+  const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
+  const comparisonStart=recurrenceHtml.indexOf('id="research-cycle-comparison"');
+  const instrumentStart=recurrenceHtml.indexOf('id="recurrence-instrument"');
+  assert.ok(stripStart>=0 && selectedStart>stripStart && controlsStart>selectedStart
+    && dockStart>controlsStart && baseStart>dockStart && candidatesStart>baseStart
+    && comparisonStart>candidatesStart && instrumentStart>comparisonStart);
+  assert.match(recurrenceHtml,/id="research-target-date-input"/);
+  assert.match(recurrenceHtml,/id="research-target-date-apply"/);
   assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact"/);
-  assert.match(recurrenceHtml,/class="research-year-head"/);
-  assert.match(recurrenceHtml,/class="research-base-caption">基準/);
-  assert.doesNotMatch(recurrenceHtml.slice(dockStart, comparisonStart),/id="base-year"/);
-  assert.doesNotMatch(recurrenceHtml.slice(instrumentStart,instrumentEnd),/id="base-year"|id="candidate-buttons"/);
-  for (const id of ["base-year","base-month","base-day"]) {
-    assert.ok(recurrenceHtml.slice(baseStart, controlsStart).includes(`id="${id}"`));
-  }
-  for (const id of ["delta-number","candidate-buttons","delta-slider"]) {
+  assert.doesNotMatch(recurrenceHtml.slice(selectedStart,controlsStart),/id="base-year"/);
+  for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons","delta-slider"])
     assert.ok(recurrenceHtml.slice(dockStart,comparisonStart).includes(`id="${id}"`));
-  }
-  const layout = await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
   assert.match(layout,/\.research-task-primary \.research-year-strip\s*\{[\s\S]*?width:100%;max-width:none/);
-  assert.match(layout,/\.research-task-primary \.research-year-head\s*\{[\s\S]*?display:grid/);
+  assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
   assert.match(layout,/\.research-task-primary \.research-cycle-inline\s*\{[\s\S]*?grid-template-columns:repeat\(2/);
   assert.match(layout,/\.research-task-primary \.recurrence-instrument\s*\{[\s\S]*?border:0;border-radius:0;[\s\S]*?background:transparent;box-shadow:none/);
-  assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0,
-    "second, runtime-loaded stylesheet must not reinstate 980px");
+  assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0);
   assert.ok(recurrenceCss.includes(".delta-dock {"));
 });
 
