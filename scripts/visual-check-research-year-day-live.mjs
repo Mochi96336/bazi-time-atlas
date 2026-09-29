@@ -14,6 +14,7 @@ const cases=[
  {route:"original",date:"2026-09-13",delta:400,width:1440,height:1700,name:"research-original-400y-1440.png"},
  {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-original-lichun-day-390.png"},
  {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-original-normal-2023-390.png"},
+ {route:"original",date:"2023-01-10",width:390,height:2000,name:"research-original-cross-year-jiazi-390.png"},
  {route:"bare",width:390,height:2000,name:"research-original-default-390.png"}
 ];
 function findBrowser(){
