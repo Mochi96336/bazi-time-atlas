@@ -49,6 +49,9 @@ if (attr(probe, "data-apply-visible") !== "false") throw new Error(`idle ordinar
 if (attr(probe, "data-apply-visible-after-edit") !== "true" || attr(probe, "data-dirty-after-edit") !== "true") {
   throw new Error(`edited ordinary exact-time rail did not reveal Apply with dirty state: ${url}`);
 }
+for (const name of ["invalid-feedback","invalid-did-not-apply","invalid-one-row","error-cleared-on-edit"]) {
+  if (attr(probe, "data-" + name) !== "true") throw new Error(`mobile invalid-time feedback: ${name} failed: ${url}`);
+}
 const share = Number(attr(probe, "data-instrument-share"));
 if (!Number.isFinite(share) || share < 0.70) throw new Error(`instrument no longer owns the first mobile viewport (share=${share}): ${url}`);
 
