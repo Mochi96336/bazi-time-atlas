@@ -257,38 +257,50 @@
     }
 
     function exerciseMobileZodiacDatum(childWindow, doc, instrument) {
-      // Test only when explicitly requested by the browser diagnostic runner.
-      // Default screenshot fixtures remain byte-for-byte free of this mutation.
+      // The wheel retains the Zodiac identity. The time dock never duplicates it.
       if (!exerciseZodiac || zodiacExercised || !instrument?.dataset.zodiac) return;
-      const label = doc.querySelector("#mobile-zodiac-readout");
       const dock = doc.querySelector("#mobile-time-dock");
       const input = doc.querySelector("#mobile-instant-input");
+      const now = doc.querySelector("#mobile-now-button");
       const apply = doc.querySelector("#mobile-time-apply");
-      if (!label || !dock || !input?.value || !apply ||
-          childWindow.getComputedStyle(label).display === "none") return;
+      const zodiacTrack = doc.querySelector("#zodiac-track");
+      const stateZodiac = doc.querySelector("#state-zodiac");
+      if (!dock || !input?.value || !now || !apply || !zodiacTrack || !stateZodiac) return;
       zodiacExercised = true;
-      const current = instrument.dataset.zodiac;
-      probe.dataset.zodiacInitialMatches = String(label.textContent === "黃道 · " + current);
-      probe.dataset.zodiacInitialVisible = String(!label.hidden
-        && childWindow.getComputedStyle(label).display !== "none");
-      probe.dataset.zodiacFontSize = childWindow.getComputedStyle(label).fontSize;
+      const visible = node => {
+        const style = childWindow.getComputedStyle(node);
+        return style.display !== "none" && style.visibility !== "hidden";
+      };
+      const row = action => Math.abs(
+        (input.getBoundingClientRect().top + input.getBoundingClientRect().bottom) / 2 -
+        (action.getBoundingClientRect().top + action.getBoundingClientRect().bottom) / 2
+      ) <= 5;
+      const originalInputX = input.getBoundingClientRect().left;
+      probe.dataset.wheelZodiacIdentity = String(
+        stateZodiac.textContent.trim() === instrument.dataset.zodiac &&
+        !doc.querySelector("#mobile-zodiac-readout")
+      );
+      probe.dataset.singleRowInitial = String(visible(now) && !visible(apply) &&
+        row(now) && dock.getBoundingClientRect().height < 80);
       input.dispatchEvent(new childWindow.Event("input", { bubbles:true }));
-      probe.dataset.zodiacDirtyHidden = String(dock.dataset.dirty === "true"
-        && childWindow.getComputedStyle(label).display === "none");
+      probe.dataset.dirtySwapsAction = String(dock.dataset.dirty === "true" &&
+        !visible(now) && visible(apply) && row(apply) &&
+        Math.abs(input.getBoundingClientRect().left - originalInputX) <= 1);
       apply.click();
-      probe.dataset.zodiacApplyRestored = String(dock.dataset.dirty === "false"
-        && childWindow.getComputedStyle(label).display !== "none"
-        && label.textContent === "黃道 · " + instrument.dataset.zodiac);
-      const classificationWas = instrument.getAttribute("data-classification-overlay");
+      probe.dataset.restoreOneRow = String(dock.dataset.dirty === "false" &&
+        visible(now) && !visible(apply) && row(now));
+      const prevClass = instrument.getAttribute("data-classification-overlay");
       instrument.setAttribute("data-classification-overlay", "on");
-      probe.dataset.zodiacClassificationHidden = String(childWindow.getComputedStyle(label).display === "none");
-      if (classificationWas === null) instrument.removeAttribute("data-classification-overlay");
-      else instrument.setAttribute("data-classification-overlay", classificationWas);
-      const analysisWas = instrument.getAttribute("data-analysis-open");
+      probe.dataset.classificationOneRow = String(row(now) &&
+        !doc.querySelector("#mobile-zodiac-readout"));
+      if (prevClass === null) instrument.removeAttribute("data-classification-overlay");
+      else instrument.setAttribute("data-classification-overlay", prevClass);
+      const prevAnalysis = instrument.getAttribute("data-analysis-open");
       instrument.setAttribute("data-analysis-open", "true");
-      probe.dataset.zodiacAnalysisHidden = String(childWindow.getComputedStyle(label).display === "none");
-      if (analysisWas === null) instrument.removeAttribute("data-analysis-open");
-      else instrument.setAttribute("data-analysis-open", analysisWas);
+      probe.dataset.analysisOneRow = String(row(now) &&
+        !doc.querySelector("#mobile-zodiac-readout"));
+      if (prevAnalysis === null) instrument.removeAttribute("data-analysis-open");
+      else instrument.setAttribute("data-analysis-open", prevAnalysis);
     }
 
     function snapshot() {
