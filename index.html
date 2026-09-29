@@ -171,10 +171,6 @@
     </section>
 
     <section id="mobile-time-dock" class="mobile-time-dock" aria-label="手機精確時間控制" data-dirty="false">
-      <div class="mobile-time-heading">
-        <strong>精確時間</strong>
-        <small id="mobile-time-status" data-state="idle">UTC+08:00 · 秒級</small>
-      </div>
       <label class="mobile-time-field">
         <span>選定時間，UTC+08:00，秒級</span>
         <input id="mobile-instant-input" type="datetime-local" step="1" aria-label="選定時間，UTC+8，秒級">
@@ -183,8 +179,7 @@
         <button id="mobile-time-apply" type="button">套用</button>
         <button id="mobile-now-button" type="button" aria-label="將選定時間回到現在">現在</button>
       </div>
-      <!-- Derived context belongs below the selected-time control, not inside its action row. -->
-      <span id="mobile-zodiac-readout" aria-live="off" hidden></span>
+      <output id="mobile-time-status" role="status" aria-live="polite" aria-atomic="true">UTC+08:00 · 秒級</output>
     </section>
 
     <section class="timeline-dock" aria-label="時間游標">
