@@ -156,6 +156,29 @@ iframe.addEventListener("load",async()=>{
     ticks.every((t,i)=>i===0 ||
       Number(t.dataset.dayOffset)-Number(ticks[i-1].dataset.dayOffset)===60),
     "original Year bar must have genuine 甲子 days at exactly 60-day intervals");
+  // Actual highlight MUST begin on the previous canonical Jiazi even when
+  // it is before Jan 1 (only the drawing is clipped), and must move with the
+  // ORIGINAL pointer and source-owned Day ordinal.
+  const progress=d.getElementById("research-year-day-progress");
+  const targetOrdinal=Number(d.getElementById("research-cycles-day-target-ordinal")
+    .textContent.split("/")[0]);
+  const selectedOffset=Number(d.getElementById("research-year-scrub").value);
+  const preceding=selectedOffset-(targetOrdinal-1);
+  const activeTicks=ticks.filter(t=>t.dataset.current==="true");
+  check(progress && targetOrdinal>=1 && targetOrdinal<=60 &&
+    Number(progress.dataset.dayOrdinal)===targetOrdinal &&
+    Number(progress.dataset.selectedOffset)===selectedOffset &&
+    Number(progress.dataset.previousJiaziOffset)===preceding &&
+    progress.dataset.preview==="false" &&
+    w.getComputedStyle(progress).backgroundColor!=="rgba(0, 0, 0, 0)" &&
+    (preceding>=0
+      ? activeTicks.length===1 &&
+        Number(activeTicks[0].dataset.dayOffset)===preceding &&
+        progress.dataset.anchorClipped==="false"
+      : activeTicks.length===0 &&
+        progress.dataset.anchorClipped==="true" &&
+        Math.abs(parseFloat(progress.style.left))<.00001),
+    "Day highlight must show the authentic preceding Jiazi → selected xx/60 on the same annual bar");
   const controls=d.getElementById("research-controls");
   check(controls && !controls.open &&
     d.getElementById("research-controls-base").textContent.includes("/") &&
@@ -213,6 +236,8 @@ iframe.addEventListener("load",async()=>{
       slider.value="34";
       slider.dispatchEvent(new Event("input",{bubbles:true}));
       check(instrument.dataset.targetDate==="2024-02-10" &&
+        progress.dataset.preview==="true" &&
+        progress.dataset.dayOrdinal==="35" &&
         d.getElementById("research-year-scrub-hint").textContent.includes("2024/02/04"),
         "input-preview must not create a second committed selected date");
       slider.dispatchEvent(new Event("change",{bubbles:true}));
@@ -223,6 +248,8 @@ iframe.addEventListener("load",async()=>{
         strip.dataset.selectedYearPillar==="unavailable" &&
         strip.dataset.selectedYearMembershipStatus==="unresolved" &&
         strip.dataset.selectedDayPillar!==dayName &&
+        progress.dataset.preview==="false" &&
+        progress.dataset.dayOrdinal==="35" &&
         w.location.search.includes("date=2024-02-04"),
         "releasing original bar did not commit into original Year/Day/date/URL");
       probe.dataset.boundaryScrub="true";
@@ -231,6 +258,8 @@ iframe.addEventListener("load",async()=>{
       check(instrument.dataset.targetDate==="2024-02-10" &&
         baseDay.value==="10" &&
         strip.dataset.selectedDayPillar===dayName &&
+        progress.dataset.preview==="false" &&
+        progress.dataset.dayOrdinal==="41" &&
         strip.dataset.selectedYearPillar==="甲辰" &&
         w.location.search.includes("date=2024-02-10"),
         "original date/Day/Year and URL did not roundtrip after slider return");
@@ -242,6 +271,7 @@ iframe.addEventListener("load",async()=>{
       check(instrument.dataset.stripSelectionOutcome==="stale-original-input" &&
         instrument.dataset.targetDate==="2024-02-10" &&
         baseDay.value==="30" && slider.value==="40" &&
+        progress.dataset.preview==="false" && progress.dataset.dayOrdinal==="41" &&
         w.location.pathname+w.location.search===settled &&
         !d.getElementById("research-year-scrub-feedback").hidden,
         "gesture overwrote uncommitted original date input");
