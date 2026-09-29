@@ -65,7 +65,7 @@ if(
 console.log("[research-r3] PASS old mode=dates link migrates compare→original date owner, no second UI");
 
 // True native geometry + R1/R2 authority/gesture guards.
-for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?width=320","?width=768","?desktop=1","?deep=1","?precise=1"]){
+for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?preciseBoundary=before","?preciseBoundary=after","?width=320","?width=768","?desktop=1","?deep=1","?precise=1"]){
   const proof=dump("scripts/fixtures/research-original-r0-390.html"+suffix,15000);
   const tag=opening(proof.dom,"probe","output");
   if(
