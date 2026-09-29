@@ -67,6 +67,34 @@ iframe.addEventListener("load",async()=>{
     check(el&&!el.hidden&&el.checkVisibility(),
       "ORIGINAL Research module absent or hidden: "+id);
   }
+  // R4 layout proof: one genuinely full-width year rail, an in-flow date
+  // owner, and an unboxed fan, at actual 320/390/768/1440 viewports.
+  const datePicker=d.querySelector("#research-year-strip .research-base-date");
+  const compactControls=d.getElementById("research-controls");
+  const task=d.getElementById("research-discrete");
+  const taskBox=task.getBoundingClientRect();
+  const stripBox=strip.getBoundingClientRect();
+  const fanBox=instrument.getBoundingClientRect();
+  const fanStyle=w.getComputedStyle(instrument);
+  check(datePicker && datePicker.checkVisibility() &&
+    strip.contains(datePicker) && !compactControls.open,
+    "R4 date picker must be visible without opening displacement settings");
+  check(stripBox.width >= taskBox.width-6,
+    "R4 year rail still has a narrow max-width: "+stripBox.width+" / "+taskBox.width);
+  check(Math.abs(fanBox.width-stripBox.width)<6 &&
+    fanStyle.borderTopWidth==="0px" &&
+    fanStyle.borderBottomWidth==="0px" &&
+    fanStyle.boxShadow==="none" &&
+    fanStyle.backgroundImage==="none",
+    "R4 fan is still a card or mismatched width: "+JSON.stringify({
+      strip:stripBox.width,fan:fanBox.width,border:fanStyle.borderTopWidth,
+      shadow:fanStyle.boxShadow,background:fanStyle.backgroundImage
+    }));
+  const baseCompare=d.querySelector('.research-cycle-inline-row[data-side="base"]').getBoundingClientRect();
+  const targetCompare=d.querySelector('.research-cycle-inline-row[data-side="target"]').getBoundingClientRect();
+  check(width>=1051 ? Math.abs(baseCompare.top-targetCompare.top)<4
+    : targetCompare.top>=baseCompare.bottom-1,
+    "R4 paired comparison did not use the responsive measured rows");
   const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),
