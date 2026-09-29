@@ -117,3 +117,34 @@
   pointer-events:none;z-index:1;
 }
 .research-year-approx-li-chun[hidden]{display:none}
+
+/* No new chart: a faint trace from the REAL preceding Jiazi to the active
+   Day marker inside the existing annual strip. Selected tick, same origin. */
+.research-year-day-progress {
+  position:absolute;z-index:1;top:27px;height:5px;
+  border-radius:2px;pointer-events:none;
+  background:rgba(139,199,182,.48);
+  box-shadow:0 0 5px rgba(139,199,182,.16);
+}
+.research-year-day-progress[data-preview="true"] {
+  background:rgba(177,223,211,.3);
+  box-shadow:none;
+}
+/* A leading fragment began in the PREVIOUS civil year. Fading its first
+   pixels makes the clipped Jan-1 viewport edge visually distinct from
+   an actual 甲子 tick, without adding another label or chart. */
+.research-year-day-progress[data-anchor-clipped="true"] {
+  background:linear-gradient(90deg,rgba(139,199,182,.10),rgba(139,199,182,.48));
+}
+.research-year-day-progress[data-preview="true"][data-anchor-clipped="true"] {
+  background:linear-gradient(90deg,rgba(177,223,211,.07),rgba(177,223,211,.30));
+}
+.research-year-jiazi-tick[data-current="true"] {
+  border-color:#d9eee0;
+  border-left-width:1.5px;
+}
+.research-year-jiazi-tick[data-current="true"] > small {
+  color:#d2e8d9;font-weight:700;
+}
+.research-year-base,
+.research-year-li-chun {z-index:3}
