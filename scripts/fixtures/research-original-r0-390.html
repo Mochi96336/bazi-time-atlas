@@ -99,11 +99,45 @@ iframe.addEventListener("load",async()=>{
   check(fanGraphic && fanReadout && fanReadout.top>=fanGraphic.bottom-1 &&
     w.getComputedStyle(d.querySelector(".recurrence-readout.research-current-state")).position==="relative",
     "R4 phase footer still floats over the half-circle");
-  const baseCompare=d.querySelector('.research-cycle-inline-row[data-side="base"]').getBoundingClientRect();
-  const targetCompare=d.querySelector('.research-cycle-inline-row[data-side="target"]').getBoundingClientRect();
-  check(width>=1051 ? Math.abs(baseCompare.top-targetCompare.top)<4
-    : targetCompare.top>=baseCompare.bottom-1,
-    "R4 paired comparison did not use the responsive measured rows");
+  const panel=d.getElementById("research-cycle-comparison");
+  const baseRow=panel.querySelector('.research-cycle-inline-row[data-side="base"]');
+  const targetRow=panel.querySelector('.research-cycle-inline-row[data-side="target"]');
+  const baseCompare=baseRow.getBoundingClientRect();
+  const targetCompare=targetRow.getBoundingClientRect();
+  const isBound=instrument.dataset.selectedTargetInstantBound==="true";
+  const isSingle=instrument.dataset.deltaYears==="0" && !isBound;
+  check(panel.dataset.readoutMode===(isSingle?"single":"comparison") &&
+    targetRow.checkVisibility() &&
+    d.getElementById("research-cycles-target-label").textContent===(isSingle?"選定":"比較"),
+    "R5 readout mode/label differs from canonical delta or precise target");
+  if(isSingle){
+    check(!baseRow.checkVisibility() &&
+      panel.getBoundingClientRect().height<130,
+      "R5 duplicate baseline is still visible for an unbound zero-year selection");
+  } else {
+    check(baseRow.checkVisibility() &&
+      (width>=1051 ? Math.abs(baseCompare.top-targetCompare.top)<4
+        : targetCompare.top>=baseCompare.bottom-1),
+      "R5 actual comparison must retain both responsive Year/Day rows");
+  }
+  if(width<=390) {
+    const stageLimit=width<=320?316:359;
+    check(fanGraphic.height<=stageLimit+1,
+      "R5 mobile SVG drawing stage still wastes fixed 465px height: "+
+      fanGraphic.height);
+    const wheel=d.getElementById("recurrence-wheel");
+    const legend=d.querySelector(".recurrence-legend");
+    const transform=wheel.getScreenCTM();
+    // Original outer Gregorian sector apex in canonical SVG space is
+    // (600, 820 - 560) = (600, 260).
+    const apexY=transform.d*260+transform.f;
+    const astronomyApexY=transform.d*195+transform.f;
+    const legendBottom=legend.getBoundingClientRect().bottom;
+    check(Number.isFinite(apexY) && Number.isFinite(astronomyApexY) &&
+      apexY>=legendBottom+22 && astronomyApexY>=legendBottom+32,
+      "R5 fan or outer astronomy orbit overlaps the mobile legend: "+
+      JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
+  }
   const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),

@@ -189,8 +189,10 @@
         Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
       );
       probe.dataset.recurrenceYearDayFullyVisible = String(Boolean(
-        yearCardRect && dayCardRect && yearCardRect.top >= 0 && dayCardRect.top >= 0
-        && yearCardRect.bottom <= viewportHeight && dayCardRect.bottom <= viewportHeight
+        baseRow && targetRow && dayCardRect && targetRow.checkVisibility()
+        && ((recurrenceComparison?.dataset.readoutMode==="single" && !baseRow.checkVisibility())
+          || (recurrenceComparison?.dataset.readoutMode==="comparison" && baseRow.checkVisibility()))
+        && dayCardRect.top >= 0 && dayCardRect.bottom <= viewportHeight
       ));
       probe.dataset.recurrenceComparisonBeforeFan = String(Boolean(
         comparisonRect && recurrenceRect && comparisonRect.bottom <= recurrenceRect.top

@@ -96,7 +96,7 @@ requireEqual(attr(probe, "data-recurrence-delta-dock-before-instrument"), "true"
 requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Inline displacement button must be accessible in the first viewport", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
-requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "Both base/target inline readouts must be visible in the mobile first viewport", url);
+requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "The selected date must be visible without duplicating its zero-year baseline", url);
 requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
@@ -149,7 +149,9 @@ if (
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}): ${url}`
   );
 }
-if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 460) {
+// The responsive 390px fan stage is ~358px, plus the normal-flow readout.
+// A fixed 460px minimum previously preserved a card-sized blank space.
+if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 390) {
   throw new Error(`Recurrence unboxed phase fan became too shallow (${recurrenceHeight}px): ${url}`);
 }
 if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
