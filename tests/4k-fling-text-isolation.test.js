@@ -43,9 +43,19 @@ test("effective F mode is split into isolated filter, transition and animation c
   assert.match(js,/"filter-transition":\{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel \*\{filter:none!important;transition:none!important\}"\}/);
   assert.match(js,/data-active-ring/);
   assert.match(js,/data-coasting-ring/);
-  assert.match(js,/effectiveStyles:computedStyleEvidence\(doc\)/);
+  assert.match(js,/activeStyles=computedStyleEvidence\(doc\)/);
+  assert.match(js,/restingStyles:computedStyleEvidence\(doc\)/);
   assert.match(js,/majorTick:"#year-track \.ring-tick\.major"/);
   assert.match(js,/sector:"#year-track \.cycle-sector"/);
+});
+
+test("manual fling fixture compares baseline, global transition-off and movement-scoped guards",()=>{
+  for(const key of ["motion-transition-all","motion-transition-surfaces"]) assert.match(source,new RegExp('value="'+key+'"'));
+  assert.match(js,/"motion-transition-all":\{material:"svg",rule:"",audit:"all"\}/);
+  assert.match(js,/"motion-transition-surfaces":\{material:"svg",rule:"",audit:"surfaces"\}/);
+  assert.match(js,/config\.audit\?"&motionTransitionAudit="\+config\.audit/);
+  assert.match(js,/motionTransitionAudit:svg\.dataset\.motionTransitionAudit\|\|"off"/);
+  assert.match(js,/activeStyles/);
 });
 
 test("manual native pointer flings are measured rather than relying on smooth autoplay",()=>{
