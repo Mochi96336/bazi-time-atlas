@@ -33,6 +33,21 @@ test("static labels and active readheads can be disabled independently",()=>{
   assert.match(js,/filter:none!important;transition:none!important;animation:none!important/);
 });
 
+test("effective F mode is split into isolated filter, transition and animation controls",()=>{
+  for (const key of ["filter-only","transition-only","animation-only","filter-transition","motion-scoped-effects"]) {
+    assert.match(source,new RegExp('value="'+key+'"'));
+  }
+  assert.match(js,/"filter-only":\{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel \*\{filter:none!important\}"\}/);
+  assert.match(js,/"transition-only":\{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel \*\{transition:none!important\}"\}/);
+  assert.match(js,/"animation-only":\{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel \*\{animation:none!important\}"\}/);
+  assert.match(js,/"filter-transition":\{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel \*\{filter:none!important;transition:none!important\}"\}/);
+  assert.match(js,/data-active-ring/);
+  assert.match(js,/data-coasting-ring/);
+  assert.match(js,/effectiveStyles:computedStyleEvidence\(doc\)/);
+  assert.match(js,/majorTick:"#year-track \.ring-tick\.major"/);
+  assert.match(js,/sector:"#year-track \.cycle-sector"/);
+});
+
 test("manual native pointer flings are measured rather than relying on smooth autoplay",()=>{
   assert.match(js,/svg\.addEventListener\("pointerdown",onDown/);
   assert.match(js,/svg\.addEventListener\("pointermove",onMove/);
