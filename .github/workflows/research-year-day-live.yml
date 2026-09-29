@@ -4,6 +4,7 @@ on:
     paths:
       - 'recurrence.html'
       - 'research-discrete-density.css'
+      - 'research-compact-surface.css'
       - 'src/recurrence-view.js'
       - 'src/research-year-strip-view.js'
       - 'src/recurrence/original-strip-date-projection.js'
