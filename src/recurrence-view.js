@@ -507,7 +507,7 @@ function handleOriginalYearStripSelection(event) {
 function submitSelectedDate(event) {
   event.preventDefault();
   const raw=selectedDateInput?.value.trim() ?? "";
-  const match=raw.match(/^(\\d{1,8})[\\/-](\\d{1,2})[\\/-](\\d{1,2})$/);
+  const match=raw.match(/^(\d{1,8})[\/-](\d{1,2})[\/-](\d{1,2})$/);
   const requested=match
     ? {year:Number(match[1]),month:Number(match[2]),day:Number(match[3])}
     : null;
