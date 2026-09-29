@@ -218,3 +218,20 @@
   #zodiac-track .zodiac-label,
   .ring-legend-row[data-ring-toggle] { transition: none; }
 }
+
+
+/* Native 4K hard-fling diagnostic: toggle only via ?motionTransitionAudit=...
+   Gesture ownership is already exposed on the SVG by ring-drag-controller.
+   Never suppress transitions on ordinary playback, idle, or elsewhere in UI.
+   Broad mode should reproduce the user's global I ablation during movement.
+   Surfaces mode tests whether disabling known transitioning descendants suffices.
+   The CSS declaration itself is reversible and completely inert by default. */
+#kinetic-wheel[data-motion-transition-audit="all"]:is([data-active-ring], [data-coasting-ring]),
+#kinetic-wheel[data-motion-transition-audit="all"]:is([data-active-ring], [data-coasting-ring]) * {
+  transition: none !important;
+}
+#kinetic-wheel[data-motion-transition-audit="surfaces"]:is([data-active-ring], [data-coasting-ring])
+  :is(.cycle-sector, .term-sector, .zodiac-sector, .ring-tick, .term-mark,
+      .cycle-label, .term-label, .zodiac-label) {
+  transition: none !important;
+}
