@@ -78,6 +78,7 @@ function validateNormal(run, probe, { edited = false } = {}) {
   const open = rect(probe, "open", "normal", run.url);
   const openFontSize = Number.parseFloat(requireAttr(probe, "data-open-font-size", "normal", run.url));
   const now = rect(probe, "now", "normal", run.url);
+  const apply = rect(probe, "mobile-time-apply", "normal", run.url);
   const nowFontSize = Number.parseFloat(requireAttr(probe, "data-now-font-size", "normal", run.url));
   const labels = DIRECT_LABELS.map(([id, expected]) => ({ id, expected, box:rect(probe, id, "normal", run.url) }));
 
@@ -143,23 +144,25 @@ function validateNormal(run, probe, { edited = false } = {}) {
       "/h" + open.height.toFixed(1) + "/" + openFontSize + "px): " + run.url
     );
   }
-  if (requireAttr(probe, "data-now-visible", "normal", run.url) !== "true" ||
-    now.height < 40 || !Number.isFinite(nowFontSize) || nowFontSize < 9.5 ||
-    now.left < timeInput.right + 2 || now.right > dock.right + 1 ||
-    Math.abs(now.bottom - timeInput.bottom) > 16) {
-    throw new Error(
-      "normal: Now is not a separate, usable action next to selected mobile time " +
-      "(now=" + JSON.stringify(now) + "/" + nowFontSize + "px, input=" +
-      JSON.stringify(timeInput) + ", dock=" + JSON.stringify(dock) + "): " + run.url
-    );
-  }
-
+  // A dirty draft swaps Now for Apply in the same fixed action cell.
   const expectedDirty = String(edited);
-  if (
-    requireAttr(probe, "data-mobile-time-dirty", "normal", run.url) !== expectedDirty
-    || requireAttr(probe, "data-mobile-time-apply-visible", "normal", run.url) !== expectedDirty
-  ) {
-    throw new Error(`normal: exact-time Apply disclosure disagrees with dirty state (edited=${edited}): ${run.url}`);
+  const nowVisible = requireAttr(probe, "data-now-visible", "normal", run.url);
+  const applyVisible = requireAttr(probe, "data-mobile-time-apply-visible", "normal", run.url);
+  const action = edited ? apply : now;
+  const actionFits = action.height >= 40 &&
+    action.left >= timeInput.right + 2 && action.right <= dock.right + 1 &&
+    Math.abs(action.bottom - timeInput.bottom) <= 16;
+  if (requireAttr(probe, "data-mobile-time-dirty", "normal", run.url) !== expectedDirty
+      || nowVisible !== String(!edited) || applyVisible !== expectedDirty
+      || !actionFits || !Number.isFinite(nowFontSize) || nowFontSize < 9.5
+      || dock.height > 80) {
+    throw new Error(
+      "normal: time must share a single fixed action slot " +
+      "(edited=" + edited + ", NowVisible=" + nowVisible +
+      ", ApplyVisible=" + applyVisible + ", action=" + JSON.stringify(action) +
+      ", input=" + JSON.stringify(timeInput) + ", dock=" + JSON.stringify(dock) +
+      "): " + run.url
+    );
   }
 
   if (requireAttr(probe, "data-reference-visible", "normal", run.url) !== "false" ||
@@ -239,9 +242,9 @@ function validateAnalysis(run, probe) {
 
   if (
     requireAttr(probe, "data-mobile-time-dirty", "analysis", run.url) !== "false"
-    || requireAttr(probe, "data-mobile-time-apply-visible", "analysis", run.url) !== "true"
+    || requireAttr(probe, "data-mobile-time-apply-visible", "analysis", run.url) !== "false"
   ) {
-    throw new Error("analysis: exact-time Apply was incorrectly hidden by ordinary-reading progressive disclosure: " + run.url);
+    throw new Error("analysis: idle mobile time must reserve the sole action slot for Now: " + run.url);
   }
 
   if (
