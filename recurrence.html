@@ -69,7 +69,7 @@
           <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
         </div>
             <details id="research-controls" class="research-controls-compact">
-              <summary><span>位移 <b id="research-controls-delta">0 年</b></span><span class="research-controls-action">設定</span></summary>
+              <summary><span>Δ <b id="research-controls-delta">0 年</b></span><span class="research-controls-action">設定</span></summary>
               <section class="delta-dock" aria-label="時間位移控制">
                       <label>位移年數
                         <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
@@ -165,8 +165,8 @@
       </section>
 
       <section id="recurrence-instrument" class="recurrence-instrument" aria-label="離散相位與十二節形狀比較">
-
-        <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 閉合 · 左右為距 0 的最短循環位移</span></div>
+        <div class="research-fan-graphic">
+          <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 閉合 · 左右為距 0 的最短循環位移</span></div>
         <div class="recurrence-legend" aria-hidden="true">
           <div><i class="gregorian-dot"></i><span>公曆結構</span><strong id="gregorian-phase-readout">—</strong></div>
           <div><i class="year-dot"></i><span>60 年序</span><strong id="year-phase-readout">—</strong></div>
@@ -186,6 +186,7 @@
           <g id="astronomy-residual-ring"></g>
           <g id="recurrence-cursor"></g>
         </svg>
+        </div>
 
         <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
           <div class="research-current-state-head"><span>目前 Δ</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
