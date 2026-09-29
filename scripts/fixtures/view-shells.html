@@ -140,7 +140,8 @@
       const originalStripRect = originalYearStrip?.getBoundingClientRect();
       const controlsRect = compactControls?.getBoundingClientRect();
       const controlsClosedOnEntry = Boolean(compactControls && !compactControls.open);
-      const baseDateInputClosedRect=baseDateInput?.getBoundingClientRect();
+      const selectedDateInput=recurrenceDoc.querySelector("#research-target-date-input");
+      const selectedDateInputClosedRect=selectedDateInput?.getBoundingClientRect();
       // Measure the existing 44px+ original controls INSIDE the optional
       // drawer. Measuring their closed rectangles would incorrectly read 0.
       if (compactControls)compactControls.open=true;
@@ -210,11 +211,13 @@
       probe.dataset.recurrenceDeltaNumberHeight = String(Math.round(deltaNumberRect?.height ?? -1));
       probe.dataset.recurrenceDeltaSliderHeight = String(Math.round(deltaSliderRect?.height ?? -1));
       probe.dataset.recurrenceBaseDateInputHeight = String(Math.round(baseDateInputRect?.height ?? -1));
+      probe.dataset.recurrenceTargetDateInputHeight = String(Math.round(selectedDateInputClosedRect?.height ?? -1));
       probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
       probe.dataset.recurrenceDeltaDockBeforeInstrument = String(Boolean(
         recurrenceRect && controlsRect && originalStripRect &&
         originalYearStrip.contains(compactControls) &&
-        originalYearStrip.contains(baseDateInput) &&
+        originalYearStrip.contains(selectedDateInput) &&
+        !compactControls.open && selectedDateInputClosedRect?.width>85 &&
         controlsRect.top >= originalStripRect.top && controlsRect.bottom <= recurrenceRect.top &&
         originalStripRect.bottom <= recurrenceRect.top
       ));
@@ -225,8 +228,8 @@
       probe.dataset.recurrenceDeltaDockTop = String(Math.round(controlsRect?.top??-1));
       probe.dataset.recurrenceDeltaDockBottom = String(Math.round(controlsRect?.bottom??-1));
       probe.dataset.recurrenceDeltaDockGap = String(Math.round(
-        controlsRect && baseDateInputClosedRect
-          ? Math.abs(baseDateInputClosedRect.bottom - controlsRect.bottom) : -1
+        controlsRect && selectedDateInputClosedRect
+          ? Math.abs(selectedDateInputClosedRect.bottom - controlsRect.bottom) : -1
       ));
 
       const [birthWin, birthDoc] = docs["birth-mobile"];
