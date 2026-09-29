@@ -35,6 +35,8 @@ pre{font-size:10px;max-height:16vh;overflow:auto;white-space:pre-wrap;overflow-w
       <option value="animation-only">J｜保留文字，只關閉 SVG animation</option>
       <option value="filter-transition">K｜只關閉 SVG filter＋transition</option>
       <option value="motion-scoped-effects">L｜只在拖曳／慣性期間關閉全部 SVG 特效</option>
+      <option value="motion-transition-all">M｜只在拖曳／慣性期間關閉所有 SVG 過渡</option>
+      <option value="motion-transition-surfaces">N｜只在拖曳／慣性期間關閉扇區、刻度及標籤的過渡</option>
     </select>
   </label>
   <button id="start" disabled>開始記錄，手動快甩 10 秒</button>
@@ -51,7 +53,7 @@ pre{font-size:10px;max-height:16vh;overflow:auto;white-space:pre-wrap;overflow-w
   <button id="copy" disabled>複製這組結果</button>
   <small id="status" aria-live="polite">初始化…</small>
   <pre id="report" aria-label="本次快甩指標"></pre>
-  <small>H / I 分開拆解先前效果良好的 F；J 用來排除 animation，K 檢查兩者是否需同時關閉，L 驗證能否只在拖曳與慣性期間啟用。測試期間必須真的用力甩動。</small>
+  <small>I 已在原生 4K 快甩測試中比 H 有效。M 測試只在拖曳及慣性期間關閉 SVG 過渡（仍保留文字、陰影與靜止過渡）；N 進一步限制到已知扇區、刻度及標籤。每組請在同一環用相同力度甩動。</small>
   <small>面板在 iframe 外。記錄滑鼠事件與畫格間隔，無法自動辨識 GPU 黑畫面；請以肉眼回報為準。</small>
 </aside>
 <script>
@@ -67,7 +69,9 @@ const MODES=Object.freeze({
   "transition-only":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{transition:none!important}"},
   "animation-only":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{animation:none!important}"},
   "filter-transition":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{filter:none!important;transition:none!important}"},
-  "motion-scoped-effects":{material:"svg",rule:"#kinetic-wheel:is([data-active-ring],[data-coasting-ring]),#kinetic-wheel:is([data-active-ring],[data-coasting-ring]) *{filter:none!important;transition:none!important;animation:none!important}"}
+  "motion-scoped-effects":{material:"svg",rule:"#kinetic-wheel:is([data-active-ring],[data-coasting-ring]),#kinetic-wheel:is([data-active-ring],[data-coasting-ring]) *{filter:none!important;transition:none!important;animation:none!important}"},
+  "motion-transition-all":{material:"svg",rule:"",audit:"all"},
+  "motion-transition-surfaces":{material:"svg",rule:"",audit:"surfaces"}
 });
 const $=x=>document.getElementById(x);
 const stage=$("stage"),mode=$("mode"),start=$("start"),status=$("status"),observation=$("observation"),copy=$("copy"),report=$("report");
@@ -101,7 +105,7 @@ function load(){
   start.disabled=true;copy.disabled=true;observation.value="";report.textContent="";
   const config=MODES[mode.value];
   status.textContent="載入隔離模式…";
-  stage.src=new URL("../../?material="+config.material+"&instant="+fixedInstant+"&flingAudit="+encodeURIComponent(mode.value),location.href).href;
+  stage.src=new URL("../../?material="+config.material+"&instant="+fixedInstant+"&flingAudit="+encodeURIComponent(mode.value)+(config.audit?"&motionTransitionAudit="+config.audit:""),location.href).href;
 }
 stage.addEventListener("load",()=>{
   const doc=stage.contentDocument,win=stage.contentWindow,svg=doc?.getElementById("kinetic-wheel");
@@ -126,6 +130,7 @@ start.addEventListener("click",async()=>{
   if(!svg)return;
   recording=true;start.disabled=true;copy.disabled=true;
   const frames=[],data={pointerDown:0,pointerMove:0,coalescedSamples:0,pointerUp:0,coastingFrames:0,activeDragFrames:0};
+  let activeStyles=null;
   let prior=null,rafId=null,completed=false;
   const onDown=()=>{data.pointerDown++;};
   const onMove=e=>{data.pointerMove++;data.coalescedSamples+=e.getCoalescedEvents?.().length||1;};
@@ -141,6 +146,8 @@ start.addEventListener("click",async()=>{
     prior=timestamp;
     if(svg.dataset.activeRing)data.activeDragFrames++;
     if(svg.dataset.coastingRing)data.coastingFrames++;
+    if(!activeStyles && (svg.dataset.activeRing || svg.dataset.coastingRing))
+      activeStyles=computedStyleEvidence(doc);
     if(performance.now()-started<durationMs)rafId=win.requestAnimationFrame(frame);
     else finish();
   };
@@ -159,7 +166,9 @@ start.addEventListener("click",async()=>{
       viewportCss:[win.innerWidth,win.innerHeight],
       devicePixelRatio:win.devicePixelRatio,
       browser:navigator.userAgent,
-      effectiveStyles:computedStyleEvidence(doc),
+      motionTransitionAudit:svg.dataset.motionTransitionAudit||"off",
+      activeStyles,
+      restingStyles:computedStyleEvidence(doc),
       frameTiming:summarize(frames),
       drag:data,
       visualObservation:observation.value,
