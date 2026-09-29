@@ -75,8 +75,8 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(compare,/panel\.dataset\.readoutMode = singleDate \? "single" : "comparison"/);
   assert.ok(layout.includes('data-readout-mode="single"') &&
     layout.includes('research-cycle-inline-row[data-side="base"] {display:none}'));
-  assert.match(layout,/height:clamp\\(315px,calc\\(70vw \\+ 85px\\),385px\\)/);
-  assert.match(layout,/top:74px;[\\s\\S]*?height:calc\\(100% - 74px\\)/);
+  assert.match(layout,/height:clamp\(315px,calc\(70vw \+ 85px\),385px\)/);
+  assert.match(layout,/top:74px;[\s\S]*?height:calc\(100% - 74px\)/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
 });
 
