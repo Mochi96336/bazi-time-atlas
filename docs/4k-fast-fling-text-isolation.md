@@ -38,6 +38,20 @@ First reproduce A (unchanged baseline) and F on the same 4K display; then test H
 
 If I is clean, prioritize removing rapid `fill`/`opacity` transitions from specific `.cycle-sector` and scale-related SVG nodes only during motion; do not remove CSS animation indiscriminately. If H is clean, narrow the scope to rotating major tick drop shadows, static guide shadows and cursor shadow/hover brightness separately. If H and I are only partly effective but K approximates F, consider a bounded motion-only combination. Confirm that resting glyphs, material reflections and active boundaries remain visually equivalent and that 4K hard flings—not just CI screenshots—stop blacking out.
 
+## Phase-5: opt-in, movement-only transition guard
+
+Native 4K A/B: disabling **transition only (I)** helped substantially more than disabling only **SVG filters (H)**. I reduced flashing but did **not** yet prove a full cure. B/C separately removing either static or active labels did poorly, so do not delete labels or permanently remove material.
+
+There is now a **default-inert production implementation** controlled by two exact URL parameters:
+
+- `?material=svg&motionTransitionAudit=all`: when `#kinetic-wheel` has `data-active-ring` or `data-coasting-ring`, disable every SVG descendant's CSS transitions. This replicates I only **during real manual drag and inertia**; all text, SVG filters, animated properties and resting transition styles remain.
+- `?material=svg&motionTransitionAudit=surfaces`: use the same temporal guard but only on transitioning SVG sectors, tick marks and labels, instead of all SVG children. This is the narrower potential implementation.
+- No parameter (or any invalid value) preserves existing production behavior identically; default rendering has not been modified.
+
+Standalone `scripts/fixtures/4k-fling-text-isolation.html` has **M** and **N** modes matching the two URL experiments, in addition to original **A** and validated **I**. It records an `activeStyles` computed-style snapshot as soon as the first actual `data-active-ring` or `data-coasting-ring` is observed, and the restored `restingStyles` at the end; it does not falsely claim its rAF cadence measures black GPU frames.
+
+Repeat A and I as controls in native accelerated 4K maximized Chrome, then M and N on the same ring and similar 3–5 strong manual flings. Specifically report whether M and N behave like I, whether there is still any **page** blackout, and whether the transition returns when the wheel stops. Do not enable this permanently until native 4K data supports it. If M reproduces I but N does not, narrow selector scopes incrementally or investigate other implicit SVG transitions. If both still flash, investigate combined transition+filter and Chrome compositor rather than shipping a cosmetic sacrifice. If M produces a new blackout at fling start/stop, prefer a different lifecycle than toggling the style on the whole SVG tree.
+
 ## Interpretation / proof gates
 
 - A flashes, B consistently clean: fixed glyph rasterization is implicated.
