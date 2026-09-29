@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4K 全頁黑屏｜分層隔離診斷</title>
+<style>
+  html, body { margin:0; height:100%; width:100%; overflow:hidden; background:#0a0d13; color:#ecebe9; font:12px system-ui,sans-serif; }
+  #stage { position:fixed; inset:0; border:0; width:100%; height:100%; background:#0a0d13; }
+  #panel { position:fixed; z-index:10; top:12px; right:12px; width:min(355px,calc(100vw - 24px));
+    box-sizing:border-box; background:rgba(17,24,33,.97); border:1px solid #69717b; padding:12px; }
+  #panel > * { display:block; margin:0 0 9px; }
+  select,button { min-height:36px; border:1px solid #7a8086; background:#192431; color:#f0ebe1; padding:5px; width:100%; }
+  button:disabled { opacity:.45; } button:focus-visible,select:focus-visible { outline:2px solid #d9c289; }
+  pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:23vh; overflow:auto; color:#c0cbd1; font-size:10px; }
+  small { color:#b5bdc7; line-height:1.45; }
+</style>
+</head>
+<body>
+<iframe id="stage" title="4K isolated render surface"></iframe>
+<aside id="panel" aria-label="分層診斷控制">
+  <strong>4K 全頁黑屏｜瀏覽器與網站分層測試</strong>
+  <label>隔離模式
+    <select id="mode">
+      <option value="blank">1. 純色靜態背景：完全沒有網站程式</option>
+      <option value="css">2. 純 CSS 動畫：完全沒有 SVG / WebGL</option>
+      <option value="static-svg">3. 正式網站 SVG：停止播放</option>
+      <option value="live-svg">4. 正式網站 SVG：正常轉動</option>
+      <option value="no-filter">5. 正式網站：轉動但停用全部濾鏡與陰影</option>
+      <option value="no-wheel">6. 正式網站：保留播放運算，隱藏轉盤繪製</option>
+      <option value="webgl">7. 正式網站：完整 WebGL + SVG</option>
+    </select>
+  </label>
+  <button id="measure" disabled>播放／測量 150 畫格</button>
+  <label>肉眼觀察
+    <select id="observed">
+      <option value="not-recorded">選擇觀察結果</option>
+      <option value="none">沒有閃爍</option>
+      <option value="content">只有轉盤或網站內容變黑，右上角診斷面板正常</option>
+      <option value="full-browser">連右上角診斷面板也變黑</option>
+      <option value="display">連 Chrome 工具列／其他視窗或整個螢幕都變黑</option>
+    </select>
+  </label>
+  <button id="copy" disabled>複製本次結果</button>
+  <small id="status" aria-live="polite">開啟診斷畫面…</small>
+  <pre id="report" aria-label="診斷結果"></pre>
+  <small>請維持真正 4K 螢幕解析度。量測只能記錄畫格間隔，無法直接偵測 GPU 合成造成的黑屏，肉眼觀察必須另外記錄。</small>
+</aside>
+<script>
+  const CASES = Object.freeze({
+    blank:{kind:"minimal",animated:false,play:false},
+    css:{kind:"minimal",animated:true,play:false},
+    "static-svg":{kind:"app",play:false},
+    "live-svg":{kind:"app",play:true},
+    "no-filter":{kind:"app",play:true,stripFilters:true},
+    "no-wheel":{kind:"app",play:true,hideWheel:true},
+    webgl:{kind:"app",play:true,webgl:true}
+  });
+  const $=id=>document.getElementById(id);
+  const stage=$("stage"),mode=$("mode"),measure=$("measure"),status=$("status");
+  const observed=$("observed"),copy=$("copy"),report=$("report");
+  let loaded=false,measuring=false,last=null;
+  const STABLE_INSTANT="2026-09-13T23%3A43%3A42.000Z";
+  const minHTML=animated=>`<!doctype html><html lang="zh-Hant"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0d13}
+    #surface{height:100%;width:100%;background:linear-gradient(180deg,#0d121b,#070a10)}
+    #shape{position:absolute;left:30%;top:32%;width:40%;height:38%;
+      background:linear-gradient(125deg,#202e3a,#4d5560);border-radius:50%;
+      opacity:.7;animation:move 3s linear infinite;animation-play-state:${animated?"running":"paused"}}
+    @keyframes move{from{transform:translate3d(-10px,0,0) rotate(0deg)}to{transform:translate3d(10px,0,0) rotate(360deg)}}
+    </style></head><body><div id="surface"></div>${animated?'<div id="shape"></div>':''}</body></html>`;
+  const summarize=values=>{
+    if(!values.length)return {samples:0};
+    const x=[...values].sort((a,b)=>a-b);
+    const q=p=>Number(x[Math.floor((x.length-1)*p)].toFixed(2));
+    return {samples:x.length,medianMs:q(.5),p95Ms:q(.95),p99Ms:q(.99),over33ms:x.filter(v=>v>33.34).length,over50ms:x.filter(v=>v>50).length};
+  };
+  const ready=()=>{loaded=true;measure.disabled=false;status.textContent="就緒：肉眼觀察並按下量測";};
+  function injectIsolation(doc,current) {
+    if (!current.stripFilters&&!current.hideWheel)return;
+    const style=doc.createElement("style");
+    style.id="blackout-isolation-styles";
+    style.textContent=current.stripFilters
+      ? "*{filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}"
+      : "#kinetic-wheel,#material-wheel-layer{visibility:hidden!important}";
+    doc.head.appendChild(style);
+  }
+  function loadMode() {
+    loaded=false;measuring=false;last=null;
+    measure.disabled=true;copy.disabled=true;report.textContent="";observed.value="not-recorded";
+    const key=mode.value;
+    const current=CASES[key];
+    status.textContent="載入："+key;
+    if(current.kind==="minimal") {
+      stage.removeAttribute("src");
+      stage.srcdoc=minHTML(current.animated);
+    } else {
+      stage.removeAttribute("srcdoc");
+      stage.src=new URL("../../?material="+(current.webgl?"roughness":"svg")+
+        "&instant="+STABLE_INSTANT,location.href).href;
+    }
+  }
+  stage.addEventListener("load",()=>{
+    const current=CASES[mode.value];
+    if(current.kind==="app") {
+      const doc=stage.contentDocument;
+      if(!doc?.getElementById("kinetic-wheel")||!doc.getElementById("play-button")) {
+        status.textContent="同源網站載入失敗";return;
+      }
+      injectIsolation(doc,current);
+    }
+    ready();
+  });
+  mode.addEventListener("change",loadMode);
+  observed.addEventListener("change",()=>{
+    if(last) {last.observation=observed.value;report.textContent=JSON.stringify(last,null,2);}
+  });
+  measure.addEventListener("click",async()=>{
+    if(!loaded||measuring)return;
+    measuring=true;measure.disabled=true;
+    const key=mode.value,current=CASES[key],win=stage.contentWindow,doc=stage.contentDocument;
+    const button=current.play?doc.getElementById("play-button"):null;
+    const intervals=[];
+    let prior=null,elapsed=0;
+    status.textContent="量測中…";
+    try {
+      if(button)button.click();
+      await new Promise(resolve=>{
+        const step=ts=>{
+          if(prior!==null)intervals.push(ts-prior);
+          prior=ts;elapsed++;
+          if(elapsed<=150)win.requestAnimationFrame(step);
+          else resolve();
+        };
+        win.requestAnimationFrame(step);
+      });
+      last={
+        mode:key,viewportCss:[win.innerWidth,win.innerHeight],
+        devicePixelRatio:win.devicePixelRatio,
+        browser:navigator.userAgent,
+        playbackStarted:Boolean(button),
+        timing:summarize(intervals),
+        observation:observed.value,
+        caveat:"rAF timing cannot detect full-screen compositor blackouts; note whether the overlay and browser toolbar also turn black."
+      };
+      report.textContent=JSON.stringify(last,null,2);
+      copy.disabled=false;
+      status.textContent="已完成；請填入肉眼觀察後複製結果";
+    }catch(e){status.textContent="量測中斷："+String(e);}
+    finally{if(button&&doc?.contains(button)&&button.getAttribute("aria-pressed")==="true")button.click();measuring=false;measure.disabled=false;}
+  });
+  copy.addEventListener("click",()=>{
+    if(!last)return;
+    last.observation=observed.value;
+    void navigator.clipboard.writeText(JSON.stringify(last,null,2)).then(
+      ()=>{status.textContent="結果已複製";},
+      ()=>{status.textContent="複製失敗，可直接選取下方結果文字";}
+    );
+  });
+  loadMode();
+</script>
+</body>
+</html>
