@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4K rotation — isolated material diagnostic</title>
+<style>
+  html,body { margin:0; width:100%; height:100%; background:#080b10; color:#e9ebe9; font:12px system-ui,sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  #panel { position:fixed; z-index:100; top:8px; left:8px; width:min(350px,calc(100vw - 16px)); padding:10px; background:#0b1019ec; border:1px solid #404a52; }
+  #panel>* { display:block; margin:5px 0; }
+  a { color:#d2bd90; }
+  button, select { min-height:38px; color:#ebe5d8; background:#17202a; border:1px solid #59616b; padding:6px; }
+  pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:30vh; overflow:auto; font-size:10px; }
+</style>
+</head>
+<body>
+<iframe id="stage" title="Actual responsive bazi-time-atlas under motion"></iframe>
+<section id="panel" aria-label="4K flicker isolated diagnostic">
+  <strong>4K 轉動閃爍｜同一套正式轉盤</strong>
+  <label>測試組別 <select id="mode">
+    <option value="default">原始 WebGL（預設）</option>
+    <option value="svg">純 SVG（完全不用 WebGL）</option>
+    <option value="fallback">WebGL 故障備援 SVG</option>
+    <option value="high">WebGL 高效能 GPU 偏好</option>
+    <option value="preserve">WebGL 保留繪製緩衝區</option>
+    <option value="half">WebGL 材質解析度減半</option>
+  </select></label>
+  <button id="start" type="button" disabled>播放並量測 120 畫格</button>
+  <button id="copy" type="button" disabled>複製結果</button>
+  <small id="status" aria-live="polite">載入中…</small>
+  <pre id="report" aria-label="本機測試結果"></pre>
+</section>
+<script>
+  const modes = Object.freeze({
+    default:"?material=roughness&renderAudit=1",
+    svg:"?material=svg&renderAudit=1",
+    fallback:"?material=roughness&materialWebgl=off&renderAudit=1",
+    high:"?material=roughness&renderAudit=1&materialGpu=high",
+    preserve:"?material=roughness&renderAudit=1&materialBuffer=preserve",
+    half:"?material=roughness&renderAudit=1&materialScale=0.5"
+  });
+  const stage=document.querySelector("#stage");
+  const mode=document.querySelector("#mode");
+  const start=document.querySelector("#start");
+  const copy=document.querySelector("#copy");
+  const status=document.querySelector("#status");
+  const report=document.querySelector("#report");
+  let ready=false;
+  let result=null;
+  const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const summarize=samples=>{
+    const sorted=[...samples].sort((a,b)=>a-b);
+    const quantile=p=>sorted[Math.min(sorted.length-1,Math.floor((sorted.length-1)*p))]??null;
+    return {
+      samples:sorted.length,medianMs:quantile(.5)?.toFixed(2)??null,
+      p95Ms:quantile(.95)?.toFixed(2)??null,
+      p99Ms:quantile(.99)?.toFixed(2)??null,
+      framesOver33ms:sorted.filter(x=>x>33.34).length,
+      framesOver50ms:sorted.filter(x=>x>50).length
+    };
+  };
+  async function load() {
+    ready=false;start.disabled=true;copy.disabled=true;result=null;report.textContent="";
+    const key=mode.value in modes?mode.value:"default";
+    status.textContent="啟動 "+key+"…";
+    const url=new URL("../../"+modes[key]+"&instant=2026-09-13T23%3A43%3A42.000Z",location.href);
+    stage.src=url.href;
+    for(let retry=0;retry<90;retry++) {
+      await sleep(120);
+      const doc=stage.contentDocument,win=stage.contentWindow;
+      if(!doc?.querySelector("#kinetic-instrument")?.dataset.selectedInstantMs)continue;
+      if(!win.__atlasRenderAudit)continue;
+      const audit=win.__atlasRenderAudit;
+      if (key==="default"||key==="high"||key==="preserve"||key==="half") {
+        if(!audit.frameCount&&!audit.fallback)continue;
+      }
+      ready=true;start.disabled=false;
+      status.textContent="已載入；視窗應設為實際 4K，確定後按量測";
+      return;
+    }
+    status.textContent="初始化失敗；請檢查頁面是否可以同源載入與 WebGL 是否啟用";
+  }
+  mode.addEventListener("change",()=>void load());
+  start.addEventListener("click",async()=>{
+    if(!ready)return;
+    ready=false;start.disabled=true;copy.disabled=true;
+    const win=stage.contentWindow;
+    const doc=stage.contentDocument;
+    const button=doc.querySelector("#play-button");
+    status.textContent="量測中（不需捲動頁面）…";
+    const intervals=[];
+    let previous=null;
+    let n=0;
+    const samples=120;
+    const before=win.__atlasRenderAudit.snapshot();
+    const started=performance.now();
+    button.click();
+    await new Promise(resolve=>{
+      const step=t=>{
+        if(previous!==null)intervals.push(t-previous);
+        previous=t;
+        n++;
+        if(n<=samples)win.requestAnimationFrame(step);
+        else resolve();
+      };
+      win.requestAnimationFrame(step);
+    });
+    button.click();
+    const after=win.__atlasRenderAudit.snapshot();
+    const samplesCpu=after.drawCpuMs;
+    const drawDeltas=after.drawGapMs;
+    const shaderActive=doc.querySelector("#kinetic-instrument")?.dataset.materialPrototype==="roughness";
+    result={
+      mode:mode.value,
+      frameSizeCss:[win.innerWidth,win.innerHeight],
+      actualDevicePixelRatio:win.devicePixelRatio,
+      elapsedWallMs:Number((performance.now()-started).toFixed(1)),
+      frameTiming:summarize(intervals),
+      materialDrawSubmissionCpu:summarize(samplesCpu),
+      materialDrawGap:summarize(drawDeltas),
+      materialDrawsDuringTest:after.frameCount-before.frameCount,
+      shaderActive,
+      materialFallback:doc.querySelector("#kinetic-instrument")?.dataset.materialPrototypeFallback??null,
+      material:after,
+      caution:"Frame times reveal jank, not visual flicker. CPU submission time is NOT actual GPU execution time. Hardware/system/browser should be compared on the same display and browser."
+    };
+    report.textContent=JSON.stringify(result,null,2);
+    status.textContent="量測完成。請觀察是否真的有肉眼閃爍；切換另一組別再測。";
+    ready=true;start.disabled=false;copy.disabled=false;
+  });
+  copy.addEventListener("click",()=>{if(result)void navigator.clipboard.writeText(JSON.stringify(result,null,2));});
+  void load();
+</script>
+</body>
+</html>
