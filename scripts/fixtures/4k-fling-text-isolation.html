@@ -28,8 +28,13 @@ pre{font-size:10px;max-height:16vh;overflow:auto;white-space:pre-wrap;overflow-w
       <option value="active-text-off">C｜只隱藏移動的讀取文字</option>
       <option value="all-text-off">D｜隱藏轉盤全部 SVG 文字</option>
       <option value="motion-off">E｜只隱藏運動軌跡</option>
-      <option value="effects-off">F｜保留文字，關閉 SVG filter 與動畫過渡</option>
+      <option value="effects-off">F｜保留文字，關閉全部 SVG 特效（已驗證參考）</option>
       <option value="webgl-text-off">G｜WebGL 保留，隱藏全部 SVG 文字</option>
+      <option value="filter-only">H｜保留文字，只關閉 SVG filter</option>
+      <option value="transition-only">I｜保留文字，只關閉 SVG transition</option>
+      <option value="animation-only">J｜保留文字，只關閉 SVG animation</option>
+      <option value="filter-transition">K｜只關閉 SVG filter＋transition</option>
+      <option value="motion-scoped-effects">L｜只在拖曳／慣性期間關閉全部 SVG 特效</option>
     </select>
   </label>
   <button id="start" disabled>開始記錄，手動快甩 10 秒</button>
@@ -46,6 +51,7 @@ pre{font-size:10px;max-height:16vh;overflow:auto;white-space:pre-wrap;overflow-w
   <button id="copy" disabled>複製這組結果</button>
   <small id="status" aria-live="polite">初始化…</small>
   <pre id="report" aria-label="本次快甩指標"></pre>
+  <small>H / I 分開拆解先前效果良好的 F；J 用來排除 animation，K 檢查兩者是否需同時關閉，L 驗證能否只在拖曳與慣性期間啟用。測試期間必須真的用力甩動。</small>
   <small>面板在 iframe 外。記錄滑鼠事件與畫格間隔，無法自動辨識 GPU 黑畫面；請以肉眼回報為準。</small>
 </aside>
 <script>
@@ -56,12 +62,33 @@ const MODES=Object.freeze({
   "all-text-off":{material:"svg",rule:"#kinetic-wheel text{display:none!important}"},
   "motion-off":{material:"svg",rule:"#kinetic-wheel .motion-trace{display:none!important}"},
   "effects-off":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{filter:none!important;transition:none!important;animation:none!important}"},
-  "webgl-text-off":{material:"roughness",rule:"#kinetic-wheel text{display:none!important}"}
+  "webgl-text-off":{material:"roughness",rule:"#kinetic-wheel text{display:none!important}"},
+  "filter-only":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{filter:none!important}"},
+  "transition-only":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{transition:none!important}"},
+  "animation-only":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{animation:none!important}"},
+  "filter-transition":{material:"svg",rule:"#kinetic-wheel,#kinetic-wheel *{filter:none!important;transition:none!important}"},
+  "motion-scoped-effects":{material:"svg",rule:"#kinetic-wheel:is([data-active-ring],[data-coasting-ring]),#kinetic-wheel:is([data-active-ring],[data-coasting-ring]) *{filter:none!important;transition:none!important;animation:none!important}"}
 });
 const $=x=>document.getElementById(x);
 const stage=$("stage"),mode=$("mode"),start=$("start"),status=$("status"),observation=$("observation"),copy=$("copy"),report=$("report");
 let ready=false,recording=false,last=null,generation=0;
 const fixedInstant="2026-09-13T23%3A43%3A42.000Z";
+function computedStyleEvidence(doc) {
+  const selectors={
+    majorTick:"#year-track .ring-tick.major",
+    fixedGuide:"#guide-layer .guide-arc:not(.annual-subdivide)",
+    cursor:"#cursor-layer .cursor-line",
+    sector:"#year-track .cycle-sector",
+    staticGlyph:"#year-track .cycle-label",
+    activeGlyph:"#year-track .active-cycle-label"
+  };
+  return Object.fromEntries(Object.entries(selectors).map(([name,selector])=>{
+    const node=doc.querySelector(selector);
+    if(!node)return [name,null];
+    const value=doc.defaultView.getComputedStyle(node);
+    return [name,{filter:value.filter,transition:value.transition,animation:value.animation}];
+  }));
+}
 const summarize=values=>{
   if(!values.length)return {samples:0};
   const sorted=[...values].sort((a,b)=>a-b);
@@ -132,6 +159,7 @@ start.addEventListener("click",async()=>{
       viewportCss:[win.innerWidth,win.innerHeight],
       devicePixelRatio:win.devicePixelRatio,
       browser:navigator.userAgent,
+      effectiveStyles:computedStyleEvidence(doc),
       frameTiming:summarize(frames),
       drag:data,
       visualObservation:observation.value,
