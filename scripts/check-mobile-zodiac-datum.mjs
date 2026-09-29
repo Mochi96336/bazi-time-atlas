@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { MATERIAL_FIXED_INSTANT } from "./material-visual-contract.mjs";
 
-// Exercise the real child iframe at 390 CSS px, not Chromium's 500px minimum outer window.
+// Preserve the 390px proof entrypoint, but validate the canonical wheel
+// identity and the single-row mobile controller instead of a duplicate caption.
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 function browserPath() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -9,11 +10,11 @@ function browserPath() {
     const probe = spawnSync("sh", ["-lc", "command -v " + candidate], { encoding:"utf8" });
     if (probe.status === 0 && probe.stdout.trim()) return probe.stdout.trim();
   }
-  throw new Error("No Chromium found for 390px mobile Zodiac runtime proof");
+  throw new Error("No Chromium for 390px mobile rail proof");
 }
-const requestedTarget = "../../?material=roughness&instant=" + MATERIAL_FIXED_INSTANT;
 const fixture = "scripts/fixtures/mobile-390.html?" + new URLSearchParams({
-  target:requestedTarget, height:"844", exerciseZodiac:"1"
+  target:"../../?material=roughness&instant=" + MATERIAL_FIXED_INSTANT,
+  height:"844", exerciseZodiac:"1"
 }).toString();
 const url = new URL(fixture, baseURL).href;
 const r = spawnSync(browserPath(), [
@@ -24,22 +25,17 @@ const r = spawnSync(browserPath(), [
 ], { encoding:"utf8", timeout:65_000, killSignal:"SIGKILL" });
 if (r.status !== 0) {
   process.stderr.write(r.stderr ?? "");
-  throw new Error("390px mobile Zodiac runtime browser failed");
+  throw new Error("390px mobile one-row browser failed");
 }
-function attr(name) {
-  return r.stdout.match(new RegExp("data-" + name + '="([^"]*)"'))?.[1] ?? "";
-}
+const attr = name => r.stdout.match(new RegExp("data-" + name + '="([^"]*)"'))?.[1] ?? "";
 const required = [
-  "zodiac-initial-matches", "zodiac-initial-visible", "zodiac-dirty-hidden",
-  "zodiac-apply-restored", "zodiac-classification-hidden", "zodiac-analysis-hidden"
+  "wheel-zodiac-identity", "single-row-initial", "dirty-swaps-action",
+  "restore-one-row", "classification-one-row", "analysis-one-row"
 ];
-if (attr("ready") !== "true" || attr("inner-width") !== "390"
-  || attr("media-matched") !== "true") {
-  throw new Error("Mobile Zodiac fixture did not render at genuine 390px width");
+if (attr("ready") !== "true" || attr("inner-width") !== "390" ||
+    attr("media-matched") !== "true") {
+  throw new Error("Mobile rail fixture did not render at genuine 390px width");
 }
 const missing = required.filter(name => attr(name) !== "true");
-if (missing.length) throw new Error("Mobile Zodiac runtime state failed: " + missing.join(", "));
-if (Math.abs(Number.parseFloat(attr("zodiac-font-size")) - 12) > 0.25) {
-  throw new Error("Mobile Zodiac caption lost its 12px screen-space text sizing");
-}
-console.log("[mobile-zodiac] 390px selected-label, dirty, apply, Classification and Analysis contracts passed");
+if (missing.length) throw new Error("Mobile single-row state failed: " + missing.join(", "));
+console.log("[mobile-rail] 390px wheel Zodiac authority + one-row idle/dirty/classification/Analysis passed");
