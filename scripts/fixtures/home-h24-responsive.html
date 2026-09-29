@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>H2.4 responsive hierarchy audit</title>
+<title>H2.4 single-row responsive hierarchy audit</title>
 <style>
-  html, body { margin: 0; width: 600px; min-height: 100%; overflow: hidden; background: #0a0d13; }
-  iframe { display: block; border: 0; background: #0a0d13; }
-  output { display: none; }
+  html, body { margin:0; width:600px; min-height:100%; overflow:hidden; background:#0a0d13; }
+  iframe { display:block; border:0; background:#0a0d13; }
+  output { display:none; }
 </style>
 </head>
 <body>
@@ -21,8 +21,8 @@
   const target = params.get("target") || "../../?instant=2026-09-13T23%3A43%3A42.000Z";
   const stage = document.querySelector("#stage");
   const proof = document.querySelector("#proof");
-  if (!Number.isInteger(width) || width < 320 || width > 481
-    || !Number.isInteger(height) || height < 600 || height > 1400) {
+  if (!Number.isInteger(width) || width < 320 || width > 481 ||
+      !Number.isInteger(height) || height < 600 || height > 1400) {
     proof.dataset.error = "invalid-responsive-fixture-viewport";
     throw new Error("Invalid H2.4 fixture viewport");
   }
@@ -33,115 +33,127 @@
   stage.src = new URL(target, location.href).href;
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const visible = (win, el) => Boolean(el && !el.hidden &&
-    win.getComputedStyle(el).display !== "none" &&
-    win.getComputedStyle(el).visibility !== "hidden");
-  const bounds = el => {
-    const r = el.getBoundingClientRect();
-    return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width };
+  const visible = (win, node) => Boolean(node && !node.hidden &&
+    win.getComputedStyle(node).display !== "none" &&
+    win.getComputedStyle(node).visibility !== "hidden");
+  const bounds = node => {
+    const r = node.getBoundingClientRect();
+    return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, width:r.width, height:r.height };
   };
+  const sameRow = (a, b) => Math.abs(
+    (bounds(a).top + bounds(a).bottom) / 2 - (bounds(b).top + bounds(b).bottom) / 2
+  ) <= 5;
+  const noExtraRow = dock => bounds(dock).height <= 80;
 
   async function collectAudit() {
     if (!runAudit) return;
     const win = stage.contentWindow, doc = stage.contentDocument;
-    let instrument, dock, input, label, timestamp;
-    for (let retries = 0; retries < 60; retries += 1) {
+    let instrument, dock, input, timestamp;
+    for (let retries=0; retries<60; retries++) {
       instrument = doc?.querySelector("#kinetic-instrument");
       dock = doc?.querySelector("#mobile-time-dock");
       input = doc?.querySelector("#mobile-instant-input");
-      label = doc?.querySelector("#mobile-zodiac-readout");
       timestamp = doc?.querySelector(".instrument-readout");
       if (instrument?.dataset.selectedInstantMs && instrument?.dataset.zodiac &&
-        (width > 480 || (input?.value && visible(win, label)))) break;
+          (width > 480 || input?.value)) break;
       await sleep(75);
     }
-    if (!instrument?.dataset.selectedInstantMs || !instrument?.dataset.zodiac || !dock || !label) {
+    if (!instrument?.dataset.selectedInstantMs || !instrument?.dataset.zodiac || !dock || !input) {
       proof.dataset.error = "selected-instant-did-not-initialize";
       return;
     }
     const mobile = width <= 480;
     proof.dataset.innerWidth = String(win.innerWidth);
     proof.dataset.mobile = String(win.matchMedia("(max-width: 480px)").matches);
-    proof.dataset.bodyOverflow = String(Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth) > width + 2);
-    proof.dataset.initialInstant = instrument.dataset.selectedInstantMs;
-    proof.dataset.initialZodiac = instrument.dataset.zodiac;
+    proof.dataset.bodyOverflow = String(
+      Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth) > width + 2
+    );
     if (!mobile) {
-      proof.dataset.desktopDockHidden = String(!visible(win, dock));
-      proof.dataset.desktopReadoutVisible = String(visible(win, timestamp));
+      proof.dataset.desktopDockHidden = String(!visible(win,dock));
+      proof.dataset.desktopReadoutVisible = String(visible(win,timestamp));
       proof.dataset.ready = "true";
       return;
     }
 
-    const nowButton = doc.querySelector("#mobile-now-button");
-    if (!nowButton) {
-      proof.dataset.error = "selected-time-now-missing";
+    const apply = doc.querySelector("#mobile-time-apply");
+    const now = doc.querySelector("#mobile-now-button");
+    const status = doc.querySelector("#mobile-time-status");
+    const wheelZodiac = doc.querySelector("#state-zodiac");
+    if (!apply || !now || !status || !wheelZodiac) {
+      proof.dataset.error = "one-row-owner-missing";
       return;
     }
-    const rDock = bounds(dock), rInput = bounds(input), rCaption = bounds(label), rNow = bounds(nowButton);
-    proof.dataset.initialMatches = String(label.textContent === "黃道 · " + instrument.dataset.zodiac);
-    proof.dataset.initialVisible = String(visible(win, label));
-    proof.dataset.fontPx = win.getComputedStyle(label).fontSize;
-    proof.dataset.railBounds = [rDock.left, rDock.right].map(v => v.toFixed(2)).join(",");
-    proof.dataset.inputBounds = [rInput.left, rInput.right].map(v => v.toFixed(2)).join(",");
-    proof.dataset.captionBounds = [rCaption.left, rCaption.right].map(v => v.toFixed(2)).join(",");
-    proof.dataset.nowBounds = [rNow.left, rNow.right, rNow.top, rNow.bottom].map(v => v.toFixed(2)).join(",");
-    // Input and Now form the control row. Zodiac is intentionally the next
-    // derived-context row and must not masquerade as part of the control.
-    proof.dataset.sameRow = String(Math.abs(
-      (rInput.top + rInput.bottom) / 2 - (rNow.top + rNow.bottom) / 2
-    ) <= 5);
-    proof.dataset.nowVisible = String(visible(win, nowButton));
-    proof.dataset.nowFits = String(rNow.width >= 42 && rNow.bottom - rNow.top >= 42 &&
-      rNow.left >= rInput.right + 2 && rNow.left - rInput.right <= 16 &&
-      rNow.right <= Math.min(width, rDock.right) + 1);
-    proof.dataset.nowAligned = String(Math.abs(
-      (rNow.top + rNow.bottom) / 2 - (rInput.top + rInput.bottom) / 2
-    ) <= 5);
-    proof.dataset.noOverlap = String(rNow.left >= rInput.right + 2 &&
-      rCaption.top >= Math.max(rInput.bottom, rNow.bottom) - 1);
-    proof.dataset.notClipped = String(rCaption.right <= Math.min(width, rDock.right) + 1 &&
-      rCaption.left >= Math.max(0, rDock.left) - 1 &&
-      label.scrollWidth <= label.clientWidth + 1);
-    proof.dataset.inputUsable = String(rInput.width >= 130);
+    const d = bounds(dock), a = bounds(input), n = bounds(now);
+    const timeX = a.left;
+    proof.dataset.railBounds = [d.left,d.right,d.top,d.bottom].map(x=>x.toFixed(2)).join(",");
+    proof.dataset.inputBounds = [a.left,a.right,a.top,a.bottom].map(x=>x.toFixed(2)).join(",");
+    proof.dataset.nowBounds = [n.left,n.right,n.top,n.bottom].map(x=>x.toFixed(2)).join(",");
+    proof.dataset.nowVisible = String(visible(win,now) && !visible(win,apply));
+    proof.dataset.sameRow = String(sameRow(input,now));
+    proof.dataset.nowFits = String(n.width>=42 && n.height>=42 &&
+      n.left>=a.right+2 && n.left-a.right<=16 && n.right<=Math.min(width,d.right)+1);
+    proof.dataset.noOverlap = String(n.left>=a.right+2 && noExtraRow(dock));
+    proof.dataset.notClipped = String(a.left>=Math.max(0,d.left)-1 &&
+      n.right<=Math.min(width,d.right)+1 && input.scrollWidth<=input.clientWidth+1);
+    proof.dataset.inputUsable = String(a.width>=130);
+    proof.dataset.statusOffscreen = String(
+      bounds(status).height<=1 && bounds(status).width<=1
+    );
+    proof.dataset.noDuplicateZodiac = String(
+      !doc.querySelector("#mobile-zodiac-readout") &&
+      wheelZodiac.textContent.trim()===instrument.dataset.zodiac
+    );
 
-    // A dirty, unapplied editor must not display an apparently applied Zodiac.
-    input.dispatchEvent(new win.Event("input", { bubbles: true }));
-    proof.dataset.dirtyHidden = String(dock.dataset.dirty === "true" && !visible(win, label));
-    doc.querySelector("#mobile-time-apply")?.click();
+    // A dirty edit owns the SAME action cell; Now and Apply are never peers.
+    input.dispatchEvent(new win.Event("input",{bubbles:true}));
+    proof.dataset.dirtySwap = String(dock.dataset.dirty==="true" &&
+      !visible(win,now) && visible(win,apply) && sameRow(input,apply) &&
+      Math.abs(bounds(input).left-timeX)<=1 && noExtraRow(dock));
+    apply.click();
     await sleep(60);
-    proof.dataset.reapplied = String(dock.dataset.dirty === "false" &&
-      visible(win, label) && label.textContent === "黃道 · " + instrument.dataset.zodiac);
+    proof.dataset.reapplied = String(dock.dataset.dirty==="false" &&
+      visible(win,now) && !visible(win,apply) && sameRow(input,now));
 
-    // Cross an actual Zodiac boundary through the ONLY selected-instant command.
-    // Do not infer the expected sign by name or by an independent ephemeris.
+    // Zodiac changes via the canonical selected-instant command, not a
+    // redundant second mobile caption or independently inferred date.
     const previous = instrument.dataset.zodiac;
     const future = Date.parse("2026-11-15T07:43:42.000Z");
-    instrument.dispatchEvent(new win.CustomEvent("atlas:set-selected-instant", {
-      detail: { instantMs: future, source: "h24-responsive-browser-proof" }
+    instrument.dispatchEvent(new win.CustomEvent("atlas:set-selected-instant",{
+      detail:{instantMs:future,source:"h24-responsive-browser-proof"}
     }));
-    for (let wait = 0; wait < 20; wait += 1) {
-      if (instrument.dataset.selectedInstantMs === String(future)
-        && label.textContent === "黃道 · " + instrument.dataset.zodiac) break;
+    for(let wait=0;wait<20;wait++) {
+      if(instrument.dataset.selectedInstantMs===String(future) &&
+          wheelZodiac.textContent.trim()===instrument.dataset.zodiac &&
+          input.value.includes("2026-11-15")) break;
       await sleep(55);
     }
-    proof.dataset.futureSelected = String(instrument.dataset.selectedInstantMs === String(future));
-    proof.dataset.futureZodiacChanged = String(instrument.dataset.zodiac !== previous);
-    proof.dataset.futureCaptionSynced = String(label.textContent === "黃道 · " + instrument.dataset.zodiac);
-    proof.dataset.futureInputSynced = String(input.value.includes("2026/11/15") || input.value.includes("2026/11/15".replaceAll("/", "-")));
-    proof.dataset.futureNoOverlap = String(bounds(nowButton).left >= bounds(input).right + 2 &&
-      bounds(label).top >= Math.max(bounds(input).bottom, bounds(nowButton).bottom) - 1 &&
-      bounds(label).right <= Math.min(width, bounds(dock).right) + 1);
+    proof.dataset.futureSelected = String(instrument.dataset.selectedInstantMs===String(future));
+    proof.dataset.futureZodiacChanged = String(instrument.dataset.zodiac!==previous);
+    proof.dataset.futureWheelSynced = String(wheelZodiac.textContent.trim()===instrument.dataset.zodiac);
+    proof.dataset.futureInputSynced = String(input.value.includes("2026/11/15") ||
+      input.value.includes("2026-11-15"));
+    proof.dataset.futureNoOverlap = String(
+      sameRow(input,now) && bounds(now).left>=bounds(input).right+2 &&
+      noExtraRow(dock) && bounds(now).right<=Math.min(width,bounds(dock).right)+1
+    );
 
-    // Class/Analysis belong to their own screens. The same caption never duplicates.
-    instrument.dataset.classificationOverlay = "on";
-    proof.dataset.classificationHidden = String(!visible(win, label));
+    instrument.dataset.classificationOverlay="on";
+    proof.dataset.classificationOneRow = String(
+      sameRow(input,now) && noExtraRow(dock) &&
+      !doc.querySelector("#mobile-zodiac-readout")
+    );
     delete instrument.dataset.classificationOverlay;
-    instrument.dataset.analysisOpen = "true";
-    proof.dataset.analysisHidden = String(!visible(win, label));
-    instrument.dataset.analysisOpen = "false";
-    proof.dataset.ready = "true";
+    instrument.dataset.analysisOpen="true";
+    proof.dataset.analysisOneRow = String(
+      sameRow(input,now) && noExtraRow(dock) &&
+      !doc.querySelector("#mobile-zodiac-readout")
+    );
+    instrument.dataset.analysisOpen="false";
+    proof.dataset.ready="true";
   }
-  stage.addEventListener("load", () => { void collectAudit().catch(e => { proof.dataset.error = String(e); }); });
+  stage.addEventListener("load",()=>{
+    void collectAudit().catch(error=>{proof.dataset.error=String(error);});
+  });
 </script>
 </body>
 </html>

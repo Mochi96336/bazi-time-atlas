@@ -86,19 +86,15 @@ test("mobile ordinary reading keeps exact-time chrome flat with M2 etched rails"
   );
 });
 
-test("mobile ordinary idle exact-time rail removes duplicate metadata but preserves feedback states", () => {
+test("mobile exact-time rail has no duplicate visual metadata row", () => {
+  const mobileCss = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
+  assert.doesNotMatch(html, /class="mobile-time-heading"|id="mobile-zodiac-readout"/);
+  assert.match(html, /id="mobile-time-status" role="status" aria-live="polite"/);
   assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock \.mobile-time-heading\s*\{[^}]*justify-content:\s*flex-end;/s
+    mobileCss,
+    /\.mobile-time-field span,[\s\S]*?\.mobile-time-dock #mobile-time-status\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?clip-path:\s*inset\(50%\);/
   );
-  assert.match(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock \.mobile-time-heading strong,[\s\S]*?#mobile-time-status\[data-state="idle"\]\s*\{\s*display:\s*none;/
-  );
-  assert.doesNotMatch(
-    css,
-    /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock #mobile-time-status:not\(\[data-state="idle"\]\)\s*\{[^}]*display:\s*none;/s
-  );
+  assert.match(css, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);/);
 });
 
 test("ordinary reading keeps long-form notes and provenance footer out of the main path", () => {

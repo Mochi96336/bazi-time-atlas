@@ -17,7 +17,6 @@ const inputLabel = document.querySelector(".mobile-time-field > span");
 const applyButton = document.querySelector("#mobile-time-apply");
 const nowButton = document.querySelector("#mobile-now-button");
 const status = document.querySelector("#mobile-time-status");
-const zodiacReadout = document.querySelector("#mobile-zodiac-readout");
 const mobileQuery = window.matchMedia("(max-width: 480px)");
 
 function currentTimeContext() {
@@ -70,14 +69,6 @@ function syncContextCopy(context) {
 
 function syncFromInstrument() {
   if (!instrument || !input) return;
-  // Reuse the canonical selected-instant display; never independently infer
-  // Zodiac from calendar dates or the free wheel rotation.
-  const activeZodiac = instrument.dataset.zodiac?.trim() ?? "";
-  if (zodiacReadout) {
-    zodiacReadout.textContent = activeZodiac ? `黃道 · ${activeZodiac}` : "";
-    zodiacReadout.hidden = !activeZodiac;
-    zodiacReadout.setAttribute("aria-label", activeZodiac ? `所選瞬間的黃道分類：${activeZodiac}` : "");
-  }
   const context = currentTimeContext();
   syncContextCopy(context);
   if (document.activeElement === input) return;
@@ -133,9 +124,19 @@ nowButton?.addEventListener("click", () => {
   setStatus(`${formatAtlasUtcOffset(currentTimeContext().utcOffsetHours)} · 秒級`, "idle");
 });
 input?.addEventListener("keydown", event => {
-  if (event.key !== "Enter") return;
-  event.preventDefault();
-  applyExactTime();
+  if (event.key === "Escape" && dock?.dataset.dirty === "true") {
+    // A dirty edit temporarily replaces Now with Apply. Escape restores the
+    // canonical readout without adding a third action or a second row.
+    event.preventDefault();
+    input.blur();
+    syncFromInstrument();
+    input.removeAttribute("aria-invalid");
+    setDirty(false);
+    setStatus(`${formatAtlasUtcOffset(currentTimeContext().utcOffsetHours)} · 秒級`, "idle");
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    applyExactTime();
+  }
 });
 input?.addEventListener("input", () => {
   input.removeAttribute("aria-invalid");
@@ -147,7 +148,7 @@ input?.addEventListener("input", () => {
 if (instrument) {
   new MutationObserver(syncFromInstrument).observe(instrument, {
     attributes:true,
-    attributeFilter:["data-selected-instant-ms", "data-utc-offset-hours", "data-day-boundary", "data-zodiac"]
+    attributeFilter:["data-selected-instant-ms", "data-utc-offset-hours", "data-day-boundary"]
   });
 }
 

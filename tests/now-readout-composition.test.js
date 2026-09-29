@@ -22,11 +22,12 @@ test("editor hides Now without changing the symmetric grid geometry", () => {
   assert.match(css, /grid-template-columns:72px max-content 72px/);
 });
 
-test("mobile keeps time and Now in the control row and moves Zodiac below", () => {
-  const actions = page.match(/<div class="mobile-time-actions">([\s\S]*?)<\/div>/)?.[1];
-  assert.ok(actions);
-  assert.match(actions, /id="mobile-time-apply"[\s\S]*id="mobile-now-button"/);
-  assert.doesNotMatch(actions, /mobile-zodiac-readout/);
-  assert.ok(page.indexOf('id="mobile-zodiac-readout"') > page.indexOf('class="mobile-time-actions"'));
-  assert.match(css, /#mobile-zodiac-readout:not\(\[hidden\]\)\s*\{[\s\S]*?grid-column:1 \/ -1;[\s\S]*?justify-self:end;/);
+test("mobile has one real time/action row and no duplicate Zodiac or visual status row", () => {
+  const dock = page.match(/<section id="mobile-time-dock"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(dock);
+  assert.match(dock, /id="mobile-instant-input"[\s\S]*?class="mobile-time-actions"[\s\S]*?id="mobile-time-apply"[\s\S]*?id="mobile-now-button"/);
+  assert.match(dock, /id="mobile-time-status" role="status" aria-live="polite"/);
+  assert.doesNotMatch(dock, /mobile-time-heading|mobile-zodiac-readout/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0,1fr\) 48px !important/);
+  assert.match(css, /data-dirty="true"\] \.mobile-time-actions #mobile-now-button\s*\{[\s\S]*?display: none;/);
 });

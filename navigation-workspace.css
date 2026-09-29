@@ -160,9 +160,6 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
     color:#d1c3a0; font-size:10px; font-weight:690; cursor:pointer;
   }
   .mobile-time-dock .mobile-time-actions #mobile-now-button:hover { color:#f1dfb1; }
-  .mobile-time-dock .mobile-time-actions #mobile-zodiac-readout:not([hidden]) {
-    flex:0 0 auto; padding-left:6px; font-size:10px;
-  }
 }
 
 /* Now/read-head F2: the selected time is the centered datum. "Now" is a
@@ -243,54 +240,49 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 }
 
 @media (max-width:480px) {
-  /* Mobile owns one control row: editable time + Now. Derived Zodiac context
-     gets its own line below, so action and output no longer compete. */
+  /* Mobile has one row in every state, with one action slot. */
   #kinetic-instrument ~ .mobile-time-dock {
-    grid-template-columns:minmax(0,1fr) auto !important;
-    align-items:end;
-    column-gap:6px;
-    row-gap:3px;
+    grid-template-columns: minmax(0,1fr) 48px !important;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 0;
   }
   .mobile-time-dock .mobile-time-field {
-    grid-column:1;
-    width:100%;
-    min-width:0;
+    grid-column: 1;
+    min-width: 0;
+    width: 100%;
   }
   .mobile-time-dock #mobile-instant-input {
-    width:100%;
-    max-width:none;
+    width: 100%;
+    max-width: none;
+    min-height: 42px;
+    padding-inline: 3px;
+    font-size: 12px;
   }
   .mobile-time-dock .mobile-time-actions {
-    grid-column:2;
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    gap:4px;
-    min-width:0;
-    white-space:nowrap;
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-width: 0;
   }
-  .mobile-time-dock .mobile-time-actions #mobile-now-button {
-    margin:0;
-    min-width:46px;
-    min-height:42px;
-    padding:0 5px;
-    border:0;
-    border-left:1px solid rgba(181,190,186,.14);
-    border-radius:0;
-    background:transparent;
-    color:#c7b98f;
-    font-size:10px;
-    font-weight:690;
+  .mobile-time-dock .mobile-time-actions #mobile-now-button,
+  .mobile-time-dock .mobile-time-actions #mobile-time-apply {
+    min-width: 46px;
+    min-height: 42px;
+    margin: 0;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    background: transparent;
+    color: #c7b98f;
+    font-size: 12px;
+    font-weight: 650;
   }
-  .mobile-time-dock #mobile-zodiac-readout:not([hidden]) {
-    grid-column:1 / -1;
-    justify-self:end;
-    margin:1px 0 0;
-    padding:2px 0 0 !important;
-    border-left:0 !important;
-    color:color-mix(in srgb, var(--zodiac) 21%, var(--ink));
-    font-size:12px !important;
-    font-weight:650;
-    line-height:1.25;
+  .mobile-time-dock[data-dirty="false"] .mobile-time-actions #mobile-time-apply,
+  .mobile-time-dock[data-dirty="true"] .mobile-time-actions #mobile-now-button {
+    display: none;
   }
 }

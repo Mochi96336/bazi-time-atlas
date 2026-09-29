@@ -48,44 +48,40 @@ function attr(markup, key) {
   return result?.[1] ?? "";
 }
 function checkProof(markup, width) {
-  if (attr(markup, "ready") !== "true") {
-    throw new Error("H2.4 fixture did not finish: " + width + "px; " + attr(markup, "error"));
+  if (attr(markup,"ready") !== "true") {
+    throw new Error("H2.4 fixture did not finish: "+width+"px; "+attr(markup,"error"));
   }
-  if (attr(markup, "inner-width") !== String(width) ||
-    attr(markup, "mobile") !== String(width <= 480)) {
-    throw new Error("H2.4 measured incorrect iframe viewport at " + width + "px");
+  if (attr(markup,"inner-width") !== String(width) ||
+      attr(markup,"mobile") !== String(width<=480)) {
+    throw new Error("H2.4 fixture measured incorrect iframe width: "+width+"px");
   }
   if (width === 481) {
-    for (const name of ["desktop-dock-hidden", "desktop-readout-visible"]) {
-      if (attr(markup, name) !== "true") throw new Error("481px breakpoint " + name + " failed");
+    for (const name of ["desktop-dock-hidden","desktop-readout-visible"]) {
+      if(attr(markup,name)!=="true") throw new Error("481px breakpoint: "+name);
     }
   } else {
     for (const name of [
-      "initial-matches", "initial-visible", "same-row", "now-visible", "now-fits", "now-aligned", "no-overlap",
-      "not-clipped", "input-usable", "dirty-hidden", "reapplied",
-      "future-selected", "future-zodiac-changed", "future-caption-synced",
-      "future-input-synced", "future-no-overlap",
-      "classification-hidden", "analysis-hidden"
-    ]) if (attr(markup, name) !== "true") {
-      throw new Error("H2.4 " + width + "px failed " + name +
-        " / input=" + attr(markup, "input-bounds") +
-        " / caption=" + attr(markup, "caption-bounds") +
-        " / now=" + attr(markup, "now-bounds") +
-        " / rail=" + attr(markup, "rail-bounds"));
-    }
-    if (Math.abs(Number.parseFloat(attr(markup, "font-px")) - 12) > .25) {
-      throw new Error("H2.4 " + width + "px did not preserve 12px physical caption");
+      "now-visible","same-row","now-fits","no-overlap","not-clipped",
+      "input-usable","status-offscreen","no-duplicate-zodiac","dirty-swap",
+      "reapplied","future-selected","future-zodiac-changed","future-wheel-synced",
+      "future-input-synced","future-no-overlap","classification-one-row",
+      "analysis-one-row"
+    ]) {
+      if (attr(markup,name)!=="true") {
+        throw new Error("H2.4 "+width+"px failed "+name+
+          " / input="+attr(markup,"input-bounds")+
+          " / now="+attr(markup,"now-bounds")+
+          " / rail="+attr(markup,"rail-bounds"));
+      }
     }
   }
   return {
-    width, mobile:width <= 480, horizontalOverflow:attr(markup, "body-overflow") === "true",
-    initialSign:attr(markup, "initial-zodiac"),
-    railBounds:attr(markup, "rail-bounds") || null,
-    inputBounds:attr(markup, "input-bounds") || null,
-    captionBounds:attr(markup, "caption-bounds") || null,
-    nowBounds:attr(markup, "now-bounds") || null,
-    fontPx:attr(markup, "font-px") || null,
-    dynamicSignSwitchPassed:width <= 480
+    width, mobile:width<=480,
+    horizontalOverflow:attr(markup,"body-overflow")==="true",
+    singleControlRow:width<=480,
+    railBounds:attr(markup,"rail-bounds")||null,
+    inputBounds:attr(markup,"input-bounds")||null,
+    nowBounds:attr(markup,"now-bounds")||null
   };
 }
 await mkdir(out, { recursive:true });
@@ -114,8 +110,8 @@ const report = {
   viewports:matrix,
   constraints:[
     "Image capture uses the unchanged fixed instant; DOM interaction proof is a separate launch.",
-    "Computed geometry and 12px font size are structural checks, not a human legibility score.",
-    "Review actual native-width crops at 320, 360, 390, 430, 480 and the 481px desktop breakpoint.",
+    "Computed geometry, action swapping and status offscreen are structural checks, not a human legibility score.",
+    "Review actual native-width crops; mobile time + one action stays on one baseline without a second derived-context row.",
     "This audit changes no production UI, phase/ephemeris model or material parameters."
   ]
 };
