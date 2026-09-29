@@ -15,7 +15,7 @@ test("ordinary mobile and Analysis share one real time-control row", () => {
   assert.match(mobileCss, /#mobile-time-status\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?clip-path:\s*inset\(50%\);/);
   assert.match(html, /id="mobile-time-dock"[\s\S]*?id="mobile-instant-input"[\s\S]*?id="mobile-time-apply"[\s\S]*?id="mobile-now-button"[\s\S]*?id="mobile-time-status"/);
   assert.doesNotMatch(html, /id="mobile-zodiac-readout"|class="mobile-time-heading"/);
-  assert.match(instrumentCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-readout\s*\{\s*display:\s*none;/);
+  assert.match(mobileCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.instrument-readout\s*\{\s*display:\s*none;/);
   assert.doesNotMatch(mobileCss, /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-readout\s*\{[^}]*display:\s*none;/s);
 });
 
