@@ -149,7 +149,9 @@ if (
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}): ${url}`
   );
 }
-if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 460) {
+// The responsive 390px fan stage is ~358px, plus the normal-flow readout.
+// A fixed 460px minimum previously preserved a card-sized blank space.
+if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 390) {
   throw new Error(`Recurrence unboxed phase fan became too shallow (${recurrenceHeight}px): ${url}`);
 }
 if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
