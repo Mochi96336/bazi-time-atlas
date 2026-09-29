@@ -113,6 +113,7 @@ for (const [label, dataName, minHeight] of [
   ["canonical candidate button", "data-recurrence-candidate-button-height", 42],
   ["numeric displacement input", "data-recurrence-delta-number-height", 42],
   ["base-date input", "data-recurrence-base-date-input-height", 42],
+  ["selected-date input", "data-recurrence-target-date-input-height", 42],
   ["model-boundary disclosure", "data-recurrence-model-boundary-summary-height", 42],
   ["displacement slider", "data-recurrence-delta-slider-height", 32]
 ]) {
