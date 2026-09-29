@@ -6,7 +6,7 @@ import {
 } from "./recurrence/gregorian-cycle.js";
 import { sexagenaryYearPillarForLiChunYear } from "./calendar/sexagenary-year.js";
 import { shiftGregorianDate } from "./recurrence/gregorian-date-navigation.js";
-import { jiaziAnchoredCivilYear } from "./recurrence/jiazi-year-geometry.js";
+import { jiaziAnchoredCivilYear, jiaziSelectedDayProgress } from "./recurrence/jiazi-year-geometry.js";
 import { sexagenaryDayForGregorianDate } from "./recurrence/ganzhi-cycle-comparison.js";
 import { resolveResearchSeasonalBoundary } from "./recurrence/research-seasonal-boundary-resolution.js";
 import {
@@ -474,6 +474,7 @@ function render() {
     });
     jiaziLayer.replaceChildren(nodes);
   }
+  updateSelectedDayProgress(state.selectedDate);
   // The one visible slider follows the existing instrument's selected
   // target. It never creates or persists another selected-date state.
   const scrub=document.querySelector("#research-year-scrub");
@@ -530,7 +531,7 @@ function render() {
     state.selectedYearMembership.status==="model-estimated" ? "模型估計" :
     yearIsBoundary ? "需提供時刻" : "年界證據不足");
   setText("research-year-full-cycle",
-    "甲子日每隔 60 天重現；到明年元旦，日序走過 "+
+    "走到明年元旦，日序走過 "+
     state.civilYearFullDayCycles+" 輪，再向前 "+state.civilYearDayRemainder+" 位。");
   setText("research-year-base-date", formatDate(state.selectedDate));
 
@@ -620,6 +621,31 @@ function render() {
   }
 }
 
+/** Only a thin highlight in the EXISTING Year line. This is a drawing
+ * derived from the original target date, not a separate selection state.
+ * For January dates whose previous 甲子 lies last year, clip the beginning
+ * of the drawn highlight without lying about the day index.
+ */
+function updateSelectedDayProgress(date, {preview=false} = {}) {
+  const part=jiaziSelectedDayProgress(date);
+  const el=document.getElementById("research-year-day-progress");
+  if (el) {
+    el.style.left=part.leftPercent.toFixed(5)+"%";
+    el.style.width=part.widthPercent.toFixed(5)+"%";
+    el.dataset.preview=String(preview);
+    el.dataset.dayIndex=String(part.dayIndex);
+    el.dataset.dayOrdinal=String(part.dayOrdinal);
+    el.dataset.previousJiaziOffset=String(part.previousJiaziOffset);
+    el.dataset.anchorClipped=String(!part.anchorInYear);
+    el.dataset.selectedOffset=String(part.selectedOffset);
+  }
+  document.querySelectorAll("#research-year-jiazi-ticks .research-year-jiazi-tick")
+    .forEach(tick=>{
+      tick.dataset.current=String(part.anchorInYear &&
+        Number(tick.dataset.dayOffset)===part.previousJiaziOffset);
+    });
+}
+
 function scrubPreview(event){
   const input=event.currentTarget;
   const target=parseDate(instrument?.dataset.targetDate);
@@ -629,6 +655,7 @@ function scrubPreview(event){
     position >= (isGregorianLeapYear(target.year)?366:365)) return;
   const preview=shiftGregorianDate({year:target.year,month:1,day:1},position);
   if(preview.year!==target.year)return;
+  updateSelectedDayProgress(preview,{preview:true});
   const marker=document.querySelector("#research-year-base-marker");
   if(marker)marker.style.setProperty("--year-x",
     (position/(isGregorianLeapYear(target.year)?365:364)*100).toFixed(4)+"%");
