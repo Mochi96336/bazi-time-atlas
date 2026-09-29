@@ -289,33 +289,9 @@
     display: none;
   }
 
-  /* The existing exact-time rail carries one screen-sized classification caption.
-     It is not an additional time dock, material glow or free-floating badge. */
-  #mobile-zodiac-readout { display: none; }
-  #kinetic-instrument:not([data-analysis-open="true"]):not([data-classification-overlay="on"])
-    ~ .mobile-time-dock[data-dirty="false"] #mobile-zodiac-readout:not([hidden]) {
-    display: block;
-    min-width: 0;
-    padding-left: 9px;
-    border-left: 1px solid var(--m2-etched-dark-soft);
-    color: color-mix(in srgb, var(--zodiac) 23%, var(--ink));
-    font-size: 12px;
-    font-weight: 680;
-    line-height: 1.3;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* The read-head immediately above already states the selected time, zone and
-     precision. Keep ordinary idle chrome silent; transient apply/error feedback
-     may still surface in the existing status slot. */
-  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock .mobile-time-heading {
-    justify-content: flex-end;
-  }
-  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock .mobile-time-heading strong,
-  #kinetic-instrument:not([data-analysis-open="true"]) ~ .mobile-time-dock #mobile-time-status[data-state="idle"] {
-    display: none;
-  }
+  /* Zodiac already belongs to the wheel. Never duplicate it below the
+     one-line mobile time/Now (or dirty time/Apply) rail. The status output
+     remains accessible through its live region without consuming a row. */
 
   #kinetic-instrument:not([data-analysis-open="true"]) #now-button {
     min-height: 32px;
