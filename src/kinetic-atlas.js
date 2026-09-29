@@ -52,6 +52,15 @@ import {
 } from "./interaction/kinetic-playback.js";
 
 const svg = document.querySelector("#kinetic-wheel");
+
+// Native 4K fling experiment only; do not modify default presentation until
+// the user's real accelerated GPU compositor has confirmed the result.
+// Invalid or absent query values must not change production behavior.
+const motionTransitionAudit = new URLSearchParams(globalThis.location.search)
+  .get("motionTransitionAudit");
+if (motionTransitionAudit === "all" || motionTransitionAudit === "surfaces") {
+  svg.dataset.motionTransitionAudit = motionTransitionAudit;
+}
 const instrument = document.querySelector("#kinetic-instrument");
 const slider = document.querySelector("#time-slider");
 const instantInput = document.querySelector("#instant-input");
