@@ -45,6 +45,24 @@ function setDirty(dirty) {
   dock?.setAttribute("data-dirty", dirty ? "true" : "false");
 }
 
+// Errors cannot occupy a persistent second row. Use the native constraint
+// validation bubble on demand, while the existing live region serves AT.
+function clearInputError() {
+  if (!input) return;
+  input.setCustomValidity("");
+  input.removeAttribute("aria-invalid");
+  input.removeAttribute("title");
+}
+
+function showInputError(message) {
+  if (!input) return;
+  input.setAttribute("aria-invalid", "true");
+  input.setCustomValidity(message);
+  input.title = message;
+  setStatus(message, "error");
+  input.reportValidity();
+}
+
 function configureMobileInput() {
   if (!input) return;
   input.type = "text";
@@ -77,7 +95,11 @@ function syncFromInstrument() {
   const value = formatMobileAtlasInput(selectedMs, context);
   if (value) {
     input.value = value;
+    clearInputError();
     setDirty(false);
+    if (status?.dataset.state === "error") {
+      setStatus(`${formatAtlasUtcOffset(context.utcOffsetHours)} · 秒級`, "idle");
+    }
   }
   dock?.setAttribute("data-selected-instant-ms", Number.isFinite(selectedMs) ? String(selectedMs) : "");
 }
@@ -87,11 +109,10 @@ function applyExactTime() {
   const context = currentTimeContext();
   const instantMs = parseMobileAtlasInput(input.value, context);
   if (instantMs === null) {
-    input.setAttribute("aria-invalid", "true");
-    setStatus(`請用 ${MOBILE_ATLAS_INPUT_DISPLAY_FORMAT}`, "error");
+    showInputError(`請用 ${MOBILE_ATLAS_INPUT_DISPLAY_FORMAT}`);
     return;
   }
-  input.removeAttribute("aria-invalid");
+  clearInputError();
 
   setStatus("套用中…", "pending");
   instrument.dispatchEvent(new CustomEvent(SELECTED_INSTANT_COMMAND, {
@@ -99,7 +120,7 @@ function applyExactTime() {
   }));
 
   if (Number(instrument.dataset.selectedInstantMs) !== Math.round(instantMs)) {
-    setStatus("無法套用時間", "error");
+    showInputError("無法套用時間，請重試");
     return;
   }
 
@@ -118,7 +139,7 @@ nowButton?.addEventListener("click", () => {
   instrument.dispatchEvent(new CustomEvent(SELECTED_INSTANT_COMMAND, {
     detail:{ instantMs:Date.now(), source:"mobile-now" }
   }));
-  input?.removeAttribute("aria-invalid");
+  clearInputError();
   syncFromInstrument();
   setDirty(false);
   setStatus(`${formatAtlasUtcOffset(currentTimeContext().utcOffsetHours)} · 秒級`, "idle");
@@ -130,7 +151,7 @@ input?.addEventListener("keydown", event => {
     event.preventDefault();
     input.blur();
     syncFromInstrument();
-    input.removeAttribute("aria-invalid");
+    clearInputError();
     setDirty(false);
     setStatus(`${formatAtlasUtcOffset(currentTimeContext().utcOffsetHours)} · 秒級`, "idle");
   } else if (event.key === "Enter") {
@@ -139,7 +160,7 @@ input?.addEventListener("keydown", event => {
   }
 });
 input?.addEventListener("input", () => {
-  input.removeAttribute("aria-invalid");
+  clearInputError();
   setDirty(true);
   const context = currentTimeContext();
   setStatus(`${formatAtlasUtcOffset(context.utcOffsetHours)} · 秒級`, "idle");

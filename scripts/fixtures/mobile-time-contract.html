@@ -104,8 +104,24 @@
       if (!mobileApplied) {
         mobileApplied = true;
         mobileWin.__exactTimeContinuity = "alive";
+        // First test a malformed entry. Its native validation bubble must be
+        // available without introducing a persistent status row or changing time.
+        const priorMs = instrument.dataset.selectedInstantMs;
+        input.value = "2026-02-30 05:15:09";
+        input.dispatchEvent(new mobileWin.Event("input", { bubbles:true }));
+        apply.click();
+        probe.dataset.invalidFeedback = String(
+          input.getAttribute("aria-invalid") === "true" &&
+          input.validity.customError &&
+          input.validationMessage.includes("YYYY-MM-DD HH:mm:ss")
+        );
+        probe.dataset.invalidDidNotApply = String(instrument.dataset.selectedInstantMs === priorMs);
+        probe.dataset.invalidOneRow = String(dock.getBoundingClientRect().height <= 80);
         input.value = "2026-09-16 05:15:09";
-        input.dispatchEvent(new Event("input", { bubbles:true }));
+        input.dispatchEvent(new mobileWin.Event("input", { bubbles:true }));
+        probe.dataset.errorClearedOnEdit = String(
+          !input.validity.customError && !input.hasAttribute("aria-invalid")
+        );
         probe.dataset.applyVisibleAfterEdit = String(apply.getBoundingClientRect().width > 0 && apply.getBoundingClientRect().height > 0);
         probe.dataset.dirtyAfterEdit = dock.dataset.dirty ?? "";
         apply.click();
