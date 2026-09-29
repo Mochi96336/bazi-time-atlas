@@ -1,7 +1,7 @@
 /* Single-surface Research: one original Year band, inline base/target identities.
    This is presentation only; the recurrence view remains the sole date owner. */
 .research-controls-compact {
-  width:min(980px,100%);margin:3px auto 12px;
+  width:auto;margin:0;
   padding:0;border:0;
 }
 .research-controls-compact > summary {
@@ -25,7 +25,7 @@
   background:rgba(15,21,17,.3);
 }
 .research-year-strip {
-  width:min(980px,100%);margin:13px auto 0;padding-top:10px;
+  width:100%;margin:13px 0 0;padding-top:10px;
 }
 .research-year-strip > header strong{font-size:12px}
 .research-year-strip > header #research-year-strip-basis{display:none}
@@ -148,3 +148,175 @@
 }
 .research-year-base,
 .research-year-li-chun {z-index:3}
+
+/* Research R4: one width and one flow. The annual track owns the date
+   picker; displacement stays a secondary in-flow disclosure. */
+.research-task-primary .research-year-strip {
+  width:100%;max-width:none;margin:12px 0 0;min-width:0;padding:12px 0 0;
+}
+.research-task-primary .research-year-head {
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:6px 20px;min-width:0;
+}
+.research-year-head > #research-year-strip-title {
+  font-size:14px;line-height:1.4;white-space:nowrap;
+}
+#research-controls-base[hidden], #research-year-strip-basis {
+  display:none!important;
+}
+.research-year-actions {
+  display:flex;align-items:center;justify-content:flex-end;
+  flex-wrap:wrap;gap:8px 14px;min-width:0;
+}
+.research-year-head .research-base-date {
+  display:flex;align-items:center;flex-wrap:nowrap;gap:5px;min-width:0;
+}
+.research-year-head .research-base-caption {
+  align-self:center;margin-right:4px;
+  color:#90a097;font-size:10px;font-weight:630;white-space:nowrap;
+}
+.research-year-head .research-base-date label {
+  display:grid;gap:2px;min-width:0;
+  color:#89968b;font-size:9px;font-weight:510;
+  letter-spacing:normal;text-transform:none;
+}
+.research-year-head .research-base-date input {
+  width:48px;min-height:36px;padding:6px 5px;
+  border:1px solid rgba(198,218,203,.23);border-radius:6px;
+  color:#e1eae2;background:rgba(7,13,10,.36);
+  font-size:12px;font-variant-numeric:tabular-nums;
+}
+.research-year-head .research-base-date label:first-of-type input {width:77px}
+.research-year-head .research-controls-compact {margin:0;width:auto}
+.research-year-head .research-controls-compact > summary {
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-wrap:nowrap;gap:7px;min-height:36px;padding:5px 8px;
+  border:1px solid rgba(202,219,204,.16);border-radius:6px;
+  background:transparent;color:#aabbb0;
+  font-size:10.5px;white-space:nowrap;
+}
+.research-year-head .research-controls-compact > summary span {
+  display:inline-flex;align-items:center;gap:4px;margin:0;
+  color:inherit;font-size:inherit;
+}
+.research-year-head .research-controls-compact > summary b {color:#e0e9de}
+.research-year-head .research-controls-action {color:#a6bcae}
+.research-year-actions:has(.research-controls-compact[open]) {
+  width:min(820px,100%);
+}
+.research-year-head .research-controls-compact[open] {
+  width:100%;flex-basis:100%;
+}
+.research-year-head .research-controls-compact[open] > summary {
+  margin-bottom:8px;
+}
+.research-year-head .research-controls-compact .delta-dock,
+.research-year-head .research-controls-compact .delta-dock.research-delta-consolidated {
+  display:grid;grid-template-columns:minmax(125px,180px) minmax(0,1fr);
+  grid-template-areas:"number presets" "slider slider";
+  gap:9px 12px;min-width:0;margin:0;padding:12px;
+  border-radius:8px;box-shadow:none;
+}
+.research-year-head .research-controls-compact .delta-dock .candidate-buttons {
+  flex-wrap:wrap;justify-content:flex-end;
+}
+
+/* Each line is a baseline/target measurement, not another pair of cards.
+   Thin rules echo the three layers in the unboxed phase fan below. */
+.research-task-primary .research-cycle-inline {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0 22px;margin:10px 0 0;padding:8px 0;
+  border-top:1px solid rgba(197,215,200,.12);
+  border-bottom:1px solid rgba(197,215,200,.12);
+}
+.research-task-primary .research-cycle-inline-row {
+  display:grid;
+  grid-template-columns:minmax(118px,1fr) minmax(125px,1fr) minmax(122px,1fr);
+  align-items:baseline;gap:5px 12px;min-width:0;
+  line-height:1.5;font-size:11px;
+}
+.research-task-primary .research-cycle-inline-row[data-side="target"] {
+  padding-left:22px;border-left:1px solid rgba(197,215,200,.14);
+}
+.research-task-primary .research-cycle-inline-row > span {
+  display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:2px 5px;
+  min-width:0;
+}
+.research-task-primary .research-cycle-inline-date {
+  min-width:0!important;white-space:nowrap;
+}
+.research-cycle-inline-row[data-side="base"] .research-cycle-inline-date {
+  color:#94a49a;
+}
+.research-task-primary .research-cycle-inline-closure {
+  grid-column:1;align-self:center;margin-top:5px;
+}
+.research-task-primary .research-cycle-inline-lookup {
+  grid-column:2;justify-self:end;align-self:center;margin:5px 0 0;
+  font-size:10px;
+}
+.research-task-primary .research-year-key-data {
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:baseline;gap:4px 20px;margin:8px 0 0!important;
+}
+.research-task-primary .research-year-full-cycle {
+  grid-column:2;padding:0!important;margin:0!important;
+  border:0;color:#9dbbac!important;white-space:nowrap;
+}
+.research-task-primary .research-year-transition-line {
+  grid-column:1;min-width:0;font-size:11px!important;
+}
+.research-task-primary .research-year-same-date-details {
+  margin:4px 0 0;border-top:0;
+}
+
+@media(max-width:1050px) {
+  .research-task-primary .research-cycle-inline {
+    grid-template-columns:minmax(0,1fr);row-gap:5px;
+  }
+  .research-task-primary .research-cycle-inline-row {
+    grid-template-columns:minmax(118px,.8fr) minmax(116px,1fr) minmax(110px,1fr);
+  }
+  .research-task-primary .research-cycle-inline-row[data-side="target"] {
+    border-left:0;border-top:1px solid rgba(197,215,200,.09);
+    padding:5px 0 0;
+  }
+  .research-task-primary .research-cycle-inline-closure,
+  .research-task-primary .research-cycle-inline-lookup {
+    grid-column:1;justify-self:start;
+  }
+  .research-task-primary .research-year-key-data {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .research-task-primary .research-year-full-cycle {
+    grid-column:1;white-space:normal;
+  }
+}
+@media(max-width:640px) {
+  .research-task-primary .research-year-head {
+    grid-template-columns:minmax(0,1fr);gap:5px;
+  }
+  .research-year-actions {justify-content:space-between;width:100%;gap:6px}
+  .research-year-head .research-base-caption {font-size:9px;margin-right:2px}
+  .research-year-head .research-base-date input {
+    min-height:42px;width:44px;font-size:12px;
+  }
+  .research-year-head .research-base-date label:first-of-type input {width:70px}
+  .research-year-head .research-controls-compact > summary {
+    min-height:42px;padding:6px;
+  }
+  .research-year-head .research-controls-compact .delta-dock,
+  .research-year-head .research-controls-compact .delta-dock.research-delta-consolidated {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"number" "presets" "slider";
+  }
+  .research-year-head .research-controls-compact .delta-dock .candidate-buttons {
+    justify-content:flex-start;
+  }
+  .research-task-primary .research-cycle-inline-row {
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:1px 12px;
+  }
+  .research-task-primary .research-cycle-inline-date {grid-column:1 / -1}
+  .research-task-primary .research-cycle-inline-row > span {min-width:0}
+  .research-task-primary .research-cycle-inline-lookup {min-height:28px}
+}
