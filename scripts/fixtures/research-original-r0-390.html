@@ -17,6 +17,7 @@ const boundary=query.get("boundary")==="1";
 const interactive=query.get("interactive")==="1";
 const deep=query.get("deep")==="1";
 const precise=query.get("precise")==="1";
+const selector=query.get("selector")==="1";
 const preciseBoundary=query.get("preciseBoundary");
 const iframe=document.getElementById("research");
 const probe=document.getElementById("probe");
@@ -69,7 +70,8 @@ iframe.addEventListener("load",async()=>{
   }
   // R4 layout proof: one genuinely full-width year rail, an in-flow date
   // owner, and an unboxed fan, at actual 320/390/768/1440 viewports.
-  const datePicker=d.querySelector("#research-year-strip .research-base-date");
+  const datePicker=d.querySelector("#research-target-date-form");
+  const baselinePicker=d.querySelector("#research-controls .research-base-date");
   const compactControls=d.getElementById("research-controls");
   const task=d.getElementById("research-discrete");
   const taskBox=task.getBoundingClientRect();
@@ -78,9 +80,11 @@ iframe.addEventListener("load",async()=>{
   const fanStyle=w.getComputedStyle(instrument);
   const fanGraphic=d.querySelector(".research-fan-graphic")?.getBoundingClientRect();
   const fanReadout=d.querySelector(".recurrence-readout.research-current-state")?.getBoundingClientRect();
-  check(datePicker && datePicker.checkVisibility() &&
-    strip.contains(datePicker) && !compactControls.open,
-    "R4 date picker must be visible without opening displacement settings");
+  check(datePicker && datePicker.checkVisibility() && baselinePicker &&
+    !baselinePicker.checkVisibility() && strip.contains(datePicker) &&
+    d.getElementById("research-target-date-input").value ===
+      instrument.dataset.targetDate.replaceAll("-","/") && !compactControls.open,
+    "R4 selected target date must be visible, baseline hidden behind optional settings");
   check(stripBox.width >= taskBox.width-6,
     "R4 year rail still has a narrow max-width: "+stripBox.width+" / "+taskBox.width);
   check(Math.abs(fanBox.width-stripBox.width)<6 &&
@@ -329,6 +333,28 @@ iframe.addEventListener("load",async()=>{
   check(w.getComputedStyle(strip).display!=="none" &&
     w.getComputedStyle(strip).visibility!=="hidden",
     "old erroneous forced-hidden original Year strip CSS survived R0");
+  if(selector){
+    const selected=d.getElementById("research-target-date-input");
+    const form=d.getElementById("research-target-date-form");
+    selected.value="2025/06/02";
+    form.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}));
+    await wait(120);
+    check(instrument.dataset.targetDate==="2025-06-02" &&
+      instrument.dataset.baseDate===(deep?"2024-06-02":"2025-06-02") &&
+      instrument.dataset.deltaYears===(deep?"1":"0") &&
+      selected.value==="2025/06/02" &&
+      strip.dataset.selectedDayPillar &&
+      w.location.search.includes("date="+instrument.dataset.baseDate) &&
+      w.location.search.includes("delta="+(deep?"1":"0")),
+      "explicit selected-date input did not update the one existing base+Δ model");
+    const settled=instrument.dataset.targetDate;
+    selected.value="2025/02/29"; // invalid: never coerce into March
+    form.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}));
+    check(instrument.dataset.targetDate===settled &&
+      !d.getElementById("research-target-date-feedback").hidden,
+      "invalid explicit date silently changed model or hid the error");
+    probe.dataset.selectedForm="canonical";
+  }
   probe.dataset.ready="true";
   probe.dataset.width=String(width);
   probe.dataset.bare=String(bare);
