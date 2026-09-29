@@ -76,6 +76,8 @@ iframe.addEventListener("load",async()=>{
   const stripBox=strip.getBoundingClientRect();
   const fanBox=instrument.getBoundingClientRect();
   const fanStyle=w.getComputedStyle(instrument);
+  const fanGraphic=d.querySelector(".research-fan-graphic")?.getBoundingClientRect();
+  const fanReadout=d.querySelector(".recurrence-readout.research-current-state")?.getBoundingClientRect();
   check(datePicker && datePicker.checkVisibility() &&
     strip.contains(datePicker) && !compactControls.open,
     "R4 date picker must be visible without opening displacement settings");
@@ -90,6 +92,9 @@ iframe.addEventListener("load",async()=>{
       strip:stripBox.width,fan:fanBox.width,border:fanStyle.borderTopWidth,
       shadow:fanStyle.boxShadow,background:fanStyle.backgroundImage
     }));
+  check(fanGraphic && fanReadout && fanReadout.top>=fanGraphic.bottom-1 &&
+    w.getComputedStyle(d.querySelector(".recurrence-readout.research-current-state")).position==="relative",
+    "R4 phase footer still floats over the half-circle");
   const baseCompare=d.querySelector('.research-cycle-inline-row[data-side="base"]').getBoundingClientRect();
   const targetCompare=d.querySelector('.research-cycle-inline-row[data-side="target"]').getBoundingClientRect();
   check(width>=1051 ? Math.abs(baseCompare.top-targetCompare.top)<4
