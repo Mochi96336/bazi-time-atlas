@@ -261,8 +261,8 @@ if (
 const beforeLiChun = expectCase("recurrence.html?date=2024-02-01&delta=0", {"data-target-date":"2024-02-01"}, "pre-Li Chun year identity");
 const afterLiChun = expectCase("recurrence.html?date=2024-02-10&delta=0", {"data-target-date":"2024-02-10"}, "post-Li Chun year identity");
 if (
-  !beforeLiChun.dom.includes('id="research-cycles-year-base">癸卯') ||
-  !afterLiChun.dom.includes('id="research-cycles-year-base">甲辰') ||
+  !beforeLiChun.dom.includes('id="research-cycles-year-base">約癸卯') ||
+  !afterLiChun.dom.includes('id="research-cycles-year-base">約甲辰') ||
   attr(tagById(beforeLiChun.dom,"research-sexagenary-wheel"), "data-research-date") !== "2024-02-01" ||
   attr(tagById(afterLiChun.dom,"research-sexagenary-wheel"), "data-research-date") !== "2024-02-10"
 ) {

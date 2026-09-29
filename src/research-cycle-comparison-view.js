@@ -1,6 +1,7 @@
 import { researchGanzhiCycleComparison } from "./recurrence/ganzhi-cycle-comparison.js";
 import { researchYearStripState } from "./research-year-strip-view.js";
 import { validateGregorianDate } from "./recurrence/gregorian-cycle.js";
+import { readSelectedTargetInstant } from "./recurrence/target-instant-instrument.js";
 import { RESEARCH_SEASONAL_EVIDENCE_READY_EVENT } from "./recurrence/research-seasonal-chunk-prefetch.js";
 
 const panel = typeof document === "undefined" ? null : document.querySelector("#research-cycle-comparison");
@@ -52,9 +53,9 @@ function renderTape(id, baseIndex, targetIndex, label) {
   });
 }
 
-function visibleYear(date, nominal) {
+function visibleYear(date, nominal, { targetInstant = null } = {}) {
   let state;
-  try { state = researchYearStripState(date); } catch {
+  try { state = researchYearStripState(date,{ targetInstant }); } catch {
     return { name:nominal.name,cycleIndex:nominal.cycleIndex,positionBasis:"nominal",
       note:"僅名義立春後年標 · 年界資料不可用" };
   }
@@ -66,6 +67,7 @@ function visibleYear(date, nominal) {
       name:state.selectedYearPillar.name,
       cycleIndex:state.selectedYearPillar.cycleIndex,
       positionBasis:"active",
+      estimated:status !== "exact",
       note:status === "exact" ? "已判定年柱"
         : status === "model-estimated" ? "年界模型估計" : "年界待驗"
     };
@@ -93,7 +95,7 @@ function visibleYear(date, nominal) {
 
 function displayedYearName(item) {
   if (!item) return "—";
-  return item.positionBasis === "active" ? item.name : "約" + item.name;
+  return item.positionBasis === "active" && !item.estimated ? item.name : "約" + item.name;
 }
 
 function displayedYearOrdinal(item,date) {
@@ -140,8 +142,15 @@ function render() {
   panel.dataset.targetDayPillar = model.target?.day.name ?? "invalid";
   panel.dataset.dayAnchorConvention = model.dayConvention;
 
+  // Original strip and inline comparison must read the same explicit
+  // comparison instant. Baseline remains date-only: no base clock was set.
+  let targetInstant=null;
+  try { targetInstant=readSelectedTargetInstant(instrument.dataset); }
+  catch { targetInstant=null; }
   const baseYear = visibleYear(model.base.date,model.base.year);
-  const targetYear = model.target ? visibleYear(model.target.date,model.target.year) : null;
+  const targetYear = model.target
+    ? visibleYear(model.target.date,model.target.year,{targetInstant})
+    : null;
   renderTape("research-cycles-year-tape",baseYear.cycleIndex,targetYear?.cycleIndex ?? null,"干支年位置");
   renderTape("research-cycles-day-tape",model.base.day.index,model.target?.day.index ?? null,"60 日序");
   panel.dataset.baseYearDisplayed = baseYear.name;
@@ -188,13 +197,16 @@ function render() {
 }
 
 if (panel && instrument) {
+  const yearReadoutDependencies = [
+    "data-base-date","data-target-date","data-delta-years",
+    "data-selected-target-instant-basis","data-selected-target-instant-bound",
+    "data-selected-target-instant-julian-day",
+    "data-selected-target-instant-local-offset-hours-from-ut1"
+  ];
   const observer = new MutationObserver(records => {
-    if (records.some(record => ["data-base-date","data-target-date","data-delta-years"].includes(record.attributeName))) render();
+    if(records.some(record=>yearReadoutDependencies.includes(record.attributeName)))render();
   });
-  observer.observe(instrument,{
-    attributes:true,
-    attributeFilter:["data-base-date","data-target-date","data-delta-years"]
-  });
+  observer.observe(instrument,{attributes:true,attributeFilter:yearReadoutDependencies});
   // New research-only binary evidence can refine active Year identity without
   // modifying the nominal 60-year sequence or 60-day arithmetic.
   document.addEventListener(RESEARCH_SEASONAL_EVIDENCE_READY_EVENT,render);
