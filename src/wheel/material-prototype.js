@@ -433,6 +433,27 @@ const FRAGMENT_SHADER = [
   "}"
 ].join("\n");
 
+export function resolveMaterialAuditOptions(search = "") {
+  const normal = {
+    enabled:false,
+    powerPreference:"low-power",
+    preserveDrawingBuffer:false,
+    renderScale:1
+  };
+  try {
+    const params = new URLSearchParams(search);
+    if (params.get("renderAudit") !== "1") return normal;
+    return {
+      enabled:true,
+      powerPreference:params.get("materialGpu") === "high" ? "high-performance" : "low-power",
+      preserveDrawingBuffer:params.get("materialBuffer") === "preserve",
+      renderScale:params.get("materialScale") === "0.5" ? 0.5 : 1
+    };
+  } catch {
+    return normal;
+  }
+}
+
 function normalizeMode(value) {
   if (value === null || value === "") return MATERIAL_MODES.ROUGHNESS;
   if (value === MATERIAL_MODES.SVG) return MATERIAL_MODES.SVG;
@@ -649,12 +670,12 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   const requestedProbe = resolveMaterialProbe(search);
   // Diagnostic controls are inert unless renderAudit=1 is explicit. Normal
   // material quality, GPU preference and drawing-buffer policy never change.
-  const params = new URLSearchParams(search);
-  const auditEnabled = params.get("renderAudit") === "1";
-  const auditPower = auditEnabled && params.get("materialGpu") === "high"
-    ? "high-performance" : "low-power";
-  const auditPreserve = auditEnabled && params.get("materialBuffer") === "preserve";
-  const auditScale = auditEnabled && params.get("materialScale") === "0.5" ? 0.5 : 1;
+  const {
+    enabled:auditEnabled,
+    powerPreference:auditPower,
+    preserveDrawingBuffer:auditPreserve,
+    renderScale:auditScale
+  } = resolveMaterialAuditOptions(search);
   let materialWasExplicit = false;
   try {
     materialWasExplicit = new URLSearchParams(search).has("material");
