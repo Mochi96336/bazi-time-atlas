@@ -66,6 +66,18 @@ test("primary selected date stays visible and baseline/delta share one secondary
   assert.ok(recurrenceCss.includes(".delta-dock {"));
 });
 
+test("default single-date readout and responsive fan preserve paired comparisons",async()=>{
+  const compare=await readFile(new URL("../src/research-cycle-comparison-view.js",import.meta.url),"utf8");
+  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  assert.match(recurrenceHtml,/id="research-cycles-target-label"/);
+  assert.match(compare,/deltaYears === 0/);
+  assert.match(compare,/selectedTargetInstantBound !== "true"/);
+  assert.match(compare,/panel\.dataset\.readoutMode = singleDate \? "single" : "comparison"/);
+  assert.match(layout,/data-readout-mode="single"[\\s\\S]*?display:none/);
+  assert.match(layout,/height:clamp\(315px,calc\(70vw \+ 85px\),385px\)/);
+  assert.match(recurrenceHtml,/class="research-fan-graphic"/);
+});
+
 test("global period meaning remains attached to the 24000 preset", () => {
   assert.match(view, /button\[data-delta-years="24000"\]/);
   assert.match(view, /preset\.textContent = "全域 24,000"/);
