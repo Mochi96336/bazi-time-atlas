@@ -153,6 +153,16 @@ function render() {
     : null;
   renderTape("research-cycles-year-tape",baseYear.cycleIndex,targetYear?.cycleIndex ?? null,"干支年位置");
   renderTape("research-cycles-day-tape",model.base.day.index,model.target?.day.index ?? null,"60 日序");
+  // When there is no time binding and Δ=0, two rows describe the same date.
+  // Keep both underlying evidence values in the DOM, but present one selected
+  // row rather than wasting a baseline row on duplicate facts.
+  const singleDate = deltaYears === 0 &&
+    instrument.dataset.selectedTargetInstantBound !== "true";
+  panel.dataset.readoutMode = singleDate ? "single" : "comparison";
+  panel.setAttribute("aria-label", singleDate
+    ? "選定日期干支；位移零年，基準與選定相同"
+    : "基準與比較日期干支對照");
+  setText("research-cycles-target-label",singleDate ? "選定" : "比較");
   panel.dataset.baseYearDisplayed = baseYear.name;
   panel.dataset.targetYearDisplayed = targetYear?.name ?? "unavailable";
   panel.dataset.yearTapeBasis = baseYear.positionBasis === "active" && targetYear?.positionBasis === "active"
