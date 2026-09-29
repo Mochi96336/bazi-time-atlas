@@ -320,3 +320,37 @@
   .research-task-primary .research-cycle-inline-row > span {min-width:0}
   .research-task-primary .research-cycle-inline-lookup {min-height:28px}
 }
+
+/* The phase fan is a chapter illustration, not a separate rounded card.
+   It now shares the same page grid as the year rail above it. */
+.research-task-primary .recurrence-instrument {
+  width:100%;min-height:590px;position:relative;overflow:hidden;
+  margin:13px 0 0;border:0;border-radius:0;
+  background:transparent;box-shadow:none;
+}
+.research-task-primary .phase-gauge-caption {
+  top:17px;right:4px;max-width:290px;
+}
+.research-task-primary .recurrence-legend {
+  top:22px;left:4px;
+}
+.research-task-primary #recurrence-wheel {top:-19px}
+.research-task-primary .recurrence-readout.research-current-state {
+  width:calc(100% - 8px);bottom:7px;
+}
+@media(max-width:820px){
+  .research-task-primary .recurrence-instrument {min-height:515px;margin-top:7px}
+  .research-task-primary #recurrence-wheel {top:0}
+  .research-task-primary .recurrence-readout.research-current-state {
+    width:calc(100% - 16px);bottom:11px;
+  }
+}
+@media(max-width:480px){
+  .research-task-primary .recurrence-instrument {min-height:465px}
+  .research-task-primary .phase-gauge-caption {
+    top:6px;right:5px;left:auto;max-width:190px;text-align:right;
+  }
+  .research-task-primary .recurrence-legend {
+    top:58px;left:5px;
+  }
+}
