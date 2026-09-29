@@ -73,7 +73,8 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(compare,/deltaYears === 0/);
   assert.match(compare,/selectedTargetInstantBound !== "true"/);
   assert.match(compare,/panel\.dataset\.readoutMode = singleDate \? "single" : "comparison"/);
-  assert.match(layout,/data-readout-mode="single"[\\s\\S]*?display:none/);
+  assert.ok(layout.includes('data-readout-mode="single"') &&
+    layout.includes('research-cycle-inline-row[data-side="base"] {display:none}'));
   assert.match(layout,/height:clamp\(315px,calc\(70vw \+ 85px\),385px\)/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
 });
