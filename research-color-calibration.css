@@ -477,6 +477,13 @@ body {
 .research-fan-graphic .phase-label {
   fill: rgba(225, 233, 238, .82);
 }
+.research-fan-graphic .phase-ring-name {
+  stroke: var(--research-fan-field);
+}
+.research-fan-graphic .phase-ring-name-gregorian { fill: #b6c4ce; }
+.research-fan-graphic .phase-ring-name-year { fill: #c1ced6; }
+.research-fan-graphic .phase-ring-name-day { fill: #ccd7dd; }
+.research-fan-graphic .astronomy-layer-label { fill: var(--research-fan-brass); }
 
 /* Legend and moving return markers stay distinguishable without reintroducing
    three unrelated hue families. */
@@ -489,6 +496,12 @@ body {
 .research-fan-graphic .return-marker-label-gregorian { fill: #8198ab; }
 .research-fan-graphic .return-marker-label-year { fill: #92a9bb; }
 .research-fan-graphic .return-marker-label-day { fill: #a9c0cf; }
+.research-fan-graphic .return-marker-zero-node {
+  stroke: var(--research-fan-datum);
+}
+.research-fan-graphic .return-marker-zero-node-gregorian { fill: #60778c; }
+.research-fan-graphic .return-marker-zero-node-year { fill: #7892a8; }
+.research-fan-graphic .return-marker-zero-node-day { fill: #91adbf; }
 
 /* Brass is reserved for the outer seasonal comparison. Negative residuals
    remain cool blue because their sign is semantic rather than decorative. */

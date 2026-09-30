@@ -68,6 +68,30 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
 .phase-tick { stroke:rgba(238,242,237,.30); stroke-width:1; }
 .phase-tick.major { stroke:rgba(238,242,237,.58); stroke-width:1.35; }
 .phase-label { fill:rgba(232,238,233,.67); font-size:9px; font-weight:700; text-anchor:middle; dominant-baseline:middle; }
+.phase-ring-name {
+  fill:rgba(220,229,233,.72);
+  stroke:#0d1110;
+  stroke-width:2.4px;
+  paint-order:stroke;
+  font-size:10px;
+  font-weight:780;
+  letter-spacing:.035em;
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+.astronomy-layer-label {
+  fill:#d0aa76;
+  font-size:9px;
+  font-weight:760;
+  letter-spacing:.08em;
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+.return-marker-zero-node {
+  stroke:var(--cursor);
+  stroke-width:1.25;
+  vector-effect:non-scaling-stroke;
+}
 .cursor-line { stroke:var(--cursor); stroke-width:2.2; }.cursor-halo { stroke:rgba(241,230,183,.17); stroke-width:9; }
 .cursor-label { fill:var(--cursor); font-size:9px; font-weight:800; letter-spacing:.12em; text-anchor:middle; }
 .return-marker { stroke-width:5.5; stroke-linecap:round; filter:drop-shadow(0 0 7px rgba(238,242,237,.22)); }

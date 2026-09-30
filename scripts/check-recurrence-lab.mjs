@@ -107,11 +107,19 @@ function expectSignedEvidenceCopy(dom, { year, day }, label, url) {
 }
 
 function expectDiscreteComprehension(dom, url) {
-  if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 閉合 · 左右為距 0 的最短循環位移")) {
+  if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 與基準同相位 · 左右為距 0 的最短循環位移")) {
     throw new Error(`phase gauge does not explain its zero / signed-shortest semantics: ${url}`);
   }
-  if (!dom.includes(">閉合 · 0</text>")) {
-    throw new Error(`phase gauge zero reference is not labeled as closure: ${url}`);
+  if (!dom.includes(">基準 · 0</text>")) {
+    throw new Error(`phase gauge zero reference is not labeled as the shared datum: ${url}`);
+  }
+  for (const [key, label] of [["gregorian","公曆 · 400 年"],["year","年序 · 60 年"],["day","日序 · 60 日"]]) {
+    if (!dom.includes(`data-phase-ring-label="${key}"`) || !dom.includes(`>${label}</text>`)) {
+      throw new Error(`phase gauge is missing the direct ${key} ring label: ${url}`);
+    }
+  }
+  if (!dom.includes('data-astronomy-layer-label="1"') || !dom.includes(">十二節 · 天文殘差</text>")) {
+    throw new Error(`astronomy comparison is not labeled directly on the fan: ${url}`);
   }
   for (const delta of ["400", "1200", "8000", "24000"]) {
     if (!new RegExp(`class="discrete-derivation-step[^"]*"[^>]*data-delta-years="${delta}"`).test(dom)) {
@@ -234,8 +242,13 @@ expectConsolidatedGlobalPeriod(global.dom, global.url);
 if (!/三個離散相位同時歸零/.test(global.dom) || !/26026-09-13/.test(global.dom)) {
   throw new Error(`24000-year global closure explanation missing: ${global.url}`);
 }
-for (const key of ["gregorian", "year", "day"]) expectMarker(global.dom, key, "-90.000", "0", "24000-year global recurrence", global.url);
-console.log(`[recurrence] PASS global closure stacks every discrete marker on the same reference and owns one labeled preset: ${global.url}`);
+for (const key of ["gregorian", "year", "day"]) {
+  expectMarker(global.dom, key, "-90.000", "0", "24000-year global recurrence", global.url);
+  if (!global.dom.includes(`data-return-marker="${key}-zero-node"`) || !global.dom.includes(`data-phase-zero-owner="${key}"`)) {
+    throw new Error(`24000-year global recurrence: ${key} zero landing is not visually separated on the shared datum: ${global.url}`);
+  }
+}
+console.log(`[recurrence] PASS global closure keeps three distinct zero landings on the shared reference and owns one labeled preset: ${global.url}`);
 if (
   !global.dom.includes('data-li-chun-boundary-status="absolute-source-unavailable"') ||
   !global.dom.includes('data-li-chun-projection-status="unavailable"') ||
