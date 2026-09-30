@@ -94,6 +94,7 @@ export function createOrbitalBackground({
   if (!root || !field || !instrument || !svg || !wheelCenter) return null;
 
   const config = Object.freeze({ ...DEFAULTS, ...options });
+  field.style.transformOrigin = `${wheelCenter.x}px ${wheelCenter.y}px`;
   let backgroundAngleDeg = 0;
   let backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
   let frameId = null;
