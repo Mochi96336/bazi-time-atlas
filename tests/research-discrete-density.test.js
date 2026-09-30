@@ -59,6 +59,12 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(recurrenceHtml,/id="research-target-date-input"/);
   assert.match(recurrenceHtml,/id="research-target-date-apply"/);
   assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact research-derivation-controls"/);
+  assert.match(recurrenceHtml,/id="research-jump-instant-form"/);
+  assert.match(recurrenceHtml,/id="research-jump-instant"/);
+  assert.match(recurrenceHtml,/id="research-delta-step"/);
+  assert.match(recurrenceHtml,/id="research-delta-step-minus"/);
+  assert.match(recurrenceHtml,/id="research-delta-step-plus"/);
+  assert.match(recurrenceHtml,/id="research-base-editor"/);
   assert.doesNotMatch(recurrenceHtml.slice(selectedStart,trackStart),/id="research-controls"|id="base-year"|id="delta-number"/);
   assert.ok(recurrenceHtml.slice(derivationStart,controlsStart).includes('id="delta-slider"'));
   for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons"])
@@ -75,12 +81,33 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/::-webkit-slider-thumb/);
   assert.match(layout,/grid-template-columns:minmax\(180px,1fr\) auto/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > \.delta-dock[\s\S]*?position:absolute/);
+  assert.match(layout,/\.delta-dock\.research-shift-toolbar[\s\S]*?display:flex[\s\S]*?min-height:46px/);
+  assert.match(layout,/\.research-shift-toolbar > form[\s\S]*?flex:1 1 300px/);
+  assert.match(layout,/\.research-base-editor > \.research-base-date[\s\S]*?position:absolute/);
+  assert.match(layout,/\.research-shift-toolbar > \[hidden\][\s\S]*?display:none!important/);
+  assert.match(layout,/background:#0a0f12/);
+  assert.match(layout,/border:1px solid rgba\(196,207,215,\.14\)/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > summary[\s\S]*?min-height:34px/);
   assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(4,minmax\(0,1fr\)\)/);
   assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0);
   assert.ok(recurrenceCss.includes(".delta-dock {"));
 });
 
+
+test("R11 Other displacement is useful without duplicating the public milestone rail",()=>{
+  assert.match(recurrenceHtml,/placeholder="YYYY\/MM\/DD HH:MM"/);
+  for (const value of ["60","400","1200","8000","24000"]) {
+    assert.match(recurrenceHtml,new RegExp(`<option value="${value}"`));
+  }
+  assert.match(recurrenceHtml,/id="candidate-buttons"[^>]*hidden/);
+  assert.match(recurrenceHtml,/class="global-period" hidden/);
+  assert.match(recurrenceView,/function shiftBySelectedStep\(direction\)/);
+  assert.match(recurrenceView,/currentDelta \+ direction \* step/);
+  assert.match(recurrenceView,/projectExplicitResearchTargetDate\(currentBase,currentDelta,parsed\.date\)/);
+  assert.match(recurrenceView,/target-instant-enabled/);
+  assert.match(recurrenceView,/targetTime/);
+  assert.match(recurrenceView,/setText\("research-base-summary"/);
+});
 
 test("default single-date readout and responsive fan preserve paired comparisons",async()=>{
   const compare=await readFile(new URL("../src/research-cycle-comparison-view.js",import.meta.url),"utf8");
