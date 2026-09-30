@@ -76,6 +76,10 @@ iframe.addEventListener("load",async()=>{
   const derivation=d.querySelector(".discrete-derivation");
   const derivationSteps=d.getElementById("discrete-derivation-steps");
   const zeroStep=derivationSteps?.querySelector('[data-delta-years="0"]');
+  const publicDeltaSlider=d.querySelector(".research-delta-public-slider");
+  const deltaSlider=d.getElementById("delta-slider");
+  const advancedSummary=compactControls?.querySelector(":scope > summary");
+  const sexagenaryDetails=d.getElementById("discrete-sexagenary-details");
   const task=d.getElementById("research-discrete");
   const taskBox=task.getBoundingClientRect();
   const stripBox=strip.getBoundingClientRect();
@@ -124,6 +128,13 @@ iframe.addEventListener("load",async()=>{
         : targetCompare.top>=baseCompare.bottom-1),
       "R5 actual comparison must retain both responsive Year/Day rows");
   }
+  if(width>=821){
+    check(fanGraphic.height<=526,
+      "R7 desktop fan retained excess vertical stage: "+fanGraphic.height);
+  } else if(width>480){
+    check(fanGraphic.height<=441,
+      "R7 tablet fan retained excess vertical stage: "+fanGraphic.height);
+  }
   if(width<=390) {
     const stageLimit=width<=320?316:359;
     check(fanGraphic.height<=stageLimit+1,
@@ -146,6 +157,14 @@ iframe.addEventListener("load",async()=>{
     zeroStep && zeroStep.textContent.includes("0 年") &&
     (instrument.dataset.deltaYears==="0" ? zeroStep.classList.contains("active") : true),
     "R6 derivation rail must contain 0/+400/+1200/+8000/+24000 with zero active at baseline");
+  check(publicDeltaSlider && deltaSlider && publicDeltaSlider.contains(deltaSlider) &&
+    deltaSlider.checkVisibility() && !compactControls.contains(deltaSlider) &&
+    deltaSlider.getBoundingClientRect().height>=32 &&
+    advancedSummary?.getBoundingClientRect().height>=32,
+    "R7 slider must stay visible and Other displacement must remain a readable secondary control");
+  check(sexagenaryDetails && derivation &&
+    derivation.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top,
+    "R7 60 Ganzhi source must move below the delta derivation");
     const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),
