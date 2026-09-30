@@ -440,3 +440,93 @@ body {
 .epoch-audit-summary strong { color: #b4cad7; }
 .epoch-audit-source[data-qualified-coverage="true"] header b { color: #8bb9cf; }
 .epoch-audit-facts strong { color: #93a3a9; }
+
+/* R3 — Research 01 fan palette A: Night Graphite + Cool Blue + Warm Brass.
+   Scope stays inside the existing recurrence instrument. Geometry, data,
+   interaction ownership and semantic status colors remain untouched. */
+.research-fan-graphic {
+  --research-fan-field: #05080d;
+  --research-fan-outer: #2f3d4c;
+  --research-fan-middle: #415668;
+  --research-fan-inner: #556d80;
+  --research-fan-brass: #d7b07a;
+  --research-fan-datum: #f1e7c9;
+}
+
+/* The three discrete rings are one cool material family; meaning comes from
+   radial position and labels instead of unrelated purple / ochre / cyan hues. */
+.research-fan-graphic .phase-band-gregorian { fill: rgba(47, 61, 76, .24); }
+.research-fan-graphic .phase-band-year { fill: rgba(65, 86, 104, .22); }
+.research-fan-graphic .phase-band-day { fill: rgba(85, 109, 128, .22); }
+.research-fan-graphic .gregorian-sector { fill: var(--research-fan-outer); }
+.research-fan-graphic .year-sector { fill: var(--research-fan-middle); }
+.research-fan-graphic .day-sector { fill: var(--research-fan-inner); }
+
+.research-fan-graphic .phase-sector {
+  stroke: rgba(5, 8, 13, .56);
+}
+.research-fan-graphic .recurrence-guide {
+  stroke: rgba(185, 205, 219, .27);
+}
+.research-fan-graphic .phase-tick {
+  stroke: rgba(203, 217, 226, .34);
+}
+.research-fan-graphic .phase-tick.major {
+  stroke: rgba(225, 233, 238, .70);
+}
+.research-fan-graphic .phase-label {
+  fill: rgba(225, 233, 238, .82);
+}
+
+/* Legend and moving return markers stay distinguishable without reintroducing
+   three unrelated hue families. */
+.research-fan-graphic .gregorian-dot { background: #60778c; }
+.research-fan-graphic .year-dot { background: #7892a8; }
+.research-fan-graphic .day-dot { background: #91adbf; }
+.research-fan-graphic .return-marker-gregorian { stroke: #71899e; }
+.research-fan-graphic .return-marker-year { stroke: #839db2; }
+.research-fan-graphic .return-marker-day { stroke: #9bb6c7; }
+.research-fan-graphic .return-marker-label-gregorian { fill: #8198ab; }
+.research-fan-graphic .return-marker-label-year { fill: #92a9bb; }
+.research-fan-graphic .return-marker-label-day { fill: #a9c0cf; }
+
+/* Brass is reserved for the outer seasonal comparison. Negative residuals
+   remain cool blue because their sign is semantic rather than decorative. */
+.research-fan-graphic .astronomy-dot { background: var(--research-fan-brass); }
+.research-fan-graphic .astronomy-baseline {
+  stroke: rgba(215, 176, 122, .46);
+}
+.research-fan-graphic .astronomy-base-dot {
+  fill: #0a1017;
+  stroke: rgba(215, 176, 122, .72);
+}
+.research-fan-graphic .astronomy-target-dot.positive {
+  fill: var(--research-fan-brass);
+  stroke: #ead0a5;
+}
+.research-fan-graphic .astronomy-target-dot.negative {
+  fill: #7ea8bd;
+  stroke: #b5ced9;
+}
+.research-fan-graphic .astronomy-residual-whisker.positive { stroke: #d7b07a; }
+.research-fan-graphic .astronomy-residual-whisker.negative { stroke: #7ea8bd; }
+.research-fan-graphic .astronomy-term-label { fill: var(--research-fan-brass); }
+.research-fan-graphic .astronomy-reference-extension {
+  stroke: rgba(215, 176, 122, .78);
+}
+
+/* Ivory is the single closure / datum highlight. */
+.research-fan-graphic .cursor-line,
+.research-fan-graphic .return-marker.is-closed {
+  stroke: var(--research-fan-datum);
+}
+.research-fan-graphic .cursor-halo {
+  stroke: rgba(241, 231, 201, .16);
+}
+.research-fan-graphic .cursor-label {
+  fill: var(--research-fan-datum);
+}
+.research-fan-graphic .return-marker-label {
+  stroke: var(--research-fan-field);
+}
+
