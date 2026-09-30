@@ -129,7 +129,10 @@
       const baseEditorSummary = baseEditor?.querySelector(":scope > summary");
       const recurrenceOutline = recurrenceDoc.querySelector(".research-outline");
       const recurrenceOutlineLinks = [...recurrenceDoc.querySelectorAll(".research-outline a")];
+      const recurrenceQuestion = recurrenceDoc.querySelector(".recurrence-intro h1");
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
+      const recurrenceAlignmentRows = [...recurrenceDoc.querySelectorAll(".research-alignment-row")];
+      const recurrenceNext = recurrenceDoc.querySelector(".research-question-next");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
       const sexagenaryDetails = recurrenceDoc.querySelector("#discrete-sexagenary-details");
       const astronomyTaskHead = recurrenceDoc.querySelector("#research-astronomy > .research-task-head");
@@ -181,7 +184,10 @@
         ? Math.max(0, Math.min(recurrenceRect.bottom, viewportHeight) - Math.max(recurrenceRect.top, 0))
         : -1;
       probe.dataset.recurrenceLedeHidden = String(hidden(recurrenceWin, recurrenceLede));
-      probe.dataset.recurrenceQuestionText = recurrenceLede?.textContent.trim() ?? "missing";
+      probe.dataset.recurrenceQuestionText = recurrenceQuestion?.textContent.trim() ?? "missing";
+      probe.dataset.recurrenceAlignmentCount = String(recurrenceAlignmentRows.length);
+      probe.dataset.recurrenceAlignmentText = recurrenceAlignmentRows.map(node => node.textContent.replace(/\s+/g," ").trim()).join("|");
+      probe.dataset.recurrenceNextText = recurrenceNext?.textContent.replace(/\s+/g," ").trim() ?? "missing";
       probe.dataset.recurrenceSpineDiscrete = recurrenceDoc.querySelector("#research-spine-discrete")?.textContent.trim() ?? "missing";
       probe.dataset.recurrenceSpineAstronomy = recurrenceDoc.querySelector("#research-spine-astronomy")?.textContent.trim() ?? "missing";
       probe.dataset.recurrenceSpineEvidence = recurrenceDoc.querySelector("#research-spine-evidence")?.textContent.trim() ?? "missing";

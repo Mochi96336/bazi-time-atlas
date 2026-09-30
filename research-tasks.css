@@ -1,12 +1,101 @@
+.research-question-intro {
+  display:block;
+  margin:20px 2px 12px;
+}
+.research-question-intro > .research-question-copy {
+  max-width:900px;
+}
+.research-question-intro h1 {
+  margin:0;
+  max-width:none;
+  font-size:clamp(25px,2.8vw,40px);
+  line-height:1.08;
+  letter-spacing:-.035em;
+  font-weight:650;
+}
+.research-question-intro .lede {
+  margin:7px 0 0;
+  max-width:760px;
+  font-size:clamp(11.5px,1vw,13.5px);
+  line-height:1.55;
+}
+.research-alignment-map {
+  width:min(690px,100%);
+  display:grid;
+  gap:7px;
+  margin:13px 0 9px;
+}
+.research-alignment-row {
+  display:grid;
+  grid-template-columns:max-content minmax(110px,1fr) max-content;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.research-alignment-row > strong {
+  display:inline-flex;
+  align-items:baseline;
+  gap:6px;
+  min-width:58px;
+  color:#c5ced1;
+  font-size:11px;
+  font-weight:650;
+  white-space:nowrap;
+}
+.research-alignment-row > strong:last-child { justify-content:flex-end; }
+.research-alignment-row > strong em {
+  color:#718087;
+  font-size:8px;
+  font-style:normal;
+  font-weight:780;
+  letter-spacing:.08em;
+}
+.research-alignment-bridge {
+  display:grid;
+  grid-template-rows:1px auto;
+  gap:3px;
+  align-items:center;
+  min-width:0;
+  color:#74838a;
+  text-align:center;
+}
+.research-alignment-bridge i {
+  display:block;
+  width:100%;
+  border-top:1px solid rgba(175,194,201,.22);
+}
+.research-alignment-bridge small {
+  font-size:8px;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.research-question-next {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:3px 5px;
+  margin:4px 0 0;
+  color:#87959a;
+  font-size:11px;
+  line-height:1.5;
+}
+.research-question-next strong {
+  color:#d7e0df;
+  font-size:12px;
+  font-weight:700;
+}
+
 .research-outline {
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:0;
   margin:0 2px 16px;
-  border-top:1px solid rgba(238,242,237,.09);
+  border:0;
   border-bottom:1px solid rgba(238,242,237,.07);
 }
 .research-outline a {
+  --research-task-accent:#9aa9ae;
+  position:relative;
   min-width:0;
   min-height:42px;
   display:grid;
@@ -15,15 +104,29 @@
   column-gap:7px;
   row-gap:1px;
   align-content:center;
-  padding:5px 4px;
+  padding:5px 6px 7px 0;
   color:#7f8982;
+  background:transparent;
   text-decoration:none;
 }
-.research-outline a + a { border-left:1px solid rgba(238,242,237,.045); }
+.research-outline a:nth-child(2) { --research-task-accent:#c59563; }
+.research-outline a:nth-child(3) { --research-task-accent:#86a1ba; }
+.research-outline a::after {
+  content:"";
+  position:absolute;
+  left:0;
+  right:14%;
+  bottom:-1px;
+  height:1px;
+  background:var(--research-task-accent);
+  opacity:.24;
+  transition:opacity .16s ease;
+}
+.research-outline a + a { border-left:0; }
 .research-outline span {
   grid-area:index;
   align-self:center;
-  color:#58635c;
+  color:#68767c;
   font-size:8px;
   font-weight:850;
   letter-spacing:.1em;
@@ -49,6 +152,8 @@
 }
 .research-outline a:hover strong,
 .research-outline a:focus-visible strong { color:#eef2ed; }
+.research-outline a:hover::after,
+.research-outline a:focus-visible::after { opacity:.72; }
 
 .research-task {
   scroll-margin-top:18px;
@@ -100,7 +205,28 @@
   .research-task-primary { margin-top:0; padding-top:0; }
 }
 @media (max-width:480px) {
-  .research-outline a { min-height:42px; }
+  .research-question-intro { margin:7px 0 10px; }
+  .research-question-intro h1 { font-size:24px; }
+  .research-question-intro .lede { margin-top:5px; font-size:11px; line-height:1.45; }
+  .research-alignment-map { gap:6px; margin:10px 0 7px; }
+  .research-alignment-row {
+    grid-template-columns:max-content minmax(90px,1fr) max-content;
+    gap:7px;
+  }
+  .research-alignment-row > strong { min-width:52px; font-size:10.5px; }
+  .research-alignment-bridge small { font-size:7.5px; }
+  .research-question-next { margin-top:3px; font-size:10.5px; }
+  .research-question-next strong { font-size:11px; }
+
+  .research-outline {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    margin:0 0 12px;
+  }
+  .research-outline a {
+    min-height:42px;
+    padding:4px 3px 6px 0;
+  }
+  .research-outline small { font-size:7.5px; }
   .research-task { margin-top:28px; padding-top:15px; }
   .research-task-primary { margin-top:0; padding-top:0; }
   .research-task-head { margin-bottom:9px; }
