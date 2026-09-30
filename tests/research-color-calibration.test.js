@@ -50,3 +50,23 @@ test("status colors stay semantic rather than sharing one decorative accent",()=
   assert.match(css,/identical-by-definition[\s\S]*color: #c1ad79/);
   assert.match(css,/data-qualified-coverage="true"\] header b \{ color: #83afc4; \}/);
 });
+
+test("R3 palette A unifies only the Research 01 fan into cool graphite plus brass datum accents",()=>{
+  for(const token of [
+    "--research-fan-field: #05080d",
+    "--research-fan-outer: #2f3d4c",
+    "--research-fan-middle: #415668",
+    "--research-fan-inner: #556d80",
+    "--research-fan-brass: #d7b07a",
+    "--research-fan-datum: #f1e7c9"
+  ]) assert.ok(css.includes(token),token);
+
+  assert.doesNotMatch(css,/#research-discrete \.recurrence-instrument \{[\s\S]*?(?:background|box-shadow)\s*:/);
+  assert.match(css,/\.research-fan-graphic \.gregorian-sector \{ fill: var\(--research-fan-outer\); \}/);
+  assert.match(css,/\.research-fan-graphic \.year-sector \{ fill: var\(--research-fan-middle\); \}/);
+  assert.match(css,/\.research-fan-graphic \.day-sector \{ fill: var\(--research-fan-inner\); \}/);
+  assert.match(css,/\.research-fan-graphic \.astronomy-term-label \{ fill: var\(--research-fan-brass\); \}/);
+  assert.match(css,/\.research-fan-graphic \.cursor-label \{\s*fill: var\(--research-fan-datum\);/);
+  assert.match(css,/\.research-fan-graphic \.astronomy-target-dot\.negative \{[\s\S]*fill: #7ea8bd/);
+});
+
