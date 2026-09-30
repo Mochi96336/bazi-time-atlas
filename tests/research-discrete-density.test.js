@@ -259,7 +259,7 @@ test("reading order leads with paired names and phase wheel, then delta derivati
     stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
-  assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
+  assert.match(recurrenceView, /三個離散相位同時歸零，只建立四柱重現候選/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 閉合"));
 });
 
