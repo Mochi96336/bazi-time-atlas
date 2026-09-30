@@ -733,7 +733,7 @@
   border-radius:6px;
   background:rgba(255,255,255,.015);
   color:#a8bbb0;
-  font-size:10.5px;
+  font-size:11.5px;
   font-weight:620;
 }
 .discrete-derivation .research-derivation-controls > summary::after {
@@ -809,7 +809,7 @@
   .discrete-derivation .research-derivation-controls > summary {
     min-height:32px;
     padding:4px 8px;
-    font-size:10px;
+    font-size:10.5px;
   }
   .discrete-derivation .research-derivation-controls > .delta-dock,
   .discrete-derivation .research-derivation-controls > .delta-dock.research-delta-consolidated {
