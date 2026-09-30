@@ -193,82 +193,84 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 }
 
 .orbital-grain {
-  opacity: .24;
+  opacity: .22;
   background-image:
-    radial-gradient(circle, rgba(134, 155, 174, .075) 0 .35px, transparent .72px),
-    radial-gradient(circle, rgba(82, 104, 123, .055) 0 .3px, transparent .68px);
+    radial-gradient(circle, rgba(134, 155, 174, .068) 0 .32px, transparent .70px),
+    radial-gradient(circle, rgba(82, 104, 123, .050) 0 .28px, transparent .66px);
   background-position: 0 0, 3px 5px;
   background-size: 7px 9px, 11px 13px;
   mix-blend-mode: soft-light;
-}
-
-.orbital-field {
-  transform: rotate(0deg);
-  transform-origin: var(--orbital-center-x) var(--orbital-center-y);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-.orbital-rings,
-.orbital-veil {
-  position: absolute;
-  inset: 0;
 }
 
 .orbital-rings-primary {
   background:
     radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
       transparent 0 calc(var(--orbital-r1) - .6px),
-      rgba(111, 137, 160, .070) var(--orbital-r1) calc(var(--orbital-r1) + .45px),
+      rgba(111, 137, 160, .064) var(--orbital-r1) calc(var(--orbital-r1) + .42px),
       transparent calc(var(--orbital-r1) + 1px) calc(var(--orbital-r3) - .55px),
-      rgba(111, 137, 160, .058) var(--orbital-r3) calc(var(--orbital-r3) + .45px),
+      rgba(111, 137, 160, .052) var(--orbital-r3) calc(var(--orbital-r3) + .42px),
       transparent calc(var(--orbital-r3) + 1px) calc(var(--orbital-r5) - .55px),
-      rgba(111, 137, 160, .050) var(--orbital-r5) calc(var(--orbital-r5) + .45px),
+      rgba(111, 137, 160, .044) var(--orbital-r5) calc(var(--orbital-r5) + .42px),
       transparent calc(var(--orbital-r5) + 1px) calc(var(--orbital-r7) - .55px),
-      rgba(111, 137, 160, .042) var(--orbital-r7) calc(var(--orbital-r7) + .45px),
+      rgba(111, 137, 160, .036) var(--orbital-r7) calc(var(--orbital-r7) + .42px),
       transparent calc(var(--orbital-r7) + 1px));
 }
 
 .orbital-rings-secondary {
-  opacity: .72;
+  opacity: .70;
   background:
     radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
       transparent 0 calc(var(--orbital-r2) - .45px),
-      rgba(82, 108, 132, .045) var(--orbital-r2) calc(var(--orbital-r2) + .35px),
+      rgba(82, 108, 132, .040) var(--orbital-r2) calc(var(--orbital-r2) + .32px),
       transparent calc(var(--orbital-r2) + .9px) calc(var(--orbital-r4) - .45px),
-      rgba(82, 108, 132, .038) var(--orbital-r4) calc(var(--orbital-r4) + .35px),
+      rgba(82, 108, 132, .034) var(--orbital-r4) calc(var(--orbital-r4) + .32px),
       transparent calc(var(--orbital-r4) + .9px) calc(var(--orbital-r6) - .45px),
-      rgba(82, 108, 132, .031) var(--orbital-r6) calc(var(--orbital-r6) + .35px),
+      rgba(82, 108, 132, .028) var(--orbital-r6) calc(var(--orbital-r6) + .32px),
       transparent calc(var(--orbital-r6) + .9px));
 }
 
+.orbital-veils {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.orbital-field {
+  transform: rotate(0deg);
+  transform-box: view-box;
+  transform-origin: 600px 1360px;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
 .orbital-veil {
-  opacity: .72;
-  background:
-    conic-gradient(from 206deg at var(--orbital-center-x) var(--orbital-center-y),
-      transparent 0deg 22deg,
-      rgba(91, 121, 148, .012) 38deg,
-      rgba(105, 135, 161, .052) 64deg,
-      rgba(73, 101, 127, .021) 96deg,
-      transparent 126deg 244deg,
-      rgba(82, 109, 135, .010) 266deg,
-      rgba(100, 128, 153, .036) 292deg,
-      transparent 326deg 360deg);
-  -webkit-mask-image:
-    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
-      transparent 0 calc(var(--orbital-r1) - 34px),
-      rgba(0,0,0,.32) calc(var(--orbital-r1) + 18px),
-      #000 calc(var(--orbital-r2) + 22px) calc(var(--orbital-r6) + 38px),
-      rgba(0,0,0,.28) calc(var(--orbital-r7) + 18px),
-      transparent calc(var(--orbital-r7) + 116px));
-  mask-image:
-    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
-      transparent 0 calc(var(--orbital-r1) - 34px),
-      rgba(0,0,0,.32) calc(var(--orbital-r1) + 18px),
-      #000 calc(var(--orbital-r2) + 22px) calc(var(--orbital-r6) + 38px),
-      rgba(0,0,0,.28) calc(var(--orbital-r7) + 18px),
-      transparent calc(var(--orbital-r7) + 116px));
-  filter: blur(7px);
+  fill: none;
+  stroke: rgba(105, 133, 158, .052);
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.orbital-veil-a {
+  stroke-dasharray: 43 57;
+  stroke-dashoffset: 8;
+  opacity: .64;
+}
+
+.orbital-veil-b {
+  stroke: rgba(86, 116, 143, .044);
+  stroke-width: 1.8;
+  stroke-dasharray: 36 64;
+  stroke-dashoffset: -19;
+  opacity: .52;
+}
+
+.orbital-veil-c {
+  stroke: rgba(117, 142, 164, .036);
+  stroke-width: 2.4;
+  stroke-dasharray: 31 69;
+  stroke-dashoffset: 27;
+  opacity: .42;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -276,7 +278,7 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
     transform: none !important;
     will-change: auto;
   }
-  .orbital-veil { opacity: .48; }
+  .orbital-veil { opacity: .34; }
 }
 
 #kinetic-wheel { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
