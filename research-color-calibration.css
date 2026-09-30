@@ -444,15 +444,8 @@ body {
 /* R3 — Research 01 fan palette A: Night Graphite + Cool Blue + Warm Brass.
    Scope stays inside the existing recurrence instrument. Geometry, data,
    interaction ownership and semantic status colors remain untouched. */
-#research-discrete .recurrence-instrument {
-  background:
-    radial-gradient(circle at 50% 112%, rgba(85, 109, 128, .105), transparent 43%),
-    linear-gradient(180deg, #071019 0%, #05080d 100%);
-  border-color: rgba(157, 181, 198, .11);
-  box-shadow: 0 34px 100px rgba(0, 0, 0, .32);
-}
-
 .research-fan-graphic {
+  --research-fan-field: #05080d;
   --research-fan-outer: #2f3d4c;
   --research-fan-middle: #415668;
   --research-fan-inner: #556d80;
@@ -534,6 +527,6 @@ body {
   fill: var(--research-fan-datum);
 }
 .research-fan-graphic .return-marker-label {
-  stroke: #05080d;
+  stroke: var(--research-fan-field);
 }
 
