@@ -224,6 +224,7 @@ export function createOrbitalBackground({
     if (settledToIdle) {
       backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
       lastTimestamp = null;
+      delete root.dataset.orbitalKinetic;
       if (idleActivated) scheduleIdleTick();
       return;
     }
@@ -234,6 +235,7 @@ export function createOrbitalBackground({
   function startInteractiveFrame() {
     if (destroyed || isReducedMotion() || frameId !== null) return;
     stopIdleTimer();
+    root.dataset.orbitalKinetic = "true";
     frameId = requestFrame(renderFrame);
   }
 
@@ -248,6 +250,7 @@ export function createOrbitalBackground({
     stopIdleTimer();
     if (isReducedMotion()) {
       root.dataset.orbitalMotion = "reduced";
+      delete root.dataset.orbitalKinetic;
       backgroundVelocityDegPerSec = 0;
       field.style.transform = "none";
       return;
@@ -298,6 +301,7 @@ export function createOrbitalBackground({
       instrument.removeEventListener?.("touchstart", activateIdleMotion);
       reducedMotionQuery?.removeEventListener?.("change", applyMotionPreference);
       delete root.dataset.orbitalMotion;
+      delete root.dataset.orbitalKinetic;
       field.style.transform = "";
     }
   });
