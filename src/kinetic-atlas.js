@@ -3,6 +3,8 @@ import { solarTerms, zodiacSigns } from "./data.js";
 import {
   CURSOR_ANGLE,
   RINGS,
+  RADII,
+  WHEEL_CENTER,
   SEXAGENARY_RING_IDS,
   assertWheelModel
 } from "./wheel/ring-model.js";
@@ -15,6 +17,7 @@ import {
   setModelRotation
 } from "./wheel/ring-state.js";
 import { createRingDragController } from "./wheel/ring-drag-controller.js";
+import { createOrbitalBackground } from "./orbital-background.js";
 import {
   ATLAS_SEXAGENARY_NAMES,
   atlasInputValueFromFields,
@@ -579,6 +582,14 @@ function initialize() {
   bindControls();
   updateWheel();
   installRingDrag();
+  createOrbitalBackground({
+    root:document.querySelector("#orbital-background"),
+    instrument,
+    svg,
+    wheelCenter:WHEEL_CENTER,
+    wheelOuterRadius:RADII.outer,
+    getWheelAngularVelocityDegPerSec:() => dragController?.currentAngularVelocityDegPerSec ?? 0
+  });
 }
 
 initialize();
