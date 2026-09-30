@@ -55,15 +55,16 @@ test("B1.2 orbital coordinate rings and mask stay outside the canonical wheel en
 
 test("B1.2 kinetic energy makes a hard fling substantially thicker and brighter", () => {
   assert.equal(orbitalKineticIntensity(0), 0);
-  assert.equal(orbitalKineticIntensity(35), 0);
-  assert.equal(orbitalKineticIntensity(360), 1);
-  assert.equal(orbitalKineticIntensity(-360), 1);
+  assert.equal(orbitalKineticIntensity(25), 0);
+  assert.equal(orbitalKineticIntensity(220), 1);
+  assert.equal(orbitalKineticIntensity(-220), 1);
+  assert.ok(orbitalKineticIntensity(150) > 0.65);
 
   const idle = orbitalVeilPresentation(0, 0);
   const hot = orbitalVeilPresentation(0, 1);
-  assert.equal(idle.strokeWidth, 0.9);
-  assert.equal(hot.strokeWidth, 4.8);
-  assert.ok(hot.strokeWidth > idle.strokeWidth * 5);
+  assert.equal(idle.strokeWidth, 0.85);
+  assert.equal(hot.strokeWidth, 5.2);
+  assert.ok(hot.strokeWidth > idle.strokeWidth * 6);
   assert.ok(hot.opacity > idle.opacity * 3);
 });
 
