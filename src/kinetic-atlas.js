@@ -3,6 +3,7 @@ import { solarTerms, zodiacSigns } from "./data.js";
 import {
   CURSOR_ANGLE,
   RINGS,
+  RADII,
   WHEEL_CENTER,
   SEXAGENARY_RING_IDS,
   assertWheelModel
@@ -586,6 +587,7 @@ function initialize() {
     instrument,
     svg,
     wheelCenter:WHEEL_CENTER,
+    wheelOuterRadius:RADII.outer,
     getWheelAngularVelocityDegPerSec:() => dragController?.currentAngularVelocityDegPerSec ?? 0
   });
 }
