@@ -897,7 +897,7 @@
   appearance:none;
   width:100%;
   min-width:0;
-  height:26px;
+  height:32px;
   margin:0;
   padding:0;
   background:transparent;
@@ -996,7 +996,7 @@
     padding-top:5px;
   }
   .research-delta-public-slider input[type="range"] {
-    height:28px;
+    height:32px;
   }
   .research-delta-public-slider output {
     min-width:55px;
