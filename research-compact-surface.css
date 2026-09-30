@@ -578,7 +578,7 @@
   border-bottom:1px solid rgba(197,215,200,.12);
 }
 .discrete-derivation .research-derivation-controls .research-base-date input {
-  min-height:40px;
+  min-height:42px;
 }
 .discrete-derivation .research-derivation-controls .candidate-buttons {
   justify-content:flex-end;
