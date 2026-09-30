@@ -1090,3 +1090,34 @@
     min-height:68px;
   }
 }
+
+/* R10: keep Δ, scrubber, live value and advanced control on one physical
+   row even on narrow screens. There is enough width for a useful scrub rail;
+   stacking it added height without adding information. */
+@media(max-width:820px) {
+  .discrete-derivation > header {
+    grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-areas:"title slider controls";
+    align-items:center;
+    gap:3px 8px;
+  }
+  .research-delta-public-slider {
+    grid-template-columns:minmax(72px,1fr) auto;
+    gap:6px;
+    min-width:0;
+  }
+}
+@media(max-width:480px) {
+  .discrete-derivation-title > strong {
+    font-size:9px;
+  }
+  .research-delta-public-slider output {
+    min-width:38px;
+    font-size:9px;
+  }
+  .discrete-derivation .research-derivation-controls > summary {
+    padding-left:7px;
+    padding-right:7px;
+    white-space:nowrap;
+  }
+}
