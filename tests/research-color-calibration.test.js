@@ -34,6 +34,16 @@ test("color pass does not become a hidden layout rewrite",()=>{
   assert.doesNotMatch(css,forbidden);
 });
 
+test("R2 separates chapter temperature without adding layout chrome",()=>{
+  assert.match(css,/\.research-task \{[\s\S]*--research-section-accent: var\(--research-discrete\);[\s\S]*linear-gradient/);
+  assert.match(css,/#research-astronomy \{ --research-section-accent: var\(--research-astronomy\); \}/);
+  assert.match(css,/#research-evidence \{ --research-section-accent: var\(--research-evidence\); \}/);
+  assert.match(css,/#research-astronomy \.research-task-head h2 \{\s*color: #eee6da;/);
+  assert.match(css,/#research-evidence \.research-task-head h2 \{\s*color: #e6edf1;/);
+  assert.match(css,/data-resolved="true"[\s\S]*color: #9bd0b7/);
+  assert.match(css,/not-resolved-by-shape-model[\s\S]*color: #c78b7d/);
+});
+
 test("status colors stay semantic rather than sharing one decorative accent",()=>{
   assert.match(css,/data-resolved="true"[\s\S]*color: #91c7ad/);
   assert.match(css,/not-resolved-by-shape-model[\s\S]*color: #bd8377/);
