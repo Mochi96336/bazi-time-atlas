@@ -150,6 +150,135 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 .ring-solar i { background: var(--solar); }
 .ring-zodiac i { background: var(--zodiac); }
 
+
+/* B1 — presentation-only kinetic orbital field.
+   Geometry follows the wheel camera, but this layer owns no time semantics,
+   hit testing, ring selection or drag state. */
+#orbital-background {
+  --orbital-center-x: 50%;
+  --orbital-center-y: 178.95%;
+  --orbital-r1: 565px;
+  --orbital-r2: 695px;
+  --orbital-r3: 805px;
+  --orbital-r4: 945px;
+  --orbital-r5: 1105px;
+  --orbital-r6: 1265px;
+  --orbital-r7: 1395px;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 4%, rgba(87, 111, 137, .042), transparent 43%),
+    linear-gradient(180deg, rgba(4, 10, 17, .16), rgba(2, 7, 12, .025) 56%, rgba(20, 29, 38, .032));
+}
+
+#orbital-background > * {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orbital-haze {
+  background:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      rgba(84, 108, 131, .043) 0,
+      rgba(56, 76, 96, .020) 42%,
+      transparent 69%),
+    radial-gradient(ellipse at 72% 14%, rgba(85, 112, 141, .027), transparent 39%),
+    radial-gradient(ellipse at 24% 28%, rgba(47, 70, 94, .023), transparent 45%);
+}
+
+.orbital-grain {
+  opacity: .24;
+  background-image:
+    radial-gradient(circle, rgba(134, 155, 174, .075) 0 .35px, transparent .72px),
+    radial-gradient(circle, rgba(82, 104, 123, .055) 0 .3px, transparent .68px);
+  background-position: 0 0, 3px 5px;
+  background-size: 7px 9px, 11px 13px;
+  mix-blend-mode: soft-light;
+}
+
+.orbital-field {
+  transform: rotate(0deg);
+  transform-origin: var(--orbital-center-x) var(--orbital-center-y);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.orbital-rings,
+.orbital-veil {
+  position: absolute;
+  inset: 0;
+}
+
+.orbital-rings-primary {
+  background:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0 calc(var(--orbital-r1) - .6px),
+      rgba(111, 137, 160, .070) var(--orbital-r1) calc(var(--orbital-r1) + .45px),
+      transparent calc(var(--orbital-r1) + 1px) calc(var(--orbital-r3) - .55px),
+      rgba(111, 137, 160, .058) var(--orbital-r3) calc(var(--orbital-r3) + .45px),
+      transparent calc(var(--orbital-r3) + 1px) calc(var(--orbital-r5) - .55px),
+      rgba(111, 137, 160, .050) var(--orbital-r5) calc(var(--orbital-r5) + .45px),
+      transparent calc(var(--orbital-r5) + 1px) calc(var(--orbital-r7) - .55px),
+      rgba(111, 137, 160, .042) var(--orbital-r7) calc(var(--orbital-r7) + .45px),
+      transparent calc(var(--orbital-r7) + 1px));
+}
+
+.orbital-rings-secondary {
+  opacity: .72;
+  background:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0 calc(var(--orbital-r2) - .45px),
+      rgba(82, 108, 132, .045) var(--orbital-r2) calc(var(--orbital-r2) + .35px),
+      transparent calc(var(--orbital-r2) + .9px) calc(var(--orbital-r4) - .45px),
+      rgba(82, 108, 132, .038) var(--orbital-r4) calc(var(--orbital-r4) + .35px),
+      transparent calc(var(--orbital-r4) + .9px) calc(var(--orbital-r6) - .45px),
+      rgba(82, 108, 132, .031) var(--orbital-r6) calc(var(--orbital-r6) + .35px),
+      transparent calc(var(--orbital-r6) + .9px));
+}
+
+.orbital-veil {
+  opacity: .72;
+  background:
+    conic-gradient(from 206deg at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0deg 22deg,
+      rgba(91, 121, 148, .012) 38deg,
+      rgba(105, 135, 161, .052) 64deg,
+      rgba(73, 101, 127, .021) 96deg,
+      transparent 126deg 244deg,
+      rgba(82, 109, 135, .010) 266deg,
+      rgba(100, 128, 153, .036) 292deg,
+      transparent 326deg 360deg);
+  -webkit-mask-image:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0 calc(var(--orbital-r1) - 34px),
+      rgba(0,0,0,.32) calc(var(--orbital-r1) + 18px),
+      #000 calc(var(--orbital-r2) + 22px) calc(var(--orbital-r6) + 38px),
+      rgba(0,0,0,.28) calc(var(--orbital-r7) + 18px),
+      transparent calc(var(--orbital-r7) + 116px));
+  mask-image:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0 calc(var(--orbital-r1) - 34px),
+      rgba(0,0,0,.32) calc(var(--orbital-r1) + 18px),
+      #000 calc(var(--orbital-r2) + 22px) calc(var(--orbital-r6) + 38px),
+      rgba(0,0,0,.28) calc(var(--orbital-r7) + 18px),
+      transparent calc(var(--orbital-r7) + 116px));
+  filter: blur(7px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbital-field {
+    transform: none !important;
+    will-change: auto;
+  }
+  .orbital-veil { opacity: .48; }
+}
+
 #kinetic-wheel { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cycle-sector { stroke: color-mix(in srgb, var(--field) 74%, transparent); stroke-width: 1.2; transition: fill 140ms ease, opacity 140ms ease; }
 .year-sector { fill: color-mix(in srgb, var(--year) 17%, transparent); }
