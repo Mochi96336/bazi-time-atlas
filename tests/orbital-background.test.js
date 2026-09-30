@@ -46,6 +46,10 @@ test("B1 stays decorative and consumes a read-only wheel velocity", () => {
   assert.match(html, /id="orbital-background" aria-hidden="true"/);
   assert.match(css, /#orbital-background\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*transform;/);
+  assert.match(
+    readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8"),
+    /fieldAnimation\.currentTime = backgroundAngleDeg \* 1000/
+  );
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.orbital-field/);
   assert.match(drag, /get currentAngularVelocityDegPerSec\(\)/);
   assert.match(atlas, /getWheelAngularVelocityDegPerSec:\(\) => dragController\?\.currentAngularVelocityDegPerSec \?\? 0/);
