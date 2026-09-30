@@ -34,6 +34,14 @@ const selectedDateInput = document.querySelector("#research-target-date-input");
 const selectedDateFeedback = document.querySelector("#research-target-date-feedback");
 const deltaNumber = document.querySelector("#delta-number");
 const deltaSlider = document.querySelector("#delta-slider");
+const jumpInstantForm = document.querySelector("#research-jump-instant-form");
+const jumpInstantInput = document.querySelector("#research-jump-instant");
+const deltaStep = document.querySelector("#research-delta-step");
+const deltaStepMinus = document.querySelector("#research-delta-step-minus");
+const deltaStepPlus = document.querySelector("#research-delta-step-plus");
+const deltaNumberApply = document.querySelector("#research-delta-number-apply");
+const baseEditor = document.querySelector("#research-base-editor");
+const shiftFeedback = document.querySelector("#research-shift-feedback");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const derivationSteps = document.querySelector("#discrete-derivation-steps");
 const cursorGroup = document.querySelector("#recurrence-cursor");
@@ -271,6 +279,109 @@ function formatDate(date) {
   const pad = value => String(value).padStart(2, "0");
   return `${date.year}-${pad(date.month)}-${pad(date.day)}`;
 }
+function formatDateSlash(date) {
+  return formatDate(date).replaceAll("-", "/");
+}
+
+function showShiftFeedback(message = "") {
+  if (!shiftFeedback) return;
+  shiftFeedback.hidden = !message;
+  shiftFeedback.textContent = message;
+}
+
+function selectedClockText() {
+  const enabled = document.querySelector("#target-instant-enabled");
+  const time = document.querySelector("#target-instant-time");
+  if (enabled?.checked && time?.value) return time.value.slice(0,5);
+  const params = new URLSearchParams(location.search);
+  if (params.get("targetClock") !== "fixed-zone") return "";
+  const queryTime = params.get("targetTime") ?? "";
+  return /^\d{2}:\d{2}/.test(queryTime) ? queryTime.slice(0,5) : "";
+}
+
+function syncShiftToolbar(state) {
+  setText("research-base-summary", formatDateSlash(currentBase));
+  const targetText = state?.targetValid ? formatDateSlash(state.targetDate) : "";
+  const clock = selectedClockText();
+  if (jumpInstantInput && document.activeElement !== jumpInstantInput && targetText) {
+    jumpInstantInput.value = clock ? `${targetText} ${clock}` : targetText;
+  }
+  if (deltaStepMinus) deltaStepMinus.disabled = currentDelta <= 0;
+  if (deltaStepPlus) deltaStepPlus.disabled = currentDelta >= maxSelectableDelta();
+}
+
+function parseJumpInstant(rawValue) {
+  const match = /^(\d{1,8})[\/-](\d{1,2})[\/-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(rawValue.trim());
+  if (!match) return null;
+  const date = { year:Number(match[1]), month:Number(match[2]), day:Number(match[3]) };
+  if (!validateGregorianDate(date)) return null;
+  if (match[4] === undefined) return { date, time:null };
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6] ?? 0);
+  if (hour > 23 || minute > 59 || second > 59) return null;
+  return {
+    date,
+    time:`${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}:${String(second).padStart(2,"0")}`
+  };
+}
+
+function applyToolbarTargetClock(timeText) {
+  if (!timeText) return;
+  const enabled = document.querySelector("#target-instant-enabled");
+  const time = document.querySelector("#target-instant-time");
+  const offset = document.querySelector("#target-instant-offset");
+  if (enabled && time) {
+    time.value = timeText;
+    if (!enabled.checked) {
+      enabled.checked = true;
+      enabled.dispatchEvent(new Event("change", { bubbles:true }));
+    }
+    time.dispatchEvent(new Event("change", { bubbles:true }));
+    return;
+  }
+  // The proof-chain controller is normally present before a human can use
+  // this toolbar. Preserve intent through its canonical query contract if a
+  // very early interaction happens before that module has mounted.
+  const url = new URL(location.href);
+  url.searchParams.set("targetClock", "fixed-zone");
+  url.searchParams.set("targetTime", timeText);
+  if (!url.searchParams.has("ut1Offset")) url.searchParams.set("ut1Offset", offset?.value || "8");
+  history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+function applyJumpInstant(event) {
+  event.preventDefault();
+  const parsed = parseJumpInstant(jumpInstantInput?.value ?? "");
+  if (!parsed) {
+    showShiftFeedback("請輸入 YYYY/MM/DD 或 YYYY/MM/DD HH:MM");
+    return;
+  }
+  const projection = projectExplicitResearchTargetDate(currentBase,currentDelta,parsed.date);
+  if (projection.status !== "applied") {
+    showShiftFeedback("這個時間無法沿用目前 Δ");
+    return;
+  }
+  currentBase = projection.baseDate;
+  yearInput.value = String(currentBase.year);
+  monthInput.value = String(currentBase.month);
+  dayInput.value = String(currentBase.day);
+  instrument.dataset.baseDateValid = "true";
+  if (selectedDateInput) selectedDateInput.value = formatDateSlash(projection.targetDate);
+  updateDeltaControlBounds();
+  rebuildCandidates();
+  setDelta(currentDelta,{source:"other-shift-time"});
+  applyToolbarTargetClock(parsed.time);
+  showShiftFeedback("");
+}
+
+function shiftBySelectedStep(direction) {
+  const step = Number(deltaStep?.value);
+  if (!Number.isFinite(step) || step <= 0) return;
+  setDelta(currentDelta + direction * step, { source:direction < 0 ? "step-minus" : "step-plus" });
+  showShiftFeedback("");
+}
+
 
 function syncQueryState() {
   const url = new URL(location.href);
@@ -433,6 +544,7 @@ function renderState() {
   instrument.dataset.yearSequenceClosed = String(state.closed.yearSequence);
   instrument.dataset.dayClosed = String(state.closed.day);
   instrument.dataset.globalClosed = String(state.closed.gregorian && state.closed.yearSequence && state.closed.day);
+  syncShiftToolbar(state);
 
   candidateButtons.querySelectorAll("button").forEach(button => button.classList.toggle("active", Number(button.dataset.deltaYears) === currentDelta));
   derivationSteps?.querySelectorAll(".discrete-derivation-step").forEach(step => step.classList.toggle("active", Number(step.dataset.deltaYears) === currentDelta));
@@ -460,6 +572,8 @@ function updateBaseDate() {
   updateDeltaControlBounds();
   rebuildCandidates();
   setDelta(currentDelta, { source:"base-date" });
+  baseEditor?.removeAttribute("open");
+  showShiftFeedback("");
 }
 
 // Sole commit authority for a date chosen on the ORIGINAL annual strip.
@@ -577,8 +691,12 @@ function submitSelectedDate(event) {
 
 function bindControls() {
   selectedDateForm?.addEventListener("submit",submitSelectedDate);
+  jumpInstantForm?.addEventListener("submit",applyJumpInstant);
   [yearInput, monthInput, dayInput].forEach(input => input.addEventListener("change", updateBaseDate));
   deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value, { source:"number" }));
+  deltaNumberApply?.addEventListener("click", () => setDelta(deltaNumber.value, { source:"number-apply" }));
+  deltaStepMinus?.addEventListener("click", () => shiftBySelectedStep(-1));
+  deltaStepPlus?.addEventListener("click", () => shiftBySelectedStep(1));
   deltaSlider.addEventListener("input", () => setDelta(deltaSlider.value, { source:"slider" }));
   window.addEventListener("recurrence:select-strip-date",handleOriginalYearStripSelection);
   window.addEventListener("recurrence:select-delta", event => {
