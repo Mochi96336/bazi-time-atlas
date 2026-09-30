@@ -70,7 +70,9 @@
 .research-cycle-inline-row[data-side="target"] small{color:#c9d9ce}
 .research-cycle-inline-closure{font-size:9px}
 .research-cycle-inline-lookup{
+  display:inline-flex;align-items:center;flex:0 0 auto;
   align-self:flex-start;margin:2px 0 0;
+  max-width:max-content;white-space:nowrap;
   color:#99b7b7;font-size:9px;text-decoration:none;
 }
 .research-cycle-inline-lookup:hover{text-decoration:underline}
