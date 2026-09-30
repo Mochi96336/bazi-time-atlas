@@ -5,13 +5,21 @@ const DEFAULTS = Object.freeze({
   followRate:7.5,
   releaseRate:2.25,
   quietThresholdDegPerSec:0.8,
-  maxFrameDeltaSec:0.05
+  idleTickMs:125,
+  idleSettleEpsilonDegPerSec:0.04,
+  maxFrameDeltaSec:0.05,
+  maxIdleDeltaSec:0.25
 });
 
 const ORBIT_RADII_WORLD = Object.freeze([565, 695, 805, 945, 1105, 1265, 1395]);
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function monotonicNowMs() {
+  const now = globalThis.performance?.now?.();
+  return Number.isFinite(now) ? now : Date.now();
 }
 
 export function orbitalTargetVelocityDegPerSec(
@@ -86,25 +94,23 @@ export function createOrbitalBackground({
   getWheelAngularVelocityDegPerSec = () => 0,
   requestFrame = callback => globalThis.requestAnimationFrame(callback),
   cancelFrame = frameId => globalThis.cancelAnimationFrame(frameId),
+  setTimer = (callback, delay) => globalThis.setTimeout(callback, delay),
+  clearTimer = timerId => globalThis.clearTimeout(timerId),
   reducedMotionQuery = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)") ?? null,
   ResizeObserverCtor = globalThis.ResizeObserver,
+  MutationObserverCtor = globalThis.MutationObserver,
   options = {}
 } = {}) {
   const field = root?.querySelector?.(".orbital-field");
   if (!root || !field || !instrument || !svg || !wheelCenter) return null;
 
   const config = Object.freeze({ ...DEFAULTS, ...options });
-  const fieldAnimation = typeof field.animate === "function"
-    ? field.animate(
-        [{ transform:"rotate(0deg)" }, { transform:"rotate(360deg)" }],
-        { duration:360000, iterations:Infinity }
-      )
-    : null;
-  fieldAnimation?.pause();
   let backgroundAngleDeg = 0;
   let backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
   let frameId = null;
+  let idleTimerId = null;
   let lastTimestamp = null;
+  let lastIdleTimestamp = null;
   let destroyed = false;
 
   function syncGeometry() {
@@ -133,10 +139,51 @@ export function createOrbitalBackground({
     return Boolean(reducedMotionQuery?.matches);
   }
 
+  function wheelMotionActive() {
+    return Boolean(instrument.dataset.dragRing);
+  }
+
+  function applyAngle() {
+    field.style.transform = `rotate(${backgroundAngleDeg.toFixed(4)}deg)`;
+  }
+
   function stopFrame() {
     if (frameId !== null) cancelFrame?.(frameId);
     frameId = null;
     lastTimestamp = null;
+  }
+
+  function stopIdleTimer() {
+    if (idleTimerId !== null) clearTimer?.(idleTimerId);
+    idleTimerId = null;
+    lastIdleTimestamp = null;
+  }
+
+  function scheduleIdleTick() {
+    if (destroyed || isReducedMotion() || idleTimerId !== null || frameId !== null) return;
+    if (!Number.isFinite(lastIdleTimestamp)) lastIdleTimestamp = monotonicNowMs();
+    idleTimerId = setTimer(idleTick, config.idleTickMs);
+  }
+
+  function idleTick() {
+    idleTimerId = null;
+    if (destroyed || isReducedMotion() || frameId !== null) return;
+    if (wheelMotionActive()) {
+      startInteractiveFrame();
+      return;
+    }
+
+    const now = monotonicNowMs();
+    const deltaTimeSec = clamp(
+      (now - lastIdleTimestamp) / 1000,
+      0,
+      config.maxIdleDeltaSec
+    );
+    lastIdleTimestamp = now;
+    backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
+    backgroundAngleDeg = (backgroundAngleDeg + backgroundVelocityDegPerSec * deltaTimeSec) % 360;
+    applyAngle();
+    scheduleIdleTick();
   }
 
   function renderFrame(timestamp) {
@@ -167,35 +214,46 @@ export function createOrbitalBackground({
       responseRate
     );
     backgroundAngleDeg = (backgroundAngleDeg + backgroundVelocityDegPerSec * deltaTimeSec) % 360;
-    if (fieldAnimation) {
-      // One degree maps to one second of paused animation time. Updating
-      // currentTime stays inside the animation/compositor path and does not
-      // rewrite the element's style attribute every frame.
-      fieldAnimation.currentTime = backgroundAngleDeg * 1000;
-    } else {
-      field.style.transform = `rotate(${backgroundAngleDeg.toFixed(4)}deg)`;
+    applyAngle();
+
+    const settledToIdle = !wheelMotionActive()
+      && !coupled
+      && Math.abs(backgroundVelocityDegPerSec - config.idleSpeedDegPerSec)
+        <= config.idleSettleEpsilonDegPerSec;
+    if (settledToIdle) {
+      backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
+      lastTimestamp = null;
+      scheduleIdleTick();
+      return;
     }
 
     frameId = requestFrame(renderFrame);
   }
 
-  function startFrame() {
+  function startInteractiveFrame() {
     if (destroyed || isReducedMotion() || frameId !== null) return;
+    stopIdleTimer();
     frameId = requestFrame(renderFrame);
   }
 
   function applyMotionPreference() {
     stopFrame();
+    stopIdleTimer();
     if (isReducedMotion()) {
       root.dataset.orbitalMotion = "reduced";
       backgroundVelocityDegPerSec = 0;
-      if (fieldAnimation) fieldAnimation.currentTime = 0;
-      else field.style.transform = "none";
+      field.style.transform = "none";
       return;
     }
     root.dataset.orbitalMotion = "active";
     backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
-    startFrame();
+    if (wheelMotionActive()) startInteractiveFrame();
+    else scheduleIdleTick();
+  }
+
+  function instrumentMotionChange() {
+    if (destroyed || isReducedMotion()) return;
+    if (wheelMotionActive()) startInteractiveFrame();
   }
 
   syncGeometry();
@@ -203,6 +261,15 @@ export function createOrbitalBackground({
     ? new ResizeObserverCtor(syncGeometry)
     : null;
   resizeObserver?.observe?.(instrument);
+
+  const motionObserver = typeof MutationObserverCtor === "function"
+    ? new MutationObserverCtor(instrumentMotionChange)
+    : null;
+  motionObserver?.observe?.(instrument, {
+    attributes:true,
+    attributeFilter:["data-drag-ring"]
+  });
+
   reducedMotionQuery?.addEventListener?.("change", applyMotionPreference);
   applyMotionPreference();
 
@@ -213,10 +280,11 @@ export function createOrbitalBackground({
     destroy() {
       destroyed = true;
       stopFrame();
+      stopIdleTimer();
       resizeObserver?.disconnect?.();
+      motionObserver?.disconnect?.();
       reducedMotionQuery?.removeEventListener?.("change", applyMotionPreference);
       delete root.dataset.orbitalMotion;
-      fieldAnimation?.cancel?.();
       field.style.transform = "";
     }
   });
