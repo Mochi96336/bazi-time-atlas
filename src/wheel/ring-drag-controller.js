@@ -39,6 +39,11 @@ function eventTimeMs(event) {
   return Number.isFinite(event?.timeStamp) ? event.timeStamp : null;
 }
 
+function monotonicNowMs() {
+  const now = globalThis.performance?.now?.();
+  return Number.isFinite(now) ? now : null;
+}
+
 export function createRingDragController({
   svg,
   ringStates,
@@ -292,7 +297,8 @@ export function createRingDragController({
     }
     setHoverRing(ring.id);
     const velocityEstimator = createAngularVelocityEstimator({ windowMs:sampleWindowMs });
-    velocityEstimator.reset(eventTimeMs(event));
+    const initialEventTimeMs = eventTimeMs(event);
+    velocityEstimator.reset(initialEventTimeMs);
     active = {
       pointerId: event.pointerId,
       ringId: ring.id,
@@ -301,6 +307,8 @@ export function createRingDragController({
       dragActivated: false,
       pendingDelta: 0,
       velocityEstimator,
+      lastVelocityEventTimeMs: initialEventTimeMs,
+      lastVelocityClockMs: monotonicNowMs(),
       trustedInput: event.isTrusted !== false
     };
     svg.dataset.activeRing = ring.id;
@@ -313,7 +321,11 @@ export function createRingDragController({
     const delta = shortestAngleDelta(nextAngle, active.lastAngle);
     active.lastAngle = nextAngle;
     if (Math.abs(delta) < DETENT_EPSILON) return;
-    active.velocityEstimator.add(delta, eventTimeMs(sample));
+    const sampleTimeMs = eventTimeMs(sample);
+    if (active.velocityEstimator.add(delta, sampleTimeMs)) {
+      active.lastVelocityEventTimeMs = sampleTimeMs;
+      active.lastVelocityClockMs = monotonicNowMs();
+    }
 
     const wasActivated = active.dragActivated;
     const activation = resolveDragActivationInto(activationScratch, active, delta);
@@ -400,6 +412,25 @@ export function createRingDragController({
     setHoverRing(null);
   }
 
+  function currentAngularVelocityDegPerSec() {
+    if (coasting && Number.isFinite(coasting.velocityDegPerMs)) {
+      return coasting.velocityDegPerMs * 1000;
+    }
+    if (!active?.dragActivated || !Number.isFinite(active.lastVelocityEventTimeMs)) return 0;
+
+    const nowClockMs = monotonicNowMs();
+    const elapsedMs = Number.isFinite(nowClockMs) && Number.isFinite(active.lastVelocityClockMs)
+      ? Math.max(0, nowClockMs - active.lastVelocityClockMs)
+      : 0;
+    if (elapsedMs > maxSampleAgeMs) return 0;
+
+    const velocityDegPerMs = active.velocityEstimator.velocityAt(
+      active.lastVelocityEventTimeMs + elapsedMs,
+      { maxSampleAgeMs }
+    );
+    return Number.isFinite(velocityDegPerMs) ? velocityDegPerMs * 1000 : 0;
+  }
+
   function ringVisibilityChange(event) {
     const { ringId, visible } = event?.detail ?? {};
     if (visible !== false || typeof ringId !== "string") return;
@@ -425,6 +456,7 @@ export function createRingDragController({
     get compareMode() { return compareMode; },
     get activeMode() { return active?.mode ?? null; },
     get isCoasting() { return coasting !== null; },
+    get currentAngularVelocityDegPerSec() { return currentAngularVelocityDegPerSec(); },
     get hoverRingId() { return hoverRingId; },
     destroy() {
       cancelActiveGesture({ detent:false, reason:"destroy" });

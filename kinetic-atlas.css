@@ -150,6 +150,140 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 .ring-solar i { background: var(--solar); }
 .ring-zodiac i { background: var(--zodiac); }
 
+
+/* B1 — presentation-only kinetic orbital field.
+   Geometry follows the wheel camera, but this layer owns no time semantics,
+   hit testing, ring selection or drag state. */
+#orbital-background {
+  --orbital-center-x: 50%;
+  --orbital-center-y: 178.95%;
+  --orbital-r1: 565px;
+  --orbital-r2: 695px;
+  --orbital-r3: 805px;
+  --orbital-r4: 945px;
+  --orbital-r5: 1105px;
+  --orbital-r6: 1265px;
+  --orbital-r7: 1395px;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 4%, rgba(87, 111, 137, .042), transparent 43%),
+    linear-gradient(180deg, rgba(4, 10, 17, .16), rgba(2, 7, 12, .025) 56%, rgba(20, 29, 38, .032));
+}
+
+#orbital-background > * {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orbital-haze {
+  background:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      rgba(84, 108, 131, .043) 0,
+      rgba(56, 76, 96, .020) 42%,
+      transparent 69%),
+    radial-gradient(ellipse at 72% 14%, rgba(85, 112, 141, .027), transparent 39%),
+    radial-gradient(ellipse at 24% 28%, rgba(47, 70, 94, .023), transparent 45%);
+}
+
+.orbital-grain {
+  opacity: .18;
+  background-image:
+    radial-gradient(circle, rgba(134, 155, 174, .060) 0 .30px, transparent .68px),
+    radial-gradient(circle, rgba(82, 104, 123, .044) 0 .26px, transparent .64px);
+  background-position: 0 0, 5px 7px;
+  background-size: 13px 17px, 19px 23px;
+}
+
+.orbital-rings-primary {
+  background:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0 calc(var(--orbital-r1) - .6px),
+      rgba(111, 137, 160, .064) var(--orbital-r1) calc(var(--orbital-r1) + .42px),
+      transparent calc(var(--orbital-r1) + 1px) calc(var(--orbital-r3) - .55px),
+      rgba(111, 137, 160, .052) var(--orbital-r3) calc(var(--orbital-r3) + .42px),
+      transparent calc(var(--orbital-r3) + 1px) calc(var(--orbital-r5) - .55px),
+      rgba(111, 137, 160, .044) var(--orbital-r5) calc(var(--orbital-r5) + .42px),
+      transparent calc(var(--orbital-r5) + 1px) calc(var(--orbital-r7) - .55px),
+      rgba(111, 137, 160, .036) var(--orbital-r7) calc(var(--orbital-r7) + .42px),
+      transparent calc(var(--orbital-r7) + 1px));
+}
+
+.orbital-rings-secondary {
+  opacity: .70;
+  background:
+    radial-gradient(circle at var(--orbital-center-x) var(--orbital-center-y),
+      transparent 0 calc(var(--orbital-r2) - .45px),
+      rgba(82, 108, 132, .040) var(--orbital-r2) calc(var(--orbital-r2) + .32px),
+      transparent calc(var(--orbital-r2) + .9px) calc(var(--orbital-r4) - .45px),
+      rgba(82, 108, 132, .034) var(--orbital-r4) calc(var(--orbital-r4) + .32px),
+      transparent calc(var(--orbital-r4) + .9px) calc(var(--orbital-r6) - .45px),
+      rgba(82, 108, 132, .028) var(--orbital-r6) calc(var(--orbital-r6) + .32px),
+      transparent calc(var(--orbital-r6) + .9px));
+}
+
+.orbital-veils {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.orbital-field {
+  transform: rotate(0deg);
+  transform-box: view-box;
+  transform-origin: 600px 1360px;
+  will-change: auto;
+  backface-visibility: hidden;
+}
+
+#orbital-background[data-orbital-kinetic="true"] .orbital-field {
+  will-change: transform;
+}
+
+.orbital-veil {
+  fill: none;
+  stroke: rgba(105, 133, 158, .052);
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.orbital-veil-a {
+  stroke-dasharray: 43 57;
+  stroke-dashoffset: 8;
+  opacity: .64;
+}
+
+.orbital-veil-b {
+  stroke: rgba(86, 116, 143, .044);
+  stroke-width: 1.8;
+  stroke-dasharray: 36 64;
+  stroke-dashoffset: -19;
+  opacity: .52;
+}
+
+.orbital-veil-c {
+  stroke: rgba(117, 142, 164, .036);
+  stroke-width: 2.4;
+  stroke-dasharray: 31 69;
+  stroke-dashoffset: 27;
+  opacity: .42;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbital-field {
+    transform: none !important;
+    will-change: auto;
+  }
+  .orbital-veil { opacity: .34; }
+}
+
 #kinetic-wheel { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cycle-sector { stroke: color-mix(in srgb, var(--field) 74%, transparent); stroke-width: 1.2; transition: fill 140ms ease, opacity 140ms ease; }
 .year-sector { fill: color-mix(in srgb, var(--year) 17%, transparent); }
