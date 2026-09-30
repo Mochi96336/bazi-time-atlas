@@ -631,3 +631,37 @@
  .research-year-selection-line strong {font-size:12.5px}
  .research-year-full-cycle {font-size:12.5px}
 }
+
+/* R6 runtime-loaded density layer must preserve the five-item Δ selector.
+   This file is injected after the static layout CSS, so these overrides are
+   intentionally repeated here to prevent the old 4/2-column derivation grid
+   from wrapping 24,000 or crushing phone labels. */
+.discrete-derivation-steps {
+  grid-template-columns:minmax(92px,.6fr) repeat(4,minmax(0,1fr));
+}
+@media(max-width:820px) {
+  .discrete-derivation-steps {
+    display:grid;
+    grid-template-columns:none;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(145px,43vw);
+    overflow-x:auto;
+    overscroll-behavior-inline:contain;
+    scrollbar-width:thin;
+  }
+  .discrete-derivation-step,
+  .discrete-derivation-step:nth-child(odd) {
+    border-left:1px solid rgba(238,242,237,.06);
+    min-height:104px;
+  }
+  .discrete-derivation-step:first-child {border-left:0}
+}
+@media(max-width:480px) {
+  .discrete-derivation-steps {
+    grid-auto-columns:minmax(150px,55vw);
+  }
+  .discrete-derivation-step {
+    min-height:98px;
+    padding:9px 10px 10px;
+  }
+}
