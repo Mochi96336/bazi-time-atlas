@@ -45,7 +45,9 @@ test("B1 stays decorative and consumes a read-only wheel velocity", () => {
 
   assert.match(html, /id="orbital-background" aria-hidden="true"/);
   assert.match(css, /#orbital-background\s*\{[\s\S]*?pointer-events:\s*none;/);
-  assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*transform;/);
+  assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*auto;/);
+  assert.match(css, /data-orbital-kinetic="true"[\s\S]*?will-change:\s*transform;/);
+  assert.doesNotMatch(css, /\.orbital-grain\s*\{[\s\S]*?mix-blend-mode:/);
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
   assert.match(orbital, /idleTickMs:125/);
   assert.match(orbital, /attributeFilter:\["data-drag-ring"\]/);
