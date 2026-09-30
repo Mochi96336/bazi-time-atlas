@@ -18,6 +18,7 @@ const interactive=query.get("interactive")==="1";
 const deep=query.get("deep")==="1";
 const precise=query.get("precise")==="1";
 const selector=query.get("selector")==="1";
+const shiftOpen=query.get("shiftOpen")==="1";
 const preciseBoundary=query.get("preciseBoundary");
 const iframe=document.getElementById("research");
 const probe=document.getElementById("probe");
@@ -459,6 +460,10 @@ iframe.addEventListener("load",async()=>{
       "R11 - step did not return to the prior displacement");
     probe.dataset.selectedForm="canonical";
     probe.dataset.shiftToolbar="canonical";
+  }
+  if(shiftOpen){
+    compactControls.open=true;
+    probe.dataset.shiftOpen="true";
   }
   probe.dataset.ready="true";
   probe.dataset.width=String(width);
