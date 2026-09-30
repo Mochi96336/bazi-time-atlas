@@ -163,6 +163,23 @@ iframe.addEventListener("load",async()=>{
     deltaSlider.getBoundingClientRect().height>=32 &&
     advancedSummary?.getBoundingClientRect().height>=32,
     "R7 slider must stay visible and Other displacement must remain a readable secondary control");
+  compactControls.open=true;
+  await wait(0);
+  const shiftToolbar=d.querySelector(".research-shift-toolbar");
+  const shiftGroups=[
+    d.getElementById("research-jump-instant"),
+    d.getElementById("research-delta-step-minus"),
+    d.getElementById("delta-number"),
+    d.querySelector("#research-base-editor > summary")
+  ].map(node=>node?.getBoundingClientRect());
+  const toolbarBox=shiftToolbar?.getBoundingClientRect();
+  check(shiftToolbar?.checkVisibility() && toolbarBox.height>=44 && toolbarBox.height<=52 &&
+    shiftGroups.every(Boolean) &&
+    Math.max(...shiftGroups.map(box=>box.top))-Math.min(...shiftGroups.map(box=>box.top))<=2 &&
+    Math.max(...shiftGroups.map(box=>box.bottom))-Math.min(...shiftGroups.map(box=>box.bottom))<=2 &&
+    !d.getElementById("candidate-buttons").checkVisibility(),
+    "R11 Other displacement must be one 44–52px toolbar with duplicate candidates hidden");
+  compactControls.open=false;
   check(sexagenaryDetails && derivation && astronomyTransition &&
     derivation.getBoundingClientRect().bottom<=astronomyTransition.getBoundingClientRect().top &&
     astronomyTransition.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top,
@@ -416,7 +433,32 @@ iframe.addEventListener("load",async()=>{
     check(instrument.dataset.targetDate===settled &&
       !d.getElementById("research-target-date-feedback").hidden,
       "invalid explicit date silently changed model or hid the error");
+
+    const shiftForm=d.getElementById("research-jump-instant-form");
+    const shiftInput=d.getElementById("research-jump-instant");
+    const stepSelect=d.getElementById("research-delta-step");
+    const stepPlus=d.getElementById("research-delta-step-plus");
+    const stepMinus=d.getElementById("research-delta-step-minus");
+    const beforeStep=Number(instrument.dataset.deltaYears);
+    shiftInput.value="2025/06/03 14:20";
+    shiftForm.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}));
+    for(let n=0;n<80 && instrument.dataset.selectedTargetInstantBound!=="true";n++)await wait(25);
+    check(instrument.dataset.targetDate==="2025-06-03" &&
+      shiftInput.value.startsWith("2025/06/03") &&
+      instrument.dataset.selectedTargetInstantBound==="true" &&
+      w.location.search.includes("targetTime=14%3A20%3A00"),
+      "R11 concrete-time jump did not update the canonical target date/time authority");
+    stepSelect.value="60";
+    stepPlus.click();
+    await wait(60);
+    check(Number(instrument.dataset.deltaYears)===beforeStep+60,
+      "R11 + step did not add the selected 60-year displacement");
+    stepMinus.click();
+    await wait(60);
+    check(Number(instrument.dataset.deltaYears)===beforeStep,
+      "R11 - step did not return to the prior displacement");
     probe.dataset.selectedForm="canonical";
+    probe.dataset.shiftToolbar="canonical";
   }
   probe.dataset.ready="true";
   probe.dataset.width=String(width);
