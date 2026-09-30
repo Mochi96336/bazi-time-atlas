@@ -200,18 +200,43 @@
           <details id="research-controls" class="research-controls-compact research-derivation-controls">
             <summary><span>其他位移</span></summary>
             <span id="research-controls-delta" hidden>0 年</span>
-            <section class="delta-dock" aria-label="基準日期與進階位移控制">
-              <div class="base-date research-base-date" aria-label="基準日期">
-                <label>年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
-                <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
-                <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+            <section class="delta-dock research-shift-toolbar" aria-label="其他位移工具">
+              <form id="research-jump-instant-form" class="research-shift-time" aria-label="直接前往具體時間">
+                <span class="research-shift-key">時間</span>
+                <input id="research-jump-instant" type="text" inputmode="numeric" autocomplete="off"
+                  value="2026/09/13" placeholder="YYYY/MM/DD HH:MM"
+                  aria-label="前往日期與可選時間">
+                <button type="submit" title="前往">↵</button>
+              </form>
+              <div class="research-shift-step" role="group" aria-label="相對位移步長">
+                <span class="research-shift-key">步長</span>
+                <select id="research-delta-step" aria-label="相對位移步長">
+                  <option value="60">60 年</option>
+                  <option value="400" selected>400 年</option>
+                  <option value="1200">1,200 年</option>
+                  <option value="8000">8,000 年</option>
+                  <option value="24000">24,000 年</option>
+                </select>
+                <button id="research-delta-step-minus" type="button" aria-label="向前減去目前步長">−</button>
+                <button id="research-delta-step-plus" type="button" aria-label="向後增加目前步長">+</button>
               </div>
-              <label>時間位移年數
-                <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
-                <small id="delta-range-note">可直接輸入任意位移；常用閉合候選也可從下方選擇。</small>
-              </label>
-              <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="其他回歸候選"></div>
-              <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
+              <div class="research-shift-exact" role="group" aria-label="任意位移年數">
+                <span class="research-shift-key">Δ</span>
+                <input id="delta-number" type="number" min="0" max="999924" step="1" value="0"
+                  inputmode="numeric" aria-describedby="delta-range-note" aria-label="任意位移年數">
+                <button id="research-delta-number-apply" type="button" title="套用任意位移">↵</button>
+              </div>
+              <details id="research-base-editor" class="research-base-editor">
+                <summary>基準 <strong id="research-base-summary">2026/09/13</strong><span aria-hidden="true">⋯</span></summary>
+                <div class="base-date research-base-date" aria-label="基準日期">
+                  <label>年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
+                  <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
+                  <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+                </div>
+              </details>
+              <small id="delta-range-note" class="research-shift-note">0–24,000 年可用滑桿；此列可直接輸入任意 Δ 或以步長 ± 跳轉。</small>
+              <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="其他回歸候選" hidden></div>
+              <div class="global-period" hidden><span>離散全域 exact</span><strong>24,000 年</strong></div>
             </section>
           </details>
         </header>
