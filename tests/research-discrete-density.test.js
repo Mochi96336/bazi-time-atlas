@@ -39,32 +39,36 @@ test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.remove\(\)/);
 });
 
-test("primary selected date stays visible and baseline/delta share one secondary header control", async () => {
+test("selected date owns the top rail; Δ controls move to the lower derivation rail", async () => {
   const stripStart=recurrenceHtml.indexOf('id="research-year-strip"');
   const selectedStart=recurrenceHtml.indexOf('id="research-target-date-form"');
+  const trackStart=recurrenceHtml.indexOf('class="research-year-track"');
+  const comparisonStart=recurrenceHtml.indexOf('id="research-cycle-comparison"');
+  const instrumentStart=recurrenceHtml.indexOf('id="recurrence-instrument"');
+  const derivationStart=recurrenceHtml.indexOf('class="discrete-derivation"');
   const controlsStart=recurrenceHtml.indexOf('id="research-controls"');
   const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
   const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
   const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
-  const comparisonStart=recurrenceHtml.indexOf('id="research-cycle-comparison"');
-  const instrumentStart=recurrenceHtml.indexOf('id="recurrence-instrument"');
-  assert.ok(stripStart>=0 && selectedStart>stripStart && controlsStart>selectedStart
-    && dockStart>controlsStart && baseStart>dockStart && candidatesStart>baseStart
-    && comparisonStart>candidatesStart && instrumentStart>comparisonStart);
+  assert.ok(stripStart>=0 && selectedStart>stripStart && trackStart>selectedStart
+    && comparisonStart>trackStart && instrumentStart>comparisonStart
+    && derivationStart>instrumentStart && controlsStart>derivationStart
+    && dockStart>controlsStart && baseStart>dockStart && candidatesStart>baseStart);
   assert.match(recurrenceHtml,/id="research-target-date-input"/);
   assert.match(recurrenceHtml,/id="research-target-date-apply"/);
-  assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact"/);
-  assert.doesNotMatch(recurrenceHtml.slice(selectedStart,controlsStart),/id="base-year"/);
+  assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact research-derivation-controls"/);
+  assert.doesNotMatch(recurrenceHtml.slice(selectedStart,trackStart),/id="research-controls"|id="base-year"|id="delta-number"/);
   for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons","delta-slider"])
-    assert.ok(recurrenceHtml.slice(dockStart,comparisonStart).includes(`id="${id}"`));
+    assert.ok(recurrenceHtml.slice(controlsStart).includes(`id="${id}"`));
   const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
   assert.match(layout,/\.research-task-primary \.research-year-strip\s*\{[\s\S]*?width:100%;max-width:none/);
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
-  assert.match(layout,/\.research-task-primary \.research-cycle-inline\s*\{[\s\S]*?grid-template-columns:repeat\(2/);
-  assert.match(layout,/\.research-task-primary \.recurrence-instrument\s*\{[\s\S]*?border:0;border-radius:0;[\s\S]*?background:transparent;box-shadow:none/);
+  assert.match(layout,/\.discrete-derivation \.research-derivation-controls > \.delta-dock[\s\S]*?position:absolute/);
+  assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(4,minmax\(0,1fr\)\)/);
   assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0);
   assert.ok(recurrenceCss.includes(".delta-dock {"));
 });
+
 
 test("default single-date readout and responsive fan preserve paired comparisons",async()=>{
   const compare=await readFile(new URL("../src/research-cycle-comparison-view.js",import.meta.url),"utf8");
@@ -78,6 +82,15 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(layout,/height:clamp\(315px,calc\(70vw \+ 85px\),385px\)/);
   assert.match(layout,/top:74px;[\s\S]*?height:calc\(100% - 74px\)/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
+});
+
+test("zero displacement is integrated into the same derivation selector as 400/1200/8000/24000",()=>{
+  assert.match(recurrenceView,/DERIVATION_DELTAS = Object\.freeze\(\[0, 400, 1200, 8000, 24_000\]\)/);
+  assert.match(recurrenceView,/deltaYears === 0 \? recurrenceState\(currentBase,0\)/);
+  assert.match(recurrenceView,/deltaYears === 0 \? "0 年"/);
+  assert.match(recurrenceView,/選定日期本身 · 三個離散相位的基準點/);
+  assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
+  assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
 });
 
 test("global period meaning remains attached to the 24000 preset", () => {
