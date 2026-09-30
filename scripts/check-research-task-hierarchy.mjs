@@ -62,11 +62,16 @@ const astronomy = sectionById(probe.dom, "research-astronomy");
 const evidence = sectionById(probe.dom, "research-evidence");
 
 for (const expected of [
-  "離散週期重新對齊，四柱也會回到同一狀態嗎？",
-  "天文偏移",
-  "四柱判定",
-  "離散候選 → 節氣邊界驗證",
-  "天文偏移 → 柱位判定",
+  "八字多久會重複一次？",
+  "四柱都落在六十甲子序列上",
+  "同一節令下固定對齊",
+  "同一時辰下固定對齊",
+  "年柱 × 日柱",
+  "年日週期",
+  "節氣校驗",
+  "四柱重現",
+  "年日候選 → 節氣位置",
+  "節氣校驗 → 四柱比較",
   "3 / 3 exact",
   "仍有偏移",
   "2 / 4 可解析"
@@ -179,7 +184,7 @@ const epochSupportIndex = defaultEvidence.indexOf('id="epoch-audit-support-detai
 if (!(determinacyIndex >= 0 && proofSupportIndex > determinacyIndex && epochSupportIndex > proofSupportIndex)) {
   throw new Error(`evidence outcome/support ordering regressed: ${defaultEvidenceProbe.url}`);
 }
-if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/.test(probe.dom)) {
+if (probe.dom.includes('class="research-task-nav"') || /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊|先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/.test(probe.dom)) {
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 for (const expected of [

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="離散週期、六十日干支與長期天文殘差的回歸研究。">
-  <title>BaZi Time Atlas · Recurrence Lab</title>
+  <meta name="description" content="從六十甲子年日週期出發，檢查節氣偏移與四柱是否能在深時間後重現。">
+  <title>八字多久會重複一次？ · BaZi Time Atlas</title>
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./recurrence.css">
   <link rel="stylesheet" href="./research-tasks.css">
@@ -28,14 +28,30 @@
       </nav>
     </header>
 
-    <section class="recurrence-intro">
-      <div>
-        <div class="eyebrow">Recurrence laboratory</div>
-        <h1>回歸研究</h1>
-        <p class="lede">離散週期重新對齊，四柱也會回到同一狀態嗎？</p>
-      </div>
+    <section class="recurrence-intro research-question-intro" aria-labelledby="research-question-title">
+      <div class="research-question-copy">
+        <h1 id="research-question-title">八字多久會重複一次？</h1>
+        <p class="lede">四柱都落在六十甲子序列上，但不是四個彼此獨立、可以任意錯開的轉盤。</p>
 
-      <p class="scope-note">天文外圈採 Berger 1978 長期近似；只比較季節形狀，不作遠未來民用時刻預報。</p>
+        <div class="research-alignment-map" role="group" aria-label="年月與日時在相同節令或時辰下的固定對齊關係">
+          <div class="research-alignment-row" data-alignment="year-month">
+            <strong><span>年柱</span><em>60</em></strong>
+            <span class="research-alignment-bridge research-alignment-season">
+              <i aria-hidden="true"></i><small>同一節令下固定對齊</small>
+            </span>
+            <strong><span>月柱</span><em>60</em></strong>
+          </div>
+          <div class="research-alignment-row" data-alignment="day-hour">
+            <strong><span>日柱</span><em>60</em></strong>
+            <span class="research-alignment-bridge">
+              <i aria-hidden="true"></i><small>同一時辰下固定對齊</small>
+            </span>
+            <strong><span>時柱</span><em>60</em></strong>
+          </div>
+        </div>
+
+        <p class="research-question-next"><span>所以先找</span><strong>年柱 × 日柱</strong><span>何時一起回來，再檢查節氣位置。</span></p>
+      </div>
     </section>
 
 
@@ -47,17 +63,17 @@
          Legacy ?mode=dates exploration remains available only for old deep links;
          its replacement timeline is NOT the public Research landing page. -->
     <nav class="research-outline" aria-label="研究項目">
-      <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>離散閉合</strong><small id="research-spine-discrete">等待狀態</small></a>
-      <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>天文偏移</strong><small id="research-spine-astronomy">等待狀態</small></a>
-      <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>四柱判定</strong><small id="research-spine-evidence">等待狀態</small></a>
+      <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>年日週期</strong><small id="research-spine-discrete">等待狀態</small></a>
+      <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>節氣校驗</strong><small id="research-spine-astronomy">等待狀態</small></a>
+      <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>四柱重現</strong><small id="research-spine-evidence">等待狀態</small></a>
     </nav>
 
     <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
       <header class="research-task-head">
         <div class="research-task-index">01</div>
-        <div><div class="eyebrow">Discrete closure</div><h2 id="research-discrete-title">離散閉合</h2></div>
+        <div><div class="eyebrow">Year / Day cycles</div><h2 id="research-discrete-title">年日週期</h2></div>
       </header>
-      <p class="research-discrete-scope">先比較公曆結構、60 年序、60 日序；年柱與月柱仍須經節氣邊界判定。</p>
+      <p class="research-discrete-scope">先找 60 年序與 60 日序何時回到原位；公曆 400 年結構一起檢查。同一節令與真正年柱留到下一步校驗。</p>
 
       <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
         <header class="research-year-head">
@@ -284,8 +300,8 @@
     <section id="research-astronomy" class="research-task" data-research-task="astronomy" aria-labelledby="research-astronomy-title">
       <header class="research-task-head">
         <div class="research-task-index">02</div>
-        <div><div class="eyebrow">Astronomical offset</div><h2 id="research-astronomy-title">天文偏移</h2></div>
-        <span class="research-task-relation">離散候選 → 節氣邊界驗證</span>
+        <div><div class="eyebrow">Seasonal check</div><h2 id="research-astronomy-title">節氣校驗</h2></div>
+        <span class="research-task-relation">年日候選 → 節氣位置</span>
       </header>
 
       <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
@@ -315,8 +331,8 @@
     <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">
       <header class="research-task-head">
         <div class="research-task-index">03</div>
-        <div><div class="eyebrow">Four-pillar verdict</div><h2 id="research-evidence-title">四柱判定</h2></div>
-        <span class="research-task-relation">天文偏移 → 柱位判定</span>
+        <div><div class="eyebrow">Four-pillar recurrence</div><h2 id="research-evidence-title">四柱重現</h2></div>
+        <span class="research-task-relation">節氣校驗 → 四柱比較</span>
       </header>
 
       <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" aria-label="此回歸模型對四柱可判定範圍">

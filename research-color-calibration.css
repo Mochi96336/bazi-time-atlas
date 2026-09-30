@@ -543,3 +543,29 @@ body {
   stroke: var(--research-fan-field);
 }
 
+
+
+/* Research question-first header: keep the explanation diagram and task rail
+   flatter than the instrument. Accents indicate meaning, never card chrome. */
+.research-question-intro h1 { color:#f0f2ef; }
+.research-question-intro .lede { color:#98a4a8; }
+.research-alignment-row > strong { color:#c4cfd2; }
+.research-alignment-row > strong em { color:#72838b; }
+.research-alignment-bridge { color:#74858d; }
+.research-alignment-bridge i { border-top-color:rgba(142,174,187,.25); }
+.research-alignment-season { color:#a88f70; }
+.research-alignment-season i { border-top-color:rgba(197,149,99,.34); }
+.research-question-next { color:#829198; }
+.research-question-next strong { color:#dbe3e1; }
+
+.research-outline a,
+.research-outline a:hover,
+.research-outline a:focus-visible {
+  background:transparent;
+}
+.research-outline a:nth-child(1) { --research-task-accent:var(--research-discrete); }
+.research-outline a:nth-child(2) { --research-task-accent:var(--research-astronomy); }
+.research-outline a:nth-child(3) { --research-task-accent:var(--research-evidence); }
+.research-outline a span {
+  color:color-mix(in srgb,var(--research-task-accent) 68%,#7f8b91);
+}

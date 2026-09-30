@@ -106,7 +106,10 @@ requireEqual(attr(probe, "data-recurrence-delta-slider-public"), "true", "Recurr
 requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
 requireEqual(attr(probe, "data-recurrence-duplicate-candidates-hidden"), "true", "Other displacement must not visibly repeat the public recurrence candidates", url);
 requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Other displacement toolbar must remain one physical row while open", url);
-requireEqual(attr(probe, "data-recurrence-question-text"), "離散週期重新對齊，四柱也會回到同一狀態嗎？", "Research question changed", url);
+requireEqual(attr(probe, "data-recurrence-question-text"), "八字多久會重複一次？", "Research question changed", url);
+requireEqual(attr(probe, "data-recurrence-alignment-count"), "2", "Research header must keep exactly two compact alignment relations", url);
+requireEqual(attr(probe, "data-recurrence-alignment-text"), "年柱 60 同一節令下固定對齊 月柱 60|日柱 60 同一時辰下固定對齊 時柱 60", "Research alignment explanation changed", url);
+requireEqual(attr(probe, "data-recurrence-next-text"), "所以先找 年柱 × 日柱 何時一起回來，再檢查節氣位置。", "Research inference line changed", url);
 requireEqual(attr(probe, "data-recurrence-spine-discrete"), "基準狀態", "Research discrete spine lost identity state", url);
 requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "同一參照", "Research astronomy spine lost identity state", url);
 requireEqual(attr(probe, "data-recurrence-spine-evidence"), "4 / 4 同一", "Research evidence spine lost identity state", url);
