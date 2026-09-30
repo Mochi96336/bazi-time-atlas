@@ -46,24 +46,30 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   const comparisonStart=recurrenceHtml.indexOf('id="research-cycle-comparison"');
   const instrumentStart=recurrenceHtml.indexOf('id="recurrence-instrument"');
   const derivationStart=recurrenceHtml.indexOf('class="discrete-derivation"');
+  const sliderStart=recurrenceHtml.indexOf('id="delta-slider"');
   const controlsStart=recurrenceHtml.indexOf('id="research-controls"');
   const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
   const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
   const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
   assert.ok(stripStart>=0 && selectedStart>stripStart && trackStart>selectedStart
     && comparisonStart>trackStart && instrumentStart>comparisonStart
-    && derivationStart>instrumentStart && controlsStart>derivationStart
-    && dockStart>controlsStart && baseStart>dockStart && candidatesStart>baseStart);
+    && derivationStart>instrumentStart && sliderStart>derivationStart
+    && controlsStart>sliderStart && dockStart>controlsStart
+    && baseStart>dockStart && candidatesStart>baseStart);
   assert.match(recurrenceHtml,/id="research-target-date-input"/);
   assert.match(recurrenceHtml,/id="research-target-date-apply"/);
   assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact research-derivation-controls"/);
   assert.doesNotMatch(recurrenceHtml.slice(selectedStart,trackStart),/id="research-controls"|id="base-year"|id="delta-number"/);
-  for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons","delta-slider"])
+  assert.ok(recurrenceHtml.slice(derivationStart,controlsStart).includes('id="delta-slider"'));
+  for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons"])
     assert.ok(recurrenceHtml.slice(controlsStart).includes(`id="${id}"`));
   const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
   assert.match(layout,/\.research-task-primary \.research-year-strip\s*\{[\s\S]*?width:100%;max-width:none/);
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
+  assert.match(layout,/\.research-delta-public-slider\s*\{[\s\S]*?grid-area:slider/);
+  assert.match(layout,/\.research-delta-public-slider input\[type="range"\][\s\S]*?height:32px/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > \.delta-dock[\s\S]*?position:absolute/);
+  assert.match(layout,/\.discrete-derivation \.research-derivation-controls > summary[\s\S]*?min-height:34px/);
   assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(4,minmax\(0,1fr\)\)/);
   assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0);
   assert.ok(recurrenceCss.includes(".delta-dock {"));
@@ -93,6 +99,14 @@ test("zero displacement is integrated into the same derivation selector as 400/1
   assert.match(css,/grid-template-columns:minmax\(92px,\.6fr\) repeat\(4,minmax\(0,1fr\)\)/);
   assert.match(css,/@media\(max-width:820px\)[\s\S]*?grid-auto-flow:column;[\s\S]*?overflow-x:auto/);
   assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
+});
+
+test("R7 compresses the fan header space without removing its legend",async()=>{
+  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(490px,36vw,525px\)/);
+  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-62px/);
+  assert.match(recurrenceHtml,/class="recurrence-legend"/);
+  assert.match(recurrenceHtml,/class="phase-gauge-caption"/);
 });
 
 test("global period meaning remains attached to the 24000 preset", () => {
@@ -209,9 +223,10 @@ test("mobile year strip moves edge-adjacent base labels onto a second lane", () 
 test("60-day cycle remains supporting evidence behind one flat drilldown", () => {
   assert.match(view, /details\.id = "discrete-sexagenary-details"/);
   assert.match(view, /details\.dataset\.researchDrilldown = "discrete-sexagenary"/);
-  assert.match(view, /60 日序來源/);
-  assert.match(view, /10 天干 \/ 12 地支 → 60 配對/);
+  assert.match(view, /六十干支圖/);
+  assert.match(view, /10 天干 × 12 地支 → 60 配對/);
   assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?border-top:\s*0;/);
+  assert.match(view,/derivation\.insertAdjacentElement\("afterend", details\)/);
 });
 
 test("60-day wheel is the selector: direct sector click, pointer scrub, and keyboard arrows remain", () => {
@@ -226,14 +241,14 @@ test("60-day wheel is the selector: direct sector click, pointer scrub, and keyb
   assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*none;/);
 });
 
-test("reading order leads with paired names before the phase wheel and puts the Day cycle before derivation", () => {
+test("reading order leads with paired names and phase wheel, then delta derivation before the 60-day source", () => {
   const comparisonStart = recurrenceHtml.indexOf('id="research-cycle-comparison"');
   const stateStart = recurrenceHtml.indexOf('class="recurrence-readout research-current-state"');
   const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
   assert.ok(stripStart >= 0 && comparisonStart > stripStart &&
-    stateStart > comparisonStart && cycleStart > stateStart && derivationStart > cycleStart);
+    stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
