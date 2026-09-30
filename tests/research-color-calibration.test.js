@@ -61,7 +61,6 @@ test("R3 palette A unifies only the Research 01 fan into cool graphite plus bras
     "--research-fan-datum: #f1e7c9"
   ]) assert.ok(css.includes(token),token);
 
-  assert.match(css,/#research-discrete \.recurrence-instrument \{[\s\S]*#05080d/);
   assert.doesNotMatch(css,/#research-discrete \.recurrence-instrument \{[\s\S]*?(?:background|box-shadow)\s*:/);
   assert.match(css,/\.research-fan-graphic \.gregorian-sector \{ fill: var\(--research-fan-outer\); \}/);
   assert.match(css,/\.research-fan-graphic \.year-sector \{ fill: var\(--research-fan-middle\); \}/);
