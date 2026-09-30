@@ -1,5 +1,7 @@
 # 4K hard-fling SVG text vs high-speed rendering
 
+> **Historical isolation record.** The native-tested motion-scoped M transition guard has since become the production default. Refer to [the 4K motion transition mitigation release note](./4k-fling-motion-transition-mitigation.md) for default behavior, rollback with `?motionTransitionAudit=off`, and final native acceptance. The older default-off statements below describe experiments **before** the release; they are intentionally retained as historical evidence.
+
 ## New native Windows evidence (2026-09-30)
 
 On a native 4K monitor with Chrome graphics acceleration enabled, a **half-width Chrome window is clean**, while maximized Chrome can black the **webpage only** (tabs remain visible). Turning off graphics acceleration makes the wheel too slow to yield an interpretable result. All earlier 150-frame *smooth* autoplay tests were clean, yet **physically hard-flinging mode 3 (static pure SVG) reproduces page blackouts**. Therefore neither WebGL material nor smooth playback alone is necessary. The remaining high-risk path is high-speed **manual pointer/coasting → SVG text/raster, animated active labels, dynamic motion traces, CSS filters and large full-viewport GPU compositing**. This evidence cannot independently prove text is the cause.
