@@ -1149,6 +1149,7 @@
   top:calc(100% + 5px);
   right:0;
   display:flex;
+  box-sizing:border-box;
   align-items:center;
   gap:0;
   width:min(1100px,calc(100vw - 32px));
