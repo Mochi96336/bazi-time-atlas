@@ -92,8 +92,8 @@ requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence rese
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
-requireEqual(attr(probe, "data-recurrence-delta-dock-before-instrument"), "true", "Recurrence displacement controls must precede the result instrument", url);
-requireEqual(attr(probe, "data-recurrence-delta-dock-in-first-viewport"), "true", "Inline displacement button must be accessible in the first viewport", url);
+requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
+requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year displacement must be the active first item beside 400/1200/8000/24000", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
 requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "The selected date must be visible without duplicating its zero-year baseline", url);
@@ -134,19 +134,19 @@ const comparisonTop = Number(attr(probe, "data-recurrence-primary-comparison-top
 const comparisonBottom = Number(attr(probe, "data-recurrence-primary-comparison-bottom"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
 const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"));
-const deltaDockTop = Number(attr(probe, "data-recurrence-delta-dock-top"));
-const deltaDockBottom = Number(attr(probe, "data-recurrence-delta-dock-bottom"));
-const deltaDockGap = Number(attr(probe, "data-recurrence-delta-dock-gap"));
+const derivationTop = Number(attr(probe, "data-recurrence-derivation-top"));
+const deltaSettingsHeight = Number(attr(probe, "data-recurrence-delta-settings-height"));
+const zeroDeltaStepHeight = Number(attr(probe, "data-recurrence-zero-delta-step-height"));
 if (
-  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, deltaDockTop, deltaDockBottom, comparisonTop, comparisonBottom, recurrenceTop].every(Number.isFinite)
+  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, comparisonTop, comparisonBottom, recurrenceTop, derivationTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom
-    && taskHeadBottom <= deltaDockTop && deltaDockTop < deltaDockBottom
-    && deltaDockBottom < comparisonTop && comparisonTop < comparisonBottom && comparisonBottom <= recurrenceTop)
+    && taskHeadBottom < comparisonTop && comparisonTop < comparisonBottom
+    && comparisonBottom <= recurrenceTop && recurrenceTop < derivationTop)
   || outlineHeight > 46
 ) {
   throw new Error(
     `Recurrence mobile outline must stay compact and precede section 01 ` +
-    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, dock=${deltaDockTop}..${deltaDockBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}): ${url}`
+    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}, deltaRail=${derivationTop}): ${url}`
   );
 }
 // The responsive 390px fan stage is ~358px, plus the normal-flow readout.
@@ -158,16 +158,14 @@ if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
   throw new Error(`Named Year/Day comparison must begin within the first 844px mobile viewport (${comparisonTop}..${comparisonBottom}): ${url}`);
 }
 if (
-  !Number.isFinite(deltaDockTop)
-  || !Number.isFinite(deltaDockBottom)
-  || !Number.isFinite(deltaDockGap)
-  || deltaDockTop <= taskHeadBottom
-  || deltaDockBottom >= comparisonTop
-  || deltaDockGap > 12
+  !Number.isFinite(deltaSettingsHeight)
+  || !Number.isFinite(zeroDeltaStepHeight)
+  || deltaSettingsHeight > 34
+  || zeroDeltaStepHeight < 92
 ) {
   throw new Error(
-    "Inline displacement settings and date inputs must share one header baseline " +
-    "(top=" + deltaDockTop + ", bottom=" + deltaDockBottom + ", gap=" + deltaDockGap + "): " + url
+    "Lower Δ rail must keep a compact closed advanced-settings trigger and a full-size zero milestone " +
+    "(settings=" + deltaSettingsHeight + ", zeroStep=" + zeroDeltaStepHeight + "): " + url
   );
 }
 if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
