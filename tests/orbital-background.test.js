@@ -2,8 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
+  orbitalKineticIntensity,
+  orbitalOcclusionRadiusWorld,
   orbitalRadiiWorld,
   orbitalTargetVelocityDegPerSec,
+  orbitalVeilPresentation,
   orbitalViewportGeometry,
   stepOrbitalVelocityDegPerSec
 } from "../src/orbital-background.js";
@@ -40,12 +43,28 @@ test("orbital geometry maps the canonical wheel center through the SVG meet came
 
 
 
-test("B1.1 orbital coordinate rings stay outside the canonical wheel envelope", () => {
+test("B1.2 orbital coordinate rings and mask stay outside the canonical wheel envelope", () => {
   const radii = orbitalRadiiWorld(1182);
+  const maskRadius = orbitalOcclusionRadiusWorld(1182);
   assert.equal(radii.length, 6);
-  assert.ok(radii.every(radius => radius > 1182));
+  assert.equal(maskRadius, 1200);
+  assert.ok(radii.every(radius => radius > maskRadius));
   assert.ok(radii.every((radius, index) => index === 0 || radius > radii[index - 1]));
-  assert.ok(radii[0] < 1260, "first background orbit should sit just beyond the wheel rim");
+  assert.ok(radii[0] < 1240, "first background orbit should remain close to the wheel rim");
+});
+
+test("B1.2 kinetic energy makes a hard fling substantially thicker and brighter", () => {
+  assert.equal(orbitalKineticIntensity(0), 0);
+  assert.equal(orbitalKineticIntensity(35), 0);
+  assert.equal(orbitalKineticIntensity(360), 1);
+  assert.equal(orbitalKineticIntensity(-360), 1);
+
+  const idle = orbitalVeilPresentation(0, 0);
+  const hot = orbitalVeilPresentation(0, 1);
+  assert.equal(idle.strokeWidth, 0.9);
+  assert.equal(hot.strokeWidth, 4.8);
+  assert.ok(hot.strokeWidth > idle.strokeWidth * 5);
+  assert.ok(hot.opacity > idle.opacity * 3);
 });
 
 test("B1 stays decorative and consumes a read-only wheel velocity", () => {
@@ -55,18 +74,28 @@ test("B1 stays decorative and consumes a read-only wheel velocity", () => {
   const atlas = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
 
   assert.match(html, /id="orbital-background" aria-hidden="true"/);
+  assert.match(html, /class="orbital-space"[^>]*viewBox="0 0 1200 760"/);
+  assert.match(html, /id="orbital-wheel-occlusion"/);
+  assert.match(html, /class="orbital-occlusion-disc"/);
+  assert.match(html, /class="orbital-static-rings"/);
+  assert.equal((html.match(/class="orbital-static-ring orbital-static-ring-/g) ?? []).length, 6);
   assert.match(css, /#orbital-background\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*auto;/);
   assert.match(css, /data-orbital-kinetic="true"[\s\S]*?will-change:\s*transform;/);
   assert.doesNotMatch(html, /class="orbital-grain"/);
   const orbitalCss = css.slice(
-    css.indexOf("/* B1.1"),
-    css.indexOf("#kinetic-wheel", css.indexOf("/* B1.1"))
+    css.indexOf("/* B1.2"),
+    css.indexOf("#kinetic-wheel", css.indexOf("/* B1.2"))
   );
   assert.doesNotMatch(orbitalCss, /repeating-(?:linear|radial)-gradient/);
   assert.doesNotMatch(orbitalCss, /mix-blend-mode:/);
+  assert.doesNotMatch(orbitalCss, /orbital-rings-primary|orbital-rings-secondary/);
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
   assert.match(orbital, /idleTickMs:125/);
+  assert.match(orbital, /setCircleGeometry\(occlusionDisc, occlusionRadiusWorld\)/);
+  assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\(wheelVelocity, config\)/);
+  assert.match(orbital, /veil\.style\.strokeWidth/);
+  assert.match(orbital, /veil\.style\.opacity/);
   assert.match(orbital, /attributeFilter:\["data-drag-ring"\]/);
   assert.match(orbital, /if \(settledToIdle\)[\s\S]*?scheduleIdleTick\(\)/);
   assert.match(orbital, /function activateIdleMotion\(\)[\s\S]*?idleActivated = true/);
