@@ -87,8 +87,8 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('id="recurrence-instrument"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
-  assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-sexagenary-cycle"'));
-  assert.ok(discrete.indexOf('id="research-sexagenary-cycle"') < discrete.indexOf('class="discrete-derivation"'));
+  assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('class="discrete-derivation"'));
+  assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
   assert.doesNotMatch(discrete, /class="astronomy-panel"/);
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
