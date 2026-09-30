@@ -94,7 +94,13 @@ export function createOrbitalBackground({
   if (!root || !field || !instrument || !svg || !wheelCenter) return null;
 
   const config = Object.freeze({ ...DEFAULTS, ...options });
-  field.style.transformOrigin = `${wheelCenter.x}px ${wheelCenter.y}px`;
+  const fieldAnimation = typeof field.animate === "function"
+    ? field.animate(
+        [{ transform:"rotate(0deg)" }, { transform:"rotate(360deg)" }],
+        { duration:360000, iterations:Infinity }
+      )
+    : null;
+  fieldAnimation?.pause();
   let backgroundAngleDeg = 0;
   let backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
   let frameId = null;
@@ -161,7 +167,14 @@ export function createOrbitalBackground({
       responseRate
     );
     backgroundAngleDeg = (backgroundAngleDeg + backgroundVelocityDegPerSec * deltaTimeSec) % 360;
-    field.style.transform = `rotate(${backgroundAngleDeg.toFixed(4)}deg)`;
+    if (fieldAnimation) {
+      // One degree maps to one second of paused animation time. Updating
+      // currentTime stays inside the animation/compositor path and does not
+      // rewrite the element's style attribute every frame.
+      fieldAnimation.currentTime = backgroundAngleDeg * 1000;
+    } else {
+      field.style.transform = `rotate(${backgroundAngleDeg.toFixed(4)}deg)`;
+    }
 
     frameId = requestFrame(renderFrame);
   }
@@ -176,7 +189,8 @@ export function createOrbitalBackground({
     if (isReducedMotion()) {
       root.dataset.orbitalMotion = "reduced";
       backgroundVelocityDegPerSec = 0;
-      field.style.transform = "none";
+      if (fieldAnimation) fieldAnimation.currentTime = 0;
+      else field.style.transform = "none";
       return;
     }
     root.dataset.orbitalMotion = "active";
@@ -202,6 +216,7 @@ export function createOrbitalBackground({
       resizeObserver?.disconnect?.();
       reducedMotionQuery?.removeEventListener?.("change", applyMotionPreference);
       delete root.dataset.orbitalMotion;
+      fieldAnimation?.cancel?.();
       field.style.transform = "";
     }
   });
