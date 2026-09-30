@@ -183,7 +183,7 @@ if (probe.dom.includes('class="research-task-nav"') || /先回答：|再問：|�
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 for (const expected of [
-  "時間位移",
+  "其他位移",
   "公曆結構",
   "60 年序",
   "60 日序",
