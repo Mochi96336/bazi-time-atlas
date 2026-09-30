@@ -1222,6 +1222,7 @@
   letter-spacing:.04em;
   white-space:nowrap;
 }
+.delta-dock.research-shift-toolbar input[type="number"],
 .research-shift-toolbar input,
 .research-shift-toolbar select,
 .research-shift-toolbar button,
