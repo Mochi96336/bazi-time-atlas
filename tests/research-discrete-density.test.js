@@ -250,6 +250,16 @@ test("60-day cycle remains supporting evidence behind one flat drilldown", () =>
   assert.match(view,/transition\.insertAdjacentElement\("afterend", details\)/);
 });
 
+test("60-day wheel shortcut stays on one line and opens its disclosure", async () => {
+  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  assert.match(recurrenceHtml,/class="research-cycle-inline-lookup"[^>]*href="#discrete-sexagenary-details">六十日轉盤 ↗<\/a>/);
+  assert.match(layout,/\.research-cycle-inline-lookup\s*\{[\s\S]*?display:inline-flex;[\s\S]*?white-space:nowrap;/);
+  assert.match(view,/target === details \|\| target === cycle/);
+  assert.match(view,/lookup\.addEventListener\("click"[\s\S]*?details\.open = true/);
+  assert.match(view,/history\.pushState\(null, "", nextHash\)/);
+  assert.match(view,/details\.scrollIntoView\(\{ block:"start" \}\)/);
+});
+
 test("60-day wheel is the selector: direct sector click, pointer scrub, and keyboard arrows remain", () => {
   assert.doesNotMatch(recurrenceHtml, /research-cycle-prev|research-cycle-next|前一位|後一位/);
   assert.match(cycleView, /hit\.addEventListener\("click", \(\) => setActive\(index\)\)/);
