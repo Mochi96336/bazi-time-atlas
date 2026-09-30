@@ -5,6 +5,7 @@ const DEFAULTS = Object.freeze({
   followRate:7.5,
   releaseRate:2.25,
   quietThresholdDegPerSec:0.8,
+  idleStartDelayMs:8000,
   idleTickMs:125,
   idleSettleEpsilonDegPerSec:0.04,
   maxFrameDeltaSec:0.05,
@@ -159,10 +160,10 @@ export function createOrbitalBackground({
     lastIdleTimestamp = null;
   }
 
-  function scheduleIdleTick() {
+  function scheduleIdleTick(delayMs = config.idleTickMs) {
     if (destroyed || isReducedMotion() || idleTimerId !== null || frameId !== null) return;
     if (!Number.isFinite(lastIdleTimestamp)) lastIdleTimestamp = monotonicNowMs();
-    idleTimerId = setTimer(idleTick, config.idleTickMs);
+    idleTimerId = setTimer(idleTick, delayMs);
   }
 
   function idleTick() {
@@ -248,7 +249,7 @@ export function createOrbitalBackground({
     root.dataset.orbitalMotion = "active";
     backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
     if (wheelMotionActive()) startInteractiveFrame();
-    else scheduleIdleTick();
+    else scheduleIdleTick(config.idleStartDelayMs);
   }
 
   function instrumentMotionChange() {
