@@ -73,6 +73,9 @@ iframe.addEventListener("load",async()=>{
   const datePicker=d.querySelector("#research-target-date-form");
   const baselinePicker=d.querySelector("#research-controls .research-base-date");
   const compactControls=d.getElementById("research-controls");
+  const derivation=d.querySelector(".discrete-derivation");
+  const derivationSteps=d.getElementById("discrete-derivation-steps");
+  const zeroStep=derivationSteps?.querySelector('[data-delta-years="0"]');
   const task=d.getElementById("research-discrete");
   const taskBox=task.getBoundingClientRect();
   const stripBox=strip.getBoundingClientRect();
@@ -82,9 +85,10 @@ iframe.addEventListener("load",async()=>{
   const fanReadout=d.querySelector(".recurrence-readout.research-current-state")?.getBoundingClientRect();
   check(datePicker && datePicker.checkVisibility() && baselinePicker &&
     !baselinePicker.checkVisibility() && strip.contains(datePicker) &&
+    !strip.contains(compactControls) && derivation?.contains(compactControls) &&
     d.getElementById("research-target-date-input").value ===
       instrument.dataset.targetDate.replaceAll("-","/") && !compactControls.open,
-    "R4 selected target date must be visible, baseline hidden behind optional settings");
+    "R6 selected date must own the top rail while Δ settings live below with derivation");
   check(stripBox.width >= taskBox.width-6,
     "R4 year rail still has a narrow max-width: "+stripBox.width+" / "+taskBox.width);
   check(Math.abs(fanBox.width-stripBox.width)<6 &&
@@ -138,7 +142,11 @@ iframe.addEventListener("load",async()=>{
       "R5 fan or outer astronomy orbit overlaps the mobile legend: "+
       JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
   }
-  const optionalWheel=d.getElementById("research-sexagenary-cycle");
+  check(derivationSteps?.children.length===5 &&
+    zeroStep && zeroStep.textContent.includes("0 年") &&
+    (instrument.dataset.deltaYears==="0" ? zeroStep.classList.contains("active") : true),
+    "R6 derivation rail must contain 0/+400/+1200/+8000/+24000 with zero active at baseline");
+    const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),
     "original 60-day wheel was deleted instead of retaining its original optional disclosure");

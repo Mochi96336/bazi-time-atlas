@@ -37,7 +37,7 @@ const deltaSlider = document.querySelector("#delta-slider");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const derivationSteps = document.querySelector("#discrete-derivation-steps");
 const cursorGroup = document.querySelector("#recurrence-cursor");
-const DERIVATION_DELTAS = Object.freeze([400, 1200, 8000, 24_000]);
+const DERIVATION_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000]);
 
 // Radial scale follows the same product grammar as the main atlas: shorter
 // recurrence cycles live inside, longer cycles live outside. Astronomy remains
@@ -317,6 +317,7 @@ function derivationPhase(label, closed, phase, modulus) {
 }
 
 function derivationMeaning(deltaYears) {
+  if (deltaYears === 0) return "選定日期本身 · 三個離散相位的基準點";
   if (deltaYears === 400) return "400 年＝146,097 日；公曆結構先回到 0";
   if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0";
   if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0";
@@ -327,13 +328,15 @@ function renderDerivation(states) {
   if (!derivationSteps) return;
   derivationSteps.replaceChildren();
   for (const deltaYears of DERIVATION_DELTAS) {
-    const state = states.find(candidate => candidate.deltaYears === deltaYears);
+    const state = deltaYears === 0
+      ? recurrenceState(currentBase,0)
+      : states.find(candidate => candidate.deltaYears === deltaYears);
     if (!state) continue;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "discrete-derivation-step";
     button.dataset.deltaYears = String(deltaYears);
-    button.innerHTML = `<strong>+${deltaYears.toLocaleString("en-US")} 年</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears)}</small>`;
+    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears)}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
     derivationSteps.appendChild(button);
   }
