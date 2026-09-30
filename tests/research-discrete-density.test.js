@@ -68,6 +68,12 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
   assert.match(layout,/\.research-delta-public-slider\s*\{[\s\S]*?grid-area:slider/);
   assert.match(layout,/\.research-delta-public-slider input\[type="range"\][\s\S]*?height:32px/);
+  assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
+  assert.match(recurrenceView,/setText\("delta-slider-output"/);
+  assert.match(recurrenceView,/--delta-progress/);
+  assert.match(layout,/-webkit-appearance:none/);
+  assert.match(layout,/::-webkit-slider-thumb/);
+  assert.match(layout,/grid-template-columns:minmax\(180px,1fr\) auto/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > \.delta-dock[\s\S]*?position:absolute/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > summary[\s\S]*?min-height:34px/);
   assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(4,minmax\(0,1fr\)\)/);
