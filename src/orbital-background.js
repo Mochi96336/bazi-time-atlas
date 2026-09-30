@@ -11,7 +11,17 @@ const DEFAULTS = Object.freeze({
   maxIdleDeltaSec:0.25
 });
 
-const ORBIT_RADII_WORLD = Object.freeze([565, 695, 805, 945, 1105, 1265, 1395]);
+const ORBIT_RADIUS_MULTIPLIERS = Object.freeze([1.048, 1.108, 1.184, 1.272, 1.377, 1.503]);
+const VEIL_RADIUS_MULTIPLIERS = Object.freeze([1.076, 1.252, 1.452]);
+
+export function orbitalRadiiWorld(wheelOuterRadius) {
+  if (!Number.isFinite(wheelOuterRadius) || wheelOuterRadius <= 0) {
+    throw new RangeError("wheel outer radius must be a positive finite number");
+  }
+  return Object.freeze(
+    ORBIT_RADIUS_MULTIPLIERS.map(multiplier => wheelOuterRadius * multiplier)
+  );
+}
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -91,6 +101,7 @@ export function createOrbitalBackground({
   instrument,
   svg,
   wheelCenter,
+  wheelOuterRadius,
   getWheelAngularVelocityDegPerSec = () => 0,
   requestFrame = callback => globalThis.requestAnimationFrame(callback),
   cancelFrame = frameId => globalThis.cancelAnimationFrame(frameId),
@@ -102,9 +113,15 @@ export function createOrbitalBackground({
   options = {}
 } = {}) {
   const field = root?.querySelector?.(".orbital-field");
-  if (!root || !field || !instrument || !svg || !wheelCenter) return null;
+  const veils = Array.from(root?.querySelectorAll?.(".orbital-veil") ?? []);
+  if (!root || !field || !instrument || !svg || !wheelCenter
+    || !Number.isFinite(wheelOuterRadius) || wheelOuterRadius <= 0) return null;
 
   const config = Object.freeze({ ...DEFAULTS, ...options });
+  const orbitRadiiWorld = orbitalRadiiWorld(wheelOuterRadius);
+  const veilRadiiWorld = VEIL_RADIUS_MULTIPLIERS.map(
+    multiplier => wheelOuterRadius * multiplier
+  );
   let backgroundAngleDeg = 0;
   let backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
   let frameId = null;
@@ -113,6 +130,17 @@ export function createOrbitalBackground({
   let lastIdleTimestamp = null;
   let idleActivated = false;
   let destroyed = false;
+
+  function syncWorldGeometry() {
+    field.style.transformOrigin = `${wheelCenter.x}px ${wheelCenter.y}px`;
+    veils.forEach((veil, index) => {
+      const radius = veilRadiiWorld[index];
+      if (!Number.isFinite(radius)) return;
+      veil.setAttribute("cx", String(wheelCenter.x));
+      veil.setAttribute("cy", String(wheelCenter.y));
+      veil.setAttribute("r", radius.toFixed(3));
+    });
+  }
 
   function syncGeometry() {
     const rect = instrument.getBoundingClientRect();
@@ -128,7 +156,7 @@ export function createOrbitalBackground({
 
     root.style.setProperty("--orbital-center-x", `${geometry.centerX.toFixed(3)}px`);
     root.style.setProperty("--orbital-center-y", `${geometry.centerY.toFixed(3)}px`);
-    ORBIT_RADII_WORLD.forEach((radius, index) => {
+    orbitRadiiWorld.forEach((radius, index) => {
       root.style.setProperty(
         `--orbital-r${index + 1}`,
         `${(radius * geometry.scale).toFixed(3)}px`
@@ -266,6 +294,7 @@ export function createOrbitalBackground({
     if (wheelMotionActive()) startInteractiveFrame();
   }
 
+  syncWorldGeometry();
   syncGeometry();
   const resizeObserver = typeof ResizeObserverCtor === "function"
     ? new ResizeObserverCtor(syncGeometry)
