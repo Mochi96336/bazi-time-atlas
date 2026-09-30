@@ -378,3 +378,65 @@ body {
 .epoch-audit-source[data-qualified-coverage="true"] header b { color: #83afc4; }
 .epoch-audit-facts span { border-top-color: var(--research-line-soft); }
 .epoch-audit-facts strong { color: #88989e; }
+
+
+/* R2 — semantic luminance polish.
+   Keep the R1 palette; improve chapter separation and secondary-text legibility
+   without introducing cards, new geometry, or stronger global saturation. */
+.research-task {
+  --research-section-accent: var(--research-discrete);
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--research-section-accent) 2.6%, transparent),
+      transparent 34%);
+}
+#research-astronomy { --research-section-accent: var(--research-astronomy); }
+#research-evidence { --research-section-accent: var(--research-evidence); }
+
+.research-task-relation,
+.research-outline small,
+.phase-gauge-caption span,
+.recurrence-legend span,
+.astronomy-panel small,
+.near-search-copy > small,
+.near-stat span,
+.near-stat small,
+.determinacy-card p,
+.determinacy-foot,
+.proof-chain-stage p,
+.proof-chain-foot small,
+.epoch-audit-foot {
+  color: #74838a;
+}
+
+#research-astronomy .research-task-head h2 {
+  color: #eee6da;
+}
+#research-evidence .research-task-head h2 {
+  color: #e6edf1;
+}
+
+.astronomy-panel strong { color: #e0b77f; }
+.astronomy-term-cell.positive strong { color: #d1a574; }
+.astronomy-term-cell.negative strong { color: #88b4c5; }
+.near-stat.best strong { color: #dfbe7e; }
+.near-ranking-row > em { color: #bc986c; }
+
+.determinacy-scope strong { color: #c3d2d7; }
+.determinacy-card .determinacy-status { color: #aeb9bb; }
+.determinacy-card[data-resolved="true"] .determinacy-status,
+.proof-chain-stage[data-status="satisfied"] strong { color: #9bd0b7; }
+.determinacy-card[data-status="identical-by-definition"] .determinacy-status,
+.proof-chain-stage[data-status="unbound-convention"] strong { color: #cab681; }
+.determinacy-card[data-status="not-resolved-by-shape-model"] .determinacy-status,
+.proof-chain-stage[data-status="missing-deep-time-model"] strong,
+.proof-chain-stage[data-status="missing-model"] strong,
+.proof-chain-stage[data-status="uncertain-estimate"] strong,
+.proof-chain-stage[data-status="evidence-not-authoritative"] strong,
+.proof-chain-foot strong { color: #c78b7d; }
+.determinacy-card[data-status="branch-resolved-stem-mixed"] .determinacy-status,
+.determinacy-card[data-status="mixed-with-year-sequence"] .determinacy-status { color: #c2a475; }
+
+.epoch-audit-summary strong { color: #b4cad7; }
+.epoch-audit-source[data-qualified-coverage="true"] header b { color: #8bb9cf; }
+.epoch-audit-facts strong { color: #93a3a9; }
