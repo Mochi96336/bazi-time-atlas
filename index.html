@@ -81,13 +81,27 @@
 
       <div id="orbital-background" aria-hidden="true">
         <div class="orbital-haze"></div>
-        <div class="orbital-rings orbital-rings-primary"></div>
-        <div class="orbital-rings orbital-rings-secondary"></div>
-        <svg class="orbital-veils" viewBox="0 0 1200 760" aria-hidden="true">
-          <g class="orbital-field">
-            <circle class="orbital-veil orbital-veil-a" pathLength="100"></circle>
-            <circle class="orbital-veil orbital-veil-b" pathLength="100"></circle>
-            <circle class="orbital-veil orbital-veil-c" pathLength="100"></circle>
+        <svg class="orbital-space" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <mask id="orbital-wheel-occlusion" maskUnits="userSpaceOnUse" x="-2400" y="-2400" width="6000" height="6000">
+              <rect x="-2400" y="-2400" width="6000" height="6000" fill="white"></rect>
+              <circle class="orbital-occlusion-disc" fill="black"></circle>
+            </mask>
+          </defs>
+          <g class="orbital-space-masked" mask="url(#orbital-wheel-occlusion)">
+            <g class="orbital-static-rings">
+              <circle class="orbital-static-ring orbital-static-ring-1"></circle>
+              <circle class="orbital-static-ring orbital-static-ring-2"></circle>
+              <circle class="orbital-static-ring orbital-static-ring-3"></circle>
+              <circle class="orbital-static-ring orbital-static-ring-4"></circle>
+              <circle class="orbital-static-ring orbital-static-ring-5"></circle>
+              <circle class="orbital-static-ring orbital-static-ring-6"></circle>
+            </g>
+            <g class="orbital-field">
+              <circle class="orbital-veil orbital-veil-a" pathLength="100"></circle>
+              <circle class="orbital-veil orbital-veil-b" pathLength="100"></circle>
+              <circle class="orbital-veil orbital-veil-c" pathLength="100"></circle>
+            </g>
           </g>
         </svg>
       </div>
