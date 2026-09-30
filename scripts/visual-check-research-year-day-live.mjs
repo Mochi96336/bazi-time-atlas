@@ -10,6 +10,8 @@ const cases=[
  {route:"original-frame",width:320,height:2250,name:"research-original-320.png"},
  {route:"original-frame",width:768,height:2250,name:"research-original-768.png"},
  {route:"original",date:"2024-02-10",width:1440,height:2300,name:"research-original-1440.png"},
+ {route:"shift-frame",width:390,height:1500,name:"research-other-shift-open-390.png"},
+ {route:"shift-frame",width:1440,height:1500,name:"research-other-shift-open-1440.png"},
  {route:"original",date:"2026-09-13",delta:400,width:390,height:1700,name:"research-original-400y-390.png"},
  {route:"original",date:"2026-09-13",delta:400,width:1440,height:1700,name:"research-original-400y-1440.png"},
  {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-original-lichun-day-390.png"},
@@ -38,7 +40,8 @@ for(const item of cases){
  frame.searchParams.set("height",String(item.height));
  const responsive=new URL("scripts/fixtures/research-original-r0-390.html",base);
  responsive.searchParams.set("width",String(item.width));
- const url=item.route==="original-frame"?responsive:
+ if(item.route==="shift-frame")responsive.searchParams.set("shiftOpen","1");
+ const url=(item.route==="original-frame"||item.route==="shift-frame")?responsive:
    item.width===390?frame:u;
  const result=spawnSync(browser,["--headless=new","--no-sandbox","--disable-gpu",
   "--hide-scrollbars","--run-all-compositor-stages-before-draw",
