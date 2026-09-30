@@ -26,19 +26,32 @@ function consolidateGlobalPeriod() {
   dock.classList.add("research-delta-consolidated");
 }
 
-function hashTargetsCycle(cycle) {
+function hashTargetsCycle(details, cycle) {
   const id = decodeURIComponent(location.hash.slice(1));
   if (!id) return false;
   const target = document.getElementById(id);
-  return Boolean(target && (target === cycle || cycle.contains(target)));
+  return Boolean(target && (target === details || target === cycle || cycle.contains(target)));
 }
 
 function revealCycleHash(details, cycle) {
-  if (!details || !cycle || !hashTargetsCycle(cycle)) return;
+  if (!details || !cycle || !hashTargetsCycle(details, cycle)) return;
   details.open = true;
   requestAnimationFrame(() => {
     const id = decodeURIComponent(location.hash.slice(1));
     document.getElementById(id)?.scrollIntoView({ block:"start" });
+  });
+}
+
+function bindSexagenaryLookup(details) {
+  const lookup = researchDiscrete?.querySelector(".research-cycle-inline-lookup");
+  if (!details || !lookup || lookup.dataset.disclosureBound === "1") return;
+  lookup.dataset.disclosureBound = "1";
+  lookup.addEventListener("click", event => {
+    event.preventDefault();
+    details.open = true;
+    const nextHash = `#${details.id}`;
+    if (location.hash !== nextHash) history.pushState(null, "", nextHash);
+    requestAnimationFrame(() => details.scrollIntoView({ block:"start" }));
   });
 }
 
@@ -71,6 +84,7 @@ function ensureSexagenaryDrilldown() {
     derivation.insertAdjacentElement("afterend", details);
   }
 
+  bindSexagenaryLookup(details);
   revealCycleHash(details, cycle);
   return details;
 }
