@@ -64,7 +64,10 @@ function ensureSexagenaryDrilldown() {
   // main Δ selector. This keeps the first-screen recurrence story compact:
   // Year strip → phase fan → visible Δ slider/milestones → optional source.
   const derivation = researchDiscrete?.querySelector(".discrete-derivation");
-  if (derivation && details.previousElementSibling !== derivation) {
+  const transition = researchDiscrete?.querySelector(".discrete-to-astronomy");
+  if (transition && details.previousElementSibling !== transition) {
+    transition.insertAdjacentElement("afterend", details);
+  } else if (!transition && derivation && details.previousElementSibling !== derivation) {
     derivation.insertAdjacentElement("afterend", details);
   }
 

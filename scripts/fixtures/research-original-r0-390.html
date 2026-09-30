@@ -80,6 +80,7 @@ iframe.addEventListener("load",async()=>{
   const deltaSlider=d.getElementById("delta-slider");
   const advancedSummary=compactControls?.querySelector(":scope > summary");
   const sexagenaryDetails=d.getElementById("discrete-sexagenary-details");
+  const astronomyTransition=d.querySelector(".discrete-to-astronomy");
   const task=d.getElementById("research-discrete");
   const taskBox=task.getBoundingClientRect();
   const stripBox=strip.getBoundingClientRect();
@@ -129,11 +130,11 @@ iframe.addEventListener("load",async()=>{
       "R5 actual comparison must retain both responsive Year/Day rows");
   }
   if(width>=821){
-    check(fanGraphic.height<=526,
-      "R7 desktop fan retained excess vertical stage: "+fanGraphic.height);
+    check(fanGraphic.height<=466,
+      "R9 desktop fan retained excess vertical stage: "+fanGraphic.height);
   } else if(width>480){
-    check(fanGraphic.height<=441,
-      "R7 tablet fan retained excess vertical stage: "+fanGraphic.height);
+    check(fanGraphic.height<=406,
+      "R9 tablet fan retained excess vertical stage: "+fanGraphic.height);
   }
   if(width<=390) {
     const stageLimit=width<=320?316:359;
@@ -162,9 +163,10 @@ iframe.addEventListener("load",async()=>{
     deltaSlider.getBoundingClientRect().height>=32 &&
     advancedSummary?.getBoundingClientRect().height>=32,
     "R7 slider must stay visible and Other displacement must remain a readable secondary control");
-  check(sexagenaryDetails && derivation &&
-    derivation.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top,
-    "R7 60 Ganzhi source must move below the delta derivation");
+  check(sexagenaryDetails && derivation && astronomyTransition &&
+    derivation.getBoundingClientRect().bottom<=astronomyTransition.getBoundingClientRect().top &&
+    astronomyTransition.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top,
+    "R9 60 Ganzhi source must move behind the primary next-step transition");
     const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),

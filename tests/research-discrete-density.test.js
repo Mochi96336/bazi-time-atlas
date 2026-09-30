@@ -68,6 +68,12 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
   assert.match(layout,/\.research-delta-public-slider\s*\{[\s\S]*?grid-area:slider/);
   assert.match(layout,/\.research-delta-public-slider input\[type="range"\][\s\S]*?height:32px/);
+  assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
+  assert.match(recurrenceView,/setText\("delta-slider-output"/);
+  assert.match(recurrenceView,/--delta-progress/);
+  assert.match(layout,/-webkit-appearance:none/);
+  assert.match(layout,/::-webkit-slider-thumb/);
+  assert.match(layout,/grid-template-columns:minmax\(180px,1fr\) auto/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > \.delta-dock[\s\S]*?position:absolute/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > summary[\s\S]*?min-height:34px/);
   assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(4,minmax\(0,1fr\)\)/);
@@ -103,8 +109,10 @@ test("zero displacement is integrated into the same derivation selector as 400/1
 
 test("R7 compresses the fan header space without removing its legend",async()=>{
   const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
-  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(490px,36vw,525px\)/);
-  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-62px/);
+  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(445px,32vw,465px\)/);
+  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-90px/);
+  assert.match(layout,/recurrence-legend[\s\S]*?display:flex/);
+  assert.match(layout,/phase-gauge-caption strong,[\s\S]*?display:inline/);
   assert.match(recurrenceHtml,/class="recurrence-legend"/);
   assert.match(recurrenceHtml,/class="phase-gauge-caption"/);
 });
@@ -226,7 +234,7 @@ test("60-day cycle remains supporting evidence behind one flat drilldown", () =>
   assert.match(view, /六十干支圖/);
   assert.match(view, /10 天干 × 12 地支 → 60 配對/);
   assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?border-top:\s*0;/);
-  assert.match(view,/derivation\.insertAdjacentElement\("afterend", details\)/);
+  assert.match(view,/transition\.insertAdjacentElement\("afterend", details\)/);
 });
 
 test("60-day wheel is the selector: direct sector click, pointer scrub, and keyboard arrows remain", () => {
@@ -251,7 +259,7 @@ test("reading order leads with paired names and phase wheel, then delta derivati
     stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
-  assert.match(recurrenceHtml, /三個離散相位同時歸零，只建立四柱重現候選/);
+  assert.match(recurrenceView, /三個離散相位同時歸零，只建立四柱重現候選/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 閉合"));
 });
 

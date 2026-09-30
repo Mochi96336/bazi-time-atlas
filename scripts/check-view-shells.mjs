@@ -165,7 +165,7 @@ if (
   || !Number.isFinite(publicDeltaSliderWidth)
   || deltaSettingsHeight < 32
   || deltaSettingsHeight > 40
-  || zeroDeltaStepHeight < 78
+  || zeroDeltaStepHeight < 64
   || publicDeltaSliderWidth < 220
 ) {
   throw new Error(
