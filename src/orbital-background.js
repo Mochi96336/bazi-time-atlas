@@ -5,7 +5,6 @@ const DEFAULTS = Object.freeze({
   followRate:7.5,
   releaseRate:2.25,
   quietThresholdDegPerSec:0.8,
-  idleStartDelayMs:8000,
   idleTickMs:125,
   idleSettleEpsilonDegPerSec:0.04,
   maxFrameDeltaSec:0.05,
@@ -112,6 +111,7 @@ export function createOrbitalBackground({
   let idleTimerId = null;
   let lastTimestamp = null;
   let lastIdleTimestamp = null;
+  let idleActivated = false;
   let destroyed = false;
 
   function syncGeometry() {
@@ -224,7 +224,7 @@ export function createOrbitalBackground({
     if (settledToIdle) {
       backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
       lastTimestamp = null;
-      scheduleIdleTick();
+      if (idleActivated) scheduleIdleTick();
       return;
     }
 
@@ -235,6 +235,12 @@ export function createOrbitalBackground({
     if (destroyed || isReducedMotion() || frameId !== null) return;
     stopIdleTimer();
     frameId = requestFrame(renderFrame);
+  }
+
+  function activateIdleMotion() {
+    if (destroyed || isReducedMotion()) return;
+    idleActivated = true;
+    if (!wheelMotionActive() && frameId === null) scheduleIdleTick();
   }
 
   function applyMotionPreference() {
@@ -249,7 +255,7 @@ export function createOrbitalBackground({
     root.dataset.orbitalMotion = "active";
     backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
     if (wheelMotionActive()) startInteractiveFrame();
-    else scheduleIdleTick(config.idleStartDelayMs);
+    else if (idleActivated) scheduleIdleTick();
   }
 
   function instrumentMotionChange() {
@@ -271,6 +277,9 @@ export function createOrbitalBackground({
     attributeFilter:["data-drag-ring"]
   });
 
+  instrument.addEventListener?.("pointermove", activateIdleMotion, { passive:true });
+  instrument.addEventListener?.("pointerdown", activateIdleMotion, { passive:true });
+  instrument.addEventListener?.("touchstart", activateIdleMotion, { passive:true });
   reducedMotionQuery?.addEventListener?.("change", applyMotionPreference);
   applyMotionPreference();
 
@@ -284,6 +293,9 @@ export function createOrbitalBackground({
       stopIdleTimer();
       resizeObserver?.disconnect?.();
       motionObserver?.disconnect?.();
+      instrument.removeEventListener?.("pointermove", activateIdleMotion);
+      instrument.removeEventListener?.("pointerdown", activateIdleMotion);
+      instrument.removeEventListener?.("touchstart", activateIdleMotion);
       reducedMotionQuery?.removeEventListener?.("change", applyMotionPreference);
       delete root.dataset.orbitalMotion;
       field.style.transform = "";
