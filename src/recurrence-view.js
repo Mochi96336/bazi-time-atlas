@@ -20,6 +20,7 @@ const CY = 820;
 const CURSOR_ANGLE = -90;
 const FAN_START = -170;
 const FAN_END = -10;
+const RING_LABEL_ANGLE = -148;
 const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
@@ -43,9 +44,9 @@ const DERIVATION_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000]);
 // recurrence cycles live inside, longer cycles live outside. Astronomy remains
 // the outer comparison layer rather than another discrete gear.
 const ringSpecs = Object.freeze({
-  day: { group: document.querySelector("#day-ring"), inner:270, outer:360, sectors:60, phasePerSector:1, modulus:60, className:"day-sector" },
-  year: { group: document.querySelector("#year-ring"), inner:360, outer:450, sectors:60, phasePerSector:1, modulus:60, className:"year-sector" },
-  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector" }
+  day: { group: document.querySelector("#day-ring"), inner:270, outer:360, sectors:60, phasePerSector:1, modulus:60, className:"day-sector", displayLabel:"日序 · 60 日" },
+  year: { group: document.querySelector("#year-ring"), inner:360, outer:450, sectors:60, phasePerSector:1, modulus:60, className:"year-sector", displayLabel:"年序 · 60 年" },
+  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆 · 400 年" }
 });
 
 let currentBase = { year:2026, month:9, day:13 };
@@ -142,16 +143,34 @@ function renderRing(key) {
       label.textContent = formatSigned(cell.signedStart);
     }
   }
+
+  const directLabelPoint = polar((spec.inner + spec.outer) / 2, RING_LABEL_ANGLE);
+  const directLabel = svgEl("text", {
+    x:directLabelPoint.x,
+    y:directLabelPoint.y,
+    class:`phase-ring-name phase-ring-name-${key}`,
+    "data-phase-ring-label":key
+  }, spec.group);
+  directLabel.textContent = spec.displayLabel;
 }
 
 function renderCursor() {
   const inner = polar(258, CURSOR_ANGLE);
   const outer = polar(575, CURSOR_ANGLE);
+  const astronomyLabelPoint = polar(655, CURSOR_ANGLE);
+  const astronomyLabel = svgEl("text", {
+    x:astronomyLabelPoint.x,
+    y:astronomyLabelPoint.y,
+    class:"astronomy-layer-label",
+    "data-astronomy-layer-label":"1"
+  }, cursorGroup);
+  astronomyLabel.textContent = "十二節 · 天文殘差";
+
   svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
   svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
   const labelPoint = polar(595, CURSOR_ANGLE);
   const label = svgEl("text", { x:labelPoint.x, y:labelPoint.y, class:"cursor-label" }, cursorGroup);
-  label.textContent = "閉合 · 0";
+  label.textContent = "基準 · 0";
 }
 
 function renderReturnMarkers(state) {
@@ -187,6 +206,17 @@ function renderReturnMarkers(state) {
       "data-phase-signed":signed,
       "data-phase-modulus":spec.modulus
     }, cursorGroup);
+    if (phase === 0) {
+      const zeroPoint = polar((spec.inner + spec.outer) / 2, angle);
+      svgEl("circle", {
+        cx:zeroPoint.x,
+        cy:zeroPoint.y,
+        r:4.1,
+        class:`return-marker-zero-node return-marker-zero-node-${key}`,
+        "data-return-marker":`${key}-zero-node`,
+        "data-phase-zero-owner":key
+      }, cursorGroup);
+    }
     const labelPoint = polar(spec.outer + 9, angle);
     const label = svgEl("text", {
       x:labelPoint.x,
