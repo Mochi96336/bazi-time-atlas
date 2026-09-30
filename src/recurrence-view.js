@@ -324,7 +324,7 @@ function derivationMeaning(deltaYears) {
   if (deltaYears === 400) return "400 年＝146,097 日；公曆結構先回到 0";
   if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0";
   if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0";
-  return "三個離散相位第一次全域同時歸零";
+  return "三個離散相位同時歸零，只建立四柱重現候選";
 }
 
 function renderDerivation(states) {
@@ -339,6 +339,7 @@ function renderDerivation(states) {
     button.type = "button";
     button.className = "discrete-derivation-step";
     button.dataset.deltaYears = String(deltaYears);
+    button.title = derivationMeaning(deltaYears);
     button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears)}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
     derivationSteps.appendChild(button);
