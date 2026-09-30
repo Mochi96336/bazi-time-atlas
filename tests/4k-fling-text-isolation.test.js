@@ -53,7 +53,8 @@ test("manual fling fixture compares baseline, global transition-off and movement
   for(const key of ["motion-transition-all","motion-transition-surfaces"]) assert.match(source,new RegExp('value="'+key+'"'));
   assert.match(js,/"motion-transition-all":\{material:"svg",rule:"",audit:"all"\}/);
   assert.match(js,/"motion-transition-surfaces":\{material:"svg",rule:"",audit:"surfaces"\}/);
-  assert.match(js,/config\.audit\?"&motionTransitionAudit="\+config\.audit/);
+  assert.match(js,/"&motionTransitionAudit="\+\(config\.audit\|\|"off"\)/);
+  assert.match(js,/baseline:\{material:"svg",rule:""\}/);
   assert.match(js,/motionTransitionAudit:svg\.dataset\.motionTransitionAudit\|\|"off"/);
   assert.match(js,/activeStyles/);
 });
