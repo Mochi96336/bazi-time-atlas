@@ -287,8 +287,11 @@ function updateDeltaControlBounds() {
 
 function updateDeltaScaleMode() {
   const deep = currentDelta > FINE_SLIDER_MAX;
-  deltaSlider.value = String(Math.min(currentDelta, FINE_SLIDER_MAX));
+  const visibleDelta = Math.min(currentDelta, FINE_SLIDER_MAX);
+  deltaSlider.value = String(visibleDelta);
   deltaSlider.dataset.outOfRange = String(deep);
+  deltaSlider.style.setProperty("--delta-progress", `${(visibleDelta / FINE_SLIDER_MAX) * 100}%`);
+  setText("delta-slider-output", `${deep ? "+" : ""}${currentDelta.toLocaleString("en-US")} 年`);
   instrument.dataset.deltaMode = deep ? "deep" : "fine";
   setText(
     "delta-range-note",
