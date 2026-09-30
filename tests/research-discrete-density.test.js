@@ -150,6 +150,19 @@ test("R7 compresses the fan header space without removing its legend",async()=>{
   assert.match(recurrenceHtml,/class="phase-gauge-caption"/);
 });
 
+test("fan explains its own rings, datum and astronomy layer without a separate tutorial", () => {
+  assert.match(recurrenceHtml,/0 = 與基準同相位/);
+  assert.match(recurrenceView,/label\.textContent = "基準 · 0"/);
+  assert.match(recurrenceView,/displayLabel:"公曆 · 400 年"/);
+  assert.match(recurrenceView,/displayLabel:"年序 · 60 年"/);
+  assert.match(recurrenceView,/displayLabel:"日序 · 60 日"/);
+  assert.match(recurrenceView,/astronomyLabel\.textContent = "十二節 · 天文殘差"/);
+  assert.match(recurrenceView,/return-marker-zero-node/);
+  assert.match(recurrenceCss,/\.phase-ring-name\s*\{/);
+  assert.match(recurrenceCss,/\.astronomy-layer-label\s*\{/);
+  assert.match(recurrenceCss,/\.return-marker-zero-node\s*\{/);
+});
+
 test("global period meaning remains attached to the 24000 preset", () => {
   assert.match(view, /button\[data-delta-years="24000"\]/);
   assert.match(view, /preset\.textContent = "全域 24,000"/);
@@ -270,6 +283,16 @@ test("60-day cycle remains supporting evidence behind one flat drilldown", () =>
   assert.match(view,/transition\.insertAdjacentElement\("afterend", details\)/);
 });
 
+test("60-day wheel shortcut stays on one line and opens its disclosure", async () => {
+  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  assert.match(recurrenceHtml,/class="research-cycle-inline-lookup"[^>]*href="#discrete-sexagenary-details">六十日轉盤 ↗<\/a>/);
+  assert.match(layout,/\.research-cycle-inline-lookup\s*\{[\s\S]*?display:inline-flex;[\s\S]*?white-space:nowrap;/);
+  assert.match(view,/target === details \|\| target === cycle/);
+  assert.match(view,/lookup\.addEventListener\("click"[\s\S]*?details\.open = true/);
+  assert.match(view,/history\.pushState\(null, "", nextHash\)/);
+  assert.match(view,/details\.scrollIntoView\(\{ block:"start" \}\)/);
+});
+
 test("60-day wheel is the selector: direct sector click, pointer scrub, and keyboard arrows remain", () => {
   assert.doesNotMatch(recurrenceHtml, /research-cycle-prev|research-cycle-next|前一位|後一位/);
   assert.match(cycleView, /hit\.addEventListener\("click", \(\) => setActive\(index\)\)/);
@@ -293,7 +316,7 @@ test("reading order leads with paired names and phase wheel, then delta derivati
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /三個離散相位同時歸零，只建立四柱重現候選/);
-  assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 閉合"));
+  assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
 test("research integration still loads the discrete presentation layer", () => {
