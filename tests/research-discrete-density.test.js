@@ -109,8 +109,10 @@ test("zero displacement is integrated into the same derivation selector as 400/1
 
 test("R7 compresses the fan header space without removing its legend",async()=>{
   const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
-  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(490px,36vw,525px\)/);
-  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-62px/);
+  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(445px,32vw,465px\)/);
+  assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-90px/);
+  assert.match(layout,/recurrence-legend[\s\S]*?display:flex/);
+  assert.match(layout,/phase-gauge-caption strong,[\s\S]*?display:inline/);
   assert.match(recurrenceHtml,/class="recurrence-legend"/);
   assert.match(recurrenceHtml,/class="phase-gauge-caption"/);
 });
@@ -232,7 +234,7 @@ test("60-day cycle remains supporting evidence behind one flat drilldown", () =>
   assert.match(view, /六十干支圖/);
   assert.match(view, /10 天干 × 12 地支 → 60 配對/);
   assert.match(css, /\.research-sexagenary-drilldown > \.research-cycle\s*\{[\s\S]*?border-top:\s*0;/);
-  assert.match(view,/derivation\.insertAdjacentElement\("afterend", details\)/);
+  assert.match(view,/transition\.insertAdjacentElement\("afterend", details\)/);
 });
 
 test("60-day wheel is the selector: direct sector click, pointer scrub, and keyboard arrows remain", () => {
