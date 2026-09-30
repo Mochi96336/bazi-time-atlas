@@ -5,8 +5,8 @@ const DEFAULTS = Object.freeze({
   followRate:7.5,
   releaseRate:2.25,
   quietThresholdDegPerSec:0.8,
-  energyThresholdDegPerSec:35,
-  energyFullDegPerSec:360,
+  energyThresholdDegPerSec:25,
+  energyFullDegPerSec:220,
   energyFollowRate:9.5,
   energyReleaseRate:3.0,
   energySettleEpsilon:0.012,
@@ -20,9 +20,9 @@ const DEFAULTS = Object.freeze({
 const ORBIT_RADIUS_MULTIPLIERS = Object.freeze([1.035, 1.088, 1.155, 1.242, 1.355, 1.495]);
 const VEIL_RADIUS_MULTIPLIERS = Object.freeze([1.066, 1.225, 1.425]);
 const VEIL_PROFILES = Object.freeze([
-  Object.freeze({ idleWidth:0.90, hotWidth:4.80, idleOpacity:0.28, hotOpacity:0.90 }),
-  Object.freeze({ idleWidth:1.15, hotWidth:3.45, idleOpacity:0.23, hotOpacity:0.72 }),
-  Object.freeze({ idleWidth:1.35, hotWidth:2.70, idleOpacity:0.18, hotOpacity:0.52 })
+  Object.freeze({ idleWidth:0.85, hotWidth:5.20, idleOpacity:0.27, hotOpacity:0.92 }),
+  Object.freeze({ idleWidth:1.10, hotWidth:3.60, idleOpacity:0.22, hotOpacity:0.74 }),
+  Object.freeze({ idleWidth:1.30, hotWidth:2.80, idleOpacity:0.17, hotOpacity:0.54 })
 ]);
 
 function clamp(value, min, max) {
