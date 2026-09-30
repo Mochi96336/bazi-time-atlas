@@ -121,6 +121,7 @@
       const candidateButtons = recurrenceDoc.querySelector("#candidate-buttons");
       const deltaNumber = recurrenceDoc.querySelector("#delta-number");
       const deltaSlider = recurrenceDoc.querySelector("#delta-slider");
+      const publicDeltaSlider = recurrenceDoc.querySelector(".research-delta-public-slider");
       const recurrenceOutline = recurrenceDoc.querySelector(".research-outline");
       const recurrenceOutlineLinks = [...recurrenceDoc.querySelectorAll(".research-outline a")];
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
@@ -158,6 +159,7 @@
       const candidateButtonRect = candidateButton?.getBoundingClientRect();
       const deltaNumberRect = deltaNumber?.getBoundingClientRect();
       const deltaSliderRect = deltaSlider?.getBoundingClientRect();
+      const publicDeltaSliderRect = publicDeltaSlider?.getBoundingClientRect();
       const baseDateInputRect = baseDateInput?.getBoundingClientRect();
       const modelBoundarySummaryRect = modelBoundarySummary?.getBoundingClientRect();
       const derivationRect = derivation?.getBoundingClientRect();
@@ -180,6 +182,10 @@
       probe.dataset.recurrenceOutlineHeight = String(Math.round(outlineRect?.height ?? -1));
       probe.dataset.recurrenceSexagenaryDetailsOpen = String(Boolean(sexagenaryDetails?.open));
       probe.dataset.recurrenceSexagenaryDetailsHeight = String(Math.round(sexagenaryDetailsRect?.height ?? -1));
+      probe.dataset.recurrenceSexagenaryAfterDerivation = String(Boolean(
+        derivationRect && sexagenaryDetailsRect &&
+        derivationRect.bottom <= sexagenaryDetailsRect.top
+      ));
       probe.dataset.recurrenceAstronomyTaskTop = String(Math.round(astronomyTaskHeadRect?.top ?? -1));
       probe.dataset.recurrenceTaskNavVisible = String(Boolean(researchTaskNav && !hidden(recurrenceWin, researchTaskNav)));
       probe.dataset.recurrenceTaskNavTop = String(Math.round(taskNavRect?.top ?? -1));
@@ -211,12 +217,17 @@
       probe.dataset.recurrenceCandidateInDeltaDock = String(Boolean(candidateButtons && deltaDock?.contains(candidateButtons)));
       probe.dataset.recurrenceCandidateInToolbar = String(Boolean(candidateButtons && recurrenceToolbar?.contains(candidateButtons)));
       probe.dataset.recurrenceDeltaNumberInDock = String(Boolean(deltaNumber && deltaDock?.contains(deltaNumber)));
-      probe.dataset.recurrenceDeltaSliderInDock = String(Boolean(deltaSlider && deltaDock?.contains(deltaSlider)));
+      probe.dataset.recurrenceDeltaSliderPublic = String(Boolean(
+        deltaSlider && publicDeltaSlider && publicDeltaSlider.contains(deltaSlider) &&
+        derivation?.contains(publicDeltaSlider) && !deltaDock?.contains(deltaSlider) &&
+        deltaSlider.checkVisibility()
+      ));
       probe.dataset.recurrenceCandidateCount = String(candidateButtons?.querySelectorAll("button").length ?? -1);
       probe.dataset.recurrenceOutlineLinkHeight = String(Math.round(outlineLinkRect?.height ?? -1));
       probe.dataset.recurrenceCandidateButtonHeight = String(Math.round(candidateButtonRect?.height ?? -1));
       probe.dataset.recurrenceDeltaNumberHeight = String(Math.round(deltaNumberRect?.height ?? -1));
       probe.dataset.recurrenceDeltaSliderHeight = String(Math.round(deltaSliderRect?.height ?? -1));
+      probe.dataset.recurrencePublicDeltaSliderWidth = String(Math.round(publicDeltaSliderRect?.width ?? -1));
       probe.dataset.recurrenceBaseDateInputHeight = String(Math.round(baseDateInputRect?.height ?? -1));
       probe.dataset.recurrenceTargetDateInputHeight = String(Math.round(selectedDateInputClosedRect?.height ?? -1));
       probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
