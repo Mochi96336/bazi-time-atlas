@@ -1,0 +1,380 @@
+/* Research color calibration R1
+   Color/material only. Layout, ownership, typography, geometry and data semantics
+   remain in their existing stylesheets. The page should read as a deep graphite
+   instrument with a small number of meaningful research colors, not one green fog. */
+:root {
+  --bg: #090d12;
+  --ink: #eef1ef;
+  --muted: #939da1;
+  --faint: #5e6970;
+  --hairline: rgba(207, 220, 225, .115);
+
+  --gregorian: #aa97c8;
+  --year: #c5a96f;
+  --day: #78aabd;
+  --cursor: #efe2ad;
+  --closed: #91c7ad;
+  --open: #b77f75;
+
+  --research-field: #090d12;
+  --research-raised: #0e151d;
+  --research-raised-soft: #0c1219;
+  --research-line: rgba(190, 207, 215, .12);
+  --research-line-soft: rgba(190, 207, 215, .065);
+  --research-discrete: #93afbd;
+  --research-astronomy: #c59563;
+  --research-evidence: #86a1ba;
+  --research-jiazi: #83b8ab;
+  --research-warning: #bd8275;
+}
+
+html { background: var(--research-field); }
+
+body {
+  background:
+    radial-gradient(circle at 18% -12%, rgba(77, 111, 145, .085), transparent 31rem),
+    radial-gradient(circle at 84% -10%, rgba(176, 132, 76, .045), transparent 27rem),
+    linear-gradient(180deg, #0c1219 0%, var(--research-field) 58%, #070a0f 100%);
+}
+
+/* Page chrome: neutral graphite first; accents are reserved for research meaning. */
+.brand { color: #edf1ee; }
+.recurrence-intro .eyebrow { color: #8497a2; }
+.recurrence-intro h1 { color: #f1f3f0; }
+.recurrence-intro .lede { color: #9da9ad; }
+.scope-note { color: #74828a; }
+.site-nav a { color: #7f8d94; }
+.site-nav a:hover,
+.site-nav a.active {
+  color: #eef2ef;
+  border-color: rgba(210, 222, 226, .15);
+  background: rgba(173, 196, 208, .035);
+}
+
+/* The three research tasks should be distinguishable without becoming three cards. */
+.research-outline {
+  border-top-color: var(--research-line);
+  border-bottom-color: var(--research-line-soft);
+}
+.research-outline a + a { border-left-color: var(--research-line-soft); }
+.research-outline a {
+  --research-task-accent: var(--research-discrete);
+  color: #7e8c92;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--research-task-accent) 4%, transparent),
+    transparent 72%);
+}
+.research-outline a:nth-child(2) { --research-task-accent: var(--research-astronomy); }
+.research-outline a:nth-child(3) { --research-task-accent: var(--research-evidence); }
+.research-outline a span {
+  color: color-mix(in srgb, var(--research-task-accent) 72%, #86939a);
+}
+.research-outline a strong { color: #b4bec2; }
+.research-outline a small { color: #69777e; }
+.research-outline a:hover,
+.research-outline a:focus-visible {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--research-task-accent) 8%, transparent),
+    transparent 78%);
+}
+.research-outline a:hover strong,
+.research-outline a:focus-visible strong { color: #eef2ef; }
+
+.research-task { border-top-color: var(--research-line); }
+.research-task-head h2 { color: #e8ece9; }
+.research-task-index { color: var(--research-discrete); }
+#research-astronomy .research-task-index { color: var(--research-astronomy); }
+#research-evidence .research-task-index { color: var(--research-evidence); }
+.research-task-relation { color: #718089; }
+
+/* Date / delta controls: remove the green cast while keeping them secondary. */
+.research-controls-compact > summary {
+  color: #aab8bd;
+  background: rgba(132, 157, 171, .035);
+  border-color: rgba(185, 205, 214, .15);
+}
+.research-controls-compact > summary b { color: #e0e8e7; }
+.research-controls-action { color: #9db5b9; }
+.research-controls-compact > .delta-dock {
+  border-color: var(--research-line);
+  background: rgba(11, 18, 24, .72);
+}
+.research-year-head .research-date-picker label { color: #a9b7bb; }
+.research-year-head .research-date-picker input {
+  border-color: rgba(185, 207, 216, .28);
+  color: #edf2ef;
+  background: rgba(7, 13, 19, .68);
+}
+.research-year-head .research-date-picker button {
+  border-color: rgba(176, 201, 210, .19);
+  color: #b9c9cd;
+  background: transparent;
+}
+.research-year-head .research-date-picker button:hover {
+  color: #eff3f1;
+  background: rgba(134, 166, 180, .075);
+}
+.candidate-buttons button {
+  color: #a2afb3;
+  border-color: var(--research-line);
+  background: rgba(10, 16, 22, .72);
+}
+.candidate-buttons button:hover,
+.candidate-buttons button.active {
+  color: #10151a;
+  background: #d5dddc;
+  border-color: #d5dddc;
+}
+.delta-slider-wrap input { accent-color: #93adb7; }
+.delta-scale,
+.global-period { color: #64727a; }
+.global-period strong { color: #dccb97; }
+
+/* Original one-year rail: brass = seasonal boundary, jade = real 60-day cadence. */
+.research-year-strip { border-top-color: var(--research-line); }
+.research-year-strip > header strong { color: #dde4e2; }
+.research-year-strip > header span { color: #76848b; }
+.research-year-line {
+  background: rgba(186, 204, 211, .31);
+}
+.research-year-track[data-li-chun-available="true"] .research-year-line {
+  background: linear-gradient(90deg,
+    rgba(197, 161, 95, .75) 0 var(--li-chun-stop),
+    rgba(111, 170, 159, .66) var(--li-chun-stop) 100%);
+}
+.research-year-jiazi-tick { border-color: rgba(105, 174, 161, .58); }
+.research-year-jiazi-tick > small { color: #86a39f; }
+.research-year-jiazi-tick[data-first="true"] { border-color: #9bcab8; }
+.research-year-jiazi-tick[data-first="true"] > small { color: #a9cdbd; }
+.research-year-jiazi-tick[data-current="true"] { border-color: #d7eee4; }
+.research-year-jiazi-tick[data-current="true"] > small { color: #d9eee5; }
+.research-year-day-progress {
+  background: rgba(112, 190, 168, .54);
+  box-shadow: 0 0 7px rgba(112, 190, 168, .15);
+}
+.research-year-day-progress[data-preview="true"] {
+  background: rgba(151, 204, 188, .32);
+}
+.research-year-day-progress[data-anchor-clipped="true"] {
+  background: linear-gradient(90deg, rgba(112,190,168,.10), rgba(112,190,168,.54));
+}
+.research-year-day-progress[data-preview="true"][data-anchor-clipped="true"] {
+  background: linear-gradient(90deg, rgba(151,204,188,.07), rgba(151,204,188,.32));
+}
+.research-year-approx-li-chun {
+  background: rgba(195, 159, 95, .105);
+  border-left-color: rgba(201, 165, 100, .66);
+  border-right-color: rgba(201, 165, 100, .30);
+}
+.research-year-base > i { background: #a7cec7; }
+.research-year-base > i::after { background: #d7f0e7; }
+.research-year-li-chun > i { background: #c6a465; }
+.research-year-li-chun > i::after { background: #d8bb79; }
+
+/* Inline year/day identities now form a deliberate brass + mineral-blue pair. */
+.research-task-primary .research-cycle-inline {
+  border-top-color: var(--research-line);
+  border-bottom-color: var(--research-line);
+}
+.research-task-primary .research-cycle-inline-row[data-side="target"] {
+  border-left-color: var(--research-line);
+}
+.research-cycle-inline-row { color: #b8c4c3; }
+.research-cycle-inline-row[data-side="target"] { color: #e1e8e5; }
+.research-cycle-inline-year strong { color: #d4bd82; }
+.research-cycle-inline-day strong { color: #9bc8d7; }
+.research-cycle-inline-row small { color: #91a0a3; }
+.research-cycle-inline-row[data-side="target"] small { color: #b8c5c4; }
+.research-cycle-inline-row[data-side="base"] .research-cycle-inline-date { color: #87969b; }
+.research-cycle-inline-lookup { color: #82aeba; }
+.research-year-transition-line { color: #c3a976 !important; }
+.research-year-full-cycle { color: #8fb7ad !important; }
+
+/* Discrete fan: keep the authored three meanings, remove the muddy olive/green cast. */
+.phase-band-gregorian { fill: color-mix(in srgb, var(--gregorian) 10%, transparent); }
+.phase-band-year { fill: color-mix(in srgb, var(--year) 9%, transparent); }
+.phase-band-day { fill: color-mix(in srgb, var(--day) 10%, transparent); }
+.gregorian-sector { fill: color-mix(in srgb, var(--gregorian) 29%, transparent); }
+.year-sector { fill: color-mix(in srgb, var(--year) 27%, transparent); }
+.day-sector { fill: color-mix(in srgb, var(--day) 29%, transparent); }
+.recurrence-guide { stroke: rgba(203, 216, 222, .13); }
+.phase-sector { stroke: rgba(215, 225, 229, .07); }
+.phase-tick { stroke: rgba(214, 225, 229, .28); }
+.phase-tick.major { stroke: rgba(226, 234, 236, .54); }
+.phase-label { fill: rgba(229, 235, 235, .68); }
+.return-marker-label { stroke: var(--research-field); }
+.phase-gauge-caption strong { color: #b3bec1; }
+.phase-gauge-caption span,
+.recurrence-legend span { color: #68777e; }
+.recurrence-legend strong { color: #d6dddd; }
+
+/* Compact current-state rail: success/warning has meaning, neutral state stays neutral. */
+.recurrence-readout.research-current-state {
+  border-top-color: var(--research-line);
+  border-bottom-color: var(--research-line-soft);
+}
+.research-current-state-head > span { color: #718087; }
+.research-current-state-head > strong { color: #dfe5e3; }
+.research-current-state-head > i { color: #5f6d74; }
+.research-current-state-phases small { color: #65747b; }
+.research-current-state-phases strong { color: var(--research-warning); }
+.research-current-state-phases > span.is-closed strong { color: var(--closed); }
+.recurrence-readout.research-current-state > p { color: #879398; }
+
+/* Structural 60-day wheel: charcoal + cool steel, with ivory only at selection. */
+.research-cycle-head h3,
+.research-cycle-inspector h4 { color: #edf1ef; }
+.research-cycle-head p { color: #75838a; }
+.research-cycle-key { color: #68767d; }
+.research-cycle-key strong { color: #a8b4b7; }
+.research-cycle-key i { color: #4f5d64; }
+.research-cycle-guide { stroke: rgba(201, 215, 220, .11); }
+.research-cycle-guide-label,
+.research-cycle-index { fill: #66757c; }
+.research-cycle-node {
+  fill: #0c131a;
+  stroke: rgba(201, 217, 222, .17);
+}
+.research-cycle-node.active {
+  fill: color-mix(in srgb, var(--cursor) 9%, transparent);
+  stroke: var(--cursor);
+}
+.research-cycle-node-label { fill: #a7b3b6; }
+.research-cycle-node-label.active { fill: #f0e8c7; }
+.research-cycle-tick { stroke: rgba(210, 222, 225, .20); }
+.research-cycle-tick.major { stroke: rgba(219, 229, 232, .39); }
+.research-cycle-dot { fill: #617078; }
+.research-cycle-dot.major { fill: #8a999f; }
+.research-cycle-center {
+  fill: #090e14;
+  stroke: rgba(207, 220, 224, .13);
+}
+.research-cycle-center-kicker { fill: #6f7d84; }
+.research-cycle-center-value { fill: #edf1ef; }
+.research-cycle-center-note { fill: #748289; }
+.research-cycle-inspector { border-left-color: var(--research-line); }
+.research-cycle-ordinal,
+.research-cycle-phase > span,
+.research-cycle-phase em { color: #68777e; }
+.research-cycle-phase strong { color: #e0e6e4; }
+.research-cycle-phase small { color: #7f8d92; }
+
+/* Task 02: old brass for astronomy, mineral blue for negative residuals. */
+.astronomy-dot { background: var(--research-astronomy); }
+.astronomy-baseline { stroke: color-mix(in srgb, var(--research-astronomy) 30%, transparent); }
+.astronomy-residual-whisker.positive { stroke: #d2a06b; }
+.astronomy-residual-whisker.negative { stroke: #74a6ba; }
+.astronomy-base-dot {
+  fill: #0c1319;
+  stroke: rgba(226, 210, 181, .55);
+}
+.astronomy-target-dot.positive { fill: #d5a26b; stroke: #e7c596; }
+.astronomy-target-dot.negative { fill: #75a8bc; stroke: #acd0dc; }
+.astronomy-term-label { fill: #bfa37f; }
+.astronomy-panel {
+  border-top-color: var(--research-line);
+  border-bottom-color: var(--research-line-soft);
+  background: linear-gradient(180deg, rgba(197,149,99,.026), transparent);
+}
+.astronomy-panel span { color: #6f7c82; }
+.astronomy-panel strong { color: #d9b27e; }
+.astronomy-panel small { color: #77858b; }
+#astronomy-orbit-readout { color: #a19a8d; }
+#astronomy-scale-readout { color: #8d8274; }
+.astronomy-term-cell { border-top-color: var(--research-line-soft); }
+.astronomy-term-cell span { color: #6b7980; }
+.astronomy-term-cell.positive strong { color: #cda170; }
+.astronomy-term-cell.negative strong { color: #7eacbd; }
+
+.near-search-panel {
+  border-top-color: var(--research-line);
+  border-bottom-color: var(--research-line);
+}
+.near-search-copy > strong { color: #d2d9d8; }
+.near-search-copy > small,
+.near-stat span,
+.near-stat small { color: #68767d; }
+.near-stat strong { color: #d9dfde; }
+.near-stat.best strong { color: #d9b97d; }
+.near-axis { stroke: rgba(208, 220, 224, .11); }
+.near-axis-label { fill: #5e6d75; }
+.near-dot { fill: #74838a; }
+.near-dot.first { fill: #bd865a; }
+.near-dot.best {
+  fill: var(--cursor);
+  stroke: #fff0bd;
+  filter: drop-shadow(0 0 7px rgba(239,226,173,.25));
+}
+.near-ranking-row { border-top-color: var(--research-line-soft); color: #819097; }
+.near-ranking-row:hover,
+.near-ranking-row:focus-visible,
+.near-ranking-row.selected { background: rgba(156, 181, 193, .035); }
+.near-ranking-row.selected { box-shadow: inset 2px 0 0 var(--cursor); }
+.near-ranking-row > span { color: #58666e; }
+.near-ranking-row > strong { color: #d4dcda; }
+.near-ranking-row > em { color: #b49269; }
+.near-ranking-row > small { color: #627078; }
+.near-ranking-row.best { background: rgba(239,226,173,.018); }
+.near-ranking-row.best:hover,
+.near-ranking-row.best:focus-visible,
+.near-ranking-row.best.selected { background: rgba(239,226,173,.05); }
+.near-ranking-row.best > strong,
+.near-ranking-row.selected > strong { color: #eee4bd; }
+
+/* Task 03: cold evidentiary blue; status colors remain semantic, not decorative. */
+.determinacy-panel,
+.proof-chain-panel,
+.epoch-audit-panel {
+  border-top-color: var(--research-line);
+  border-bottom-color: var(--research-line-soft);
+}
+.determinacy-label,
+.proof-chain-head h2,
+.epoch-audit-head h2 { color: #b5c1c4; }
+.determinacy-scope {
+  border-left-color: color-mix(in srgb, var(--research-evidence) 34%, transparent);
+}
+.determinacy-scope span,
+.determinacy-card header span,
+.proof-chain-stage span,
+.proof-chain-foot span,
+.epoch-audit-summary span { color: #687780; }
+.determinacy-scope strong { color: #b9c9cf; }
+.determinacy-card + .determinacy-card,
+.proof-chain-stage + .proof-chain-stage,
+.epoch-audit-source + .epoch-audit-source { border-left-color: var(--research-line-soft); }
+.determinacy-card header strong { color: #d7dfdf; }
+.determinacy-card .determinacy-status { color: #a4b0b1; }
+.determinacy-card p,
+.determinacy-foot,
+.proof-chain-stage p,
+.proof-chain-foot small,
+.epoch-audit-foot { color: #6d7a80; }
+.determinacy-card[data-resolved="true"] .determinacy-status,
+.proof-chain-stage[data-status="satisfied"] strong { color: #91c7ad; }
+.determinacy-card[data-status="identical-by-definition"] .determinacy-status,
+.proof-chain-stage[data-status="unbound-convention"] strong { color: #c1ad79; }
+.determinacy-card[data-status="not-resolved-by-shape-model"] .determinacy-status,
+.proof-chain-stage[data-status="missing-deep-time-model"] strong,
+.proof-chain-stage[data-status="missing-model"] strong,
+.proof-chain-stage[data-status="uncertain-estimate"] strong,
+.proof-chain-stage[data-status="evidence-not-authoritative"] strong,
+.proof-chain-foot strong { color: #bd8377; }
+.determinacy-card[data-status="branch-resolved-stem-mixed"] .determinacy-status,
+.determinacy-card[data-status="mixed-with-year-sequence"] .determinacy-status { color: #b99c70; }
+.proof-chain-blocker {
+  border-left-color: rgba(189, 131, 119, .42);
+}
+.proof-chain-blocker strong { color: #c89280; }
+.epoch-audit-summary {
+  border-left-color: color-mix(in srgb, var(--research-evidence) 44%, transparent);
+}
+.epoch-audit-summary strong { color: #aac2d1; }
+.epoch-audit-summary small { color: #6d7b83; }
+.epoch-audit-source header span,
+.epoch-audit-facts em { color: #617078; }
+.epoch-audit-source header strong { color: #c5cfce; }
+.epoch-audit-source header b { color: #a17f75; }
+.epoch-audit-source[data-qualified-coverage="true"] header b { color: #83afc4; }
+.epoch-audit-facts span { border-top-color: var(--research-line-soft); }
+.epoch-audit-facts strong { color: #88989e; }
