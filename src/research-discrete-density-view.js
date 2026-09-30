@@ -54,10 +54,18 @@ function ensureSexagenaryDrilldown() {
     details.dataset.researchDrilldown = "discrete-sexagenary";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = "<span>60 日序來源</span><strong>10 天干 / 12 地支 → 60 配對</strong>";
+    summary.innerHTML = "<span>六十干支圖</span><strong>10 天干 × 12 地支 → 60 配對</strong>";
 
     cycle.insertAdjacentElement("beforebegin", details);
     details.append(summary, cycle);
+  }
+
+  // Keep the large 60-pair diagram as supporting evidence *after* the
+  // main Δ selector. This keeps the first-screen recurrence story compact:
+  // Year strip → phase fan → visible Δ slider/milestones → optional source.
+  const derivation = researchDiscrete?.querySelector(".discrete-derivation");
+  if (derivation && details.previousElementSibling !== derivation) {
+    derivation.insertAdjacentElement("afterend", details);
   }
 
   revealCycleHash(details, cycle);
