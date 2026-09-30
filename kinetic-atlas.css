@@ -193,13 +193,12 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 }
 
 .orbital-grain {
-  opacity: .22;
+  opacity: .18;
   background-image:
-    radial-gradient(circle, rgba(134, 155, 174, .068) 0 .32px, transparent .70px),
-    radial-gradient(circle, rgba(82, 104, 123, .050) 0 .28px, transparent .66px);
-  background-position: 0 0, 3px 5px;
-  background-size: 7px 9px, 11px 13px;
-  mix-blend-mode: soft-light;
+    radial-gradient(circle, rgba(134, 155, 174, .060) 0 .30px, transparent .68px),
+    radial-gradient(circle, rgba(82, 104, 123, .044) 0 .26px, transparent .64px);
+  background-position: 0 0, 5px 7px;
+  background-size: 13px 17px, 19px 23px;
 }
 
 .orbital-rings-primary {
@@ -239,8 +238,12 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
   transform: rotate(0deg);
   transform-box: view-box;
   transform-origin: 600px 1360px;
-  will-change: transform;
+  will-change: auto;
   backface-visibility: hidden;
+}
+
+#orbital-background[data-orbital-kinetic="true"] .orbital-field {
+  will-change: transform;
 }
 
 .orbital-veil {
