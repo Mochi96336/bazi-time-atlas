@@ -51,11 +51,14 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
   const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
   const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
-  assert.ok(stripStart>=0 && selectedStart>stripStart && trackStart>selectedStart
-    && comparisonStart>trackStart && instrumentStart>comparisonStart
-    && derivationStart>instrumentStart && sliderStart>derivationStart
-    && controlsStart>sliderStart && dockStart>controlsStart
-    && baseStart>dockStart && candidatesStart>baseStart);
+  assert.ok(stripStart>=0 && selectedStart>stripStart && trackStart>selectedStart,
+    "selected date must stay inside the original year-strip header");
+  assert.ok(comparisonStart>trackStart && instrumentStart>comparisonStart && derivationStart>instrumentStart,
+    "year-strip evidence must precede the fan and lower Δ derivation");
+  assert.ok(sliderStart>derivationStart && controlsStart>sliderStart && dockStart>controlsStart,
+    "public Δ slider must precede the optional Other displacement toolbar");
+  assert.ok(baseStart>dockStart && candidatesStart>dockStart,
+    "baseline and hidden canonical candidates must remain owned by the optional toolbar");
   assert.match(recurrenceHtml,/id="research-target-date-input"/);
   assert.match(recurrenceHtml,/id="research-target-date-apply"/);
   assert.match(recurrenceHtml,/id="research-controls" class="research-controls-compact research-derivation-controls"/);
