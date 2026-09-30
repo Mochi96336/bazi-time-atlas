@@ -53,6 +53,7 @@ test("status colors stay semantic rather than sharing one decorative accent",()=
 
 test("R3 palette A unifies only the Research 01 fan into cool graphite plus brass datum accents",()=>{
   for(const token of [
+    "--research-fan-field: #05080d",
     "--research-fan-outer: #2f3d4c",
     "--research-fan-middle: #415668",
     "--research-fan-inner: #556d80",
@@ -61,6 +62,7 @@ test("R3 palette A unifies only the Research 01 fan into cool graphite plus bras
   ]) assert.ok(css.includes(token),token);
 
   assert.match(css,/#research-discrete \.recurrence-instrument \{[\s\S]*#05080d/);
+  assert.doesNotMatch(css,/#research-discrete \.recurrence-instrument \{[\s\S]*?(?:background|box-shadow)\s*:/);
   assert.match(css,/\.research-fan-graphic \.gregorian-sector \{ fill: var\(--research-fan-outer\); \}/);
   assert.match(css,/\.research-fan-graphic \.year-sector \{ fill: var\(--research-fan-middle\); \}/);
   assert.match(css,/\.research-fan-graphic \.day-sector \{ fill: var\(--research-fan-inner\); \}/);
