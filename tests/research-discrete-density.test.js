@@ -90,6 +90,8 @@ test("zero displacement is integrated into the same derivation selector as 400/1
   assert.match(recurrenceView,/deltaYears === 0 \? "0 年"/);
   assert.match(recurrenceView,/選定日期本身 · 三個離散相位的基準點/);
   assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
+  assert.match(css,/grid-template-columns:minmax\(92px,\.6fr\) repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css,/@media\(max-width:820px\)[\s\S]*?grid-auto-flow:column;[\s\S]*?overflow-x:auto/);
   assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
 });
 
