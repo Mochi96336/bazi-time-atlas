@@ -86,7 +86,7 @@ test("default single-date readout and responsive fan preserve paired comparisons
 
 test("zero displacement is integrated into the same derivation selector as 400/1200/8000/24000",()=>{
   assert.match(recurrenceView,/DERIVATION_DELTAS = Object\.freeze\(\[0, 400, 1200, 8000, 24_000\]\)/);
-  assert.match(recurrenceView,/deltaYears === 0 \? recurrenceState\(currentBase,0\)/);
+  assert.match(recurrenceView,/deltaYears === 0[\s\S]*?\? recurrenceState\(currentBase,0\)/);
   assert.match(recurrenceView,/deltaYears === 0 \? "0 年"/);
   assert.match(recurrenceView,/選定日期本身 · 三個離散相位的基準點/);
   assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
