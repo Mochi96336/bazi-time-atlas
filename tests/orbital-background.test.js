@@ -47,11 +47,11 @@ test("B1 stays decorative and consumes a read-only wheel velocity", () => {
   assert.match(css, /#orbital-background\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*transform;/);
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
-  assert.match(orbital, /idleStartDelayMs:8000/);
   assert.match(orbital, /idleTickMs:125/);
   assert.match(orbital, /attributeFilter:\["data-drag-ring"\]/);
   assert.match(orbital, /if \(settledToIdle\)[\s\S]*?scheduleIdleTick\(\)/);
-  assert.match(orbital, /else scheduleIdleTick\(config\.idleStartDelayMs\)/);
+  assert.match(orbital, /function activateIdleMotion\(\)[\s\S]*?idleActivated = true/);
+  assert.match(orbital, /addEventListener\?\.\("pointermove", activateIdleMotion/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.orbital-field/);
   assert.match(drag, /get currentAngularVelocityDegPerSec\(\)/);
   assert.match(atlas, /getWheelAngularVelocityDegPerSec:\(\) => dragController\?\.currentAngularVelocityDegPerSec \?\? 0/);
