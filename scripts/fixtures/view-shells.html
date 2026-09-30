@@ -122,6 +122,11 @@
       const deltaNumber = recurrenceDoc.querySelector("#delta-number");
       const deltaSlider = recurrenceDoc.querySelector("#delta-slider");
       const publicDeltaSlider = recurrenceDoc.querySelector(".research-delta-public-slider");
+      const shiftToolbar = recurrenceDoc.querySelector(".research-shift-toolbar");
+      const jumpInstantInput = recurrenceDoc.querySelector("#research-jump-instant");
+      const deltaStepMinus = recurrenceDoc.querySelector("#research-delta-step-minus");
+      const baseEditor = recurrenceDoc.querySelector("#research-base-editor");
+      const baseEditorSummary = baseEditor?.querySelector(":scope > summary");
       const recurrenceOutline = recurrenceDoc.querySelector(".research-outline");
       const recurrenceOutlineLinks = [...recurrenceDoc.querySelectorAll(".research-outline a")];
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
@@ -149,6 +154,7 @@
       // Measure the existing 44px+ original controls INSIDE the optional
       // drawer. Measuring their closed rectangles would incorrectly read 0.
       if (compactControls)compactControls.open=true;
+      if (baseEditor)baseEditor.open=true;
       const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
       const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
@@ -160,10 +166,15 @@
       const deltaNumberRect = deltaNumber?.getBoundingClientRect();
       const deltaSliderRect = deltaSlider?.getBoundingClientRect();
       const publicDeltaSliderRect = publicDeltaSlider?.getBoundingClientRect();
+      const shiftToolbarRect = shiftToolbar?.getBoundingClientRect();
+      const jumpInstantRect = jumpInstantInput?.getBoundingClientRect();
+      const deltaStepMinusRect = deltaStepMinus?.getBoundingClientRect();
+      const baseEditorSummaryRect = baseEditorSummary?.getBoundingClientRect();
       const baseDateInputRect = baseDateInput?.getBoundingClientRect();
       const modelBoundarySummaryRect = modelBoundarySummary?.getBoundingClientRect();
       const derivationRect = derivation?.getBoundingClientRect();
       const zeroDeltaStepRect = zeroDeltaStep?.getBoundingClientRect();
+      if (baseEditor)baseEditor.open=false;
       if (compactControls)compactControls.open=false;
       const viewportHeight = recurrenceWin.innerHeight;
       const visibleInstrumentHeight = recurrenceRect
@@ -223,6 +234,18 @@
         deltaSlider.checkVisibility()
       ));
       probe.dataset.recurrenceCandidateCount = String(candidateButtons?.querySelectorAll("button").length ?? -1);
+      probe.dataset.recurrenceDuplicateCandidatesHidden = String(Boolean(candidateButtons && hidden(recurrenceWin,candidateButtons)));
+      probe.dataset.recurrenceShiftToolbarHeight = String(Math.round(shiftToolbarRect?.height ?? -1));
+      probe.dataset.recurrenceShiftToolbarOneRow = String(Boolean(
+        jumpInstantRect && deltaStepMinusRect && deltaNumberRect && baseEditorSummaryRect &&
+        Math.max(jumpInstantRect.top,deltaStepMinusRect.top,deltaNumberRect.top,baseEditorSummaryRect.top) -
+          Math.min(jumpInstantRect.top,deltaStepMinusRect.top,deltaNumberRect.top,baseEditorSummaryRect.top) <= 2 &&
+        Math.max(jumpInstantRect.bottom,deltaStepMinusRect.bottom,deltaNumberRect.bottom,baseEditorSummaryRect.bottom) -
+          Math.min(jumpInstantRect.bottom,deltaStepMinusRect.bottom,deltaNumberRect.bottom,baseEditorSummaryRect.bottom) <= 2
+      ));
+      probe.dataset.recurrenceJumpInstantHeight = String(Math.round(jumpInstantRect?.height ?? -1));
+      probe.dataset.recurrenceDeltaStepButtonHeight = String(Math.round(deltaStepMinusRect?.height ?? -1));
+      probe.dataset.recurrenceBaseEditorSummaryHeight = String(Math.round(baseEditorSummaryRect?.height ?? -1));
       probe.dataset.recurrenceOutlineLinkHeight = String(Math.round(outlineLinkRect?.height ?? -1));
       probe.dataset.recurrenceCandidateButtonHeight = String(Math.round(candidateButtonRect?.height ?? -1));
       probe.dataset.recurrenceDeltaNumberHeight = String(Math.round(deltaNumberRect?.height ?? -1));

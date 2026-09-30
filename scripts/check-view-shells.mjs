@@ -104,6 +104,8 @@ requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recu
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
 requireEqual(attr(probe, "data-recurrence-delta-slider-public"), "true", "Recurrence slider must remain visibly exposed beside the lower derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
+requireEqual(attr(probe, "data-recurrence-duplicate-candidates-hidden"), "true", "Other displacement must not visibly repeat the public recurrence candidates", url);
+requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Other displacement toolbar must remain one physical row while open", url);
 requireEqual(attr(probe, "data-recurrence-question-text"), "離散週期重新對齊，四柱也會回到同一狀態嗎？", "Research question changed", url);
 requireEqual(attr(probe, "data-recurrence-spine-discrete"), "基準狀態", "Research discrete spine lost identity state", url);
 requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "同一參照", "Research astronomy spine lost identity state", url);
@@ -111,12 +113,14 @@ requireEqual(attr(probe, "data-recurrence-spine-evidence"), "4 / 4 同一", "Res
 
 for (const [label, dataName, minHeight] of [
   ["research outline link", "data-recurrence-outline-link-height", 42],
-  ["canonical candidate button", "data-recurrence-candidate-button-height", 42],
-  ["numeric displacement input", "data-recurrence-delta-number-height", 42],
-  ["base-date input", "data-recurrence-base-date-input-height", 42],
+  ["numeric displacement input", "data-recurrence-delta-number-height", 32],
+  ["base-date input", "data-recurrence-base-date-input-height", 32],
   ["selected-date input", "data-recurrence-target-date-input-height", 42],
   ["model-boundary disclosure", "data-recurrence-model-boundary-summary-height", 42],
-  ["displacement slider", "data-recurrence-delta-slider-height", 32]
+  ["displacement slider", "data-recurrence-delta-slider-height", 32],
+  ["direct-time input", "data-recurrence-jump-instant-height", 32],
+  ["relative-step button", "data-recurrence-delta-step-button-height", 32],
+  ["base-editor summary", "data-recurrence-base-editor-summary-height", 32]
 ]) {
   const height = Number(attr(probe, dataName));
   if (!Number.isFinite(height) || height < minHeight) {
@@ -139,6 +143,7 @@ const derivationTop = Number(attr(probe, "data-recurrence-derivation-top"));
 const deltaSettingsHeight = Number(attr(probe, "data-recurrence-delta-settings-height"));
 const zeroDeltaStepHeight = Number(attr(probe, "data-recurrence-zero-delta-step-height"));
 const publicDeltaSliderWidth = Number(attr(probe, "data-recurrence-public-delta-slider-width"));
+const shiftToolbarHeight = Number(attr(probe, "data-recurrence-shift-toolbar-height"));
 if (
   ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, comparisonTop, comparisonBottom, recurrenceTop, derivationTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom
@@ -167,11 +172,14 @@ if (
   || deltaSettingsHeight > 40
   || zeroDeltaStepHeight < 64
   || publicDeltaSliderWidth < 220
+  || !Number.isFinite(shiftToolbarHeight)
+  || shiftToolbarHeight < 44
+  || shiftToolbarHeight > 52
 ) {
   throw new Error(
     "Lower Δ rail must expose a usable slider, readable Other displacement trigger and compact milestone " +
     "(settings=" + deltaSettingsHeight + ", sliderW=" + publicDeltaSliderWidth +
-    ", zeroStep=" + zeroDeltaStepHeight + "): " + url
+    ", zeroStep=" + zeroDeltaStepHeight + ", shiftToolbarH=" + shiftToolbarHeight + "): " + url
   );
 }
 if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
