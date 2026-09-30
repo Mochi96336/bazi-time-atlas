@@ -90,6 +90,7 @@ requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mo
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
+requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the primary delta derivation, not between fan and controls", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
@@ -101,7 +102,7 @@ requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Name
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
-requireEqual(attr(probe, "data-recurrence-delta-slider-in-dock"), "true", "Recurrence slider left the unified dock", url);
+requireEqual(attr(probe, "data-recurrence-delta-slider-public"), "true", "Recurrence slider must remain visibly exposed beside the lower derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
 requireEqual(attr(probe, "data-recurrence-question-text"), "離散週期重新對齊，四柱也會回到同一狀態嗎？", "Research question changed", url);
 requireEqual(attr(probe, "data-recurrence-spine-discrete"), "基準狀態", "Research discrete spine lost identity state", url);
@@ -137,6 +138,7 @@ const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"
 const derivationTop = Number(attr(probe, "data-recurrence-derivation-top"));
 const deltaSettingsHeight = Number(attr(probe, "data-recurrence-delta-settings-height"));
 const zeroDeltaStepHeight = Number(attr(probe, "data-recurrence-zero-delta-step-height"));
+const publicDeltaSliderWidth = Number(attr(probe, "data-recurrence-public-delta-slider-width"));
 if (
   ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, comparisonTop, comparisonBottom, recurrenceTop, derivationTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom
@@ -160,12 +162,16 @@ if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
 if (
   !Number.isFinite(deltaSettingsHeight)
   || !Number.isFinite(zeroDeltaStepHeight)
-  || deltaSettingsHeight > 34
-  || zeroDeltaStepHeight < 92
+  || !Number.isFinite(publicDeltaSliderWidth)
+  || deltaSettingsHeight < 32
+  || deltaSettingsHeight > 40
+  || zeroDeltaStepHeight < 78
+  || publicDeltaSliderWidth < 220
 ) {
   throw new Error(
-    "Lower Δ rail must keep a compact closed advanced-settings trigger and a full-size zero milestone " +
-    "(settings=" + deltaSettingsHeight + ", zeroStep=" + zeroDeltaStepHeight + "): " + url
+    "Lower Δ rail must expose a usable slider, readable Other displacement trigger and compact milestone " +
+    "(settings=" + deltaSettingsHeight + ", sliderW=" + publicDeltaSliderWidth +
+    ", zeroStep=" + zeroDeltaStepHeight + "): " + url
   );
 }
 if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {

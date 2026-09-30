@@ -665,3 +665,196 @@
     padding:9px 10px 10px;
   }
 }
+
+/* R7: compress the primary recurrence story without hiding controls.
+   The phase fan rises into its previously empty header space; the canonical
+   0..24,000 slider is always visible beside the milestone rail. */
+.research-task-primary .recurrence-instrument {
+  margin-top:4px;
+}
+.research-task-primary .recurrence-readout.research-current-state {
+  padding-top:7px;
+  padding-bottom:7px;
+}
+.research-task-primary .research-cycle-inline {
+  margin-top:5px;
+  padding-top:5px;
+  padding-bottom:5px;
+}
+.research-task-primary .research-year-key-data {
+  margin-top:3px!important;
+}
+.research-task-primary .research-year-same-date-details {
+  margin-top:2px;
+}
+.research-task-primary .research-year-same-date-details > summary {
+  min-height:28px;
+  padding-top:5px;
+}
+
+@media(min-width:821px) {
+  .research-task-primary .research-fan-graphic {
+    height:clamp(490px,36vw,525px);
+  }
+  .research-task-primary #recurrence-wheel {
+    top:-62px;
+    height:calc(100% + 62px);
+  }
+  .research-task-primary .recurrence-legend {
+    top:4px;
+  }
+  .research-task-primary .phase-gauge-caption {
+    top:4px;
+  }
+}
+@media(min-width:481px) and (max-width:820px) {
+  .research-task-primary .research-fan-graphic {
+    height:440px;
+  }
+  .research-task-primary #recurrence-wheel {
+    top:-34px;
+    height:calc(100% + 34px);
+  }
+  .research-task-primary .recurrence-legend {
+    top:5px;
+  }
+  .research-task-primary .phase-gauge-caption {
+    top:5px;
+  }
+}
+
+/* Slider is now a primary, always-visible control. */
+.discrete-derivation {
+  margin-top:9px;
+  padding-top:9px;
+}
+.discrete-derivation > header {
+  display:grid;
+  grid-template-columns:auto minmax(220px,1fr) auto;
+  grid-template-areas:"title slider controls";
+  align-items:center;
+  gap:10px 16px;
+  margin-bottom:6px;
+}
+.discrete-derivation-title {
+  grid-area:title;
+}
+.research-delta-public-slider {
+  grid-area:slider;
+  display:grid;
+  grid-template-columns:auto minmax(120px,1fr) auto;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  color:#718078;
+  font-size:8.5px;
+  font-variant-numeric:tabular-nums;
+}
+.research-delta-public-slider input[type="range"] {
+  width:100%;
+  min-width:90px;
+  height:32px;
+  margin:0;
+  accent-color:#b8cdc0;
+}
+.discrete-derivation .research-derivation-controls {
+  grid-area:controls;
+}
+.discrete-derivation .research-derivation-controls > summary {
+  min-height:34px;
+  padding:5px 9px;
+  border:1px solid rgba(202,219,204,.16);
+  border-radius:6px;
+  background:rgba(255,255,255,.015);
+  color:#a8bbb0;
+  font-size:11.5px;
+  font-weight:620;
+}
+.discrete-derivation .research-derivation-controls > summary::after {
+  content:" +";
+  color:#82958a;
+  font-weight:500;
+}
+.discrete-derivation .research-derivation-controls[open] > summary::after {
+  content:" −";
+}
+.discrete-derivation .research-derivation-controls > .delta-dock,
+.discrete-derivation .research-derivation-controls > .delta-dock.research-delta-consolidated {
+  grid-template-areas:"base base" "number presets";
+}
+.discrete-derivation-steps {
+  min-height:0;
+}
+.discrete-derivation-step,
+.discrete-derivation-step:nth-child(odd) {
+  min-height:88px;
+  padding:8px 10px 9px;
+}
+.discrete-derivation-phases {
+  margin-top:5px;
+}
+.discrete-derivation-step > small {
+  margin-top:5px;
+  line-height:1.35;
+}
+.discrete-derivation > p {
+  margin-top:5px;
+}
+
+/* The 60-pair diagram is supporting evidence after the Δ derivation rather
+   than a rail between the fan and the user's displacement controls. */
+.discrete-derivation + .research-sexagenary-drilldown {
+  margin-top:8px;
+}
+
+@media(max-width:820px) {
+  .discrete-derivation > header {
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"title controls" "slider slider";
+    gap:4px 8px;
+  }
+  .research-delta-public-slider {
+    width:100%;
+  }
+  .discrete-derivation-step,
+  .discrete-derivation-step:nth-child(odd) {
+    min-height:86px;
+  }
+}
+@media(max-width:480px) {
+  .discrete-derivation {
+    margin-top:7px;
+    padding-top:7px;
+  }
+  .discrete-derivation > header {
+    display:grid;
+    margin-bottom:4px;
+  }
+  .discrete-derivation-title > span {
+    display:none;
+  }
+  .research-delta-public-slider {
+    gap:6px;
+    font-size:8px;
+  }
+  .research-delta-public-slider input[type="range"] {
+    height:32px;
+  }
+  .discrete-derivation .research-derivation-controls > summary {
+    min-height:32px;
+    padding:4px 8px;
+    font-size:10.5px;
+  }
+  .discrete-derivation .research-derivation-controls > .delta-dock,
+  .discrete-derivation .research-derivation-controls > .delta-dock.research-delta-consolidated {
+    grid-template-areas:"base" "number" "presets";
+  }
+  .discrete-derivation-step,
+  .discrete-derivation-step:nth-child(odd) {
+    min-height:82px;
+    padding:7px 9px 8px;
+  }
+  .discrete-derivation-step > small {
+    margin-top:4px;
+  }
+}

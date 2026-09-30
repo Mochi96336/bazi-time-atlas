@@ -189,6 +189,37 @@
 
 
 
+      <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
+        <header>
+          <div class="discrete-derivation-title"><strong id="discrete-derivation-title">24,000 年怎麼來</strong><span>同一個 Δ，同時檢查三個離散相位</span></div>
+          <div class="research-delta-public-slider" role="group" aria-label="位移年數 0 到 24,000 年">
+            <span>0</span>
+            <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0"
+              aria-label="位移年數 0 到 24,000 年的細部尺度" aria-describedby="delta-range-note">
+            <span>24,000 年</span>
+          </div>
+          <details id="research-controls" class="research-controls-compact research-derivation-controls">
+            <summary><span>其他位移</span></summary>
+            <span id="research-controls-delta" hidden>0 年</span>
+            <section class="delta-dock" aria-label="基準日期與進階位移控制">
+              <div class="base-date research-base-date" aria-label="基準日期">
+                <label>年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
+                <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
+                <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+              </div>
+              <label>時間位移年數
+                <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
+                <small id="delta-range-note">可直接輸入任意位移；常用閉合候選也可從下方選擇。</small>
+              </label>
+              <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="其他回歸候選"></div>
+              <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
+            </section>
+          </details>
+        </header>
+        <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
+        <p>三個離散相位同時歸零，只建立四柱重現候選。</p>
+      </section>
+
       <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
         <header class="research-cycle-head">
           <div><div class="eyebrow">60-day Ganzhi</div><h3 id="research-cycle-heading">六十日干支循環</h3></div>
@@ -220,36 +251,6 @@
             <button id="research-cycle-return" type="button" class="research-cycle-return" hidden>回到比較日</button>
           </aside>
         </div>
-      </section>
-
-      <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
-        <header>
-          <div class="discrete-derivation-title"><strong id="discrete-derivation-title">24,000 年怎麼來</strong><span>同一個 Δ，同時檢查三個離散相位</span></div>
-          <details id="research-controls" class="research-controls-compact research-derivation-controls">
-          <summary><span>其他位移</span></summary>
-          <span id="research-controls-delta" hidden>0 年</span>
-          <section class="delta-dock" aria-label="基準日期與時間位移控制">
-          <div class="base-date research-base-date" aria-label="基準日期">
-          <label>年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
-          <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
-          <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
-          </div>
-          <label>位移年數
-          <input id="delta-number" type="number" min="0" max="999924" step="1" value="0" aria-describedby="delta-range-note">
-          <small id="delta-range-note">0–24,000 年；深時間候選可由下方排名跳轉。</small>
-          </label>
-          <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="回歸候選"></div>
-          <div class="delta-slider-wrap">
-          <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0"
-          aria-label="位移年數 0 到 24000 年的細部尺度" aria-describedby="delta-range-note">
-          <div class="delta-scale"><span>0</span><span>12,000</span><span>24,000 年</span></div>
-          </div>
-          <div class="global-period"><span>離散全域 exact</span><strong>24,000 年</strong></div>
-          </section>
-          </details>
-        </header>
-        <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
-        <p>三個離散相位同時歸零，只建立四柱重現候選。</p>
       </section>
 
       <p class="discrete-to-astronomy">下一步：立春與十二節邊界也回到同一位置嗎？</p>
