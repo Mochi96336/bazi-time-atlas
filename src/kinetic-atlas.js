@@ -53,13 +53,15 @@ import {
 
 const svg = document.querySelector("#kinetic-wheel");
 
-// Native 4K fling experiment only; do not modify default presentation until
-// the user's real accelerated GPU compositor has confirmed the result.
-// Invalid or absent query values must not change production behavior.
+// Native 4K manual-fling mitigation: suspend SVG transitions only while the
+// drag controller exposes an active pointer gesture or inertia. Resting visual
+// presentation and normal playback are unchanged. This opt-out is intentionally
+// reversible without a deployment if a browser shows a regression.
 const motionTransitionAudit = new URLSearchParams(globalThis.location.search)
   .get("motionTransitionAudit");
-if (motionTransitionAudit === "all" || motionTransitionAudit === "surfaces") {
-  svg.dataset.motionTransitionAudit = motionTransitionAudit;
+if (motionTransitionAudit !== "off") {
+  svg.dataset.motionTransitionAudit =
+    motionTransitionAudit === "surfaces" ? "surfaces" : "all";
 }
 const instrument = document.querySelector("#kinetic-instrument");
 const slider = document.querySelector("#time-slider");

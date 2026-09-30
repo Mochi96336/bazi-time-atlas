@@ -7,12 +7,11 @@ const drag=readFileSync(new URL("../src/wheel/ring-drag-controller.js",import.me
 const css=readFileSync(new URL("../scale-emphasis.css",import.meta.url),"utf8");
 const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
 
-test("native-4K transition guard remains explicitly opt-in",()=>{
+test("native-4K transition guard defaults to the verified all mode and has a URL rollback",()=>{
   assert.match(app,/new URLSearchParams\(globalThis\.location\.search\)\s*\.get\("motionTransitionAudit"\)/);
-  assert.match(app,/motionTransitionAudit === "all" \|\| motionTransitionAudit === "surfaces"/);
-  assert.match(app,/svg\.dataset\.motionTransitionAudit = motionTransitionAudit;/);
-  assert.doesNotMatch(app,/motionTransitionAudit\s*=\s*"all"/);
-  assert.doesNotMatch(app,/motionTransitionAudit\s*=\s*"surfaces"/);
+  assert.match(app,/if \(motionTransitionAudit !== "off"\) \{/);
+  assert.match(app,/svg\.dataset\.motionTransitionAudit =\s*motionTransitionAudit === "surfaces" \? "surfaces" : "all";/);
+  assert.doesNotMatch(app,/svg\.dataset\.motionTransitionAudit = "off"/);
   assert.match(html,/href="\.\/scale-emphasis\.css"/);
 });
 

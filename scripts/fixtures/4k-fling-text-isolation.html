@@ -53,7 +53,7 @@ pre{font-size:10px;max-height:16vh;overflow:auto;white-space:pre-wrap;overflow-w
   <button id="copy" disabled>複製這組結果</button>
   <small id="status" aria-live="polite">初始化…</small>
   <pre id="report" aria-label="本次快甩指標"></pre>
-  <small>I 已在原生 4K 快甩測試中比 H 有效。M 測試只在拖曳及慣性期間關閉 SVG 過渡（仍保留文字、陰影與靜止過渡）；N 進一步限制到已知扇區、刻度及標籤。每組請在同一環用相同力度甩動。</small>
+  <small>正式版現已預設套用 M。為了讓 A／I／H 等舊實驗仍是獨立對照，除了 M／N，其餘所有隔離模式都明確停用正式版的動態過渡保護。M 只在拖曳及慣性期間關閉 SVG 過渡；N 僅限制於扇區、刻度及標籤。每組請在同一環用相同力度甩動。</small>
   <small>面板在 iframe 外。記錄滑鼠事件與畫格間隔，無法自動辨識 GPU 黑畫面；請以肉眼回報為準。</small>
 </aside>
 <script>
@@ -105,7 +105,7 @@ function load(){
   start.disabled=true;copy.disabled=true;observation.value="";report.textContent="";
   const config=MODES[mode.value];
   status.textContent="載入隔離模式…";
-  stage.src=new URL("../../?material="+config.material+"&instant="+fixedInstant+"&flingAudit="+encodeURIComponent(mode.value)+(config.audit?"&motionTransitionAudit="+config.audit:""),location.href).href;
+  stage.src=new URL("../../?material="+config.material+"&instant="+fixedInstant+"&flingAudit="+encodeURIComponent(mode.value)+"&motionTransitionAudit="+(config.audit||"off"),location.href).href;
 }
 stage.addEventListener("load",()=>{
   const doc=stage.contentDocument,win=stage.contentWindow,svg=doc?.getElementById("kinetic-wheel");

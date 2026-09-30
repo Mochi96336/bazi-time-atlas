@@ -220,12 +220,12 @@
 }
 
 
-/* Native 4K hard-fling diagnostic: toggle only via ?motionTransitionAudit=...
-   Gesture ownership is already exposed on the SVG by ring-drag-controller.
-   Never suppress transitions on ordinary playback, idle, or elsewhere in UI.
-   Broad mode should reproduce the user's global I ablation during movement.
-   Surfaces mode tests whether disabling known transitioning descendants suffices.
-   The CSS declaration itself is reversible and completely inert by default. */
+/* Native 4K hard-fling diagnostic: production-default motion-only mitigation.
+   Gesture ownership comes from ring-drag-controller on the SVG itself. The
+   default "all" guard and optional "surfaces" comparison are both active only
+   during real drag/inertia; ?motionTransitionAudit=off restores original CSS.
+   No transitions are suppressed at rest, during autoplay or outside the wheel.
+   Keep text, filters and normal material appearance unchanged. */
 #kinetic-wheel[data-motion-transition-audit="all"]:is([data-active-ring], [data-coasting-ring]),
 #kinetic-wheel[data-motion-transition-audit="all"]:is([data-active-ring], [data-coasting-ring]) * {
   transition: none !important;
