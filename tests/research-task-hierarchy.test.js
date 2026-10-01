@@ -169,6 +169,10 @@ test("section chrome stays flat and compact on phone", () => {
   assert.match(taskCss, /\.research-outline small\s*\{[\s\S]*grid-area:outcome/);
   assert.match(taskCss, /\.research-question-intro h1\s*\{[\s\S]*font-size:clamp\(25px,2\.8vw,40px\)/);
   assert.match(taskCss, /\.research-alignment-map\s*\{[\s\S]*display:grid/);
+  assert.match(taskCss, /\.research-question-intro\s*\{[\s\S]*grid-template-columns:minmax\(0,1\.12fr\) minmax\(360px,\.88fr\)/);
+  assert.match(taskCss, /\.research-question-aside\s*\{[\s\S]*justify-self:end/);
+  assert.match(taskCss, /\.research-outline\s*\{[\s\S]*width:min\(1080px,calc\(100% - 4px\)\)/);
+  assert.match(taskCss, /@media \(max-width:900px\)[\s\S]*\.research-question-intro\s*\{[\s\S]*grid-template-columns:1fr/);
   assert.match(taskCss, /@media \(max-width:480px\)[\s\S]*\.research-outline\s*\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(taskCss, /@media \(max-width:480px\)[\s\S]*\.research-outline a\s*\{[\s\S]*min-height:42px/);
   assert.doesNotMatch(taskCss, /\.research-outline[^}]*border-radius/);
