@@ -177,13 +177,13 @@ if (
   || deltaSettingsHeight < 32
   || deltaSettingsHeight > 40
   || zeroDeltaStepHeight < 64
-  || publicDeltaSliderWidth < 220
+  || publicDeltaSliderWidth < 170
   || !Number.isFinite(shiftToolbarHeight)
   || shiftToolbarHeight < 44
   || shiftToolbarHeight > 52
 ) {
   throw new Error(
-    "Lower time-progression rail must expose a usable slider, readable Other time trigger and compact milestone " +
+    "Lower time-progression rail must expose a usable slider, readable Play/Other time controls and compact milestone " +
     "(settings=" + deltaSettingsHeight + ", sliderW=" + publicDeltaSliderWidth +
     ", zeroStep=" + zeroDeltaStepHeight + ", shiftToolbarH=" + shiftToolbarHeight + "): " + url
   );
