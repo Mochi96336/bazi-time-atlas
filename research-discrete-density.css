@@ -745,6 +745,44 @@
 .discrete-derivation-title {
   grid-area:title;
 }
+.discrete-derivation-title {
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.research-delta-play {
+  min-height:28px;
+  padding:3px 7px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  border:1px solid rgba(185,211,194,.14);
+  border-radius:5px;
+  background:rgba(255,255,255,.012);
+  color:#91a098;
+  font:inherit;
+  font-size:9px;
+  font-weight:650;
+  line-height:1;
+  cursor:pointer;
+}
+.research-delta-play:hover,
+.research-delta-play:focus-visible {
+  color:#d1ddd5;
+  border-color:rgba(185,211,194,.30);
+  background:rgba(185,211,194,.04);
+}
+.research-delta-play[aria-pressed="true"] {
+  color:#d4e2d8;
+  border-color:rgba(185,211,194,.34);
+  background:rgba(185,211,194,.055);
+}
+.research-delta-play-icon {
+  width:9px;
+  text-align:center;
+  font-size:8px;
+}
 .research-delta-public-slider {
   grid-area:slider;
   display:grid;
@@ -807,7 +845,7 @@
   margin-top:5px;
 }
 
-/* The 60-pair diagram is supporting evidence after the Δ derivation rather
+/* The 60-pair diagram is supporting evidence after the time derivation rather
    than a rail between the fan and the user's displacement controls. */
 .discrete-derivation + .research-sexagenary-drilldown {
   margin-top:8px;
@@ -865,7 +903,7 @@
   }
 }
 
-/* R8: turn the exposed Δ control into an instrument rail, not a default
+/* R8: turn the exposed time-progression control into an instrument rail, not a default
    browser range floating in empty space. Keep it in the same compact row as
    the derivation title and advanced-control trigger. */
 .discrete-derivation {
@@ -997,6 +1035,12 @@
   }
 }
 @media(max-width:480px) {
+  .research-delta-play {
+    min-width:32px;
+    min-height:32px;
+    padding:4px 7px;
+  }
+  .research-delta-play-label {display:none}
   .discrete-derivation {
     margin-top:4px;
     padding-top:5px;
