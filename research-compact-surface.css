@@ -652,6 +652,8 @@
 @media(max-width:480px) {
   .research-delta-play {min-width:32px;min-height:32px;padding:4px 7px}
   .research-delta-play-label {display:none}
+  .research-delta-public-slider {grid-template-columns:minmax(0,1fr)}
+  .research-delta-public-slider output {display:none}
   .discrete-derivation > header {
     gap:6px;
   }
