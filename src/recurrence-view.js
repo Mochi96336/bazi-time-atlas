@@ -46,7 +46,7 @@ const shiftFeedback = document.querySelector("#research-shift-feedback");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const derivationSteps = document.querySelector("#discrete-derivation-steps");
 const cursorGroup = document.querySelector("#recurrence-cursor");
-const DERIVATION_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000]);
+const DERIVATION_STRUCTURAL_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000]);
 
 // Radial scale follows the same product grammar as the main atlas: shorter
 // recurrence cycles live inside, longer cycles live outside. Astronomy remains
@@ -460,28 +460,48 @@ function derivationPhase(label, closed, phase, modulus) {
   return `<span><small>${label}</small><em class="${closed ? "phase-ok" : "phase-no"}">${closed ? "0" : formatSigned(signed)}</em></span>`;
 }
 
-function derivationMeaning(deltaYears) {
-  if (deltaYears === 0) return "選定日期本身 · 三個離散相位的基準點";
-  if (deltaYears === 400) return "400 年＝146,097 日；公曆結構先回到 0";
-  if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0";
-  if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0";
-  return "三個離散相位同時歸零，只建立四柱重現候選";
+function visibleDerivationDeltas(localYears) {
+  return [...new Set([
+    ...DERIVATION_STRUCTURAL_DELTAS,
+    ...(Number.isInteger(localYears) ? [localYears] : [])
+  ])].sort((a,b) => a-b);
 }
 
-function renderDerivation(states) {
+function derivationMeaning(deltaYears, localYears) {
+  if (deltaYears === 0) return "選定日期本身 · 三個離散相位的基準點";
+  if (deltaYears === localYears && deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD) {
+    return "60 年序＋60 日序首次重遇，且公曆結構也同時歸零";
+  }
+  if (deltaYears === localYears) return "60 年序＋60 日序首次重遇；公曆 400 年相位不必歸零";
+  if (deltaYears === 400) return "400 年＝146,097 日；公曆結構回到 0，只是日數結構里程碑";
+  if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0；60 日序仍未回來";
+  if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0；60 年序仍未回來";
+  if (deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD) {
+    return "三個離散曆法相位全歸零；不是四柱重現必須等待的條件";
+  }
+  return "離散相位比較";
+}
+
+function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
   derivationSteps.replaceChildren();
-  for (const deltaYears of DERIVATION_DELTAS) {
+  for (const deltaYears of visibleDerivationDeltas(localYears)) {
     const state = deltaYears === 0
       ? recurrenceState(currentBase,0)
       : states.find(candidate => candidate.deltaYears === deltaYears);
     if (!state) continue;
     const button = document.createElement("button");
+    const isLocalYearDay = deltaYears === localYears && state.closed.yearSequence && state.closed.day;
     button.type = "button";
-    button.className = "discrete-derivation-step";
+    button.className = `discrete-derivation-step${isLocalYearDay ? " is-local-recurrence" : ""}`;
     button.dataset.deltaYears = String(deltaYears);
-    button.title = derivationMeaning(deltaYears);
-    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears)}</small>`;
+    button.dataset.milestone = isLocalYearDay
+      ? "local-year-day"
+      : deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD
+        ? "global-discrete"
+        : "structural";
+    button.title = derivationMeaning(deltaYears, localYears);
+    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears, localYears)}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
     derivationSteps.appendChild(button);
   }
@@ -492,7 +512,7 @@ function rebuildCandidates() {
   const localYears = local?.deltaYears ?? null;
   candidateStates = canonicalRecurrenceCandidates(currentBase);
   candidateButtons.replaceChildren();
-  renderDerivation(candidateStates);
+  renderDerivation(candidateStates, localYears);
 
   candidateStates.forEach(state => {
     const button = document.createElement("button");

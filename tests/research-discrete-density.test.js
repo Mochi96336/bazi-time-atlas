@@ -129,13 +129,19 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
 });
 
-test("zero displacement is integrated into the same derivation selector as 400/1200/8000/24000",()=>{
-  assert.match(recurrenceView,/DERIVATION_DELTAS = Object\.freeze\(\[0, 400, 1200, 8000, 24_000\]\)/);
+test("year-day local recurrence is promoted into the visible derivation rail",()=>{
+  assert.match(recurrenceView,/DERIVATION_STRUCTURAL_DELTAS = Object\.freeze\(\[0, 400, 1200, 8000, 24_000\]\)/);
+  assert.match(recurrenceView,/visibleDerivationDeltas\(localYears\)/);
+  assert.match(recurrenceView,/\.\.\.\(Number\.isInteger\(localYears\) \? \[localYears\] : \[\]\)/);
+  assert.match(recurrenceView,/data\.milestone|dataset\.milestone/);
+  assert.match(recurrenceView,/local-year-day/);
+  assert.match(recurrenceView,/60 年序＋60 日序首次重遇；公曆 400 年相位不必歸零/);
   assert.match(recurrenceView,/deltaYears === 0[\s\S]*?\? recurrenceState\(currentBase,0\)/);
   assert.match(recurrenceView,/deltaYears === 0 \? "0 年"/);
   assert.match(recurrenceView,/選定日期本身 · 三個離散相位的基準點/);
   assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
-  assert.match(css,/grid-template-columns:minmax\(92px,\.6fr\) repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css,/grid-template-columns:minmax\(82px,\.55fr\) repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.discrete-derivation-step\.is-local-recurrence/);
   assert.match(css,/@media\(max-width:820px\)[\s\S]*?grid-auto-flow:column;[\s\S]*?overflow-x:auto/);
   assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
 });
@@ -186,7 +192,7 @@ test("milestone detail table is fully removed while the derivation stays visible
   assert.doesNotMatch(recurrenceHtml, /class="milestone-table"|id="milestone-rows"|相位明細/);
   assert.doesNotMatch(view, /ensureMilestoneDrilldown|discrete-milestone-details|milestone-rows/);
   assert.doesNotMatch(recurrenceView, /milestoneRows|milestone-row/);
-  for (const delta of ["400", "1200", "8000", "24,000"]) {
+  for (const delta of ["400", "1200", "1980", "8000", "24,000"]) {
     assert.ok(recurrenceView.includes(delta), `missing derivation delta ${delta}`);
   }
   assert.match(recurrenceHtml, /class="discrete-derivation"/);
@@ -315,7 +321,8 @@ test("reading order leads with paired names and phase wheel, then delta derivati
     stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
-  assert.match(recurrenceView, /三個離散相位同時歸零，只建立四柱重現候選/);
+  assert.match(recurrenceView, /三個離散曆法相位全歸零；不是四柱重現必須等待的條件/);
+  assert.match(recurrenceHtml, /年序 0 ＋ 日序 0 即成立；公曆 400 年相位不必歸零/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
