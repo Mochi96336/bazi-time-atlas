@@ -131,7 +131,7 @@ let dragController = null;
 let compareController = null;
 let playbackController = null;
 let orbitalBackground = null;
-const hourOrbitalVelocity = createOrbitalSourceVelocityTracker();
+const yearOrbitalVelocity = createOrbitalSourceVelocityTracker();
 let linkedWheelRenderPending = false;
 let pendingLinkedDiagnostics = null;
 const linkedDragResult = {
@@ -223,8 +223,8 @@ function renderRingPose(id) {
   }
   setTrackDiagnostics(id);
 
-  if (id === "hour") {
-    hourOrbitalVelocity.observe(rotation);
+  if (id === "year") {
+    yearOrbitalVelocity.observe(rotation);
     orbitalBackground?.sourceMotionChanged();
   }
 }
@@ -599,7 +599,7 @@ function initialize() {
     svg,
     wheelCenter:WHEEL_CENTER,
     wheelOuterRadius:RADII.outer,
-    getSourceAngularVelocityDegPerSec:() => hourOrbitalVelocity.current()
+    getSourceAngularVelocityDegPerSec:() => yearOrbitalVelocity.current()
   });
 }
 
