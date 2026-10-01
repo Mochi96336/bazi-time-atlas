@@ -8,6 +8,7 @@ import {
 import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
 import { projectOriginalStripSelection } from "./recurrence/original-strip-date-projection.js";
 import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-date-projection.js";
+import { createDeltaPlaybackController } from "./recurrence/delta-playback-controller.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -24,6 +25,7 @@ const RING_LABEL_ANGLE = -148;
 const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
+const DELTA_PLAY_YEARS_PER_SECOND = 20;
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -35,6 +37,9 @@ const selectedDateInput = document.querySelector("#research-target-date-input");
 const selectedDateFeedback = document.querySelector("#research-target-date-feedback");
 const deltaNumber = document.querySelector("#delta-number");
 const deltaSlider = document.querySelector("#delta-slider");
+const deltaPlayButton = document.querySelector("#research-delta-play");
+const deltaPlayIcon = deltaPlayButton?.querySelector(".research-delta-play-icon");
+const deltaPlayLabel = deltaPlayButton?.querySelector(".research-delta-play-label");
 const jumpInstantForm = document.querySelector("#research-jump-instant-form");
 const jumpInstantInput = document.querySelector("#research-jump-instant");
 const deltaStep = document.querySelector("#research-delta-step");
@@ -60,6 +65,7 @@ const ringSpecs = Object.freeze({
 let currentBase = { year:2026, month:9, day:13 };
 let currentDelta = 0;
 let candidateStates = [];
+let deltaPlaybackController = null;
 
 function polar(radius, angleDegrees) {
   const angle = angleDegrees * Math.PI / 180;
@@ -389,7 +395,7 @@ function applyJumpInstant(event) {
   }
   const projection = projectExplicitResearchTargetDate(currentBase,currentDelta,parsed.date);
   if (projection.status !== "applied") {
-    showShiftFeedback("這個時間無法沿用目前 Δ");
+    showShiftFeedback("這個時間無法沿用目前推演年數");
     return;
   }
   currentBase = projection.baseDate;
@@ -601,6 +607,11 @@ function renderState() {
 }
 
 function setDelta(value, options = {}) {
+  if (deltaPlaybackController?.playing &&
+      options.source !== "playback" &&
+      options.source !== "playback-reset") {
+    deltaPlaybackController.stop({ commit:false });
+  }
   const next = clampDelta(value);
   currentDelta = next;
   deltaNumber.value = String(next);
@@ -741,6 +752,7 @@ function submitSelectedDate(event) {
 
 function bindControls() {
   selectedDateForm?.addEventListener("submit",submitSelectedDate);
+  deltaPlayButton?.addEventListener("click", () => deltaPlaybackController?.toggle());
   jumpInstantForm?.addEventListener("submit",applyJumpInstant);
   [yearInput, monthInput, dayInput].forEach(input => input.addEventListener("change", updateBaseDate));
   deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value, { source:"number" }));
@@ -754,9 +766,27 @@ function bindControls() {
     if (!Number.isFinite(deltaYears)) return;
     setDelta(deltaYears, { source:event.detail?.source ?? "external" });
   });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) deltaPlaybackController?.stop();
+  });
 }
 
 function initialize() {
+  deltaPlaybackController = createDeltaPlaybackController({
+    playButton:deltaPlayButton,
+    playIcon:deltaPlayIcon,
+    playLabel:deltaPlayLabel,
+    getDelta:() => currentDelta,
+    setDelta,
+    maxDelta:() => FINE_SLIDER_MAX,
+    yearsPerSecond:DELTA_PLAY_YEARS_PER_SECOND,
+    onPlayingChange:playing => {
+      instrument.dataset.deltaPlayback = playing ? "playing" : "stopped";
+    },
+    onStop:({ commit }) => {
+      if (commit) syncQueryState();
+    }
+  });
   renderGuides();
   renderRing("day");
   renderRing("year");
