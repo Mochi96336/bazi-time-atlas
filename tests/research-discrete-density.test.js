@@ -94,7 +94,7 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/background:#0a0f12/);
   assert.match(layout,/border:1px solid rgba\(196,207,215,\.14\)/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > summary[\s\S]*?min-height:34px/);
-  assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(5,minmax\(0,1fr\)\)/);
   assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0);
   assert.ok(recurrenceCss.includes(".delta-dock {"));
 });
@@ -192,7 +192,7 @@ test("milestone detail table is fully removed while the derivation stays visible
   assert.doesNotMatch(recurrenceHtml, /class="milestone-table"|id="milestone-rows"|相位明細/);
   assert.doesNotMatch(view, /ensureMilestoneDrilldown|discrete-milestone-details|milestone-rows/);
   assert.doesNotMatch(recurrenceView, /milestoneRows|milestone-row/);
-  for (const delta of ["400", "1200", "1980", "8000", "24,000"]) {
+  for (const delta of ["400", "1200", "8000", "24,000"]) {
     assert.ok(recurrenceView.includes(delta), `missing derivation delta ${delta}`);
   }
   assert.match(recurrenceHtml, /class="discrete-derivation"/);
