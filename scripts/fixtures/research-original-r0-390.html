@@ -79,6 +79,7 @@ iframe.addEventListener("load",async()=>{
   const zeroStep=derivationSteps?.querySelector('[data-delta-years="0"]');
   const publicDeltaSlider=d.querySelector(".research-delta-public-slider");
   const deltaSlider=d.getElementById("delta-slider");
+  const deltaPlay=d.getElementById("research-delta-play");
   const advancedSummary=compactControls?.querySelector(":scope > summary");
   const sexagenaryDetails=d.getElementById("discrete-sexagenary-details");
   const astronomyTransition=d.querySelector(".discrete-to-astronomy");
@@ -162,11 +163,14 @@ iframe.addEventListener("load",async()=>{
     localStep.textContent.includes("首次重遇") &&
     (instrument.dataset.deltaYears==="0" ? zeroStep.classList.contains("active") : true),
     "R6 derivation rail must contain 0/+400/+1200/+1980/+8000/+24000 and promote the local Year+Day recurrence");
-  check(publicDeltaSlider && deltaSlider && publicDeltaSlider.contains(deltaSlider) &&
-    deltaSlider.checkVisibility() && !compactControls.contains(deltaSlider) &&
+  check(publicDeltaSlider && deltaSlider && deltaPlay && publicDeltaSlider.contains(deltaSlider) &&
+    deltaSlider.checkVisibility() && deltaPlay.checkVisibility() &&
+    !compactControls.contains(deltaSlider) &&
     deltaSlider.getBoundingClientRect().height>=32 &&
+    deltaPlay.getAttribute("aria-pressed")==="false" &&
+    deltaPlay.textContent.includes("播放") &&
     advancedSummary?.getBoundingClientRect().height>=32,
-    "R7 slider must stay visible and Other displacement must remain a readable secondary control");
+    "R7 time progression slider/play must stay visible and Other time must remain a readable secondary control");
   compactControls.open=true;
   await wait(0);
   const shiftToolbar=d.querySelector(".research-shift-toolbar");
@@ -182,7 +186,7 @@ iframe.addEventListener("load",async()=>{
     Math.max(...shiftGroups.map(box=>box.top))-Math.min(...shiftGroups.map(box=>box.top))<=2 &&
     Math.max(...shiftGroups.map(box=>box.bottom))-Math.min(...shiftGroups.map(box=>box.bottom))<=2 &&
     !d.getElementById("candidate-buttons").checkVisibility(),
-    "R11 Other displacement must be one 44–52px toolbar with duplicate candidates hidden");
+    "R11 Other time must be one 44–52px toolbar with duplicate candidates hidden");
   compactControls.open=false;
   check(sexagenaryDetails && derivation && astronomyTransition &&
     derivation.getBoundingClientRect().bottom<=astronomyTransition.getBoundingClientRect().top &&

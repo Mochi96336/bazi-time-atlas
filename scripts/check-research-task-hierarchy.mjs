@@ -188,7 +188,8 @@ if (probe.dom.includes('class="research-task-nav"') || /Recurrence laboratory|<h
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 for (const expected of [
-  "其他位移",
+  "時間推演",
+  "其他時間",
   "公曆結構",
   "60 年序",
   "60 日序",
@@ -202,6 +203,8 @@ for (const expected of [
 }
 for (const stale of [
   "Time displacement",
+  "位移 Δ",
+  "其他位移",
   "Gregorian frame",
   "Year sequence",
   "Day sequence",

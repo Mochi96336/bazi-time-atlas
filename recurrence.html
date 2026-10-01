@@ -156,7 +156,7 @@
           <summary>同月同日的比較參考（非全年日數）</summary>
         <div class="research-year-relations" aria-label="三種一年關係">
           <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
-          <div><strong>60 年序</strong><span>Δ 年 mod 60 的名義序號；不決定立春前後的年柱</span></div>
+          <div><strong>60 年序</strong><span>相隔年數 mod 60 的名義序號；不決定立春前後的年柱</span></div>
           <div><strong>60 日序</strong><span>看兩日期間實際經過 <b id="research-year-day-count">—</b> 日</span></div>
         </div>
         <div class="research-year-continuation" aria-label="選定日到下一年同月同日">
@@ -192,7 +192,7 @@
         </div>
 
         <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
-          <div class="research-current-state-head"><span>目前 Δ</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
+          <div class="research-current-state-head"><span>相隔</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
           <div class="research-current-state-phases">
             <span data-closure="gregorian"><small>公曆結構</small><strong id="gregorian-status">—</strong></span>
             <span data-closure="year"><small>60 年序</small><strong id="year-status">—</strong></span>
@@ -206,16 +206,23 @@
 
       <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
         <header>
-          <div class="discrete-derivation-title"><strong id="discrete-derivation-title">位移 Δ</strong></div>
-          <div class="research-delta-public-slider" role="group" aria-label="位移年數 0 到 24,000 年">
-            <input id="delta-slider" type="range" min="0" max="24000" step="20" value="0"
-              aria-label="位移年數 0 到 24,000 年的細部尺度" aria-describedby="delta-range-note delta-slider-output">
+          <div class="discrete-derivation-title">
+            <strong id="discrete-derivation-title">時間推演</strong>
+            <button id="research-delta-play" class="research-delta-play" type="button"
+              aria-pressed="false" aria-label="播放時間推演" title="播放時間推演">
+              <span class="research-delta-play-icon" aria-hidden="true">▶</span>
+              <span class="research-delta-play-label">播放</span>
+            </button>
+          </div>
+          <div class="research-delta-public-slider" role="group" aria-label="向後推演 0 到 24,000 年">
+            <input id="delta-slider" type="range" min="0" max="24000" step="1" value="0"
+              aria-label="向後推演 0 到 24,000 年" aria-describedby="delta-range-note delta-slider-output">
             <output id="delta-slider-output" for="delta-slider">0 年</output>
           </div>
           <details id="research-controls" class="research-controls-compact research-derivation-controls">
-            <summary><span>其他位移</span></summary>
+            <summary><span>其他時間</span></summary>
             <span id="research-controls-delta" hidden>0 年</span>
-            <section class="delta-dock research-shift-toolbar" aria-label="其他位移工具">
+            <section class="delta-dock research-shift-toolbar" aria-label="其他時間工具">
               <form id="research-jump-instant-form" class="research-shift-time" aria-label="直接前往具體時間">
                 <span class="research-shift-key">時間</span>
                 <input id="research-jump-instant" type="text" inputmode="numeric" autocomplete="off"
@@ -223,9 +230,9 @@
                   aria-label="前往日期與可選時間">
                 <button type="submit" title="前往">↵</button>
               </form>
-              <div class="research-shift-step" role="group" aria-label="相對位移步長">
+              <div class="research-shift-step" role="group" aria-label="跳轉步長">
                 <span class="research-shift-key">步長</span>
-                <select id="research-delta-step" aria-label="相對位移步長">
+                <select id="research-delta-step" aria-label="跳轉步長">
                   <option value="60">60 年</option>
                   <option value="400" selected>400 年</option>
                   <option value="1200">1,200 年</option>
@@ -235,11 +242,11 @@
                 <button id="research-delta-step-minus" type="button" aria-label="目標時間向前移動目前步長">−</button>
                 <button id="research-delta-step-plus" type="button" aria-label="目標時間向後移動目前步長">+</button>
               </div>
-              <div class="research-shift-exact" role="group" aria-label="任意位移年數">
-                <span class="research-shift-key">Δ</span>
+              <div class="research-shift-exact" role="group" aria-label="任意推演年數">
+                <span class="research-shift-key">年數</span>
                 <input id="delta-number" type="number" min="0" max="999924" step="1" value="0"
-                  inputmode="numeric" aria-describedby="delta-range-note" aria-label="任意位移年數">
-                <button id="research-delta-number-apply" type="button" title="套用任意位移">↵</button>
+                  inputmode="numeric" aria-describedby="delta-range-note" aria-label="任意推演年數">
+                <button id="research-delta-number-apply" type="button" title="套用推演年數">↵</button>
               </div>
               <details id="research-base-editor" class="research-base-editor">
                 <summary>基準 <strong id="research-base-summary">2026/09/13</strong><span aria-hidden="true">⋯</span></summary>
@@ -249,7 +256,7 @@
                   <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
                 </div>
               </details>
-              <small id="delta-range-note" class="research-shift-note">0–24,000 年可用滑桿；此列可直接輸入任意 Δ 或以步長 ± 跳轉。</small>
+              <small id="delta-range-note" class="research-shift-note">0–24,000 年可用滑桿或播放；此列可直接輸入任意年數或以步長 ± 跳轉。</small>
               <output id="research-shift-feedback" class="research-shift-feedback" role="status" aria-live="polite" hidden></output>
               <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="其他回歸候選" hidden></div>
               <div class="global-period" hidden><span>離散全域 exact</span><strong>24,000 年</strong></div>

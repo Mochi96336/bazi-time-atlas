@@ -516,9 +516,29 @@
 }
 .discrete-derivation-title {
   display:flex;
-  align-items:baseline;
+  align-items:center;
   min-width:0;
-  gap:12px;
+  gap:7px;
+}
+.research-delta-play {
+  min-height:28px;
+  padding:3px 7px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border:1px solid rgba(185,211,194,.14);
+  border-radius:5px;
+  background:transparent;
+  color:#84948b;
+  font:inherit;
+  font-size:9px;
+  line-height:1;
+  cursor:pointer;
+}
+.research-delta-play[aria-pressed="true"] {
+  color:#d4e2d8;
+  border-color:rgba(185,211,194,.30);
+  background:rgba(185,211,194,.04);
 }
 .discrete-derivation-title > strong {
   color:#d8ded9;
@@ -630,6 +650,10 @@
   }
 }
 @media(max-width:480px) {
+  .research-delta-play {min-width:32px;min-height:32px;padding:4px 7px}
+  .research-delta-play-label {display:none}
+  .research-delta-public-slider {grid-template-columns:minmax(0,1fr)}
+  .research-delta-public-slider output {display:none}
   .discrete-derivation > header {
     gap:6px;
   }
