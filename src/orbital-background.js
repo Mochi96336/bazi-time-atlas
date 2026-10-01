@@ -34,6 +34,63 @@ function monotonicNowMs() {
   return Number.isFinite(now) ? now : Date.now();
 }
 
+export function createOrbitalSourceVelocityTracker({
+  staleAfterMs = 90,
+  minimumSampleMs = 4,
+  nowMs = monotonicNowMs
+} = {}) {
+  if (!Number.isFinite(staleAfterMs) || staleAfterMs <= 0
+    || !Number.isFinite(minimumSampleMs) || minimumSampleMs < 0
+    || typeof nowMs !== "function") {
+    throw new RangeError("orbital source velocity tracker options are invalid");
+  }
+
+  let sampleAngleDeg = null;
+  let sampleTimeMs = null;
+  let lastObservationTimeMs = null;
+  let velocityDegPerSec = 0;
+
+  function observe(rotationDeg, timestampMs = nowMs()) {
+    if (!Number.isFinite(rotationDeg) || !Number.isFinite(timestampMs)) return velocityDegPerSec;
+    lastObservationTimeMs = timestampMs;
+
+    if (!Number.isFinite(sampleAngleDeg) || !Number.isFinite(sampleTimeMs)) {
+      sampleAngleDeg = rotationDeg;
+      sampleTimeMs = timestampMs;
+      velocityDegPerSec = 0;
+      return velocityDegPerSec;
+    }
+
+    const deltaTimeMs = timestampMs - sampleTimeMs;
+    if (deltaTimeMs <= 0 || deltaTimeMs < minimumSampleMs) return velocityDegPerSec;
+
+    velocityDegPerSec = (rotationDeg - sampleAngleDeg) / deltaTimeMs * 1000;
+    sampleAngleDeg = rotationDeg;
+    sampleTimeMs = timestampMs;
+    return velocityDegPerSec;
+  }
+
+  function current(timestampMs = nowMs()) {
+    if (!Number.isFinite(timestampMs) || !Number.isFinite(lastObservationTimeMs)) return 0;
+    if (timestampMs - lastObservationTimeMs > staleAfterMs) return 0;
+    return Number.isFinite(velocityDegPerSec) ? velocityDegPerSec : 0;
+  }
+
+  function reset() {
+    sampleAngleDeg = null;
+    sampleTimeMs = null;
+    lastObservationTimeMs = null;
+    velocityDegPerSec = 0;
+  }
+
+  return Object.freeze({
+    observe,
+    current,
+    reset,
+    get velocityDegPerSec() { return velocityDegPerSec; }
+  });
+}
+
 export function orbitalRadiiWorld(wheelOuterRadius) {
   if (!Number.isFinite(wheelOuterRadius) || wheelOuterRadius <= 0) {
     throw new RangeError("wheel outer radius must be a positive finite number");
@@ -158,7 +215,7 @@ export function createOrbitalBackground({
   svg,
   wheelCenter,
   wheelOuterRadius,
-  getWheelAngularVelocityDegPerSec = () => 0,
+  getSourceAngularVelocityDegPerSec = () => 0,
   requestFrame = callback => globalThis.requestAnimationFrame(callback),
   cancelFrame = frameId => globalThis.cancelAnimationFrame(frameId),
   setTimer = (callback, delay) => globalThis.setTimeout(callback, delay),
@@ -290,9 +347,9 @@ export function createOrbitalBackground({
     );
     lastTimestamp = timestamp;
 
-    const wheelVelocity = Number(getWheelAngularVelocityDegPerSec?.()) || 0;
-    const coupled = Math.abs(wheelVelocity) >= config.quietThresholdDegPerSec;
-    const targetVelocity = orbitalTargetVelocityDegPerSec(wheelVelocity, config);
+    const sourceVelocity = Number(getSourceAngularVelocityDegPerSec?.()) || 0;
+    const coupled = Math.abs(sourceVelocity) >= config.quietThresholdDegPerSec;
+    const targetVelocity = orbitalTargetVelocityDegPerSec(sourceVelocity, config);
     const waking = coupled && (
       Math.abs(targetVelocity) >= Math.abs(backgroundVelocityDegPerSec)
       || Math.sign(targetVelocity) !== Math.sign(backgroundVelocityDegPerSec)
@@ -308,7 +365,7 @@ export function createOrbitalBackground({
     backgroundAngleDeg = (backgroundAngleDeg + backgroundVelocityDegPerSec * deltaTimeSec) % 360;
     applyAngle();
 
-    const targetIntensity = orbitalKineticIntensity(wheelVelocity, config);
+    const targetIntensity = orbitalKineticIntensity(sourceVelocity, config);
     const energyRate = targetIntensity > kineticIntensity
       ? config.energyFollowRate
       : config.energyReleaseRate;
@@ -376,6 +433,11 @@ export function createOrbitalBackground({
     if (wheelMotionActive()) startInteractiveFrame();
   }
 
+  function sourceMotionChanged() {
+    if (destroyed || isReducedMotion()) return;
+    startInteractiveFrame();
+  }
+
   syncGeometry();
   applyEnergy(0);
 
@@ -400,6 +462,7 @@ export function createOrbitalBackground({
 
   return Object.freeze({
     syncGeometry,
+    sourceMotionChanged,
     get backgroundAngleDeg() { return backgroundAngleDeg; },
     get backgroundVelocityDegPerSec() { return backgroundVelocityDegPerSec; },
     get kineticIntensity() { return kineticIntensity; },
