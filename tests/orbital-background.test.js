@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
+  createOrbitalSourceVelocityTracker,
   orbitalKineticIntensity,
   orbitalOcclusionRadiusWorld,
   orbitalRadiiWorld,
@@ -18,6 +19,18 @@ test("orbital target idles below the quiet threshold and preserves fling directi
   assert.equal(orbitalTargetVelocityDegPerSec(-100), -8.5);
   assert.equal(orbitalTargetVelocityDegPerSec(1000), 32);
   assert.equal(orbitalTargetVelocityDegPerSec(-1000), -32);
+});
+
+test("B1.3 source velocity tracker follows the rendered hour rotation and expires stale motion", () => {
+  let now = 0;
+  const tracker = createOrbitalSourceVelocityTracker({ nowMs:() => now, staleAfterMs:90 });
+  assert.equal(tracker.observe(10, 0), 0);
+  now = 20;
+  assert.equal(tracker.observe(14, 20), 200);
+  now = 70;
+  assert.equal(tracker.current(), 200);
+  now = 111;
+  assert.equal(tracker.current(), 0);
 });
 
 test("orbital velocity smoothing approaches rather than snaps to target", () => {
@@ -68,7 +81,7 @@ test("B1.2 kinetic energy makes a hard fling substantially thicker and brighter"
   assert.ok(hot.opacity > idle.opacity * 3);
 });
 
-test("B1 stays decorative and consumes a read-only wheel velocity", () => {
+test("B1 stays decorative and consumes only rendered hour-ring velocity", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const css = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
   const drag = readFileSync(new URL("../src/wheel/ring-drag-controller.js", import.meta.url), "utf8");
@@ -94,7 +107,7 @@ test("B1 stays decorative and consumes a read-only wheel velocity", () => {
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
   assert.match(orbital, /idleTickMs:125/);
   assert.match(orbital, /setCircleGeometry\(occlusionDisc, occlusionRadiusWorld\)/);
-  assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\(wheelVelocity, config\)/);
+  assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\(sourceVelocity, config\)/);
   assert.match(orbital, /veil\.style\.strokeWidth/);
   assert.match(orbital, /veil\.style\.opacity/);
   assert.match(orbital, /attributeFilter:\["data-drag-ring"\]/);
@@ -104,6 +117,9 @@ test("B1 stays decorative and consumes a read-only wheel velocity", () => {
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.orbital-field/);
   assert.match(drag, /get currentAngularVelocityDegPerSec\(\)/);
   assert.match(atlas, /wheelOuterRadius:RADII\.outer/);
-  assert.match(atlas, /getWheelAngularVelocityDegPerSec:\(\) => dragController\?\.currentAngularVelocityDegPerSec \?\? 0/);
+  assert.match(atlas, /hourOrbitalVelocity\.observe\(rotation\)/);
+  assert.match(atlas, /orbitalBackground\?\.sourceMotionChanged\(\)/);
+  assert.match(atlas, /getSourceAngularVelocityDegPerSec:\(\) => hourOrbitalVelocity\.current\(\)/);
+  assert.doesNotMatch(atlas, /getWheelAngularVelocityDegPerSec:[\s\S]*?dragController/);
   assert.doesNotMatch(atlas, /getComputedStyle\([^)]*kinetic-wheel|DOMMatrix.*kinetic-wheel/);
 });
