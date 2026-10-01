@@ -17,7 +17,10 @@ import {
   setModelRotation
 } from "./wheel/ring-state.js";
 import { createRingDragController } from "./wheel/ring-drag-controller.js";
-import { createOrbitalBackground } from "./orbital-background.js";
+import {
+  createOrbitalBackground,
+  createOrbitalSourceVelocityTracker
+} from "./orbital-background.js";
 import {
   ATLAS_SEXAGENARY_NAMES,
   atlasInputValueFromFields,
@@ -127,6 +130,8 @@ let currentDisplay = null;
 let dragController = null;
 let compareController = null;
 let playbackController = null;
+let orbitalBackground = null;
+const hourOrbitalVelocity = createOrbitalSourceVelocityTracker();
 let linkedWheelRenderPending = false;
 let pendingLinkedDiagnostics = null;
 const linkedDragResult = {
@@ -208,14 +213,20 @@ function setTrackDiagnostics(id) {
 function renderRingPose(id) {
   const pose = ringStates[id];
   if (!pose || !currentDisplay) return;
+  const rotation = effectiveRotation(pose);
   if (SEXAGENARY_RING_IDS.includes(id)) {
-    renderer.setCyclePose(id, effectiveRotation(pose), cycleIndexForRing(id, currentDisplay));
+    renderer.setCyclePose(id, rotation, cycleIndexForRing(id, currentDisplay));
   } else if (id === "solar") {
-    renderer.setSolarRingPose(effectiveRotation(pose), currentDisplay.longitude);
+    renderer.setSolarRingPose(rotation, currentDisplay.longitude);
   } else if (id === "zodiac") {
-    renderer.setZodiacRingPose(effectiveRotation(pose), currentDisplay.longitude);
+    renderer.setZodiacRingPose(rotation, currentDisplay.longitude);
   }
   setTrackDiagnostics(id);
+
+  if (id === "hour") {
+    hourOrbitalVelocity.observe(rotation);
+    orbitalBackground?.sourceMotionChanged();
+  }
 }
 
 function renderAllRingPoses() {
@@ -582,13 +593,13 @@ function initialize() {
   bindControls();
   updateWheel();
   installRingDrag();
-  createOrbitalBackground({
+  orbitalBackground = createOrbitalBackground({
     root:document.querySelector("#orbital-background"),
     instrument,
     svg,
     wheelCenter:WHEEL_CENTER,
     wheelOuterRadius:RADII.outer,
-    getWheelAngularVelocityDegPerSec:() => dragController?.currentAngularVelocityDegPerSec ?? 0
+    getSourceAngularVelocityDegPerSec:() => hourOrbitalVelocity.current()
   });
 }
 
