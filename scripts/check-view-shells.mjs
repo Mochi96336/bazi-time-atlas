@@ -104,9 +104,10 @@ requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Re
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
 requireEqual(attr(probe, "data-recurrence-delta-slider-public"), "true", "Recurrence slider must remain visibly exposed beside the lower derivation rail", url);
+requireEqual(attr(probe, "data-recurrence-delta-play-visible"), "true", "Recurrence time progression must expose one canonical Play control", url);
 requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical recurrence candidates changed count", url);
-requireEqual(attr(probe, "data-recurrence-duplicate-candidates-hidden"), "true", "Other displacement must not visibly repeat the public recurrence candidates", url);
-requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Other displacement toolbar must remain one physical row while open", url);
+requireEqual(attr(probe, "data-recurrence-duplicate-candidates-hidden"), "true", "Other time must not visibly repeat the public recurrence candidates", url);
+requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Other time toolbar must remain one physical row while open", url);
 requireEqual(attr(probe, "data-recurrence-question-text"), "八字多久會重複一次？", "Research question changed", url);
 requireEqual(attr(probe, "data-recurrence-alignment-count"), "2", "Research header must keep exactly two compact alignment relations", url);
 requireEqual(attr(probe, "data-recurrence-alignment-text"), "年柱60 同一節令下固定對齊 月柱60|日柱60 同一時辰下固定對齊 時柱60", "Research alignment explanation changed", url);
@@ -122,6 +123,7 @@ for (const [label, dataName, minHeight] of [
   ["selected-date input", "data-recurrence-target-date-input-height", 42],
   ["model-boundary disclosure", "data-recurrence-model-boundary-summary-height", 42],
   ["displacement slider", "data-recurrence-delta-slider-height", 32],
+  ["time-progression play", "data-recurrence-delta-play-height", 28],
   ["direct-time input", "data-recurrence-jump-instant-height", 32],
   ["relative-step button", "data-recurrence-delta-step-button-height", 32],
   ["base-editor summary", "data-recurrence-base-editor-summary-height", 32]
@@ -181,7 +183,7 @@ if (
   || shiftToolbarHeight > 52
 ) {
   throw new Error(
-    "Lower Δ rail must expose a usable slider, readable Other displacement trigger and compact milestone " +
+    "Lower time-progression rail must expose a usable slider, readable Other time trigger and compact milestone " +
     "(settings=" + deltaSettingsHeight + ", sliderW=" + publicDeltaSliderWidth +
     ", zeroStep=" + zeroDeltaStepHeight + ", shiftToolbarH=" + shiftToolbarHeight + "): " + url
   );
