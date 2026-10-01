@@ -82,6 +82,7 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/\.research-delta-public-slider input\[type="range"\][\s\S]*?height:32px/);
   assert.match(layout,/\.research-delta-play\s*\{[\s\S]*?min-height:28px/);
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-play\s*\{[\s\S]*?min-height:32px/);
+  assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-public-slider output\s*\{display:none\}/);
   assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
   assert.match(recurrenceHtml,/id="discrete-derivation-title">時間推演<\/strong>/);
   assert.match(recurrenceHtml,/id="research-delta-play"[\s\S]*?aria-pressed="false"[\s\S]*?aria-label="播放時間推演"/);
