@@ -80,9 +80,19 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
   assert.match(layout,/\.research-delta-public-slider\s*\{[\s\S]*?grid-area:slider/);
   assert.match(layout,/\.research-delta-public-slider input\[type="range"\][\s\S]*?height:32px/);
+  assert.match(layout,/\.research-delta-play\s*\{[\s\S]*?min-height:28px/);
+  assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-play\s*\{[\s\S]*?min-height:32px/);
   assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
+  assert.match(recurrenceHtml,/id="discrete-derivation-title">時間推演<\/strong>/);
+  assert.match(recurrenceHtml,/id="research-delta-play"[\s\S]*?aria-pressed="false"[\s\S]*?aria-label="播放時間推演"/);
+  assert.match(recurrenceHtml,/id="delta-slider"[^>]*step="1"/);
+  assert.match(recurrenceHtml,/summary><span>其他時間<\/span><\/summary>/);
   assert.match(recurrenceView,/setText\("delta-slider-output"/);
   assert.match(recurrenceView,/--delta-progress/);
+  assert.match(recurrenceView,/createDeltaPlaybackController/);
+  assert.match(recurrenceView,/DELTA_PLAY_YEARS_PER_SECOND = 20/);
+  assert.match(recurrenceView,/deltaPlaybackController\.stop\(\{ commit:false \}\)/);
+  assert.match(recurrenceView,/document\.addEventListener\("visibilitychange"/);
   assert.match(layout,/-webkit-appearance:none/);
   assert.match(layout,/::-webkit-slider-thumb/);
   assert.match(layout,/grid-template-columns:minmax\(180px,1fr\) auto/);
@@ -100,7 +110,7 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
 });
 
 
-test("R11 Other displacement is useful without duplicating the public milestone rail",()=>{
+test("R11 Other time controls remain useful without duplicating the public milestone rail",()=>{
   assert.match(recurrenceHtml,/placeholder="YYYY\/MM\/DD HH:MM"/);
   for (const value of ["60","400","1200","8000","24000"]) {
     assert.match(recurrenceHtml,new RegExp(`<option value="${value}"`));
