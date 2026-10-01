@@ -586,13 +586,30 @@
   justify-content:flex-end;
 }
 .discrete-derivation-steps {
-  grid-template-columns:minmax(92px,.6fr) repeat(4,minmax(0,1fr));
+  grid-template-columns:minmax(82px,.55fr) repeat(5,minmax(0,1fr));
 }
 .discrete-derivation-step[data-delta-years="0"] {
   background:rgba(169,199,178,.018);
 }
 .discrete-derivation-step[data-delta-years="0"] > strong {
   color:#b9cbbd;
+}
+.discrete-derivation-step.is-local-recurrence {
+  background:linear-gradient(180deg,rgba(120,170,189,.055),rgba(120,170,189,.012));
+  box-shadow:inset 0 2px 0 rgba(140,190,207,.54);
+}
+.discrete-derivation-step.is-local-recurrence > strong {
+  color:#cce1e7;
+}
+.discrete-derivation-step.is-local-recurrence > small {
+  color:#91aeb8;
+}
+.discrete-derivation-rule {
+  margin-top:8px!important;
+}
+.discrete-derivation-rule strong {
+  color:#c6d8dc;
+  font-weight:680;
 }
 .discrete-derivation-step.active {
   background:rgba(169,199,178,.055);
