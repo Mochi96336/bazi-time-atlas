@@ -107,7 +107,7 @@ test("B1 stays decorative and consumes only rendered hour-ring velocity", () => 
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
   assert.match(orbital, /idleTickMs:125/);
   assert.match(orbital, /setCircleGeometry\(occlusionDisc, occlusionRadiusWorld\)/);
-  assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\(wheelVelocity, config\)/);
+  assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\\(sourceVelocity, config\\)/);
   assert.match(orbital, /veil\.style\.strokeWidth/);
   assert.match(orbital, /veil\.style\.opacity/);
   assert.match(orbital, /attributeFilter:\["data-drag-ring"\]/);
