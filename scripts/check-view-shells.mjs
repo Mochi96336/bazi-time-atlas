@@ -94,7 +94,8 @@ requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true",
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
-requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year displacement must be the active first item beside 400/1200/8000/24000", url);
+requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year displacement must stay the active first item in the six-step derivation rail", url);
+requireEqual(attr(probe, "data-recurrence-local-year-day-visible"), "true", "The first local Year+Day recurrence must be visible and identified in the derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
 requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "The selected date must be visible without duplicating its zero-year baseline", url);

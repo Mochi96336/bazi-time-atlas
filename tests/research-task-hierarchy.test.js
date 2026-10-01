@@ -82,7 +82,7 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
-  assert.match(discrete, /先找 60 年序與 60 日序何時回到原位；公曆 400 年結構一起檢查。同一節令與真正年柱留到下一步校驗。/);
+  assert.match(discrete, /先找 60 年序與 60 日序何時一起回到原位；公曆 400 年只作日數結構參考，不是年日重遇的必要閉合條件。節氣與真正年柱留到下一步校驗。/);
   assert.match(discrete, /id="research-year-strip-title">年度時間條/);
   assert.match(discrete, /id="research-year-full-cycle"/);
   assert.match(discrete, /id="research-year-selected-day"/);

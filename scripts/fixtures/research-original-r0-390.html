@@ -155,10 +155,13 @@ iframe.addEventListener("load",async()=>{
       "R5 fan or outer astronomy orbit overlaps the mobile legend: "+
       JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
   }
-  check(derivationSteps?.children.length===5 &&
+  const localStep=derivationSteps?.querySelector('[data-milestone="local-year-day"]');
+  check(derivationSteps?.children.length===6 &&
     zeroStep && zeroStep.textContent.includes("0 年") &&
+    localStep && localStep.dataset.deltaYears==="1980" &&
+    localStep.textContent.includes("首次重遇") &&
     (instrument.dataset.deltaYears==="0" ? zeroStep.classList.contains("active") : true),
-    "R6 derivation rail must contain 0/+400/+1200/+8000/+24000 with zero active at baseline");
+    "R6 derivation rail must contain 0/+400/+1200/+1980/+8000/+24000 and promote the local Year+Day recurrence");
   check(publicDeltaSlider && deltaSlider && publicDeltaSlider.contains(deltaSlider) &&
     deltaSlider.checkVisibility() && !compactControls.contains(deltaSlider) &&
     deltaSlider.getBoundingClientRect().height>=32 &&

@@ -121,16 +121,25 @@ function expectDiscreteComprehension(dom, url) {
   if (!dom.includes('data-astronomy-layer-label="1"') || !dom.includes(">十二節 · 天文殘差</text>")) {
     throw new Error(`astronomy comparison is not labeled directly on the fan: ${url}`);
   }
-  for (const delta of ["400", "1200", "8000", "24000"]) {
+  for (const delta of ["400", "1200", "1980", "8000", "24000"]) {
     if (!new RegExp(`class="discrete-derivation-step[^"]*"[^>]*data-delta-years="${delta}"`).test(dom)) {
       throw new Error(`visible discrete derivation is missing +${delta}: ${url}`);
     }
   }
-  if (!dom.includes("400 年＝146,097 日；公曆結構先回到 0")) {
+  if (!dom.includes("400 年＝146,097 日；公曆結構回到 0，只是日數結構里程碑")) {
     throw new Error(`400-year Gregorian/day bridge is not visible: ${url}`);
   }
-  if (!dom.includes("三個離散相位同時歸零，只建立四柱重現候選")) {
-    throw new Error(`discrete result is overclaiming beyond candidate closure: ${url}`);
+  if (!dom.includes("60 年序＋60 日序首次重遇；公曆 400 年相位不必歸零")) {
+    throw new Error(`1980-year local Year+Day recurrence meaning is not visible: ${url}`);
+  }
+  if (!dom.includes('data-milestone="local-year-day"')) {
+    throw new Error(`local Year+Day recurrence is not visually promoted in the derivation rail: ${url}`);
+  }
+  if (!dom.includes("年序 0 ＋ 日序 0 即成立；公曆 400 年相位不必歸零")) {
+    throw new Error(`Year+Day recurrence rule still implies Gregorian closure is required: ${url}`);
+  }
+  if (!dom.includes("三個離散曆法相位全歸零；不是四柱重現必須等待的條件")) {
+    throw new Error(`global discrete closure still implies Gregorian closure is required for recurrence: ${url}`);
   }
 }
 
