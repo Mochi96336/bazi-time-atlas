@@ -1041,6 +1041,8 @@
     padding:4px 7px;
   }
   .research-delta-play-label {display:none}
+  .research-delta-public-slider {grid-template-columns:minmax(0,1fr)}
+  .research-delta-public-slider output {display:none}
   .discrete-derivation {
     margin-top:4px;
     padding-top:5px;
