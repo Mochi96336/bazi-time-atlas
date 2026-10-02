@@ -118,8 +118,12 @@ export function installAtlasVisibleTenGods(instrument = document.querySelector("
   else instrument.append(panel);
 
   const update = () => {
-    const state = stateFromInstrument(instrument);
     const analysisOpen = instrument.dataset.analysisOpen === "true";
+    if (!analysisOpen) {
+      panel.hidden = true;
+      return;
+    }
+    const state = stateFromInstrument(instrument);
     panel.hidden = !analysisOpen || state === null;
     panel.dataset.available = String(state !== null);
     if (!state) return;

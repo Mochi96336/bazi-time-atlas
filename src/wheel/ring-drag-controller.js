@@ -54,6 +54,7 @@ export function createRingDragController({
   onLinkedDragDelta,
   onLinkedDragEnd,
   onModeChange,
+  projectionOptions = {},
   inertiaOptions = {}
 }) {
   const {
@@ -92,6 +93,38 @@ export function createRingDragController({
     pendingDelta:0,
     deltaToApply:0
   };
+
+  const {
+    ResizeObserverCtor = globalThis.ResizeObserver,
+    MutationObserverCtor = globalThis.MutationObserver,
+    eventTarget = globalThis.window
+  } = projectionOptions;
+
+  function invalidatePointerProjection() {
+    if (active) active.screenInverse = null;
+  }
+
+  const projectionResizeObserver = typeof ResizeObserverCtor === "function"
+    ? new ResizeObserverCtor(invalidatePointerProjection) : null;
+  projectionResizeObserver?.observe(svg);
+  if (svg.parentElement) projectionResizeObserver?.observe(svg.parentElement);
+
+  const projectionCameraObserver = typeof MutationObserverCtor === "function"
+    ? new MutationObserverCtor(invalidatePointerProjection) : null;
+  projectionCameraObserver?.observe(svg, {
+    attributes:true,
+    attributeFilter:["viewBox", "preserveAspectRatio", "style", "transform", "class"]
+  });
+  for (let ancestor = svg.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    projectionCameraObserver?.observe(ancestor, {
+      attributes:true,
+      attributeFilter:["style", "class", "hidden", "data-analysis-open"]
+    });
+  }
+  eventTarget?.addEventListener?.("resize", invalidatePointerProjection, { passive:true });
+  eventTarget?.addEventListener?.("scroll", invalidatePointerProjection, { passive:true, capture:true });
+  eventTarget?.visualViewport?.addEventListener?.("resize", invalidatePointerProjection, { passive:true });
+  eventTarget?.visualViewport?.addEventListener?.("scroll", invalidatePointerProjection, { passive:true });
 
   function updatePointerStyle() {
     svg.style.touchAction = "none";
@@ -283,7 +316,8 @@ export function createRingDragController({
 
   function begin(event) {
     if (event.button > 0 || active) return;
-    if (!screenToWorld(svg, event.clientX, event.clientY, pointerWorld)) return;
+    const inverse = screenInverse(svg);
+    if (!screenToWorld(svg, event.clientX, event.clientY, pointerWorld, inverse)) return;
     const ring = ringAtWorldPoint(pointerWorld);
     if (!ring?.draggable || !ringIsVisible(svg, ring.id)) return;
     const state = ringStates[ring.id];
@@ -303,6 +337,9 @@ export function createRingDragController({
       pointerId: event.pointerId,
       ringId: ring.id,
       mode: compareMode ? "free" : "linked",
+      screenInverse: inverse,
+      lastClientX: event.clientX,
+      lastClientY: event.clientY,
       lastAngle: angleAt(WHEEL_CENTER, pointerWorld),
       dragActivated: false,
       pendingDelta: 0,
@@ -320,6 +357,8 @@ export function createRingDragController({
     const nextAngle = angleAt(WHEEL_CENTER, pointerWorld);
     const delta = shortestAngleDelta(nextAngle, active.lastAngle);
     active.lastAngle = nextAngle;
+    active.lastClientX = sample.clientX;
+    active.lastClientY = sample.clientY;
     if (Math.abs(delta) < DETENT_EPSILON) return;
     const sampleTimeMs = eventTimeMs(sample);
     if (active.velocityEstimator.add(delta, sampleTimeMs)) {
@@ -342,7 +381,18 @@ export function createRingDragController({
   }
 
   function applyPointerEventSamples(event) {
-    const inverse = screenInverse(svg);
+    if (!active) return;
+    let inverse = active.screenInverse;
+    if (!inverse) {
+      inverse = screenInverse(svg);
+      if (!inverse) return;
+      active.screenInverse = inverse;
+      // A camera/scroll change must not turn a stationary finger into a time
+      // gesture. Reproject the previous screen sample in the new camera first.
+      if (screenToWorld(svg, active.lastClientX, active.lastClientY, pointerWorld, inverse)) {
+        active.lastAngle = angleAt(WHEEL_CENTER, pointerWorld);
+      }
+    }
     if (!inverse) return;
     const samples = typeof event.getCoalescedEvents === "function"
       ? event.getCoalescedEvents()
@@ -470,6 +520,12 @@ export function createRingDragController({
       svg.removeEventListener("pointerleave", leave);
       svg.removeEventListener(RING_VISIBILITY_EVENT, ringVisibilityChange);
       visibilityTarget?.removeEventListener?.("visibilitychange", visibilityChange);
+      projectionResizeObserver?.disconnect();
+      projectionCameraObserver?.disconnect();
+      eventTarget?.removeEventListener?.("resize", invalidatePointerProjection);
+      eventTarget?.removeEventListener?.("scroll", invalidatePointerProjection, true);
+      eventTarget?.visualViewport?.removeEventListener?.("resize", invalidatePointerProjection);
+      eventTarget?.visualViewport?.removeEventListener?.("scroll", invalidatePointerProjection);
       delete svg.dataset.activeRing;
       delete svg.dataset.coastingRing;
       delete svg.dataset.coastingMode;

@@ -83,12 +83,12 @@
         <div class="orbital-haze"></div>
         <svg class="orbital-space" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
           <defs>
-            <mask id="orbital-wheel-occlusion" maskUnits="userSpaceOnUse" x="-2400" y="-2400" width="6000" height="6000">
-              <rect x="-2400" y="-2400" width="6000" height="6000" fill="white"></rect>
-              <circle class="orbital-occlusion-disc" fill="black"></circle>
-            </mask>
+            <clipPath id="orbital-wheel-occlusion" clipPathUnits="userSpaceOnUse">
+              <path class="orbital-occlusion-clip" clip-rule="evenodd" fill-rule="evenodd"></path>
+            </clipPath>
+            <circle class="orbital-occlusion-disc" fill="black"></circle>
           </defs>
-          <g class="orbital-space-masked" mask="url(#orbital-wheel-occlusion)">
+          <g class="orbital-space-clipped" clip-path="url(#orbital-wheel-occlusion)">
             <g class="orbital-static-rings">
               <circle class="orbital-static-ring orbital-static-ring-1"></circle>
               <circle class="orbital-static-ring orbital-static-ring-2"></circle>

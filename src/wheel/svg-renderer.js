@@ -2,6 +2,29 @@ export const SVG_NS = "http://www.w3.org/2000/svg";
 
 const activeSectorIndexByNodes = new WeakMap();
 
+// DOM writes invalidate SVG/style state even when their serialized value is
+// unchanged. Keep the live DOM authoritative; attribute reads do not require
+// layout and also tolerate changes made by the other instrument views.
+export function setAttributeIfChanged(node, name, value) {
+  const next = String(value);
+  if (node.getAttribute(name) === next) return false;
+  node.setAttribute(name, next);
+  return true;
+}
+
+export function setDatasetIfChanged(node, name, value) {
+  const next = String(value);
+  if (node.dataset[name] === next) return false;
+  node.dataset[name] = next;
+  return true;
+}
+
+export function setTextIfChanged(node, value) {
+  if (!node || node.textContent === value) return false;
+  node.textContent = value;
+  return true;
+}
+
 export function svgElement(tag, attrs = {}, parent) {
   const node = document.createElementNS(SVG_NS, tag);
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));

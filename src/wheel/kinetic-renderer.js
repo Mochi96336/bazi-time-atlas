@@ -23,7 +23,7 @@ import {
   rotationInReferenceFrame,
   validReferenceRing
 } from "./reference-frame.js";
-import { addTitle, setActiveSector, svgElement } from "./svg-renderer.js";
+import { addTitle, setActiveSector, svgElement, setAttributeIfChanged, setDatasetIfChanged } from "./svg-renderer.js";
 import { createWheelMaterialPrototype } from "./material-prototype.js";
 
 const MOTION_TRACE_TTL_MS = 420;
@@ -298,9 +298,9 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const model = ringModel(id);
     const point = polar((model.innerRadius + model.outerRadius) / 2, coordinate);
     const label = sexagenary[activeIndex];
-    node.setAttribute("x", String(point.x));
-    node.setAttribute("y", String(point.y));
-    node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
+    setAttributeIfChanged(node, "x", String(point.x));
+    setAttributeIfChanged(node, "y", String(point.y));
+    setAttributeIfChanged(node, "transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
     if (indexChanged) {
       node.setAttribute("data-cycle-index", String(activeIndex));
       node.setAttribute("data-cycle-label", label);
@@ -341,9 +341,9 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const outerRadius = kind === "term" ? RADII.solarTermOuter : model.outerRadius;
     const point = polar((innerRadius + outerRadius) / 2, coordinate);
     const label = source[activeIndex]?.name ?? "";
-    node.setAttribute("x", String(point.x));
-    node.setAttribute("y", String(point.y));
-    node.setAttribute("transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
+    setAttributeIfChanged(node, "x", String(point.x));
+    setAttributeIfChanged(node, "y", String(point.y));
+    setAttributeIfChanged(node, "transform", `rotate(${coordinate + 90} ${point.x} ${point.y})`);
     if (indexChanged) {
       node.setAttribute("data-annual-index", String(activeIndex));
       node.setAttribute("data-annual-label", label);
@@ -490,7 +490,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const radius = (model.innerRadius + model.outerRadius) / 2;
     const d = signedMotionArcPath(WHEEL_CENTER, radius, cursorAngle, delta);
     if (!d) return;
-    node.setAttribute("d", d);
+    setAttributeIfChanged(node, "d", d);
     node.classList.add("is-visible");
 
     const priorTimer = motionTimers.get(id);
@@ -524,12 +524,12 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
 
     const { referenceId, frameOffset } = frameSettings();
     const cursorAngle = CURSOR_ANGLE - frameOffset;
-    svg.dataset.referenceFrame = referenceId ?? "world";
-    svg.dataset.referenceFrameOffsetDegrees = frameOffset.toFixed(4);
-    svg.dataset.referenceCursorAngle = cursorAngle.toFixed(4);
+    setDatasetIfChanged(svg, "referenceFrame", referenceId ?? "world");
+    setDatasetIfChanged(svg, "referenceFrameOffsetDegrees", frameOffset.toFixed(4));
+    setDatasetIfChanged(svg, "referenceCursorAngle", cursorAngle.toFixed(4));
 
     if (cursorLayer) {
-      cursorLayer.setAttribute("transform", rotationTransform(-frameOffset, WHEEL_CENTER));
+      setAttributeIfChanged(cursorLayer, "transform", rotationTransform(-frameOffset, WHEEL_CENTER));
     }
 
     renderedRotations.clear();
@@ -539,9 +539,9 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       const renderedRotation = rotationInReferenceFrame(worldRotation, frameOffset);
       if (!Number.isFinite(renderedRotation)) return;
       const group = groupFor(ring.id);
-      group.setAttribute("transform", rotationTransform(renderedRotation, WHEEL_CENTER));
-      group.dataset.worldRotation = worldRotation.toFixed(4);
-      group.dataset.renderedRotation = renderedRotation.toFixed(4);
+      setAttributeIfChanged(group, "transform", rotationTransform(renderedRotation, WHEEL_CENTER));
+      setDatasetIfChanged(group, "worldRotation", worldRotation.toFixed(4));
+      setDatasetIfChanged(group, "renderedRotation", renderedRotation.toFixed(4));
       renderedRotations.set(ring.id, renderedRotation);
     });
 
@@ -550,10 +550,10 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const solarWorldRotation = worldRotations.get("solar");
     const solarRenderedRotation = renderedRotations.get("solar");
     if (Number.isFinite(solarWorldRotation) && Number.isFinite(solarRenderedRotation)) {
-      zodiacTrack.setAttribute("transform", rotationTransform(solarRenderedRotation, WHEEL_CENTER));
-      zodiacTrack.dataset.worldRotation = solarWorldRotation.toFixed(4);
-      zodiacTrack.dataset.renderedRotation = solarRenderedRotation.toFixed(4);
-      zodiacTrack.dataset.derivedFrom = "solar";
+      setAttributeIfChanged(zodiacTrack, "transform", rotationTransform(solarRenderedRotation, WHEEL_CENTER));
+      setDatasetIfChanged(zodiacTrack, "worldRotation", solarWorldRotation.toFixed(4));
+      setDatasetIfChanged(zodiacTrack, "renderedRotation", solarRenderedRotation.toFixed(4));
+      setDatasetIfChanged(zodiacTrack, "derivedFrom", "solar");
     }
 
     // The material pass consumes the same final rendered pose that the SVG

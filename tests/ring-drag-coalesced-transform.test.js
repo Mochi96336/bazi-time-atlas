@@ -29,6 +29,7 @@ class FakeSvg {
     this.listeners = new Map();
     this.ctmCalls = 0;
     this.inverseCalls = 0;
+    this.projection = { a:1, b:0, c:0, d:1, e:0, f:0 };
   }
 
   getScreenCTM() {
@@ -36,7 +37,7 @@ class FakeSvg {
     return {
       inverse: () => {
         this.inverseCalls += 1;
-        return { a:1, b:0, c:0, d:1, e:0, f:0 };
+        return { ...this.projection };
       }
     };
   }
@@ -95,7 +96,7 @@ class FakeSvg {
   }
 }
 
-test("coalesced pointer samples share one affine screen transform without DOM point allocation", t => {
+test("coalesced pointer samples reuse the gesture affine screen transform without DOM point allocation", t => {
   poisonDomPointApis(t);
   const svg = new FakeSvg();
   const deltas = [];
@@ -112,6 +113,8 @@ test("coalesced pointer samples share one affine screen transform without DOM po
   t.after(() => controller.destroy());
 
   svg.dispatchAt("pointerdown", -90, 1, 0);
+  assert.equal(svg.ctmCalls, 1);
+  assert.equal(svg.inverseCalls, 1);
   svg.resetTransformCounters();
 
   svg.dispatchCoalesced("pointermove", -88, 1, 40, [
@@ -120,20 +123,20 @@ test("coalesced pointer samples share one affine screen transform without DOM po
     { angle:-88, at:40 }
   ]);
 
-  assert.equal(svg.ctmCalls, 1);
-  assert.equal(svg.inverseCalls, 1);
+  assert.equal(svg.ctmCalls, 0);
+  assert.equal(svg.inverseCalls, 0);
   assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 2) < 1e-9);
 
   svg.resetTransformCounters();
   svg.dispatchAt("pointermove", -87.5, 1, 60);
-  assert.equal(svg.ctmCalls, 1);
-  assert.equal(svg.inverseCalls, 1);
+  assert.equal(svg.ctmCalls, 0);
+  assert.equal(svg.inverseCalls, 0);
   assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 2.5) < 1e-9);
 
   svg.resetTransformCounters();
   svg.dispatchCoalesced("pointermove", -87, 1, 80, []);
-  assert.equal(svg.ctmCalls, 1);
-  assert.equal(svg.inverseCalls, 1);
+  assert.equal(svg.ctmCalls, 0);
+  assert.equal(svg.inverseCalls, 0);
   assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 3) < 1e-9);
 
   svg.resetTransformCounters();
@@ -141,8 +144,52 @@ test("coalesced pointer samples share one affine screen transform without DOM po
     { angle:-86.5, at:100 },
     { angle:-86, at:120 }
   ]);
-  assert.equal(svg.ctmCalls, 1);
-  assert.equal(svg.inverseCalls, 1);
+  assert.equal(svg.ctmCalls, 0);
+  assert.equal(svg.inverseCalls, 0);
   assert.ok(Math.abs(deltas.reduce((sum, delta) => sum + delta, 0) - 4) < 1e-9);
 });
 
+test("camera, resize and scroll invalidate the gesture projection without producing false motion", t => {
+  const svg = new FakeSvg();
+  const eventTarget = new EventTarget();
+  eventTarget.visualViewport = new EventTarget();
+  let cameraChanged, resized, disconnects = 0;
+  const deltas = [];
+  const controller = createRingDragController({
+    svg, ringStates:{ day:createRingState("day") },
+    onLinkedDragDelta:(_id, delta) => deltas.push(delta),
+    projectionOptions:{
+      eventTarget,
+      MutationObserverCtor:class {
+        constructor(callback) { cameraChanged = callback; }
+        observe() {} disconnect() { disconnects++; }
+      },
+      ResizeObserverCtor:class {
+        constructor(callback) { resized = callback; }
+        observe() {} disconnect() { disconnects++; }
+      }
+    },
+    inertiaOptions:{ prefersReducedMotion:() => true }
+  });
+  t.after(() => controller.destroy());
+  svg.dispatchAt("pointerdown", -90, 1, 0);
+  svg.dispatchAt("pointermove", -88, 1, 40);
+  assert.equal(svg.ctmCalls, 1);
+  assert.equal(deltas.length, 1);
+  for (const invalidate of [cameraChanged, resized,
+    () => eventTarget.dispatchEvent(new Event("scroll")),
+    () => eventTarget.visualViewport.dispatchEvent(new Event("resize"))]) {
+    svg.projection.e += 30;
+    invalidate();
+    const before = svg.ctmCalls;
+    svg.dispatchAt("pointermove", -88, 1, 60);
+    assert.equal(svg.ctmCalls, before + 1);
+    assert.equal(deltas.length, 1, "a stationary finger must not move time when the camera changes");
+    svg.dispatchAt("pointermove", -88, 1, 70);
+    assert.equal(svg.ctmCalls, before + 1, "the new projection must also be reused");
+  }
+  svg.dispatchAt("pointermove", -87, 1, 80);
+  assert.ok(deltas.at(-1) > 0);
+  controller.destroy();
+  assert.equal(disconnects, 2);
+});

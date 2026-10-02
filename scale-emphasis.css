@@ -220,6 +220,16 @@
 }
 
 
+/* The almost-transparent bevels are decorative. Avoid dozens of SVG filter
+   surfaces while a phone is dragging/coasting; restore the resting finish at
+   release. Labels, sectors, hit targets and desktop filters keep their cadence. */
+@media (max-width: 480px), (pointer: coarse) {
+  #kinetic-wheel:is([data-active-ring], [data-coasting-ring]) .ring-tick.major,
+  #kinetic-wheel:is([data-active-ring], [data-coasting-ring]) .cursor-line {
+    filter: none;
+  }
+}
+
 /* Native 4K hard-fling diagnostic: production-default motion-only mitigation.
    Gesture ownership comes from ring-drag-controller on the SVG itself. The
    default "all" guard and optional "surfaces" comparison are both active only

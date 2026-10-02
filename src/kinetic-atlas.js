@@ -11,6 +11,7 @@ import {
 import { temporalCycleRotation } from "./wheel/temporal-track.js";
 import { shortestAngleDelta } from "./wheel/polar-geometry.js";
 import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
+import { setAttributeIfChanged, setDatasetIfChanged, setTextIfChanged } from "./wheel/svg-renderer.js";
 import {
   createRingState,
   effectiveRotation,
@@ -205,9 +206,9 @@ function setTrackDiagnostics(id) {
   const track = trackNodes.get(id) ?? null;
   const pose = ringStates[id];
   if (!track || !pose) return;
-  track.dataset.modelRotation = pose.modelRotation.toFixed(4);
-  track.dataset.manualOffset = pose.manualOffset.toFixed(4);
-  track.dataset.linked = String(pose.linked);
+  setDatasetIfChanged(track, "modelRotation", pose.modelRotation.toFixed(4));
+  setDatasetIfChanged(track, "manualOffset", pose.manualOffset.toFixed(4));
+  setDatasetIfChanged(track, "linked", String(pose.linked));
 }
 
 function renderRingPose(id) {
@@ -296,7 +297,7 @@ function temporalContextUrl(currentHref, timeContext) {
 
 function setText(id, value) {
   const node = textNodes.get(id) ?? null;
-  if (node) node.textContent = value;
+  setTextIfChanged(node, value);
 }
 
 function updateReadout(display) {
@@ -329,21 +330,21 @@ function updateReadout(display) {
   setText("state-hour", pillars.hour.name);
   setText("state-zodiac", activeZodiac.name);
   setText("state-term", activeTerm.name);
-  if (timeBasisReadout) timeBasisReadout.textContent = basisLabel;
-  if (instantInput) instantInput.setAttribute("aria-label", `選定時間，${offsetLabel}，秒級`);
-  instrument.dataset.selectedInstantMs = String(Math.round(state.selectedMs));
-  instrument.dataset.utcOffsetHours = String(timeContext.utcOffsetHours);
-  instrument.dataset.dayBoundary = timeContext.dayBoundary;
-  instrument.dataset.yearPillar = yearName;
-  instrument.dataset.monthPillar = monthName;
-  instrument.dataset.dayPillar = pillars.day.name;
-  instrument.dataset.hourPillar = pillars.hour.name;
-  instrument.dataset.solarLongitude = longitude.toFixed(6);
-  instrument.dataset.term = activeTerm.name;
-  instrument.dataset.zodiac = activeZodiac.name;
+  setTextIfChanged(timeBasisReadout, basisLabel);
+  if (instantInput) setAttributeIfChanged(instantInput, "aria-label", `選定時間，${offsetLabel}，秒級`);
+  setDatasetIfChanged(instrument, "selectedInstantMs", String(Math.round(state.selectedMs)));
+  setDatasetIfChanged(instrument, "utcOffsetHours", String(timeContext.utcOffsetHours));
+  setDatasetIfChanged(instrument, "dayBoundary", timeContext.dayBoundary);
+  setDatasetIfChanged(instrument, "yearPillar", yearName);
+  setDatasetIfChanged(instrument, "monthPillar", monthName);
+  setDatasetIfChanged(instrument, "dayPillar", pillars.day.name);
+  setDatasetIfChanged(instrument, "hourPillar", pillars.hour.name);
+  setDatasetIfChanged(instrument, "solarLongitude", longitude.toFixed(6));
+  setDatasetIfChanged(instrument, "term", activeTerm.name);
+  setDatasetIfChanged(instrument, "zodiac", activeZodiac.name);
   if (state.legacyProjection) {
-    instrument.dataset.projectionMode = "legacy-longitude";
-    instrument.dataset.projectionLongitude = longitude.toFixed(6);
+    setDatasetIfChanged(instrument, "projectionMode", "legacy-longitude");
+    setDatasetIfChanged(instrument, "projectionLongitude", longitude.toFixed(6));
     if (state.legacyProjection.monthBranch) instrument.dataset.focusMonth = state.legacyProjection.monthBranch;
     if (state.legacyProjection.yearStem) instrument.dataset.yearStem = state.legacyProjection.yearStem;
   } else {
@@ -352,7 +353,10 @@ function updateReadout(display) {
     delete instrument.dataset.focusMonth;
     delete instrument.dataset.yearStem;
   }
-  if (document.activeElement !== instantInput) instantInput.value = atlasInputValueFromFields(fields);
+  if (document.activeElement !== instantInput) {
+    const value = atlasInputValueFromFields(fields);
+    if (instantInput.value !== value) instantInput.value = value;
+  }
 }
 
 function updateWheel() {
@@ -377,10 +381,10 @@ function setSliderForScale() {
     selectedMs: state.selectedMs,
     anchorMs: state.anchorMs
   });
-  slider.min = String(sliderState.min);
-  slider.max = String(sliderState.max);
-  slider.step = String(sliderState.step);
-  slider.value = String(sliderState.value);
+  if (slider.min !== String(sliderState.min)) slider.min = String(sliderState.min);
+  if (slider.max !== String(sliderState.max)) slider.max = String(sliderState.max);
+  if (slider.step !== String(sliderState.step)) slider.step = String(sliderState.step);
+  if (slider.value !== String(sliderState.value)) slider.value = String(sliderState.value);
   setText("slider-left", sliderState.leftLabel);
   setText("slider-right", sliderState.rightLabel);
   setText("scale-readout", sliderState.label);
