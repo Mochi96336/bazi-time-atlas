@@ -1,3 +1,5 @@
+import { decorativeRenderBudget } from "./wheel/decorative-render-budget.js";
+
 const DEFAULTS = Object.freeze({
   idleSpeedDegPerSec:0.42,
   inputToBackground:0.085,
@@ -223,6 +225,7 @@ export function createOrbitalBackground({
   reducedMotionQuery = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)") ?? null,
   ResizeObserverCtor = globalThis.ResizeObserver,
   MutationObserverCtor = globalThis.MutationObserver,
+  visibilityTarget = globalThis.document ?? null,
   options = {}
 } = {}) {
   const orbitalSpace = root?.querySelector?.(".orbital-space");
@@ -252,6 +255,7 @@ export function createOrbitalBackground({
   let idleTimerId = null;
   let lastTimestamp = null;
   let lastIdleTimestamp = null;
+  let renderBudget = decorativeRenderBudget();
   let idleActivated = false;
   let destroyed = false;
 
@@ -269,6 +273,7 @@ export function createOrbitalBackground({
   }
 
   function syncGeometry() {
+    renderBudget = decorativeRenderBudget();
     const viewBox = svg.getAttribute?.("viewBox");
     if (viewBox) orbitalSpace.setAttribute("viewBox", viewBox);
     const preserveAspectRatio = svg.getAttribute?.("preserveAspectRatio") || "xMidYMid meet";
@@ -278,6 +283,10 @@ export function createOrbitalBackground({
 
   function isReducedMotion() {
     return Boolean(reducedMotionQuery?.matches);
+  }
+
+  function isPaused() {
+    return isReducedMotion() || Boolean(visibilityTarget?.hidden);
   }
 
   function wheelMotionActive() {
@@ -309,14 +318,14 @@ export function createOrbitalBackground({
   }
 
   function scheduleIdleTick(delayMs = config.idleTickMs) {
-    if (destroyed || isReducedMotion() || idleTimerId !== null || frameId !== null) return;
+    if (destroyed || isPaused() || idleTimerId !== null || frameId !== null) return;
     if (!Number.isFinite(lastIdleTimestamp)) lastIdleTimestamp = monotonicNowMs();
     idleTimerId = setTimer(idleTick, delayMs);
   }
 
   function idleTick() {
     idleTimerId = null;
-    if (destroyed || isReducedMotion() || frameId !== null) return;
+    if (destroyed || isPaused() || frameId !== null) return;
     if (wheelMotionActive()) {
       startInteractiveFrame();
       return;
@@ -337,7 +346,13 @@ export function createOrbitalBackground({
 
   function renderFrame(timestamp) {
     frameId = null;
-    if (destroyed || isReducedMotion()) return;
+    if (destroyed || isPaused()) return;
+
+    if (Number.isFinite(lastTimestamp)
+      && timestamp - lastTimestamp < renderBudget.frameIntervalMs - 0.5) {
+      frameId = requestFrame(renderFrame);
+      return;
+    }
 
     if (!Number.isFinite(lastTimestamp)) lastTimestamp = timestamp;
     const deltaTimeSec = clamp(
@@ -396,14 +411,14 @@ export function createOrbitalBackground({
   }
 
   function startInteractiveFrame() {
-    if (destroyed || isReducedMotion() || frameId !== null) return;
+    if (destroyed || isPaused() || frameId !== null) return;
     stopIdleTimer();
     root.dataset.orbitalKinetic = "true";
     frameId = requestFrame(renderFrame);
   }
 
   function activateIdleMotion() {
-    if (destroyed || isReducedMotion()) return;
+    if (destroyed || isPaused()) return;
     idleActivated = true;
     if (!wheelMotionActive() && frameId === null) scheduleIdleTick();
   }
@@ -420,6 +435,11 @@ export function createOrbitalBackground({
       applyEnergy(0);
       return;
     }
+    if (visibilityTarget?.hidden) {
+      root.dataset.orbitalMotion = "paused";
+      delete root.dataset.orbitalKinetic;
+      return;
+    }
     root.dataset.orbitalMotion = "active";
     backgroundVelocityDegPerSec = config.idleSpeedDegPerSec;
     kineticIntensity = 0;
@@ -429,12 +449,17 @@ export function createOrbitalBackground({
   }
 
   function instrumentMotionChange() {
-    if (destroyed || isReducedMotion()) return;
+    if (destroyed || isPaused()) return;
     if (wheelMotionActive()) startInteractiveFrame();
   }
 
   function sourceMotionChanged() {
-    if (destroyed || isReducedMotion()) return;
+    if (destroyed || isPaused()) return;
+    // Every linked time update also writes the year pose. An unchanged/quiet
+    // source must not wake a full-rate decorative loop behind an hour drag.
+    if (!wheelMotionActive() && frameId === null
+      && Math.abs(Number(getSourceAngularVelocityDegPerSec?.()) || 0)
+        < config.quietThresholdDegPerSec) return;
     startInteractiveFrame();
   }
 
@@ -458,6 +483,7 @@ export function createOrbitalBackground({
   instrument.addEventListener?.("pointerdown", activateIdleMotion, { passive:true });
   instrument.addEventListener?.("touchstart", activateIdleMotion, { passive:true });
   reducedMotionQuery?.addEventListener?.("change", applyMotionPreference);
+  visibilityTarget?.addEventListener?.("visibilitychange", applyMotionPreference);
   applyMotionPreference();
 
   return Object.freeze({
@@ -477,6 +503,7 @@ export function createOrbitalBackground({
       instrument.removeEventListener?.("pointerdown", activateIdleMotion);
       instrument.removeEventListener?.("touchstart", activateIdleMotion);
       reducedMotionQuery?.removeEventListener?.("change", applyMotionPreference);
+      visibilityTarget?.removeEventListener?.("visibilitychange", applyMotionPreference);
       delete root.dataset.orbitalMotion;
       delete root.dataset.orbitalKinetic;
       field.style.transform = "";

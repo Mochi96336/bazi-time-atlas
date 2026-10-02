@@ -4,6 +4,7 @@ import {
   WHEEL_CENTER,
   ringModel
 } from "./ring-model.js";
+import { createDecorativeDrawQueue, decorativeRenderBudget } from "./decorative-render-budget.js";
 
 export const MATERIAL_MODES = Object.freeze({
   SVG: "svg",
@@ -668,14 +669,16 @@ function setupRoughnessTexture(gl) {
 export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.location?.search ?? "" }) {
   const requestedMode = resolveMaterialMode(search);
   const requestedProbe = resolveMaterialProbe(search);
-  // Diagnostic controls are inert unless renderAudit=1 is explicit. Normal
-  // material quality, GPU preference and drawing-buffer policy never change.
+  // Extra diagnostic controls are inert unless renderAudit=1 is explicit.
   const {
     enabled:auditEnabled,
     powerPreference:auditPower,
     preserveDrawingBuffer:auditPreserve,
     renderScale:auditScale
   } = resolveMaterialAuditOptions(search);
+  const fullQuality = auditEnabled
+    && new URLSearchParams(search).get("materialBudget") === "full";
+  let renderBudget = decorativeRenderBudget({ fullQuality });
   let materialWasExplicit = false;
   try {
     materialWasExplicit = new URLSearchParams(search).has("material");
@@ -696,8 +699,17 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   let uniforms = null;
   let active = false;
   let sizeDirty = true;
+  let projectionDirty = true;
+  let projection = null;
   let resizeObserver = null;
+  let cameraObserver = null;
   let materialEvidenceStamp = null;
+  const drawnRotations = new Float32Array(MATERIAL_RING_IDS.length).fill(NaN);
+  let drawnSolarRotation = NaN;
+  const drawQueue = createDecorativeDrawQueue({
+    draw,
+    frameIntervalMs:() => renderBudget.frameIntervalMs
+  });
   // No frame observer, DOM log or GPU readback in normal production. CPU
   // submission time is not a GPU duration; the latter needs GPU timer queries.
   const audit = auditEnabled ? {
@@ -706,6 +718,8 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     devicePixelRatio:globalThis.devicePixelRatio || 1,
     frameCount:0,
     resizeCount:0,
+    projectionCount:0,
+    renderBudget,
     contextLost:0,
     fallback:null,
     canvasPixels:null,
@@ -723,6 +737,9 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
         devicePixelRatio:this.devicePixelRatio,
         frameCount:this.frameCount,
         resizeCount:this.resizeCount,
+        projectionCount:this.projectionCount,
+        renderBudget:this.renderBudget,
+        drawnPose:{ rotations:Array.from(drawnRotations), solarRotation:drawnSolarRotation },
         contextLost:this.contextLost,
         fallback:this.fallback,
         canvasPixels:this.canvasPixels,
@@ -740,6 +757,11 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   function fallBack(reason, detail = "") {
     if (audit) audit.fallback = { reason, detail };
     active = false;
+    drawQueue.cancel();
+    resizeObserver?.disconnect();
+    cameraObserver?.disconnect();
+    globalThis.removeEventListener?.("resize", invalidateGeometry);
+    globalThis.document?.removeEventListener?.("visibilitychange", drawQueue.visibilityChanged);
     shell?.removeAttribute("data-material-prototype");
     shell?.removeAttribute("data-material-probe");
     shell?.removeAttribute("data-material-probe-transform");
@@ -761,15 +783,17 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
 
   function resizeCanvas() {
     if (!active || !sizeDirty) return;
-    sizeDirty = false;
     const rect = svg.getBoundingClientRect();
     if (!(rect.width > 0 && rect.height > 0)) return;
-    const dpr = Math.min(globalThis.devicePixelRatio || 1, 2) * auditScale;
+    sizeDirty = false;
+    renderBudget = decorativeRenderBudget({ fullQuality });
+    const dpr = renderBudget.pixelRatio * auditScale;
     const width = Math.max(1, Math.round(rect.width * dpr));
     const height = Math.max(1, Math.round(rect.height * dpr));
     if (audit) {
       audit.cssPixels = [rect.width, rect.height];
       audit.canvasPixels = [width, height];
+      audit.renderBudget = renderBudget;
     }
     if (canvas.width !== width || canvas.height !== height) {
       if (audit) audit.resizeCount += 1;
@@ -780,20 +804,30 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   }
 
   function draw() {
-    if (!active) return;
+    if (!active) return false;
+    if (!sizeDirty && !projectionDirty && solarRotation === drawnSolarRotation
+      && rotations.every((value, index) => value === drawnRotations[index])) return false;
     const drawStart = audit ? performance.now() : 0;
     resizeCanvas();
-    if (!(canvas.width > 1 && canvas.height > 1)) return;
+    if (!(canvas.width > 1 && canvas.height > 1)) return false;
 
-    const canvasRect = canvas.getBoundingClientRect();
-    const screenCtm = svg.getScreenCTM?.();
-    if (!screenCtm || !(canvasRect.width > 0 && canvasRect.height > 0)) return;
-    let screenToSvg;
-    try {
-      screenToSvg = screenCtm.inverse();
-    } catch {
-      return;
+    // Ring transforms do not change the canvas-to-SVG camera. Reading layout
+    // after those writes on every pose used to force a synchronous style flush.
+    if (projectionDirty || !projection) {
+      const canvasRect = canvas.getBoundingClientRect();
+      const screenCtm = svg.getScreenCTM?.();
+      if (!screenCtm || !(canvasRect.width > 0 && canvasRect.height > 0)) return false;
+      let screenToSvg;
+      try {
+        screenToSvg = screenCtm.inverse();
+      } catch {
+        return false;
+      }
+      projection = { canvasRect, screenCtm, screenToSvg };
+      projectionDirty = false;
+      if (audit) audit.projectionCount += 1;
     }
+    const { canvasRect, screenCtm, screenToSvg } = projection;
 
     // --dump-dom and --screenshot can use different Chromium viewport heights.
     // Only an EXPLICIT diagnostic probe embeds its own CTM in screenshot pixels.
@@ -865,6 +899,8 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    drawnRotations.set(rotations);
+    drawnSolarRotation = solarRotation;
     if (audit) {
       audit.frameCount += 1;
       if (audit.lastDrawAt !== null) audit.drawGapMs.push(drawStart - audit.lastDrawAt);
@@ -873,6 +909,13 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       if (audit.drawGapMs.length > 240) audit.drawGapMs.shift();
       if (audit.drawCpuMs.length > 240) audit.drawCpuMs.shift();
     }
+    return true;
+  }
+
+  function invalidateGeometry() {
+    sizeDirty = true;
+    projectionDirty = true;
+    drawQueue.request({ immediate:true });
   }
 
   function activateShader() {
@@ -929,20 +972,26 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       }, { once: true });
 
       if (typeof ResizeObserver === "function") {
-        resizeObserver = new ResizeObserver(() => {
-          sizeDirty = true;
-          draw();
-        });
+        resizeObserver = new ResizeObserver(invalidateGeometry);
         resizeObserver.observe(svg);
-      } else {
-        globalThis.addEventListener?.("resize", () => {
-          sizeDirty = true;
-          draw();
+        resizeObserver.observe(canvas);
+      }
+      if (typeof MutationObserver === "function") {
+        cameraObserver = new MutationObserver(() => {
+          projectionDirty = true;
+          drawQueue.request({ immediate:true });
+        });
+        cameraObserver.observe(svg, {
+          attributes:true,
+          attributeFilter:["viewBox", "preserveAspectRatio", "transform", "style"]
         });
       }
+      globalThis.addEventListener?.("resize", invalidateGeometry, { passive:true });
+      globalThis.document?.addEventListener?.("visibilitychange", drawQueue.visibilityChanged);
 
       sizeDirty = true;
-      draw();
+      projectionDirty = true;
+      drawQueue.request({ immediate:true });
       return true;
     } catch (error) {
       const forced = error?.message === "forced WebGL fallback";
@@ -974,10 +1023,9 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
   }
 
   function updateFrame(renderedRotations) {
-    if (!active) return;
     fillRenderedRotations(renderedRotations, rotations);
     solarRotation = renderedSolarRotation(renderedRotations);
-    draw();
+    if (active) drawQueue.request();
   }
 
   return Object.freeze({

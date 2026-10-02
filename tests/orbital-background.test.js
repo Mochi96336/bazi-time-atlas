@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
+  createOrbitalBackground,
   createOrbitalSourceVelocityTracker,
   orbitalKineticIntensity,
   orbitalOcclusionRadiusWorld,
@@ -122,4 +123,57 @@ test("B1 stays decorative and consumes only rendered year-ring velocity", () => 
   assert.match(atlas, /getSourceAngularVelocityDegPerSec:\(\) => yearOrbitalVelocity\.current\(\)/);
   assert.doesNotMatch(atlas, /getWheelAngularVelocityDegPerSec:[\s\S]*?dragController/);
   assert.doesNotMatch(atlas, /getComputedStyle\([^)]*kinetic-wheel|DOMMatrix.*kinetic-wheel/);
+});
+
+test("mobile orbital painting is bounded and visibility stops both idle and interactive scheduling", t => {
+  const priorWidth = Object.getOwnPropertyDescriptor(globalThis, "innerWidth");
+  Object.defineProperty(globalThis, "innerWidth", { configurable:true, value:390 });
+  t.after(() => priorWidth ? Object.defineProperty(globalThis, "innerWidth", priorWidth) : delete globalThis.innerWidth);
+  const frames = new Map(), timers = new Map();
+  let frameSequence = 0, timerSequence = 0, writes = 0, velocity = 0;
+  const node = () => ({ style:{}, setAttribute() {}, getAttribute:() => "0 0 1200 760" });
+  const field = node();
+  field.style = new Proxy({}, { set(target, key, value) { if (key === "transform") writes++; target[key] = value; return true; } });
+  const space = node(), disc = node();
+  const veils = Array.from({ length:3 }, node), rings = Array.from({ length:6 }, node);
+  const root = { dataset:{},
+    querySelector:selector => ({ ".orbital-space":space, ".orbital-field":field, ".orbital-occlusion-disc":disc })[selector],
+    querySelectorAll:selector => selector === ".orbital-veil" ? veils : rings };
+  const instrument = new EventTarget();
+  instrument.dataset = {};
+  const visibilityTarget = new EventTarget();
+  visibilityTarget.hidden = false;
+  const background = createOrbitalBackground({ root, instrument, svg:node(), wheelCenter:{ x:600, y:1360 },
+    wheelOuterRadius:1182, visibilityTarget,
+    getSourceAngularVelocityDegPerSec:() => velocity,
+    reducedMotionQuery:{ matches:false }, ResizeObserverCtor:null, MutationObserverCtor:null,
+    requestFrame(callback) { const id = ++frameSequence; frames.set(id, callback); return id; },
+    cancelFrame:id => frames.delete(id),
+    setTimer(callback) { const id = ++timerSequence; timers.set(id, callback); return id; },
+    clearTimer:id => timers.delete(id) });
+  background.sourceMotionChanged();
+  assert.equal(frames.size, 0, "unchanged year pose must not wake an animation loop");
+  instrument.dispatchEvent(new Event("pointermove"));
+  assert.equal(timers.size, 1);
+  velocity = 200;
+  background.sourceMotionChanged();
+  assert.equal(timers.size, 0);
+  for (let n = 0; n < 120; n++) {
+    const [id, callback] = frames.entries().next().value;
+    frames.delete(id);
+    callback(n * 1000 / 120);
+  }
+  assert.ok(writes <= 31, `background writes=${writes}`);
+  assert.ok(background.backgroundAngleDeg > 0);
+  visibilityTarget.hidden = true;
+  visibilityTarget.dispatchEvent(new Event("visibilitychange"));
+  background.sourceMotionChanged();
+  assert.equal(frames.size, 0);
+  assert.equal(timers.size, 0);
+  visibilityTarget.hidden = false;
+  visibilityTarget.dispatchEvent(new Event("visibilitychange"));
+  assert.equal(timers.size, 1);
+  background.destroy();
+  assert.equal(timers.size, 0);
+  assert.equal(frames.size, 0);
 });

@@ -1,0 +1,64 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Mobile material workload contract</title>
+<style>body{margin:0;background:#090b0f;color:#eee}iframe{width:390px;height:844px;border:0}pre{white-space:pre-wrap}</style>
+<iframe id="stage" title="Actual mobile homepage"></iframe>
+<pre id="proof" data-ready="false"></pre>
+<script type="module">
+import { SELECTED_INSTANT_COMMAND } from "../../src/interaction/selected-instant-command.js";
+const stage = document.querySelector("#stage");
+const proof = document.querySelector("#proof");
+const full = new URLSearchParams(location.search).get("full") === "1";
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+stage.src = "../../?renderAudit=1&instant=2026-09-13T23%3A43%3A42.000Z"
+  + (full ? "&materialBudget=full" : "");
+try {
+  let instrument, audit, win, doc;
+  for (let attempt = 0; attempt < 150; attempt++) {
+    await sleep(30);
+    win = stage.contentWindow;
+    doc = stage.contentDocument;
+    instrument = doc?.querySelector("#kinetic-instrument");
+    audit = win.__atlasRenderAudit;
+    if (instrument?.dataset.materialPrototype === "roughness" && audit?.frameCount) break;
+  }
+  if (instrument?.dataset.materialPrototype !== "roughness") throw new Error("WebGL material did not activate");
+  await sleep(150);
+  const before = audit.snapshot();
+  const initialMs = Number(instrument.dataset.selectedInstantMs);
+  const count = 32;
+  for (let n = 1; n <= count; n++) {
+    instrument.dispatchEvent(new win.CustomEvent(SELECTED_INSTANT_COMMAND, {
+      detail:{ instantMs:initialMs + n * 3600000, source:"mobile-material-contract" }
+    }));
+    await sleep(8);
+  }
+  await sleep(100); // Includes the trailing draw after the final input.
+  const after = audit.snapshot();
+  const canvas = doc.querySelector("#material-wheel-layer");
+  const bounds = canvas.getBoundingClientRect();
+  const expectedRatio = Math.min(win.devicePixelRatio, full ? 2 : 1);
+  if (canvas.width !== Math.round(bounds.width * expectedRatio)
+    || canvas.height !== Math.round(bounds.height * expectedRatio)) throw new Error("incorrect canvas pixel budget");
+  const drawn = after.drawnPose;
+  for (const [index, id] of ["hour", "day", "month", "year"].entries()) {
+    const rotation = Math.fround(Number(doc.querySelector(`#${id}-track`).dataset.renderedRotation));
+    if (Math.abs(drawn.rotations[index] - rotation) > 0.001) throw new Error(`stale final ${id} material pose`);
+  }
+  if (Math.abs(drawn.solarRotation - Number(doc.querySelector("#solar-track").dataset.renderedRotation)) > 0.001) {
+    throw new Error("stale final solar material pose");
+  }
+  if (Number(instrument.dataset.selectedInstantMs) !== initialMs + count * 3600000) throw new Error("selected time changed");
+  const draws = after.frameCount - before.frameCount;
+  if (draws < 2 || (!full && draws >= count)) throw new Error("material did not coalesce rapid pose input");
+  const projectionReads = after.projectionCount - before.projectionCount;
+  if (projectionReads > 2) throw new Error("stable camera re-read during rotation");
+  proof.textContent = JSON.stringify({ full, dpr:win.devicePixelRatio, cssPixels:[bounds.width,bounds.height],
+    canvasPixels:[canvas.width,canvas.height], inputUpdates:count, draws, projectionReads,
+    selectedTimeAndFinalPose:true, budget:after.renderBudget });
+  proof.dataset.ready = "true";
+} catch (error) {
+  proof.dataset.error = error.message;
+  proof.textContent = error.stack;
+}
+</script>

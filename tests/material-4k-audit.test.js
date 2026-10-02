@@ -50,7 +50,7 @@ test("audit never forces GPU readback and exposes its metrics only by explicit o
   assert.match(source,/const drawStart = audit \? performance\.now\(\) : 0;/);
   assert.match(source,/preserveDrawingBuffer: auditPreserve/);
   assert.match(source,/powerPreference: auditPower/);
-  assert.match(source,/const dpr = Math\.min\(globalThis\.devicePixelRatio \|\| 1, 2\) \* auditScale;/);
+  assert.match(source,/const dpr = renderBudget\.pixelRatio \* auditScale;/);
   assert.doesNotMatch(source,/gl\.finish\(|gl\.readPixels\(/);
 });
 
