@@ -75,10 +75,11 @@ try {
   poseObserver.disconnect();
   if (redundantRingTransformWrites !== 0) throw new Error("identical poses re-dirtied SVG transforms");
 
-  let pointerProjectionReads = 0;
+  let svgProjectionReads = 0;
+  const materialProjectionStart = audit.snapshot().projectionCount;
   const originalProjection = svg.getScreenCTM;
   const matrix = originalProjection.call(svg);
-  svg.getScreenCTM = function() { pointerProjectionReads++; return originalProjection.call(this); };
+  svg.getScreenCTM = function() { svgProjectionReads++; return originalProjection.call(this); };
   function pointer(type, degrees) {
     const angle = degrees * Math.PI / 180;
     const x = 600 + 685 * Math.cos(angle), y = 1360 + 685 * Math.sin(angle);
@@ -97,7 +98,12 @@ try {
   await sleep(100);
   svg.getScreenCTM = originalProjection;
   toolObserver.disconnect();
-  if (pointerProjectionReads > 2) throw new Error("gesture repeatedly re-read SVG layout");
+  const materialProjectionReads = audit.snapshot().projectionCount - materialProjectionStart;
+  const pointerProjectionReads = svgProjectionReads - materialProjectionReads;
+  if (pointerProjectionReads < 1 || pointerProjectionReads > 2 || svgProjectionReads > 6) {
+    throw new Error("gesture repeatedly re-read SVG layout: "
+      + JSON.stringify({ pointerProjectionReads, materialProjectionReads, svgProjectionReads }));
+  }
   if (Number(instrument.dataset.selectedInstantMs) === repeatedMs) throw new Error("pointer gesture did not change selected time");
   if (hiddenToolTextWrites !== 0) throw new Error("hidden tool text repainted during motion");
   if (win.getComputedStyle(svg.querySelector(".ring-tick.major")).filter === "none") {
@@ -110,7 +116,8 @@ try {
   }
   proof.textContent = JSON.stringify({ full, dpr:win.devicePixelRatio, cssPixels:[bounds.width,bounds.height],
     canvasPixels:[canvas.width,canvas.height], inputUpdates:count, draws, projectionReads,
-    pointerProjectionReads, redundantRingTransformWrites, hiddenToolTextWrites,
+    pointerProjectionReads, materialProjectionReads, svgProjectionReads,
+    redundantRingTransformWrites, hiddenToolTextWrites,
     mobileMotionFilters:true, geometricOrbitalClip:true,
     selectedTimeAndFinalPose:true, budget:after.renderBudget });
   proof.dataset.ready = "true";
