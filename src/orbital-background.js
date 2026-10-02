@@ -211,6 +211,19 @@ export function orbitalViewportGeometry({
   });
 }
 
+// One even-odd path gives the existing rectangle-minus-wheel aperture a
+// geometric clip. A luminance mask otherwise composites a separate surface
+// whenever the orbit animates, including on mobile Safari.
+export function orbitalOcclusionClipPath(wheelCenter, radius) {
+  if (![wheelCenter?.x, wheelCenter?.y, radius].every(Number.isFinite) || radius <= 0) {
+    throw new RangeError("orbital clip center and radius must be finite, radius positive");
+  }
+  const r = Number(radius.toFixed(3));
+  const { x, y } = wheelCenter;
+  return `M -2400 -2400 H 3600 V 3600 H -2400 Z M ${x - r} ${y}`
+    + ` a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
+}
+
 export function createOrbitalBackground({
   root,
   instrument,
@@ -233,6 +246,7 @@ export function createOrbitalBackground({
   const staticRings = Array.from(root?.querySelectorAll?.(".orbital-static-ring") ?? []);
   const veils = Array.from(root?.querySelectorAll?.(".orbital-veil") ?? []);
   const occlusionDisc = root?.querySelector?.(".orbital-occlusion-disc");
+  const occlusionClip = root?.querySelector?.(".orbital-occlusion-clip");
   if (!root || !orbitalSpace || !field || !occlusionDisc || !instrument || !svg || !wheelCenter
     || staticRings.length !== ORBIT_RADIUS_MULTIPLIERS.length
     || veils.length !== VEIL_RADIUS_MULTIPLIERS.length
@@ -270,6 +284,7 @@ export function createOrbitalBackground({
     staticRings.forEach((ring, index) => setCircleGeometry(ring, orbitRadiiWorld[index]));
     veils.forEach((veil, index) => setCircleGeometry(veil, veilRadiiWorld[index]));
     setCircleGeometry(occlusionDisc, occlusionRadiusWorld);
+    occlusionClip?.setAttribute("d", orbitalOcclusionClipPath(wheelCenter, occlusionRadiusWorld));
   }
 
   function syncGeometry() {

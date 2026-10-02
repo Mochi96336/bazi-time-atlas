@@ -200,9 +200,11 @@ export function installSelectedInstantEditor(
   instrument.addEventListener("atlas-tools-closing", () => closeEditor({ restoreFocus:false }));
   instrument.addEventListener("atlas-find-time-entering", () => closeEditor({ restoreFocus:false }));
 
-  const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(records => {
     if (open && documentRef.activeElement !== input) syncInput();
-    syncAvailability();
+    if (records.some(record => record.attributeName !== "data-selected-instant-ms")) {
+      syncAvailability();
+    }
   });
   observer.observe(instrument, {
     attributes:true,

@@ -31,3 +31,31 @@ the former pixel/cadence budget for the diagnostic session. It does not undo the
 camera cache or orbital changes. Without `renderAudit=1`, `materialBudget` is
 inert. Real iPhone/Safari FPS and touch latency remain device verification work;
 virtual-time CI is not a device-performance benchmark.
+
+## Follow-up: SVG motion cost
+
+The lower material budget alone did not resolve the user's low mobile frame
+rate. The follow-up removes more work from the actual gesture/render path:
+
+- A gesture retains its screen-to-world inverse across pointer samples. SVG
+  camera attributes, ancestor layout attributes, resize, scroll and the visual
+  viewport invalidate it. Reprojecting the last screen sample after invalidation
+  prevents a stationary finger from changing time as the camera moves.
+- The orbital aperture uses one even-odd geometric clipping path instead of a
+  luminance mask. The canonical center, radius and original outer rectangle are
+  unchanged, and the clip stays outside the rotating field. A single path also
+  avoids multi-child SVG clipping that can fall back to mask compositing.
+- Mobile/coarse-pointer drag and inertia temporarily omit the tiny major-tick
+  bevel filters and cursor glow. The resting finish returns when motion ends;
+  the desktop presentation is unchanged.
+- Unchanged ring transforms, pose/context diagnostics and readout strings do
+  not write back to the DOM. Closed ten-god/classification panels do not repaint
+  their hidden text. The closed instant editor does not rewrite its interaction
+  attributes for every selected-time change.
+
+The actual-homepage DPR 3 CI fixture now also checks a 32-sample pointer gesture,
+bounded projection reads, zero repeated ring-transform writes for identical
+commands, no hidden ten-god text writes, and restoration of the resting filters.
+These are rendering-work contracts, not a physical-phone FPS measurement. The
+calendar model, drag/inertia integration, precision and label density remain
+unchanged. The phone model/browser was not available during this follow-up.

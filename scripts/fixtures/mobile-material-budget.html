@@ -53,8 +53,72 @@ try {
   if (draws < 2 || (!full && draws >= count)) throw new Error("material did not coalesce rapid pose input");
   const projectionReads = after.projectionCount - before.projectionCount;
   if (projectionReads > 2) throw new Error("stable camera re-read during rotation");
+
+  // Exercise the real controller and live DOM as well as the shader. Repeating
+  // the current instant must not re-dirty SVG transforms or hidden tool text.
+  const svg = doc.querySelector("#kinetic-wheel");
+  let redundantRingTransformWrites = 0, hiddenToolTextWrites = 0;
+  const poseObserver = new win.MutationObserver(records => {
+    redundantRingTransformWrites += records.filter(record =>
+      record.target.id?.endsWith("-track") || record.target.id === "cursor-layer").length;
+  });
+  poseObserver.observe(svg, { attributes:true, subtree:true, attributeFilter:["transform"] });
+  const toolObserver = new win.MutationObserver(records => { hiddenToolTextWrites += records.length; });
+  toolObserver.observe(doc.querySelector("#atlas-visible-ten-gods"), { childList:true, characterData:true, subtree:true });
+  const repeatedMs = Number(instrument.dataset.selectedInstantMs);
+  for (let n = 0; n < 16; n++) {
+    instrument.dispatchEvent(new win.CustomEvent(SELECTED_INSTANT_COMMAND, {
+      detail:{ instantMs:repeatedMs, source:"mobile-dom-contract" }
+    }));
+    await sleep(8);
+  }
+  poseObserver.disconnect();
+  if (redundantRingTransformWrites !== 0) throw new Error("identical poses re-dirtied SVG transforms");
+
+  let svgProjectionReads = 0;
+  const materialProjectionStart = audit.snapshot().projectionCount;
+  const originalProjection = svg.getScreenCTM;
+  const matrix = originalProjection.call(svg);
+  svg.getScreenCTM = function() { svgProjectionReads++; return originalProjection.call(this); };
+  function pointer(type, degrees) {
+    const angle = degrees * Math.PI / 180;
+    const x = 600 + 685 * Math.cos(angle), y = 1360 + 685 * Math.sin(angle);
+    svg.dispatchEvent(new win.PointerEvent(type, { bubbles:true, cancelable:true, pointerId:71,
+      pointerType:"touch", button:0, buttons:type === "pointerup" ? 0 : 1,
+      clientX:matrix.a * x + matrix.c * y + matrix.e,
+      clientY:matrix.b * x + matrix.d * y + matrix.f }));
+  }
+  pointer("pointerdown", -90);
+  await sleep(8);
+  if (win.getComputedStyle(svg.querySelector(".ring-tick.major")).filter !== "none") {
+    throw new Error("mobile motion retained decorative tick filters");
+  }
+  for (let n = 1; n <= 32; n++) { pointer("pointermove", -90 + n * 0.1); await sleep(8); }
+  pointer("pointerup", -86.8);
+  await sleep(100);
+  svg.getScreenCTM = originalProjection;
+  toolObserver.disconnect();
+  const materialProjectionReads = audit.snapshot().projectionCount - materialProjectionStart;
+  const pointerProjectionReads = svgProjectionReads - materialProjectionReads;
+  if (pointerProjectionReads < 1 || pointerProjectionReads > 2 || svgProjectionReads > 6) {
+    throw new Error("gesture repeatedly re-read SVG layout: "
+      + JSON.stringify({ pointerProjectionReads, materialProjectionReads, svgProjectionReads }));
+  }
+  if (Number(instrument.dataset.selectedInstantMs) === repeatedMs) throw new Error("pointer gesture did not change selected time");
+  if (hiddenToolTextWrites !== 0) throw new Error("hidden tool text repainted during motion");
+  if (win.getComputedStyle(svg.querySelector(".ring-tick.major")).filter === "none") {
+    throw new Error("resting decorative tick finish was not restored");
+  }
+  const orbitalGroup = doc.querySelector(".orbital-space-clipped");
+  if (!orbitalGroup?.getAttribute("clip-path") || orbitalGroup.hasAttribute("mask")
+    || doc.querySelectorAll("#orbital-wheel-occlusion path").length !== 1) {
+    throw new Error("orbital aperture is not a single geometric clip");
+  }
   proof.textContent = JSON.stringify({ full, dpr:win.devicePixelRatio, cssPixels:[bounds.width,bounds.height],
     canvasPixels:[canvas.width,canvas.height], inputUpdates:count, draws, projectionReads,
+    pointerProjectionReads, materialProjectionReads, svgProjectionReads,
+    redundantRingTransformWrites, hiddenToolTextWrites,
+    mobileMotionFilters:true, geometricOrbitalClip:true,
     selectedTimeAndFinalPose:true, budget:after.renderBudget });
   proof.dataset.ready = "true";
 } catch (error) {

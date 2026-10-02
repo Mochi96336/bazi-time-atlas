@@ -52,7 +52,7 @@ function annotateZodiacSectors() {
 }
 
 function updateCurrentReadout() {
-  if (!instrument) return;
+  if (!instrument || legend?.hidden) return;
   const pillarSummary = PRIMARY_PILLARS.map(([id, label]) => {
     const name = instrument.dataset[`${id}Pillar`] ?? "";
     const classification = pillarClassification(name);
@@ -120,7 +120,6 @@ function initialize() {
   observer.observe(instrument, {
     attributes: true,
     attributeFilter: [
-      "data-selected-instant-ms",
       "data-hour-pillar",
       "data-day-pillar",
       "data-month-pillar",
