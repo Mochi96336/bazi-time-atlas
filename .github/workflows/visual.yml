@@ -50,6 +50,10 @@ jobs:
         run: node scripts/check-material-shader.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify mobile material pixel budget, camera cache and final pose
+        run: node scripts/check-mobile-material-budget.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify cross-view deep links
         run: node scripts/check-deep-links.mjs
         env:
