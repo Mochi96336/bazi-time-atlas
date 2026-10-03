@@ -54,6 +54,10 @@ jobs:
         run: node scripts/check-mobile-material-budget.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
+      - name: Verify delayed mobile camera startup and element resizing
+        run: node scripts/check-mobile-camera-lifecycle.mjs
+        env:
+          BASE_URL: http://127.0.0.1:4173/
       - name: Verify cross-view deep links
         run: node scripts/check-deep-links.mjs
         env:
