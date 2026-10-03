@@ -76,7 +76,9 @@ test("transient zero sizing retains the last valid camera and page restoration r
   h.resized(); h.flush();
   assert.equal(h.svg.getAttribute("viewBox"), before);
   h.setBounds({ width:374, height:650 });
-  h.eventTarget.dispatchEvent(new Event("pageshow")); h.flush();
+  h.eventTarget.dispatchEvent(new Event("pageshow"));
+  assert.notEqual(h.svg.getAttribute("viewBox"), before, "page recovery must not wait for a suspended animation frame");
+  h.flush();
   assert.equal(h.cameras.at(-1).viewportAspect, 374 / 650);
   h.controller.destroy();
 });

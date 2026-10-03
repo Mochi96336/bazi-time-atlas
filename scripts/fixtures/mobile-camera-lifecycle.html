@@ -96,8 +96,14 @@ try {
     cameraAndBackgroundAligned:true, timeAndPosePreserved:true, startupViewBox,
     svgPixels:[svg.getBoundingClientRect().width, svg.getBoundingClientRect().height] });
   proof.dataset.ready = "true";
-} catch (error) {
-  proof.dataset.error = error.message;
+  } catch (error) {
+  const svg = stage.contentDocument?.querySelector("#kinetic-wheel");
+  const rect = svg?.getBoundingClientRect();
+  const detail = JSON.stringify({ viewBox:svg?.getAttribute("viewBox"),
+    backgroundViewBox:stage.contentDocument?.querySelector(".orbital-space")?.getAttribute("viewBox"),
+    svgPixels:rect ? [rect.width,rect.height] : null,
+    viewportPixels:[stage.contentWindow?.innerWidth,stage.contentWindow?.innerHeight] });
+  proof.dataset.error = error.message + ": " + detail;
   proof.textContent = error.stack;
 }
 </script>

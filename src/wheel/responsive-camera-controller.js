@@ -44,8 +44,15 @@ export function createResponsiveCameraController({
     });
   }
 
+  function recoverCamera() {
+    // A restored page may still have a suspended/pending animation frame.
+    // Repair any valid current box immediately, then recheck after layout.
+    refresh();
+    scheduleRefresh();
+  }
+
   function visibilityChanged() {
-    if (!visibilityTarget?.hidden) scheduleRefresh();
+    if (!visibilityTarget?.hidden) recoverCamera();
   }
 
   const resizeObserver = typeof ResizeObserverCtor === "function"
@@ -53,7 +60,7 @@ export function createResponsiveCameraController({
   resizeObserver?.observe(svg);
   if (instrument) resizeObserver?.observe(instrument);
   eventTarget?.addEventListener("resize", scheduleRefresh, { passive:true });
-  eventTarget?.addEventListener("pageshow", scheduleRefresh, { passive:true });
+  eventTarget?.addEventListener("pageshow", recoverCamera, { passive:true });
   eventTarget?.visualViewport?.addEventListener("resize", scheduleRefresh, { passive:true });
   visibilityTarget?.addEventListener("visibilitychange", visibilityChanged);
   refresh();
@@ -67,7 +74,7 @@ export function createResponsiveCameraController({
       frameId = null;
       resizeObserver?.disconnect();
       eventTarget?.removeEventListener("resize", scheduleRefresh);
-      eventTarget?.removeEventListener("pageshow", scheduleRefresh);
+      eventTarget?.removeEventListener("pageshow", recoverCamera);
       eventTarget?.visualViewport?.removeEventListener("resize", scheduleRefresh);
       visibilityTarget?.removeEventListener("visibilitychange", visibilityChanged);
     }
