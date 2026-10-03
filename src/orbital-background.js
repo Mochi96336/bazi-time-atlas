@@ -486,6 +486,16 @@ export function createOrbitalBackground({
     : null;
   resizeObserver?.observe?.(instrument);
 
+  // A responsive camera update changes SVG world projection without resizing
+  // this background. Follow the source camera after any ResizeObserver order.
+  const cameraObserver = typeof MutationObserverCtor === "function"
+    ? new MutationObserverCtor(syncGeometry)
+    : null;
+  cameraObserver?.observe?.(svg, {
+    attributes:true,
+    attributeFilter:["viewBox", "preserveAspectRatio"]
+  });
+
   const motionObserver = typeof MutationObserverCtor === "function"
     ? new MutationObserverCtor(instrumentMotionChange)
     : null;
@@ -513,6 +523,7 @@ export function createOrbitalBackground({
       stopFrame();
       stopIdleTimer();
       resizeObserver?.disconnect?.();
+      cameraObserver?.disconnect?.();
       motionObserver?.disconnect?.();
       instrument.removeEventListener?.("pointermove", activateIdleMotion);
       instrument.removeEventListener?.("pointerdown", activateIdleMotion);

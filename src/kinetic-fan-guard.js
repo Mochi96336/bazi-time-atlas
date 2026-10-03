@@ -6,7 +6,7 @@ import {
   assertWheelModel
 } from "./wheel/ring-model.js";
 import { fanSectorPath } from "./wheel/polar-geometry.js";
-import { responsiveInstrumentCamera, viewBoxString } from "./wheel/camera.js";
+import { createResponsiveCameraController } from "./wheel/responsive-camera-controller.js";
 import { SVG_NS } from "./wheel/svg-renderer.js";
 
 const CLIP_ID = "kinetic-master-fan-clip";
@@ -19,19 +19,7 @@ const CLIP_MARGIN = 58;
 const svg = document.querySelector("#kinetic-wheel");
 const instrument = document.querySelector("#kinetic-instrument");
 
-function applyResponsiveCamera() {
-  if (!svg || !instrument) return null;
-  const bounds = svg.getBoundingClientRect();
-  const viewportAspect = bounds.width > 0 && bounds.height > 0
-    ? bounds.width / bounds.height
-    : 1200 / 760;
-  const camera = responsiveInstrumentCamera({
-    center: WHEEL_CENTER,
-    outerRadius: RADII.outer,
-    viewportWidth: window.innerWidth,
-    viewportAspect
-  });
-  svg.setAttribute("viewBox", viewBoxString(camera.viewBox));
+function recordCameraDiagnostics(camera) {
   instrument.dataset.geometryCameraMode = camera.mode;
   instrument.dataset.geometryCameraZoom = camera.zoom.toFixed(4);
   instrument.dataset.geometryCameraX = camera.viewBox.x.toFixed(3);
@@ -43,7 +31,7 @@ function applyResponsiveCamera() {
   instrument.dataset.geometryCameraOriginGapRatio = camera.originGapRatio.toFixed(4);
   instrument.dataset.geometryCameraInnerBlank = (RADII.inner - camera.originGap).toFixed(3);
   instrument.dataset.geometryCameraInnerBlankRatio = ((RADII.inner - camera.originGap) / RADII.outer).toFixed(4);
-  return camera;
+  refreshCompositionDiagnostics();
 }
 
 function installMasterFanClip() {
@@ -105,8 +93,6 @@ function installMasterFanClip() {
       layer.dataset.fanClipOwner = WRAPPER_ID;
     });
 
-  applyResponsiveCamera();
-
   instrument.dataset.masterGeometry = "shared-fan";
   instrument.dataset.fanClip = "active";
   instrument.dataset.geometrySource = "wheel-core";
@@ -143,20 +129,22 @@ function recordCompositionDiagnostics() {
 }
 
 function refreshCompositionDiagnostics() {
-  applyResponsiveCamera();
   recordCompositionDiagnostics();
   queueMicrotask(recordCompositionDiagnostics);
   requestAnimationFrame(recordCompositionDiagnostics);
   setTimeout(recordCompositionDiagnostics, 50);
 }
 
-function boot(attempt = 0) {
-  if (installMasterFanClip()) {
-    refreshCompositionDiagnostics();
-    return;
-  }
-  if (attempt < 12) requestAnimationFrame(() => boot(attempt + 1));
-}
+let cameraController = null;
 
-boot();
-window.addEventListener("resize", refreshCompositionDiagnostics, { passive: true });
+// The renderer calls this immediately after renderStatic. Module download speed
+// must not decide whether the master clip and responsive camera get installed.
+export function installKineticFanGuard() {
+  if (cameraController) return true;
+  if (!installMasterFanClip()) return false;
+  cameraController = createResponsiveCameraController({
+    svg, instrument, center:WHEEL_CENTER, outerRadius:RADII.outer,
+    onCameraChange:recordCameraDiagnostics
+  });
+  return true;
+}
