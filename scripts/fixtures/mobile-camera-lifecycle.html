@@ -35,7 +35,8 @@ try {
     return Boolean(instrument?.dataset.selectedInstantMs);
   }, "delayed renderer did not initialize");
   const selectedMs = instrument.dataset.selectedInstantMs;
-  const pose = () => [...svg.querySelectorAll(".ring-track")].map(node => node.getAttribute("transform"));
+  const pose = () => ["hour", "day", "solar", "zodiac", "month", "year"]
+    .map(id => svg.querySelector(`#${id}-track`).getAttribute("transform"));
   const originalPose = pose();
   const zeroSizeDeferred = !instrument.dataset.geometryCameraMode && svg.getAttribute("viewBox") === "0 0 1200 760";
   doc.querySelector("#camera-startup-hidden").remove();
@@ -49,7 +50,7 @@ try {
   }
   await until(cameraMatchesBox, "portrait camera did not recover after zero-sized startup");
   if (!zeroSizeDeferred) throw new Error("zero-sized startup installed a fallback camera");
-  if (instrument.dataset.fanClip !== "active" || svg.querySelectorAll("#kinetic-fan-layer > .ring-track").length !== 6) {
+  if (instrument.dataset.fanClip !== "active" || svg.querySelectorAll('#kinetic-fan-layer > g[id$="-track"]').length !== 6) {
     throw new Error("delayed renderer missed master fan installation");
   }
   const startupViewBox = svg.getAttribute("viewBox");
