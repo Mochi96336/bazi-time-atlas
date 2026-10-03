@@ -10,11 +10,15 @@ const proof = document.querySelector("#proof");
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const params = new URLSearchParams(location.search);
 const capture = params.get("capture") === "1";
+let layoutStarted = false;
 
 async function until(check, message) {
   for (let n = 0; n < 100; n++) {
     if (check()) return;
-    await sleep(25);
+    // Virtual-time timers can outrun ResizeObserver/compositor delivery. Once
+    // layout starts, wait for actual render frames rather than a timer deadline.
+    if (layoutStarted) await new Promise(resolve => stage.contentWindow.requestAnimationFrame(resolve));
+    else await sleep(25);
   }
   throw new Error(message);
 }
@@ -40,6 +44,7 @@ try {
   const originalPose = pose();
   const zeroSizeDeferred = !instrument.dataset.geometryCameraMode && svg.getAttribute("viewBox") === "0 0 1200 760";
   doc.querySelector("#camera-startup-hidden").remove();
+  layoutStarted = true;
 
   function cameraMatchesBox() {
     const rect = svg.getBoundingClientRect();

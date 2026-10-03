@@ -14,7 +14,8 @@ const url = new URL("scripts/fixtures/mobile-camera-lifecycle.html",
   process.env.BASE_URL ?? "http://127.0.0.1:4173/");
 const args = ["--headless=new", "--no-sandbox", "--disable-dev-shm-usage",
   "--force-device-scale-factor=3", "--enable-unsafe-swiftshader", "--use-angle=swiftshader-webgl",
-  "--window-size=600,900", "--virtual-time-budget=6500"];
+  "--run-all-compositor-stages-before-draw",
+  "--window-size=600,900", "--virtual-time-budget=15000"];
 const run = spawnSync(browser, [...args, "--dump-dom", url.href],
   { encoding:"utf8", timeout:65000, killSignal:"SIGKILL", maxBuffer:12 * 1024 * 1024 });
 const proof = run.stdout?.match(/<pre id="proof"[^>]*>([\s\S]*?)<\/pre>/);
