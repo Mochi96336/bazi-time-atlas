@@ -35,11 +35,8 @@ test("proxy can be calibrated against year-4006 reviewed DE441 evidence", () => 
 
   assert.equal(assessment.status, "proxy-with-target-evidence");
   assert.equal(assessment.targetBoundary.authorityClass, "reviewed-production-direct-event");
-  assert.ok(Number.isFinite(assessment.validation.errorHours));
-  assert.ok(assessment.validation.absoluteErrorHours >= 0);
+  assert.ok(Math.abs(assessment.validation.errorHours - (-12.199)) < 0.01);
   assert.equal(assessment.proxyIsAbsoluteAuthority, false);
-
-  console.log(`[seasonal-phase-proxy] 4006 LiChun error = ${assessment.validation.errorHours.toFixed(3)} h`);
 });
 
 test("year-4006 calibration separates common seasonal phase from within-year shape", () => {
@@ -79,17 +76,13 @@ test("year-4006 calibration separates common seasonal phase from within-year sha
   const minus = stats(minusShapeErrors);
 
   assert.equal(plusShapeErrors.length, 24);
-  for (const result of [plus, none, minus]) {
-    assert.ok(Number.isFinite(result.meanHours));
-    assert.ok(Number.isFinite(result.spreadHours));
-    assert.ok(Number.isFinite(result.rmsAroundMeanHours));
-  }
-
-  console.log(
-    `[seasonal-phase-proxy] 4006 +shape mean=${plus.meanHours.toFixed(3)}h spread=${plus.spreadHours.toFixed(3)}h rms=${plus.rmsAroundMeanHours.toFixed(3)}h; `
-    + `no-shape mean=${none.meanHours.toFixed(3)}h spread=${none.spreadHours.toFixed(3)}h rms=${none.rmsAroundMeanHours.toFixed(3)}h; `
-    + `-shape mean=${minus.meanHours.toFixed(3)}h spread=${minus.spreadHours.toFixed(3)}h rms=${minus.rmsAroundMeanHours.toFixed(3)}h`
-  );
+  assert.ok(Math.abs(plus.meanHours - (-12.104)) < 0.01);
+  assert.ok(plus.spreadHours < 0.25);
+  assert.ok(plus.rmsAroundMeanHours < 0.1);
+  assert.ok(none.spreadHours > 50);
+  assert.ok(none.rmsAroundMeanHours > 18);
+  assert.ok(minus.spreadHours > 100);
+  assert.ok(minus.rmsAroundMeanHours > 37);
 });
 
 test("proxy can be stress-tested against pinned year-10026 DE441-derived evidence without promoting it", () => {
@@ -103,9 +96,7 @@ test("proxy can be stress-tested against pinned year-10026 DE441-derived evidenc
   assert.equal(assessment.targetBoundary.authorityClass, "source-derived-research-evidence");
   assert.equal(assessment.validation.independentTargetYearTruth, false);
   assert.equal(assessment.validation.productionAuthorityGranted, false);
-  assert.ok(Number.isFinite(assessment.validation.errorHours));
-
-  console.log(`[seasonal-phase-proxy] 10026 LiChun error = ${assessment.validation.errorHours.toFixed(3)} h`);
+  assert.ok(Math.abs(assessment.validation.errorHours - (-33.118)) < 0.01);
 });
 
 test("year 26026 remains proxy-only and exposes the separate Earth-rotation uncertainty", () => {
@@ -122,12 +113,6 @@ test("year 26026 remains proxy-only and exposes the separate Earth-rotation unce
   assert.ok(Number.isFinite(assessment.proxy.ttJulianDay));
   assert.equal(assessment.proxyIsAbsoluteAuthority, false);
   assert.equal(assessment.civilTimeResolved, false);
-  assert.ok(assessment.earthRotation.deltaTPointEstimateDays > 20);
-  assert.ok(assessment.earthRotation.oneSigmaDays > 7);
-
-  console.log(
-    `[seasonal-phase-proxy] 26026 proxy TT JD = ${assessment.proxy.ttJulianDay.toFixed(6)}; `
-    + `DeltaT point = ${assessment.earthRotation.deltaTPointEstimateDays.toFixed(3)} d; `
-    + `1sigma = ${assessment.earthRotation.oneSigmaDays.toFixed(3)} d`
-  );
+  assert.ok(Math.abs(assessment.earthRotation.deltaTPointEstimateDays - 21.701) < 0.001);
+  assert.ok(Math.abs(assessment.earthRotation.oneSigmaDays - 7.128) < 0.001);
 });
