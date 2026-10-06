@@ -94,7 +94,7 @@ def parse_berger_coefficients(source_path: Path):
 
     def parse_array(name):
         match = re.search(
-            rf"const {name} = Object\\.freeze\\((\\[[\\s\\S]*?\\])\\);",
+            rf"const {name} = Object\.freeze\((\[[\s\S]*?\])\);",
             text,
         )
         if not match:
