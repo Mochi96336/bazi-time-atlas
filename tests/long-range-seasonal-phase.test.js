@@ -173,10 +173,12 @@ test("4006-calibrated orbit clock predicts the pinned year-10026 Li Chun without
   assert.equal(assessment.status, "orbit-clock-with-target-evidence");
   assert.equal(assessment.targetBoundary.authorityClass, "source-derived-research-evidence");
   assert.equal(assessment.validation.independentTargetYearTruth, false);
-  assert.ok(Number.isFinite(assessment.validation.proxyMinusTargetHours));
+  assert.ok(Math.abs(assessment.validation.proxyMinusTargetHours + 24.017) < 0.02);
+  assert.equal(SEASONAL_ORBIT_CLOCK_CONTRACT.outOfCalibrationResult, "rejected-at-10026");
+  assert.equal(SEASONAL_ORBIT_CLOCK_CONTRACT.validatedFor24000, false);
   assert.equal(assessment.productionAuthorityGranted, false);
   console.log(
-    `[seasonal-orbit-clock] 10026 LiChun prediction error = ${assessment.validation.proxyMinusTargetHours.toFixed(3)} h`
+    `[seasonal-orbit-clock] 10026 LiChun prediction error = ${assessment.validation.proxyMinusTargetHours.toFixed(3)} h (rejected)`
   );
 });
 
