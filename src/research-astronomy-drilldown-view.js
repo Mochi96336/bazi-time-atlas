@@ -79,7 +79,7 @@ function installMonthBoundaryDetail() {
 
   if (heading) heading.textContent = "季節形狀造成的交節分歧窗口";
 
-  const detail = makeDetails("month-boundary-detail", "shape-only 交節窗口明細");
+  const detail = makeDetails("month-boundary-detail", "只看季節形狀的交節窗口明細");
   if (prose) detail.appendChild(prose);
   if (impact) detail.appendChild(impact);
   if (attribution) detail.appendChild(attribution);
