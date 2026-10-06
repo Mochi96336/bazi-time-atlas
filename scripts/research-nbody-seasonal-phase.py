@@ -4,9 +4,10 @@
 This experiment asks a deliberately narrow question:
 
 Can a reproducible Solar-System integration, initialized from JPL Horizons at
-J2000, preserve enough absolute orbital phase that Berger's already-validated
-moving-equinox perihelion geometry lands on the repository's DE441 seasonal
-crossings at years 4006 and 10026?
+J2000, preserve enough absolute orbital phase that its geocentric apparent Sun
+direction, transformed through the repository's already-validated Owen/Horizons
+mean-ecliptic-of-date frame path, lands on the DE441 seasonal crossings at
+years 4006 and 10026?
 
 The script does NOT produce a year-26026 claim.  It first measures:
   * 4006 residuals against reviewed 24-crossing DE441 truth;
@@ -33,6 +34,10 @@ import rebound
 J2000_JD = 2_451_545.0
 TAU = math.tau
 SECONDS_PER_DAY = 86_400.0
+SPEED_OF_LIGHT_AU_PER_DAY = 173.1446326846693
+SOLAR_SCHWARZSCHILD_RADIUS_AU = 1.97412574336e-8
+PINNED_IERS_DPSI_ARCSEC = -0.113478
+PINNED_IERS_DEPS_ARCSEC = -0.006944
 HORIZONS_EPOCH = "JD2451545.0"
 BODY_IDS = ("10", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 SUN_INDEX = 0
@@ -87,49 +92,6 @@ def normalize_radians(value):
 
 def signed_radians(value):
     return (value + math.pi) % TAU - math.pi
-
-
-def parse_berger_coefficients(source_path: Path):
-    text = source_path.read_text(encoding="utf-8")
-
-    def parse_array(name):
-        match = re.search(
-            rf"const {name} = Object\.freeze\((\[[\s\S]*?\])\);",
-            text,
-        )
-        if not match:
-            raise RuntimeError(f"could not parse {name} from {source_path}")
-        return json.loads(match.group(1))
-
-    return parse_array("ECCENTRICITY_TERMS"), parse_array("PRECESSION_TERMS")
-
-
-def berger_perihelion_longitude_radians(year, eccentricity_terms, precession_terms):
-    degree = math.pi / 180.0
-    t = year - 1950.0
-
-    e_sin_pi = 0.0
-    e_cos_pi = 0.0
-    for amplitude, frequency_arcsec_per_year, phase_degrees in eccentricity_terms:
-        argument = (
-            t * frequency_arcsec_per_year / 3600.0 + phase_degrees
-        ) * degree
-        e_sin_pi += amplitude * math.sin(argument)
-        e_cos_pi += amplitude * math.cos(argument)
-    pie = math.atan2(e_sin_pi, e_cos_pi)
-
-    periodic_precession_arcsec = 0.0
-    for amplitude_arcsec, frequency_arcsec_per_year, phase_degrees in precession_terms:
-        argument = (
-            t * frequency_arcsec_per_year / 3600.0 + phase_degrees
-        ) * degree
-        periodic_precession_arcsec += amplitude_arcsec * math.sin(argument)
-
-    psi = (
-        3.392506
-        + (t * 50.439273 + periodic_precession_arcsec) / 3600.0
-    ) * degree
-    return normalize_radians(pie + psi + math.pi)
 
 
 def parse_4006_events(source_path: Path):
@@ -212,7 +174,7 @@ def make_base_simulation():
     simulation.units = ("AU", "day", "Msun")
 
     for body_id in BODY_IDS:
-        simulation.add(body_id, date=HORIZONS_EPOCH, plane="ecliptic")
+        simulation.add(body_id, date=HORIZONS_EPOCH, plane="frame")
 
     if simulation.N != len(BODY_IDS):
         raise RuntimeError(f"expected {len(BODY_IDS)} bodies, got {simulation.N}")
@@ -222,81 +184,133 @@ def make_base_simulation():
     return simulation, rows, digest
 
 
-def osculating_true_anomaly_and_rate(simulation):
+def geocentric_sun_apparent_icrf_and_rate(simulation):
     sun = simulation.particles[SUN_INDEX]
     earth = simulation.particles[EMB_INDEX]
 
-    r = (
-        earth.x - sun.x,
-        earth.y - sun.y,
-        earth.z - sun.z,
+    earth_position = (earth.x, earth.y, earth.z)
+    earth_velocity = (earth.vx, earth.vy, earth.vz)
+    sun_position = (sun.x, sun.y, sun.z)
+    sun_velocity = (sun.vx, sun.vy, sun.vz)
+
+    relative_position = vec_sub(sun_position, earth_position)
+    relative_velocity = vec_sub(sun_velocity, earth_velocity)
+    distance = norm(relative_position)
+    if not (distance > 0):
+        raise RuntimeError("Sun and EMB positions must be distinct")
+
+    # Match the repository's absolute-state seasonal solver at the precision
+    # relevant here: reception-time Earth, three fixed-point light-time
+    # iterations, then SOFA-compatible stellar aberration. The Sun-center
+    # gravitational-deflection stage is an evidence-bounded identity in the
+    # repository; the small solar-potential term below is the one retained by
+    # SOFA eraAb itself.
+    emission_position = sun_position
+    light_time_days = 0.0
+    for _ in range(3):
+        light_time_days = norm(vec_sub(emission_position, earth_position)) / SPEED_OF_LIGHT_AU_PER_DAY
+        emission_position = tuple(
+            sun_position[index] - sun_velocity[index] * light_time_days
+            for index in range(3)
+        )
+
+    natural = unit(vec_sub(emission_position, earth_position))
+    beta = vec_scale(earth_velocity, 1.0 / SPEED_OF_LIGHT_AU_PER_DAY)
+    beta2 = dot(beta, beta)
+    if not (beta2 < 1):
+        raise RuntimeError("observer velocity must be subluminal")
+    bm1 = math.sqrt(1.0 - beta2)
+    pdv = dot(natural, beta)
+    w1 = 1.0 + pdv / (1.0 + bm1)
+    w2 = SOLAR_SCHWARZSCHILD_RADIUS_AU / distance
+    apparent = unit(tuple(
+        natural[index] * bm1
+        + w1 * beta[index]
+        + w2 * (beta[index] - pdv * natural[index])
+        for index in range(3)
+    ))
+
+    # A local timing conversion only: relative angular speed of the
+    # Sun-Earth line. Frame precession/nutation rates are tiny on the one-day
+    # scale and do not materially affect this conversion.
+    h = cross(relative_position, relative_velocity)
+    angular_rate_radians_per_day = norm(h) / (distance * distance)
+    return apparent, angular_rate_radians_per_day, light_time_days
+
+
+def vector_to_ra_dec(direction):
+    x, y, z = unit(direction)
+    return (
+        math.degrees(math.atan2(y, x)) % 360.0,
+        math.degrees(math.asin(z)),
     )
-    v = (
-        earth.vx - sun.vx,
-        earth.vy - sun.vy,
-        earth.vz - sun.vz,
+
+
+def frame_longitude_of_date(frame_probe, tt_julian_day, direction_icrf):
+    ra_degrees, dec_degrees = vector_to_ra_dec(direction_icrf)
+    import subprocess
+
+    run = subprocess.run(
+        [
+            str(frame_probe),
+            "apparent",
+            str(tt_julian_day),
+            str(ra_degrees),
+            str(dec_degrees),
+            str(PINNED_IERS_DPSI_ARCSEC),
+            str(PINNED_IERS_DEPS_ARCSEC),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
     )
-
-    r_norm = norm(r)
-    h = cross(r, v)
-    h_norm = norm(h)
-    mu = simulation.G * (sun.m + earth.m)
-    eccentricity_vector = vec_sub(
-        vec_scale(cross(v, h), 1.0 / mu),
-        vec_scale(r, 1.0 / r_norm),
-    )
-    eccentricity = norm(eccentricity_vector)
-    e_hat = unit(eccentricity_vector)
-    r_hat = unit(r)
-    h_hat = unit(h)
-
-    cosine = max(-1.0, min(1.0, dot(e_hat, r_hat)))
-    sine = dot(h_hat, cross(e_hat, r_hat))
-    true_anomaly = normalize_radians(math.atan2(sine, cosine))
-    angular_rate_radians_per_day = h_norm / (r_norm * r_norm)
-    return true_anomaly, angular_rate_radians_per_day, eccentricity
+    if run.returncode != 0:
+        raise RuntimeError(
+            f"Owen frame probe failed at TT JD {tt_julian_day}: {run.stderr.strip()}"
+        )
+    values = [float(value) for value in run.stdout.strip().split()]
+    if len(values) != 3 or any(not math.isfinite(value) for value in values):
+        raise RuntimeError(f"malformed Owen frame probe output: {run.stdout!r}")
+    return {
+        "longitudeDegrees": values[0],
+        "latitudeDegrees": values[1],
+        "meanObliquityDegrees": values[2],
+    }
 
 
-def evaluate_event(
-    simulation,
-    event,
-    eccentricity_terms,
-    precession_terms,
-):
+def evaluate_event(simulation, event, frame_probe):
     target_time_days = event["ttJulianDay"] - J2000_JD
     if target_time_days < simulation.t:
         raise RuntimeError("events must be evaluated in chronological order")
 
     simulation.integrate(target_time_days, exact_finish_time=1)
 
-    actual_true_anomaly, angular_rate, osculating_eccentricity = (
-        osculating_true_anomaly_and_rate(simulation)
+    apparent_icrf, angular_rate, light_time_days = (
+        geocentric_sun_apparent_icrf_and_rate(simulation)
     )
-    pibar = berger_perihelion_longitude_radians(
-        event["catalogueYear"],
-        eccentricity_terms,
-        precession_terms,
-    )
-    expected_true_anomaly = normalize_radians(
-        math.radians(event["longitudeDegrees"]) - pibar
+    framed = frame_longitude_of_date(
+        frame_probe,
+        event["ttJulianDay"],
+        apparent_icrf,
     )
     angular_residual = signed_radians(
-        actual_true_anomaly - expected_true_anomaly
+        math.radians(framed["longitudeDegrees"] - event["longitudeDegrees"])
     )
 
-    # Positive angular residual means the integrated orbit is already ahead at
-    # the DE441 event epoch, so its predicted crossing happened earlier.
+    # Positive longitude residual means the integrated model is already ahead
+    # at the DE441 event epoch, so its predicted crossing happened earlier.
     predicted_minus_truth_days = -angular_residual / angular_rate
 
     return {
         **event,
         "simulationTimeDaysFromJ2000": simulation.t,
-        "actualTrueAnomalyDegrees": math.degrees(actual_true_anomaly),
-        "expectedTrueAnomalyDegrees": math.degrees(expected_true_anomaly),
-        "angularResidualDegrees": math.degrees(angular_residual),
+        "predictedLongitudeDegrees": framed["longitudeDegrees"],
+        "predictedLatitudeDegrees": framed["latitudeDegrees"],
+        "meanObliquityDegrees": framed["meanObliquityDegrees"],
+        "longitudeResidualDegrees": math.degrees(angular_residual),
         "predictedMinusTruthHours": predicted_minus_truth_days * 24.0,
-        "osculatingEccentricity": osculating_eccentricity,
         "angularRateDegreesPerDay": math.degrees(angular_rate),
+        "lightTimeSeconds": light_time_days * SECONDS_PER_DAY,
     }
 
 
@@ -319,7 +333,7 @@ def summarize(events):
     }
 
 
-def run_variant(base_simulation, step_days, all_events, eccentricity_terms, precession_terms):
+def run_variant(base_simulation, step_days, all_events, frame_probe):
     simulation = base_simulation.copy()
     simulation.integrator = "whfast"
     simulation.dt = step_days
@@ -333,8 +347,7 @@ def run_variant(base_simulation, step_days, all_events, eccentricity_terms, prec
             evaluate_event(
                 simulation,
                 event,
-                eccentricity_terms,
-                precession_terms,
+                frame_probe,
             )
         )
     final_energy = simulation.energy()
@@ -393,6 +406,7 @@ def convergence_summary(coarse, fine):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--frame-probe", required=True, type=Path)
     parser.add_argument(
         "--steps",
         default="4,2",
@@ -401,9 +415,8 @@ def main():
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[1]
-    eccentricity_terms, precession_terms = parse_berger_coefficients(
-        root / "src/recurrence/berger-orbit.js"
-    )
+    if not args.frame_probe.is_file():
+        raise FileNotFoundError(args.frame_probe)
     events_4006 = parse_4006_events(
         root / "src/recurrence/direct-seasonal-provider-validation-evidence.js"
     )
@@ -425,8 +438,7 @@ def main():
             base_simulation,
             step_days,
             all_events,
-            eccentricity_terms,
-            precession_terms,
+            args.frame_probe,
         )
         for step_days in steps
     ]
@@ -447,7 +459,7 @@ def main():
         "initialization": {
             "authority": "NASA/JPL Horizons",
             "epoch": HORIZONS_EPOCH,
-            "referencePlane": "ecliptic J2000",
+            "referencePlane": "ICRF / J2000 equatorial frame",
             "referenceCenter": "Solar System barycenter",
             "vectorCorrections": "NONE",
             "bodyIds": list(BODY_IDS),
@@ -464,10 +476,18 @@ def main():
             "earthMoonResolvedSeparately": False,
         },
         "seasonFrame": {
-            "shapeAndPrecessionModel": "Berger 1978 coefficients from repository",
+            "frameModel": "pinned Swiss Owen/JPLHOR mean-ecliptic-of-date proof path",
+            "frameProbe": str(args.frame_probe),
+            "eopTerminalDPsiArcsec": PINNED_IERS_DPSI_ARCSEC,
+            "eopTerminalDEpsArcsec": PINNED_IERS_DEPS_ARCSEC,
+            "apparentDirection": (
+                "three-iteration Sun light-time approximation plus "
+                "SOFA-compatible stellar aberration; Sun-center gravitational "
+                "deflection remains evidence-bounded identity"
+            ),
             "comparison": (
-                "N-body osculating true anomaly versus "
-                "solar-longitude minus Berger moving-equinox perihelion longitude"
+                "integrated geocentric apparent solar longitude in "
+                "mean ecliptic-of-date versus DE441 seasonal crossing longitude"
             ),
         },
         "evidence": {
