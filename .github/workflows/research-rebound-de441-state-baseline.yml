@@ -62,7 +62,7 @@ jobs:
           assert r["deepProjection26026"]["absoluteSeasonalPhaseResolved"] is False
           assert r["deepProjection26026"]["productionAuthorityGranted"] is False
 
-          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine", "grUltrafine", "grIas15"):
+          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine", "grUltrafine", "grIas15", "grFullIas15"):
               samples = r[family]
               assert len(samples) == 6
               for sample in samples:
@@ -132,6 +132,18 @@ jobs:
               print(
                   f"[rebound-gr-ias15-delta] {sample['year']} {sample['label']}: "
                   f"IAS15-minus-WHFast0.5d direction={sample['ias15MinusWhfastDirectionErrorArcsec']:.3f} arcsec"
+              )
+          for sample in r["grFullIas15"]:
+              print(
+                  f"[rebound-gr-full-ias15] {sample['year']} {sample['label']}: "
+                  f"direction={sample['geocentricSunDirectionErrorArcsec']:.3f} arcsec, "
+                  f"geo-pos={sample['geocentricSunPositionErrorKm']:.1f} km, "
+                  f"geo-v={sample['geocentricSunVelocityErrorMps']:.4f} m/s"
+              )
+          for sample in r["grFullComparison"]:
+              print(
+                  f"[rebound-gr-full-delta] {sample['year']} {sample['label']}: "
+                  f"full-minus-approx direction={sample['fullMinusApproxDirectionErrorArcsec']:.3f} arcsec"
               )
           PY
 
