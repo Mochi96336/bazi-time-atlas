@@ -72,7 +72,7 @@ jobs:
           PY
 
       - name: Upload N-body research evidence
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v7
         with:
           name: nbody-seasonal-phase
