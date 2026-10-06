@@ -299,10 +299,12 @@ const near = expect(
       "data-full-pillar-attribution": "boundary-isolated",
       "data-year-boundary-li-chun-before-branch": "丑",
       "data-year-boundary-li-chun-after-branch": "寅",
-      "data-year-boundary-li-chun-base-year-pillar": "丁未",
-      "data-year-boundary-li-chun-target-year-pillar": "丙午",
-      "data-year-boundary-li-chun-base-month-pillar": "壬寅",
-      "data-year-boundary-li-chun-target-month-pillar": "辛丑"
+      "data-year-boundary-li-chun-base-month-branch": "丑",
+      "data-year-boundary-li-chun-target-month-branch": "寅",
+      "data-year-boundary-li-chun-base-year-pillar": "丙午",
+      "data-year-boundary-li-chun-target-year-pillar": "丁未",
+      "data-year-boundary-li-chun-base-month-pillar": "辛丑",
+      "data-year-boundary-li-chun-target-month-pillar": "壬寅"
     },
     float: [
       { name: "data-astronomy-max-residual-hours", expected: 10.385719, tolerance: 0.001 },
