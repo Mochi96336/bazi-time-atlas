@@ -138,6 +138,23 @@ The first intentionally incomplete model (WHFast, 2-day convergence run; no aste
 
 The 4-day and 2-day integrations stay much closer to each other than either stays to DE441, so the dominant remaining error is already **physical-model incompleteness**, not simply the WHFast timestep. The year-26026 integrated state remains unvalidated and must not be promoted to an absolute seasonal phase.
 
+### Relativity A/B
+
+The same 2-day WHFast baseline was then rerun with REBOUNDx `gr`. This force is used rather than `gr_potential` because the research target is orbital phase: the central-star `gr` treatment preserves the relevant first-order mean-motion and perihelion-precession correction, while the faster potential approximation is not suitable for a phase comparison.
+
+Against the same DE441 checkpoints:
+
+- year 4006 mean geocentric-Sun direction error: **172.150 → 29.973 arcsec** (**−82.59%**);
+  - Li Chun window: 176.921 → 23.068 arcsec;
+  - March equinox window: 170.953 → 40.101 arcsec;
+  - September equinox window: 168.575 → 26.751 arcsec.
+- year 10026 mean direction error: **662.297 → 547.988 arcsec** (**−17.26%**);
+  - Li Chun window: 671.695 → 546.420 arcsec;
+  - March equinox window: 666.970 → 557.271 arcsec;
+  - September equinox window: 648.228 → 540.272 arcsec.
+
+General relativity is therefore a **necessary and strongly supported correction**, especially by year 4006, but it does not explain the dominant year-10026 drift. The next experiment should isolate longer-period perturbing physics (especially the massive small-body/asteroid terms present in the JPL dynamical solution) before any +24,000-year seasonal phase is surfaced.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
