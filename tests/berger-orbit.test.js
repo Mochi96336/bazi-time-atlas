@@ -33,25 +33,18 @@ test("normalized solar-term shape uses Berger's apparent-Sun longitude conventio
 
 test("1980-year local discrete recurrence is not an orbital-shape closure", () => {
   const residual = solarTermShapeResiduals(2026, 4006);
-  assert.ok(residual.maxAbsHours > 20 && residual.maxAbsHours < 50);
-  assert.ok(residual.minHours < 0);
-  assert.ok(residual.maxHours > 0);
+  close(residual.maxAbsHours, 42.182669474, 1e-6, "1980-year max residual hours");
+  close(residual.minHours, -42.182669474, 1e-6, "1980-year min residual hours");
+  close(residual.maxHours, 10.498154692, 1e-6, "1980-year max signed residual hours");
   assert.equal(residual.closed, false);
-  console.log(
-    `[berger-shape] 2026→4006 max=${residual.maxAbsHours.toFixed(9)} h `
-    + `min=${residual.minHours.toFixed(9)} h maxSigned=${residual.maxHours.toFixed(9)} h`
-  );
 });
 
 test("24000-year discrete closure still leaves a large solar-term shape residual", () => {
   const residual = solarTermShapeResiduals(2026, 26026);
-  assert.ok(residual.maxAbsHours > 50);
+  close(residual.maxAbsHours, 94.801900722, 1e-6, "24000-year max residual hours");
+  close(residual.terms.find(term => term.name === "寒露").residualHours, -94.801900722, 1e-6, "寒露 residual");
+  close(residual.terms.find(term => term.name === "清明").residualHours, -1.055993098, 1e-6, "清明 residual");
   assert.equal(residual.closed, false);
-  console.log(
-    `[berger-shape] 2026→26026 max=${residual.maxAbsHours.toFixed(9)} h `
-    + `min=${residual.minHours.toFixed(9)} h maxSigned=${residual.maxHours.toFixed(9)} h; `
-    + residual.terms.map(term => `${term.name}=${term.residualHours.toFixed(9)}`).join(" ")
-  );
 });
 
 
@@ -89,10 +82,6 @@ test("Berger seasonal shape agrees with the 2026→4006 DE441 24-crossing shape 
   assert.ok(rmsErrorHours < 0.6, `RMS DE441 disagreement ${rmsErrorHours} h`);
   assert.ok(spreadHours < 1.5, `spread DE441 disagreement ${spreadHours} h`);
 
-  console.log(
-    `[berger-shape] DE441 2026→4006 maxError=${maxAbsErrorHours.toFixed(6)} h `
-    + `rms=${rmsErrorHours.toFixed(6)} h spread=${spreadHours.toFixed(6)} h`
-  );
 });
 
 test("same-year comparison is the only exact shape identity in this comparator", () => {
