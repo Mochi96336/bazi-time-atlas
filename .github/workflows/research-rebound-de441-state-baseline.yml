@@ -42,7 +42,8 @@ jobs:
             --kernel tmp/rebound-de441/de441_part-2.bsp \
             --output tmp/rebound-de441/result.json \
             --primary-dt-days 4 \
-            --convergence-dt-days 2
+            --convergence-dt-days 2 \
+            --gr-fine-dt-days 1
 
       - name: Report research baseline without promoting it
         run: |
@@ -60,7 +61,7 @@ jobs:
           assert r["deepProjection26026"]["absoluteSeasonalPhaseResolved"] is False
           assert r["deepProjection26026"]["productionAuthorityGranted"] is False
 
-          for family in ("primary", "convergence", "grPrimary", "grConvergence"):
+          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine"):
               samples = r[family]
               assert len(samples) == 6
               for sample in samples:
@@ -94,6 +95,18 @@ jobs:
                   f"improvement={sample['directionImprovementArcsec']:.3f} arcsec "
                   f"({sample['directionImprovementFraction']*100:.2f}%), "
                   f"geo-pos-improvement={sample['positionImprovementKm']:.1f} km"
+              )
+          for sample in r["grFine"]:
+              print(
+                  f"[rebound-gr-fine] {sample['year']} {sample['label']}: "
+                  f"direction={sample['geocentricSunDirectionErrorArcsec']:.3f} arcsec, "
+                  f"geo-pos={sample['geocentricSunPositionErrorKm']:.1f} km"
+              )
+          for sample in r["grFineConvergence"]:
+              print(
+                  f"[rebound-gr-convergence] {sample['year']} {sample['label']}: "
+                  f"1d-minus-2d direction-error={sample['directionErrorArcsecDifference']:.3f} arcsec, "
+                  f"geo-pos-error={sample['geocentricPositionErrorKmDifference']:.1f} km"
               )
           PY
 
