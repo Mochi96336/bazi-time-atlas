@@ -124,7 +124,8 @@ if (!astronomy.includes('class="astronomy-panel"') || !astronomy.includes('id="m
   throw new Error(`astronomy task did not retain residual, month-boundary, and near-recurrence evidence: ${probe.url}`);
 }
 if (
-  !astronomy.includes("季節形狀 · 春分歸零")
+  !astronomy.includes("季節形狀 RMS")
+  || !astronomy.includes("春分歸零後的十二節形狀與模型參數")
   || !astronomy.includes("季節相位 · 公曆框架")
   || !astronomy.includes("春分相對公曆的絕對位移另算")
 ) {
