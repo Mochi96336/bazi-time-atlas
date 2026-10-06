@@ -43,7 +43,8 @@ jobs:
             --output tmp/rebound-de441/result.json \
             --primary-dt-days 4 \
             --convergence-dt-days 2 \
-            --gr-fine-dt-days 1
+            --gr-fine-dt-days 1 \
+            --gr-ultrafine-dt-days 0.5
 
       - name: Report research baseline without promoting it
         run: |
@@ -61,7 +62,7 @@ jobs:
           assert r["deepProjection26026"]["absoluteSeasonalPhaseResolved"] is False
           assert r["deepProjection26026"]["productionAuthorityGranted"] is False
 
-          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine"):
+          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine", "grUltrafine"):
               samples = r[family]
               assert len(samples) == 6
               for sample in samples:
@@ -106,6 +107,18 @@ jobs:
               print(
                   f"[rebound-gr-convergence] {sample['year']} {sample['label']}: "
                   f"1d-minus-2d direction-error={sample['directionErrorArcsecDifference']:.3f} arcsec, "
+                  f"geo-pos-error={sample['geocentricPositionErrorKmDifference']:.1f} km"
+              )
+          for sample in r["grUltrafine"]:
+              print(
+                  f"[rebound-gr-ultrafine] {sample['year']} {sample['label']}: "
+                  f"direction={sample['geocentricSunDirectionErrorArcsec']:.3f} arcsec, "
+                  f"geo-pos={sample['geocentricSunPositionErrorKm']:.1f} km"
+              )
+          for sample in r["grUltrafineConvergence"]:
+              print(
+                  f"[rebound-gr-ultrafine-convergence] {sample['year']} {sample['label']}: "
+                  f"0.5d-minus-1d direction-error={sample['directionErrorArcsecDifference']:.3f} arcsec, "
                   f"geo-pos-error={sample['geocentricPositionErrorKmDifference']:.1f} km"
               )
           PY
