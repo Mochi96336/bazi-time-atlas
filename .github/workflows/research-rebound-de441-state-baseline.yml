@@ -21,8 +21,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install pinned research integrator and SPK reader
-        run: python -m pip install --disable-pip-version-check "rebound==5.2.2" "jplephem==2.24" "numpy<3"
+      - name: Install pinned research dynamics stack
+        run: python -m pip install --disable-pip-version-check "rebound==5.2.2" "reboundx==5.1.0" "jplephem==2.24" "numpy<3"
 
       - name: Download official DE441 part 2 kernel
         env:
@@ -81,6 +81,44 @@ jobs:
               )
           PY
 
+      - name: Run GR A-B side experiment
+        run: |
+          python scripts/research-rebound-de441-state-baseline.py \
+            --kernel tmp/rebound-de441/de441_part-2.bsp \
+            --output tmp/rebound-de441/gr.json \
+            --primary-dt-days 2 \
+            --convergence-dt-days 2 \
+            --relativity gr
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          n = json.loads(Path("tmp/rebound-de441/result.json").read_text())
+          g = json.loads(Path("tmp/rebound-de441/gr.json").read_text())
+          assert n["relativity"] == "none"
+          assert g["relativity"] == "gr"
+          n_by = {(x["year"], x["label"]): x for x in n["convergence"]}
+          g_by = {(x["year"], x["label"]): x for x in g["convergence"]}
+
+          for key in sorted(n_by):
+              before = n_by[key]["geocentricSunDirectionErrorArcsec"]
+              after = g_by[key]["geocentricSunDirectionErrorArcsec"]
+              print(
+                  f"[rebound-gr] {key[0]} {key[1]}: "
+                  f"Newtonian={before:.3f} arcsec, GR={after:.3f} arcsec, "
+                  f"delta={after-before:+.3f} arcsec"
+              )
+          for year in (4006, 10026):
+              keys = [key for key in n_by if key[0] == year]
+              before = sum(n_by[key]["geocentricSunDirectionErrorArcsec"] for key in keys) / len(keys)
+              after = sum(g_by[key]["geocentricSunDirectionErrorArcsec"] for key in keys) / len(keys)
+              print(
+                  f"[rebound-gr-summary] {year}: "
+                  f"mean direction error {before:.3f} -> {after:.3f} arcsec "
+                  f"({(after/before-1)*100:+.2f}%)"
+              )
+          PY
+
       - name: Remove large source kernel
         if: always()
         run: rm -f tmp/rebound-de441/de441_part-2.bsp
@@ -90,6 +128,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: rebound-de441-state-baseline
-          path: tmp/rebound-de441/result.json
+          path: |
+            tmp/rebound-de441/result.json
+            tmp/rebound-de441/gr.json
           if-no-files-found: error
           retention-days: 7
