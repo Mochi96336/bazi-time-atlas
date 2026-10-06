@@ -28,11 +28,31 @@ jobs:
       - name: Install pinned N-body integrator
         run: python -m pip install --disable-pip-version-check "rebound==5.2.1"
 
+      - name: Build pinned Owen/Horizons frame probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+          make -C tmp/swisseph libswe.a
+          cc -O2 -Wall -Wextra \
+            -I tmp/swisseph \
+            scripts/research-swiss-owen-frame-probe.c \
+            tmp/swisseph/libswe.a \
+            -lm -ldl \
+            -o tmp/owen-frame-probe
+
       - name: Run 4006 / 10026 N-body phase calibration
         run: |
           mkdir -p tmp/nbody-seasonal-phase
           python scripts/research-nbody-seasonal-phase.py \
             --output tmp/nbody-seasonal-phase/result.json \
+            --frame-probe tmp/owen-frame-probe \
             --steps 4,2
 
       - name: Verify research claim boundary and numerical convergence payload
