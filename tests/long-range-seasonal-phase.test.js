@@ -35,7 +35,7 @@ test("proxy can be calibrated against year-4006 reviewed DE441 evidence", () => 
 
   assert.equal(assessment.status, "proxy-with-target-evidence");
   assert.equal(assessment.targetBoundary.authorityClass, "reviewed-production-direct-event");
-  assert.ok(Math.abs(assessment.validation.errorHours - (-12.199)) < 0.01);
+  assert.ok(Math.abs(assessment.validation.phaseOffsetHours - 12.199) < 0.01);
   assert.equal(assessment.proxyIsAbsoluteAuthority, false);
 });
 
@@ -55,9 +55,9 @@ test("year-4006 calibration separates common seasonal phase from within-year sha
     const actual = assessment.targetBoundary.ttJulianDay;
     const skeleton = assessment.baseBoundary.ttJulianDay + assessment.proxy.seasonalSkeletonDays;
     const shape = assessment.proxy.shapeCorrectionDays;
-    plusShapeErrors.push((skeleton + shape - actual) * 24);
-    skeletonOnlyErrors.push((skeleton - actual) * 24);
-    minusShapeErrors.push((skeleton - shape - actual) * 24);
+    plusShapeErrors.push((actual - (skeleton + shape)) * 24);
+    skeletonOnlyErrors.push((actual - skeleton) * 24);
+    minusShapeErrors.push((actual - (skeleton - shape)) * 24);
   }
 
   function stats(errors) {
@@ -76,7 +76,7 @@ test("year-4006 calibration separates common seasonal phase from within-year sha
   const minus = stats(minusShapeErrors);
 
   assert.equal(plusShapeErrors.length, 24);
-  assert.ok(Math.abs(plus.meanHours - (-12.104)) < 0.01);
+  assert.ok(Math.abs(plus.meanHours - 12.104) < 0.01);
   assert.ok(plus.spreadHours < 0.25);
   assert.ok(plus.rmsAroundMeanHours < 0.1);
   assert.ok(none.spreadHours > 50);
@@ -96,7 +96,7 @@ test("proxy can be stress-tested against pinned year-10026 DE441-derived evidenc
   assert.equal(assessment.targetBoundary.authorityClass, "source-derived-research-evidence");
   assert.equal(assessment.validation.independentTargetYearTruth, false);
   assert.equal(assessment.validation.productionAuthorityGranted, false);
-  assert.ok(Math.abs(assessment.validation.errorHours - (-33.118)) < 0.01);
+  assert.ok(Math.abs(assessment.validation.phaseOffsetHours - 33.118) < 0.01);
 });
 
 test("year 26026 remains proxy-only and exposes the separate Earth-rotation uncertainty", () => {
