@@ -26,7 +26,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install pinned N-body integrator
-        run: python -m pip install --disable-pip-version-check "rebound==5.2.1"
+        run: python -m pip install --disable-pip-version-check "rebound==5.2.1" "reboundx==5.1.0"
 
       - name: Build pinned Owen/Horizons frame probe
         shell: bash
@@ -71,9 +71,16 @@ jobs:
           assert claim["productionAuthorityGranted"] is False
 
           assert result["initialization"]["authority"] == "NASA/JPL Horizons"
-          assert result["initialization"]["earthProxy"] == "Earth-Moon barycenter (3)"
-          assert len(result["initialization"]["states"]) == 10
-          assert len(result["variants"]) == 2
+          assert result["initialization"]["embBaseline"]["earthProxy"] == "Earth-Moon barycenter (3)"
+          assert len(result["initialization"]["embBaseline"]["states"]) == 10
+          assert len(result["initialization"]["earthMoonAblation"]["states"]) == 11
+          assert len(result["variants"]) == 4
+          assert [item["physicsLabel"] for item in result["variants"]] == [
+              "emb-newtonian",
+              "emb-newtonian",
+              "earth-moon-newtonian",
+              "earth-moon-gr-potential",
+          ]
 
           for variant in result["variants"]:
               assert variant["years"]["4006"]["summary"]["count"] == 24
