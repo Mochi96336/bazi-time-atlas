@@ -1,0 +1,82 @@
+name: Research N-body seasonal phase
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-nbody-seasonal-phase.yml"
+      - "scripts/research-nbody-seasonal-phase.py"
+      - "src/recurrence/berger-orbit.js"
+      - "src/recurrence/direct-seasonal-provider-validation-evidence.js"
+      - "assets/research/de441-seasonal/10026.bin"
+      - "assets/research/de441-seasonal/10026.manifest.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned N-body integrator
+        run: python -m pip install --disable-pip-version-check "rebound==5.2.1"
+
+      - name: Run 4006 / 10026 N-body phase calibration
+        run: |
+          mkdir -p tmp/nbody-seasonal-phase
+          python scripts/research-nbody-seasonal-phase.py \
+            --output tmp/nbody-seasonal-phase/result.json \
+            --steps 4,2
+
+      - name: Verify research claim boundary and numerical convergence payload
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("tmp/nbody-seasonal-phase/result.json").read_text())
+          assert result["experimentId"] == "research-nbody-seasonal-phase-v1"
+          claim = result["claimBoundary"]
+          assert claim["researchOnly"] is True
+          assert claim["absoluteSeasonalEpochPromoted"] is False
+          assert claim["year26026Evaluated"] is False
+          assert claim["civilTimeResolved"] is False
+          assert claim["productionAuthorityGranted"] is False
+
+          assert result["initialization"]["authority"] == "NASA/JPL Horizons"
+          assert result["initialization"]["earthProxy"] == "Earth-Moon barycenter (3)"
+          assert len(result["initialization"]["states"]) == 10
+          assert len(result["variants"]) == 2
+
+          for variant in result["variants"]:
+              assert variant["years"]["4006"]["summary"]["count"] == 24
+              assert variant["years"]["10026"]["summary"]["count"] == 24
+              assert variant["relativeEnergyDrift"] is not None
+
+          for year in ("4006", "10026"):
+              conv = result["convergence"][year]
+              assert conv["maxAbsHours"] >= 0
+              assert conv["rmsHours"] >= 0
+
+          print(json.dumps({
+              "fine": result["variants"][-1]["years"],
+              "convergence": result["convergence"],
+          }, indent=2))
+          PY
+
+      - name: Upload N-body research evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nbody-seasonal-phase
+          path: tmp/nbody-seasonal-phase/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 9
