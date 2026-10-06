@@ -2,8 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   LONG_RANGE_SEASONAL_PHASE_PROXY_CONTRACT,
+  SEASONAL_ORBIT_CLOCK_CONTRACT,
+  assessSeasonalOrbitClock,
   assessSeasonalPhaseProxy,
-  seasonalEventUniformTimeProxy
+  calibrateSeasonalOrbitClock,
+  seasonalEventUniformTimeProxy,
+  seasonalOrbitClockTurns,
+  unwrappedSeasonalEventMeanAnomalyTurns
 } from "../src/recurrence/long-range-seasonal-phase.js";
 
 const LI_CHUN = 315;
@@ -115,4 +120,84 @@ test("year 26026 remains proxy-only and exposes the separate Earth-rotation unce
   assert.equal(assessment.civilTimeResolved, false);
   assert.ok(Math.abs(assessment.earthRotation.deltaTPointEstimateDays - 21.701) < 0.001);
   assert.ok(Math.abs(assessment.earthRotation.oneSigmaDays - 7.128) < 0.001);
+});
+
+
+test("seasonal orbit clock follows anomaly phase continuously instead of losing full precession turns", () => {
+  const short = unwrappedSeasonalEventMeanAnomalyTurns({
+    baseYear:2026,
+    targetYear:4006,
+    longitudeDegrees:LI_CHUN
+  });
+  const deep = unwrappedSeasonalEventMeanAnomalyTurns({
+    baseYear:2026,
+    targetYear:26026,
+    longitudeDegrees:LI_CHUN
+  });
+  assert.ok(Number.isFinite(short));
+  assert.ok(Number.isFinite(deep));
+  assert.ok(Math.abs(short) < 0.5);
+  assert.ok(Math.abs(deep) > Math.abs(short));
+  assert.ok(Math.abs(seasonalOrbitClockTurns({
+    baseYear:2026,
+    targetYear:26026,
+    longitudeDegrees:LI_CHUN
+  }) - 24_000) < 2);
+});
+
+test("year-4006 reviewed 24-term evidence calibrates one common orbit clock", () => {
+  const calibration = calibrateSeasonalOrbitClock({
+    baseYear:2026,
+    calibrationYear:4006
+  });
+  assert.equal(SEASONAL_ORBIT_CLOCK_CONTRACT.productionAuthorityGranted, false);
+  assert.equal(calibration.status, "calibrated");
+  assert.equal(calibration.sampleCount, 24);
+  assert.ok(calibration.meanDaysPerOrbitTurn > 365.2);
+  assert.ok(calibration.meanDaysPerOrbitTurn < 365.3);
+  assert.ok(Number.isFinite(calibration.spreadSeconds));
+  assert.ok(Number.isFinite(calibration.rmsSpreadSeconds));
+  console.log(
+    `[seasonal-orbit-clock] 2026→4006 P = ${calibration.meanDaysPerOrbitTurn.toFixed(9)} d; `
+    + `24-term spread = ${calibration.spreadSeconds.toFixed(3)} s; RMS = ${calibration.rmsSpreadSeconds.toFixed(3)} s`
+  );
+});
+
+test("4006-calibrated orbit clock predicts the pinned year-10026 Li Chun without refitting", () => {
+  const assessment = assessSeasonalOrbitClock({
+    baseYear:2026,
+    calibrationYear:4006,
+    targetYear:10026,
+    longitudeDegrees:LI_CHUN
+  });
+  assert.equal(assessment.status, "orbit-clock-with-target-evidence");
+  assert.equal(assessment.targetBoundary.authorityClass, "source-derived-research-evidence");
+  assert.equal(assessment.validation.independentTargetYearTruth, false);
+  assert.ok(Math.abs(assessment.validation.proxyMinusTargetHours + 24.017) < 0.02);
+  assert.equal(SEASONAL_ORBIT_CLOCK_CONTRACT.outOfCalibrationResult, "rejected-at-10026");
+  assert.equal(SEASONAL_ORBIT_CLOCK_CONTRACT.validatedFor24000, false);
+  assert.equal(assessment.productionAuthorityGranted, false);
+  console.log(
+    `[seasonal-orbit-clock] 10026 LiChun prediction error = ${assessment.validation.proxyMinusTargetHours.toFixed(3)} h (rejected)`
+  );
+});
+
+test("26026 orbit-clock estimate remains research-only without absolute ephemeris truth", () => {
+  const assessment = assessSeasonalOrbitClock({
+    baseYear:2026,
+    calibrationYear:4006,
+    targetYear:26026,
+    longitudeDegrees:LI_CHUN
+  });
+  assert.equal(assessment.status, "orbit-clock-proxy-only");
+  assert.equal(assessment.targetBoundary.status, "absolute-source-unavailable");
+  assert.equal(assessment.validation, null);
+  assert.equal(assessment.blocker, "ephemeris-source-coverage");
+  assert.ok(Number.isFinite(assessment.proxy.ttJulianDay));
+  assert.equal(assessment.productionAuthorityGranted, false);
+  assert.equal(assessment.civilTimeResolved, false);
+  console.log(
+    `[seasonal-orbit-clock] 26026 LiChun proxy TT JD = ${assessment.proxy.ttJulianDay.toFixed(6)}; `
+    + `orbit turns = ${assessment.proxy.orbitTurns.toFixed(9)}`
+  );
 });

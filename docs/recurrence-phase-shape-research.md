@@ -109,6 +109,23 @@ A first research-only phase proxy was also calibrated after the Berger correctio
 
 This demonstrates the intended decomposition: corrected Berger geometry can explain the **within-year shape**, while the missing quantity is the **common seasonal phase**. The common phase is not safely represented by a linear drift extrapolation.
 
+### Fixed orbit-clock experiment: useful rejection
+
+A second proxy tested whether the missing phase could be recovered from Berger's event mean anomaly plus one calibrated anomalistic/orbit-clock period.
+
+- 2026→4006, fitting all 24 reviewed DE441 seasonal crossings gives **365.259606774 d per orbit turn**.
+- The 24 independently fitted values agree to a full spread of only **0.420 s** (RMS spread ≈ **0.122 s**), so this is an excellent local/common-clock description over that interval.
+- Freezing that clock and predicting the pinned DE441-derived year-10026 Li Chun misses by about **−24.017 h**.
+
+Therefore a single fixed anomalistic/orbit-clock period is **rejected** as the missing deep-time phase model. The failure is consistent with long-term perturbations of absolute orbital phase / mean motion that are intentionally absent from Berger's seasonal-shape approximation.
+
+Source audit also rules out a trivial replacement with the public Laskar tables:
+
+- official La2010 `a,l,k,h,q,p` files do contain mean longitude `l`, but the published La2010 series runs from the past to J2000, not into the +24 kyr future;
+- official La2004 future files reach +21 Myr but the public insolation tables contain only `e`, obliquity and moving-equinox longitude of perihelion, not absolute mean longitude.
+
+The next justified experiment is therefore a reproducible long-range numerical orbital-phase integration, calibrated inside DE441 coverage before any +24,000-year value is surfaced.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
