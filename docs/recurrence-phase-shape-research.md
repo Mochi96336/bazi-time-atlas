@@ -40,6 +40,24 @@ At +24,000 years, the corrected maximum shape residual is about 94.80 h. This sh
 
 Physically, in the current implementation the shape change is driven by the long-term change in orbital eccentricity and the longitude of perihelion relative to the seasonal frame. Obliquity is not presently used by the term-timing comparator.
 
+### Berger longitude-convention correction
+
+The first implementation of the seasonal-shape comparator applied an extra 180° opposition: it converted the requested apparent-Sun longitude to an Earth heliocentric longitude and then subtracted Berger's `OMEGVP / varpi`. Berger's parameter is already used in the moving-equinox apparent-Sun longitude convention for the insolation/time-of-season calculation, so that conversion reversed the seasonal timing shape.
+
+The corrected comparator uses:
+
+```
+true anomaly for timing = solar longitude - Berger varpi
+```
+
+The correction is externally checked against the repository's year-4006 DE441 seasonal-event evidence. Across all 24 canonical 15° crossings, after cancelling the common seasonal phase, the corrected Berger shape differs from the 2026→4006 DE441 shape by:
+
+- maximum absolute error ≈ 0.1745 h,
+- RMS error ≈ 0.0847 h,
+- full error spread ≈ 0.2332 h.
+
+This is now a permanent regression gate. A future refactor must not reintroduce the extra 180° conversion.
+
 ### Missing layer: absolute seasonal phase
 
 To test the intuition that the Gregorian calendar remains strongly related to the seasonal/zodiac frame, Research 02 still needs a separate quantity:
@@ -82,6 +100,14 @@ The near-recurrence search is therefore already doing the intended second-stage 
 ```
 exact discrete lattice -> rank by astronomical shape residual
 ```
+
+A first research-only phase proxy was also calibrated after the Berger correction. It advances the known 2026 TT event by a fixed 365.2422-day skeleton and adds the corrected Berger within-year shape change. Against absolute evidence:
+
+- year 4006: Li Chun proxy error ≈ -12.20 h; across all 24 terms the residual is almost a pure common offset (≈ -12.10 h mean, ≈ 0.23 h spread);
+- year 10026: Li Chun proxy error ≈ -33.12 h against the pinned DE441-derived Research crossing;
+- year 26026: no absolute ephemeris truth is available, so the proxy remains unvalidated and must not be shown as an absolute seasonal date.
+
+This demonstrates the intended decomposition: corrected Berger geometry can explain the **within-year shape**, while the missing quantity is the **common seasonal phase**. The common phase is not safely represented by a linear drift extrapolation.
 
 ## Implementation order
 
