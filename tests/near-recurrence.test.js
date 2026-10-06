@@ -18,6 +18,11 @@ test("future search only evaluates 24,000-year exact-discrete closures", () => {
 
 test("ranking improves on the first 24,000-year astronomical residual", () => {
   const search = rankExactDiscreteAstronomyCandidates(2026);
+  console.log(
+    `[near-recurrence-shape] first +${search.chronological[0].deltaYears} max=${search.chronological[0].maxAbsHours.toFixed(9)} h rms=${search.chronological[0].rmsHours.toFixed(9)} h; `
+    + `+792000 max=${search.chronological.find(item => item.deltaYears === 792000)?.maxAbsHours.toFixed(9)} h; `
+    + `best +${search.best?.deltaYears} max=${search.best?.maxAbsHours.toFixed(9)} h rms=${search.best?.rmsHours.toFixed(9)} h`
+  );
   assert.equal(search.candidateCount, 41);
   assert.ok(search.best);
   assert.ok(search.best.maxAbsHours < search.chronological[0].maxAbsHours);
