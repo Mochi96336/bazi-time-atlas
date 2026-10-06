@@ -188,11 +188,15 @@ function meanAnomalyAtSolarLongitude(parameters, solarLongitudeDegrees) {
   return normalizeRadians(eccentricAnomaly - e * Math.sin(eccentricAnomaly));
 }
 
-export function normalizedSolarLongitudeOffsetDays(year, solarLongitudeDegrees) {
+export function meanAnomalyAtSolarLongitudeTurns(year, solarLongitudeDegrees) {
   const parameters = bergerOrbitalParameters(year);
-  const startMeanAnomaly = meanAnomalyAtSolarLongitude(parameters, 0);
-  const targetMeanAnomaly = meanAnomalyAtSolarLongitude(parameters, solarLongitudeDegrees);
-  const phase = normalizeRadians(targetMeanAnomaly - startMeanAnomaly) / TAU;
+  return meanAnomalyAtSolarLongitude(parameters, solarLongitudeDegrees) / TAU;
+}
+
+export function normalizedSolarLongitudeOffsetDays(year, solarLongitudeDegrees) {
+  const startMeanAnomaly = meanAnomalyAtSolarLongitudeTurns(year, 0);
+  const targetMeanAnomaly = meanAnomalyAtSolarLongitudeTurns(year, solarLongitudeDegrees);
+  const phase = ((targetMeanAnomaly - startMeanAnomaly) % 1 + 1) % 1;
   return phase * BERGER_MODEL.normalizedTropicalYearDays;
 }
 
