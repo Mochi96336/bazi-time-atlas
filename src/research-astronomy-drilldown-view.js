@@ -46,7 +46,10 @@ function installAstronomyResidualDetail() {
   maxMetric.append(maxLabel, maxResidual);
   meta.appendChild(maxMetric);
 
-  [...panel.children].slice(1).forEach(node => meta.appendChild(node));
+  const phaseCard = panel.querySelector(".astronomy-phase-card");
+  [...panel.children]
+    .filter(node => node !== headline && node !== phaseCard)
+    .forEach(node => meta.appendChild(node));
   detail.append(meta, termGrid);
   panel.insertAdjacentElement("afterend", detail);
 }
