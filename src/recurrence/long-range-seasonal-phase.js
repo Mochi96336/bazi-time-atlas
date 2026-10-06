@@ -128,9 +128,14 @@ export function assessSeasonalPhaseProxy({
       evidenceStatus:targetBoundary.status,
       authorityClass:targetBoundary.authorityClass,
       targetTtJulianDay:targetBoundary.ttJulianDay,
-      errorDays,
-      errorHours:errorDays * HOURS_PER_DAY,
-      absoluteErrorHours:Math.abs(errorDays * HOURS_PER_DAY),
+      proxyMinusTargetDays:errorDays,
+      proxyMinusTargetHours:errorDays * HOURS_PER_DAY,
+      absoluteProxyErrorHours:Math.abs(errorDays * HOURS_PER_DAY),
+      // Positive phaseOffset means the observed seasonal event occurs later
+      // than the fixed-365.2422 skeleton plus Berger within-year shape.
+      phaseOffsetDays:-errorDays,
+      phaseOffsetHours:-errorDays * HOURS_PER_DAY,
+      phaseReference:"target-evidence-minus-fixed-tropical-year-plus-berger-shape",
       independentTargetYearTruth:targetBoundary.independentTargetYearTruth ?? null,
       productionAuthorityGranted:targetBoundary.productionAuthorityGranted ?? (
         targetBoundary.authorityClass === "reviewed-production-direct-event"
