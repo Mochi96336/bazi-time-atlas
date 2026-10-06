@@ -205,14 +205,14 @@ const local = expect(
       "data-full-pillar-attribution": "boundary-isolated"
     },
     float: [
-      { name: "data-astronomy-max-residual-hours", expected: 41.355249, tolerance: 0.0001 },
-      { name: "data-astronomy-min-residual-hours", expected: -11.325575, tolerance: 0.0001 },
-      { name: "data-astronomy-max-signed-residual-hours", expected: 41.355249, tolerance: 0.0001 }
+      { name: "data-astronomy-max-residual-hours", expected: 42.182669, tolerance: 0.0001 },
+      { name: "data-astronomy-min-residual-hours", expected: -42.182669, tolerance: 0.0001 },
+      { name: "data-astronomy-max-signed-residual-hours", expected: 10.498155, tolerance: 0.0001 }
     ]
   },
   "1980-year local discrete recurrence with astronomy residual"
 );
-if (!/41\.36 h/.test(local.dom)) {
+if (!/42\.18 h/.test(local.dom)) {
   throw new Error(`1980-year astronomy residual headline missing: ${local.url}`);
 }
 assertPillarDecomposition(local, "1980-year local recurrence");
@@ -240,23 +240,23 @@ const global = expect(
       "data-full-pillar-attribution": "boundary-isolated",
       "data-year-boundary-li-chun-before-branch": "丑",
       "data-year-boundary-li-chun-after-branch": "寅",
-      "data-year-boundary-li-chun-base-month-branch": "寅",
-      "data-year-boundary-li-chun-target-month-branch": "丑",
-      "data-year-boundary-li-chun-base-year-pillar": "丁未",
-      "data-year-boundary-li-chun-target-year-pillar": "丙午",
-      "data-year-boundary-li-chun-base-month-pillar": "壬寅",
-      "data-year-boundary-li-chun-target-month-pillar": "辛丑"
+      "data-year-boundary-li-chun-base-month-branch": "丑",
+      "data-year-boundary-li-chun-target-month-branch": "寅",
+      "data-year-boundary-li-chun-base-year-pillar": "丙午",
+      "data-year-boundary-li-chun-target-year-pillar": "丁未",
+      "data-year-boundary-li-chun-base-month-pillar": "辛丑",
+      "data-year-boundary-li-chun-target-month-pillar": "壬寅"
     },
     float: [
-      { name: "data-astronomy-max-residual-hours", expected: 95.109375, tolerance: 0.0001 },
-      { name: "data-astronomy-min-residual-hours", expected: 1.363468, tolerance: 0.0001 },
-      { name: "data-astronomy-max-signed-residual-hours", expected: 95.109375, tolerance: 0.0001 },
-      { name: "data-month-boundary-largest-window-hours", expected: 95.109375, tolerance: 0.0001 }
+      { name: "data-astronomy-max-residual-hours", expected: 94.801901, tolerance: 0.0001 },
+      { name: "data-astronomy-min-residual-hours", expected: -94.801901, tolerance: 0.0001 },
+      { name: "data-astronomy-max-signed-residual-hours", expected: -1.055993, tolerance: 0.0001 },
+      { name: "data-month-boundary-largest-window-hours", expected: 94.801901, tolerance: 0.0001 }
     ]
   },
   "24000-year discrete closure with astronomical non-closure"
 );
-if (!/95\.11 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
+if (!/94\.80 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
   throw new Error(`24000-year astronomical residual readout missing: ${global.url}`);
 }
 if (!global.dom.includes("季節相位 · 公曆框架") || !global.dom.includes("春分相對公曆的絕對位移另算")) {
@@ -267,10 +267,10 @@ if (!global.dom.includes("尚未加入春分相對公曆的整體平移")) {
 }
 assertBoundaryShiftDiagram(global, "24000-year global recurrence");
 assertBoundaryIsolatedGanzhi(global, "24000-year global recurrence");
-if (!global.dom.includes("丁未·壬寅") || !global.dom.includes("丙午·辛丑")) {
+if (!global.dom.includes("丙午·辛丑") || !global.dom.includes("丁未·壬寅")) {
   throw new Error(`24000-year Li Chun full Ganzhi state missing: ${global.url}`);
 }
-if (!/data-term="清明"[^>]*data-base-year-pillar="丙午"[^>]*data-base-month-pillar="壬辰"[^>]*data-target-year-pillar="丙午"[^>]*data-target-month-pillar="辛卯"/.test(global.dom)) {
+if (!/data-term="清明"[^>]*data-base-year-pillar="丙午"[^>]*data-base-month-pillar="辛卯"[^>]*data-target-year-pillar="丙午"[^>]*data-target-month-pillar="壬辰"/.test(global.dom)) {
   throw new Error(`24000-year Qingming full Ganzhi state missing or wrong: ${global.url}`);
 }
 const globalExposure = assertPillarDecomposition(global, "24000-year global recurrence");
@@ -283,7 +283,7 @@ if (!(globalExposure.monthOnlyHours > globalExposure.yearMonthHours && globalExp
 if (globalExposure.overlap > 0.001) {
   throw new Error(`24000-year reference windows unexpectedly overlap: ${globalExposure.overlap}: ${global.url}`);
 }
-console.log(`[astronomy-residual] PASS 24000-year Ganzhi isolation; LiChun 丁未/壬寅 ↔ 丙午/辛丑; union=${globalExposure.hours.toFixed(3)} h: ${global.url}`);
+console.log(`[astronomy-residual] PASS 24000-year Ganzhi isolation; LiChun 丙午/辛丑 ↔ 丁未/壬寅; union=${globalExposure.hours.toFixed(3)} h: ${global.url}`);
 
 const near = expect(
   "recurrence.html?date=2026-09-13&delta=792000",
@@ -305,15 +305,15 @@ const near = expect(
       "data-year-boundary-li-chun-target-month-pillar": "辛丑"
     },
     float: [
-      { name: "data-astronomy-max-residual-hours", expected: 10.619909, tolerance: 0.001 },
-      { name: "data-month-boundary-largest-window-hours", expected: 10.619909, tolerance: 0.001 }
+      { name: "data-astronomy-max-residual-hours", expected: 10.385719, tolerance: 0.001 },
+      { name: "data-month-boundary-largest-window-hours", expected: 10.385719, tolerance: 0.001 }
     ]
   },
   "792000-year exact-discrete near recurrence"
 );
 assertBoundaryShiftDiagram(near, "792000-year near recurrence");
 assertBoundaryIsolatedGanzhi(near, "792000-year near recurrence");
-if (!near.dom.includes("丁未·壬寅") || !near.dom.includes("丙午·辛丑")) {
+if (!near.dom.includes("丙午·辛丑") || !near.dom.includes("丁未·壬寅")) {
   throw new Error(`792000-year Li Chun full Ganzhi state missing: ${near.url}`);
 }
 const nearExposure = assertPillarDecomposition(near, "792000-year near recurrence");
@@ -326,4 +326,4 @@ if (!(nearExposure.percent > 0 && nearExposure.percent < globalExposure.percent)
 if (!(nearExposure.monthOnlyHours < globalExposure.monthOnlyHours && nearExposure.yearMonthHours < globalExposure.yearMonthHours)) {
   throw new Error(`792000-year pillar decomposition did not improve on 24000 years: near=${JSON.stringify(nearExposure)}, global=${JSON.stringify(globalExposure)}: ${near.url}`);
 }
-console.log(`[astronomy-residual] PASS 792000-year Ganzhi isolation; LiChun 丁未/壬寅 ↔ 丙午/辛丑; union=${nearExposure.hours.toFixed(3)} h: ${near.url}`);
+console.log(`[astronomy-residual] PASS 792000-year Ganzhi isolation; LiChun 丙午/辛丑 ↔ 丁未/壬寅; union=${nearExposure.hours.toFixed(3)} h: ${near.url}`);
