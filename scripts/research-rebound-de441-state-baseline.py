@@ -103,7 +103,6 @@ def add_body(sim: rebound.Simulation, name: str, position, velocity):
         vx=float(velocity[0]),
         vy=float(velocity[1]),
         vz=float(velocity[2]),
-        hash=name,
     )
 
 
@@ -128,8 +127,10 @@ def vector_angle_arcsec(a, b) -> float:
 
 
 def snapshot(sim: rebound.Simulation):
-    earth = sim.particles["earth"]
-    sun = sim.particles["sun"]
+    # BODIES order is a pinned part of this research harness:
+    # Sun index 0, Earth index 3.
+    sun = sim.particles[0]
+    earth = sim.particles[3]
     ep = np.array([earth.x, earth.y, earth.z], dtype=np.float64)
     ev = np.array([earth.vx, earth.vy, earth.vz], dtype=np.float64)
     sp = np.array([sun.x, sun.y, sun.z], dtype=np.float64)
