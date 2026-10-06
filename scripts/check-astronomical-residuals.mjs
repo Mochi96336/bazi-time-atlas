@@ -137,6 +137,9 @@ const zero = expect(
     exact: {
       "data-astronomy-model": "berger-1978",
       "data-astronomy-validity": "within-range",
+      "data-astronomy-residual-basis": "vernal-equinox-normalized-shape",
+      "data-astronomy-absolute-seasonal-phase": "identity",
+      "data-month-boundary-exposure-basis": "seasonal-shape-only",
       "data-astronomy-shape-closed": "true",
       "data-astronomy-term-count": "12",
       "data-month-boundary-exposure-validity": "within-range",
@@ -222,6 +225,9 @@ const global = expect(
     exact: {
       "data-global-closed": "true",
       "data-gregorian-closed": "true",
+      "data-astronomy-residual-basis": "vernal-equinox-normalized-shape",
+      "data-astronomy-absolute-seasonal-phase": "not-modeled",
+      "data-month-boundary-exposure-basis": "seasonal-shape-only",
       "data-year-sequence-closed": "true",
       "data-day-closed": "true",
       "data-astronomy-shape-closed": "false",
@@ -252,6 +258,12 @@ const global = expect(
 );
 if (!/95\.11 h/.test(global.dom) || !/e 0\.01669 → 0\.00340/.test(global.dom)) {
   throw new Error(`24000-year astronomical residual readout missing: ${global.url}`);
+}
+if (!global.dom.includes("季節相位 · 公曆框架") || !global.dom.includes("春分相對公曆的絕對位移另算")) {
+  throw new Error(`24000-year phase/shape separation copy missing: ${global.url}`);
+}
+if (!global.dom.includes("尚未加入春分相對公曆的整體平移")) {
+  throw new Error(`24000-year shape-only boundary warning missing: ${global.url}`);
 }
 assertBoundaryShiftDiagram(global, "24000-year global recurrence");
 assertBoundaryIsolatedGanzhi(global, "24000-year global recurrence");
