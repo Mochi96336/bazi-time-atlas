@@ -211,6 +211,7 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--primary-dt-days", type=float, default=4.0)
     parser.add_argument("--convergence-dt-days", type=float, default=2.0)
+    parser.add_argument("--gr-fine-dt-days", type=float, default=1.0)
     args = parser.parse_args()
 
     observed_md5 = file_md5(args.kernel)
@@ -233,6 +234,9 @@ def main():
         )
         gr_convergence = integrate_validation(
             kernel, args.convergence_dt_days, validation_years, physics="gr"
+        )
+        gr_fine = integrate_validation(
+            kernel, args.gr_fine_dt_days, validation_years, physics="gr"
         )
 
         # Keep the existing Newtonian deep projection only as a historical
@@ -292,8 +296,29 @@ def main():
                 ),
             })
 
+        gr_2d_by_key = {
+            (item["year"], item["label"]): item for item in gr_convergence
+        }
+        gr_fine_convergence = []
+        for item in gr_fine:
+            coarse = gr_2d_by_key[(item["year"], item["label"])]
+            gr_fine_convergence.append({
+                "year": item["year"],
+                "label": item["label"],
+                "fineDtDays": args.gr_fine_dt_days,
+                "coarseDtDays": args.convergence_dt_days,
+                "directionErrorArcsecDifference": (
+                    item["geocentricSunDirectionErrorArcsec"]
+                    - coarse["geocentricSunDirectionErrorArcsec"]
+                ),
+                "geocentricPositionErrorKmDifference": (
+                    item["geocentricSunPositionErrorKm"]
+                    - coarse["geocentricSunPositionErrorKm"]
+                ),
+            })
+
         result = {
-            "schemaVersion": 2,
+            "schemaVersion": 3,
             "researchOnly": True,
             "sourceEphemeris": "DE441",
             "initialEpochTdbJulianDay": J2000_TDB_JD,
@@ -314,11 +339,14 @@ def main():
             },
             "primaryDtDays": args.primary_dt_days,
             "convergenceDtDays": args.convergence_dt_days,
+            "grFineDtDays": args.gr_fine_dt_days,
             "primary": primary,
             "convergence": convergence,
             "convergenceDelta": convergence_delta,
             "grPrimary": gr_primary,
             "grConvergence": gr_convergence,
+            "grFine": gr_fine,
+            "grFineConvergence": gr_fine_convergence,
             "grImprovement": gr_improvement,
             "summary": {
                 "primaryMaxDirectionErrorArcsec": max_metric(primary, "geocentricSunDirectionErrorArcsec"),
@@ -327,8 +355,10 @@ def main():
                 "convergenceMaxGeocentricPositionErrorKm": max_metric(convergence, "geocentricSunPositionErrorKm"),
                 "grPrimaryMaxDirectionErrorArcsec": max_metric(gr_primary, "geocentricSunDirectionErrorArcsec"),
                 "grConvergenceMaxDirectionErrorArcsec": max_metric(gr_convergence, "geocentricSunDirectionErrorArcsec"),
+                "grFineMaxDirectionErrorArcsec": max_metric(gr_fine, "geocentricSunDirectionErrorArcsec"),
                 "grPrimaryMaxGeocentricPositionErrorKm": max_metric(gr_primary, "geocentricSunPositionErrorKm"),
                 "grConvergenceMaxGeocentricPositionErrorKm": max_metric(gr_convergence, "geocentricSunPositionErrorKm"),
+                "grFineMaxGeocentricPositionErrorKm": max_metric(gr_fine, "geocentricSunPositionErrorKm"),
             },
             "deepProjection26026": {
                 "status": "unvalidated-nbody-state-only",
@@ -353,6 +383,7 @@ def main():
         "reboundxVersion": result["reboundxVersion"],
         "primaryDtDays": result["primaryDtDays"],
         "convergenceDtDays": result["convergenceDtDays"],
+        "grFineDtDays": result["grFineDtDays"],
         **result["summary"],
         "year26026Status": result["deepProjection26026"]["status"],
     }, indent=2))
