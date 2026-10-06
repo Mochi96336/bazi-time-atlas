@@ -126,6 +126,18 @@ Source audit also rules out a trivial replacement with the public Laskar tables:
 
 The next justified experiment is therefore a reproducible long-range numerical orbital-phase integration, calibrated inside DE441 coverage before any +24,000-year value is surfaced.
 
+### First N-body state baseline
+
+A research-only REBOUND baseline now tests that path directly. It starts from official DE441 J2000 ICRF/TDB states, integrates the Sun, major-planet barycentres plus separate Earth/Moon, and compares Earth/Sun states back to DE441 while DE441 truth still exists.
+
+The first intentionally incomplete model (WHFast, 2-day convergence run; no asteroids, general relativity, or solar mass loss) gives approximately:
+
+- year 4006: geocentric-Sun direction error ≈ 169–177 arcsec, roughly 1.1 h of solar-longitude timing;
+- year 10026: ≈ 648–672 arcsec, roughly 4.3–4.5 h;
+- maximum geocentric Earth–Sun position error by year 10026 ≈ 489,000 km.
+
+The 4-day and 2-day integrations stay much closer to each other than either stays to DE441, so the dominant remaining error is already **physical-model incompleteness**, not simply the WHFast timestep. The year-26026 integrated state remains unvalidated and must not be promoted to an absolute seasonal phase.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
