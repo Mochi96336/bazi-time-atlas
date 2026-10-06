@@ -58,6 +58,17 @@ boundary_i = phase + shape_i
 
 The existing month-boundary exposure is currently based on `shape_i` only and must continue to be labelled as such until absolute seasonal phase is implemented.
 
+### Existing absolute-epoch work and its hard coverage limit
+
+The repository already contains a separate absolute seasonal-epoch authority / civil-projection chain. It must be reused rather than replaced, but it does **not** currently reach the +24,000-year target:
+
+- year 2026: bounded ShouXing direct seasonal event model resolves an astronomical TT epoch;
+- year 4006: reviewed DE441 direct-event runtime resolves the seasonal event;
+- year 10026: DE441 source coverage exists and Research has pinned source-derived evidence, but canonical production runtime / independent target-year truth remain intentionally unpromoted;
+- year 26026: the authority returns `absolute-source-unavailable` with blocker `ephemeris-source-coverage`; the nearest qualified DE441 boundary is year 17191.
+
+Therefore Research 02 must not manufacture an exact Gregorian-frame phase for +24,000 from the current absolute-epoch stack. The next long-term phase layer needs an explicitly qualified long-range approximation or another source, with uncertainty / claim boundaries kept separate from the existing absolute authority.
+
 ## Useful evidence already present
 
 For base year 2026:
