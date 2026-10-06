@@ -50,7 +50,7 @@ function setSeasonalPhaseStatus({ identity = false } = {}) {
   const card = document.querySelector(".astronomy-phase-card");
   if (identity) {
     setText("astronomy-phase-status", "0 h · 同一狀態");
-    setText("astronomy-phase-note", "Δ=0 不需要額外 seasonal-phase 模型。");
+    setText("astronomy-phase-note", "Δ=0 不需要額外季節相位模型。");
     if (card) card.dataset.phaseStatus = "identity";
     instrument.dataset.astronomyAbsoluteSeasonalPhase = "identity";
     return;
@@ -92,7 +92,7 @@ function ensureMonthBoundaryPanel() {
     <div class="month-boundary-copy">
       <div class="eyebrow">年／月柱邊界</div>
       <h3>季節形狀能指出哪些交界可能分歧。</h3>
-      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。這裡只量「季節形狀」造成的窗口，尚未加入春分相對公曆的整體平移，因此不是完整 civil-calendar 交節誤差。只有比較相位落在這些區間內，兩個年份才會站在不同的月支 sector；11 個節只影響月柱，立春的 丑→寅 同時也是本站採用的年柱切換邊界。比例仍是幾何相位窗口，不是人口上的「八字錯誤率」。</p>
+      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。這裡只量「季節形狀」造成的窗口，尚未加入春分相對公曆的整體平移，因此不是公曆框架下的完整交節誤差。只有比較相位落在這些區間內，兩個年份才會站在不同的月支 sector；11 個節只影響月柱，立春的 丑→寅 同時也是本站採用的年柱切換邊界。比例仍是幾何相位窗口，不是人口上的「八字錯誤率」。</p>
     </div>
     <div class="month-boundary-stat">
       <span>形狀窗口聯集</span>
