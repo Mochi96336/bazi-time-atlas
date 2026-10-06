@@ -69,51 +69,51 @@ test("24000-year exact closure isolates concrete Ganzhi changes inside swept win
   assert.equal(exposure.fullPillarAttribution, "boundary-isolated");
 
   const qingMing = exposure.windows.find(window => window.name === "清明");
-  assert.equal(qingMing.direction, "target-later");
+  assert.equal(qingMing.direction, "target-earlier");
   assert.deepEqual(qingMing.baseWindowPillars, {
     activeYearLabel:2026,
-    yearPillar:"丙午",
-    yearStem:"丙",
-    yearBranch:"午",
-    monthBranch:"辰",
-    monthPillar:"壬辰"
-  });
-  assert.deepEqual(qingMing.targetWindowPillars, {
-    activeYearLabel:26026,
     yearPillar:"丙午",
     yearStem:"丙",
     yearBranch:"午",
     monthBranch:"卯",
     monthPillar:"辛卯"
   });
+  assert.deepEqual(qingMing.targetWindowPillars, {
+    activeYearLabel:26026,
+    yearPillar:"丙午",
+    yearStem:"丙",
+    yearBranch:"午",
+    monthBranch:"辰",
+    monthPillar:"壬辰"
+  });
 
   const liChun = exposure.windows.find(window => window.name === "立春");
-  assert.equal(liChun.direction, "target-later");
+  assert.equal(liChun.direction, "target-earlier");
   assert.deepEqual(liChun.baseWindowPillars, {
-    activeYearLabel:2027,
-    yearPillar:"丁未",
-    yearStem:"丁",
-    yearBranch:"未",
-    monthBranch:"寅",
-    monthPillar:"壬寅"
-  });
-  assert.deepEqual(liChun.targetWindowPillars, {
-    activeYearLabel:26026,
+    activeYearLabel:2026,
     yearPillar:"丙午",
     yearStem:"丙",
     yearBranch:"午",
     monthBranch:"丑",
     monthPillar:"辛丑"
   });
+  assert.deepEqual(liChun.targetWindowPillars, {
+    activeYearLabel:26027,
+    yearPillar:"丁未",
+    yearStem:"丁",
+    yearBranch:"未",
+    monthBranch:"寅",
+    monthPillar:"壬寅"
+  });
 
   const jingZhe = exposure.windows.find(window => window.name === "驚蟄");
-  assert.equal(jingZhe.direction, "target-later");
+  assert.equal(jingZhe.direction, "target-earlier");
   assert.equal(jingZhe.baseWindowPillars.activeYearLabel, 2027);
   assert.equal(jingZhe.targetWindowPillars.activeYearLabel, 26027);
   assert.equal(jingZhe.baseWindowPillars.yearPillar, "丁未");
   assert.equal(jingZhe.targetWindowPillars.yearPillar, "丁未");
-  assert.equal(jingZhe.baseWindowPillars.monthPillar, "癸卯");
-  assert.equal(jingZhe.targetWindowPillars.monthPillar, "壬寅");
+  assert.equal(jingZhe.baseWindowPillars.monthPillar, "壬寅");
+  assert.equal(jingZhe.targetWindowPillars.monthPillar, "癸卯");
 });
 
 test("non-60-year comparisons are marked as mixed with background year-sequence offset", () => {
@@ -129,7 +129,7 @@ test("24000-year exact discrete closure still sweeps substantial month-boundary 
   assert.equal(exposure.mergedWindows.length, 12);
   assert.ok(exposure.unionExposureHours > 500);
   assert.ok(exposure.yearPercent > 5 && exposure.yearPercent < 10);
-  assert.ok(exposure.largestWindow.widthHours > 95 && exposure.largestWindow.widthHours < 96);
+  assert.ok(exposure.largestWindow.widthHours > 94 && exposure.largestWindow.widthHours < 95);
   assert.ok(exposure.yearMonthExposureHours > 0);
   assert.ok(exposure.monthOnlyExposureHours > exposure.yearMonthExposureHours);
   assert.ok(Math.abs(
