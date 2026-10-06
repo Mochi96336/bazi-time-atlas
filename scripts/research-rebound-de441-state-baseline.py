@@ -108,10 +108,17 @@ def add_body(sim: rebound.Simulation, name: str, position, velocity):
     )
 
 
-def make_simulation(kernel: SPK, dt_days: float, physics: str = "newtonian"):
+def make_simulation(
+    kernel: SPK,
+    dt_days: float,
+    physics: str = "newtonian",
+    integrator: str = "whfast"
+):
     sim = rebound.Simulation()
     sim.units = ("AU", "day", "Msun")
-    sim.integrator = "whfast"
+    if integrator not in ("whfast", "ias15"):
+        raise ValueError(f"unsupported integrator: {integrator}")
+    sim.integrator = integrator
     sim.dt = dt_days
     for name, route in BODIES:
         p, v = state_from_route(kernel, J2000_TDB_JD, route)
@@ -182,9 +189,12 @@ def integrate_validation(
     kernel: SPK,
     dt_days: float,
     years: tuple[int, ...],
-    physics: str = "newtonian"
+    physics: str = "newtonian",
+    integrator: str = "whfast"
 ):
-    sim, rebx = make_simulation(kernel, dt_days, physics=physics)
+    sim, rebx = make_simulation(
+        kernel, dt_days, physics=physics, integrator=integrator
+    )
     # Keep the Extras object alive for the full integration.
     _ = rebx
     samples = []
@@ -241,6 +251,13 @@ def main():
         )
         gr_ultrafine = integrate_validation(
             kernel, args.gr_ultrafine_dt_days, validation_years, physics="gr"
+        )
+        gr_ias15 = integrate_validation(
+            kernel,
+            args.gr_ultrafine_dt_days,
+            validation_years,
+            physics="gr",
+            integrator="ias15"
         )
 
         # Keep the existing Newtonian deep projection only as a historical
@@ -342,8 +359,27 @@ def main():
                 ),
             })
 
+        gr_ultrafine_by_key = {
+            (item["year"], item["label"]): item for item in gr_ultrafine
+        }
+        gr_ias15_comparison = []
+        for item in gr_ias15:
+            whfast = gr_ultrafine_by_key[(item["year"], item["label"])]
+            gr_ias15_comparison.append({
+                "year": item["year"],
+                "label": item["label"],
+                "ias15DirectionErrorArcsec": item["geocentricSunDirectionErrorArcsec"],
+                "whfastHalfDayDirectionErrorArcsec": whfast["geocentricSunDirectionErrorArcsec"],
+                "ias15MinusWhfastDirectionErrorArcsec": (
+                    item["geocentricSunDirectionErrorArcsec"]
+                    - whfast["geocentricSunDirectionErrorArcsec"]
+                ),
+                "ias15GeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
+                "whfastHalfDayGeocentricPositionErrorKm": whfast["geocentricSunPositionErrorKm"],
+            })
+
         result = {
-            "schemaVersion": 4,
+            "schemaVersion": 5,
             "researchOnly": True,
             "sourceEphemeris": "DE441",
             "initialEpochTdbJulianDay": J2000_TDB_JD,
@@ -375,6 +411,8 @@ def main():
             "grFineConvergence": gr_fine_convergence,
             "grUltrafine": gr_ultrafine,
             "grUltrafineConvergence": gr_ultrafine_convergence,
+            "grIas15": gr_ias15,
+            "grIas15Comparison": gr_ias15_comparison,
             "grImprovement": gr_improvement,
             "summary": {
                 "primaryMaxDirectionErrorArcsec": max_metric(primary, "geocentricSunDirectionErrorArcsec"),
@@ -385,10 +423,12 @@ def main():
                 "grConvergenceMaxDirectionErrorArcsec": max_metric(gr_convergence, "geocentricSunDirectionErrorArcsec"),
                 "grFineMaxDirectionErrorArcsec": max_metric(gr_fine, "geocentricSunDirectionErrorArcsec"),
                 "grUltrafineMaxDirectionErrorArcsec": max_metric(gr_ultrafine, "geocentricSunDirectionErrorArcsec"),
+                "grIas15MaxDirectionErrorArcsec": max_metric(gr_ias15, "geocentricSunDirectionErrorArcsec"),
                 "grPrimaryMaxGeocentricPositionErrorKm": max_metric(gr_primary, "geocentricSunPositionErrorKm"),
                 "grConvergenceMaxGeocentricPositionErrorKm": max_metric(gr_convergence, "geocentricSunPositionErrorKm"),
                 "grFineMaxGeocentricPositionErrorKm": max_metric(gr_fine, "geocentricSunPositionErrorKm"),
                 "grUltrafineMaxGeocentricPositionErrorKm": max_metric(gr_ultrafine, "geocentricSunPositionErrorKm"),
+                "grIas15MaxGeocentricPositionErrorKm": max_metric(gr_ias15, "geocentricSunPositionErrorKm"),
             },
             "deepProjection26026": {
                 "status": "unvalidated-nbody-state-only",
