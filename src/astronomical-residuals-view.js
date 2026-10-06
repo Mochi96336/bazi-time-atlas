@@ -307,6 +307,7 @@ function renderMonthBoundaryExposure(result) {
   });
 
   instrument.dataset.monthBoundaryExposureValidity = "within-range";
+  instrument.dataset.monthBoundaryExposureBasis = "seasonal-shape-only";
   instrument.dataset.monthBoundaryExposureHours = exposure.unionExposureHours.toFixed(6);
   instrument.dataset.monthBoundaryExposurePercent = exposure.yearPercent.toFixed(6);
   instrument.dataset.monthBoundaryRawSweepHours = exposure.rawSweepHours.toFixed(6);
@@ -350,6 +351,7 @@ function renderMonthBoundaryUnavailable() {
   setText("pillar-impact-year-month-percent", "—");
   setText("full-pillar-attribution-note", "—");
   instrument.dataset.monthBoundaryExposureValidity = "outside-range";
+  instrument.dataset.monthBoundaryExposureBasis = "seasonal-shape-only";
   delete instrument.dataset.monthBoundaryExposureHours;
   delete instrument.dataset.monthBoundaryExposurePercent;
   delete instrument.dataset.monthBoundaryRawSweepHours;
