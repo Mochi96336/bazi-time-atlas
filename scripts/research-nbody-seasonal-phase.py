@@ -323,8 +323,8 @@ def run_variant(base_simulation, step_days, all_events, eccentricity_terms, prec
     simulation = base_simulation.copy()
     simulation.integrator = "whfast"
     simulation.dt = step_days
-    simulation.ri_whfast.safe_mode = 0
-    simulation.ri_whfast.corrector = 11
+    simulation.integrator.safe_mode = False
+    simulation.integrator.corrector = 11
 
     initial_energy = simulation.energy()
     evaluated = []
