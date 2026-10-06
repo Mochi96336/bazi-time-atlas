@@ -106,7 +106,7 @@ def add_body(sim: rebound.Simulation, name: str, position, velocity):
     )
 
 
-def make_simulation(kernel: SPK, dt_days: float) -> rebound.Simulation:
+def make_simulation(kernel: SPK, dt_days: float, relativity: str = "none"):
     sim = rebound.Simulation()
     sim.units = ("AU", "day", "Msun")
     sim.integrator = "whfast"
@@ -114,8 +114,21 @@ def make_simulation(kernel: SPK, dt_days: float) -> rebound.Simulation:
     for name, route in BODIES:
         p, v = state_from_route(kernel, J2000_TDB_JD, route)
         add_body(sim, name, p, v)
+
+    rebx = None
+    if relativity != "none":
+        if relativity not in ("gr", "gr_full"):
+            raise ValueError("relativity must be none, gr, or gr_full")
+        import reboundx
+        rebx = reboundx.Extras(sim)
+        force = rebx.load_force(relativity)
+        rebx.add_force(force)
+        # Speed of light in the simulation's AU/day units.
+        force.params["c"] = 299_792.458 * SECONDS_PER_DAY / AU_KM
+
     # Keep the exact DE441 barycentric initial frame.  Do not move_to_com().
-    return sim
+    # Return REBOUNDx Extras as well so its lifetime covers the integration.
+    return sim, rebx
 
 
 def vector_angle_arcsec(a, b) -> float:
@@ -164,8 +177,13 @@ def compare_at(kernel: SPK, sim: rebound.Simulation, jd: float):
     }
 
 
-def integrate_validation(kernel: SPK, dt_days: float, years: tuple[int, ...]):
-    sim = make_simulation(kernel, dt_days)
+def integrate_validation(
+    kernel: SPK,
+    dt_days: float,
+    years: tuple[int, ...],
+    relativity: str = "none",
+):
+    sim, rebx = make_simulation(kernel, dt_days, relativity)
     samples = []
     for year in years:
         for month, day, label in (
@@ -190,6 +208,12 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--primary-dt-days", type=float, default=4.0)
     parser.add_argument("--convergence-dt-days", type=float, default=2.0)
+    parser.add_argument(
+        "--relativity",
+        choices=("none", "gr", "gr_full"),
+        default="none",
+        help="Optional REBOUNDx first-order post-Newtonian model.",
+    )
     args = parser.parse_args()
 
     observed_md5 = file_md5(args.kernel)
@@ -201,11 +225,25 @@ def main():
     kernel = SPK.open(str(args.kernel))
     try:
         validation_years = (4006, 10026)
-        primary = integrate_validation(kernel, args.primary_dt_days, validation_years)
-        convergence = integrate_validation(kernel, args.convergence_dt_days, validation_years)
+        primary = integrate_validation(
+            kernel,
+            args.primary_dt_days,
+            validation_years,
+            args.relativity,
+        )
+        convergence = integrate_validation(
+            kernel,
+            args.convergence_dt_days,
+            validation_years,
+            args.relativity,
+        )
 
         # N-body-only deep projection.  There is no DE441 truth at year 26026.
-        deep = make_simulation(kernel, args.convergence_dt_days)
+        deep, deep_rebx = make_simulation(
+            kernel,
+            args.convergence_dt_days,
+            args.relativity,
+        )
         deep_jd = gregorian_julian_day(26026, 3, 20.5)
         deep.integrate(deep_jd - J2000_TDB_JD, exact_finish_time=1)
         dep, dev, dsp, dsv = snapshot(deep)
@@ -241,13 +279,15 @@ def main():
                 "majorPlanets": True,
                 "earthMoonSeparated": True,
                 "asteroidsIncluded": False,
-                "generalRelativityIncluded": False,
+                "generalRelativityIncluded": args.relativity != "none",
+                "relativityModel": args.relativity,
                 "solarMassLossIncluded": False,
                 "initialStateFrame": "DE441 ICRF barycentric",
                 "initialStateTimeScale": "TDB",
             },
             "primaryDtDays": args.primary_dt_days,
             "convergenceDtDays": args.convergence_dt_days,
+            "relativity": args.relativity,
             "primary": primary,
             "convergence": convergence,
             "convergenceDelta": convergence_delta,
@@ -279,6 +319,7 @@ def main():
         "reboundVersion": result["reboundVersion"],
         "primaryDtDays": result["primaryDtDays"],
         "convergenceDtDays": result["convergenceDtDays"],
+        "relativity": result["relativity"],
         **result["summary"],
         "year26026Status": result["deepProjection26026"]["status"],
     }, indent=2))
