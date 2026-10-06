@@ -73,6 +73,12 @@ jobs:
                   f"geo-pos={sample['geocentricSunPositionErrorKm']:.1f} km, "
                   f"geo-v={sample['geocentricSunVelocityErrorMps']:.4f} m/s"
               )
+          for sample in r["convergenceDelta"]:
+              print(
+                  f"[rebound-convergence] {sample['year']} {sample['label']}: "
+                  f"2d-minus-4d direction-error={sample['directionErrorArcsecDifference']:.3f} arcsec, "
+                  f"geo-pos-error={sample['geocentricPositionErrorKmDifference']:.1f} km"
+              )
           PY
 
       - name: Remove large source kernel
