@@ -5,6 +5,7 @@ import {
   futureExactDiscreteAstronomyCandidates,
   rankExactDiscreteAstronomyCandidates
 } from "../src/recurrence/near-recurrence.js";
+import { solarTermShapeResiduals } from "../src/recurrence/berger-orbit.js";
 
 test("future search only evaluates 24,000-year exact-discrete closures", () => {
   const candidates = futureExactDiscreteAstronomyCandidates(2026);
@@ -22,6 +23,11 @@ test("ranking improves on the first 24,000-year astronomical residual", () => {
     `[near-recurrence-shape] first +${search.chronological[0].deltaYears} max=${search.chronological[0].maxAbsHours.toFixed(9)} h rms=${search.chronological[0].rmsHours.toFixed(9)} h; `
     + `+792000 max=${search.chronological.find(item => item.deltaYears === 792000)?.maxAbsHours.toFixed(9)} h; `
     + `best +${search.best?.deltaYears} max=${search.best?.maxAbsHours.toFixed(9)} h rms=${search.best?.rmsHours.toFixed(9)} h`
+  );
+  const nearResidual = solarTermShapeResiduals(2026, 794026);
+  console.log(
+    "[near-recurrence-shape] +792000 terms "
+    + nearResidual.terms.map(term => `${term.name}=${term.residualHours.toFixed(9)}`).join(" ")
   );
   assert.equal(search.candidateCount, 41);
   assert.ok(search.best);
