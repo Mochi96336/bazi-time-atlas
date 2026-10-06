@@ -81,7 +81,7 @@ jobs:
               )
           PY
 
-      - name: Run GR A-B side experiment
+      - name: Run GR and full-PN side experiments
         run: |
           python scripts/research-rebound-de441-state-baseline.py \
             --kernel tmp/rebound-de441/de441_part-2.bsp \
@@ -89,33 +89,48 @@ jobs:
             --primary-dt-days 2 \
             --convergence-dt-days 2 \
             --relativity gr
+          python scripts/research-rebound-de441-state-baseline.py \
+            --kernel tmp/rebound-de441/de441_part-2.bsp \
+            --output tmp/rebound-de441/gr-full.json \
+            --primary-dt-days 2 \
+            --convergence-dt-days 2 \
+            --relativity gr_full
           python - <<'PY'
           import json
           from pathlib import Path
 
           n = json.loads(Path("tmp/rebound-de441/result.json").read_text())
           g = json.loads(Path("tmp/rebound-de441/gr.json").read_text())
+          gf = json.loads(Path("tmp/rebound-de441/gr-full.json").read_text())
           assert n["relativity"] == "none"
           assert g["relativity"] == "gr"
-          n_by = {(x["year"], x["label"]): x for x in n["convergence"]}
-          g_by = {(x["year"], x["label"]): x for x in g["convergence"]}
+          assert gf["relativity"] == "gr_full"
+          by = {
+              "Newtonian": {(x["year"], x["label"]): x for x in n["convergence"]},
+              "GR": {(x["year"], x["label"]): x for x in g["convergence"]},
+              "GR-full": {(x["year"], x["label"]): x for x in gf["convergence"]},
+          }
 
-          for key in sorted(n_by):
-              before = n_by[key]["geocentricSunDirectionErrorArcsec"]
-              after = g_by[key]["geocentricSunDirectionErrorArcsec"]
+          for key in sorted(by["Newtonian"]):
+              nv = by["Newtonian"][key]["geocentricSunDirectionErrorArcsec"]
+              gv = by["GR"][key]["geocentricSunDirectionErrorArcsec"]
+              fv = by["GR-full"][key]["geocentricSunDirectionErrorArcsec"]
               print(
                   f"[rebound-gr] {key[0]} {key[1]}: "
-                  f"Newtonian={before:.3f} arcsec, GR={after:.3f} arcsec, "
-                  f"delta={after-before:+.3f} arcsec"
+                  f"Newtonian={nv:.3f}, GR={gv:.3f}, GR-full={fv:.3f} arcsec; "
+                  f"GR-full-minus-GR={fv-gv:+.3f}"
               )
           for year in (4006, 10026):
-              keys = [key for key in n_by if key[0] == year]
-              before = sum(n_by[key]["geocentricSunDirectionErrorArcsec"] for key in keys) / len(keys)
-              after = sum(g_by[key]["geocentricSunDirectionErrorArcsec"] for key in keys) / len(keys)
+              keys = [key for key in by["Newtonian"] if key[0] == year]
+              means = {
+                  name: sum(table[key]["geocentricSunDirectionErrorArcsec"] for key in keys) / len(keys)
+                  for name, table in by.items()
+              }
               print(
                   f"[rebound-gr-summary] {year}: "
-                  f"mean direction error {before:.3f} -> {after:.3f} arcsec "
-                  f"({(after/before-1)*100:+.2f}%)"
+                  f"Newtonian={means['Newtonian']:.3f}, "
+                  f"GR={means['GR']:.3f}, GR-full={means['GR-full']:.3f} arcsec; "
+                  f"GR-full vs GR={(means['GR-full']/means['GR']-1)*100:+.2f}%"
               )
           PY
 
@@ -131,5 +146,6 @@ jobs:
           path: |
             tmp/rebound-de441/result.json
             tmp/rebound-de441/gr.json
+            tmp/rebound-de441/gr-full.json
           if-no-files-found: error
           retention-days: 7
