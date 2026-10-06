@@ -42,6 +42,39 @@ test("proxy can be calibrated against year-4006 reviewed DE441 evidence", () => 
   console.log(`[seasonal-phase-proxy] 4006 LiChun error = ${assessment.validation.errorHours.toFixed(3)} h`);
 });
 
+test("year-4006 calibration separates common seasonal phase from within-year shape", () => {
+  const errors = [];
+  for (let longitudeDegrees = 0; longitudeDegrees < 360; longitudeDegrees += 15) {
+    const assessment = assessSeasonalPhaseProxy({
+      baseYear:2026,
+      targetYear:4006,
+      longitudeDegrees
+    });
+    assert.equal(assessment.status, "proxy-with-target-evidence", `${longitudeDegrees}°`);
+    assert.equal(assessment.targetBoundary.authorityClass, "reviewed-production-direct-event", `${longitudeDegrees}°`);
+    errors.push(assessment.validation.errorHours);
+  }
+
+  const meanHours = errors.reduce((sum, value) => sum + value, 0) / errors.length;
+  const minHours = Math.min(...errors);
+  const maxHours = Math.max(...errors);
+  const spreadHours = maxHours - minHours;
+  const rmsAroundMeanHours = Math.sqrt(
+    errors.reduce((sum, value) => sum + (value - meanHours) ** 2, 0) / errors.length
+  );
+
+  assert.equal(errors.length, 24);
+  assert.ok(Number.isFinite(meanHours));
+  assert.ok(Number.isFinite(spreadHours));
+  assert.ok(Number.isFinite(rmsAroundMeanHours));
+
+  console.log(
+    `[seasonal-phase-proxy] 4006 all-terms mean = ${meanHours.toFixed(3)} h; `
+    + `range = ${minHours.toFixed(3)}..${maxHours.toFixed(3)} h; `
+    + `spread = ${spreadHours.toFixed(3)} h; shape-RMS-around-mean = ${rmsAroundMeanHours.toFixed(3)} h`
+  );
+});
+
 test("proxy can be stress-tested against pinned year-10026 DE441-derived evidence without promoting it", () => {
   const assessment = assessSeasonalPhaseProxy({
     baseYear:2026,
