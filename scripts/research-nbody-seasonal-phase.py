@@ -30,6 +30,7 @@ import struct
 from pathlib import Path
 
 import rebound
+import reboundx
 
 J2000_JD = 2_451_545.0
 TAU = math.tau
@@ -39,9 +40,10 @@ SOLAR_SCHWARZSCHILD_RADIUS_AU = 1.97412574336e-8
 PINNED_IERS_DPSI_ARCSEC = -0.113478
 PINNED_IERS_DEPS_ARCSEC = -0.006944
 HORIZONS_EPOCH = "JD2451545.0"
-BODY_IDS = ("10", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+BODY_IDS_EMB = ("10", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+BODY_IDS_EARTH_MOON = ("10", "1", "2", "399", "301", "4", "5", "6", "7", "8", "9")
 SUN_INDEX = 0
-EMB_INDEX = 3
+EARTH_PROXY_INDEX = 3
 
 TERM_NAMES = (
     "春分", "清明", "穀雨", "立夏", "小滿", "芒種",
@@ -168,16 +170,16 @@ def initial_state_digest(simulation):
     return rows, hashlib.sha256(encoded).hexdigest()
 
 
-def make_base_simulation():
+def make_base_simulation(body_ids):
     rebound.horizons.INITDATE = None
     simulation = rebound.Simulation()
     simulation.units = ("AU", "day", "Msun")
 
-    for body_id in BODY_IDS:
+    for body_id in body_ids:
         simulation.add(body_id, date=HORIZONS_EPOCH, plane="frame")
 
-    if simulation.N != len(BODY_IDS):
-        raise RuntimeError(f"expected {len(BODY_IDS)} bodies, got {simulation.N}")
+    if simulation.N != len(body_ids):
+        raise RuntimeError(f"expected {len(body_ids)} bodies, got {simulation.N}")
 
     simulation.move_to_com()
     rows, digest = initial_state_digest(simulation)
@@ -186,7 +188,7 @@ def make_base_simulation():
 
 def geocentric_sun_apparent_icrf_and_rate(simulation):
     sun = simulation.particles[SUN_INDEX]
-    earth = simulation.particles[EMB_INDEX]
+    earth = simulation.particles[EARTH_PROXY_INDEX]
 
     earth_position = (earth.x, earth.y, earth.z)
     earth_velocity = (earth.vx, earth.vy, earth.vz)
@@ -333,14 +335,35 @@ def summarize(events):
     }
 
 
-def run_variant(base_simulation, step_days, all_events, frame_probe):
+def run_variant(
+    base_simulation,
+    step_days,
+    all_events,
+    frame_probe,
+    physics_label,
+    use_gr_potential=False,
+):
     simulation = base_simulation.copy()
     simulation.integrator = "whfast"
     simulation.dt = step_days
     simulation.integrator.safe_mode = False
     simulation.integrator.corrector = 11
 
-    initial_energy = simulation.energy()
+    rebx = None
+    gr_force = None
+    if use_gr_potential:
+        rebx = reboundx.Extras(simulation)
+        gr_force = rebx.load_force("gr_potential")
+        rebx.add_force(gr_force)
+        gr_force.params["c"] = SPEED_OF_LIGHT_AU_PER_DAY
+
+    def total_energy():
+        classical = simulation.energy()
+        if rebx is None:
+            return classical
+        return classical + rebx.gr_potential_potential(gr_force)
+
+    initial_energy = total_energy()
     evaluated = []
     for event in all_events:
         evaluated.append(
@@ -350,7 +373,7 @@ def run_variant(base_simulation, step_days, all_events, frame_probe):
                 frame_probe,
             )
         )
-    final_energy = simulation.energy()
+    final_energy = total_energy()
 
     by_year = {}
     for year in (4006, 10026):
@@ -361,10 +384,12 @@ def run_variant(base_simulation, step_days, all_events, frame_probe):
         }
 
     return {
+        "physicsLabel": physics_label,
         "integrator": "WHFast",
         "stepDays": step_days,
         "safeMode": False,
         "corrector": 11,
+        "grPotential": use_gr_potential,
         "initialEnergy": initial_energy,
         "finalEnergy": final_energy,
         "relativeEnergyDrift": (
@@ -428,23 +453,48 @@ def main():
         key=lambda event: event["ttJulianDay"],
     )
 
-    base_simulation, initial_states, initial_state_sha256 = make_base_simulation()
+    emb_simulation, emb_initial_states, emb_initial_state_sha256 = make_base_simulation(
+        BODY_IDS_EMB
+    )
+    earth_moon_simulation, earth_moon_initial_states, earth_moon_initial_state_sha256 = (
+        make_base_simulation(BODY_IDS_EARTH_MOON)
+    )
     steps = [float(item) for item in args.steps.split(",") if item.strip()]
     if len(steps) < 2:
         raise RuntimeError("at least two integration steps are required")
 
-    variants = [
+    baseline_variants = [
         run_variant(
-            base_simulation,
+            emb_simulation,
             step_days,
             all_events,
             args.frame_probe,
+            physics_label="emb-newtonian",
         )
         for step_days in steps
     ]
-    coarse = variants[-2]
-    fine = variants[-1]
+    coarse = baseline_variants[-2]
+    fine = baseline_variants[-1]
     convergence = convergence_summary(coarse, fine)
+
+    ablations = [
+        run_variant(
+            earth_moon_simulation,
+            steps[-1],
+            all_events,
+            args.frame_probe,
+            physics_label="earth-moon-newtonian",
+        ),
+        run_variant(
+            earth_moon_simulation,
+            steps[-1],
+            all_events,
+            args.frame_probe,
+            physics_label="earth-moon-gr-potential",
+            use_gr_potential=True,
+        ),
+    ]
+    variants = [*baseline_variants, *ablations]
 
     result = {
         "schemaVersion": 1,
@@ -462,18 +512,27 @@ def main():
             "referencePlane": "ICRF / J2000 equatorial frame",
             "referenceCenter": "Solar System barycenter",
             "vectorCorrections": "NONE",
-            "bodyIds": list(BODY_IDS),
-            "earthProxy": "Earth-Moon barycenter (3)",
-            "initialStateSha256": initial_state_sha256,
-            "states": initial_states,
+            "embBaseline": {
+                "bodyIds": list(BODY_IDS_EMB),
+                "earthProxy": "Earth-Moon barycenter (3)",
+                "initialStateSha256": emb_initial_state_sha256,
+                "states": emb_initial_states,
+            },
+            "earthMoonAblation": {
+                "bodyIds": list(BODY_IDS_EARTH_MOON),
+                "earthProxy": "Earth center (399) with Moon (301) integrated separately",
+                "initialStateSha256": earth_moon_initial_state_sha256,
+                "states": earth_moon_initial_states,
+            },
         },
         "dynamics": {
             "package": "rebound",
             "version": rebound.__version__,
-            "gravity": "Newtonian point masses",
-            "relativity": False,
+            "reboundxVersion": reboundx.__version__,
+            "baselineGravity": "Newtonian point masses",
+            "grAblation": "REBOUNDx gr_potential with c in AU/day",
             "majorAsteroids": False,
-            "earthMoonResolvedSeparately": False,
+            "earthMoonAblation": True,
         },
         "seasonFrame": {
             "frameModel": "pinned Swiss Owen/JPLHOR mean-ecliptic-of-date proof path",
@@ -506,7 +565,10 @@ def main():
 
     print(json.dumps({
         "reboundVersion": rebound.__version__,
-        "initialStateSha256": initial_state_sha256,
+        "initialStateSha256": {
+            "emb": emb_initial_state_sha256,
+            "earthMoon": earth_moon_initial_state_sha256,
+        },
         "variants": [
             {
                 "stepDays": variant["stepDays"],
