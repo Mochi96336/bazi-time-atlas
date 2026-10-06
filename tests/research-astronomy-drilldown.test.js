@@ -16,14 +16,16 @@ test("astronomy progressive disclosure keeps three closed native drilldowns", ()
   assert.doesNotMatch(view, /\.open\s*=|setAttribute\(\s*["']open["']/);
 });
 
-test("RMS owns the visible astronomy headline while duplicate max residual moves into detail", () => {
+test("seasonal-shape RMS stays visible while max shape residual moves into detail and seasonal phase stays visible", () => {
   assert.match(view, /headline\.classList\.add\("research-astronomy-rms-rail"\)/);
   assert.match(view, /headline\.dataset\.astronomyVisibleMetric = "rms"/);
-  assert.match(view, /headlineLabel\.textContent = "RMS 殘差"/);
+  assert.match(view, /headlineLabel\.textContent = "季節形狀 RMS"/);
+  assert.match(view, /maxLabel\.textContent = "最大形狀殘差"/);
   assert.match(view, /maxMetric\.dataset\.astronomyDetailMetric = "max-residual"/);
   assert.match(view, /maxMetric\.append\(maxLabel, maxResidual\)/);
   assert.match(view, /meta\.appendChild\(maxMetric\)/);
-  assert.match(view, /\[\.\.\.panel\.children\]\.slice\(1\)/);
+  assert.match(view, /panel\.querySelector\("\.astronomy-phase-card"\)/);
+  assert.match(view, /node !== headline && node !== phaseCard/);
   assert.match(view, /detail\.append\(meta, termGrid\)/);
   assert.doesNotMatch(view, /cloneNode|textContent\s*=\s*maxResidual\.textContent/);
 });
@@ -35,7 +37,7 @@ test("month boundary keeps summary stats and moves only prose and deep evidence"
     'panel.querySelector(".full-pillar-attribution")',
     'panel.querySelector("#month-boundary-window-grid")'
   ]) assert.ok(view.includes(token), `missing ${token}`);
-  assert.match(view, /heading\.textContent\s*=\s*"交節分歧窗口"/);
+  assert.match(view, /heading\.textContent\s*=\s*"季節形狀造成的交節分歧窗口"/);
   assert.doesNotMatch(view, /month-boundary-exposure-hours.*appendChild/s);
 });
 

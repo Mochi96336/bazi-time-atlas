@@ -12,7 +12,7 @@
 .astronomy-panel {
   margin-top:12px;
   display:grid;
-  grid-template-columns:minmax(180px,.8fr) minmax(240px,1.3fr) minmax(160px,.8fr);
+  grid-template-columns:minmax(170px,.85fr) minmax(190px,.95fr) minmax(240px,1.25fr) minmax(150px,.75fr);
   gap:10px;
   border:1px solid var(--hairline);
   border-radius:18px;
@@ -25,6 +25,8 @@
 .astronomy-panel small { display:block; margin-top:3px; color:#758078; font-size:9px; line-height:1.45; }
 #astronomy-orbit-readout { color:#9b9589; font-size:10px; line-height:1.55; }
 #astronomy-scale-readout { color:#887f72; font-size:10px; }
+.astronomy-phase-card strong { color:#9ca8a0; font-size:14px; }
+.astronomy-phase-card[data-phase-status="not-modeled"] small { color:#6f7973; }
 
 .astronomy-term-grid {
   margin-top:8px;

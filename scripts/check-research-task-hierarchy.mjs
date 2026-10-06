@@ -70,7 +70,7 @@ for (const expected of [
   "年日週期",
   "節氣校驗",
   "四柱重現",
-  "年日候選 → 節氣位置",
+  "離散候選 → 天文較真",
   "節氣校驗 → 四柱比較",
   "3 / 3 exact",
   "仍有偏移",
@@ -122,6 +122,14 @@ if (discrete.includes('class="near-search-panel"') || discrete.includes('id="fou
 }
 if (!astronomy.includes('class="astronomy-panel"') || !astronomy.includes('id="month-boundary-exposure"') || !astronomy.includes('class="near-search-panel"')) {
   throw new Error(`astronomy task did not retain residual, month-boundary, and near-recurrence evidence: ${probe.url}`);
+}
+if (
+  !astronomy.includes("季節形狀 RMS")
+  || !astronomy.includes("春分歸零後的十二節形狀與模型參數")
+  || !astronomy.includes("季節相位 · 公曆框架")
+  || !astronomy.includes("春分相對公曆的絕對位移另算")
+) {
+  throw new Error(`astronomy task lost the visible seasonal phase / shape separation: ${probe.url}`);
 }
 const astronomyDetail = detailsById(probe.dom, "astronomy-residual-detail");
 if (!astronomy.includes('data-astronomy-visible-metric="rms"') || !astronomy.includes('id="astronomy-rms-residual"')) {
@@ -193,7 +201,7 @@ for (const expected of [
   "公曆結構",
   "60 年序",
   "60 日序",
-  "RMS 殘差",
+  "季節形狀 RMS",
   "目前可支持的最強結論",
   "年柱＋月柱可隔離 · 日柱＋時柱未解"
 ]) {

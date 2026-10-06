@@ -54,7 +54,7 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.match(html, /id="research-spine-discrete">等待狀態<\/small>/);
   assert.match(html, /id="research-spine-astronomy">等待狀態<\/small>/);
   assert.match(html, /id="research-spine-evidence">等待狀態<\/small>/);
-  assert.match(html, /class="research-task-relation">年日候選 → 節氣位置<\/span>/);
+  assert.match(html, /class="research-task-relation">離散候選 → 天文較真<\/span>/);
   assert.match(html, /class="research-task-relation">節氣校驗 → 四柱比較<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
@@ -111,8 +111,11 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);
 });
 
-test("astronomy task owns residual detail and keeps near-recurrence ranking terse", () => {
+test("astronomy task owns phase/shape refinement and keeps near-recurrence ranking terse", () => {
   assert.match(astronomy, /class="astronomy-panel"/);
+  assert.match(astronomy, /季節形狀 · 春分歸零/);
+  assert.match(astronomy, /季節相位 · 公曆框架/);
+  assert.match(astronomy, /春分相對公曆的絕對位移另算/);
   assert.match(astronomy, /id="astronomy-term-grid"/);
   assert.match(astronomy, /class="near-search-panel"/);
   assert.match(astronomy, /<strong>近回歸排名<\/strong>/);

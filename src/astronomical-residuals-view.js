@@ -46,6 +46,24 @@ function setResidualHeadline(value) {
   setText("astronomy-max-residual", value);
 }
 
+function setSeasonalPhaseStatus({ identity = false } = {}) {
+  const card = document.querySelector(".astronomy-phase-card");
+  if (identity) {
+    setText("astronomy-phase-status", "0 h · 同一狀態");
+    setText("astronomy-phase-note", "Δ=0 不需要額外季節相位模型。");
+    if (card) card.dataset.phaseStatus = "identity";
+    instrument.dataset.astronomyAbsoluteSeasonalPhase = "identity";
+    return;
+  }
+  setText("astronomy-phase-status", "尚未納入");
+  setText(
+    "astronomy-phase-note",
+    "春分相對公曆的絕對位移另算；目前殘差只量春分歸零後的季節內形狀。"
+  );
+  if (card) card.dataset.phaseStatus = "not-modeled";
+  instrument.dataset.astronomyAbsoluteSeasonalPhase = "not-modeled";
+}
+
 function formatSignedHours(value) {
   if (!Number.isFinite(value)) return "—";
   if (Math.abs(value) < 0.005) return "0.00 h";
@@ -73,16 +91,16 @@ function ensureMonthBoundaryPanel() {
   panel.innerHTML = `
     <div class="month-boundary-copy">
       <div class="eyebrow">年／月柱邊界</div>
-      <h3>交節窗口不只告訴你偏了多久，也能指出會差在哪一柱。</h3>
-      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。只有出生相位落在這些區間內，兩個年份才會站在不同的月支 sector；11 個節只影響月柱，立春的 丑→寅 同時也是本站採用的年柱切換邊界。比例仍是幾何相位窗口，不是人口上的「八字錯誤率」。</p>
+      <h3>季節形狀能指出哪些交界可能分歧。</h3>
+      <p>把春分固定成共同 0 點後，每個「節」從基準位置移到目標位置時會掃過一小段時間。這裡只量「季節形狀」造成的窗口，尚未加入春分相對公曆的整體平移，因此不是公曆框架下的完整交節誤差。只有比較相位落在這些區間內，兩個年份才會站在不同的月支 sector；11 個節只影響月柱，立春的 丑→寅 同時也是本站採用的年柱切換邊界。比例仍是幾何相位窗口，不是人口上的「八字錯誤率」。</p>
     </div>
     <div class="month-boundary-stat">
-      <span>窗口聯集</span>
+      <span>形狀窗口聯集</span>
       <strong id="month-boundary-exposure-hours">—</strong>
       <small id="month-boundary-exposure-percent">—</small>
     </div>
     <div class="month-boundary-stat">
-      <span>最大單一邊界</span>
+      <span>最大形狀邊界</span>
       <strong id="month-boundary-largest">—</strong>
       <small id="month-boundary-overlap">—</small>
     </div>
@@ -289,6 +307,7 @@ function renderMonthBoundaryExposure(result) {
   });
 
   instrument.dataset.monthBoundaryExposureValidity = "within-range";
+  instrument.dataset.monthBoundaryExposureBasis = "seasonal-shape-only";
   instrument.dataset.monthBoundaryExposureHours = exposure.unionExposureHours.toFixed(6);
   instrument.dataset.monthBoundaryExposurePercent = exposure.yearPercent.toFixed(6);
   instrument.dataset.monthBoundaryRawSweepHours = exposure.rawSweepHours.toFixed(6);
@@ -332,6 +351,7 @@ function renderMonthBoundaryUnavailable() {
   setText("pillar-impact-year-month-percent", "—");
   setText("full-pillar-attribution-note", "—");
   instrument.dataset.monthBoundaryExposureValidity = "outside-range";
+  instrument.dataset.monthBoundaryExposureBasis = "seasonal-shape-only";
   delete instrument.dataset.monthBoundaryExposureHours;
   delete instrument.dataset.monthBoundaryExposurePercent;
   delete instrument.dataset.monthBoundaryRawSweepHours;
@@ -368,6 +388,9 @@ function renderUnavailable(message) {
   setText("astronomy-scale-readout", "—");
   instrument.dataset.astronomyModel = BERGER_MODEL.id;
   instrument.dataset.astronomyValidity = "outside-range";
+  instrument.dataset.astronomyResidualBasis = "vernal-equinox-normalized-shape";
+  instrument.dataset.astronomyNormalizationDays = String(BERGER_MODEL.normalizedTropicalYearDays);
+  setSeasonalPhaseStatus();
   instrument.dataset.astronomyShapeClosed = "false";
   delete instrument.dataset.astronomyMaxResidualHours;
   delete instrument.dataset.astronomyRmsResidualHours;
@@ -465,6 +488,9 @@ function renderResult(result) {
 
   instrument.dataset.astronomyModel = result.model.id;
   instrument.dataset.astronomyValidity = "within-range";
+  instrument.dataset.astronomyResidualBasis = "vernal-equinox-normalized-shape";
+  instrument.dataset.astronomyNormalizationDays = String(result.normalizationDays);
+  setSeasonalPhaseStatus({ identity:result.baseYear === result.targetYear });
   instrument.dataset.astronomyBaseYear = String(result.baseYear);
   instrument.dataset.astronomyTargetYear = String(result.targetYear);
   instrument.dataset.astronomyMaxResidualHours = result.maxAbsHours.toFixed(6);

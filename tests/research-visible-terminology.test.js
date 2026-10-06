@@ -21,11 +21,12 @@ test("Research product labels use Chinese while canonical research terms stay re
     "公曆結構",
     "60 年序",
     "60 日序",
-    "十二節形狀殘差",
+    "季節形狀 · 春分歸零",
+    "季節相位 · 公曆框架",
     "軌道參數",
     "視覺尺度",
     "目前可支持的最強結論",
-    "最大殘差 → RMS",
+    "季節形狀最大值 → RMS",
     "最大絕對值 / RMS",
     "搜尋最佳",
     "搜尋最佳殘差"
@@ -54,9 +55,10 @@ test("Research presentation layers do not reintroduce prototype English copy", (
   assert.match(discreteView, /10 天干 × 12 地支 → 60 配對/);
   assert.doesNotMatch(discreteView, /展開看相位|相位明細|個候選 · 公曆結構 \/ 60 年序 \/ 60 日序|展開看 phase| candidates · /);
 
-  assert.match(astronomyView, /headlineLabel\.textContent = "RMS 殘差"/);
-  assert.match(astronomyView, /maxLabel\.textContent = "最大殘差"/);
-  assert.doesNotMatch(astronomyView, /RMS residual|Max residual/);
+  assert.match(astronomyView, /headlineLabel\.textContent = "季節形狀 RMS"/);
+  assert.match(astronomyView, /maxLabel\.textContent = "最大形狀殘差"/);
+  assert.match(astronomyView, /只看季節形狀的交節窗口明細/);
+  assert.doesNotMatch(astronomyView, /RMS residual|Max residual|shape-only/);
 
   assert.match(nearView, /最大 \$\{candidate\.maxAbsHours/);
   assert.match(nearView, /模型不可用/);
