@@ -43,7 +43,9 @@ test("proxy can be calibrated against year-4006 reviewed DE441 evidence", () => 
 });
 
 test("year-4006 calibration separates common seasonal phase from within-year shape", () => {
-  const errors = [];
+  const plusShapeErrors = [];
+  const skeletonOnlyErrors = [];
+  const minusShapeErrors = [];
   for (let longitudeDegrees = 0; longitudeDegrees < 360; longitudeDegrees += 15) {
     const assessment = assessSeasonalPhaseProxy({
       baseYear:2026,
@@ -52,26 +54,41 @@ test("year-4006 calibration separates common seasonal phase from within-year sha
     });
     assert.equal(assessment.status, "proxy-with-target-evidence", `${longitudeDegrees}°`);
     assert.equal(assessment.targetBoundary.authorityClass, "reviewed-production-direct-event", `${longitudeDegrees}°`);
-    errors.push(assessment.validation.errorHours);
+
+    const actual = assessment.targetBoundary.ttJulianDay;
+    const skeleton = assessment.baseBoundary.ttJulianDay + assessment.proxy.seasonalSkeletonDays;
+    const shape = assessment.proxy.shapeCorrectionDays;
+    plusShapeErrors.push((skeleton + shape - actual) * 24);
+    skeletonOnlyErrors.push((skeleton - actual) * 24);
+    minusShapeErrors.push((skeleton - shape - actual) * 24);
   }
 
-  const meanHours = errors.reduce((sum, value) => sum + value, 0) / errors.length;
-  const minHours = Math.min(...errors);
-  const maxHours = Math.max(...errors);
-  const spreadHours = maxHours - minHours;
-  const rmsAroundMeanHours = Math.sqrt(
-    errors.reduce((sum, value) => sum + (value - meanHours) ** 2, 0) / errors.length
-  );
+  function stats(errors) {
+    const meanHours = errors.reduce((sum, value) => sum + value, 0) / errors.length;
+    const minHours = Math.min(...errors);
+    const maxHours = Math.max(...errors);
+    const spreadHours = maxHours - minHours;
+    const rmsAroundMeanHours = Math.sqrt(
+      errors.reduce((sum, value) => sum + (value - meanHours) ** 2, 0) / errors.length
+    );
+    return { meanHours, minHours, maxHours, spreadHours, rmsAroundMeanHours };
+  }
 
-  assert.equal(errors.length, 24);
-  assert.ok(Number.isFinite(meanHours));
-  assert.ok(Number.isFinite(spreadHours));
-  assert.ok(Number.isFinite(rmsAroundMeanHours));
+  const plus = stats(plusShapeErrors);
+  const none = stats(skeletonOnlyErrors);
+  const minus = stats(minusShapeErrors);
+
+  assert.equal(plusShapeErrors.length, 24);
+  for (const result of [plus, none, minus]) {
+    assert.ok(Number.isFinite(result.meanHours));
+    assert.ok(Number.isFinite(result.spreadHours));
+    assert.ok(Number.isFinite(result.rmsAroundMeanHours));
+  }
 
   console.log(
-    `[seasonal-phase-proxy] 4006 all-terms mean = ${meanHours.toFixed(3)} h; `
-    + `range = ${minHours.toFixed(3)}..${maxHours.toFixed(3)} h; `
-    + `spread = ${spreadHours.toFixed(3)} h; shape-RMS-around-mean = ${rmsAroundMeanHours.toFixed(3)} h`
+    `[seasonal-phase-proxy] 4006 +shape mean=${plus.meanHours.toFixed(3)}h spread=${plus.spreadHours.toFixed(3)}h rms=${plus.rmsAroundMeanHours.toFixed(3)}h; `
+    + `no-shape mean=${none.meanHours.toFixed(3)}h spread=${none.spreadHours.toFixed(3)}h rms=${none.rmsAroundMeanHours.toFixed(3)}h; `
+    + `-shape mean=${minus.meanHours.toFixed(3)}h spread=${minus.spreadHours.toFixed(3)}h rms=${minus.rmsAroundMeanHours.toFixed(3)}h`
   );
 });
 
