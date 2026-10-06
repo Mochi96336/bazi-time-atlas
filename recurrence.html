@@ -313,7 +313,7 @@
 
       <section class="astronomy-panel" aria-label="季節相位與春分歸零後的十二節形狀殘差">
         <div><span>季節形狀 · 春分歸零</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
-        <div class="astronomy-phase-card" data-phase-status="not-modeled"><span>季節相位 · 公曆框架</span><strong id="astronomy-phase-status">尚未納入</strong><small id="astronomy-phase-note">春分相對公曆的絕對位移另算；不要把形狀殘差當成完整節氣漂移。</small></div>
+        <div class="astronomy-phase-card" data-phase-status="pending"><span>季節相位 · TT 年骨架</span><strong id="astronomy-phase-status">等待證據</strong><small id="astronomy-phase-note">有絕對節氣事件時才校準共同相位；沒有來源就不外推。</small></div>
         <div><span>軌道參數</span><div id="astronomy-orbit-readout">—</div><small>目前只比較春分後各黃經位置的相對到達時間。</small></div>
         <div><span>視覺尺度</span><strong id="astronomy-scale-readout">—</strong><small>正值向外，負值向內。</small></div>
       </section>
@@ -357,7 +357,7 @@
         <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
       </section>
 
-      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。天文外圈使用 André Berger 1978 長期軌道參數；目前只做春分錨定、365.2422 日正規化的十二節「季節形狀」比較。它刻意拿掉春分相對公曆的共同平移，因此不是公曆框架下的完整節氣位移；絕對季節相位仍需另一層長期模型。此頁亦不把搜尋結果當成遠未來精確節氣時刻或真正週期。</p></details>
+      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。天文外圈使用 André Berger 1978 長期軌道參數；目前把天文比較拆成兩層：Berger 1978 負責春分錨定後的十二節「季節形狀」；季節相位只有在目標年有絕對節氣事件證據時，才相對 365.2422 日 TT 年骨架校準共同平移。超出絕對來源時不外推相位，也不把 TT 相位直接當成民用公曆日期；深時間仍另受 TT→UT1／地球自轉不確定性限制。此頁亦不把搜尋結果當成遠未來精確節氣時刻或真正週期。</p></details>
     </section>
   </main>
 
