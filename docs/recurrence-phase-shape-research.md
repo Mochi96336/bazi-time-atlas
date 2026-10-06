@@ -103,8 +103,8 @@ exact discrete lattice -> rank by astronomical shape residual
 
 A first research-only phase proxy was also calibrated after the Berger correction. It advances the known 2026 TT event by a fixed 365.2422-day skeleton and adds the corrected Berger within-year shape change. Against absolute evidence:
 
-- year 4006: Li Chun proxy error ≈ -12.20 h; across all 24 terms the residual is almost a pure common offset (≈ -12.10 h mean, ≈ 0.23 h spread);
-- year 10026: Li Chun proxy error ≈ -33.12 h against the pinned DE441-derived Research crossing;
+- year 4006: observed seasonal phase offset ≈ +12.20 h at Li Chun; across all 24 terms it is almost a pure common offset (≈ +12.10 h mean, ≈ 0.23 h spread);
+- year 10026: observed Li Chun seasonal phase offset ≈ +33.12 h against the pinned DE441-derived Research crossing;
 - year 26026: no absolute ephemeris truth is available, so the proxy remains unvalidated and must not be shown as an absolute seasonal date.
 
 This demonstrates the intended decomposition: corrected Berger geometry can explain the **within-year shape**, while the missing quantity is the **common seasonal phase**. The common phase is not safely represented by a linear drift extrapolation.
