@@ -48,7 +48,7 @@ if (count !== 41) throw new Error(`expected 41 exact-closure candidates, got ${c
 if (!Number.isFinite(bestDelta) || bestDelta % 24_000 !== 0 || bestDelta < 24_000) {
   throw new Error(`best candidate is not an exact-discrete closure: ${bestDelta}: ${baseline.url}`);
 }
-if (!Number.isFinite(bestMax) || bestMax >= 95.109375) {
+if (!Number.isFinite(bestMax) || bestMax >= 94.801901) {
   throw new Error(`search did not improve on the +24,000-year residual: ${bestMax}: ${baseline.url}`);
 }
 if (!Number.isFinite(bestRms) || bestRms <= 0) throw new Error(`invalid best RMS: ${bestRms}: ${baseline.url}`);

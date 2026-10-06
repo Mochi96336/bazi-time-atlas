@@ -169,8 +169,15 @@ export function bergerOrbitalParameters(year) {
 }
 
 function meanAnomalyAtSolarLongitude(parameters, solarLongitudeDegrees) {
-  const earthTrueLongitude = normalizeRadians((solarLongitudeDegrees + 180) * DEG);
-  const trueAnomaly = normalizeRadians(earthTrueLongitude - parameters.perihelionLongitudeRadians);
+  // Berger's OMEGVP / varpi is expressed in the same moving-equinox
+  // longitude convention used by the apparent Sun in the insolation
+  // equations.  Therefore the orbital true anomaly for a requested solar
+  // longitude is lambda_sun - varpi.  Converting lambda_sun to the Earth's
+  // heliocentric longitude (+180 deg) here would apply the opposition twice
+  // and reverse the seasonal timing shape.
+  const trueAnomaly = normalizeRadians(
+    solarLongitudeDegrees * DEG - parameters.perihelionLongitudeRadians
+  );
   const e = parameters.eccentricity;
 
   const eccentricAnomaly = normalizeRadians(2 * Math.atan2(

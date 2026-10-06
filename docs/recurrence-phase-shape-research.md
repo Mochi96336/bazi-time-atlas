@@ -22,7 +22,7 @@ Therefore `n × 24,000` is the natural coarse search lattice for long recurrence
 
 The local +1,980-year result remains important: for the current 2026-09-13 base date it is the first year-sequence + day-sequence recurrence, but it does not restore the Gregorian 400-year phase. It demonstrates why a less constrained recurrence can happen earlier.
 
-### The current 95.11 h value is shape-only
+### The current 94.80 h value is shape-only
 
 The existing Berger comparator anchors both years at solar longitude 0° (vernal equinox) and normalizes both years to 365.2422 days.
 
@@ -36,9 +36,27 @@ shape_i =
 
 It deliberately removes the common seasonal translation relative to the Gregorian calendar.
 
-At +24,000 years, the current maximum shape residual is about 95.11 h. This should **not** be described as “the solar terms are 95 h late relative to the calendar”.
+At +24,000 years, the corrected maximum shape residual is about 94.80 h. This should **not** be described as “the solar terms are about 95 h late relative to the calendar”.
 
 Physically, in the current implementation the shape change is driven by the long-term change in orbital eccentricity and the longitude of perihelion relative to the seasonal frame. Obliquity is not presently used by the term-timing comparator.
+
+### Berger longitude-convention correction
+
+The first implementation of the seasonal-shape comparator applied an extra 180° opposition: it converted the requested apparent-Sun longitude to an Earth heliocentric longitude and then subtracted Berger's `OMEGVP / varpi`. Berger's parameter is already used in the moving-equinox apparent-Sun longitude convention for the insolation/time-of-season calculation, so that conversion reversed the seasonal timing shape.
+
+The corrected comparator uses:
+
+```
+true anomaly for timing = solar longitude - Berger varpi
+```
+
+The correction is externally checked against the repository's year-4006 DE441 seasonal-event evidence. Across all 24 canonical 15° crossings, after cancelling the common seasonal phase, the corrected Berger shape differs from the 2026→4006 DE441 shape by:
+
+- maximum absolute error ≈ 0.1745 h,
+- RMS error ≈ 0.0847 h,
+- full error spread ≈ 0.2332 h.
+
+This is now a permanent regression gate. A future refactor must not reintroduce the extra 180° conversion.
 
 ### Missing layer: absolute seasonal phase
 
@@ -73,8 +91,8 @@ Therefore Research 02 must not manufacture an exact Gregorian-frame phase for +2
 
 For base year 2026:
 
-- +24,000: discrete closure is exact, max shape residual ≈ 95.11 h.
-- +792,000 (= 33 × 24,000): Berger-model search finds a much closer shape match, max residual ≈ 10.62 h.
+- +24,000: discrete closure is exact, max shape residual ≈ 94.80 h.
+- +792,000 (= 33 × 24,000): Berger-model search finds a much closer shape match, max residual ≈ 10.39 h.
 - The latter is a model-range near-recurrence, not a newly proven “BaZi period”.
 
 The near-recurrence search is therefore already doing the intended second-stage operation:
@@ -82,6 +100,14 @@ The near-recurrence search is therefore already doing the intended second-stage 
 ```
 exact discrete lattice -> rank by astronomical shape residual
 ```
+
+A first research-only phase proxy was also calibrated after the Berger correction. It advances the known 2026 TT event by a fixed 365.2422-day skeleton and adds the corrected Berger within-year shape change. Against absolute evidence:
+
+- year 4006: observed seasonal phase offset ≈ +12.20 h at Li Chun; across all 24 terms it is almost a pure common offset (≈ +12.10 h mean, ≈ 0.23 h spread);
+- year 10026: observed Li Chun seasonal phase offset ≈ +33.12 h against the pinned DE441-derived Research crossing;
+- year 26026: no absolute ephemeris truth is available, so the proxy remains unvalidated and must not be shown as an absolute seasonal date.
+
+This demonstrates the intended decomposition: corrected Berger geometry can explain the **within-year shape**, while the missing quantity is the **common seasonal phase**. The common phase is not safely represented by a linear drift extrapolation.
 
 ## Implementation order
 
@@ -99,7 +125,7 @@ exact discrete lattice -> rank by astronomical shape residual
 
 - Do not promote +24,000 to “the BaZi period”.
 - Do not demote +1,980 to an irrelevant footnote; it is the important lower-constraint counterexample.
-- Do not describe 95.11 h as a Gregorian calendar drift.
+- Do not describe the ≈94.80 h shape residual as a Gregorian calendar drift.
 - Do not use the current shape-only month-boundary exposure as an absolute civil-calendar error rate.
 - Do not promote discrete day closure to a day-pillar proof.
 - Deep-time results near the Berger ±1 Myr model limit must be labelled as model results, not precise future ephemerides.
