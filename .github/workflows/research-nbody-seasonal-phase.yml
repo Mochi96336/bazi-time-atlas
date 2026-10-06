@@ -74,13 +74,20 @@ jobs:
           assert result["initialization"]["embBaseline"]["earthProxy"] == "Earth-Moon barycenter (3)"
           assert len(result["initialization"]["embBaseline"]["states"]) == 10
           assert len(result["initialization"]["earthMoonAblation"]["states"]) == 11
-          assert len(result["variants"]) == 4
+          assert len(result["variants"]) == 6
           assert [item["physicsLabel"] for item in result["variants"]] == [
               "emb-newtonian",
               "emb-newtonian",
               "earth-moon-newtonian",
+              "earth-moon-newtonian",
+              "earth-moon-gr-potential",
               "earth-moon-gr-potential",
           ]
+          for group in ("earthMoonNewtonian", "earthMoonGrPotential"):
+              for year in ("4006", "10026"):
+                  conv = result["physicsConvergence"][group][year]
+                  assert conv["maxAbsHours"] >= 0
+                  assert conv["rmsHours"] >= 0
 
           for variant in result["variants"]:
               assert variant["years"]["4006"]["summary"]["count"] == 24
