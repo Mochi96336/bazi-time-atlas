@@ -477,23 +477,42 @@ def main():
     fine = baseline_variants[-1]
     convergence = convergence_summary(coarse, fine)
 
-    ablations = [
+    earth_moon_steps = [steps[-1], steps[-1] / 2]
+    earth_moon_newtonian_variants = [
         run_variant(
             earth_moon_simulation,
-            steps[-1],
+            step_days,
             all_events,
             args.frame_probe,
             physics_label="earth-moon-newtonian",
-        ),
+        )
+        for step_days in earth_moon_steps
+    ]
+    earth_moon_gr_variants = [
         run_variant(
             earth_moon_simulation,
-            steps[-1],
+            step_days,
             all_events,
             args.frame_probe,
             physics_label="earth-moon-gr-potential",
             use_gr_potential=True,
-        ),
+        )
+        for step_days in earth_moon_steps
     ]
+    ablations = [
+        *earth_moon_newtonian_variants,
+        *earth_moon_gr_variants,
+    ]
+    physics_convergence = {
+        "earthMoonNewtonian": convergence_summary(
+            earth_moon_newtonian_variants[0],
+            earth_moon_newtonian_variants[1],
+        ),
+        "earthMoonGrPotential": convergence_summary(
+            earth_moon_gr_variants[0],
+            earth_moon_gr_variants[1],
+        ),
+    }
     variants = [*baseline_variants, *ablations]
 
     result = {
@@ -555,6 +574,7 @@ def main():
         },
         "variants": variants,
         "convergence": convergence,
+        "physicsConvergence": physics_convergence,
     }
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -579,6 +599,7 @@ def main():
             for variant in variants
         ],
         "convergence": convergence,
+        "physicsConvergence": physics_convergence,
     }, indent=2, sort_keys=True))
 
 
