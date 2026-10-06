@@ -420,10 +420,14 @@ export function assessSeasonalPhaseProxy({
 
 export const SEASONAL_ORBIT_CLOCK_CONTRACT = freeze({
   id:"research-seasonal-orbit-clock-v1",
-  role:"research-calibration-and-validation-only",
+  role:"research-calibration-and-rejection-evidence",
   phaseSource:"berger-event-mean-anomaly-plus-calibrated-orbit-clock",
   calibrationEvidence:"2026-to-4006-reviewed-de441-24-crossing",
   validationEvidence:"10026-source-derived-de441",
+  calibrationResult:"24-term-common-clock-consistent",
+  outOfCalibrationResult:"rejected-at-10026",
+  validatedFor24000:false,
+  rejectionReason:"long-term-absolute-orbital-phase-not-captured-by-one-fixed-orbit-clock",
   civilTimeResolved:false,
   productionAuthorityGranted:false
 });
