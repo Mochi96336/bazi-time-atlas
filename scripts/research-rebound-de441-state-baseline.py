@@ -21,12 +21,14 @@ from pathlib import Path
 
 import numpy as np
 import rebound
+import reboundx
 from jplephem.spk import SPK
 
 AU_KM = 149_597_870.700
 SECONDS_PER_DAY = 86_400.0
 J2000_TDB_JD = 2_451_545.0
 EXPECTED_KERNEL_MD5 = "ad8dfa4e505ef0e3a5d587a5b4705632"
+C_AU_PER_DAY = 173.1446326846693
 
 # GM values in km^3/s^2.  Major-body barycentres are used for planets with
 # satellites, except Earth where Earth and Moon are integrated separately.
@@ -106,7 +108,7 @@ def add_body(sim: rebound.Simulation, name: str, position, velocity):
     )
 
 
-def make_simulation(kernel: SPK, dt_days: float) -> rebound.Simulation:
+def make_simulation(kernel: SPK, dt_days: float, physics: str = "newtonian"):
     sim = rebound.Simulation()
     sim.units = ("AU", "day", "Msun")
     sim.integrator = "whfast"
@@ -114,8 +116,20 @@ def make_simulation(kernel: SPK, dt_days: float) -> rebound.Simulation:
     for name, route in BODIES:
         p, v = state_from_route(kernel, J2000_TDB_JD, route)
         add_body(sim, name, p, v)
+
     # Keep the exact DE441 barycentric initial frame.  Do not move_to_com().
-    return sim
+    # REBOUNDx's "gr" force is the single-dominant-central-body 1PN
+    # approximation.  It gets both mean motion and apsidal precession right,
+    # unlike the faster gr_potential approximation.
+    rebx = None
+    if physics == "gr":
+        rebx = reboundx.Extras(sim)
+        force = rebx.load_force("gr")
+        rebx.add_force(force)
+        force.params["c"] = C_AU_PER_DAY
+    elif physics != "newtonian":
+        raise ValueError(f"unsupported physics mode: {physics}")
+    return sim, rebx
 
 
 def vector_angle_arcsec(a, b) -> float:
@@ -164,8 +178,15 @@ def compare_at(kernel: SPK, sim: rebound.Simulation, jd: float):
     }
 
 
-def integrate_validation(kernel: SPK, dt_days: float, years: tuple[int, ...]):
-    sim = make_simulation(kernel, dt_days)
+def integrate_validation(
+    kernel: SPK,
+    dt_days: float,
+    years: tuple[int, ...],
+    physics: str = "newtonian"
+):
+    sim, rebx = make_simulation(kernel, dt_days, physics=physics)
+    # Keep the Extras object alive for the full integration.
+    _ = rebx
     samples = []
     for year in years:
         for month, day, label in (
@@ -201,11 +222,26 @@ def main():
     kernel = SPK.open(str(args.kernel))
     try:
         validation_years = (4006, 10026)
-        primary = integrate_validation(kernel, args.primary_dt_days, validation_years)
-        convergence = integrate_validation(kernel, args.convergence_dt_days, validation_years)
+        primary = integrate_validation(
+            kernel, args.primary_dt_days, validation_years, physics="newtonian"
+        )
+        convergence = integrate_validation(
+            kernel, args.convergence_dt_days, validation_years, physics="newtonian"
+        )
+        gr_primary = integrate_validation(
+            kernel, args.primary_dt_days, validation_years, physics="gr"
+        )
+        gr_convergence = integrate_validation(
+            kernel, args.convergence_dt_days, validation_years, physics="gr"
+        )
 
-        # N-body-only deep projection.  There is no DE441 truth at year 26026.
-        deep = make_simulation(kernel, args.convergence_dt_days)
+        # Keep the existing Newtonian deep projection only as a historical
+        # unvalidated state.  No GR year-26026 state is promoted until the
+        # in-coverage checkpoints show that GR actually improves the model.
+        deep, deep_rebx = make_simulation(
+            kernel, args.convergence_dt_days, physics="newtonian"
+        )
+        _ = deep_rebx
         deep_jd = gregorian_julian_day(26026, 3, 20.5)
         deep.integrate(deep_jd - J2000_TDB_JD, exact_finish_time=1)
         dep, dev, dsp, dsv = snapshot(deep)
@@ -228,13 +264,42 @@ def main():
                 ),
             })
 
+        newtonian_by_key = {
+            (item["year"], item["label"]): item for item in convergence
+        }
+        gr_improvement = []
+        for item in gr_convergence:
+            baseline = newtonian_by_key[(item["year"], item["label"])]
+            gr_improvement.append({
+                "year": item["year"],
+                "label": item["label"],
+                "newtonianDirectionErrorArcsec": baseline["geocentricSunDirectionErrorArcsec"],
+                "grDirectionErrorArcsec": item["geocentricSunDirectionErrorArcsec"],
+                "directionImprovementArcsec": (
+                    baseline["geocentricSunDirectionErrorArcsec"]
+                    - item["geocentricSunDirectionErrorArcsec"]
+                ),
+                "directionImprovementFraction": (
+                    (baseline["geocentricSunDirectionErrorArcsec"]
+                     - item["geocentricSunDirectionErrorArcsec"])
+                    / baseline["geocentricSunDirectionErrorArcsec"]
+                ),
+                "newtonianGeocentricPositionErrorKm": baseline["geocentricSunPositionErrorKm"],
+                "grGeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
+                "positionImprovementKm": (
+                    baseline["geocentricSunPositionErrorKm"]
+                    - item["geocentricSunPositionErrorKm"]
+                ),
+            })
+
         result = {
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "researchOnly": True,
             "sourceEphemeris": "DE441",
             "initialEpochTdbJulianDay": J2000_TDB_JD,
             "integrator": "WHFast",
             "reboundVersion": rebound.__version__,
+            "reboundxVersion": reboundx.__version__,
             "model": {
                 "bodies": [name for name, _ in BODIES],
                 "bodyCount": len(BODIES),
@@ -242,6 +307,7 @@ def main():
                 "earthMoonSeparated": True,
                 "asteroidsIncluded": False,
                 "generalRelativityIncluded": False,
+                "grDiagnosticMode": "reboundx-gr-single-dominant-central-body-1pn",
                 "solarMassLossIncluded": False,
                 "initialStateFrame": "DE441 ICRF barycentric",
                 "initialStateTimeScale": "TDB",
@@ -251,11 +317,18 @@ def main():
             "primary": primary,
             "convergence": convergence,
             "convergenceDelta": convergence_delta,
+            "grPrimary": gr_primary,
+            "grConvergence": gr_convergence,
+            "grImprovement": gr_improvement,
             "summary": {
                 "primaryMaxDirectionErrorArcsec": max_metric(primary, "geocentricSunDirectionErrorArcsec"),
                 "convergenceMaxDirectionErrorArcsec": max_metric(convergence, "geocentricSunDirectionErrorArcsec"),
                 "primaryMaxGeocentricPositionErrorKm": max_metric(primary, "geocentricSunPositionErrorKm"),
                 "convergenceMaxGeocentricPositionErrorKm": max_metric(convergence, "geocentricSunPositionErrorKm"),
+                "grPrimaryMaxDirectionErrorArcsec": max_metric(gr_primary, "geocentricSunDirectionErrorArcsec"),
+                "grConvergenceMaxDirectionErrorArcsec": max_metric(gr_convergence, "geocentricSunDirectionErrorArcsec"),
+                "grPrimaryMaxGeocentricPositionErrorKm": max_metric(gr_primary, "geocentricSunPositionErrorKm"),
+                "grConvergenceMaxGeocentricPositionErrorKm": max_metric(gr_convergence, "geocentricSunPositionErrorKm"),
             },
             "deepProjection26026": {
                 "status": "unvalidated-nbody-state-only",
@@ -277,6 +350,7 @@ def main():
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps({
         "reboundVersion": result["reboundVersion"],
+        "reboundxVersion": result["reboundxVersion"],
         "primaryDtDays": result["primaryDtDays"],
         "convergenceDtDays": result["convergenceDtDays"],
         **result["summary"],
