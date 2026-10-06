@@ -308,12 +308,13 @@
       <header class="research-task-head">
         <div class="research-task-index">02</div>
         <div><div class="eyebrow">Seasonal check</div><h2 id="research-astronomy-title">節氣校驗</h2></div>
-        <span class="research-task-relation">年日候選 → 節氣位置</span>
+        <span class="research-task-relation">離散候選 → 天文較真</span>
       </header>
 
-      <section class="astronomy-panel" aria-label="十二節天文形狀殘差">
-        <div><span>十二節形狀殘差</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
-        <div><span>軌道參數</span><div id="astronomy-orbit-readout">—</div><small>目標年節氣偏移 − 基準年同一偏移。</small></div>
+      <section class="astronomy-panel" aria-label="季節相位與春分歸零後的十二節形狀殘差">
+        <div><span>季節形狀 · 春分歸零</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
+        <div class="astronomy-phase-card" data-phase-status="not-modeled"><span>季節相位 · 公曆框架</span><strong id="astronomy-phase-status">尚未納入</strong><small id="astronomy-phase-note">春分相對公曆的絕對位移另算；不要把形狀殘差當成完整節氣漂移。</small></div>
+        <div><span>軌道參數</span><div id="astronomy-orbit-readout">—</div><small>目前只比較春分後各黃經位置的相對到達時間。</small></div>
         <div><span>視覺尺度</span><strong id="astronomy-scale-readout">—</strong><small>正值向外，負值向內。</small></div>
       </section>
       <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
@@ -322,7 +323,7 @@
         <div class="near-search-head">
           <div class="near-search-copy">
             <strong>近回歸排名</strong>
-            <small>24,000 年整數倍 · 最大殘差 → RMS · 近似 ≠ 真正週期</small>
+            <small>24,000 年整數倍 · 季節形狀 max → RMS · 近似 ≠ 真正週期</small>
           </div>
           <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
           <div class="near-stat best"><span>搜尋最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
@@ -356,7 +357,7 @@
         <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
       </section>
 
-      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。天文外圈使用 André Berger 1978 長期軌道參數；本頁只做春分錨定、365.2422 日正規化的十二節形狀比較，不處理 ΔT、短週期行星攝動或歷史民用曆法，也不把搜尋結果當成遠未來精確節氣時刻或真正週期。</p></details>
+      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。天文外圈使用 André Berger 1978 長期軌道參數；目前只做春分錨定、365.2422 日正規化的十二節「季節形狀」比較。它刻意拿掉春分相對公曆的共同平移，因此不是完整的 civil-calendar 節氣位移；絕對季節相位仍需另一層長期模型。此頁亦不把搜尋結果當成遠未來精確節氣時刻或真正週期。</p></details>
     </section>
   </main>
 
