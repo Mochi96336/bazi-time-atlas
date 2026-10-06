@@ -32,9 +32,9 @@ function installAstronomyResidualDetail() {
 
   headline.classList.add("research-astronomy-rms-rail");
   headline.dataset.astronomyVisibleMetric = "rms";
-  headlineLabel.textContent = "RMS 殘差";
+  headlineLabel.textContent = "季節形狀 RMS";
 
-  const detail = makeDetails("astronomy-residual-detail", "十二節殘差與模型參數");
+  const detail = makeDetails("astronomy-residual-detail", "春分歸零後的十二節形狀與模型參數");
   const meta = document.createElement("div");
   meta.className = "astronomy-detail-meta";
 
@@ -42,7 +42,7 @@ function installAstronomyResidualDetail() {
   maxMetric.className = "astronomy-detail-max";
   maxMetric.dataset.astronomyDetailMetric = "max-residual";
   const maxLabel = document.createElement("span");
-  maxLabel.textContent = "最大殘差";
+  maxLabel.textContent = "最大形狀殘差";
   maxMetric.append(maxLabel, maxResidual);
   meta.appendChild(maxMetric);
 
@@ -74,9 +74,9 @@ function installMonthBoundaryDetail() {
   const attribution = panel.querySelector(".full-pillar-attribution");
   const windows = panel.querySelector("#month-boundary-window-grid");
 
-  if (heading) heading.textContent = "交節分歧窗口";
+  if (heading) heading.textContent = "季節形狀造成的交節分歧窗口";
 
-  const detail = makeDetails("month-boundary-detail", "交節窗口明細");
+  const detail = makeDetails("month-boundary-detail", "shape-only 交節窗口明細");
   if (prose) detail.appendChild(prose);
   if (impact) detail.appendChild(impact);
   if (attribution) detail.appendChild(attribution);
