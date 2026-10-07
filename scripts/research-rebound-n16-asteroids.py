@@ -48,6 +48,39 @@ def by_key(samples):
     return {(item["year"], item["label"]): item for item in samples}
 
 
+def integrate_with_n16(baseline, kernel, years, n16_bodies):
+    sim, rebx = baseline.make_simulation(
+        kernel,
+        0.5,
+        physics="gr",
+        integrator="ias15",
+    )
+    _ = rebx
+    for body in n16_bodies:
+        sim.add(
+            m=float(body["gmKm3S2"]) / baseline.SUN_GM_UNIT,
+            x=float(body["positionAu"][0]),
+            y=float(body["positionAu"][1]),
+            z=float(body["positionAu"][2]),
+            vx=float(body["velocityAuPerDay"][0]),
+            vy=float(body["velocityAuPerDay"][1]),
+            vz=float(body["velocityAuPerDay"][2]),
+        )
+
+    samples = []
+    for year in years:
+        for month, day, label in (
+            (2, 4.5, "li-chun-window"),
+            (3, 20.5, "march-equinox-window"),
+            (9, 22.5, "september-equinox-window"),
+        ):
+            jd = baseline.gregorian_julian_day(year, month, day)
+            sample = baseline.compare_at(kernel, sim, jd)
+            sample.update({"year":year, "label":label})
+            samples.append(sample)
+    return samples
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--kernel", required=True, type=Path)
@@ -74,13 +107,11 @@ def main():
             physics="gr",
             integrator="ias15",
         )
-        n16 = baseline.integrate_validation(
+        n16 = integrate_with_n16(
+            baseline,
             kernel,
-            0.5,
             years,
-            physics="gr",
-            integrator="ias15",
-            extra_bodies=n16_bodies,
+            n16_bodies,
         )
     finally:
         kernel.close()
