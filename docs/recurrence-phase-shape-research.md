@@ -138,6 +138,30 @@ The first intentionally incomplete model (WHFast, 2-day convergence run; no aste
 
 The 4-day and 2-day integrations stay much closer to each other than either stays to DE441, so the dominant remaining error is already **physical-model incompleteness**, not simply the WHFast timestep. The year-26026 integrated state remains unvalidated and must not be promoted to an absolute seasonal phase.
 
+### Integrator / GR diagnosis
+
+The apparent hundreds-of-arcsecond deep-time error was then separated into physical and numerical components.
+
+Using REBOUNDx GR with WHFast still converges too slowly for this diagnostic: at year 10026 the maximum direction error falls from roughly 557 arcsec (2-day step) to 327 arcsec (1-day) and 172 arcsec (0.5-day). Switching the same physical model to IAS15 changes the picture completely:
+
+- year 4006: IAS15 + `gr` gives about **0.77–1.18 arcsec**;
+- year 10026: about **8.50–8.76 arcsec**;
+- the year-10026 geocentric Earth–Sun position residual falls to about **6,320 km** maximum.
+
+Replacing the central-dominant `gr` approximation with REBOUNDx `gr_full` changes those results only slightly (year 10026 max ≈ **8.60 arcsec**). The current long-range baseline is therefore **IAS15 + GR**; WHFast is retained only as a numerical-diagnostics branch, not as the preferred deep-time phase integrator.
+
+### N16 asteroid subset experiment
+
+A sourced asteroid-subset A/B then kept the IAS15 + GR baseline fixed and added the 16 massive asteroid perturbers used by Horizons in the DE440/441 era. Their J2000 SSB/ICRF geometric states were captured from NASA/JPL Horizons and their GMs were pinned explicitly.
+
+This is only a subset experiment: DE440/441 itself integrated **343 asteroids**, plus **30 KBOs and a KBO ring**. The N16 result is nevertheless directionally useful:
+
+- year 4006: direction residual improves by about **19–30%** across the three checkpoints;
+- year 10026: **8.504 / 8.762 / 8.531 arcsec → 7.616 / 7.839 / 7.659 arcsec**, about **10.2–10.5%** improvement;
+- maximum year-10026 geocentric Earth–Sun position residual improves from about **6,320 km → 5,654 km**.
+
+So asteroid perturbations are a real contributor, but **N16 is not the dominant explanation for the remaining deep-time residual**. Before attempting a computationally expensive 343-body asteroid reproduction, the next diagnostic should separate the Earth–Moon barycenter orbit from Earth-center motion. The remaining several-thousand-kilometre error is comparable to the scale on which an incomplete lunar model can move Earth around the EMB.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
