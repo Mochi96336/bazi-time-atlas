@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/research-rebound-de441-state-baseline.yml"
       - "scripts/research-rebound-de441-state-baseline.py"
+      - "scripts/research-capture-horizons-n16-j2000.py"
   workflow_dispatch:
 
 permissions:
@@ -36,6 +37,11 @@ jobs:
             'ad8dfa4e505ef0e3a5d587a5b4705632' \
             'tmp/rebound-de441/de441_part-2.bsp' | md5sum --check -
 
+      - name: Capture the DE441-era Horizons N16 subset at J2000
+        run: |
+          python scripts/research-capture-horizons-n16-j2000.py \
+            --output tmp/rebound-de441/n16-j2000.json
+
       - name: Integrate from J2000 and compare with DE441 checkpoints
         run: |
           python scripts/research-rebound-de441-state-baseline.py \
@@ -44,7 +50,8 @@ jobs:
             --primary-dt-days 4 \
             --convergence-dt-days 2 \
             --gr-fine-dt-days 1 \
-            --gr-ultrafine-dt-days 0.5
+            --gr-ultrafine-dt-days 0.5 \
+            --n16-state-json tmp/rebound-de441/n16-j2000.json
 
       - name: Report research baseline without promoting it
         run: |
@@ -62,7 +69,7 @@ jobs:
           assert r["deepProjection26026"]["absoluteSeasonalPhaseResolved"] is False
           assert r["deepProjection26026"]["productionAuthorityGranted"] is False
 
-          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine", "grUltrafine", "grIas15", "grFullIas15"):
+          for family in ("primary", "convergence", "grPrimary", "grConvergence", "grFine", "grUltrafine", "grIas15", "grFullIas15", "grIas15N16"):
               samples = r[family]
               assert len(samples) == 6
               for sample in samples:
@@ -145,6 +152,20 @@ jobs:
                   f"[rebound-gr-full-delta] {sample['year']} {sample['label']}: "
                   f"full-minus-approx direction={sample['fullMinusApproxDirectionErrorArcsec']:.3f} arcsec"
               )
+          for sample in r["grIas15N16"]:
+              print(
+                  f"[rebound-n16] {sample['year']} {sample['label']}: "
+                  f"direction={sample['geocentricSunDirectionErrorArcsec']:.3f} arcsec, "
+                  f"geo-pos={sample['geocentricSunPositionErrorKm']:.1f} km, "
+                  f"geo-v={sample['geocentricSunVelocityErrorMps']:.4f} m/s"
+              )
+          for sample in r["n16Comparison"]:
+              print(
+                  f"[rebound-n16-delta] {sample['year']} {sample['label']}: "
+                  f"improvement={sample['directionImprovementArcsec']:.3f} arcsec "
+                  f"({sample['directionImprovementFraction']*100:.2f}%), "
+                  f"geo-pos-improvement={sample['positionImprovementKm']:.1f} km"
+              )
           PY
 
       - name: Remove large source kernel
@@ -156,6 +177,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: rebound-de441-state-baseline
-          path: tmp/rebound-de441/result.json
+          path: |
+            tmp/rebound-de441/result.json
+            tmp/rebound-de441/n16-j2000.json
           if-no-files-found: error
           retention-days: 7
