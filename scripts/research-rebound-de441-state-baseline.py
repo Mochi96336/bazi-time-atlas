@@ -21,12 +21,14 @@ from pathlib import Path
 
 import numpy as np
 import rebound
+import reboundx
 from jplephem.spk import SPK
 
 AU_KM = 149_597_870.700
 SECONDS_PER_DAY = 86_400.0
 J2000_TDB_JD = 2_451_545.0
 EXPECTED_KERNEL_MD5 = "ad8dfa4e505ef0e3a5d587a5b4705632"
+C_AU_PER_DAY = 173.1446326846693
 
 # GM values in km^3/s^2.  Major-body barycentres are used for planets with
 # satellites, except Earth where Earth and Moon are integrated separately.
@@ -106,16 +108,35 @@ def add_body(sim: rebound.Simulation, name: str, position, velocity):
     )
 
 
-def make_simulation(kernel: SPK, dt_days: float) -> rebound.Simulation:
+def make_simulation(
+    kernel: SPK,
+    dt_days: float,
+    physics: str = "newtonian",
+    integrator: str = "whfast"
+):
     sim = rebound.Simulation()
     sim.units = ("AU", "day", "Msun")
-    sim.integrator = "whfast"
+    if integrator not in ("whfast", "ias15"):
+        raise ValueError(f"unsupported integrator: {integrator}")
+    sim.integrator = integrator
     sim.dt = dt_days
     for name, route in BODIES:
         p, v = state_from_route(kernel, J2000_TDB_JD, route)
         add_body(sim, name, p, v)
+
     # Keep the exact DE441 barycentric initial frame.  Do not move_to_com().
-    return sim
+    # REBOUNDx's "gr" force is the single-dominant-central-body 1PN
+    # approximation.  It gets both mean motion and apsidal precession right,
+    # unlike the faster gr_potential approximation.
+    rebx = None
+    if physics in ("gr", "gr_full"):
+        rebx = reboundx.Extras(sim)
+        force = rebx.load_force(physics)
+        rebx.add_force(force)
+        force.params["c"] = C_AU_PER_DAY
+    elif physics != "newtonian":
+        raise ValueError(f"unsupported physics mode: {physics}")
+    return sim, rebx
 
 
 def vector_angle_arcsec(a, b) -> float:
@@ -164,8 +185,18 @@ def compare_at(kernel: SPK, sim: rebound.Simulation, jd: float):
     }
 
 
-def integrate_validation(kernel: SPK, dt_days: float, years: tuple[int, ...]):
-    sim = make_simulation(kernel, dt_days)
+def integrate_validation(
+    kernel: SPK,
+    dt_days: float,
+    years: tuple[int, ...],
+    physics: str = "newtonian",
+    integrator: str = "whfast"
+):
+    sim, rebx = make_simulation(
+        kernel, dt_days, physics=physics, integrator=integrator
+    )
+    # Keep the Extras object alive for the full integration.
+    _ = rebx
     samples = []
     for year in years:
         for month, day, label in (
@@ -190,6 +221,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--primary-dt-days", type=float, default=4.0)
     parser.add_argument("--convergence-dt-days", type=float, default=2.0)
+    parser.add_argument("--gr-fine-dt-days", type=float, default=1.0)
+    parser.add_argument("--gr-ultrafine-dt-days", type=float, default=0.5)
     args = parser.parse_args()
 
     observed_md5 = file_md5(args.kernel)
@@ -201,11 +234,46 @@ def main():
     kernel = SPK.open(str(args.kernel))
     try:
         validation_years = (4006, 10026)
-        primary = integrate_validation(kernel, args.primary_dt_days, validation_years)
-        convergence = integrate_validation(kernel, args.convergence_dt_days, validation_years)
+        primary = integrate_validation(
+            kernel, args.primary_dt_days, validation_years, physics="newtonian"
+        )
+        convergence = integrate_validation(
+            kernel, args.convergence_dt_days, validation_years, physics="newtonian"
+        )
+        gr_primary = integrate_validation(
+            kernel, args.primary_dt_days, validation_years, physics="gr"
+        )
+        gr_convergence = integrate_validation(
+            kernel, args.convergence_dt_days, validation_years, physics="gr"
+        )
+        gr_fine = integrate_validation(
+            kernel, args.gr_fine_dt_days, validation_years, physics="gr"
+        )
+        gr_ultrafine = integrate_validation(
+            kernel, args.gr_ultrafine_dt_days, validation_years, physics="gr"
+        )
+        gr_ias15 = integrate_validation(
+            kernel,
+            args.gr_ultrafine_dt_days,
+            validation_years,
+            physics="gr",
+            integrator="ias15"
+        )
+        gr_full_ias15 = integrate_validation(
+            kernel,
+            args.gr_ultrafine_dt_days,
+            validation_years,
+            physics="gr_full",
+            integrator="ias15"
+        )
 
-        # N-body-only deep projection.  There is no DE441 truth at year 26026.
-        deep = make_simulation(kernel, args.convergence_dt_days)
+        # Keep the existing Newtonian deep projection only as a historical
+        # unvalidated state.  No GR year-26026 state is promoted until the
+        # in-coverage checkpoints show that GR actually improves the model.
+        deep, deep_rebx = make_simulation(
+            kernel, args.convergence_dt_days, physics="newtonian"
+        )
+        _ = deep_rebx
         deep_jd = gregorian_julian_day(26026, 3, 20.5)
         deep.integrate(deep_jd - J2000_TDB_JD, exact_finish_time=1)
         dep, dev, dsp, dsv = snapshot(deep)
@@ -228,13 +296,122 @@ def main():
                 ),
             })
 
+        newtonian_by_key = {
+            (item["year"], item["label"]): item for item in convergence
+        }
+        gr_improvement = []
+        for item in gr_convergence:
+            baseline = newtonian_by_key[(item["year"], item["label"])]
+            gr_improvement.append({
+                "year": item["year"],
+                "label": item["label"],
+                "newtonianDirectionErrorArcsec": baseline["geocentricSunDirectionErrorArcsec"],
+                "grDirectionErrorArcsec": item["geocentricSunDirectionErrorArcsec"],
+                "directionImprovementArcsec": (
+                    baseline["geocentricSunDirectionErrorArcsec"]
+                    - item["geocentricSunDirectionErrorArcsec"]
+                ),
+                "directionImprovementFraction": (
+                    (baseline["geocentricSunDirectionErrorArcsec"]
+                     - item["geocentricSunDirectionErrorArcsec"])
+                    / baseline["geocentricSunDirectionErrorArcsec"]
+                ),
+                "newtonianGeocentricPositionErrorKm": baseline["geocentricSunPositionErrorKm"],
+                "grGeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
+                "positionImprovementKm": (
+                    baseline["geocentricSunPositionErrorKm"]
+                    - item["geocentricSunPositionErrorKm"]
+                ),
+            })
+
+        gr_2d_by_key = {
+            (item["year"], item["label"]): item for item in gr_convergence
+        }
+        gr_fine_convergence = []
+        for item in gr_fine:
+            coarse = gr_2d_by_key[(item["year"], item["label"])]
+            gr_fine_convergence.append({
+                "year": item["year"],
+                "label": item["label"],
+                "fineDtDays": args.gr_fine_dt_days,
+                "coarseDtDays": args.convergence_dt_days,
+                "directionErrorArcsecDifference": (
+                    item["geocentricSunDirectionErrorArcsec"]
+                    - coarse["geocentricSunDirectionErrorArcsec"]
+                ),
+                "geocentricPositionErrorKmDifference": (
+                    item["geocentricSunPositionErrorKm"]
+                    - coarse["geocentricSunPositionErrorKm"]
+                ),
+            })
+
+        gr_fine_by_key = {
+            (item["year"], item["label"]): item for item in gr_fine
+        }
+        gr_ultrafine_convergence = []
+        for item in gr_ultrafine:
+            coarse = gr_fine_by_key[(item["year"], item["label"])]
+            gr_ultrafine_convergence.append({
+                "year": item["year"],
+                "label": item["label"],
+                "fineDtDays": args.gr_ultrafine_dt_days,
+                "coarseDtDays": args.gr_fine_dt_days,
+                "directionErrorArcsecDifference": (
+                    item["geocentricSunDirectionErrorArcsec"]
+                    - coarse["geocentricSunDirectionErrorArcsec"]
+                ),
+                "geocentricPositionErrorKmDifference": (
+                    item["geocentricSunPositionErrorKm"]
+                    - coarse["geocentricSunPositionErrorKm"]
+                ),
+            })
+
+        gr_ultrafine_by_key = {
+            (item["year"], item["label"]): item for item in gr_ultrafine
+        }
+        gr_ias15_comparison = []
+        for item in gr_ias15:
+            whfast = gr_ultrafine_by_key[(item["year"], item["label"])]
+            gr_ias15_comparison.append({
+                "year": item["year"],
+                "label": item["label"],
+                "ias15DirectionErrorArcsec": item["geocentricSunDirectionErrorArcsec"],
+                "whfastHalfDayDirectionErrorArcsec": whfast["geocentricSunDirectionErrorArcsec"],
+                "ias15MinusWhfastDirectionErrorArcsec": (
+                    item["geocentricSunDirectionErrorArcsec"]
+                    - whfast["geocentricSunDirectionErrorArcsec"]
+                ),
+                "ias15GeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
+                "whfastHalfDayGeocentricPositionErrorKm": whfast["geocentricSunPositionErrorKm"],
+            })
+
+        gr_ias15_by_key = {
+            (item["year"], item["label"]): item for item in gr_ias15
+        }
+        gr_full_comparison = []
+        for item in gr_full_ias15:
+            approximate = gr_ias15_by_key[(item["year"], item["label"])]
+            gr_full_comparison.append({
+                "year": item["year"],
+                "label": item["label"],
+                "grDirectionErrorArcsec": approximate["geocentricSunDirectionErrorArcsec"],
+                "grFullDirectionErrorArcsec": item["geocentricSunDirectionErrorArcsec"],
+                "fullMinusApproxDirectionErrorArcsec": (
+                    item["geocentricSunDirectionErrorArcsec"]
+                    - approximate["geocentricSunDirectionErrorArcsec"]
+                ),
+                "grGeocentricPositionErrorKm": approximate["geocentricSunPositionErrorKm"],
+                "grFullGeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
+            })
+
         result = {
-            "schemaVersion": 1,
+            "schemaVersion": 6,
             "researchOnly": True,
             "sourceEphemeris": "DE441",
             "initialEpochTdbJulianDay": J2000_TDB_JD,
             "integrator": "WHFast",
             "reboundVersion": rebound.__version__,
+            "reboundxVersion": reboundx.__version__,
             "model": {
                 "bodies": [name for name, _ in BODIES],
                 "bodyCount": len(BODIES),
@@ -242,20 +419,47 @@ def main():
                 "earthMoonSeparated": True,
                 "asteroidsIncluded": False,
                 "generalRelativityIncluded": False,
+                "grDiagnosticMode": "reboundx-gr-single-dominant-central-body-1pn",
+                "grFullDiagnosticMode": "reboundx-gr-full-first-order-post-newtonian",
                 "solarMassLossIncluded": False,
                 "initialStateFrame": "DE441 ICRF barycentric",
                 "initialStateTimeScale": "TDB",
             },
             "primaryDtDays": args.primary_dt_days,
             "convergenceDtDays": args.convergence_dt_days,
+            "grFineDtDays": args.gr_fine_dt_days,
+            "grUltrafineDtDays": args.gr_ultrafine_dt_days,
             "primary": primary,
             "convergence": convergence,
             "convergenceDelta": convergence_delta,
+            "grPrimary": gr_primary,
+            "grConvergence": gr_convergence,
+            "grFine": gr_fine,
+            "grFineConvergence": gr_fine_convergence,
+            "grUltrafine": gr_ultrafine,
+            "grUltrafineConvergence": gr_ultrafine_convergence,
+            "grIas15": gr_ias15,
+            "grIas15Comparison": gr_ias15_comparison,
+            "grFullIas15": gr_full_ias15,
+            "grFullComparison": gr_full_comparison,
+            "grImprovement": gr_improvement,
             "summary": {
                 "primaryMaxDirectionErrorArcsec": max_metric(primary, "geocentricSunDirectionErrorArcsec"),
                 "convergenceMaxDirectionErrorArcsec": max_metric(convergence, "geocentricSunDirectionErrorArcsec"),
                 "primaryMaxGeocentricPositionErrorKm": max_metric(primary, "geocentricSunPositionErrorKm"),
                 "convergenceMaxGeocentricPositionErrorKm": max_metric(convergence, "geocentricSunPositionErrorKm"),
+                "grPrimaryMaxDirectionErrorArcsec": max_metric(gr_primary, "geocentricSunDirectionErrorArcsec"),
+                "grConvergenceMaxDirectionErrorArcsec": max_metric(gr_convergence, "geocentricSunDirectionErrorArcsec"),
+                "grFineMaxDirectionErrorArcsec": max_metric(gr_fine, "geocentricSunDirectionErrorArcsec"),
+                "grUltrafineMaxDirectionErrorArcsec": max_metric(gr_ultrafine, "geocentricSunDirectionErrorArcsec"),
+                "grIas15MaxDirectionErrorArcsec": max_metric(gr_ias15, "geocentricSunDirectionErrorArcsec"),
+                "grFullIas15MaxDirectionErrorArcsec": max_metric(gr_full_ias15, "geocentricSunDirectionErrorArcsec"),
+                "grPrimaryMaxGeocentricPositionErrorKm": max_metric(gr_primary, "geocentricSunPositionErrorKm"),
+                "grConvergenceMaxGeocentricPositionErrorKm": max_metric(gr_convergence, "geocentricSunPositionErrorKm"),
+                "grFineMaxGeocentricPositionErrorKm": max_metric(gr_fine, "geocentricSunPositionErrorKm"),
+                "grUltrafineMaxGeocentricPositionErrorKm": max_metric(gr_ultrafine, "geocentricSunPositionErrorKm"),
+                "grIas15MaxGeocentricPositionErrorKm": max_metric(gr_ias15, "geocentricSunPositionErrorKm"),
+                "grFullIas15MaxGeocentricPositionErrorKm": max_metric(gr_full_ias15, "geocentricSunPositionErrorKm"),
             },
             "deepProjection26026": {
                 "status": "unvalidated-nbody-state-only",
@@ -277,8 +481,11 @@ def main():
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps({
         "reboundVersion": result["reboundVersion"],
+        "reboundxVersion": result["reboundxVersion"],
         "primaryDtDays": result["primaryDtDays"],
         "convergenceDtDays": result["convergenceDtDays"],
+        "grFineDtDays": result["grFineDtDays"],
+        "grUltrafineDtDays": result["grUltrafineDtDays"],
         **result["summary"],
         "year26026Status": result["deepProjection26026"]["status"],
     }, indent=2))
