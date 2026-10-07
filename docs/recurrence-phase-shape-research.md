@@ -174,6 +174,18 @@ The isolated effect is small relative to the unresolved deep-time phase residual
 
 The sign must not be interpreted as evidence that solar J2 is physically wrong: DE440/441 explicitly models the Sun's second-degree zonal harmonic. Instead, in the still-incomplete reconstructed force model, **solar J2 by itself is not the dominant explanation for the remaining 7–8 arcsec residual**, and adding one physically correct term can move a partially compensated incomplete model slightly farther from DE441. The next cheap isolated diagnostic is the solar Lense–Thirring term before moving to substantially more expensive asteroid/KBO reconstructions.
 
+### Solar Lense–Thirring isolated contribution
+
+A second low-cost IAS15 + GR A/B added only the solar gravitomagnetic Lense–Thirring term using the DE440/441 solar parameters: moment-of-inertia factor `C/(MR^2) = 0.06884`, equatorial radius 696,000 km, rotation rate 14.1844 deg/day, and ICRF spin pole RA 286.13° / Dec 63.87°.
+
+Its contribution is smaller still:
+
+- year 4006: direction residual improves by only about **0.0021 arcsec**;
+- year 10026: **8.504 / 8.762 / 8.531 arcsec → 8.495 / 8.753 / 8.521 arcsec**;
+- the improvement is only about **0.0091 arcsec (~0.1%)**, with roughly 6.6 km improvement in geocentric Earth–Sun position.
+
+Therefore Lense–Thirring is physically part of the DE440/441 model but **cannot explain a meaningful fraction of the remaining deep-time phase residual**. Combined with the J2 and EMB diagnostics, the error budget now points back toward omitted distributed perturbers / common planetary phase (the remaining asteroid population and Kuiper-belt model) rather than solar oblateness, frame dragging, or Earth–Moon internal motion.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
