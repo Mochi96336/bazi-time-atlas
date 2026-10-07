@@ -96,10 +96,9 @@ def state_from_route(kernel: SPK, jd: float, route: tuple[tuple[int, int], ...])
     return position / AU_KM, velocity / AU_KM
 
 
-def add_body(sim: rebound.Simulation, name: str, position, velocity, gm_km3_s2: float | None = None):
-    gm = GM[name] if gm_km3_s2 is None else gm_km3_s2
+def add_body(sim: rebound.Simulation, name: str, position, velocity):
     sim.add(
-        m=gm / SUN_GM_UNIT,
+        m=GM[name] / SUN_GM_UNIT,
         x=float(position[0]),
         y=float(position[1]),
         z=float(position[2]),
@@ -113,8 +112,7 @@ def make_simulation(
     kernel: SPK,
     dt_days: float,
     physics: str = "newtonian",
-    integrator: str = "whfast",
-    extra_bodies: list[dict] | None = None
+    integrator: str = "whfast"
 ):
     sim = rebound.Simulation()
     sim.units = ("AU", "day", "Msun")
@@ -125,14 +123,6 @@ def make_simulation(
     for name, route in BODIES:
         p, v = state_from_route(kernel, J2000_TDB_JD, route)
         add_body(sim, name, p, v)
-    for body in extra_bodies or []:
-        add_body(
-            sim,
-            body["name"],
-            np.asarray(body["positionAu"], dtype=np.float64),
-            np.asarray(body["velocityAuPerDay"], dtype=np.float64),
-            gm_km3_s2=float(body["gmKm3S2"]),
-        )
 
     # Keep the exact DE441 barycentric initial frame.  Do not move_to_com().
     # REBOUNDx's "gr" force is the single-dominant-central-body 1PN
@@ -200,15 +190,10 @@ def integrate_validation(
     dt_days: float,
     years: tuple[int, ...],
     physics: str = "newtonian",
-    integrator: str = "whfast",
-    extra_bodies: list[dict] | None = None
+    integrator: str = "whfast"
 ):
     sim, rebx = make_simulation(
-        kernel,
-        dt_days,
-        physics=physics,
-        integrator=integrator,
-        extra_bodies=extra_bodies,
+        kernel, dt_days, physics=physics, integrator=integrator
     )
     # Keep the Extras object alive for the full integration.
     _ = rebx
@@ -238,7 +223,6 @@ def main():
     parser.add_argument("--convergence-dt-days", type=float, default=2.0)
     parser.add_argument("--gr-fine-dt-days", type=float, default=1.0)
     parser.add_argument("--gr-ultrafine-dt-days", type=float, default=0.5)
-    parser.add_argument("--n16-state-json", type=Path)
     args = parser.parse_args()
 
     observed_md5 = file_md5(args.kernel)
@@ -246,22 +230,6 @@ def main():
         raise RuntimeError(
             f"DE441 kernel MD5 mismatch: expected {EXPECTED_KERNEL_MD5}, got {observed_md5}"
         )
-
-    n16_bodies = None
-    n16_metadata = None
-    if args.n16_state_json:
-        n16_metadata = json.loads(args.n16_state_json.read_text())
-        if n16_metadata.get("setId") != "horizons-de441-era-n16":
-            raise RuntimeError("unexpected N16 state-set id")
-        if n16_metadata.get("epochTdbJulianDay") != J2000_TDB_JD:
-            raise RuntimeError("N16 states must be captured at J2000 TDB")
-        if n16_metadata.get("referenceFrame") != "ICRF":
-            raise RuntimeError("N16 states must be in ICRF")
-        if n16_metadata.get("center") != "solar-system-barycenter":
-            raise RuntimeError("N16 states must be barycentric")
-        n16_bodies = n16_metadata.get("bodies")
-        if not isinstance(n16_bodies, list) or len(n16_bodies) != 16:
-            raise RuntimeError("N16 state file must contain exactly 16 bodies")
 
     kernel = SPK.open(str(args.kernel))
     try:
@@ -298,16 +266,6 @@ def main():
             physics="gr_full",
             integrator="ias15"
         )
-        gr_ias15_n16 = None
-        if n16_bodies is not None:
-            gr_ias15_n16 = integrate_validation(
-                kernel,
-                args.gr_ultrafine_dt_days,
-                validation_years,
-                physics="gr",
-                integrator="ias15",
-                extra_bodies=n16_bodies,
-            )
 
         # Keep the existing Newtonian deep projection only as a historical
         # unvalidated state.  No GR year-26026 state is promoted until the
@@ -446,38 +404,8 @@ def main():
                 "grFullGeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
             })
 
-        n16_comparison = None
-        if gr_ias15_n16 is not None:
-            baseline_by_key = {
-                (item["year"], item["label"]): item for item in gr_ias15
-            }
-            n16_comparison = []
-            for item in gr_ias15_n16:
-                baseline = baseline_by_key[(item["year"], item["label"])]
-                n16_comparison.append({
-                    "year": item["year"],
-                    "label": item["label"],
-                    "baselineDirectionErrorArcsec": baseline["geocentricSunDirectionErrorArcsec"],
-                    "n16DirectionErrorArcsec": item["geocentricSunDirectionErrorArcsec"],
-                    "directionImprovementArcsec": (
-                        baseline["geocentricSunDirectionErrorArcsec"]
-                        - item["geocentricSunDirectionErrorArcsec"]
-                    ),
-                    "directionImprovementFraction": (
-                        (baseline["geocentricSunDirectionErrorArcsec"]
-                         - item["geocentricSunDirectionErrorArcsec"])
-                        / baseline["geocentricSunDirectionErrorArcsec"]
-                    ),
-                    "baselineGeocentricPositionErrorKm": baseline["geocentricSunPositionErrorKm"],
-                    "n16GeocentricPositionErrorKm": item["geocentricSunPositionErrorKm"],
-                    "positionImprovementKm": (
-                        baseline["geocentricSunPositionErrorKm"]
-                        - item["geocentricSunPositionErrorKm"]
-                    ),
-                })
-
         result = {
-            "schemaVersion": 7,
+            "schemaVersion": 6,
             "researchOnly": True,
             "sourceEphemeris": "DE441",
             "initialEpochTdbJulianDay": J2000_TDB_JD,
@@ -489,9 +417,7 @@ def main():
                 "bodyCount": len(BODIES),
                 "majorPlanets": True,
                 "earthMoonSeparated": True,
-                "asteroidsIncluded": n16_bodies is not None,
-                "asteroidSubset": n16_metadata.get("setId") if n16_metadata else None,
-                "asteroidCount": len(n16_bodies) if n16_bodies else 0,
+                "asteroidsIncluded": False,
                 "generalRelativityIncluded": False,
                 "grDiagnosticMode": "reboundx-gr-single-dominant-central-body-1pn",
                 "grFullDiagnosticMode": "reboundx-gr-full-first-order-post-newtonian",
@@ -516,9 +442,6 @@ def main():
             "grIas15Comparison": gr_ias15_comparison,
             "grFullIas15": gr_full_ias15,
             "grFullComparison": gr_full_comparison,
-            "grIas15N16": gr_ias15_n16,
-            "n16Comparison": n16_comparison,
-            "n16StateMetadata": n16_metadata,
             "grImprovement": gr_improvement,
             "summary": {
                 "primaryMaxDirectionErrorArcsec": max_metric(primary, "geocentricSunDirectionErrorArcsec"),
@@ -531,20 +454,12 @@ def main():
                 "grUltrafineMaxDirectionErrorArcsec": max_metric(gr_ultrafine, "geocentricSunDirectionErrorArcsec"),
                 "grIas15MaxDirectionErrorArcsec": max_metric(gr_ias15, "geocentricSunDirectionErrorArcsec"),
                 "grFullIas15MaxDirectionErrorArcsec": max_metric(gr_full_ias15, "geocentricSunDirectionErrorArcsec"),
-                "grIas15N16MaxDirectionErrorArcsec": (
-                    max_metric(gr_ias15_n16, "geocentricSunDirectionErrorArcsec")
-                    if gr_ias15_n16 is not None else None
-                ),
                 "grPrimaryMaxGeocentricPositionErrorKm": max_metric(gr_primary, "geocentricSunPositionErrorKm"),
                 "grConvergenceMaxGeocentricPositionErrorKm": max_metric(gr_convergence, "geocentricSunPositionErrorKm"),
                 "grFineMaxGeocentricPositionErrorKm": max_metric(gr_fine, "geocentricSunPositionErrorKm"),
                 "grUltrafineMaxGeocentricPositionErrorKm": max_metric(gr_ultrafine, "geocentricSunPositionErrorKm"),
                 "grIas15MaxGeocentricPositionErrorKm": max_metric(gr_ias15, "geocentricSunPositionErrorKm"),
                 "grFullIas15MaxGeocentricPositionErrorKm": max_metric(gr_full_ias15, "geocentricSunPositionErrorKm"),
-                "grIas15N16MaxGeocentricPositionErrorKm": (
-                    max_metric(gr_ias15_n16, "geocentricSunPositionErrorKm")
-                    if gr_ias15_n16 is not None else None
-                ),
             },
             "deepProjection26026": {
                 "status": "unvalidated-nbody-state-only",
