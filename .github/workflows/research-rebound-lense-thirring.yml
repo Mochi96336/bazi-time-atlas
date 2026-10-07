@@ -1,0 +1,74 @@
+name: Research solar Lense-Thirring A-B
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-lense-thirring.yml"
+      - "scripts/research-rebound-lense-thirring.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: python -m pip install --disable-pip-version-check "rebound==5.2.2" "reboundx==5.1.0" "jplephem==2.24" "numpy<3"
+
+      - name: Download official DE441 part 2 kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-lt
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-lt/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-lt/de441_part-2.bsp' | md5sum --check -
+
+      - name: Run focused IAS15 Lense-Thirring A-B
+        run: |
+          python scripts/research-rebound-lense-thirring.py \
+            --kernel tmp/rebound-lt/de441_part-2.bsp \
+            --output tmp/rebound-lt/result.json
+
+      - name: Assert research claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("tmp/rebound-lt/result.json").read_text())
+          assert r["researchOnly"] is True
+          assert r["claimBoundary"]["isolatesSolarLenseThirring"] is True
+          assert r["claimBoundary"]["includesSolarJ2"] is False
+          assert r["claimBoundary"]["includesAsteroids"] is False
+          assert r["claimBoundary"]["year26026Resolved"] is False
+          assert len(r["baseline"]) == 6
+          assert len(r["lenseThirring"]) == 6
+          assert len(r["comparison"]) == 6
+          print(json.dumps(r["summary"], indent=2))
+          PY
+
+      - name: Remove large source kernel
+        if: always()
+        run: rm -f tmp/rebound-lt/de441_part-2.bsp
+
+      - name: Upload compact research evidence
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-solar-lense-thirring-ab
+          path: tmp/rebound-lt/result.json
+          if-no-files-found: error
+          retention-days: 14
