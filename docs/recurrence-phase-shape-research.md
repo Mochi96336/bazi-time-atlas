@@ -162,6 +162,18 @@ This is only a subset experiment: DE440/441 itself integrated **343 asteroids**,
 
 So asteroid perturbations are a real contributor, but **N16 is not the dominant explanation for the remaining deep-time residual**. Before attempting a computationally expensive 343-body asteroid reproduction, the next diagnostic should separate the Earth–Moon barycenter orbit from Earth-center motion. The remaining several-thousand-kilometre error is comparable to the scale on which an incomplete lunar model can move Earth around the EMB.
 
+### Solar J2 isolated contribution
+
+A focused IAS15 + GR A/B then added only the Sun's second-degree zonal harmonic, using `J2 = 2.2e-7`, solar equatorial radius 696,000 km, and ICRF spin pole RA 286.13° / Dec 63.87°.
+
+The isolated effect is small relative to the unresolved deep-time phase residual:
+
+- year 4006: the direction residual changes by only about **+0.037–0.038 arcsec**;
+- year 10026: **8.504 / 8.762 / 8.531 arcsec → 8.654 / 8.913 / 8.681 arcsec**, a change of only about **+0.150 arcsec** (~1.7%);
+- the maximum year-10026 geocentric position residual changes by about **+109 km**.
+
+The sign must not be interpreted as evidence that solar J2 is physically wrong: DE440/441 explicitly models the Sun's second-degree zonal harmonic. Instead, in the still-incomplete reconstructed force model, **solar J2 by itself is not the dominant explanation for the remaining 7–8 arcsec residual**, and adding one physically correct term can move a partially compensated incomplete model slightly farther from DE441. The next cheap isolated diagnostic is the solar Lense–Thirring term before moving to substantially more expensive asteroid/KBO reconstructions.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
