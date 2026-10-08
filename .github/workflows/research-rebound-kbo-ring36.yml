@@ -1,0 +1,107 @@
+name: Research DE441 KBO ring36 A-B
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-kbo-ring36.yml"
+      - "scripts/research-rebound-kbo-ring36.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "rebound==5.2.2" "reboundx==5.1.0" \
+            "jplephem==2.24" "numpy<3"
+
+      - name: Compile research script
+        run: python -m py_compile scripts/research-rebound-kbo-ring36.py
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-ring36
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-ring36/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-ring36/de441_part-2.bsp' | md5sum --check -
+
+      - name: Download DE440 integration constants
+        env:
+          MASS_HEADER_URL: https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/header.440
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-ring36/header.440 \
+            "$MASS_HEADER_URL"
+          grep -q 'MA8201' tmp/rebound-ring36/header.440
+          grep -q 'MA8236' tmp/rebound-ring36/header.440
+
+      - name: Run mandatory 4006 ring36 checkpoint
+        run: |
+          python scripts/research-rebound-kbo-ring36.py \
+            --kernel tmp/rebound-ring36/de441_part-2.bsp \
+            --mass-header tmp/rebound-ring36/header.440 \
+            --years 4006 \
+            --output tmp/rebound-ring36/result-4006.json
+
+      - name: Run optional 10026 ring36 checkpoint
+        continue-on-error: true
+        timeout-minutes: 30
+        run: |
+          python scripts/research-rebound-kbo-ring36.py \
+            --kernel tmp/rebound-ring36/de441_part-2.bsp \
+            --mass-header tmp/rebound-ring36/header.440 \
+            --years 10026 \
+            --output tmp/rebound-ring36/result-10026.json
+
+      - name: Assert mandatory ring model boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("tmp/rebound-ring36/result-4006.json").read_text())
+          assert r["researchOnly"] is True
+          assert r["throughYear"] == 4006
+          assert r["ring"]["pointCount"] == 36
+          assert r["ring"]["radiusAu"] == 44.0
+          assert r["claimBoundary"]["massFromOfficialIntegrationHeader"] is True
+          assert r["claimBoundary"]["absoluteRingAzimuthKnown"] is False
+          assert r["claimBoundary"]["phaseSensitivityBracketedByTwoOffsets"] is True
+          assert r["claimBoundary"]["includesKbo30"] is False
+          assert r["claimBoundary"]["includesAsteroid343"] is False
+          assert r["claimBoundary"]["year26026Resolved"] is False
+          assert len(r["comparison"]) == 6
+          print(json.dumps(r["comparison"], indent=2))
+          PY
+
+      - name: Remove source kernel
+        if: always()
+        run: rm -f tmp/rebound-ring36/de441_part-2.bsp tmp/rebound-ring36/header.440
+
+      - name: Upload compact research evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-kbo-ring36-ab
+          path: |
+            tmp/rebound-ring36/result-4006.json
+            tmp/rebound-ring36/result-10026.json
+          if-no-files-found: warn
+          retention-days: 14
