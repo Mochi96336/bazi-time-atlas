@@ -41,6 +41,15 @@ jobs:
             'ad8dfa4e505ef0e3a5d587a5b4705632' \
             'tmp/rebound-kbo30/de441_part-2.bsp' | md5sum --check -
 
+      - name: Download compact DE440 kernel for integration mass constants
+        env:
+          MASS_KERNEL_URL: https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440.bsp
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-kbo30/de440-masses.bsp \
+            "$MASS_KERNEL_URL"
+          test -s tmp/rebound-kbo30/de440-masses.bsp
+
       - name: Download official DE441 n373 short-window perturber kernel
         env:
           SMALL_KERNEL_URL: https://ssd.jpl.nasa.gov/ftp/eph/small_bodies/asteroids_de441/sb441-n373s.bsp
@@ -54,6 +63,7 @@ jobs:
         run: |
           python scripts/research-capture-de441-n373s-j2000.py \
             --planet-kernel tmp/rebound-kbo30/de441_part-2.bsp \
+            --mass-kernel tmp/rebound-kbo30/de440-masses.bsp \
             --small-kernel tmp/rebound-kbo30/sb441-n373s.bsp \
             --output tmp/rebound-kbo30/n373s-j2000.json
 
@@ -100,6 +110,7 @@ jobs:
               "bodyCount":cap["bodyCount"],
               "innerCount":cap["innerCount"],
               "outerCount":cap["outerCount"],
+              "massKernelSha256":cap["massKernelSha256"],
               "smallKernelSha256":cap["smallKernelSha256"],
           }, indent=2))
           PY
@@ -108,6 +119,7 @@ jobs:
         if: always()
         run: |
           rm -f tmp/rebound-kbo30/de441_part-2.bsp
+          rm -f tmp/rebound-kbo30/de440-masses.bsp
           rm -f tmp/rebound-kbo30/sb441-n373s.bsp
 
       - name: Upload compact research evidence
