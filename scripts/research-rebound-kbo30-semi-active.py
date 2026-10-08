@@ -109,6 +109,7 @@ def main():
     parser.add_argument("--kernel", required=True, type=Path)
     parser.add_argument("--state-json", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--years", nargs="+", type=int, default=[4006, 10026])
     args = parser.parse_args()
 
     baseline = load_baseline_module()
@@ -127,7 +128,7 @@ def main():
         all_base = []
         all_variant = []
         all_comparison = []
-        for year in (4006, 10026):
+        for year in args.years:
             base = samples_for_year(baseline, kernel, base_sim, year)
             variant = samples_for_year(baseline, kernel, variant_sim, year)
             rows = compare_rows(base, variant)
