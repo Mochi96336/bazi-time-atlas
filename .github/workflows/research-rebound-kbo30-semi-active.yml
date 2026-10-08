@@ -29,6 +29,12 @@ jobs:
             "rebound==5.2.2" "reboundx==5.1.0" \
             "jplephem==2.24" "numpy<3"
 
+      - name: Compile research scripts before large downloads
+        run: |
+          python -m py_compile \
+            scripts/research-capture-de441-n373s-j2000.py \
+            scripts/research-rebound-kbo30-semi-active.py
+
       - name: Download official DE441 positive-time kernel
         env:
           KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
