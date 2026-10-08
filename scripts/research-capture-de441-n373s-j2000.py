@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Capture J2000 barycentric states + DE441 masses from sb441-n373s.
+"""Capture J2000 barycentric states + DE440/441 mass constants for sb441-n373s.
 
 The short-window JPL kernel is used only as a source of J2000 initial
-conditions.  Masses are joined from the DE441 planetary-kernel comment
-constants through ASSIST's production parser.  States come directly from the
-SPK, including velocities, so no Horizons API state reconstruction is needed.
+conditions.  The compact DE440 planetary SPK is used only as a constants
+source because its comment block carries the MAxxxx integration masses; the
+long DE441 part-2 kernel remains the source for Sun state / later truth.
+States come directly from SPK segments, including velocities.
 """
 
 from __future__ import annotations
@@ -52,7 +53,7 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_de441_mass_constants(kernel_path: Path) -> dict[str, float]:
+def read_de_mass_constants(kernel_path: Path) -> dict[str, float]:
     handle = spice.dafopr(str(kernel_path))
     lines = []
     try:
@@ -81,7 +82,7 @@ def read_de441_mass_constants(kernel_path: Path) -> dict[str, float]:
             )
     if len(masses) < 300:
         raise RuntimeError(
-            f"only {len(masses)} MAxxxx constants found in DE441 comments"
+            f"only {len(masses)} MAxxxx constants found in mass-kernel comments"
         )
     return masses
 
@@ -142,6 +143,7 @@ def heliocentric_radius_au(position_au, sun_position_au) -> float:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--planet-kernel", required=True, type=Path)
+    parser.add_argument("--mass-kernel", required=True, type=Path)
     parser.add_argument("--small-kernel", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
@@ -150,7 +152,7 @@ def main():
     small_kernel = SPK.open(str(args.small_kernel))
     try:
         targets = unique_targets_in_file_order(small_kernel)
-        mass_constants = read_de441_mass_constants(args.planet_kernel)
+        mass_constants = read_de_mass_constants(args.mass_kernel)
         sp, _ = planet_kernel[0, 10].compute_and_differentiate(J2000_TDB_JD)
         sun_position_au = [float(value) / AU_KM for value in sp]
 
@@ -224,7 +226,7 @@ def main():
         result = {
             "schemaVersion":1,
             "researchOnly":True,
-            "source":"NASA/JPL sb441-n373s + DE441 MAxxxx comment constants via CSPICE",
+            "source":"NASA/JPL sb441-n373s states + DE440/441 MAxxxx integration constants",
             "epochTdbJulianDay":J2000_TDB_JD,
             "center":"solar-system-barycenter",
             "referenceFrame":"ICRF",
@@ -232,6 +234,7 @@ def main():
             "velocityUnits":"AU/day",
             "setId":"de441-n373s-j2000",
             "planetKernelSha256":sha256(args.planet_kernel),
+            "massKernelSha256":sha256(args.mass_kernel),
             "smallKernelSha256":sha256(args.small_kernel),
             "bodyCount":len(bodies),
             "innerCount":len(inner),
@@ -253,6 +256,7 @@ def main():
             "innerCount":len(inner),
             "outerCount":len(outer),
             "n16MassAnchorsValidated":checked,
+            "massKernelSha256":result["massKernelSha256"],
             "smallKernelSha256":result["smallKernelSha256"],
             "outerMassGmKm3S2":sum(b["gmKm3S2"] for b in outer),
             "innerMassGmKm3S2":sum(b["gmKm3S2"] for b in inner),
