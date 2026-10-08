@@ -44,6 +44,48 @@ KNOWN_N16_GM = {
 }
 
 
+/*
+ * Official SB441 N373 Kuiper-belt perturbers.
+ *
+ * Target-code / GM pairs are the 30-KBO table associated with JPL IOM
+ * 392R-21-005.  They are deliberately kept separate from DE440's MAxxxx
+ * asteroid constants: e.g. Varuna is SPICE target 2020000, not MA20000.
+ * GM units: km^3/s^2.
+ */
+KBO30_GM = {
+    2090482: 42.20083563,   # Orcus
+    2307261: 34.32487284,   # 2002 MS4
+    3361580: 31.35634872,   # 2006 QH181
+    2120347: 29.20406281,   # Salacia
+    2455502: 29.07918639,   # 2003 UZ413
+    2208996: 27.27746377,   # 2003 AZ84
+    2055565: 27.02007279,   # 2002 AW197
+    2136108: 267.3706758,   # Haumea
+    2020000: 24.64463516,   # Varuna
+    2028978: 20.26109134,   # Ixion
+    2174567: 17.78594842,   # Varda
+    2090568: 16.68075975,   # 2004 GV9
+    2230965: 1.634741082,   # 2004 XA192
+    2145452: 16.27352452,   # 2005 RN43
+    2136472: 153.9138652,   # Makemake
+    3525142: 13.26615563,   # 2010 KZ39
+    3308265: 13.02447558,   # 2004 XR190
+    2042301: 12.22210916,   # 2001 UR163
+    2278361: 12.00558918,   # 2007 JJ43
+    2225088: 115.9640382,   # Gonggong
+    3515022: 11.53072500,   # 2010 FX86
+    2019521: 11.38427368,   # Chaos
+    2136199: 1114.688287,   # Eris
+    2084522: 102.3443083,   # 2002 TC302
+    2528381: 9.570196407,   # 2008 ST291
+    2523639: 8.579026277,   # 2010 RE64
+    2055637: 8.343412204,   # 2002 UX25
+    3545742: 7.876051143,   # 2010 RF43
+    2050000: 68.59536210,   # Quaoar
+    2090377: 66.98077008,   # Sedna
+}
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -181,15 +223,27 @@ def main():
             number = target - 2_000_000 if target >= 2_000_000 else None
             if number is None:
                 raise RuntimeError(f"unexpected non-small-body target code {target}")
-            mass_key = f"MA{number:04d}"
-            if mass_key not in mass_constants:
-                raise RuntimeError(
-                    f"DE441 mass constant {mass_key} missing for target {target}"
+
+            if target in KBO30_GM:
+                gm_km3_s2 = float(KBO30_GM[target])
+                gm_au3_day2 = (
+                    gm_km3_s2 * SECONDS_PER_DAY ** 2 / AU_KM ** 3
                 )
-            gm_au3_day2 = float(mass_constants[mass_key])
-            gm_km3_s2 = (
-                gm_au3_day2 * AU_KM ** 3 / SECONDS_PER_DAY ** 2
-            )
+                population = "kbo30"
+                mass_source = "JPL-IOM-392R-21-005-KBO30"
+            else:
+                mass_key = f"MA{number:04d}"
+                if mass_key not in mass_constants:
+                    raise RuntimeError(
+                        f"DE440 asteroid mass constant {mass_key} missing for target {target}"
+                    )
+                gm_au3_day2 = float(mass_constants[mass_key])
+                gm_km3_s2 = (
+                    gm_au3_day2 * AU_KM ** 3 / SECONDS_PER_DAY ** 2
+                )
+                population = "asteroid343"
+                mass_source = f"DE440-header-{mass_key}"
+
             radius_au = heliocentric_radius_au(p, sun_position_au)
 
             bodies.append({
@@ -198,9 +252,10 @@ def main():
                 "number":number,
                 "gmAu3Day2":gm_au3_day2,
                 "gmKm3S2":gm_km3_s2,
+                "massSource":mass_source,
                 "sourceCenter":source_center,
                 "heliocentricRadiusAuAtJ2000":radius_au,
-                "population":"outer-kbo-candidate" if radius_au > 10.0 else "inner-asteroid-candidate",
+                "population":population,
                 "positionAu":p,
                 "velocityAuPerDay":v,
             })
@@ -225,21 +280,23 @@ def main():
                 f"only {checked} N16 mass anchors found in n373s; expected at least 12"
             )
 
-        inner = [b for b in bodies if b["population"] == "inner-asteroid-candidate"]
-        outer = [b for b in bodies if b["population"] == "outer-kbo-candidate"]
-        if not (20 <= len(outer) <= 40):
+        inner = [b for b in bodies if b["population"] == "asteroid343"]
+        outer = [b for b in bodies if b["population"] == "kbo30"]
+        if len(outer) != 30:
+            present = sorted(body["targetCode"] for body in outer)
+            missing = sorted(set(KBO30_GM) - set(present))
             raise RuntimeError(
-                f"unexpected outer-body count {len(outer)}; expected DE441's ~30 KBOs"
+                f"n373s contains {len(outer)} of 30 official KBO targets; missing={missing}"
             )
-        if len(inner) < 300:
+        if len(inner) != 343:
             raise RuntimeError(
-                f"unexpected inner-body count {len(inner)}; expected hundreds of asteroids"
+                f"n373s contains {len(inner)} asteroid targets; expected 343"
             )
 
         result = {
             "schemaVersion":1,
             "researchOnly":True,
-            "source":"NASA/JPL sb441-n373s states + DE440 ASCII header MAxxxx integration constants",
+            "source":"NASA/JPL sb441-n373s states + DE440 MAxxxx asteroid constants + JPL IOM 392R-21-005 KBO30 GMs",
             "epochTdbJulianDay":J2000_TDB_JD,
             "center":"solar-system-barycenter",
             "referenceFrame":"ICRF",
@@ -256,7 +313,7 @@ def main():
             "bodies":bodies,
             "claimBoundary":{
                 "shortKernelUsedOnlyForJ2000InitialState":True,
-                "outerClassificationIsRadiusBasedProxy":True,
+                "kboClassificationUsesOfficialSpiceTargetSet":True,
                 "includesKboRing":False,
                 "productionAuthorityGranted":False,
             },
