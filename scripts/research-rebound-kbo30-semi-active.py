@@ -37,7 +37,7 @@ def load_outer(path: Path, baseline):
         raise RuntimeError("n373s capture is not at J2000 TDB")
     bodies = [
         body for body in payload["bodies"]
-        if body["population"] == "outer-kbo-candidate"
+        if body["population"] == "kbo30"
     ]
     if not (20 <= len(bodies) <= 40):
         raise RuntimeError(f"unexpected outer-body count {len(bodies)}")
@@ -161,7 +161,7 @@ def main():
                 "variant":all_variant,
                 "comparison":all_comparison,
                 "claimBoundary":{
-                    "outerClassificationIsRadiusBasedProxy":True,
+                    "kboClassificationUsesOfficialSpiceTargetSet":True,
                     "includesKboRing":False,
                     "usesSemiActiveParticles":True,
                     "smallBodiesMutuallyInteract":False,
