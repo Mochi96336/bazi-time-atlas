@@ -97,7 +97,8 @@ jobs:
 
           assert cap["researchOnly"] is True
           assert cap["bodyCount"] >= 360
-          assert 20 <= cap["outerCount"] <= 40
+          assert cap["outerCount"] == 30
+          assert cap["innerCount"] == 343
           assert cap["n16MassAnchorsValidated"] >= 12
           assert r["researchOnly"] is True
           assert r["throughYear"] == 4006
