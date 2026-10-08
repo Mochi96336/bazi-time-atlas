@@ -1,0 +1,147 @@
+name: Research DE441 asteroid343 semi-active A-B
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-asteroid343-semi-active.yml"
+      - "scripts/research-capture-de441-n373s-j2000.py"
+      - "scripts/research-rebound-asteroid343-semi-active.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "rebound==5.2.2" "reboundx==5.1.0" \
+            "jplephem==2.24" "numpy<3"
+
+      - name: Compile research scripts before large downloads
+        run: |
+          python -m py_compile \
+            scripts/research-capture-de441-n373s-j2000.py \
+            scripts/research-rebound-asteroid343-semi-active.py
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-asteroid343
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-asteroid343/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-asteroid343/de441_part-2.bsp' | md5sum --check -
+
+      - name: Download DE440 ASCII header for integration mass constants
+        env:
+          MASS_HEADER_URL: https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/header.440
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-asteroid343/header.440 \
+            "$MASS_HEADER_URL"
+          grep -Eq 'GROUP[[:space:]]+1040' tmp/rebound-asteroid343/header.440
+          grep -Eq 'GROUP[[:space:]]+1041' tmp/rebound-asteroid343/header.440
+
+      - name: Download official DE441 n373 short-window perturber kernel
+        env:
+          SMALL_KERNEL_URL: https://ssd.jpl.nasa.gov/ftp/eph/small_bodies/asteroids_de441/sb441-n373s.bsp
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-asteroid343/sb441-n373s.bsp \
+            "$SMALL_KERNEL_URL"
+          test -s tmp/rebound-asteroid343/sb441-n373s.bsp
+
+      - name: Capture J2000 states and DE441 masses
+        run: |
+          python scripts/research-capture-de441-n373s-j2000.py \
+            --planet-kernel tmp/rebound-asteroid343/de441_part-2.bsp \
+            --mass-header tmp/rebound-asteroid343/header.440 \
+            --small-kernel tmp/rebound-asteroid343/sb441-n373s.bsp \
+            --output tmp/rebound-asteroid343/n373s-j2000.json
+
+      - name: Run mandatory 4006 asteroid343 checkpoint
+        run: |
+          python scripts/research-rebound-asteroid343-semi-active.py \
+            --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
+            --state-json tmp/rebound-asteroid343/n373s-j2000.json \
+            --years 4006 \
+            --output tmp/rebound-asteroid343/result-4006.json
+
+      - name: Run optional 10026 asteroid343 checkpoint
+        continue-on-error: true
+        timeout-minutes: 45
+        run: |
+          python scripts/research-rebound-asteroid343-semi-active.py \
+            --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
+            --state-json tmp/rebound-asteroid343/n373s-j2000.json \
+            --years 10026 \
+            --output tmp/rebound-asteroid343/result-10026.json
+
+      - name: Assert mandatory 4006 research boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          cap = json.loads(Path("tmp/rebound-asteroid343/n373s-j2000.json").read_text())
+          r = json.loads(Path("tmp/rebound-asteroid343/result-4006.json").read_text())
+          assert cap["innerCount"] == 343
+          assert cap["outerCount"] == 30
+          assert r["researchOnly"] is True
+          assert r["asteroidCount"] == 343
+          assert r["throughYear"] == 4006
+          assert r["claimBoundary"]["usesSemiActiveParticles"] is True
+          assert r["claimBoundary"]["smallBodiesMutuallyInteract"] is False
+          assert r["claimBoundary"]["includesKbo30"] is False
+          assert r["claimBoundary"]["includesKboRing"] is False
+          assert r["claimBoundary"]["year26026Resolved"] is False
+          assert len(r["comparison"]) == 3
+          print(json.dumps(r["comparison"], indent=2))
+          PY
+
+      - name: Report optional 10026 result
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("tmp/rebound-asteroid343/result-10026.json")
+          if not p.exists():
+              print("[asteroid343] year-10026 checkpoint unavailable within CI budget")
+          else:
+              r = json.loads(p.read_text())
+              print(json.dumps(r["comparison"], indent=2))
+          PY
+
+      - name: Remove large source kernels
+        if: always()
+        run: |
+          rm -f tmp/rebound-asteroid343/de441_part-2.bsp
+          rm -f tmp/rebound-asteroid343/header.440
+          rm -f tmp/rebound-asteroid343/sb441-n373s.bsp
+
+      - name: Upload compact research evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-asteroid343-semi-active-ab
+          path: |
+            tmp/rebound-asteroid343/n373s-j2000.json
+            tmp/rebound-asteroid343/result-4006.json
+            tmp/rebound-asteroid343/result-10026.json
+          if-no-files-found: warn
+          retention-days: 14
