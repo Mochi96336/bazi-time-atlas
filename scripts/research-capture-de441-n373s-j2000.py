@@ -54,7 +54,7 @@ def sha256(path: Path) -> str:
 
 def _ascii_group(text: str, group_number: int) -> list[str]:
     match = re.search(
-        rf"(?m)^\\s*GROUP\\s+{group_number}\\s*$([\\s\\S]*?)(?=^\\s*GROUP\\s+\\d+\\s*$|\\Z)",
+        rf"(?m)^\s*GROUP\s+{group_number}\s*$([\s\S]*?)(?=^\s*GROUP\s+\d+\s*$|\Z)",
         text,
     )
     if not match:
