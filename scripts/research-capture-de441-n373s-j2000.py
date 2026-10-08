@@ -15,7 +15,9 @@ import json
 import math
 from pathlib import Path
 
-import assist
+import re
+
+import spiceypy as spice
 from jplephem.spk import SPK
 
 AU_KM = 149_597_870.700
@@ -48,6 +50,40 @@ def sha256(path: Path) -> str:
         while chunk := handle.read(8 * 1024 * 1024):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def read_de441_mass_constants(kernel_path: Path) -> dict[str, float]:
+    handle = spice.dafopr(str(kernel_path))
+    lines = []
+    try:
+        done = False
+        while not done:
+            n, batch, done = spice.dafec(handle, 1000, 1024)
+            lines.extend(str(line) for line in batch[:n])
+    finally:
+        spice.dafcls(handle)
+
+    masses = {}
+    in_constants = False
+    pattern = re.compile(
+        r"^\\s*(MA\\d+)\\s+([+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[DdEe][+-]?\\d+)?)"
+    )
+    for line in lines:
+        if "Initial conditions and constants used for integration:" in line:
+            in_constants = True
+            continue
+        if not in_constants:
+            continue
+        match = pattern.match(line)
+        if match:
+            masses[match.group(1)] = float(
+                match.group(2).replace("D", "E").replace("d", "e")
+            )
+    if len(masses) < 300:
+        raise RuntimeError(
+            f"only {len(masses)} MAxxxx constants found in DE441 comments"
+        )
+    return masses
 
 
 def unique_targets_in_file_order(kernel: SPK) -> list[int]:
@@ -112,10 +148,9 @@ def main():
 
     planet_kernel = SPK.open(str(args.planet_kernel))
     small_kernel = SPK.open(str(args.small_kernel))
-    ephem = assist.Ephem(str(args.planet_kernel), str(args.small_kernel))
-
     try:
         targets = unique_targets_in_file_order(small_kernel)
+        mass_constants = read_de441_mass_constants(args.planet_kernel)
         sp, _ = planet_kernel[0, 10].compute_and_differentiate(J2000_TDB_JD)
         sun_position_au = [float(value) / AU_KM for value in sp]
 
@@ -128,18 +163,22 @@ def main():
                 J2000_TDB_JD,
             )
 
-            # ASSIST indexes small-body SPK targets immediately after its 11
-            # built-in major-body IDs and joins MAxxxx masses by NAIF target.
-            ap = ephem.get_particle(11 + index, 0.0)
-            gm_au3_day2 = float(ap.m)
+            number = target - 2_000_000 if target >= 2_000_000 else None
+            if number is None:
+                raise RuntimeError(f"unexpected non-small-body target code {target}")
+            mass_key = f"MA{number:04d}"
+            if mass_key not in mass_constants:
+                raise RuntimeError(
+                    f"DE441 mass constant {mass_key} missing for target {target}"
+                )
+            gm_au3_day2 = float(mass_constants[mass_key])
             gm_km3_s2 = (
                 gm_au3_day2 * AU_KM ** 3 / SECONDS_PER_DAY ** 2
             )
-            number = target - 2_000_000 if target >= 2_000_000 else None
             radius_au = heliocentric_radius_au(p, sun_position_au)
 
             bodies.append({
-                "assistIndex":11 + index,
+                "spkTargetIndex":index,
                 "targetCode":target,
                 "number":number,
                 "gmAu3Day2":gm_au3_day2,
@@ -151,9 +190,8 @@ def main():
                 "velocityAuPerDay":v,
             })
 
-        # Validate target-order ↔ ASSIST-mass joining against the already
-        # verified N16 mass set.  This fails loudly if our ordering assumption
-        # is wrong.
+        # Validate DE441 MAxxxx parsing against the already verified N16 mass
+        # set.  This fails loudly if the constants or unit conversion drift.
         checked = 0
         for body in bodies:
             number = body["number"]
@@ -186,7 +224,7 @@ def main():
         result = {
             "schemaVersion":1,
             "researchOnly":True,
-            "source":"NASA/JPL sb441-n373s + DE441 comment masses via ASSIST 1.2.0",
+            "source":"NASA/JPL sb441-n373s + DE441 MAxxxx comment constants via CSPICE",
             "epochTdbJulianDay":J2000_TDB_JD,
             "center":"solar-system-barycenter",
             "referenceFrame":"ICRF",
