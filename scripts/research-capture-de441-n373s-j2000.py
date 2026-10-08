@@ -18,7 +18,6 @@ from pathlib import Path
 
 import re
 
-import spiceypy as spice
 from jplephem.spk import SPK
 
 AU_KM = 149_597_870.700
@@ -53,36 +52,50 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_de_mass_constants(kernel_path: Path) -> dict[str, float]:
-    handle = spice.dafopr(str(kernel_path))
-    lines = []
-    try:
-        done = False
-        while not done:
-            n, batch, done = spice.dafec(handle, 1000, 1024)
-            lines.extend(str(line) for line in batch[:n])
-    finally:
-        spice.dafcls(handle)
-
-    masses = {}
-    in_constants = False
-    pattern = re.compile(
-        r"^\\s*(MA\\d+)\\s+([+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[DdEe][+-]?\\d+)?)"
+def _ascii_group(text: str, group_number: int) -> list[str]:
+    match = re.search(
+        rf"(?m)^\\s*GROUP\\s+{group_number}\\s*$([\\s\\S]*?)(?=^\\s*GROUP\\s+\\d+\\s*$|\\Z)",
+        text,
     )
-    for line in lines:
-        if "Initial conditions and constants used for integration:" in line:
-            in_constants = True
-            continue
-        if not in_constants:
-            continue
-        match = pattern.match(line)
-        if match:
-            masses[match.group(1)] = float(
-                match.group(2).replace("D", "E").replace("d", "e")
-            )
+    if not match:
+        raise RuntimeError(f"JPL ASCII header GROUP {group_number} missing")
+    tokens = match.group(1).split()
+    if not tokens:
+        raise RuntimeError(f"JPL ASCII header GROUP {group_number} is empty")
+    try:
+        declared = int(tokens[0])
+    except ValueError as exc:
+        raise RuntimeError(
+            f"GROUP {group_number} does not begin with a constant count"
+        ) from exc
+    values = tokens[1:]
+    if len(values) < declared:
+        raise RuntimeError(
+            f"GROUP {group_number} declares {declared} values but only {len(values)} were parsed"
+        )
+    return values[:declared]
+
+
+def read_de_mass_constants(header_path: Path) -> dict[str, float]:
+    text = header_path.read_text(errors="strict")
+    names = _ascii_group(text, 1040)
+    raw_values = _ascii_group(text, 1041)
+    if len(names) != len(raw_values):
+        raise RuntimeError(
+            f"JPL constant count mismatch: {len(names)} names vs {len(raw_values)} values"
+        )
+
+    constants = {
+        name: float(raw.replace("D", "E").replace("d", "e"))
+        for name, raw in zip(names, raw_values)
+    }
+    masses = {
+        name:value for name, value in constants.items()
+        if name.startswith("MA")
+    }
     if len(masses) < 300:
         raise RuntimeError(
-            f"only {len(masses)} MAxxxx constants found in mass-kernel comments"
+            f"only {len(masses)} MAxxxx constants found in JPL ASCII header"
         )
     return masses
 
@@ -143,7 +156,7 @@ def heliocentric_radius_au(position_au, sun_position_au) -> float:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--planet-kernel", required=True, type=Path)
-    parser.add_argument("--mass-kernel", required=True, type=Path)
+    parser.add_argument("--mass-header", required=True, type=Path)
     parser.add_argument("--small-kernel", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
@@ -152,7 +165,7 @@ def main():
     small_kernel = SPK.open(str(args.small_kernel))
     try:
         targets = unique_targets_in_file_order(small_kernel)
-        mass_constants = read_de_mass_constants(args.mass_kernel)
+        mass_constants = read_de_mass_constants(args.mass_header)
         sp, _ = planet_kernel[0, 10].compute_and_differentiate(J2000_TDB_JD)
         sun_position_au = [float(value) / AU_KM for value in sp]
 
@@ -226,7 +239,7 @@ def main():
         result = {
             "schemaVersion":1,
             "researchOnly":True,
-            "source":"NASA/JPL sb441-n373s states + DE440/441 MAxxxx integration constants",
+            "source":"NASA/JPL sb441-n373s states + DE440 ASCII header MAxxxx integration constants",
             "epochTdbJulianDay":J2000_TDB_JD,
             "center":"solar-system-barycenter",
             "referenceFrame":"ICRF",
@@ -234,7 +247,7 @@ def main():
             "velocityUnits":"AU/day",
             "setId":"de441-n373s-j2000",
             "planetKernelSha256":sha256(args.planet_kernel),
-            "massKernelSha256":sha256(args.mass_kernel),
+            "massHeaderSha256":sha256(args.mass_header),
             "smallKernelSha256":sha256(args.small_kernel),
             "bodyCount":len(bodies),
             "innerCount":len(inner),
@@ -256,7 +269,7 @@ def main():
             "innerCount":len(inner),
             "outerCount":len(outer),
             "n16MassAnchorsValidated":checked,
-            "massKernelSha256":result["massKernelSha256"],
+            "massHeaderSha256":result["massHeaderSha256"],
             "smallKernelSha256":result["smallKernelSha256"],
             "outerMassGmKm3S2":sum(b["gmKm3S2"] for b in outer),
             "innerMassGmKm3S2":sum(b["gmKm3S2"] for b in inner),
