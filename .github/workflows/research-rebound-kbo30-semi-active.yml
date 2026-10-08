@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check \
             "rebound==5.2.2" "reboundx==5.1.0" \
-            "spiceypy==6.0.2" "jplephem==2.24" "numpy<3"
+            "jplephem==2.24" "numpy<3"
 
       - name: Download official DE441 positive-time kernel
         env:
@@ -41,14 +41,15 @@ jobs:
             'ad8dfa4e505ef0e3a5d587a5b4705632' \
             'tmp/rebound-kbo30/de441_part-2.bsp' | md5sum --check -
 
-      - name: Download compact DE440 kernel for integration mass constants
+      - name: Download DE440 ASCII header for integration mass constants
         env:
-          MASS_KERNEL_URL: https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440.bsp
+          MASS_HEADER_URL: https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/header.440
         run: |
           curl --fail --location --retry 4 --retry-delay 5 \
-            --output tmp/rebound-kbo30/de440-masses.bsp \
-            "$MASS_KERNEL_URL"
-          test -s tmp/rebound-kbo30/de440-masses.bsp
+            --output tmp/rebound-kbo30/header.440 \
+            "$MASS_HEADER_URL"
+          grep -Eq 'GROUP[[:space:]]+1040' tmp/rebound-kbo30/header.440
+          grep -Eq 'GROUP[[:space:]]+1041' tmp/rebound-kbo30/header.440
 
       - name: Download official DE441 n373 short-window perturber kernel
         env:
@@ -63,7 +64,7 @@ jobs:
         run: |
           python scripts/research-capture-de441-n373s-j2000.py \
             --planet-kernel tmp/rebound-kbo30/de441_part-2.bsp \
-            --mass-kernel tmp/rebound-kbo30/de440-masses.bsp \
+            --mass-header tmp/rebound-kbo30/header.440 \
             --small-kernel tmp/rebound-kbo30/sb441-n373s.bsp \
             --output tmp/rebound-kbo30/n373s-j2000.json
 
@@ -110,7 +111,7 @@ jobs:
               "bodyCount":cap["bodyCount"],
               "innerCount":cap["innerCount"],
               "outerCount":cap["outerCount"],
-              "massKernelSha256":cap["massKernelSha256"],
+              "massHeaderSha256":cap["massHeaderSha256"],
               "smallKernelSha256":cap["smallKernelSha256"],
           }, indent=2))
           PY
@@ -119,7 +120,7 @@ jobs:
         if: always()
         run: |
           rm -f tmp/rebound-kbo30/de441_part-2.bsp
-          rm -f tmp/rebound-kbo30/de440-masses.bsp
+          rm -f tmp/rebound-kbo30/header.440
           rm -f tmp/rebound-kbo30/sb441-n373s.bsp
 
       - name: Upload compact research evidence
