@@ -44,14 +44,12 @@ KNOWN_N16_GM = {
 }
 
 
-/*
- * Official SB441 N373 Kuiper-belt perturbers.
- *
- * Target-code / GM pairs are the 30-KBO table associated with JPL IOM
- * 392R-21-005.  They are deliberately kept separate from DE440's MAxxxx
- * asteroid constants: e.g. Varuna is SPICE target 2020000, not MA20000.
- * GM units: km^3/s^2.
- */
+# Official SB441 N373 Kuiper-belt perturbers.
+#
+# Target-code / GM pairs are the 30-KBO table associated with JPL IOM
+# 392R-21-005. They are deliberately kept separate from DE440's MAxxxx
+# asteroid constants: e.g. Varuna is SPICE target 2020000, not MA20000.
+# GM units: km^3/s^2.
 KBO30_GM = {
     2090482: 42.20083563,   # Orcus
     2307261: 34.32487284,   # 2002 MS4
