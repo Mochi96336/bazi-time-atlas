@@ -1,0 +1,123 @@
+name: Research DE441 KBO30 semi-active A-B
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-kbo30-semi-active.yml"
+      - "scripts/research-capture-de441-n373s-j2000.py"
+      - "scripts/research-rebound-kbo30-semi-active.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "rebound==5.2.2" "reboundx==5.1.0" \
+            "assist==1.2.0" "jplephem==2.24" "numpy<3"
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-kbo30
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-kbo30/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-kbo30/de441_part-2.bsp' | md5sum --check -
+
+      - name: Download official DE441 n373 short-window perturber kernel
+        env:
+          SMALL_KERNEL_URL: https://ssd.jpl.nasa.gov/ftp/eph/small_bodies/asteroids_de441/sb441-n373s.bsp
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-kbo30/sb441-n373s.bsp \
+            "$SMALL_KERNEL_URL"
+          test -s tmp/rebound-kbo30/sb441-n373s.bsp
+
+      - name: Capture J2000 states and DE441 masses
+        run: |
+          python scripts/research-capture-de441-n373s-j2000.py \
+            --planet-kernel tmp/rebound-kbo30/de441_part-2.bsp \
+            --small-kernel tmp/rebound-kbo30/sb441-n373s.bsp \
+            --output tmp/rebound-kbo30/n373s-j2000.json
+
+      - name: Run 4006 KBO30 checkpoint
+        run: |
+          python scripts/research-rebound-kbo30-semi-active.py \
+            --kernel tmp/rebound-kbo30/de441_part-2.bsp \
+            --state-json tmp/rebound-kbo30/n373s-j2000.json \
+            --years 4006 \
+            --output tmp/rebound-kbo30/result-4006.json
+
+      - name: Run 10026 KBO30 checkpoint
+        continue-on-error: true
+        timeout-minutes: 30
+        run: |
+          python scripts/research-rebound-kbo30-semi-active.py \
+            --kernel tmp/rebound-kbo30/de441_part-2.bsp \
+            --state-json tmp/rebound-kbo30/n373s-j2000.json \
+            --years 10026 \
+            --output tmp/rebound-kbo30/result-10026.json
+
+      - name: Assert 4006 research boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          cap = json.loads(Path("tmp/rebound-kbo30/n373s-j2000.json").read_text())
+          r = json.loads(Path("tmp/rebound-kbo30/result-4006.json").read_text())
+
+          assert cap["researchOnly"] is True
+          assert cap["bodyCount"] >= 360
+          assert 20 <= cap["outerCount"] <= 40
+          assert cap["n16MassAnchorsValidated"] >= 12
+          assert r["researchOnly"] is True
+          assert r["throughYear"] == 4006
+          assert r["claimBoundary"]["includesKboRing"] is False
+          assert r["claimBoundary"]["usesSemiActiveParticles"] is True
+          assert r["claimBoundary"]["smallBodiesMutuallyInteract"] is False
+          assert r["claimBoundary"]["year26026Resolved"] is False
+          assert len(r["comparison"]) == 3
+
+          print(json.dumps({
+              "bodyCount":cap["bodyCount"],
+              "innerCount":cap["innerCount"],
+              "outerCount":cap["outerCount"],
+              "smallKernelSha256":cap["smallKernelSha256"],
+          }, indent=2))
+          PY
+
+      - name: Remove large source kernels
+        if: always()
+        run: |
+          rm -f tmp/rebound-kbo30/de441_part-2.bsp
+          rm -f tmp/rebound-kbo30/sb441-n373s.bsp
+
+      - name: Upload compact research evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-kbo30-semi-active-ab
+          path: |
+            tmp/rebound-kbo30/n373s-j2000.json
+            tmp/rebound-kbo30/result-4006.json
+            tmp/rebound-kbo30/result-10026.json
+          if-no-files-found: warn
+          retention-days: 14
