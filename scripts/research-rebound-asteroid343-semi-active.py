@@ -106,6 +106,7 @@ def main():
     parser.add_argument("--state-json", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--years", nargs="+", type=int, default=[4006, 10026])
+    parser.add_argument("--variant-only", action="store_true")
     args = parser.parse_args()
 
     baseline = load_baseline_module()
@@ -115,9 +116,12 @@ def main():
 
     kernel = SPK.open(str(args.kernel))
     try:
-        base_sim, base_rebx = baseline.make_simulation(
-            kernel, 0.5, physics="gr", integrator="ias15"
-        )
+        base_sim = None
+        base_rebx = None
+        if not args.variant_only:
+            base_sim, base_rebx = baseline.make_simulation(
+                kernel, 0.5, physics="gr", integrator="ias15"
+            )
         variant_sim, variant_rebx = make_variant(baseline, kernel, inner)
         _ = base_rebx, variant_rebx
 
@@ -125,24 +129,39 @@ def main():
         all_variant = []
         all_comparison = []
         for year in args.years:
-            base = samples_for_year(baseline, kernel, base_sim, year)
+            base = (
+                samples_for_year(baseline, kernel, base_sim, year)
+                if base_sim is not None else []
+            )
             variant = samples_for_year(baseline, kernel, variant_sim, year)
-            rows = compare_rows(base, variant)
+            rows = compare_rows(base, variant) if base else []
             all_base.extend(base)
             all_variant.extend(variant)
             all_comparison.extend(rows)
 
-            print(f"[asteroid343-checkpoint] year={year}", flush=True)
-            for row in rows:
-                print(
-                    f"[asteroid343] {row['year']} {row['label']}: "
-                    f"{row['baselineDirectionErrorArcsec']:.6f} -> "
-                    f"{row['asteroid343DirectionErrorArcsec']:.6f} arcsec; "
-                    f"improvement={row['directionImprovementArcsec']:.6f} "
-                    f"({row['directionImprovementFraction']*100:.3f}%); "
-                    f"geo-pos-improvement={row['positionImprovementKm']:.3f} km",
-                    flush=True,
-                )
+            print(
+                f"[asteroid343-checkpoint] year={year} variant_only={args.variant_only}",
+                flush=True,
+            )
+            if rows:
+                for row in rows:
+                    print(
+                        f"[asteroid343] {row['year']} {row['label']}: "
+                        f"{row['baselineDirectionErrorArcsec']:.6f} -> "
+                        f"{row['asteroid343DirectionErrorArcsec']:.6f} arcsec; "
+                        f"improvement={row['directionImprovementArcsec']:.6f} "
+                        f"({row['directionImprovementFraction']*100:.3f}%); "
+                        f"geo-pos-improvement={row['positionImprovementKm']:.3f} km",
+                        flush=True,
+                    )
+            else:
+                for item in variant:
+                    print(
+                        f"[asteroid343-variant] {item['year']} {item['label']}: "
+                        f"direction={item['geocentricSunDirectionErrorArcsec']:.6f} arcsec; "
+                        f"geo-pos={item['geocentricSunPositionErrorKm']:.3f} km",
+                        flush=True,
+                    )
 
             partial = {
                 "schemaVersion":1,
@@ -151,6 +170,7 @@ def main():
                 "experiment":"IAS15 + gr + 343 DE441 asteroids as semi-active particles",
                 "asteroidCount":len(inner),
                 "throughYear":year,
+                "variantOnly":args.variant_only,
                 "baseline":all_base,
                 "variant":all_variant,
                 "comparison":all_comparison,
