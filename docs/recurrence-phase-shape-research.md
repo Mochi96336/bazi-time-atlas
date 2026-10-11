@@ -186,6 +186,52 @@ Its contribution is smaller still:
 
 Therefore Lense–Thirring is physically part of the DE440/441 model but **cannot explain a meaningful fraction of the remaining deep-time phase residual**. Combined with the J2 and EMB diagnostics, the error budget now points back toward omitted distributed perturbers / common planetary phase (the remaining asteroid population and Kuiper-belt model) rather than solar oblateness, frame dragging, or Earth–Moon internal motion.
 
+### Individual KBO30 experiment
+
+The official DE441 `sb441-n373s` perturber kernel separates into **343 inner asteroids + 30 outer KBO perturbers**. A semi-active IAS15 + GR A/B added only the 30 individual KBOs while deliberately leaving the 44-au KBO ring out.
+
+The result is effectively negligible for the Earth–Sun phase residual:
+
+- year 4006: only about **0.02–0.04%** change;
+- year 10026: only about **0.0019 arcsec (~0.022%)** improvement.
+
+Therefore the **30 individually modeled KBOs are not the missing source of the remaining ~7–8 arcsec residual**. This does not test the separately estimated KBO ring.
+
+### Full DE441 asteroid343 experiment
+
+The same official `sb441-n373s` state set and DE440/441 `MAxxxx` integration masses were then used to add all **343 individually modeled asteroids** as REBOUND semi-active particles: the asteroids perturb the active Sun/planet/Earth/Moon system and are perturbed by it, while asteroid–asteroid interactions are omitted.
+
+A direct IAS15 + GR + asteroid343 run is computationally practical at year 4006 and gives:
+
+- Li Chun: **0.804910 → 0.528424 arcsec** (**34.35%** improvement);
+- March equinox: **0.772039 → 0.499748 arcsec** (**35.27%**);
+- September equinox: **1.180953 → 0.925853 arcsec** (**21.60%**).
+
+A direct year-10026 IAS15 + 343 run exceeded the CI budget even after the baseline integration was removed, so the deep checkpoint uses a separately validated differential method:
+
+1. integrate the 11-body IAS15 + GR baseline;
+2. run paired WHFast baseline / +343 simulations and keep **only the asteroid-induced vector difference**;
+3. add that differential vector to the IAS15 baseline;
+4. validate the method against the direct year-4006 IAS15 + 343 truth before using it at year 10026.
+
+The timestep test is important:
+
+- WHFast **8-day** differential is numerically unstable and is rejected;
+- WHFast **4-day** reconstructs the direct year-4006 IAS15 + 343 direction residual to within **0.00012–0.00014 arcsec**;
+- at year 10026, **4-day → 2-day** convergence changes the hybrid direction result by at most **0.00156 arcsec**.
+
+Using the converged 2-day differential estimate at year 10026:
+
+- Li Chun: **8.504589 → 7.420935 arcsec** (**12.74%** improvement);
+- March equinox: **8.762853 → 7.636370 arcsec** (**12.86%**);
+- September equinox: **8.531306 → 7.454026 arcsec** (**12.63%**).
+
+The asteroid-induced Earth–Sun differential is about **788–812 km** at these checkpoints.
+
+This sharpens the error budget substantially. N16 already explained roughly **10.2–10.5%** at year 10026; the full 343 set raises that to only **12.6–12.9%**. Thus the remaining 327 asteroids add only about **2–3 percentage points** beyond N16. **Main-belt asteroid perturbations are real but are not the dominant explanation for the remaining ~7.4–7.6 arcsec residual.**
+
+The next distributed-perturber diagnostic should therefore test the **separately estimated DE440/441 KBO ring** (36 equal point masses at 44 au) or another clearly isolated force-model block, rather than simply adding still more asteroid detail.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
