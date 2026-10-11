@@ -82,7 +82,7 @@ jobs:
             --years 4006 \
             --output tmp/rebound-asteroid343/result-4006.json
 
-      - name: Run optional 10026 asteroid343 checkpoint
+      - name: Run optional 10026 asteroid343 variant-only checkpoint
         continue-on-error: true
         timeout-minutes: 45
         run: |
@@ -90,6 +90,7 @@ jobs:
             --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
             --state-json tmp/rebound-asteroid343/n373s-j2000.json \
             --years 10026 \
+            --variant-only \
             --output tmp/rebound-asteroid343/result-10026.json
 
       - name: Assert mandatory 4006 research boundary
@@ -113,18 +114,41 @@ jobs:
           print(json.dumps(r["comparison"], indent=2))
           PY
 
-      - name: Report optional 10026 result
+      - name: Report optional 10026 result against merged IAS15 baseline
         if: always()
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
+
+          # Exact IAS15 + GR direction checkpoints from the merged #560-era
+          # baseline on the same main lineage.  These were independently
+          # recomputed by the KBO30 A/B before this PR.
+          baseline = {
+              "li-chun-window": 8.504588,
+              "march-equinox-window": 8.762853,
+              "september-equinox-window": 8.531306,
+          }
+
           p = Path("tmp/rebound-asteroid343/result-10026.json")
           if not p.exists():
               print("[asteroid343] year-10026 checkpoint unavailable within CI budget")
           else:
               r = json.loads(p.read_text())
-              print(json.dumps(r["comparison"], indent=2))
+              assert r["variantOnly"] is True
+              assert r["throughYear"] == 10026
+              assert len(r["variant"]) == 3
+              for item in r["variant"]:
+                  label = item["label"]
+                  before = baseline[label]
+                  after = item["geocentricSunDirectionErrorArcsec"]
+                  gain = before - after
+                  frac = gain / before
+                  print(
+                      f"[asteroid343-10026] {label}: "
+                      f"{before:.6f} -> {after:.6f} arcsec; "
+                      f"improvement={gain:.6f} ({frac*100:.3f}%)"
+                  )
           PY
 
       - name: Remove large source kernels
