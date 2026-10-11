@@ -75,68 +75,24 @@ jobs:
             --small-kernel tmp/rebound-asteroid343/sb441-n373s.bsp \
             --output tmp/rebound-asteroid343/n373s-j2000.json
 
-      - name: Preserve direct IAS15+343 year-4006 evidence
+      - name: Preserve validated differential-method evidence
         run: |
           cat <<'EOF'
-          [asteroid343-4006-direct]
-          source_run=37740451046
-          li-chun: 0.804910 -> 0.528424 arcsec
-          march-equinox: 0.772039 -> 0.499748 arcsec
-          september-equinox: 1.180953 -> 0.925853 arcsec
+          [asteroid343-hybrid-method]
+          source_run=38151851014
+          direct-IAS15+343 year-4006:
+            li-chun=0.528424 arcsec
+            march-equinox=0.499748 arcsec
+            september-equinox=0.925853 arcsec
+          hybrid WHFast dt=4d minus direct at year-4006:
+            li-chun=+0.000125 arcsec
+            march-equinox=+0.000142 arcsec
+            september-equinox=+0.000123 arcsec
+          WHFast dt=8d was numerically unstable and is rejected.
           EOF
 
-      - name: Validate hybrid differential at year 4006 with 8-day WHFast
-        run: |
-          python scripts/research-rebound-asteroid343-hybrid-differential.py \
-            --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
-            --state-json tmp/rebound-asteroid343/n373s-j2000.json \
-            --years 4006 \
-            --dt-days 8 \
-            --output tmp/rebound-asteroid343/hybrid-4006-dt8.json
-
-      - name: Validate hybrid differential at year 4006 with 4-day WHFast
-        run: |
-          python scripts/research-rebound-asteroid343-hybrid-differential.py \
-            --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
-            --state-json tmp/rebound-asteroid343/n373s-j2000.json \
-            --years 4006 \
-            --dt-days 4 \
-            --output tmp/rebound-asteroid343/hybrid-4006-dt4.json
-
-      - name: Report hybrid validation against direct IAS15+343
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          for dt in (8, 4):
-              r = json.loads(Path(f"tmp/rebound-asteroid343/hybrid-4006-dt{dt}.json").read_text())
-              errs = [abs(row["hybridMinusDirectArcsec"]) for row in r["rows"]]
-              print(
-                  f"[asteroid343-hybrid-validation] dt={dt}d "
-                  f"max_abs_hybrid_minus_direct={max(errs):.6f} arcsec"
-              )
-              for row in r["rows"]:
-                  print(
-                      f"[asteroid343-hybrid-validation] dt={dt}d {row['label']}: "
-                      f"hybrid={row['hybrid']['directionErrorArcsec']:.6f}, "
-                      f"direct={row['directIas15Asteroid343DirectionErrorArcsec']:.6f}, "
-                      f"delta={row['hybridMinusDirectArcsec']:.6f}"
-                  )
-          PY
-
-      - name: Run year-10026 hybrid estimate with 8-day WHFast
-        timeout-minutes: 35
-        run: |
-          python scripts/research-rebound-asteroid343-hybrid-differential.py \
-            --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
-            --state-json tmp/rebound-asteroid343/n373s-j2000.json \
-            --years 10026 \
-            --dt-days 8 \
-            --output tmp/rebound-asteroid343/hybrid-10026-dt8.json
-
-      - name: Run optional year-10026 hybrid convergence with 4-day WHFast
-        continue-on-error: true
-        timeout-minutes: 35
+      - name: Run year-10026 hybrid estimate with validated 4-day WHFast
+        timeout-minutes: 25
         run: |
           python scripts/research-rebound-asteroid343-hybrid-differential.py \
             --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
@@ -145,27 +101,71 @@ jobs:
             --dt-days 4 \
             --output tmp/rebound-asteroid343/hybrid-10026-dt4.json
 
-      - name: Report year-10026 hybrid estimate
-        if: always()
+      - name: Run year-10026 hybrid convergence with 2-day WHFast
+        timeout-minutes: 35
+        run: |
+          python scripts/research-rebound-asteroid343-hybrid-differential.py \
+            --kernel tmp/rebound-asteroid343/de441_part-2.bsp \
+            --state-json tmp/rebound-asteroid343/n373s-j2000.json \
+            --years 10026 \
+            --dt-days 2 \
+            --output tmp/rebound-asteroid343/hybrid-10026-dt2.json
+
+      - name: Report year-10026 convergence
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          for dt in (8, 4):
-              p = Path(f"tmp/rebound-asteroid343/hybrid-10026-dt{dt}.json")
-              if not p.exists():
-                  print(f"[asteroid343-hybrid-10026] dt={dt}d unavailable")
-                  continue
-              r = json.loads(p.read_text())
-              for row in r["rows"]:
-                  print(
-                      f"[asteroid343-hybrid-10026] dt={dt}d {row['label']}: "
-                      f"IAS15={row['ias15Baseline']['directionErrorArcsec']:.6f} -> "
-                      f"hybrid={row['hybrid']['directionErrorArcsec']:.6f} arcsec; "
-                      f"improvement={row['directionImprovementArcsec']:.6f} "
-                      f"({row['directionImprovementFraction']*100:.3f}%); "
-                      f"asteroid-delta={row['asteroidDeltaMagnitudeKm']:.3f} km"
-                  )
+
+          by_dt = {}
+          for dt in (4, 2):
+              r = json.loads(
+                  Path(f"tmp/rebound-asteroid343/hybrid-10026-dt{dt}.json").read_text()
+              )
+              assert r["researchOnly"] is True
+              assert r["asteroidCount"] == 343
+              assert r["claimBoundary"]["usesDifferentialIntegratorCancellation"] is True
+              assert r["claimBoundary"]["year10026IsHybridEstimate"] is True
+              assert r["claimBoundary"]["year26026Resolved"] is False
+              by_dt[dt] = {row["label"]: row for row in r["rows"]}
+
+          labels = (
+              "li-chun-window",
+              "march-equinox-window",
+              "september-equinox-window",
+          )
+          for label in labels:
+              a = by_dt[4][label]
+              b = by_dt[2][label]
+              diff = (
+                  b["hybrid"]["directionErrorArcsec"]
+                  - a["hybrid"]["directionErrorArcsec"]
+              )
+              print(
+                  f"[asteroid343-convergence] {label}: "
+                  f"dt4={a['hybrid']['directionErrorArcsec']:.6f} arcsec, "
+                  f"dt2={b['hybrid']['directionErrorArcsec']:.6f} arcsec, "
+                  f"dt2-dt4={diff:.6f} arcsec"
+              )
+              print(
+                  f"[asteroid343-10026] {label}: "
+                  f"IAS15={b['ias15Baseline']['directionErrorArcsec']:.6f} -> "
+                  f"hybrid343={b['hybrid']['directionErrorArcsec']:.6f} arcsec; "
+                  f"improvement={b['directionImprovementArcsec']:.6f} "
+                  f"({b['directionImprovementFraction']*100:.3f}%); "
+                  f"asteroid-delta={b['asteroidDeltaMagnitudeKm']:.3f} km"
+              )
+
+          max_conv = max(
+              abs(
+                  by_dt[2][label]["hybrid"]["directionErrorArcsec"]
+                  - by_dt[4][label]["hybrid"]["directionErrorArcsec"]
+              )
+              for label in labels
+          )
+          print(
+              f"[asteroid343-convergence] max_abs_dt2_minus_dt4={max_conv:.6f} arcsec"
+          )
           PY
 
       - name: Assert research claim boundary
@@ -173,8 +173,9 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path("tmp/rebound-asteroid343/hybrid-10026-dt8.json")
-          r = json.loads(p.read_text())
+          r = json.loads(
+              Path("tmp/rebound-asteroid343/hybrid-10026-dt2.json").read_text()
+          )
           assert r["researchOnly"] is True
           assert r["asteroidCount"] == 343
           assert r["claimBoundary"]["usesDifferentialIntegratorCancellation"] is True
@@ -198,9 +199,7 @@ jobs:
           name: rebound-asteroid343-semi-active-ab
           path: |
             tmp/rebound-asteroid343/n373s-j2000.json
-            tmp/rebound-asteroid343/hybrid-4006-dt8.json
-            tmp/rebound-asteroid343/hybrid-4006-dt4.json
-            tmp/rebound-asteroid343/hybrid-10026-dt8.json
             tmp/rebound-asteroid343/hybrid-10026-dt4.json
+            tmp/rebound-asteroid343/hybrid-10026-dt2.json
           if-no-files-found: warn
           retention-days: 14
