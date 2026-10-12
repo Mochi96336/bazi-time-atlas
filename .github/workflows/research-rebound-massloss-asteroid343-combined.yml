@@ -1,0 +1,119 @@
+name: Research mass-loss plus asteroid343 combined
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-massloss-asteroid343-combined.yml"
+      - "scripts/research-rebound-massloss-asteroid343-combined.py"
+      - "scripts/research-capture-de441-n373s-j2000.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "rebound==5.2.2" "reboundx==5.1.0" \
+            "jplephem==2.24" "numpy<3"
+
+      - name: Compile research scripts before downloads
+        run: |
+          python -m py_compile \
+            scripts/research-rebound-massloss-asteroid343-combined.py \
+            scripts/research-capture-de441-n373s-j2000.py
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-combined
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-combined/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-combined/de441_part-2.bsp' | md5sum --check -
+
+      - name: Download DE440/441 integration constants
+        env:
+          HEADER_URL: https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/header.440
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-combined/header.440 \
+            "$HEADER_URL"
+          grep -Eq 'GROUP[[:space:]]+1040' tmp/rebound-combined/header.440
+          grep -q 'MA0001' tmp/rebound-combined/header.440
+          grep -q 'GMSDOT' tmp/rebound-combined/header.440
+
+      - name: Download official DE441 n373 short-window perturber kernel
+        env:
+          SMALL_URL: https://ssd.jpl.nasa.gov/ftp/eph/small_bodies/asteroids_de441/sb441-n373s.bsp
+        run: |
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-combined/sb441-n373s.bsp \
+            "$SMALL_URL"
+          test -s tmp/rebound-combined/sb441-n373s.bsp
+
+      - name: Capture J2000 asteroid343 states and masses
+        run: |
+          python scripts/research-capture-de441-n373s-j2000.py \
+            --planet-kernel tmp/rebound-combined/de441_part-2.bsp \
+            --mass-header tmp/rebound-combined/header.440 \
+            --small-kernel tmp/rebound-combined/sb441-n373s.bsp \
+            --output tmp/rebound-combined/n373s-j2000.json
+
+      - name: Validate combined mass-loss plus asteroid343 model
+        run: |
+          python scripts/research-rebound-massloss-asteroid343-combined.py \
+            --kernel tmp/rebound-combined/de441_part-2.bsp \
+            --state-json tmp/rebound-combined/n373s-j2000.json \
+            --output tmp/rebound-combined/result.json
+
+      - name: Assert combined research boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("tmp/rebound-combined/result.json").read_text())
+          assert r["researchOnly"] is True
+          assert r["asteroidCount"] == 343
+          assert r["summary"]["validatedForYear10026"] is True
+          assert r["summary"]["max4006HybridMinusDirectArcsec"] <= 0.01
+          assert r["summary"]["max10026Dt2MinusDt4Arcsec"] <= 0.005
+          assert r["claimBoundary"]["directComboValidatedAt4006"] is True
+          assert r["claimBoundary"]["year10026IsHybridEstimate"] is True
+          assert r["claimBoundary"]["year26026Resolved"] is False
+          assert r["claimBoundary"]["productionAuthorityGranted"] is False
+          print(json.dumps(r["summary"], indent=2))
+          PY
+
+      - name: Remove large source files
+        if: always()
+        run: |
+          rm -f tmp/rebound-combined/de441_part-2.bsp
+          rm -f tmp/rebound-combined/header.440
+          rm -f tmp/rebound-combined/sb441-n373s.bsp
+
+      - name: Upload compact combined evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-massloss-asteroid343-combined
+          path: |
+            tmp/rebound-combined/n373s-j2000.json
+            tmp/rebound-combined/result.json
+          if-no-files-found: warn
+          retention-days: 14
