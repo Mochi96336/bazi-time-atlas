@@ -232,6 +232,23 @@ This sharpens the error budget substantially. N16 already explained roughly **10
 
 The next distributed-perturber diagnostic should therefore test the **separately estimated DE440/441 KBO ring** (36 equal point masses at 44 au) or another clearly isolated force-model block, rather than simply adding still more asteroid detail.
 
+### DE440/441 KBO ring36 experiment
+
+The separately estimated Kuiper-belt ring was then isolated from both the 30 individually modeled KBOs and the 343 asteroids. The experiment uses the published DE440/441 geometry: **36 equal point masses on a circular 44-au ring in the ecliptic plane**. Point masses are read from the official `MA8201..MA8236` integration constants and run as semi-active particles with IAS15 + GR.
+
+Because the published description does not expose the original absolute azimuth of the 36-point realization, two uniform phase offsets were tested (0° and 5°). Their results are nearly identical, so ring-orientation uncertainty is not material at this level.
+
+At year 4006 the ring changes the Earth–Sun direction residual by only about **0.0020–0.0022 arcsec** (~0.16–0.28%).
+
+At year 10026:
+
+- phase 0°: **8.504588 / 8.762853 / 8.531306 arcsec → 8.495966 / 8.754164 / 8.522682 arcsec**;
+- phase 5°: **→ 8.495584 / 8.753777 / 8.522332 arcsec**;
+- the improvement is only about **0.0086–0.0091 arcsec (~0.10%)**;
+- the geocentric Earth–Sun position improves by only about **6.3–6.6 km**.
+
+Therefore the **KBO ring is also a minor term and cannot explain the remaining ~7.4–7.6 arcsec deep-time phase residual**. Combined with the KBO30, solar J2, Lense–Thirring, and EMB diagnostics, this substantially weakens the hypothesis that an omitted small-body population is the dominant source. The next research step should move away from adding ever smaller perturber blocks and instead audit the **common planetary phase / force-model / initial-condition equivalence** between the simplified REBOUND reconstruction and DE441.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
