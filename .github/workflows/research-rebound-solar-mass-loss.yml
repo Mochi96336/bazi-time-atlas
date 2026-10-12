@@ -1,0 +1,96 @@
+name: Research solar mass loss A-B
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-solar-mass-loss.yml"
+      - "scripts/research-rebound-solar-mass-loss.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: python -m pip install --disable-pip-version-check "rebound==5.2.2" "reboundx==5.1.0" "jplephem==2.24" "numpy<3"
+
+      - name: Compile research script
+        run: python -m py_compile scripts/research-rebound-solar-mass-loss.py
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-solar-mass-loss
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-solar-mass-loss/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-solar-mass-loss/de441_part-2.bsp' | md5sum --check -
+
+      - name: Run 10-year segment solar-mass-loss A-B
+        run: |
+          python scripts/research-rebound-solar-mass-loss.py \
+            --kernel tmp/rebound-solar-mass-loss/de441_part-2.bsp \
+            --segment-years 10 \
+            --years 4006 10026 \
+            --output tmp/rebound-solar-mass-loss/result-10y.json
+
+      - name: Run 1-year segment convergence A-B
+        run: |
+          python scripts/research-rebound-solar-mass-loss.py \
+            --kernel tmp/rebound-solar-mass-loss/de441_part-2.bsp \
+            --segment-years 1 \
+            --years 4006 10026 \
+            --output tmp/rebound-solar-mass-loss/result-1y.json
+
+      - name: Report convergence and claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a = json.loads(Path("tmp/rebound-solar-mass-loss/result-10y.json").read_text())
+          b = json.loads(Path("tmp/rebound-solar-mass-loss/result-1y.json").read_text())
+          assert a["researchOnly"] is True and b["researchOnly"] is True
+          assert a["fractionalSolarMassLossPerYear"] == -9e-14
+          assert b["claimBoundary"]["isolatesSolarMassLoss"] is True
+          assert b["claimBoundary"]["year26026Resolved"] is False
+          assert len(a["rows"]) == 6 and len(b["rows"]) == 6
+          for x, y in zip(a["rows"], b["rows"]):
+              assert (x["year"], x["label"]) == (y["year"], y["label"])
+              delta = (
+                  y["massLossDirectionErrorArcsec"]
+                  - x["massLossDirectionErrorArcsec"]
+              )
+              print(
+                  f"[solar-mass-loss-convergence] {y['year']} {y['label']}: "
+                  f"10y={x['massLossDirectionErrorArcsec']:.6f}, "
+                  f"1y={y['massLossDirectionErrorArcsec']:.6f}, "
+                  f"1y-minus-10y={delta:.6f} arcsec"
+              )
+          PY
+
+      - name: Remove source kernel
+        if: always()
+        run: rm -f tmp/rebound-solar-mass-loss/de441_part-2.bsp
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: rebound-solar-mass-loss-ab
+          path: |
+            tmp/rebound-solar-mass-loss/result-10y.json
+            tmp/rebound-solar-mass-loss/result-1y.json
+          if-no-files-found: warn
+          retention-days: 14
