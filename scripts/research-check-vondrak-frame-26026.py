@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
-"""Cross-check the pinned Swiss Vondrak frame against IAU SOFA/ERFA.
+"""Cross-check the year-26026 Vondrak mean-ecliptic frame.
 
-This is an implementation proof, not independent year-26026 astronomical
-truth.  The same inertial directions are also sent through the repository's
-Owen/Horizons mean-frame probe at overlap epochs so the model transition is
-measured before Owen's documented implementation range ends.
+The primary comparison is deliberately geometric:
+
+- pinned Swiss Vondrak equator/ecliptic pole series, exposed by the research
+  probe without copying the coefficient tables;
+- IAU SOFA/ERFA long-term ICRS->ecliptic matrix (ltecm).
+
+A second Swiss path ("precess + scalar swi_epsiln") is measured and explicitly
+rejected when it diverges from the pole construction at deep epochs.  Owen is
+also retained only as an overlap diagnostic because year 26026 lies outside
+the documented Swiss Owen implementation range.
+
+This proves implementation composition, not independent astronomical truth.
 """
 
 from __future__ import annotations
@@ -33,7 +41,8 @@ DIRECTIONS = (
     (319.0, -44.0),
 )
 
-MAX_SWISS_ERFA_RESIDUAL_ARCSEC = 0.05
+MAX_POLE_MATRIX_VS_ERFA_ARCSEC = 0.001
+MIN_REJECTED_SCALAR_MISMATCH_26026_ARCSEC = 1.0
 
 
 def gregorian_jd(year: int, month: int, day: float) -> float:
@@ -111,9 +120,10 @@ def run_probe(
         str(dec_degrees),
     ]
     if owen:
-        # Mean mode ignores EOP values, but the existing probe keeps one CLI
-        # for mean/apparent diagnostics.
+        # Mean mode ignores EOP values; the existing Owen probe keeps the
+        # arguments because its apparent mode needs them.
         args += ["0", "0"]
+
     run = subprocess.run(
         args,
         check=False,
@@ -142,6 +152,19 @@ def erfa_vondrak_ecliptic(
     return lon_lat_from_unit(vector)
 
 
+def summarize_by_year(rows: list[dict], key: str) -> dict[str, dict]:
+    result = {}
+    for year in YEARS:
+        values = [row[key] for row in rows if row["year"] == year]
+        if not values:
+            continue
+        result[str(year)] = {
+            "maxArcsec": max(values),
+            "meanArcsec": sum(values) / len(values),
+        }
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--vondrak-probe", required=True, type=Path)
@@ -150,21 +173,19 @@ def main() -> None:
     args = parser.parse_args()
 
     rows = []
-    bias_rows = []
-
     for year in YEARS:
         jd = gregorian_jd(year, 3, 20.5)
         for ra, dec in DIRECTIONS:
-            swiss_lon, swiss_lat, eps = run_probe(
+            pole_lon, pole_lat, pole_eps = run_probe(
                 args.vondrak_probe,
-                "mean",
+                "pole-matrix",
                 jd,
                 ra,
                 dec,
             )
-            no_bias_lon, no_bias_lat, _ = run_probe(
+            scalar_lon, scalar_lat, scalar_eps = run_probe(
                 args.vondrak_probe,
-                "mean-no-bias",
+                "scalar-obliquity",
                 jd,
                 ra,
                 dec,
@@ -175,34 +196,44 @@ def main() -> None:
                 dec,
             )
 
-            swiss_vector = unit_from_lon_lat(swiss_lon, swiss_lat)
+            pole_vector = unit_from_lon_lat(pole_lon, pole_lat)
+            scalar_vector = unit_from_lon_lat(scalar_lon, scalar_lat)
             erfa_vector = unit_from_lon_lat(erfa_lon, erfa_lat)
-            no_bias_vector = unit_from_lon_lat(no_bias_lon, no_bias_lat)
 
             rows.append({
                 "year": year,
                 "ttJulianDay": jd,
                 "icrfRaDegrees": ra,
                 "icrfDecDegrees": dec,
-                "swissLongitudeDegrees": swiss_lon,
-                "swissLatitudeDegrees": swiss_lat,
+                "swissPoleLongitudeDegrees": pole_lon,
+                "swissPoleLatitudeDegrees": pole_lat,
+                "swissPoleGeometricObliquityDegrees": pole_eps,
+                "swissScalarLongitudeDegrees": scalar_lon,
+                "swissScalarLatitudeDegrees": scalar_lat,
+                "swissScalarObliquityDegrees": scalar_eps,
                 "erfaLongitudeDegrees": erfa_lon,
                 "erfaLatitudeDegrees": erfa_lat,
-                "swissMeanObliquityDegrees": eps,
-                "swissMinusErfaArcsec": separation_arcsec(
-                    swiss_vector,
+                "poleMatrixMinusErfaArcsec": separation_arcsec(
+                    pole_vector,
                     erfa_vector,
                 ),
-            })
-            bias_rows.append({
-                "year": year,
-                "icrfRaDegrees": ra,
-                "icrfDecDegrees": dec,
-                "biasEffectArcsec": separation_arcsec(
-                    swiss_vector,
-                    no_bias_vector,
+                "scalarMinusPoleMatrixArcsec": separation_arcsec(
+                    scalar_vector,
+                    pole_vector,
                 ),
+                "scalarMinusGeometricObliquityArcsec": (
+                    scalar_eps - pole_eps
+                ) * 3600.0,
             })
+
+    pole_summary = summarize_by_year(
+        rows,
+        "poleMatrixMinusErfaArcsec",
+    )
+    scalar_summary = summarize_by_year(
+        rows,
+        "scalarMinusPoleMatrixArcsec",
+    )
 
     overlap = []
     for year in OWEN_OVERLAP_YEARS:
@@ -210,7 +241,7 @@ def main() -> None:
         for ra, dec in DIRECTIONS:
             vondrak_lon, vondrak_lat, _ = run_probe(
                 args.vondrak_probe,
-                "mean",
+                "pole-matrix",
                 jd,
                 ra,
                 dec,
@@ -228,55 +259,78 @@ def main() -> None:
                 "ttJulianDay": jd,
                 "icrfRaDegrees": ra,
                 "icrfDecDegrees": dec,
-                "vondrakMinusOwenMeanFrameArcsec": separation_arcsec(
+                "vondrakPoleMinusOwenMeanFrameArcsec": separation_arcsec(
                     unit_from_lon_lat(vondrak_lon, vondrak_lat),
                     unit_from_lon_lat(owen_lon, owen_lat),
                 ),
             })
 
-    max_cross = max(row["swissMinusErfaArcsec"] for row in rows)
-    max_bias = max(row["biasEffectArcsec"] for row in bias_rows)
-    overlap_by_year = {
-        str(year): {
-            "maxArcsec": max(
-                row["vondrakMinusOwenMeanFrameArcsec"]
-                for row in overlap
-                if row["year"] == year
-            ),
-            "meanArcsec": sum(
-                row["vondrakMinusOwenMeanFrameArcsec"]
-                for row in overlap
-                if row["year"] == year
-            )
-            / sum(1 for row in overlap if row["year"] == year),
+    overlap_by_year = {}
+    for year in OWEN_OVERLAP_YEARS:
+        values = [
+            row["vondrakPoleMinusOwenMeanFrameArcsec"]
+            for row in overlap
+            if row["year"] == year
+        ]
+        overlap_by_year[str(year)] = {
+            "maxArcsec": max(values),
+            "meanArcsec": sum(values) / len(values),
         }
-        for year in OWEN_OVERLAP_YEARS
-    }
 
-    accepted = max_cross < MAX_SWISS_ERFA_RESIDUAL_ARCSEC
+    max_pole_vs_erfa = max(
+        row["poleMatrixMinusErfaArcsec"]
+        for row in rows
+    )
+    max_scalar_26026 = scalar_summary[str(26026)]["maxArcsec"]
+
+    accepted = (
+        max_pole_vs_erfa < MAX_POLE_MATRIX_VS_ERFA_ARCSEC
+        and max_scalar_26026
+        > MIN_REJECTED_SCALAR_MISMATCH_26026_ARCSEC
+    )
 
     result = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "researchOnly": True,
         "frameModel": {
             "name": "Vondrak-Capitaine-Wallace 2011/2012 long-term precession",
-            "semantics": "ICRF direction to Earth mean ecliptic-of-date",
+            "semantics": "ICRF direction to Earth mean ecliptic-and-equinox of date",
             "targetCatalogueYear": 26026,
             "nominalValidityYearsFromJ2000": 200000,
             "nutationApplied": False,
+            "preferredConstruction": (
+                "equator-pole + ecliptic-pole + equinox basis"
+            ),
         },
         "implementationCrossCheck": {
             "implementations": [
-                "pinned Swiss Ephemeris Vondrak 2011",
-                "IAU SOFA long-term ecliptic matrix via ERFA ltecm",
+                "pinned Swiss Vondrak pre_pequ/pre_pecl pole series",
+                "IAU SOFA/ERFA long-term ecliptic matrix via erfa.ltecm",
             ],
             "sampleYears": list(YEARS),
             "directionsPerYear": len(DIRECTIONS),
-            "gateArcsec": MAX_SWISS_ERFA_RESIDUAL_ARCSEC,
-            "maxResidualArcsec": max_cross,
-            "maxSwissFrameBiasEffectArcsec": max_bias,
-            "accepted": accepted,
-            "rows": rows,
+            "gateArcsec": MAX_POLE_MATRIX_VS_ERFA_ARCSEC,
+            "maxResidualArcsec": max_pole_vs_erfa,
+            "summaryByYear": pole_summary,
+            "accepted": (
+                max_pole_vs_erfa
+                < MAX_POLE_MATRIX_VS_ERFA_ARCSEC
+            ),
+        },
+        "rejectedScalarObliquityShortcut": {
+            "description": (
+                "Swiss swi_precess + independently fitted swi_epsiln "
+                "does not preserve the full Vondrak ecliptic pole at "
+                "remote epochs"
+            ),
+            "minimumExpected26026MismatchArcsec": (
+                MIN_REJECTED_SCALAR_MISMATCH_26026_ARCSEC
+            ),
+            "summaryByYear": scalar_summary,
+            "rejected": (
+                max_scalar_26026
+                > MIN_REJECTED_SCALAR_MISMATCH_26026_ARCSEC
+            ),
         },
         "owenOverlapDiagnostic": {
             "owenImplementationCalendarRange": list(
@@ -287,10 +341,12 @@ def main() -> None:
             "summaryByYear": overlap_by_year,
             "rows": overlap,
         },
+        "rows": rows,
         "claimBoundary": {
             "year26026FrameAlgorithmCrossValidated": accepted,
             "year26026IndependentAstronomicalFrameTruth": False,
             "year26026NutationResolved": False,
+            "year26026ApparentEquinoxResolved": False,
             "year26026SeasonalCrossingResolved": False,
             "year26026CivilTimeResolved": False,
             "productionAuthorityGranted": False,
@@ -298,15 +354,17 @@ def main() -> None:
     }
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    args.output.write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n"
+    )
 
     print(
         json.dumps(
             {
                 "accepted": accepted,
-                "maxSwissVsErfaArcsec": max_cross,
-                "maxFrameBiasEffectArcsec": max_bias,
-                "vondrakVsOwen": overlap_by_year,
+                "poleMatrixVsErfa": pole_summary,
+                "scalarShortcutVsPoleMatrix": scalar_summary,
+                "vondrakPoleVsOwen": overlap_by_year,
             },
             indent=2,
         ),
@@ -315,7 +373,7 @@ def main() -> None:
 
     if not accepted:
         raise RuntimeError(
-            "Vondrak Swiss/ERFA implementation cross-check failed"
+            "Vondrak pole-matrix implementation proof failed"
         )
 
 
