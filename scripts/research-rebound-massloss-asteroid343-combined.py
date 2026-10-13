@@ -42,6 +42,16 @@ ISOLATED_MASS_LOSS_10026_ARCSEC = {
     "september-equinox-window": 0.969462,
 }
 
+# Direct IAS15 + GR + solar-mass-loss + asteroid343 truth from successful
+# workflow run 38287766502.  The subsequent fixes changed only the hybrid
+# baseline/differential construction, not this direct 4006 integration.
+DIRECT_COMBINED_4006_ARCSEC = {
+    "li-chun-window": 0.091333,
+    "march-equinox-window": 0.023001,
+    "september-equinox-window": 0.459581,
+}
+DIRECT_COMBINED_4006_SOURCE_RUN = 38287766502
+
 CHECKPOINTS = (
     (4006, 2, 4.5, "li-chun-window"),
     (4006, 3, 20.5, "march-equinox-window"),
@@ -304,8 +314,20 @@ def main():
         print("[combo] integrating IAS15 solar-mass-loss baseline", flush=True)
         mass_loss = mass_loss_ias15_states(baseline, kernel)
 
-        print("[combo] integrating direct IAS15 mass-loss + asteroid343 truth at 4006", flush=True)
-        direct_4006 = direct_combo_4006(baseline, kernel, bodies)
+        print(
+            f"[combo] using pinned direct 4006 truth from run "
+            f"{DIRECT_COMBINED_4006_SOURCE_RUN}",
+            flush=True,
+        )
+        direct_4006 = {
+            checkpoint_key(4006, label): {
+                "year": 4006,
+                "label": label,
+                "metrics": {"directionErrorArcsec": value},
+                "sourceRun": DIRECT_COMBINED_4006_SOURCE_RUN,
+            }
+            for label, value in DIRECT_COMBINED_4006_ARCSEC.items()
+        }
 
         hybrids = {}
         for dt_days in (4.0, 2.0):
@@ -399,6 +421,7 @@ def main():
                 "year": row["year"],
                 "label": row["label"],
                 "metrics": row["metrics"],
+                "sourceRun": row["sourceRun"],
             }
             for row in direct_4006.values()
         ],
@@ -420,6 +443,7 @@ def main():
         },
         "claimBoundary": {
             "directComboValidatedAt4006": True,
+            "direct4006TruthPinnedFromSuccessfulRun": DIRECT_COMBINED_4006_SOURCE_RUN,
             "year10026IsHybridEstimate": True,
             "includesSolarMassLoss": True,
             "includesAsteroid343Differential": True,
