@@ -34,6 +34,13 @@ SOLAR_FRACTIONAL_MASS_LOSS_PER_YEAR = -9.0e-14
 MASS_LOSS_SEGMENT_YEARS = 10.0
 VALIDATION_TOLERANCE_ARCSEC = 0.01
 CONVERGENCE_TOLERANCE_ARCSEC = 0.005
+MASS_LOSS_BASELINE_TOLERANCE_ARCSEC = 0.002
+
+ISOLATED_MASS_LOSS_10026_ARCSEC = {
+    "li-chun-window": 0.900330,
+    "march-equinox-window": 1.024500,
+    "september-equinox-window": 0.969462,
+}
 
 CHECKPOINTS = (
     (4006, 2, 4.5, "li-chun-window"),
@@ -316,8 +323,23 @@ def main():
         abs(row["hybridMinusDirectArcsec"]) for row in validation
     )
 
-    convergence = []
+    mass_loss_regression = []
     h4 = hybrids["4.0"]
+    for label, expected in ISOLATED_MASS_LOSS_10026_ARCSEC.items():
+        key = checkpoint_key(10026, label)
+        observed = h4[key]["massLossOnly"]["directionErrorArcsec"]
+        mass_loss_regression.append({
+            "label": label,
+            "expectedIsolatedDirectionErrorArcsec": expected,
+            "observedCombinedBaselineDirectionErrorArcsec": observed,
+            "observedMinusExpectedArcsec": observed - expected,
+        })
+    max_mass_loss_regression = max(
+        abs(row["observedMinusExpectedArcsec"])
+        for row in mass_loss_regression
+    )
+
+    convergence = []
     h2 = hybrids["2.0"]
     for label in ("li-chun-window", "march-equinox-window", "september-equinox-window"):
         key = checkpoint_key(10026, label)
@@ -336,6 +358,7 @@ def main():
     validated = (
         max_validation_error <= VALIDATION_TOLERANCE_ARCSEC
         and max_convergence_error <= CONVERGENCE_TOLERANCE_ARCSEC
+        and max_mass_loss_regression <= MASS_LOSS_BASELINE_TOLERANCE_ARCSEC
     )
 
     result = {
@@ -357,10 +380,12 @@ def main():
         "hybridDt4": serializable_rows(h4),
         "hybridDt2": serializable_rows(h2),
         "validation4006": validation,
+        "massLossBaselineRegression10026": mass_loss_regression,
         "convergence10026": convergence,
         "summary": {
             "max4006HybridMinusDirectArcsec": max_validation_error,
             "max10026Dt2MinusDt4Arcsec": max_convergence_error,
+            "max10026MassLossBaselineRegressionArcsec": max_mass_loss_regression,
             "validatedForYear10026": validated,
             "massLossBaselineUsesIndependentYearIntegrations": True,
         },
@@ -388,6 +413,7 @@ def main():
     print(
         f"[combo-summary] max-4006-validation={max_validation_error:.6f} arcsec; "
         f"max-10026-convergence={max_convergence_error:.6f} arcsec; "
+        f"max-massloss-regression={max_mass_loss_regression:.6f} arcsec; "
         f"validated={validated}",
         flush=True,
     )
@@ -403,7 +429,7 @@ def main():
 
     if not validated:
         raise RuntimeError(
-            "combined hybrid failed the 4006 direct-truth or 10026 timestep-convergence gate"
+            "combined hybrid failed the mass-loss regression, 4006 direct-truth, or 10026 timestep-convergence gate"
         )
 
 
