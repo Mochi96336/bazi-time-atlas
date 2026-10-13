@@ -38,7 +38,9 @@ jobs:
           git -C tmp/swisseph checkout --detach FETCH_HEAD
           test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
           grep -q 'SEMOD_PREC_VONDRAK_2011' tmp/swisseph/swephlib.c
-          grep -q 'swi_ldp_peps' tmp/swisseph/swephlib.c
+          grep -q 'static void pre_pecl' tmp/swisseph/swephlib.c
+          grep -q 'static void pre_pequ' tmp/swisseph/swephlib.c
+          grep -q '198.296701' tmp/swisseph/swephlib.c
           grep -q 'SEMOD_PREC_OWEN_1990' tmp/swisseph/swephlib.c
 
       - name: Build frame probes
@@ -75,21 +77,24 @@ jobs:
           r = json.loads(Path("tmp/vondrak-frame-26026.json").read_text())
           assert r["researchOnly"] is True
           assert r["implementationCrossCheck"]["accepted"] is True
-          assert r["implementationCrossCheck"]["maxResidualArcsec"] < 0.05
+          assert r["implementationCrossCheck"]["maxResidualArcsec"] < 0.001
+          assert r["rejectedScalarObliquityShortcut"]["rejected"] is True
           assert r["frameModel"]["targetCatalogueYear"] == 26026
           assert r["frameModel"]["nominalValidityYearsFromJ2000"] == 200000
           assert r["frameModel"]["nutationApplied"] is False
           assert r["owenOverlapDiagnostic"]["target26026InsideOwenImplementationRange"] is False
           assert r["claimBoundary"]["year26026FrameAlgorithmCrossValidated"] is True
           assert r["claimBoundary"]["year26026IndependentAstronomicalFrameTruth"] is False
+          assert r["claimBoundary"]["year26026NutationResolved"] is False
           assert r["claimBoundary"]["year26026SeasonalCrossingResolved"] is False
           assert r["claimBoundary"]["productionAuthorityGranted"] is False
           PY
 
       - name: Upload compact frame proof
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: vondrak-frame-26026-proof
           path: tmp/vondrak-frame-26026.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
