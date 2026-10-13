@@ -249,6 +249,55 @@ At year 10026:
 
 Therefore the **KBO ring is also a minor term and cannot explain the remaining ~7.4–7.6 arcsec deep-time phase residual**. Combined with the KBO30, solar J2, Lense–Thirring, and EMB diagnostics, this substantially weakens the hypothesis that an omitted small-body population is the dominant source. The next research step should move away from adding ever smaller perturber blocks and instead audit the **common planetary phase / force-model / initial-condition equivalence** between the simplified REBOUND reconstruction and DE441.
 
+### Solar-mass-loss × asteroid interaction gate
+
+The first attempt to combine solar mass loss with the full asteroid343 correction by running the WHFast asteroid pair directly on a time-varying solar-mass background was **rejected**. It still matched the direct year-4006 IAS15 combined truth, but at year 10026 the 1-day versus 2-day WHFast combined result diverged by about **4.70 arcsec**, so that acceleration path is numerically unusable.
+
+A narrower direct IAS15 interaction test was then run with the N16 asteroid subset at year 10026:
+
+```
+A = GR
+B = GR + solar mass loss
+C = GR + N16
+D = GR + solar mass loss + N16
+
+interaction = (D - B) - (C - A)
+```
+
+Across Li Chun, March equinox, and September equinox:
+
+- the maximum angular interaction separation is only **0.004347 arcsec**;
+- the interaction vector is only about **0.76 km**;
+- reconstructing the direct `D` state as `B + (C - A)` changes the final direction error by at most **0.000978 arcsec**.
+
+Therefore the asteroid perturbation and secular solar-mass-loss correction are empirically close to additive at year 10026 for the dominant N16 subset. This does **not** directly prove the 343-body interaction term is identical, but it provides the first direct evidence that the already-converged no-mass-loss asteroid differential can be added to the IAS15 solar-mass-loss baseline without forcing WHFast to integrate a time-varying central mass.
+
+The next step should therefore compute a **research-only 343 additive estimate** using the converged no-mass-loss asteroid343 vector differential, carry an explicit interaction uncertainty informed by the N16 direct test, and keep year 26026 unpromoted until that estimate is independently cross-checked.
+
+### Year-10026 combined solar-mass-loss + asteroid343 research estimate
+
+With the solar-mass-loss term established as the dominant missing phase correction, the final year-10026 estimator combines it with the already converged asteroid343 vector differential **without** re-running WHFast on a time-varying central mass.
+
+The evidence chain is deliberately split:
+
+1. **solar mass loss** is recomputed directly with IAS15 + GR and reproduces the isolated #565 result exactly;
+2. the year-10026 **asteroid343 vector differential** is pinned from the converged #561 workflow artifact;
+3. full asteroid343 additivity with solar mass loss is directly checked at year 4006, where the hybrid differs from direct IAS15 + GR + mass loss + 343 by at most **0.000463 arcsec**;
+4. at year 10026, a direct IAS15 N16 × mass-loss interaction test finds a maximum interaction angular separation of **0.004347 arcsec** and a maximum additive-vs-direct direction-error difference of only **0.000978 arcsec**;
+5. the N16 interaction result is retained only as **proxy evidence**, not a formal bound on the full 343-body interaction.
+
+Applying the pinned 343 differential to the corrected solar-mass-loss state at year 10026 gives:
+
+- Li Chun: **0.900330 → 0.250474 arcsec**;
+- March equinox: **1.024500 → 0.192191 arcsec**;
+- September equinox: **0.969462 → 0.126242 arcsec**.
+
+The same estimator using the older 4-day asteroid differential gives **0.249415 / 0.191255 / 0.125001 arcsec** respectively. The final 4-day → 2-day difference is therefore at most **0.001241 arcsec**.
+
+Relative to the original compact IAS15 + GR baseline of roughly **8.5–8.8 arcsec**, the combined research estimate leaves only about **0.13–0.25 arcsec** of Earth–Sun direction residual at these checkpoints.
+
+This is a major reduction, but it remains a **research estimate**, not a direct year-10026 IAS15 + 343 ephemeris reproduction. The full asteroid343 × mass-loss interaction has not been directly integrated to year 10026, and year 26026 remains unresolved. The next step should use this validated year-10026 state model as the calibration point for an explicit absolute seasonal-event / phase estimator before any +24,000-year result is surfaced.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
