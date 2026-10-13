@@ -92,7 +92,8 @@ jobs:
           assert r["asteroidCount"] == 343
           assert r["summary"]["validatedForYear10026"] is True
           assert r["summary"]["max4006HybridMinusDirectArcsec"] <= 0.01
-          assert r["summary"]["max10026Dt2MinusDt4Arcsec"] <= 0.005
+          assert r["summary"]["max10026Dt1MinusDt2Arcsec"] <= 0.005
+          assert r["summary"]["max10026MassLossBaselineRegressionArcsec"] <= 0.002
           assert r["claimBoundary"]["directComboValidatedAt4006"] is True
           assert r["claimBoundary"]["year10026IsHybridEstimate"] is True
           assert r["claimBoundary"]["year26026Resolved"] is False
