@@ -249,6 +249,31 @@ At year 10026:
 
 Therefore the **KBO ring is also a minor term and cannot explain the remaining ~7.4–7.6 arcsec deep-time phase residual**. Combined with the KBO30, solar J2, Lense–Thirring, and EMB diagnostics, this substantially weakens the hypothesis that an omitted small-body population is the dominant source. The next research step should move away from adding ever smaller perturber blocks and instead audit the **common planetary phase / force-model / initial-condition equivalence** between the simplified REBOUND reconstruction and DE441.
 
+### Solar-mass-loss × asteroid interaction gate
+
+The first attempt to combine solar mass loss with the full asteroid343 correction by running the WHFast asteroid pair directly on a time-varying solar-mass background was **rejected**. It still matched the direct year-4006 IAS15 combined truth, but at year 10026 the 1-day versus 2-day WHFast combined result diverged by about **4.70 arcsec**, so that acceleration path is numerically unusable.
+
+A narrower direct IAS15 interaction test was then run with the N16 asteroid subset at year 10026:
+
+```
+A = GR
+B = GR + solar mass loss
+C = GR + N16
+D = GR + solar mass loss + N16
+
+interaction = (D - B) - (C - A)
+```
+
+Across Li Chun, March equinox, and September equinox:
+
+- the maximum angular interaction separation is only **0.004347 arcsec**;
+- the interaction vector is only about **0.76 km**;
+- reconstructing the direct `D` state as `B + (C - A)` changes the final direction error by at most **0.000978 arcsec**.
+
+Therefore the asteroid perturbation and secular solar-mass-loss correction are empirically close to additive at year 10026 for the dominant N16 subset. This does **not** directly prove the 343-body interaction term is identical, but it provides the first direct evidence that the already-converged no-mass-loss asteroid differential can be added to the IAS15 solar-mass-loss baseline without forcing WHFast to integrate a time-varying central mass.
+
+The next step should therefore compute a **research-only 343 additive estimate** using the converged no-mass-loss asteroid343 vector differential, carry an explicit interaction uncertainty informed by the N16 direct test, and keep year 26026 unpromoted until that estimate is independently cross-checked.
+
 ## Implementation order
 
 1. Keep 01 intact as the derivation of discrete alignment; improve hierarchy rather than replacing the content.
