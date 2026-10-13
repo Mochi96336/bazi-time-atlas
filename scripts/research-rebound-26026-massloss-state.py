@@ -133,21 +133,26 @@ def integrate_to_jd(
 ):
     target_days = jd - baseline.J2000_TDB_JD
     integrate_mass_loss(sim, target_days, initial_mass, segment_years)
-    return target_days
 
 
-def calibration_rows(baseline, kernel, primary_sim, primary_initial_mass):
+def calibration_rows(baseline, kernel):
+    sim, rebx = baseline.make_simulation(
+        kernel, 0.5, physics="gr", integrator="ias15"
+    )
+    _ = rebx
+    initial_mass = float(sim.particles[0].m)
+
     rows = []
     for month, day, label in CHECKPOINTS:
         jd = baseline.gregorian_julian_day(CALIBRATION_YEAR, month, day)
         integrate_to_jd(
             baseline,
-            primary_sim,
-            primary_initial_mass,
+            sim,
+            initial_mass,
             PRIMARY_SEGMENT_YEARS,
             jd,
         )
-        model_geo = model_geo_state(baseline, primary_sim)
+        model_geo = model_geo_state(baseline, sim)
         truth_geo = truth_geo_state(baseline, kernel, jd)
         direction_error = baseline.vector_angle_arcsec(model_geo, truth_geo)
         expected = MASS_LOSS_10Y_REFERENCE_ARCSEC[label]
@@ -169,86 +174,44 @@ def calibration_rows(baseline, kernel, primary_sim, primary_initial_mass):
     return rows
 
 
-def deep_checkpoint_rows(
-    baseline,
-    primary_sim,
-    primary_initial_mass,
-    convergence_sim,
-    convergence_initial_mass,
-):
-    rows = []
-    for month, day, label in CHECKPOINTS:
-        jd = baseline.gregorian_julian_day(TARGET_YEAR, month, day)
-        integrate_to_jd(
-            baseline,
-            primary_sim,
-            primary_initial_mass,
-            PRIMARY_SEGMENT_YEARS,
-            jd,
-        )
-        integrate_to_jd(
-            baseline,
-            convergence_sim,
-            convergence_initial_mass,
-            CONVERGENCE_SEGMENT_YEARS,
-            jd,
-        )
-        primary_geo = model_geo_state(baseline, primary_sim)
-        convergence_geo = model_geo_state(baseline, convergence_sim)
-        angular_separation = baseline.vector_angle_arcsec(
-            primary_geo, convergence_geo
-        )
-        position_separation_km = float(
-            np.linalg.norm(primary_geo - convergence_geo) * baseline.AU_KM
-        )
-        row = {
-            "year": TARGET_YEAR,
-            "label": label,
-            "tdbJulianDay": jd,
-            "primarySegmentYears": PRIMARY_SEGMENT_YEARS,
-            "convergenceSegmentYears": CONVERGENCE_SEGMENT_YEARS,
-            "primary": snapshot_dict(baseline, primary_sim, jd),
-            "convergence": snapshot_dict(baseline, convergence_sim, jd),
-            "primaryMinusConvergenceDirectionArcsec": angular_separation,
-            "primaryMinusConvergencePositionKm": position_separation_km,
-        }
-        rows.append(row)
-        print(
-            f"[26026-state-checkpoint] {label}: "
-            f"10y-vs-1y={angular_separation:.9f} arcsec; "
-            f"geo-pos={position_separation_km:.6f} km",
-            flush=True,
-        )
-    return rows
-
-
-def deep_windows(baseline, kernel, segment_years: float):
-    # Start a fresh simulation so the window samples are independent of the
-    # convergence-check call sequence above.  This also makes the emitted state
-    # windows reusable by a later seasonal-frame/root-solve experiment.
+def deep_primary_windows(baseline, kernel):
+    """Run the primary 10-year-segment lane once and reuse its center samples."""
     sim, rebx = baseline.make_simulation(
         kernel, 0.5, physics="gr", integrator="ias15"
     )
     _ = rebx
     initial_mass = float(sim.particles[0].m)
 
-    samples = []
+    windows = []
+    centers = {}
+
     for month, day, label in CHECKPOINTS:
         center_jd = baseline.gregorian_julian_day(TARGET_YEAR, month, day)
         start_jd = center_jd - WINDOW_HALF_WIDTH_DAYS
-        sample_count = int(round((2 * WINDOW_HALF_WIDTH_DAYS) / WINDOW_STEP_DAYS)) + 1
+        sample_count = int(
+            round((2 * WINDOW_HALF_WIDTH_DAYS) / WINDOW_STEP_DAYS)
+        ) + 1
         rows = []
+        center_state = None
+
         for index in range(sample_count):
             jd = start_jd + index * WINDOW_STEP_DAYS
             integrate_to_jd(
                 baseline,
                 sim,
                 initial_mass,
-                segment_years,
+                PRIMARY_SEGMENT_YEARS,
                 jd,
             )
-            rows.append(snapshot_dict(baseline, sim, jd))
-        samples.append({
+            state = snapshot_dict(baseline, sim, jd)
+            rows.append(state)
+            if abs(jd - center_jd) < 1e-9:
+                center_state = state
+
+        if center_state is None:
+            raise RuntimeError(f"window center sample missing for {label}")
+        centers[label] = center_state
+        windows.append({
             "label": label,
             "catalogueYear": TARGET_YEAR,
             "centerTdbJulianDay": center_jd,
@@ -257,13 +220,74 @@ def deep_windows(baseline, kernel, segment_years: float):
             "sampleCount": len(rows),
             "samples": rows,
         })
+
         print(
             f"[26026-state-window] {label}: "
             f"{len(rows)} samples from {rows[0]['tdbJulianDay']:.6f} "
             f"to {rows[-1]['tdbJulianDay']:.6f}",
             flush=True,
         )
-    return samples
+
+    return windows, centers
+
+
+def vector_from_state(state):
+    return np.asarray(
+        state["geocentricSun"]["positionAu"],
+        dtype=np.float64,
+    )
+
+
+def deep_convergence_rows(baseline, kernel, primary_centers):
+    """Compare primary 10-year center states to a fresh 1-year-segment lane."""
+    sim, rebx = baseline.make_simulation(
+        kernel, 0.5, physics="gr", integrator="ias15"
+    )
+    _ = rebx
+    initial_mass = float(sim.particles[0].m)
+
+    rows = []
+    for month, day, label in CHECKPOINTS:
+        jd = baseline.gregorian_julian_day(TARGET_YEAR, month, day)
+        integrate_to_jd(
+            baseline,
+            sim,
+            initial_mass,
+            CONVERGENCE_SEGMENT_YEARS,
+            jd,
+        )
+        convergence = snapshot_dict(baseline, sim, jd)
+        primary = primary_centers[label]
+
+        primary_geo = vector_from_state(primary)
+        convergence_geo = vector_from_state(convergence)
+        angular_separation = baseline.vector_angle_arcsec(
+            primary_geo, convergence_geo
+        )
+        position_separation_km = float(
+            np.linalg.norm(primary_geo - convergence_geo) * baseline.AU_KM
+        )
+
+        rows.append({
+            "year": TARGET_YEAR,
+            "label": label,
+            "tdbJulianDay": jd,
+            "primarySegmentYears": PRIMARY_SEGMENT_YEARS,
+            "convergenceSegmentYears": CONVERGENCE_SEGMENT_YEARS,
+            "primary": primary,
+            "convergence": convergence,
+            "primaryMinusConvergenceDirectionArcsec": angular_separation,
+            "primaryMinusConvergencePositionKm": position_separation_km,
+        })
+
+        print(
+            f"[26026-state-checkpoint] {label}: "
+            f"10y-vs-1y={angular_separation:.9f} arcsec; "
+            f"geo-pos={position_separation_km:.6f} km",
+            flush=True,
+        )
+
+    return rows
 
 
 def main():
@@ -278,41 +302,13 @@ def main():
 
     kernel = SPK.open(str(args.kernel))
     try:
-        calibration_sim, calibration_rebx = baseline.make_simulation(
-            kernel, 0.5, physics="gr", integrator="ias15"
-        )
-        _ = calibration_rebx
-        calibration_initial_mass = float(calibration_sim.particles[0].m)
-
-        calibration = calibration_rows(
+        calibration = calibration_rows(baseline, kernel)
+        windows, primary_centers = deep_primary_windows(baseline, kernel)
+        deep = deep_convergence_rows(
             baseline,
             kernel,
-            calibration_sim,
-            calibration_initial_mass,
+            primary_centers,
         )
-
-        # The deep-time convergence pair must start from the same J2000 state.
-        # Do not continue the 10-year lane from the calibration simulation:
-        # stopping at the three year-10026 checkpoints would perturb the
-        # midpoint-segment boundaries and contaminate the 10y-vs-1y diagnostic.
-        deep_primary_sim, deep_primary_rebx = baseline.make_simulation(
-            kernel, 0.5, physics="gr", integrator="ias15"
-        )
-        deep_convergence_sim, deep_convergence_rebx = baseline.make_simulation(
-            kernel, 0.5, physics="gr", integrator="ias15"
-        )
-        _ = deep_primary_rebx, deep_convergence_rebx
-        deep_primary_initial_mass = float(deep_primary_sim.particles[0].m)
-        deep_convergence_initial_mass = float(deep_convergence_sim.particles[0].m)
-
-        deep = deep_checkpoint_rows(
-            baseline,
-            deep_primary_sim,
-            deep_primary_initial_mass,
-            deep_convergence_sim,
-            deep_convergence_initial_mass,
-        )
-        windows = deep_windows(baseline, kernel, PRIMARY_SEGMENT_YEARS)
     finally:
         kernel.close()
 
@@ -346,8 +342,10 @@ def main():
             "year": CALIBRATION_YEAR,
             "rows": calibration,
             "maxRegressionArcsec": max_calibration_regression,
-            "accepted": max_calibration_regression
-            <= MAX_CALIBRATION_REGRESSION_ARCSEC,
+            "accepted": (
+                max_calibration_regression
+                <= MAX_CALIBRATION_REGRESSION_ARCSEC
+            ),
         },
         "target": {
             "year": TARGET_YEAR,
@@ -362,7 +360,8 @@ def main():
         },
         "claimBoundary": {
             "year10026MassLossRegressionReproduced": (
-                max_calibration_regression <= MAX_CALIBRATION_REGRESSION_ARCSEC
+                max_calibration_regression
+                <= MAX_CALIBRATION_REGRESSION_ARCSEC
             ),
             "year26026AbsoluteOrbitalStateProjected": True,
             "year26026Asteroid343Included": False,
