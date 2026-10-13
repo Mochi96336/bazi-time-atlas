@@ -210,6 +210,10 @@ def direct_combo_4006(baseline, kernel, bodies):
 
 
 def asteroid_differentials(baseline, kernel, bodies, dt_days: float):
+    # The paired WHFast differential must live on the *same* secular
+    # solar-mass-loss background on both sides.  Otherwise the year-10026
+    # hybrid would silently assume asteroid and solar-mass-loss effects are
+    # separable after validating that assumption only at year 4006.
     base, base_rebx = baseline.make_simulation(
         kernel, dt_days, physics="gr", integrator="whfast"
     )
@@ -218,23 +222,44 @@ def asteroid_differentials(baseline, kernel, bodies, dt_days: float):
     )
     _ = base_rebx, variant_rebx
 
+    base_initial_sun_mass = float(base.particles[0].m)
+    variant_initial_sun_mass = float(variant.particles[0].m)
+
     out = {}
-    for year, month, day, label in CHECKPOINTS:
-        jd = baseline.gregorian_julian_day(year, month, day)
-        t = jd - baseline.J2000_TDB_JD
-        base.integrate(t, exact_finish_time=1)
-        variant.integrate(t, exact_finish_time=1)
-        base_geo, base_geo_v = geo_state(baseline, base)
-        var_geo, var_geo_v = geo_state(baseline, variant)
-        delta = var_geo - base_geo
-        delta_v = var_geo_v - base_geo_v
-        out[checkpoint_key(year, label)] = {
-            "year": year,
-            "label": label,
-            "deltaGeo": delta,
-            "deltaGeoV": delta_v,
-            "magnitudeKm": float(np.linalg.norm(delta) * baseline.AU_KM),
-        }
+    years = sorted({item[0] for item in CHECKPOINTS})
+    for target_year in years:
+        # Restart each target year from the same J2000 state, matching the
+        # independent-year IAS15 mass-loss baseline used above.
+        if target_year != years[0]:
+            base, base_rebx = baseline.make_simulation(
+                kernel, dt_days, physics="gr", integrator="whfast"
+            )
+            variant, variant_rebx = make_asteroid_sim(
+                baseline, kernel, "whfast", dt_days, bodies
+            )
+            _ = base_rebx, variant_rebx
+            base_initial_sun_mass = float(base.particles[0].m)
+            variant_initial_sun_mass = float(variant.particles[0].m)
+
+        for year, month, day, label in CHECKPOINTS:
+            if year != target_year:
+                continue
+            jd = baseline.gregorian_julian_day(year, month, day)
+            t = jd - baseline.J2000_TDB_JD
+            integrate_mass_loss(base, t, base_initial_sun_mass)
+            integrate_mass_loss(variant, t, variant_initial_sun_mass)
+            base_geo, base_geo_v = geo_state(baseline, base)
+            var_geo, var_geo_v = geo_state(baseline, variant)
+            delta = var_geo - base_geo
+            delta_v = var_geo_v - base_geo_v
+            out[checkpoint_key(year, label)] = {
+                "year": year,
+                "label": label,
+                "deltaGeo": delta,
+                "deltaGeoV": delta_v,
+                "magnitudeKm": float(np.linalg.norm(delta) * baseline.AU_KM),
+                "solarMassLossIncludedOnBothSides": True,
+            }
     return out
 
 
@@ -365,7 +390,7 @@ def main():
         "schemaVersion": 1,
         "researchOnly": True,
         "sourceEphemeris": "DE441",
-        "method": "IAS15 solar-mass-loss baseline + paired-WHFast asteroid343 differential",
+        "method": "IAS15 solar-mass-loss baseline + paired-WHFast asteroid343 differential on the same solar-mass-loss background",
         "fractionalSolarMassLossPerYear": SOLAR_FRACTIONAL_MASS_LOSS_PER_YEAR,
         "massLossSegmentYears": MASS_LOSS_SEGMENT_YEARS,
         "asteroidCount": len(bodies),
@@ -398,6 +423,7 @@ def main():
             "year10026IsHybridEstimate": True,
             "includesSolarMassLoss": True,
             "includesAsteroid343Differential": True,
+            "asteroidDifferentialIncludesSolarMassLossOnBothSides": True,
             "includesKbo30": False,
             "includesKboRing": False,
             "includesSolarJ2": False,
