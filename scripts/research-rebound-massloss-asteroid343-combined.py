@@ -141,26 +141,34 @@ def checkpoint_key(year, label):
 
 
 def mass_loss_ias15_states(baseline, kernel):
-    sim, rebx = baseline.make_simulation(
-        kernel, 0.5, physics="gr", integrator="ias15"
-    )
-    _ = rebx
-    initial_mass = float(sim.particles[0].m)
+    # Keep each validation year on an independent J2000->year integration.
+    # This matches the isolated solar-mass-loss experiment exactly and avoids
+    # letting intermediate checkpoint boundaries alter the midpoint-segment
+    # schedule for a later deep-time year.
     out = {}
-    for year, month, day, label in CHECKPOINTS:
-        jd = baseline.gregorian_julian_day(year, month, day)
-        t = jd - baseline.J2000_TDB_JD
-        integrate_mass_loss(sim, t, initial_mass)
-        geo, geo_v = geo_state(baseline, sim)
-        truth, truth_v = truth_state(baseline, kernel, jd)
-        out[checkpoint_key(year, label)] = {
-            "year": year,
-            "label": label,
-            "jd": jd,
-            "geo": geo,
-            "geoV": geo_v,
-            "metrics": metrics(baseline, geo, geo_v, truth, truth_v),
-        }
+    years = sorted({item[0] for item in CHECKPOINTS})
+    for target_year in years:
+        sim, rebx = baseline.make_simulation(
+            kernel, 0.5, physics="gr", integrator="ias15"
+        )
+        _ = rebx
+        initial_mass = float(sim.particles[0].m)
+        for year, month, day, label in CHECKPOINTS:
+            if year != target_year:
+                continue
+            jd = baseline.gregorian_julian_day(year, month, day)
+            t = jd - baseline.J2000_TDB_JD
+            integrate_mass_loss(sim, t, initial_mass)
+            geo, geo_v = geo_state(baseline, sim)
+            truth, truth_v = truth_state(baseline, kernel, jd)
+            out[checkpoint_key(year, label)] = {
+                "year": year,
+                "label": label,
+                "jd": jd,
+                "geo": geo,
+                "geoV": geo_v,
+                "metrics": metrics(baseline, geo, geo_v, truth, truth_v),
+            }
     return out
 
 
@@ -354,6 +362,7 @@ def main():
             "max4006HybridMinusDirectArcsec": max_validation_error,
             "max10026Dt2MinusDt4Arcsec": max_convergence_error,
             "validatedForYear10026": validated,
+            "massLossBaselineUsesIndependentYearIntegrations": True,
         },
         "captureMetadata": {
             "setId": metadata["setId"],
