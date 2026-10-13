@@ -1,0 +1,81 @@
+{
+  "asteroidCount": 343,
+  "claimBoundary": {
+    "full343MassLossInteractionDirectlyValidatedAt10026": false,
+    "n16ProvidesInteractionProxyAt10026": true,
+    "productionAuthorityGranted": false,
+    "vectorsAreNoMassLossAsteroidDifferentials": true,
+    "year26026Resolved": false
+  },
+  "method": "paired WHFast baseline/+343 semi-active asteroid differential, validated against IAS15 at year 4006",
+  "researchOnly": true,
+  "rows": [
+    {
+      "dt2": {
+        "deltaMagnitudeKm": 789.9483534305527,
+        "deltaVectorAu": [-2.210381307543585e-06, 4.3452682194078385e-06, 2.028869814069134e-06],
+        "deltaVelocityMps": 0.15738603650613373,
+        "hybridDirectionErrorArcsecOnNoMassLossBaseline": 7.420934989602225
+      },
+      "dt2MinusDt4NoMassLossHybridArcsec": -0.0012894472516107314,
+      "dt4": {
+        "deltaMagnitudeKm": 788.9974510618335,
+        "deltaVectorAu": [-2.2041759711877162e-06, 4.341458199996762e-06, 2.0272429492873556e-06],
+        "deltaVelocityMps": 0.1572938103927006,
+        "hybridDirectionErrorArcsecOnNoMassLossBaseline": 7.422224436853836
+      },
+      "label": "li-chun-window"
+    },
+    {
+      "dt2": {
+        "deltaMagnitudeKm": 812.4783195985684,
+        "deltaVectorAu": [-5.037738311897133e-06, 1.7672971199811371e-06, 9.972494678933685e-07],
+        "deltaVelocityMps": 0.1622517086690834,
+        "hybridDirectionErrorArcsecOnNoMassLossBaseline": 7.636370339509913
+      },
+      "dt2MinusDt4NoMassLossHybridArcsec": -0.0015573454473365445,
+      "dt4": {
+        "deltaMagnitudeKm": 811.3404184771099,
+        "deltaVectorAu": [-5.028627833580934e-06, 1.7694366932774486e-06, 9.98040435407077e-07],
+        "deltaVelocityMps": 0.16175096716570347,
+        "hybridDirectionErrorArcsecOnNoMassLossBaseline": 7.6379276849572495
+      },
+      "label": "march-equinox-window"
+    },
+    {
+      "dt2": {
+        "deltaMagnitudeKm": 787.5977609065964,
+        "deltaVectorAu": [4.9858672602765e-06, -1.454435705983137e-06, -8.622667199142953e-07],
+        "deltaVelocityMps": 0.15683911588561233,
+        "hybridDirectionErrorArcsecOnNoMassLossBaseline": 7.454025672602555
+      },
+      "dt2MinusDt4NoMassLossHybridArcsec": -0.0015206755261054639,
+      "dt4": {
+        "deltaMagnitudeKm": 786.5056797157453,
+        "deltaVectorAu": [4.977433038289014e-06, -1.4564573264097547e-06, -8.630402043019458e-07],
+        "deltaVelocityMps": 0.15630692444460423,
+        "hybridDirectionErrorArcsecOnNoMassLossBaseline": 7.45554634812866
+      },
+      "label": "september-equinox-window"
+    }
+  ],
+  "schemaVersion": 1,
+  "source": {
+    "artifactDigest": "sha256:abf48c5694f2cf944b5d591b97497cf12b0b7b42953cc979df59b7261f385b26",
+    "artifactId": 11708050901,
+    "artifactName": "rebound-asteroid343-semi-active-ab",
+    "headSha": "14e56bc4d936e82fcad576b3640cc7cc8ec7709a",
+    "smallKernelSha256": "2143113282bfc2b2a0b0b4626125d4f84362339b5a8ae7eea40f4120ca8da10b",
+    "workflowRunId": 38153410864
+  },
+  "validation": {
+    "direct4006MaxHybridMinusDirectArcsec": 0.00046273247484818203,
+    "direct4006SourceRunId": 38287766502,
+    "massLossSourceRunId": 38246001887,
+    "massLossTenYearToOneYearMaxDifferenceArcsec": 0.0004408030260135,
+    "n16MassLossInteractionSourceRunId": 38425282795,
+    "n16MaxAdditiveMinusDirectDirectionErrorArcsec": 0.0009777501754433676,
+    "n16MaxInteractionAngularSeparationArcsec": 0.00434670577101264
+  },
+  "year": 10026
+}
