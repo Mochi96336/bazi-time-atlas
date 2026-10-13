@@ -36,6 +36,16 @@ VALIDATION_TOLERANCE_ARCSEC = 0.01
 CONVERGENCE_TOLERANCE_ARCSEC = 0.005
 MASS_LOSS_BASELINE_TOLERANCE_ARCSEC = 0.002
 
+# Successful 2-day mass-loss-background hybrid from workflow run 38366972043.
+# The 4-day result in that run was rejected because it failed the direct-4006
+# validation catastrophically; the 2-day result matched direct truth at 4006.
+PINNED_HYBRID_DT2_10026_ARCSEC = {
+    "li-chun-window": 0.371116,
+    "march-equinox-window": 0.167391,
+    "september-equinox-window": 0.150323,
+}
+PINNED_HYBRID_DT2_SOURCE_RUN = 38366972043
+
 ISOLATED_MASS_LOSS_10026_ARCSEC = {
     "li-chun-window": 0.900330,
     "march-equinox-window": 1.024500,
@@ -329,25 +339,25 @@ def main():
             for label, value in DIRECT_COMBINED_4006_ARCSEC.items()
         }
 
-        hybrids = {}
-        for dt_days in (4.0, 2.0):
-            print(f"[combo] paired WHFast asteroid differential dt={dt_days}d", flush=True)
-            delta = asteroid_differentials(
-                baseline, kernel, bodies, dt_days
-            )
-            hybrids[str(dt_days)] = build_hybrid(
+        print("[combo] paired WHFast asteroid differential dt=1d", flush=True)
+        delta = asteroid_differentials(
+            baseline, kernel, bodies, 1.0
+        )
+        hybrids = {
+            "1.0": build_hybrid(
                 baseline, kernel, mass_loss, delta
             )
-            for year, _, _, label in CHECKPOINTS:
-                key = checkpoint_key(year, label)
-                row = hybrids[str(dt_days)][key]
-                print(
-                    f"[combo-hybrid] dt={dt_days:.0f}d {year} {label}: "
-                    f"massloss={row['massLossOnly']['directionErrorArcsec']:.6f} -> "
-                    f"combined={row['hybrid']['directionErrorArcsec']:.6f} arcsec; "
-                    f"asteroid-delta={row['asteroidDeltaMagnitudeKm']:.3f} km",
-                    flush=True,
-                )
+        }
+        for year, _, _, label in CHECKPOINTS:
+            key = checkpoint_key(year, label)
+            row = hybrids["1.0"][key]
+            print(
+                f"[combo-hybrid] dt=1d {year} {label}: "
+                f"massloss={row['massLossOnly']['directionErrorArcsec']:.6f} -> "
+                f"combined={row['hybrid']['directionErrorArcsec']:.6f} arcsec; "
+                f"asteroid-delta={row['asteroidDeltaMagnitudeKm']:.3f} km",
+                flush=True,
+            )
     finally:
         kernel.close()
 
@@ -371,10 +381,10 @@ def main():
     )
 
     mass_loss_regression = []
-    h4 = hybrids["4.0"]
+    h1 = hybrids["1.0"]
     for label, expected in ISOLATED_MASS_LOSS_10026_ARCSEC.items():
         key = checkpoint_key(10026, label)
-        observed = h4[key]["massLossOnly"]["directionErrorArcsec"]
+        observed = h1[key]["massLossOnly"]["directionErrorArcsec"]
         mass_loss_regression.append({
             "label": label,
             "expectedIsolatedDirectionErrorArcsec": expected,
@@ -387,19 +397,19 @@ def main():
     )
 
     convergence = []
-    h2 = hybrids["2.0"]
     for label in ("li-chun-window", "march-equinox-window", "september-equinox-window"):
         key = checkpoint_key(10026, label)
-        a = h4[key]["hybrid"]["directionErrorArcsec"]
-        b = h2[key]["hybrid"]["directionErrorArcsec"]
+        dt2 = PINNED_HYBRID_DT2_10026_ARCSEC[label]
+        dt1 = h1[key]["hybrid"]["directionErrorArcsec"]
         convergence.append({
             "label": label,
-            "dt4DirectionErrorArcsec": a,
-            "dt2DirectionErrorArcsec": b,
-            "dt2MinusDt4Arcsec": b - a,
+            "dt2DirectionErrorArcsec": dt2,
+            "dt1DirectionErrorArcsec": dt1,
+            "dt1MinusDt2Arcsec": dt1 - dt2,
+            "dt2SourceRun": PINNED_HYBRID_DT2_SOURCE_RUN,
         })
     max_convergence_error = max(
-        abs(row["dt2MinusDt4Arcsec"]) for row in convergence
+        abs(row["dt1MinusDt2Arcsec"]) for row in convergence
     )
 
     validated = (
@@ -425,14 +435,15 @@ def main():
             }
             for row in direct_4006.values()
         ],
-        "hybridDt4": serializable_rows(h4),
-        "hybridDt2": serializable_rows(h2),
+        "hybridDt1": serializable_rows(h1),
+        "pinnedHybridDt2_10026": PINNED_HYBRID_DT2_10026_ARCSEC,
+        "pinnedHybridDt2SourceRun": PINNED_HYBRID_DT2_SOURCE_RUN,
         "validation4006": validation,
         "massLossBaselineRegression10026": mass_loss_regression,
         "convergence10026": convergence,
         "summary": {
             "max4006HybridMinusDirectArcsec": max_validation_error,
-            "max10026Dt2MinusDt4Arcsec": max_convergence_error,
+            "max10026Dt1MinusDt2Arcsec": max_convergence_error,
             "max10026MassLossBaselineRegressionArcsec": max_mass_loss_regression,
             "validatedForYear10026": validated,
             "massLossBaselineUsesIndependentYearIntegrations": True,
@@ -462,12 +473,12 @@ def main():
 
     print(
         f"[combo-summary] max-4006-validation={max_validation_error:.6f} arcsec; "
-        f"max-10026-convergence={max_convergence_error:.6f} arcsec; "
+        f"max-10026-1d-minus-2d={max_convergence_error:.6f} arcsec; "
         f"max-massloss-regression={max_mass_loss_regression:.6f} arcsec; "
         f"validated={validated}",
         flush=True,
     )
-    for row in serializable_rows(h2):
+    for row in serializable_rows(h1):
         if row["year"] != 10026:
             continue
         print(
