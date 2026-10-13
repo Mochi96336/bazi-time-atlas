@@ -109,7 +109,7 @@ def snapshot_dict(baseline, sim, tdb_julian_day: float):
             "velocityAuPerDay": [float(x) for x in geo_v],
             "rangeAu": float(np.linalg.norm(geo)),
         },
-        "sunMassFactor": float(sim.particles[0].m),
+        "sunMassSimulationUnits": float(sim.particles[0].m),
     }
 
 
@@ -278,28 +278,39 @@ def main():
 
     kernel = SPK.open(str(args.kernel))
     try:
-        primary_sim, primary_rebx = baseline.make_simulation(
+        calibration_sim, calibration_rebx = baseline.make_simulation(
             kernel, 0.5, physics="gr", integrator="ias15"
         )
-        convergence_sim, convergence_rebx = baseline.make_simulation(
-            kernel, 0.5, physics="gr", integrator="ias15"
-        )
-        _ = primary_rebx, convergence_rebx
-        primary_initial_mass = float(primary_sim.particles[0].m)
-        convergence_initial_mass = float(convergence_sim.particles[0].m)
+        _ = calibration_rebx
+        calibration_initial_mass = float(calibration_sim.particles[0].m)
 
         calibration = calibration_rows(
             baseline,
             kernel,
-            primary_sim,
-            primary_initial_mass,
+            calibration_sim,
+            calibration_initial_mass,
         )
+
+        # The deep-time convergence pair must start from the same J2000 state.
+        # Do not continue the 10-year lane from the calibration simulation:
+        # stopping at the three year-10026 checkpoints would perturb the
+        # midpoint-segment boundaries and contaminate the 10y-vs-1y diagnostic.
+        deep_primary_sim, deep_primary_rebx = baseline.make_simulation(
+            kernel, 0.5, physics="gr", integrator="ias15"
+        )
+        deep_convergence_sim, deep_convergence_rebx = baseline.make_simulation(
+            kernel, 0.5, physics="gr", integrator="ias15"
+        )
+        _ = deep_primary_rebx, deep_convergence_rebx
+        deep_primary_initial_mass = float(deep_primary_sim.particles[0].m)
+        deep_convergence_initial_mass = float(deep_convergence_sim.particles[0].m)
+
         deep = deep_checkpoint_rows(
             baseline,
-            primary_sim,
-            primary_initial_mass,
-            convergence_sim,
-            convergence_initial_mass,
+            deep_primary_sim,
+            deep_primary_initial_mass,
+            deep_convergence_sim,
+            deep_convergence_initial_mass,
         )
         windows = deep_windows(baseline, kernel, PRIMARY_SEGMENT_YEARS)
     finally:
