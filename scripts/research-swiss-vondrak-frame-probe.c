@@ -4,10 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "swephexp.h"
-#include "sweph.h"
-#include "swephlib.h"
-
 /*
  * This research probe intentionally compiles the pinned Swiss swephlib.c into
  * the same translation unit.  That gives the probe access to Swiss's static
