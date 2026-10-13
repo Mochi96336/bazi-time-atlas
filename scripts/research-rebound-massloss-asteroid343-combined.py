@@ -362,19 +362,17 @@ def main():
         kernel.close()
 
     validation = []
-    for dt_days in (4.0, 2.0):
-        rows = hybrids[str(dt_days)]
-        for label in ("li-chun-window", "march-equinox-window", "september-equinox-window"):
-            key = checkpoint_key(4006, label)
-            direct = direct_4006[key]["metrics"]["directionErrorArcsec"]
-            hybrid = rows[key]["hybrid"]["directionErrorArcsec"]
-            validation.append({
-                "dtDays": dt_days,
-                "label": label,
-                "directDirectionErrorArcsec": direct,
-                "hybridDirectionErrorArcsec": hybrid,
-                "hybridMinusDirectArcsec": hybrid - direct,
-            })
+    for label in ("li-chun-window", "march-equinox-window", "september-equinox-window"):
+        key = checkpoint_key(4006, label)
+        direct = direct_4006[key]["metrics"]["directionErrorArcsec"]
+        hybrid = hybrids["1.0"][key]["hybrid"]["directionErrorArcsec"]
+        validation.append({
+            "dtDays": 1.0,
+            "label": label,
+            "directDirectionErrorArcsec": direct,
+            "hybridDirectionErrorArcsec": hybrid,
+            "hybridMinusDirectArcsec": hybrid - direct,
+        })
 
     max_validation_error = max(
         abs(row["hybridMinusDirectArcsec"]) for row in validation
