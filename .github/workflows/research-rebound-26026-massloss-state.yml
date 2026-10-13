@@ -1,0 +1,83 @@
+name: Research year-26026 mass-loss state projection
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-26026-massloss-state.yml"
+      - "scripts/research-rebound-26026-massloss-state.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  project:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: python -m pip install --disable-pip-version-check "rebound==5.2.2" "reboundx==5.1.0" "jplephem==2.24" "numpy<3"
+
+      - name: Compile projection harness
+        run: python -m py_compile scripts/research-rebound-26026-massloss-state.py
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-26026-state
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/rebound-26026-state/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/rebound-26026-state/de441_part-2.bsp' | md5sum --check -
+
+      - name: Project calibrated orbital state to year 26026
+        run: |
+          python scripts/research-rebound-26026-massloss-state.py \
+            --kernel tmp/rebound-26026-state/de441_part-2.bsp \
+            --output tmp/rebound-26026-state/result.json
+
+      - name: Assert research boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          r = json.loads(Path("tmp/rebound-26026-state/result.json").read_text())
+          assert r["researchOnly"] is True
+          assert r["summary"]["acceptedAsOrbitalStateProjection"] is True
+          assert r["summary"]["maxCalibrationRegressionArcsec"] <= 0.002
+          assert r["summary"]["maxTenYearVsOneYearDirectionArcsec"] <= 0.05
+          assert r["claimBoundary"]["year10026MassLossRegressionReproduced"] is True
+          assert r["claimBoundary"]["year26026AbsoluteOrbitalStateProjected"] is True
+          assert r["claimBoundary"]["year26026Asteroid343Included"] is False
+          assert r["claimBoundary"]["year26026LongTermFrameApplied"] is False
+          assert r["claimBoundary"]["year26026SeasonalCrossingResolved"] is False
+          assert r["claimBoundary"]["productionAuthorityGranted"] is False
+          assert len(r["target"]["stateWindows"]) == 3
+          assert all(window["sampleCount"] == 65 for window in r["target"]["stateWindows"])
+          print(json.dumps(r["summary"], indent=2))
+          PY
+
+      - name: Remove large source kernel
+        if: always()
+        run: rm -f tmp/rebound-26026-state/de441_part-2.bsp
+
+      - name: Upload compact state projection
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-26026-massloss-state
+          path: tmp/rebound-26026-state/result.json
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 9
