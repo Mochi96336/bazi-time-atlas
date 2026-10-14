@@ -242,6 +242,7 @@ export function createOrbitalBackground({
   ResizeObserverCtor = globalThis.ResizeObserver,
   MutationObserverCtor = globalThis.MutationObserver,
   visibilityTarget = globalThis.document ?? null,
+  pageTarget = globalThis.window ?? null,
   options = {}
 } = {}) {
   const orbitalSpace = root?.querySelector?.(".orbital-space");
@@ -467,6 +468,16 @@ export function createOrbitalBackground({
     else if (idleActivated) scheduleIdleTick();
   }
 
+  // BFCache navigation restores the old DOM without rerunning initialization.
+  // Reassert the SVG camera and visual pose after restoration, even when a
+  // ResizeObserver never fires because the element dimensions did not change.
+  function pageRestored() {
+    if (destroyed) return;
+    syncGeometry();
+    applyMotionPreference();
+    if (!isReducedMotion()) applyAngle();
+  }
+
   function instrumentMotionChange() {
     if (destroyed || isPaused()) return;
     if (wheelMotionActive()) startInteractiveFrame();
@@ -503,6 +514,7 @@ export function createOrbitalBackground({
   instrument.addEventListener?.("touchstart", activateIdleMotion, { passive:true });
   reducedMotionQuery?.addEventListener?.("change", applyMotionPreference);
   visibilityTarget?.addEventListener?.("visibilitychange", applyMotionPreference);
+  pageTarget?.addEventListener?.("pageshow", pageRestored);
   applyMotionPreference();
 
   return Object.freeze({
@@ -523,6 +535,7 @@ export function createOrbitalBackground({
       instrument.removeEventListener?.("touchstart", activateIdleMotion);
       reducedMotionQuery?.removeEventListener?.("change", applyMotionPreference);
       visibilityTarget?.removeEventListener?.("visibilitychange", applyMotionPreference);
+      pageTarget?.removeEventListener?.("pageshow", pageRestored);
       delete root.dataset.orbitalMotion;
       delete root.dataset.orbitalKinetic;
       field.style.transform = "";
