@@ -11,6 +11,9 @@ const orbitSvg = document.querySelector("#seasonal-drift-orbit");
 const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
 const secondaryRail = document.querySelector(".seasonal-drift-secondary-rail");
+const caseButton = document.querySelector("#seasonal-drift-use-case");
+const caseGateTitle = document.querySelector("#seasonal-drift-case-gate-title");
+const caseGateCopy = document.querySelector("#seasonal-drift-case-gate-copy");
 
 if (root && curveSvg && orbitSvg && scrub) {
   const initialParams = new URLSearchParams(location.search);
@@ -76,11 +79,42 @@ if (root && curveSvg && orbitSvg && scrub) {
     return `${value < 0 ? "提前" : "延後"} ${Math.abs(value).toFixed(digits)} 天`;
   }
 
+  function currentBaseYear() {
+    const match = /^(\d{1,7})-/.exec(instrument?.dataset.baseDate ?? "");
+    return match ? Number(match[1]) : null;
+  }
+
+  function syncCaseAlignment() {
+    const baseYear = currentBaseYear();
+    const delta = Number(instrument?.dataset.deltaYears);
+    const aligned = baseYear === DATA.baseYear && delta === 24000;
+    root.dataset.caseAligned = String(aligned);
+
+    if (aligned) return;
+
+    if (baseYear !== DATA.baseYear) {
+      if (caseGateTitle) caseGateTitle.textContent = `這組主案例固定從 ${DATA.baseYear} 年開始`;
+      if (caseGateCopy) {
+        caseGateCopy.textContent = Number.isInteger(baseYear)
+          ? `上方目前基準年是 ${baseYear}；先回到 ${DATA.baseYear} 年，再帶入 +24,000 年。`
+          : `先回到 ${DATA.baseYear} 年基準，再帶入 +24,000 年。`;
+      }
+      if (caseButton) caseButton.hidden = true;
+      return;
+    }
+
+    if (caseGateTitle) caseGateTitle.textContent = `目前 Δ = ${Number.isFinite(delta) ? delta.toLocaleString("en-US") : "—"} 年`;
+    if (caseGateCopy) caseGateCopy.textContent = "這組全年 N-body 證據對應 2026 → 26026；把 01 切到 +24,000 年後才展開。";
+    if (caseButton) caseButton.hidden = false;
+  }
+
   function syncSecondaryDeltaLabel() {
     const label = secondaryRail?.querySelector("strong");
     const delta = Number(instrument?.dataset.deltaYears);
     if (!label || !Number.isFinite(delta)) return;
-    label.textContent = `以下跟隨上方時間軸目前 Δ = ${delta.toLocaleString("en-US")} 年，不是固定 +24,000 年主案例。`;
+    label.textContent = delta === 24000
+      ? "目前也是 +24,000 年；以下只看 Berger 的 shape-only 快速模型，對應上圖拆解後的年內起伏。"
+      : `以下跟隨上方時間軸目前 Δ = ${delta.toLocaleString("en-US")} 年；主案例需切到 +24,000 年才展開。`;
   }
 
   function syncModeButtons() {
@@ -415,6 +449,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     root.dataset.mode = state.mode;
     root.dataset.orbitScale = state.exaggerate ? "exaggerated" : "true";
     syncModeButtons();
+    syncCaseAlignment();
     syncSecondaryDeltaLabel();
   }
 
@@ -454,10 +489,18 @@ if (root && curveSvg && orbitSvg && scrub) {
     setIndex(state.index + (event.key === "ArrowRight" ? 1 : -1),"keyboard");
   });
 
+  caseButton?.addEventListener("click", () => {
+    const preset = document.querySelector('#discrete-derivation-steps [data-delta-years="24000"]');
+    if (preset instanceof HTMLButtonElement) preset.click();
+  });
+
   if (instrument) {
-    new MutationObserver(syncSecondaryDeltaLabel).observe(instrument, {
+    new MutationObserver(() => {
+      syncCaseAlignment();
+      syncSecondaryDeltaLabel();
+    }).observe(instrument, {
       attributes:true,
-      attributeFilter:["data-delta-years"]
+      attributeFilter:["data-delta-years","data-base-date"]
     });
   }
 
