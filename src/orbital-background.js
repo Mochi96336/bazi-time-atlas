@@ -280,7 +280,6 @@ export function createOrbitalBackground({
   }
 
   function syncWorldGeometry() {
-    field.style.transformOrigin = `${wheelCenter.x}px ${wheelCenter.y}px`;
     staticRings.forEach((ring, index) => setCircleGeometry(ring, orbitRadiiWorld[index]));
     veils.forEach((veil, index) => setCircleGeometry(veil, veilRadiiWorld[index]));
     setCircleGeometry(occlusionDisc, occlusionRadiusWorld);
@@ -309,7 +308,8 @@ export function createOrbitalBackground({
   }
 
   function applyAngle() {
-    field.style.transform = `rotate(${backgroundAngleDeg.toFixed(4)}deg)`;
+    // An explicit SVG-world pivot is independent of responsive viewBox min-x/min-y.
+    field.setAttribute("transform", `rotate(${backgroundAngleDeg.toFixed(4)} ${wheelCenter.x} ${wheelCenter.y})`);
   }
 
   function applyEnergy(intensity) {
@@ -446,7 +446,7 @@ export function createOrbitalBackground({
       delete root.dataset.orbitalKinetic;
       backgroundVelocityDegPerSec = 0;
       kineticIntensity = 0;
-      field.style.transform = "none";
+      field.removeAttribute?.("transform");
       applyEnergy(0);
       return;
     }
@@ -479,6 +479,7 @@ export function createOrbitalBackground({
   }
 
   syncGeometry();
+  applyAngle();
   applyEnergy(0);
 
   const resizeObserver = typeof ResizeObserverCtor === "function"
@@ -532,7 +533,7 @@ export function createOrbitalBackground({
       visibilityTarget?.removeEventListener?.("visibilitychange", applyMotionPreference);
       delete root.dataset.orbitalMotion;
       delete root.dataset.orbitalKinetic;
-      field.style.transform = "";
+      field.removeAttribute?.("transform");
       veils.forEach(veil => {
         veil.style.strokeWidth = "";
         veil.style.opacity = "";
