@@ -20,7 +20,7 @@ test("Research 02 makes the fixed +24k case primary before dynamic astronomy too
     dynamicPanelStart > prototypeStart &&
     evidenceStart > dynamicPanelStart
   );
-  assert.match(html, /主案例 · 固定 +24,000 年 · 不受上方 Δ 影響/);
+  assert.match(html, /主案例 · 固定 \\+24,000 年 · 不受上方 Δ 影響/);
   assert.match(html, /其他 Δ · 快速形狀模型/);
   assert.match(html, /data-seasonal-drift-mode="total"/);
   assert.match(html, /data-seasonal-drift-mode="split"/);
