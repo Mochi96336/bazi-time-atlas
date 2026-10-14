@@ -11,45 +11,72 @@ function findBrowser(){
   throw Error("Chromium missing");
 }
 
-const url=new URL("recurrence.html",base);
-url.searchParams.set("date","2026-09-13");
-url.searchParams.set("delta","24000");
-
 const browser=findBrowser();
-const result=spawnSync(browser,[
-  "--headless=new",
-  "--no-sandbox",
-  "--disable-gpu",
-  "--enable-logging=stderr",
-  "--run-all-compositor-stages-before-draw",
-  "--virtual-time-budget=5000",
-  "--dump-dom",
-  url.href
-],{encoding:"utf8",timeout:35000,maxBuffer:20*1024*1024});
 
-if(result.status!==0){
-  throw Error("prototype browser failed:\n"+(result.stderr??"").slice(-5000));
+function dump(seasonalView){
+  const url=new URL("recurrence.html",base);
+  url.searchParams.set("date","2026-09-13");
+  url.searchParams.set("delta","24000");
+  if(seasonalView)url.searchParams.set("seasonalView",seasonalView);
+
+  const result=spawnSync(browser,[
+    "--headless=new",
+    "--no-sandbox",
+    "--disable-gpu",
+    "--enable-logging=stderr",
+    "--run-all-compositor-stages-before-draw",
+    "--virtual-time-budget=5000",
+    "--dump-dom",
+    url.href
+  ],{encoding:"utf8",timeout:35000,maxBuffer:20*1024*1024});
+
+  if(result.status!==0){
+    throw Error("prototype browser failed:\n"+(result.stderr??"").slice(-5000));
+  }
+  return {url:url.href,dom:result.stdout??"",stderr:result.stderr??""};
 }
 
-const dom=result.stdout??"";
-const start=dom.indexOf('id="seasonal-drift-prototype"');
-const end=start>=0?dom.indexOf('id="astronomy-term-grid"',start):-1;
-const fragment=start>=0?dom.slice(start,end>start?end:start+12000):dom.slice(0,12000);
+function fragment(dom){
+  const start=dom.indexOf('id="seasonal-drift-prototype"');
+  const end=start>=0?dom.indexOf('class="seasonal-drift-secondary-rail"',start):-1;
+  return start>=0?dom.slice(start,end>start?end:start+16000):dom.slice(0,16000);
+}
 
-const required=[
-  'data-ready="true"',
-  'class="seasonal-drift-curve-path"',
-  'seasonal-orbit-target',
-  'id="seasonal-drift-selected-total">−10.883 d',
-  'id="seasonal-drift-phase-value">−12.206 d'
-];
-const missing=required.filter(token=>!dom.includes(token));
-if(missing.length){
+function requireTokens(probe,tokens,label){
+  const missing=tokens.filter(token=>!probe.dom.includes(token));
+  if(!missing.length)return;
   throw Error(
-    "seasonal prototype did not initialize; missing "+missing.join(", ")+"\n"+
-    "stderr:\n"+(result.stderr??"").slice(-6000)+"\n"+
-    "prototype DOM:\n"+fragment.slice(0,12000)
+    label+" missing "+missing.join(", ")+"\n"+
+    "url: "+probe.url+"\n"+
+    "stderr:\n"+probe.stderr.slice(-5000)+"\n"+
+    "prototype DOM:\n"+fragment(probe.dom).slice(0,16000)
   );
 }
 
-console.log("[seasonal-drift-prototype] live browser initialized and rendered linked curve/orbit");
+const total=dump("total");
+requireTokens(total,[
+  'data-ready="true"',
+  'data-mode="total"',
+  'class="seasonal-drift-curve-path"',
+  'seasonal-orbit-target',
+  'class="seasonal-drift-gap-line"',
+  'id="seasonal-drift-selected-total-human">提前 10.883 天',
+  'id="seasonal-drift-phase-value">−12.206 d',
+  '目前 Δ = 24,000 年'
+],"total seasonal prototype");
+
+const split=dump("split");
+requireTokens(split,[
+  'data-ready="true"',
+  'data-mode="split"',
+  'id="seasonal-drift-selected-shape">+1.322 d',
+  'id="seasonal-drift-shape-span">4.022 d',
+  'data-seasonal-drift-mode="split" aria-pressed="true"',
+  'seasonal-orbit-target'
+],"split seasonal prototype");
+
+if(split.dom.includes('class="seasonal-drift-gap-line"')){
+  throw Error("split seasonal prototype kept the total-view zero-gap marker: "+split.url);
+}
+
+console.log("[seasonal-drift-prototype] PASS total + split live browser states and linked curve/orbit");
