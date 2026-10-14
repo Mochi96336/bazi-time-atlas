@@ -59,7 +59,7 @@ jobs:
         env:
           BASE_URL: http://127.0.0.1:4173/
       - name: Upload screenshot shard
-        if: ${{ always() && startsWith(matrix.suite, 'capture-') }}
+        if: ${{ always() && (startsWith(matrix.suite, 'capture-') || matrix.suite == 'home') }}
         uses: actions/upload-artifact@v7
         with:
           name: visual-shard-${{ matrix.suite }}
@@ -86,9 +86,17 @@ jobs:
       - name: Gather all screenshot shards
         uses: actions/download-artifact@v7
         with:
-          pattern: visual-shard-capture-*
+          pattern: visual-shard-*
           path: tmp/visual-check/
           merge-multiple: true
+      - name: Verify complete visual evidence inventory
+        run: |
+          test -f tmp/visual-check/mobile-material-budget.json
+          test -f tmp/visual-check/mobile-camera-lifecycle.json
+          test -s tmp/visual-check/mobile-camera-recovered-390x844.png
+          file_count=$(find tmp/visual-check -type f | wc -l)
+          echo "Combined visual evidence files: $file_count (baseline: 94)"
+          test "$file_count" -eq 94
       - name: Publish combined visual evidence
         uses: actions/upload-artifact@v7
         with:
