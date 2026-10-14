@@ -61,10 +61,11 @@ test("B1.2 orbital coordinate rings and mask stay outside the canonical wheel en
   const radii = orbitalRadiiWorld(1182);
   const maskRadius = orbitalOcclusionRadiusWorld(1182);
   assert.equal(radii.length, 6);
-  assert.equal(maskRadius, 1200);
+  assert.equal(maskRadius, 1182 * 1.16 + 18);
   assert.ok(radii.every(radius => radius > maskRadius));
   assert.ok(radii.every((radius, index) => index === 0 || radius > radii[index - 1]));
-  assert.ok(radii[0] < 1240, "first background orbit should remain close to the wheel rim");
+  assert.ok(radii[0] > maskRadius, "first background orbit must stay beyond the foreground clearance");
+  assert.ok(maskRadius > 1182 * 1.15, "orbital lines must clear labels near the outer wheel rim");
 });
 
 test("B1.2 kinetic energy makes a hard fling substantially thicker and brighter", () => {
