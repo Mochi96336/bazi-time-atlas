@@ -43,7 +43,7 @@ const required=[
   'id="seasonal-drift-selected-total">−10.883 d',
   'id="seasonal-drift-phase-value">−12.206 d'
 ];
-const missing=required.filter(token=>!fragment.includes(token));
+const missing=required.filter(token=>!dom.includes(token));
 if(missing.length){
   throw Error(
     "seasonal prototype did not initialize; missing "+missing.join(", ")+"\n"+
