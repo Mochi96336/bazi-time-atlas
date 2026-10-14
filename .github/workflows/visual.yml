@@ -14,9 +14,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  capture:
+  # The former single capture job spent ~8 minutes running everything serially.
+  # Keep all browser checks, but isolate seven independent suites on parallel
+  # runners. Fail-fast is disabled so one flaky check does not hide other evidence.
+  verify:
+    name: verify (${{ matrix.suite }})
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [shader, home, research, capture-pages, capture-interactions, capture-material, capture-responsive]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -26,11 +34,11 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
-      - name: Check data and geometry invariants
-        run: npm test
-      - name: Check JavaScript syntax
-        run: npm run check:syntax
-      - name: Install lightweight CJK font for screenshots
+      # Quality Gate independently runs npm test + syntax once; browser checks
+      # only need the vendor file that npm test used to generate as a side effect.
+      - name: Prepare browser vendor dependency
+        run: npm run vendor:prepare
+      - name: Install lightweight CJK font for browser tests and screenshots
         run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
       - name: Locate system Chromium
         run: |
@@ -46,154 +54,46 @@ jobs:
           done
           cat /tmp/bazi-time-atlas-http.log
           exit 1
-      - name: Verify material shader activation
-        run: node scripts/check-material-shader.mjs
+      - name: Run browser and visual regression suite
+        run: node scripts/run-visual-ci-suite.mjs "${{ matrix.suite }}"
         env:
           BASE_URL: http://127.0.0.1:4173/
-      - name: Verify mobile material pixel budget, camera cache and final pose
-        run: node scripts/check-mobile-material-budget.mjs
+      - name: Upload screenshot shard
+        if: ${{ always() && startsWith(matrix.suite, 'capture-') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-shard-${{ matrix.suite }}
+          path: tmp/visual-check/
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+
+  # Retain the pre-existing "capture" status-check name and combined artifact.
+  # The gate must FAIL (not skip) when any matrix shard fails or is cancelled.
+  capture:
+    name: capture
+    needs: verify
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every visual suite to pass
         env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify delayed mobile camera startup and element resizing
-        run: node scripts/check-mobile-camera-lifecycle.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify home / Research browser Back and nav camera parity
-        run: node scripts/check-camera-history-navigation.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify cross-view deep links
-        run: node scripts/check-deep-links.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify solar time preview
-        run: node scripts/check-mean-solar-preview.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify Birth basic and advanced hierarchy
-        run: node scripts/check-birth-advanced.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify cross-view shell consistency
-        run: node scripts/check-view-shells.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify exact kinetic boundaries
-        run: node scripts/check-kinetic-boundaries.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify master fan geometry and mobile composition
-        run: node scripts/check-kinetic-composition.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify mobile legend layout
-        run: node scripts/check-mobile-legend-layout.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify mobile precise-time control
-        run: node scripts/check-mobile-time-contract.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify temporal-context overlay control
-        run: node scripts/check-time-context-control.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify contextual Ganzhi inspector
-        run: node scripts/check-ganzhi-inspector.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify scale-dependent radial emphasis
-        run: node scripts/check-scale-emphasis.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify classification comparison overlay
-        run: node scripts/check-classification-overlay.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify layer visibility isolation
-        run: node scripts/check-ring-visibility.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify relative reference frames
-        run: node scripts/check-reference-frame.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify discrete intra-state phase
-        run: node scripts/check-discrete-phase.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify temporal motion hierarchy
-        run: node scripts/check-temporal-motion-hierarchy.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify temporal boundary continuity
-        run: node scripts/check-temporal-boundary-continuity.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify linked boundary drag
-        run: node scripts/check-linked-boundary-drag.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify Free Compare drag ownership
-        run: node scripts/check-free-compare-drag.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify Free Compare readhead ownership
-        run: node scripts/check-free-compare-readheads.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify exact shared boundary gates
-        run: node scripts/check-boundary-gates.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify discrete recurrence states
-        run: node scripts/check-recurrence-lab.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify Research task hierarchy
-        run: node scripts/check-research-task-hierarchy.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify original Research + retired-link migration
-        run: node scripts/check-research-date-explorer.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify astronomical residual states
-        run: node scripts/check-astronomical-residuals.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify four-pillar determinacy boundary
-        run: node scripts/check-four-pillar-determinacy.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify Day Hour proof chain
-        run: node scripts/check-day-hour-proof-chain.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify recurrence longitude controls
-        run: node scripts/check-recurrence-longitude-controls.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify seasonal epoch source audit
-        run: node scripts/check-seasonal-epoch-source-audit.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Verify exact-closure near-recurrence search
-        run: node scripts/check-near-recurrence.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Capture PNG evidence
+          VERIFY_RESULT: ${{ needs.verify.result }}
         run: |
-          npm run visual:check
-          node scripts/visual-check-determinacy.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
-      - name: Upload visual evidence
-        if: always()
+          echo "Visual suite aggregate: $VERIFY_RESULT"
+          test "$VERIFY_RESULT" = "success"
+      - name: Gather all screenshot shards
+        uses: actions/download-artifact@v7
+        with:
+          pattern: visual-shard-capture-*
+          path: tmp/visual-check/
+          merge-multiple: true
+      - name: Publish combined visual evidence
         uses: actions/upload-artifact@v7
         with:
           name: visual-png-selfcheck
           path: tmp/visual-check/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7
           compression-level: 6
