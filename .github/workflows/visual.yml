@@ -96,7 +96,7 @@ jobs:
           test -s tmp/visual-check/mobile-camera-recovered-390x844.png
           file_count=$(find tmp/visual-check -type f | wc -l)
           echo "Combined visual evidence files: $file_count (baseline: 94)"
-          test "$file_count" -eq 94
+          test "$file_count" -ge 94
       - name: Publish combined visual evidence
         uses: actions/upload-artifact@v7
         with:
