@@ -283,7 +283,7 @@ for (const [longitudeDegrees, pinnedTtJulianDay] of PINNED_571_TT) {
   regressions.push(Object.freeze({
     longitudeDegrees,
     name:point.name,
-    pinned571TtJulianDay,
+    pinned571TtJulianDay:pinnedTtJulianDay,
     observedTtJulianDay:point.ttJulianDay,
     differenceSeconds:Math.abs(point.ttJulianDay - pinnedTtJulianDay) * 86400
   }));
