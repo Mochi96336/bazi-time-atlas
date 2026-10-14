@@ -63,7 +63,13 @@ requireTokens(total,[
   'id="seasonal-drift-selected-total-human">提前 10.883 天',
   'id="seasonal-drift-phase-value">−12.206 d',
   'data-case-aligned="true"',
-  '目前也是 +24,000 年'
+  '目前也是 +24,000 年',
+  'id="absolute-boundary-consequence"',
+  'data-ready="true"',
+  'id="absolute-boundary-union">146.481 d',
+  '全年 TT 相位 40.105% · 非人口機率',
+  '年／月界未重現',
+  'shape-only-secondary'
 ],"total seasonal prototype");
 
 const split=dump("split");
