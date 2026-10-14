@@ -24,7 +24,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     right:24,
     top:24,
     bottom:52
-  });
+  };
   CURVE.plotWidth = CURVE.width - CURVE.left - CURVE.right;
   CURVE.plotHeight = CURVE.height - CURVE.top - CURVE.bottom;
 
