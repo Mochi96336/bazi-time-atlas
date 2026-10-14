@@ -17,7 +17,10 @@ const cases=[
  {route:"original",date:"2024-02-04",width:390,height:2000,name:"research-original-lichun-day-390.png"},
  {route:"original",date:"2023-06-01",width:390,height:2000,name:"research-original-normal-2023-390.png"},
  {route:"original",date:"2023-01-03",width:390,height:2000,name:"research-original-cross-year-jiazi-390.png"},
- {route:"bare",width:390,height:2000,name:"research-original-default-390.png"}
+ {route:"bare",width:390,height:2000,name:"research-original-default-390.png"},
+ {route:"original",date:"2026-09-13",delta:24000,seasonalView:"total",width:1440,height:3300,name:"research-seasonal-24000-total-1440.png"},
+ {route:"original",date:"2026-09-13",delta:24000,seasonalView:"split",width:1440,height:3300,name:"research-seasonal-24000-split-1440.png"},
+ {route:"original",date:"2026-09-13",delta:24000,seasonalView:"split",width:390,height:3400,name:"research-seasonal-24000-split-390.png"}
 ];
 function findBrowser(){
  if(process.env.CHROMIUM_BIN)return process.env.CHROMIUM_BIN;
@@ -34,6 +37,7 @@ for(const item of cases){
  if(item.route==="original"){
    u.searchParams.set("date",item.date??"2024-02-10");
    u.searchParams.set("delta",String(item.delta??0));
+   if(item.seasonalView)u.searchParams.set("seasonalView",item.seasonalView);
  }
  const frame=new URL("scripts/fixtures/mobile-390.html",base);
  frame.searchParams.set("target","../../recurrence.html"+u.search);
