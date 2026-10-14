@@ -63,7 +63,8 @@ requireTokens(total,[
   'id="seasonal-drift-selected-total-human">提前 10.883 天',
   'id="seasonal-drift-phase-value">−12.206 d',
   'data-case-aligned="true"',
-  '目前也是 +24,000 年',
+  '已收起 · Berger shape-only / 近回歸工具',
+  'data-case-state="aligned"',
   'id="absolute-boundary-consequence"',
   'data-ready="true"',
   'id="absolute-boundary-union">146.481 d',
@@ -72,6 +73,11 @@ requireTokens(total,[
   'shape-only-secondary',
   'shape-only-determinacy-details'
 ],"total seasonal prototype");
+
+const alignedToolsTag=total.dom.match(/<details[^>]*id="secondary-astronomy-tools"[^>]*>/)?.[0]??"";
+if(!alignedToolsTag||/\sopen(?:\s|=|>)/.test(alignedToolsTag)){
+  throw Error("aligned +24k state did not collapse secondary astronomy tools: "+total.url);
+}
 
 const split=dump("split");
 requireTokens(split,[
@@ -91,8 +97,14 @@ const identity=dump("total",0);
 requireTokens(identity,[
   'data-case-aligned="false"',
   'id="absolute-boundary-consequence"',
-  'data-active="false"'
+  'data-active="false"',
+  'data-case-state="other"',
+  '目前 Δ = 0 年 · 展開快速模型'
 ],"non-24k seasonal prototype");
+const otherToolsTag=identity.dom.match(/<details[^>]*id="secondary-astronomy-tools"[^>]*>/)?.[0]??"";
+if(!otherToolsTag||!/\sopen(?:\s|=|>)/.test(otherToolsTag)){
+  throw Error("non-24k state did not keep secondary astronomy tools open: "+identity.url);
+}
 if(identity.dom.includes("shape-only-secondary")){
   throw Error("non-24k state incorrectly demoted canonical determinacy: "+identity.url);
 }
