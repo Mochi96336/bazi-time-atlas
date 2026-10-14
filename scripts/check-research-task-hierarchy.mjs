@@ -73,8 +73,8 @@ for (const expected of [
   "離散候選 → 天文較真",
   "節氣校驗 → 四柱比較",
   "3 / 3 exact",
-  "仍有偏移",
-  "2 / 4 可解析"
+  "提前 10–14 d",
+  "年／月界未重現"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
