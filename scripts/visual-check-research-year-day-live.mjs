@@ -43,7 +43,7 @@ for(const item of cases){
    if(item.hash)u.hash=item.hash;
  }
  const frame=new URL("scripts/fixtures/mobile-390.html",base);
- frame.searchParams.set("target","../../recurrence.html"+u.search);
+ frame.searchParams.set("target","../../recurrence.html"+u.search+u.hash);
  frame.searchParams.set("height",String(item.height));
  const responsive=new URL("scripts/fixtures/research-original-r0-390.html",base);
  responsive.searchParams.set("width",String(item.width));
