@@ -1,4 +1,5 @@
 import "./time-context-control.js";
+import { installKineticFanGuard } from "./kinetic-fan-guard.js";
 import { solarTerms, zodiacSigns } from "./data.js";
 import {
   CURSOR_ANGLE,
@@ -591,6 +592,7 @@ function bindControls() {
 function initialize() {
   assertWheelModel();
   renderer.renderStatic();
+  installKineticFanGuard();
   applyInitialSearchState();
   setSliderForScale();
   installPlayback();
