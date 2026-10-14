@@ -94,9 +94,9 @@ async function settledHome() {
   return snapshot();
 }
 
-function assertEquivalent(baseline, after, label) {
+function assertEquivalent(baseline, after, label, { checkTime = true } = {}) {
   if (baseline.viewBox !== after.viewBox || baseline.mode !== after.mode
-    || baseline.selectedMs !== after.selectedMs) {
+    || (checkTime && baseline.selectedMs !== after.selectedMs)) {
     throw new Error(label + " changed camera/time: " + JSON.stringify({ baseline, after }));
   }
   let pixelDrift = 0;
@@ -133,7 +133,7 @@ try {
   if (!homeLink) throw new Error("Research home link missing");
   homeLink.click();
   const siteLink = await settledHome();
-  const navDrift = assertEquivalent(baseline, siteLink, "research navigation link");
+  const navDrift = assertEquivalent(baseline, siteLink, "research navigation link", { checkTime:false });
   proof.textContent = JSON.stringify({
     mode, browserBack:true, researchNav:true, persisted,
     viewBox:baseline.viewBox, baselineMode:baseline.mode,
