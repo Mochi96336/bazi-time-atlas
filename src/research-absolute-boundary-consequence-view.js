@@ -184,6 +184,30 @@ function render(){
   rendered=true;
 }
 
+function demoteDeterminacy(){
+  let details=determinacy.querySelector(":scope > .shape-only-determinacy-details");
+  if(details)return;
+  const grid=determinacy.querySelector(":scope > .determinacy-grid");
+  const foot=determinacy.querySelector(":scope > .determinacy-foot");
+  if(!grid||!foot)return;
+  details=document.createElement("details");
+  details.className="shape-only-determinacy-details";
+  const summary=document.createElement("summary");
+  summary.innerHTML="<span>展開 shape-only 四柱卡片</span><strong>僅解釋共同 phase 扣除後的年內 shape</strong>";
+  grid.insertAdjacentElement("beforebegin",details);
+  details.append(summary,grid,foot);
+}
+
+function restoreDeterminacy(){
+  const details=determinacy.querySelector(":scope > .shape-only-determinacy-details");
+  if(!details)return;
+  const grid=details.querySelector(".determinacy-grid");
+  const foot=details.querySelector(".determinacy-foot");
+  if(grid)details.insertAdjacentElement("beforebegin",grid);
+  if(foot)details.insertAdjacentElement("beforebegin",foot);
+  details.remove();
+}
+
 function sync(){
   const root=ensurePanel();
   if(!root)return;
@@ -212,6 +236,7 @@ function sync(){
       determinacy.querySelector(".determinacy-head")?.insertAdjacentElement("afterend",note);
     }
     note.textContent="下列卡片只保留「共同 phase 已扣除」後的 shape-only 歸因；+24,000 的年／月界主結論以上方 absolute boundary consequence 為準。";
+    demoteDeterminacy();
   }else{
     delete instrument.dataset.absoluteBoundaryConsequence;
     delete instrument.dataset.absoluteBoundaryYearMonthRecurrence;
@@ -225,6 +250,7 @@ function sync(){
     if(label)label.textContent="可判定範圍";
     if(scopeLabel)scopeLabel.textContent="目前可支持的最強結論";
     determinacy.querySelector(".determinacy-secondary-note")?.remove();
+    restoreDeterminacy();
   }
 }
 
