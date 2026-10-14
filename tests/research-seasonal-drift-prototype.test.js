@@ -28,7 +28,7 @@ test("Research 02 makes the fixed +24k case primary before dynamic astronomy too
 });
 
 test("secondary astronomy tools fold away only for the aligned +24k main case", () => {
-  assert.match(view, /secondaryTools\.open = !aligned/);
+  assert.match(view, /secondaryTools\.open = Boolean\(secondaryHashTarget\(\)\) \|\| !aligned/);
   assert.match(view, /secondaryTools\.dataset\.caseState/);
   assert.match(css, /\.secondary-astronomy-tools > summary/);
 });
