@@ -48,12 +48,12 @@ test("parallel visual gate preserves prior CI protection and combined PNG artifa
   assert.match(workflow, /if: \$\{\{ always\(\) \}\}/);
   assert.match(workflow, /test "\$VERIFY_RESULT" = "success"/);
   assert.match(workflow, /merge-multiple: true/);
-  assert.match(workflow, /pattern: visual-shard-\\\*/);
+  assert.ok(workflow.includes("pattern: visual-shard-*"));
   assert.match(workflow, /matrix.suite == 'home'/, "home diagnostic evidence must reach the combined artifact");
   assert.match(workflow, /mobile-camera-lifecycle.json/);
   assert.match(workflow, /mobile-camera-recovered-390x844.png/);
   assert.match(workflow, /mobile-material-budget.json/);
-  assert.match(workflow, /test "\\\$file_count" -ge 94/, "combined evidence must retain the original 94 files");
+  assert.ok(workflow.includes('test "$file_count" -ge 94'), "keep at least 94 combined evidence files");
   assert.match(workflow, /name: visual-png-selfcheck/);
   assert.match(workflow, /run: npm run vendor:prepare/, "browser vendor must be generated without full npm test");
   assert.doesNotMatch(workflow, /^\s*run: npm test\s*$/m, "Quality Gate owns duplicated Node tests");
