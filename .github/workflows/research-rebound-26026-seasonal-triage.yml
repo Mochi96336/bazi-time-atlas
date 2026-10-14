@@ -133,6 +133,12 @@ jobs:
           if (r.claimBoundary?.seasonalCrossingsResolved !== true) throw new Error("crossings missing");
           if (r.claimBoundary?.uniformDynamicalTimeDayOnly !== true) throw new Error("must remain a TT-day triage");
           if (r.claimBoundary?.civilTimeResolved !== false) throw new Error("must not claim civil time");
+          if (r.triage?.allThreeCrossingsMoreThanOneDayFromGregorianCycle !== true) {
+            throw new Error("day-level Gregorian recurrence was not decisively separated");
+          }
+          if (!(r.triage.minAbsGregorianCycleDriftHours > 24)) {
+            throw new Error("minimum Gregorian-cycle drift must exceed one day");
+          }
           console.log(JSON.stringify({
             events:r.events.map(e => ({
               name:e.name,
