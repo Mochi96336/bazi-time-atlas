@@ -1,0 +1,173 @@
+name: Research year-26026 inverse equivalent ellipse
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-26026-inverse-equivalent-ellipse.yml"
+      - "scripts/research-fit-26026-inverse-equivalent-ellipse.py"
+      - "scripts/research-rebound-26026-full-year-state.py"
+      - "scripts/research-solve-rebound-26026-full-seasonal-timeline.mjs"
+      - "scripts/research-rebound-26026-massloss-state.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+      - "scripts/research-swiss-owen-frame-probe.c"
+      - "src/astronomy/absolute-state-seasonal-solver.js"
+      - "src/astronomy/naif-tt-tdb-time-bridge.js"
+      - "src/astronomy/horizons-sun-apparent-direction-proof.js"
+      - "src/astronomy/owen-horizons-frame-proof-contract.js"
+      - "src/astronomy/direct-seasonal-event-provider.js"
+      - "scripts/prepare-vendor.mjs"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inverse-ellipse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned research dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "rebound==5.2.2" "reboundx==5.1.0" \
+            "jplephem==2.24" "numpy<3"
+
+      - name: Compile inverse-fit harness
+        run: python -m py_compile scripts/research-fit-26026-inverse-equivalent-ellipse.py
+
+      - name: Reuse merged #572 evidence
+        id: reuse_572
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: "11883063542"
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/26026-inverse-ellipse
+          curl --fail --location --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
+            --output tmp/merged-572.zip
+          unzip -q -o tmp/merged-572.zip -d tmp/26026-inverse-ellipse
+          test -s tmp/26026-inverse-ellipse/state.json
+          test -s tmp/26026-inverse-ellipse/timeline.json
+
+      - name: Prepare fallback seasonal baseline
+        if: steps.reuse_572.outcome != 'success'
+        run: |
+          npm ci --ignore-scripts
+          npm run vendor:prepare
+          python -m py_compile \
+            scripts/research-rebound-26026-full-year-state.py \
+            scripts/research-rebound-26026-massloss-state.py
+
+      - name: Download official DE441 for fallback
+        if: steps.reuse_572.outcome != 'success'
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/26026-inverse-ellipse
+          curl --fail --location --retry 4 --retry-delay 5 \
+            --output tmp/26026-inverse-ellipse/de441_part-2.bsp \
+            "$KERNEL_URL"
+          printf '%s  %s\n' \
+            'ad8dfa4e505ef0e3a5d587a5b4705632' \
+            'tmp/26026-inverse-ellipse/de441_part-2.bsp' | md5sum --check -
+
+      - name: Rebuild continuous target state for fallback
+        if: steps.reuse_572.outcome != 'success'
+        timeout-minutes: 55
+        run: |
+          python scripts/research-rebound-26026-full-year-state.py \
+            --kernel tmp/26026-inverse-ellipse/de441_part-2.bsp \
+            --output tmp/26026-inverse-ellipse/state.json
+
+      - name: Fetch pinned Swiss source for fallback
+        if: steps.reuse_572.outcome != 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+          make -C tmp/swisseph libswe.a
+          cc -O2 -Wall -Wextra \
+            -I tmp/swisseph \
+            scripts/research-swiss-owen-frame-probe.c \
+            tmp/swisseph/libswe.a \
+            -lm -ldl \
+            -o tmp/owen-frame-probe
+
+      - name: Rebuild 360-point timeline for fallback
+        if: steps.reuse_572.outcome != 'success'
+        env:
+          STATE_PROJECTION_JSON: tmp/26026-inverse-ellipse/state.json
+          OWEN_FRAME_PROBE: tmp/owen-frame-probe
+          OUTPUT_JSON: tmp/26026-inverse-ellipse/timeline.json
+        run: node scripts/research-solve-rebound-26026-full-seasonal-timeline.mjs
+
+      - name: Fit inverse equivalent ellipses
+        run: |
+          python scripts/research-fit-26026-inverse-equivalent-ellipse.py \
+            --timeline tmp/26026-inverse-ellipse/timeline.json \
+            --state tmp/26026-inverse-ellipse/state.json \
+            --output tmp/26026-inverse-ellipse/inverse-ellipse.json
+
+      - name: Assert inverse-fit research boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          r = json.loads(
+              Path("tmp/26026-inverse-ellipse/inverse-ellipse.json").read_text()
+          )
+          assert r["researchOnly"] is True
+          assert r["summary"]["accepted"] is True
+          assert 0.016 < r["summary"]["baselineEquivalentEccentricity"] < 0.0175
+          assert 0.0025 < r["summary"]["targetEquivalentEccentricity"] < 0.0035
+          assert r["inverseValidationAgainstTargetState"]["radiusProfileCorrelation"] > 0.99
+          assert r["inverseValidationAgainstTargetState"]["perihelionDifferenceDegrees"] < 1.0
+          assert r["summary"]["oneHarmonicExplainedVariance"] > 0.999
+          assert r["summary"]["oneHarmonicRmsResidualMinutes"] < 30
+          assert r["summary"]["twoHarmonicRmsResidualMinutes"] < 5
+          assert r["claimBoundary"]["trueOsculatingElementsClaimed"] is False
+          assert r["claimBoundary"]["twoBodyExactnessClaimed"] is False
+          assert r["visualizationMorphContract"]["phaseMustRemainSeparateFromEllipseShape"] is True
+          assert r["visualizationMorphContract"]["physicalIntermediateYearsClaimed"] is False
+          assert len(r["visualizationMorphContract"]["keyframes"]) == 5
+          print(json.dumps({
+              "summary": r["summary"],
+              "inverseValidation": r["inverseValidationAgainstTargetState"],
+              "driftDecomposition": r["driftDecomposition"],
+          }, indent=2))
+          PY
+
+      - name: Remove large fallback kernel
+        if: always()
+        run: rm -f tmp/26026-inverse-ellipse/de441_part-2.bsp
+
+      - name: Upload inverse-ellipse evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-26026-inverse-equivalent-ellipse
+          path: tmp/26026-inverse-ellipse/inverse-ellipse.json
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 9
