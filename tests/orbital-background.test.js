@@ -96,6 +96,8 @@ test("B1 stays decorative and consumes only rendered year-ring velocity", () => 
   assert.equal((html.match(/class="orbital-static-ring orbital-static-ring-/g) ?? []).length, 6);
   assert.match(css, /#orbital-background\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*auto;/);
+  assert.doesNotMatch(css, /\.orbital-field\s*\{[^}]*transform-origin:/,
+    "CSS must not redefine a viewBox-relative rotation pivot");
   assert.match(css, /data-orbital-kinetic="true"[\s\S]*?will-change:\s*transform;/);
   assert.doesNotMatch(html, /class="orbital-grain"/);
   const orbitalCss = css.slice(
@@ -108,6 +110,7 @@ test("B1 stays decorative and consumes only rendered year-ring velocity", () => 
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
   assert.match(orbital, /idleTickMs:125/);
   assert.match(orbital, /setCircleGeometry\(occlusionDisc, occlusionRadiusWorld\)/);
+  assert.match(orbital, /field\.setAttribute\("transform", `rotate\(/);
   assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\(sourceVelocity, config\)/);
   assert.match(orbital, /veil\.style\.strokeWidth/);
   assert.match(orbital, /veil\.style\.opacity/);
@@ -130,10 +133,12 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
   Object.defineProperty(globalThis, "innerWidth", { configurable:true, value:390 });
   t.after(() => priorWidth ? Object.defineProperty(globalThis, "innerWidth", priorWidth) : delete globalThis.innerWidth);
   const frames = new Map(), timers = new Map();
-  let frameSequence = 0, timerSequence = 0, writes = 0, velocity = 0;
+  let frameSequence = 0, timerSequence = 0, writes = 0, velocity = 0, lastTransform = "";
   const node = () => ({ style:{}, setAttribute() {}, getAttribute:() => "0 0 1200 760" });
   const field = node();
-  field.style = new Proxy({}, { set(target, key, value) { if (key === "transform") writes++; target[key] = value; return true; } });
+  field.setAttribute = (name, value) => {
+    if (name === "transform") { writes++; lastTransform = value; }
+  };
   const space = node(), disc = node();
   const veils = Array.from({ length:3 }, node), rings = Array.from({ length:6 }, node);
   const root = { dataset:{},
@@ -163,7 +168,9 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
     frames.delete(id);
     callback(n * 1000 / 120);
   }
-  assert.ok(writes <= 31, `background writes=${writes}`);
+  assert.ok(writes > 0 && writes <= 31, `background writes=${writes}`);
+  assert.match(lastTransform, /^rotate\([-\d.]+ 600 1360\)$/,
+    "moving veils must rotate about the fixed SVG-world center");
   assert.ok(background.backgroundAngleDeg > 0);
   visibilityTarget.hidden = true;
   visibilityTarget.dispatchEvent(new Event("visibilitychange"));
@@ -176,4 +183,54 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
   background.destroy();
   assert.equal(timers.size, 0);
   assert.equal(frames.size, 0);
+});
+
+test("orbital camera reacts to wheel viewBox edits even when container size does not change", () => {
+  const node = (attributes = {}) => {
+    const attrs = new Map(Object.entries(attributes));
+    return {
+      style:{},
+      setAttribute(name, value) { attrs.set(name, String(value)); },
+      getAttribute:name => attrs.get(name) ?? null
+    };
+  };
+  const wheel = node({ viewBox:"0 0 1200 760", preserveAspectRatio:"xMidYMid meet" });
+  const space = node(), field = node(), disc = node();
+  const rings = Array.from({ length:6 }, () => node());
+  const veils = Array.from({ length:3 }, () => node());
+  const root = {
+    dataset:{},
+    querySelector:selector => ({
+      ".orbital-space":space, ".orbital-field":field, ".orbital-occlusion-disc":disc
+    })[selector] ?? null,
+    querySelectorAll:selector => selector === ".orbital-veil" ? veils : rings
+  };
+  const instrument = new EventTarget();
+  instrument.dataset = {};
+  let cameraNotify = null, cameraDisconnected = false;
+  class Observer {
+    constructor(callback) { this.callback = callback; this.isCamera = false; }
+    observe(element, options) {
+      if (element === wheel && options?.attributeFilter?.includes("viewBox")) {
+        cameraNotify = this.callback;
+        this.isCamera = true;
+      }
+    }
+    disconnect() { if (this.isCamera) cameraDisconnected = true; }
+  }
+  const background = createOrbitalBackground({
+    root, instrument, svg:wheel, wheelCenter:{ x:600, y:1360 },
+    wheelOuterRadius:1182, reducedMotionQuery:{ matches:true },
+    ResizeObserverCtor:null, MutationObserverCtor:Observer,
+    visibilityTarget:new EventTarget()
+  });
+  assert.ok(background && cameraNotify, "source camera must have a viewBox mutation listener");
+  assert.equal(space.getAttribute("viewBox"), "0 0 1200 760");
+  wheel.setAttribute("viewBox", "111 222 444 555");
+  wheel.setAttribute("preserveAspectRatio", "none");
+  cameraNotify();
+  assert.equal(space.getAttribute("viewBox"), "111 222 444 555");
+  assert.equal(space.getAttribute("preserveAspectRatio"), "none");
+  background.destroy();
+  assert.equal(cameraDisconnected, true);
 });

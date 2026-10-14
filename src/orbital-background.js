@@ -280,7 +280,6 @@ export function createOrbitalBackground({
   }
 
   function syncWorldGeometry() {
-    field.style.transformOrigin = `${wheelCenter.x}px ${wheelCenter.y}px`;
     staticRings.forEach((ring, index) => setCircleGeometry(ring, orbitRadiiWorld[index]));
     veils.forEach((veil, index) => setCircleGeometry(veil, veilRadiiWorld[index]));
     setCircleGeometry(occlusionDisc, occlusionRadiusWorld);
@@ -309,7 +308,8 @@ export function createOrbitalBackground({
   }
 
   function applyAngle() {
-    field.style.transform = `rotate(${backgroundAngleDeg.toFixed(4)}deg)`;
+    // An explicit SVG-world pivot is independent of responsive viewBox min-x/min-y.
+    field.setAttribute("transform", `rotate(${backgroundAngleDeg.toFixed(4)} ${wheelCenter.x} ${wheelCenter.y})`);
   }
 
   function applyEnergy(intensity) {
@@ -446,7 +446,7 @@ export function createOrbitalBackground({
       delete root.dataset.orbitalKinetic;
       backgroundVelocityDegPerSec = 0;
       kineticIntensity = 0;
-      field.style.transform = "none";
+      field.removeAttribute?.("transform");
       applyEnergy(0);
       return;
     }
@@ -479,12 +479,23 @@ export function createOrbitalBackground({
   }
 
   syncGeometry();
+  applyAngle();
   applyEnergy(0);
 
   const resizeObserver = typeof ResizeObserverCtor === "function"
     ? new ResizeObserverCtor(syncGeometry)
     : null;
   resizeObserver?.observe?.(instrument);
+
+  // A responsive camera update changes SVG world projection without resizing
+  // this background. Follow the source camera after any ResizeObserver order.
+  const cameraObserver = typeof MutationObserverCtor === "function"
+    ? new MutationObserverCtor(syncGeometry)
+    : null;
+  cameraObserver?.observe?.(svg, {
+    attributes:true,
+    attributeFilter:["viewBox", "preserveAspectRatio"]
+  });
 
   const motionObserver = typeof MutationObserverCtor === "function"
     ? new MutationObserverCtor(instrumentMotionChange)
@@ -513,6 +524,7 @@ export function createOrbitalBackground({
       stopFrame();
       stopIdleTimer();
       resizeObserver?.disconnect?.();
+      cameraObserver?.disconnect?.();
       motionObserver?.disconnect?.();
       instrument.removeEventListener?.("pointermove", activateIdleMotion);
       instrument.removeEventListener?.("pointerdown", activateIdleMotion);
@@ -521,7 +533,7 @@ export function createOrbitalBackground({
       visibilityTarget?.removeEventListener?.("visibilitychange", applyMotionPreference);
       delete root.dataset.orbitalMotion;
       delete root.dataset.orbitalKinetic;
-      field.style.transform = "";
+      field.removeAttribute?.("transform");
       veils.forEach(veil => {
         veil.style.strokeWidth = "";
         veil.style.opacity = "";
