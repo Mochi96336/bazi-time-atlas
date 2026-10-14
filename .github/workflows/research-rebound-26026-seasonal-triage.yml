@@ -11,6 +11,9 @@ on:
       - "src/astronomy/naif-tt-tdb-time-bridge.js"
       - "src/astronomy/horizons-sun-apparent-direction-proof.js"
       - "src/astronomy/owen-horizons-frame-proof-contract.js"
+      - "src/astronomy/direct-seasonal-event-provider.js"
+      - "scripts/prepare-vendor.mjs"
+      - "package-lock.json"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +26,11 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
+
+      - name: Prepare pinned Tyme modern baseline
+        run: |
+          npm ci --ignore-scripts
+          npm run vendor:prepare
 
       - name: Reuse merged #569 orbital-state evidence when available
         id: reuse_state
