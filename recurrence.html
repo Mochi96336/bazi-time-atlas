@@ -327,64 +327,71 @@
           </div>
         </header>
 
-        <div class="seasonal-drift-summary" aria-live="polite">
-          <div class="seasonal-drift-stat primary">
-            <span>目前位置</span>
-            <strong><i id="seasonal-drift-selected-name">立春</i> · <b id="seasonal-drift-selected-longitude">315°</b></strong>
-            <small class="total-only">相對完全重現：<b id="seasonal-drift-selected-total-human">—</b></small>
-            <small class="split-only">完整差異 <b id="seasonal-drift-selected-total">—</b> · 年內起伏 <b id="seasonal-drift-selected-shape">—</b></small>
+        <div class="seasonal-drift-case-gate" aria-live="polite">
+          <div>
+            <span>先把 01 的比較狀態帶到主案例</span>
+            <strong id="seasonal-drift-case-gate-title">目前尚未選到 +24,000 年</strong>
+            <small id="seasonal-drift-case-gate-copy">這組全年 N-body 證據固定比較 2026 → 26026。</small>
           </div>
-          <div class="seasonal-drift-stat total-only range">
-            <span>全年結果</span>
-            <strong>提前 10.20–14.22 天</strong>
-            <small>沒有任何季節位置回到 0 天</small>
-          </div>
-          <div class="seasonal-drift-stat split-only phase">
-            <span>共同位移 · 全年平均</span>
-            <strong id="seasonal-drift-phase-value">—</strong>
-            <small>先把整圈一起提前的部分抽掉</small>
-          </div>
-          <div class="seasonal-drift-stat split-only shape">
-            <span>剩下的年內起伏</span>
-            <strong id="seasonal-drift-shape-span">—</strong>
-            <small>全年 peak-to-peak</small>
-          </div>
+          <button id="seasonal-drift-use-case" type="button">帶入 +24,000 年</button>
         </div>
 
-        <div class="seasonal-drift-linked-layout">
-          <div class="seasonal-drift-plot">
-            <svg id="seasonal-drift-curve" class="seasonal-drift-svg" role="img"
-              aria-label="2026 到 26026 全年 360 個太陽黃經的 Gregorian 相位漂移；可拖曳選擇黃經"></svg>
-            <div class="seasonal-drift-scrub-row">
-              <span>冬至</span>
-              <input id="seasonal-drift-scrub" type="range" min="0" max="359" step="1" value="45"
-                aria-label="沿全年太陽黃經選擇位置">
-              <span>→ 冬至</span>
+        <div class="seasonal-drift-case-content">
+          <div class="seasonal-drift-summary" aria-live="polite">
+            <div class="seasonal-drift-stat primary">
+              <span>目前位置</span>
+              <strong><i id="seasonal-drift-selected-name">立春</i> · <b id="seasonal-drift-selected-longitude">315°</b></strong>
+              <small class="total-only">相對完全重現：<b id="seasonal-drift-selected-total-human">—</b></small>
+              <small class="split-only">完整差異 <b id="seasonal-drift-selected-total">—</b> · 年內起伏 <b id="seasonal-drift-selected-shape">—</b></small>
+            </div>
+            <div class="seasonal-drift-stat total-only range">
+              <span>全年結果</span>
+              <strong>提前 10.20–14.22 天</strong>
+              <small>沒有任何季節位置回到 0 天</small>
+            </div>
+            <div class="seasonal-drift-stat split-only phase">
+              <span>共同位移 · 全年平均</span>
+              <strong id="seasonal-drift-phase-value">—</strong>
+              <small>先把整圈一起提前的部分抽掉</small>
+            </div>
+            <div class="seasonal-drift-stat split-only shape">
+              <span>剩下的年內起伏</span>
+              <strong id="seasonal-drift-shape-span">—</strong>
+              <small>全年 peak-to-peak</small>
             </div>
           </div>
 
-          <div class="seasonal-drift-orbit-panel">
-            <div class="seasonal-drift-orbit-gate total-only">
-              <strong>先把共同位移拆開。</strong>
-              <span>右圖只解釋約 4 天的年內起伏，不解釋整體約 12 天的提前。</span>
-            </div>
-            <div class="seasonal-drift-orbit-head">
-              <div>
-                <span>同一黃經 · 兩個 timing 等效軌道</span>
-                <strong>拖等效位置也能選黃經</strong>
-                <small>e：<b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b></small>
-              </div>
-              <div class="seasonal-drift-orbit-tools">
-                <small>虛線 2026<br>實線 26026</small>
-                <button type="button" id="seasonal-drift-orbit-scale" aria-pressed="true"><span id="seasonal-drift-scale-label">示意放大 ×10</span></button>
+          <div class="seasonal-drift-linked-layout">
+            <div class="seasonal-drift-plot">
+              <svg id="seasonal-drift-curve" class="seasonal-drift-svg" role="img"
+                aria-label="2026 到 26026 全年 360 個太陽黃經的 Gregorian 相位漂移；可拖曳選擇黃經"></svg>
+              <div class="seasonal-drift-scrub-row">
+                <span>冬至</span>
+                <input id="seasonal-drift-scrub" type="range" min="0" max="359" step="1" value="45"
+                  aria-label="沿全年太陽黃經選擇位置">
+                <span>→ 冬至</span>
               </div>
             </div>
-            <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
-              aria-label="2026 與 26026 的 timing 等效橢圓比較；預設將形狀差異放大十倍顯示"></svg>
+
+            <div class="seasonal-drift-orbit-panel">
+              <div class="seasonal-drift-orbit-head">
+                <div>
+                  <span>同一黃經 · 兩個 timing 等效軌道</span>
+                  <strong>拖等效位置也能選黃經</strong>
+                  <small>e：<b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b></small>
+                </div>
+                <div class="seasonal-drift-orbit-tools">
+                  <small>虛線 2026<br>實線 26026</small>
+                  <button type="button" id="seasonal-drift-orbit-scale" aria-pressed="true"><span id="seasonal-drift-scale-label">示意放大 ×10</span></button>
+                </div>
+              </div>
+              <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
+                aria-label="2026 與 26026 的 timing 等效橢圓比較；預設將形狀差異放大十倍顯示"></svg>
+            </div>
           </div>
+
+          <p class="seasonal-drift-prototype-note"><strong>怎麼讀：</strong>「完整差異」保留 0 天，先回答 24,000 年後季節有沒有真正回來；「拆成共同位移＋年內起伏」才把全年平均約 12.2 天抽掉。右側只畫 timing 反演的等效 shape，不把共同位移硬畫成軌道變形。</p>
         </div>
-
-        <p class="seasonal-drift-prototype-note"><strong>怎麼讀：</strong>「完整差異」保留 0 天，先回答 24,000 年後季節有沒有真正回來；「拆成共同位移＋年內起伏」才把全年平均約 12.2 天抽掉。右側只畫 timing 反演的等效 shape，不把共同位移硬畫成軌道變形。</p>
       </section>
 
       <div class="seasonal-drift-secondary-rail">
