@@ -1,0 +1,184 @@
+name: Research year-26026 full seasonal timeline
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-rebound-26026-full-seasonal-timeline.yml"
+      - "scripts/research-rebound-26026-full-year-state.py"
+      - "scripts/research-solve-rebound-26026-full-seasonal-timeline.mjs"
+      - "scripts/research-render-26026-seasonal-timeline-svg.mjs"
+      - "scripts/research-rebound-26026-massloss-state.py"
+      - "scripts/research-rebound-de441-state-baseline.py"
+      - "scripts/research-swiss-owen-frame-probe.c"
+      - "src/astronomy/absolute-state-seasonal-solver.js"
+      - "src/astronomy/naif-tt-tdb-time-bridge.js"
+      - "src/astronomy/horizons-sun-apparent-direction-proof.js"
+      - "src/astronomy/owen-horizons-frame-proof-contract.js"
+      - "src/astronomy/direct-seasonal-event-provider.js"
+      - "scripts/prepare-vendor.mjs"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  timeline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned orbital dependencies
+        run: |
+          python -m pip install --disable-pip-version-check             "rebound==5.2.2" "reboundx==5.1.0"             "jplephem==2.24" "numpy<3"
+
+      - name: Prepare pinned modern seasonal baseline
+        run: |
+          npm ci --ignore-scripts
+          npm run vendor:prepare
+
+      - name: Compile research scripts
+        run: |
+          python -m py_compile             scripts/research-rebound-26026-full-year-state.py             scripts/research-rebound-26026-massloss-state.py
+
+      - name: Download official DE441 positive-time kernel
+        env:
+          KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
+        run: |
+          mkdir -p tmp/rebound-26026-full-timeline
+          curl --fail --location --retry 4 --retry-delay 5             --output tmp/rebound-26026-full-timeline/de441_part-2.bsp             "$KERNEL_URL"
+          printf '%s  %s\n'             'ad8dfa4e505ef0e3a5d587a5b4705632'             'tmp/rebound-26026-full-timeline/de441_part-2.bsp' | md5sum --check -
+
+      - name: Project continuous catalogue-year state window
+        timeout-minutes: 55
+        run: |
+          python scripts/research-rebound-26026-full-year-state.py             --kernel tmp/rebound-26026-full-timeline/de441_part-2.bsp             --output tmp/rebound-26026-full-timeline/state.json
+
+      - name: Assert continuous state regression against merged #569
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          r = json.loads(
+              Path("tmp/rebound-26026-full-timeline/state.json").read_text()
+          )
+          assert r["researchOnly"] is True
+          assert r["catalogueYear"] == 26026
+          assert r["validation"]["accepted"] is True
+          assert r["validation"]["maxPinnedCheckpointDriftArcsec"] <= 0.05
+          assert len(r["validation"]["checkpoints"]) == 3
+          assert r["stateWindow"]["stepDays"] == 0.5
+          assert r["stateWindow"]["sampleCount"] > 800
+          assert r["claimBoundary"]["continuousCatalogueYearStateProjected"] is True
+          assert r["claimBoundary"]["asteroid343Included"] is False
+          print(json.dumps({
+              "validation": r["validation"],
+              "sampleCount": r["stateWindow"]["sampleCount"],
+              "start": r["stateWindow"]["startTdbJulianDay"],
+              "end": r["stateWindow"]["endTdbJulianDay"],
+          }, indent=2))
+          PY
+
+      - name: Fetch pinned Swiss Ephemeris source
+        shell: bash
+        run: |
+          set -euo pipefail
+          SWISS_COMMIT=9083a12d59e98034fb2337061481ac8800c16e64
+          mkdir -p tmp/swisseph
+          git -C tmp/swisseph init
+          git -C tmp/swisseph remote add origin https://github.com/aloistr/swisseph.git
+          git -C tmp/swisseph fetch --depth=1 origin "$SWISS_COMMIT"
+          git -C tmp/swisseph checkout --detach FETCH_HEAD
+          test "$(git -C tmp/swisseph rev-parse HEAD)" = "$SWISS_COMMIT"
+          grep -q 'SEMOD_PREC_OWEN_1990' tmp/swisseph/swephlib.c
+          grep -q 'psia += -0.000018560' tmp/swisseph/swephlib.c
+
+      - name: Build pinned Owen frame probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C tmp/swisseph libswe.a
+          cc -O2 -Wall -Wextra             -I tmp/swisseph             scripts/research-swiss-owen-frame-probe.c             tmp/swisseph/libswe.a             -lm -ldl             -o tmp/owen-frame-probe
+
+      - name: Solve all 360 integer-longitude crossings
+        env:
+          STATE_PROJECTION_JSON: tmp/rebound-26026-full-timeline/state.json
+          OWEN_FRAME_PROBE: tmp/owen-frame-probe
+          OUTPUT_JSON: tmp/rebound-26026-full-timeline/timeline.json
+        run: node scripts/research-solve-rebound-26026-full-seasonal-timeline.mjs
+
+      - name: Assert 24-term and 360-point timeline
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const r = JSON.parse(
+            fs.readFileSync("tmp/rebound-26026-full-timeline/timeline.json","utf8")
+          );
+          if (r.researchOnly !== true) throw new Error("timeline must remain research-only");
+          if (r.sampling?.crossingCount !== 360) throw new Error("expected 360 crossings");
+          if (r.sampling?.namedTermCount !== 24) throw new Error("expected 24 named terms");
+          if (r.terms?.length !== 24) throw new Error("24-term output missing");
+          if (r.curve?.length !== 360) throw new Error("360-point curve missing");
+          if (!(r.validation.maxRegressionSeconds <= 5)) {
+            throw new Error("#571 regression gate failed");
+          }
+          if (r.summary?.allSampledLongitudesMoreThanOneDayFromGregorianCycle !== true) {
+            throw new Error("some sampled longitude is within one day of Gregorian closure");
+          }
+          if (!(r.summary.minDriftDays < r.summary.maxDriftDays)) {
+            throw new Error("timeline drift range collapsed");
+          }
+          if (r.claimBoundary?.asteroid343Included !== false) {
+            throw new Error("asteroid343 must remain deferred");
+          }
+          if (r.claimBoundary?.civilTimeResolved !== false) {
+            throw new Error("timeline must not claim civil time");
+          }
+          console.log(JSON.stringify({
+            sampling:r.sampling,
+            summary:r.summary,
+            validation:r.validation,
+            terms:r.terms.map(term => ({
+              name:term.name,
+              longitudeDegrees:term.longitudeDegrees,
+              driftDays:term.gregorianCycleDriftDays,
+              date:term.prolepticGregorianTt
+            }))
+          }, null, 2));
+          NODE
+
+      - name: Render research visual prototypes
+        env:
+          TIMELINE_JSON: tmp/rebound-26026-full-timeline/timeline.json
+          CURVE_SVG: tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+          ORBIT_SVG: tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
+        run: |
+          node scripts/research-render-26026-seasonal-timeline-svg.mjs
+          test -s tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+          test -s tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
+          grep -q '2026 → 26026' tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+          grep -q '太陽系俯視概念圖' tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
+
+      - name: Remove large source kernel
+        if: always()
+        run: rm -f tmp/rebound-26026-full-timeline/de441_part-2.bsp
+
+      - name: Upload full seasonal timeline evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebound-26026-full-seasonal-timeline
+          path: |
+            tmp/rebound-26026-full-timeline/state.json
+            tmp/rebound-26026-full-timeline/timeline.json
+            tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+            tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 9
