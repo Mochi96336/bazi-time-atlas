@@ -43,15 +43,36 @@ function chromiumBaseArgs() {
   ];
 }
 
+// Retry only Chromium process-launch failures. Successful DOM probes must still
+// satisfy the original mode assertions; a missing shader is never retried away.
+function runChromium(browser, args, label) {
+  let lastResult = null;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const timeoutMs = attempt === 1 ? 15_000 : 45_000;
+    const result = spawnSync(browser, args, {
+      encoding:"utf8", timeout:timeoutMs, killSignal:"SIGKILL"
+    });
+    if (result.status === 0) return result;
+    lastResult = result;
+    if (attempt === 1) {
+      console.warn("[visual-material] RETRY " + label + " after "
+        + (result.error?.code === "ETIMEDOUT" ? "15s timeout" : "exit " + result.status));
+    }
+  }
+  process.stderr.write(lastResult?.stdout ?? "");
+  process.stderr.write(lastResult?.stderr ?? "");
+  throw new Error("Chromium failed to start for " + label + " after bounded retry");
+}
+
 function probeMode(browser, mode) {
   const pathName = materialPath(mode);
   const url = new URL(pathName, baseURL).href;
-  const result = spawnSync(browser, [
+  const result = runChromium(browser, [
     ...chromiumBaseArgs(),
     "--window-size=1440,900",
     "--dump-dom",
     url
-  ], { encoding:"utf8", timeout:45_000, killSignal:"SIGKILL" });
+  ], "DOM " + mode);
 
   if (result.status !== 0) {
     process.stderr.write(result.stdout ?? "");
@@ -82,12 +103,12 @@ function probeMode(browser, mode) {
 
 function probeDefaultProduction(browser) {
   const url = new URL("?instant=" + instant, baseURL).href;
-  const result = spawnSync(browser, [
+  const result = runChromium(browser, [
     ...chromiumBaseArgs(),
     "--window-size=1440,900",
     "--dump-dom",
     url
-  ], { encoding:"utf8", timeout:45_000, killSignal:"SIGKILL" });
+  ], "production DOM");
 
   if (result.status !== 0) throw new Error("Default material production probe failed");
   if (!result.stdout.includes('data-material-prototype="roughness"')) {
@@ -97,12 +118,12 @@ function probeDefaultProduction(browser) {
 
 function probeForcedFallback(browser) {
   const url = new URL("?material=roughness&materialWebgl=off&instant=" + instant, baseURL).href;
-  const result = spawnSync(browser, [
+  const result = runChromium(browser, [
     ...chromiumBaseArgs(),
     "--window-size=1440,900",
     "--dump-dom",
     url
-  ], { encoding:"utf8", timeout:45_000, killSignal:"SIGKILL" });
+  ], "forced fallback DOM");
 
   if (result.status !== 0) throw new Error("Forced material fallback probe failed");
   if (!result.stdout.includes('data-material-prototype-fallback="forced"')) {
@@ -130,12 +151,12 @@ for (const mode of modes) {
     const url = new URL(requestedPath, baseURL).href;
     const outputName = "material-" + mode + "-" + viewport.key + ".png";
     const outputPath = path.join(outputDir, outputName);
-    const result = spawnSync(browser, [
+    const result = runChromium(browser, [
       ...chromiumBaseArgs(),
       "--window-size=" + browserWidth + "," + viewport.height,
       "--screenshot=" + outputPath,
       url
-    ], { encoding:"utf8", timeout:45_000, killSignal:"SIGKILL" });
+    ], "screenshot " + outputName);
 
     if (result.status !== 0) {
       process.stderr.write(result.stdout ?? "");
