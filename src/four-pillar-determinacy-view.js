@@ -104,21 +104,24 @@ function refresh() {
   instrument.dataset.fourPillarAbsoluteCivilPhasePreserved = String(result.absoluteCivilPhasePreserved);
   instrument.dataset.fourPillarLocalClockModeled = String(result.localClockModeled);
 
+  const absolutePrimary = panel.dataset.absolutePrimary === "true";
   setText(
     "determinacy-scope-value",
     result.identity
       ? "同一比較狀態 · 4 / 4 相同"
-      : resolvedCount === 2
-        ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
-        : resolvedCount === 0
-          ? "沒有完整四柱可作純交界歸因"
-          : `${resolvedCount} / 4 柱可由此層解析`
+      : absolutePrimary
+        ? "shape-only：年／月交界可隔離"
+        : resolvedCount === 2
+          ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
+          : resolvedCount === 0
+            ? "沒有完整四柱可作純交界歸因"
+            : `${resolvedCount} / 4 柱可由此層解析`
   );
   setText(
     "determinacy-footnote",
     result.identity
       ? "Δ=0 是同一狀態，因此四柱相同是定義上的 identity，不是深時間模型推導。"
-      : `比較框架＝春分共同歸零的季節內形狀。絕對民用日相位：未保留；地方時：未建模；ΔT：未建模。${discreteDayClosed ? " 即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論。" : ""}`
+      : `${absolutePrimary ? "此卡片已降為 shape-only 輔助證據；+24,000 absolute 年／月界結論以上方主結果為準。 " : ""}比較框架＝春分共同歸零的季節內形狀。絕對民用日相位：未保留；地方時：未建模；ΔT：未建模。${discreteDayClosed ? " 即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論。" : ""}`
   );
 }
 
