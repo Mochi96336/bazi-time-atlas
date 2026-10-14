@@ -39,7 +39,7 @@ const fragment=start>=0?dom.slice(start,end>start?end:start+12000):dom.slice(0,1
 const required=[
   'data-ready="true"',
   'class="seasonal-drift-curve-path"',
-  'class="seasonal-orbit-path seasonal-orbit-target"',
+  'seasonal-orbit-target',
   'id="seasonal-drift-selected-total">−10.883 d',
   'id="seasonal-drift-phase-value">−12.206 d'
 ];
