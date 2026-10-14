@@ -33,6 +33,14 @@ test("secondary astronomy tools fold away only for the aligned +24k main case", 
   assert.match(css, /\.secondary-astronomy-tools > summary/);
 });
 
+test("direct hashes reopen the folded secondary astronomy lane", () => {
+  assert.match(view, /function secondaryHashTarget\(\)/);
+  assert.match(view, /secondaryTools\.contains\(target\)/);
+  assert.match(view, /secondaryTools\.open = Boolean\(secondaryHashTarget\(\)\) \|\| !aligned/);
+  assert.match(view, /addEventListener\("hashchange"/);
+  assert.match(view, /addEventListener\("load"/);
+});
+
 test("prototype only expands when the canonical Research state matches 2026 + 24k", () => {
   assert.match(html, /id="seasonal-drift-case-gate-title"/);
   assert.match(html, /id="seasonal-drift-use-case"/);
