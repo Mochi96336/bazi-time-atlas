@@ -323,26 +323,46 @@
 }
 .seasonal-drift-prototype-note strong { color:#8f9b94; font-weight:650; }
 
-.seasonal-drift-secondary-rail {
-  display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  gap:12px;
-  margin:18px 2px 4px;
-  padding-top:11px;
+.secondary-astronomy-tools {
+  margin-top:15px;
   border-top:1px solid rgba(238,242,237,.06);
+  border-bottom:1px solid rgba(238,242,237,.055);
 }
-.seasonal-drift-secondary-rail span {
-  color:#78857d;
-  font-size:8px;
+.secondary-astronomy-tools > summary {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:10px;
+  align-items:center;
+  min-height:38px;
+  padding:7px 2px;
+  color:#77847c;
+  cursor:pointer;
+  list-style:none;
+}
+.secondary-astronomy-tools > summary::-webkit-details-marker { display:none; }
+.secondary-astronomy-tools > summary span {
+  color:#7f8c84;
+  font-size:8.5px;
   font-weight:700;
-  letter-spacing:.06em;
+  letter-spacing:.04em;
 }
-.seasonal-drift-secondary-rail strong {
-  color:#66736b;
+.secondary-astronomy-tools > summary strong {
+  color:#68756d;
   font-size:8px;
   font-weight:500;
+  text-align:right;
 }
+.secondary-astronomy-tools > summary::after {
+  content:"+";
+  color:#667169;
+  font-size:13px;
+}
+.secondary-astronomy-tools[open] > summary::after { content:"−"; }
+.secondary-astronomy-tools[open] > summary {
+  border-bottom:1px solid rgba(238,242,237,.045);
+}
+.secondary-astronomy-tools > .astronomy-panel { margin-top:3px; }
+.secondary-astronomy-tools > .near-search-panel { margin-bottom:10px; }
 
 @media (max-width:900px) {
   .seasonal-drift-prototype[data-mode="split"] .seasonal-drift-linked-layout { grid-template-columns:1fr; gap:12px; }
@@ -386,14 +406,15 @@
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:17px; }
   .seasonal-drift-orbit-point-label { font-size:15px; }
-  .seasonal-drift-secondary-rail {
-    display:block;
-    margin-top:15px;
+  .secondary-astronomy-tools > summary {
+    min-height:42px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:6px;
   }
-  .seasonal-drift-secondary-rail strong {
-    display:block;
-    margin-top:3px;
-    line-height:1.45;
+  .secondary-astronomy-tools > summary strong {
+    grid-column:1 / -1;
+    text-align:left;
+    font-size:8.5px;
   }
 }
 
