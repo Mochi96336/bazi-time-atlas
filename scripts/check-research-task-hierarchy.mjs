@@ -202,8 +202,10 @@ for (const expected of [
   "60 年序",
   "60 日序",
   "季節形狀 RMS",
-  "目前可支持的最強結論",
-  "年柱＋月柱可隔離 · 日柱＋時柱未解"
+  "年／月界未重現",
+  "shape-only 輔助判定",
+  "春分歸零後的舊模型內結論",
+  "shape-only：年／月交界可隔離"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`localized Research terminology missing "${expected}": ${probe.url}`);
