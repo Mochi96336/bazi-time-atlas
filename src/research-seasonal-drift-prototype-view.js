@@ -109,6 +109,22 @@ if (root && curveSvg && orbitSvg && scrub) {
     if (caseButton) caseButton.hidden = false;
   }
 
+  function secondaryHashTarget() {
+    if (!secondaryTools || !location.hash) return null;
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return null;
+    const target = document.getElementById(id);
+    return target && secondaryTools.contains(target) ? target : null;
+  }
+
+  function revealSecondaryHashTarget() {
+    const target = secondaryHashTarget();
+    if (!target || !secondaryTools) return false;
+    secondaryTools.open = true;
+    requestAnimationFrame(() => target.scrollIntoView({ block:"start" }));
+    return true;
+  }
+
   function syncSecondaryDeltaLabel() {
     const delta = Number(instrument?.dataset.deltaYears);
     if (!secondaryToolsMeta || !Number.isFinite(delta)) return;
@@ -119,9 +135,8 @@ if (root && curveSvg && orbitSvg && scrub) {
 
     if (!secondaryTools) return;
     const state = aligned ? "aligned" : "other";
-    if (secondaryTools.dataset.caseState === state) return;
     secondaryTools.dataset.caseState = state;
-    secondaryTools.open = !aligned;
+    secondaryTools.open = Boolean(secondaryHashTarget()) || !aligned;
   }
 
   function syncModeButtons() {
@@ -510,6 +525,15 @@ if (root && curveSvg && orbitSvg && scrub) {
       attributeFilter:["data-delta-years","data-base-date"]
     });
   }
+
+  window.addEventListener("hashchange", () => {
+    syncSecondaryDeltaLabel();
+    revealSecondaryHashTarget();
+  });
+  window.addEventListener("load", () => {
+    syncSecondaryDeltaLabel();
+    revealSecondaryHashTarget();
+  }, { once:true });
 
   root.dataset.ready = "true";
   render();
