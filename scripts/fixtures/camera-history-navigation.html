@@ -76,13 +76,28 @@ function snapshot() {
       Math.abs(points[i][1]-backgroundPoints[i][1]));
   }
   if (maxAlignmentError > .3) throw new Error("backdrop projection differs: " + maxAlignmentError);
+  // Exercise the *moving* veil, not just the untransformed background SVG.
+  // Its world center must remain invariant after a nonzero 87-degree rotation.
+  const field = doc.querySelector(".orbital-field");
+  if (!field) throw new Error("moving orbital field missing");
+  const existingTransform = field.getAttribute("transform");
+  field.setAttribute("transform", "rotate(87 600 1360)");
+  const rotatedCenter = projected(field, WHEEL_CENTER.x, WHEEL_CENTER.y);
+  const fixedCenter = projected(orbital, WHEEL_CENTER.x, WHEEL_CENTER.y);
+  if (existingTransform === null) field.removeAttribute("transform");
+  else field.setAttribute("transform", existingTransform);
+  const rotationDriftPx = Math.max(
+    Math.abs(rotatedCenter[0] - fixedCenter[0]),
+    Math.abs(rotatedCenter[1] - fixedCenter[1])
+  );
+  if (rotationDriftPx > .3) throw new Error("moving orbital pivot drifted: " + rotationDriftPx);
   return {
     viewBox:actual,
     mode:instrument.dataset.geometryCameraMode,
     selectedMs:instrument.dataset.selectedInstantMs,
     pixels:points,
     svgBox:[rect.width,rect.height],
-    maxAlignmentError
+    maxAlignmentError, rotationDriftPx
   };
 }
 
@@ -147,7 +162,7 @@ try {
     mode, browserBack:true, researchNav:true, persisted,
     viewBox:baseline.viewBox, baselineMode:baseline.mode,
     backDriftPx:backDrift, navigationDriftPx:navDrift,
-    backgroundCameraAligned:true
+    backgroundCameraAligned:true, maxRotationDriftPx:Math.max(baseline.rotationDriftPx,browserBack.rotationDriftPx,siteLink.rotationDriftPx)
   });
   proof.dataset.phase = "pass";
   proof.dataset.ready = "true";
