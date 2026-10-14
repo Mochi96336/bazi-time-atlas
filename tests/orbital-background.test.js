@@ -177,3 +177,53 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
   assert.equal(timers.size, 0);
   assert.equal(frames.size, 0);
 });
+
+test("orbital camera reacts to wheel viewBox edits even when container size does not change", () => {
+  const node = (attributes = {}) => {
+    const attrs = new Map(Object.entries(attributes));
+    return {
+      style:{},
+      setAttribute(name, value) { attrs.set(name, String(value)); },
+      getAttribute:name => attrs.get(name) ?? null
+    };
+  };
+  const wheel = node({ viewBox:"0 0 1200 760", preserveAspectRatio:"xMidYMid meet" });
+  const space = node(), field = node(), disc = node();
+  const rings = Array.from({ length:6 }, () => node());
+  const veils = Array.from({ length:3 }, () => node());
+  const root = {
+    dataset:{},
+    querySelector:selector => ({
+      ".orbital-space":space, ".orbital-field":field, ".orbital-occlusion-disc":disc
+    })[selector] ?? null,
+    querySelectorAll:selector => selector === ".orbital-veil" ? veils : rings
+  };
+  const instrument = new EventTarget();
+  instrument.dataset = {};
+  let cameraNotify = null, cameraDisconnected = false;
+  class Observer {
+    constructor(callback) { this.callback = callback; this.isCamera = false; }
+    observe(element, options) {
+      if (element === wheel && options?.attributeFilter?.includes("viewBox")) {
+        cameraNotify = this.callback;
+        this.isCamera = true;
+      }
+    }
+    disconnect() { if (this.isCamera) cameraDisconnected = true; }
+  }
+  const background = createOrbitalBackground({
+    root, instrument, svg:wheel, wheelCenter:{ x:600, y:1360 },
+    wheelOuterRadius:1182, reducedMotionQuery:{ matches:true },
+    ResizeObserverCtor:null, MutationObserverCtor:Observer,
+    visibilityTarget:new EventTarget()
+  });
+  assert.ok(background && cameraNotify, "source camera must have a viewBox mutation listener");
+  assert.equal(space.getAttribute("viewBox"), "0 0 1200 760");
+  wheel.setAttribute("viewBox", "111 222 444 555");
+  wheel.setAttribute("preserveAspectRatio", "none");
+  cameraNotify();
+  assert.equal(space.getAttribute("viewBox"), "111 222 444 555");
+  assert.equal(space.getAttribute("preserveAspectRatio"), "none");
+  background.destroy();
+  assert.equal(cameraDisconnected, true);
+});
