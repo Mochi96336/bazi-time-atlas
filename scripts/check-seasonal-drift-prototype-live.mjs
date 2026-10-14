@@ -13,10 +13,10 @@ function findBrowser(){
 
 const browser=findBrowser();
 
-function dump(seasonalView){
+function dump(seasonalView,delta=24000){
   const url=new URL("recurrence.html",base);
   url.searchParams.set("date","2026-09-13");
-  url.searchParams.set("delta","24000");
+  url.searchParams.set("delta",String(delta));
   if(seasonalView)url.searchParams.set("seasonalView",seasonalView);
 
   const result=spawnSync(browser,[
@@ -69,7 +69,8 @@ requireTokens(total,[
   'id="absolute-boundary-union">146.481 d',
   '全年 TT 相位 40.105% · 非人口機率',
   '年／月界未重現',
-  'shape-only-secondary'
+  'shape-only-secondary',
+  'shape-only-determinacy-details'
 ],"total seasonal prototype");
 
 const split=dump("split");
@@ -86,4 +87,14 @@ if(split.dom.includes('class="seasonal-drift-gap-line"')){
   throw Error("split seasonal prototype kept the total-view zero-gap marker: "+split.url);
 }
 
-console.log("[seasonal-drift-prototype] PASS total + split live browser states and linked curve/orbit");
+const identity=dump("total",0);
+requireTokens(identity,[
+  'data-case-aligned="false"',
+  'id="absolute-boundary-consequence"',
+  'data-active="false"'
+],"non-24k seasonal prototype");
+if(identity.dom.includes("shape-only-secondary")){
+  throw Error("non-24k state incorrectly demoted canonical determinacy: "+identity.url);
+}
+
+console.log("[seasonal-drift-prototype] PASS total + split + non-24k gating and Research 03 handoff");
