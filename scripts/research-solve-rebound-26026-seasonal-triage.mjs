@@ -9,8 +9,11 @@ import {
 import { ttJulianDayToTdbJulianDay } from "../src/astronomy/naif-tt-tdb-time-bridge.js";
 import { HORIZONS_SUN_APPARENT_DIRECTION_PROOF_MODEL } from "../src/astronomy/horizons-sun-apparent-direction-proof.js";
 import { OWEN_HORIZONS_FRAME_PROOF_CONTRACT } from "../src/astronomy/owen-horizons-frame-proof-contract.js";
+import { solveSolarLongitude } from "../src/astronomy/direct-seasonal-event-provider.js";
 
+const BASE_YEAR = 2026;
 const TARGET_YEAR = 26026;
+const GREGORIAN_24000_DAY_SPAN = 8_765_820;
 const ROOT_TOLERANCE_SECONDS = 0.5;
 const probe = process.env.OWEN_FRAME_PROBE;
 const statePath = process.env.STATE_PROJECTION_JSON;
@@ -272,11 +275,28 @@ function solveTarget(target) {
   const alternate = solveFromWindow(0.75, 3);
   const seedParitySeconds = Math.abs(primary.ttJulianDay - alternate.ttJulianDay) * 86400;
   const calendar = julianDayToProlepticGregorian(primary.ttJulianDay);
+  const baseline2026 = solveSolarLongitude({
+    year:BASE_YEAR,
+    longitudeDegrees:target.longitudeDegrees
+  });
+  const expectedGregorianClosureTtJulianDay =
+    baseline2026.ttJulianDay + GREGORIAN_24000_DAY_SPAN;
+  const gregorianCycleDriftHours =
+    (primary.ttJulianDay - expectedGregorianClosureTtJulianDay) * 24;
+  const baseline2026Calendar =
+    julianDayToProlepticGregorian(baseline2026.ttJulianDay);
 
   return Object.freeze({
     ...target,
     ttJulianDay:primary.ttJulianDay,
     prolepticGregorianTt:calendar,
+    baseline2026:Object.freeze({
+      ttJulianDay:baseline2026.ttJulianDay,
+      prolepticGregorianTt:baseline2026Calendar
+    }),
+    expectedGregorianClosureTtJulianDay,
+    gregorianCycleDriftHours,
+    gregorianCycleDriftDays:gregorianCycleDriftHours / 24,
     offsetFromWindowCenterHours:(primary.ttJulianDay - window.centerTdbJulianDay) * 24,
     rootResidualArcsec:primary.residualDegrees * 3600,
     seedParitySeconds,
@@ -292,6 +312,12 @@ function solveTarget(target) {
 const events = TARGETS.map(solveTarget);
 const minDistanceToUniformMidnightHours = Math.min(
   ...events.map(event => event.prolepticGregorianTt.distanceToNearestMidnightHours)
+);
+const minAbsGregorianCycleDriftHours = Math.min(
+  ...events.map(event => Math.abs(event.gregorianCycleDriftHours))
+);
+const maxAbsGregorianCycleDriftHours = Math.max(
+  ...events.map(event => Math.abs(event.gregorianCycleDriftHours))
 );
 const maxSeedParitySeconds = Math.max(...events.map(event => event.seedParitySeconds));
 const maxRootResidualArcsec = Math.max(...events.map(event => event.rootResidualArcsec));
@@ -321,6 +347,10 @@ const result = Object.freeze({
   }),
   triage:Object.freeze({
     minDistanceToUniformMidnightHours,
+    minAbsGregorianCycleDriftHours,
+    maxAbsGregorianCycleDriftHours,
+    allThreeCrossingsMoreThanOneDayFromGregorianCycle:
+      minAbsGregorianCycleDriftHours > 24,
     asteroid343Deferred:true,
     decisionRule:"inspect uniform-TT day-boundary distance first; only deepen small-body modeling if the seasonal crossing is close enough to a day boundary to affect the research conclusion"
   }),
@@ -349,9 +379,13 @@ console.log(JSON.stringify({
     date:[event.prolepticGregorianTt.year,event.prolepticGregorianTt.month,event.prolepticGregorianTt.day].join("-"),
     hoursFromMidnight:event.prolepticGregorianTt.hoursFromMidnight,
     distanceToNearestMidnightHours:event.prolepticGregorianTt.distanceToNearestMidnightHours,
-    offsetFromWindowCenterHours:event.offsetFromWindowCenterHours
+    offsetFromWindowCenterHours:event.offsetFromWindowCenterHours,
+    gregorianCycleDriftHours:event.gregorianCycleDriftHours,
+    gregorianCycleDriftDays:event.gregorianCycleDriftDays
   })),
   minDistanceToUniformMidnightHours:result.triage.minDistanceToUniformMidnightHours,
+  minAbsGregorianCycleDriftHours:result.triage.minAbsGregorianCycleDriftHours,
+  maxAbsGregorianCycleDriftHours:result.triage.maxAbsGregorianCycleDriftHours,
   maxRootResidualArcsec:result.validation.maxRootResidualArcsec,
   maxSeedParitySeconds:result.validation.maxSeedParitySeconds,
   frameProbeCalls:result.validation.frameProbeCalls
