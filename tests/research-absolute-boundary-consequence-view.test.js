@@ -29,7 +29,11 @@ test("legacy determinacy is visibly demoted to shape-only when absolute evidence
   assert.match(view,/shape-only-secondary/);
   assert.match(view,/shape-only 輔助判定/);
   assert.match(view,/共同 phase 已扣除/);
+  assert.match(view,/shape-only-determinacy-details/);
+  assert.match(view,/demoteDeterminacy\(\)/);
+  assert.match(view,/restoreDeterminacy\(\)/);
   assert.match(css,/\.determinacy-panel\.shape-only-secondary/);
+  assert.match(css,/\.shape-only-determinacy-details/);
 });
 
 test("Research spine prefers absolute +24k verdicts",()=>{
