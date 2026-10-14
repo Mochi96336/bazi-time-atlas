@@ -238,36 +238,40 @@ const corrections = Object.freeze({
 const windowByLabel = new Map(stateAdapter.windows.map(window => [window.label, window]));
 
 function solveTarget(target) {
-  const seed = roughSeasonalCrossingTtJulianDay({
-    year:TARGET_YEAR,
-    longitudeDegrees:target.longitudeDegrees
-  });
-  const primary = solveSeasonalCrossingFromAbsoluteState({
-    year:TARGET_YEAR,
-    longitudeDegrees:target.longitudeDegrees,
-    seedTtJulianDay:seed,
-    initialHalfBracketDays:2,
-    maxHalfBracketDays:16,
-    toleranceSeconds:ROOT_TOLERANCE_SECONDS,
-    stateAdapter,
-    frameTransform,
-    corrections
-  });
-  const alternate = solveSeasonalCrossingFromAbsoluteState({
-    year:TARGET_YEAR,
-    longitudeDegrees:target.longitudeDegrees,
-    seedTtJulianDay:seed + 1.25,
-    initialHalfBracketDays:3,
-    maxHalfBracketDays:16,
-    toleranceSeconds:ROOT_TOLERANCE_SECONDS,
-    stateAdapter,
-    frameTransform,
-    corrections
-  });
-  const seedParitySeconds = Math.abs(primary.ttJulianDay - alternate.ttJulianDay) * 86400;
-  const calendar = julianDayToProlepticGregorian(primary.ttJulianDay);
   const window = windowByLabel.get(target.windowLabel);
   if (!window) throw new Error(`missing source window ${target.windowLabel}`);
+
+  // Seed from the actual projected-state window rather than the generic
+  // tropical-year calendar guess. Keep every bracket evaluation inside the
+  // captured window, with margin for the Sun light-time lookup.
+  const centerSeed = window.centerTdbJulianDay;
+  function solveFromWindow(seedShiftDays, initialHalfBracketDays) {
+    const seed = centerSeed + seedShiftDays;
+    const lightTimeMarginDays = 0.02;
+    const maxHalfBracketDays = Math.min(
+      seed - window.startTdbJulianDay,
+      window.endTdbJulianDay - seed
+    ) - lightTimeMarginDays;
+    if (!(maxHalfBracketDays >= initialHalfBracketDays)) {
+      throw new RangeError(`insufficient projected window around ${target.name}`);
+    }
+    return solveSeasonalCrossingFromAbsoluteState({
+      year:TARGET_YEAR,
+      longitudeDegrees:target.longitudeDegrees,
+      seedTtJulianDay:seed,
+      initialHalfBracketDays,
+      maxHalfBracketDays,
+      toleranceSeconds:ROOT_TOLERANCE_SECONDS,
+      stateAdapter,
+      frameTransform,
+      corrections
+    });
+  }
+
+  const primary = solveFromWindow(0, 2);
+  const alternate = solveFromWindow(0.75, 3);
+  const seedParitySeconds = Math.abs(primary.ttJulianDay - alternate.ttJulianDay) * 86400;
+  const calendar = julianDayToProlepticGregorian(primary.ttJulianDay);
 
   return Object.freeze({
     ...target,
