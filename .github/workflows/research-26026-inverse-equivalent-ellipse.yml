@@ -148,6 +148,9 @@ jobs:
           assert r["summary"]["twoHarmonicRmsResidualMinutes"] < 5
           assert r["claimBoundary"]["trueOsculatingElementsClaimed"] is False
           assert r["claimBoundary"]["twoBodyExactnessClaimed"] is False
+          assert r["visualizationMorphContract"]["phaseMustRemainSeparateFromEllipseShape"] is True
+          assert r["visualizationMorphContract"]["physicalIntermediateYearsClaimed"] is False
+          assert len(r["visualizationMorphContract"]["keyframes"]) == 5
           print(json.dumps({
               "summary": r["summary"],
               "inverseValidation": r["inverseValidationAgainstTargetState"],
