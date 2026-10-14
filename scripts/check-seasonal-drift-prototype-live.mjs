@@ -62,7 +62,8 @@ requireTokens(total,[
   'class="seasonal-drift-gap-line"',
   'id="seasonal-drift-selected-total-human">提前 10.883 天',
   'id="seasonal-drift-phase-value">−12.206 d',
-  '目前 Δ = 24,000 年'
+  'data-case-aligned="true"',
+  '目前也是 +24,000 年'
 ],"total seasonal prototype");
 
 const split=dump("split");
