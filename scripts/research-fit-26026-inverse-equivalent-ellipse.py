@@ -406,6 +406,30 @@ def main() -> None:
         actual_range_ellipse["perihelionSolarLongitudeDegrees"],
     )
 
+    # For visualization, interpolate the eccentricity vector rather than e and
+    # varpi independently.  This avoids angular wrap and remains well-behaved
+    # if the path passes near a circular orbit.  These are endpoint morph
+    # coordinates only; they are not a physical ephemeris for intermediate
+    # historical years.
+    morph_keyframes = []
+    for fraction in (0.0, 0.25, 0.5, 0.75, 1.0):
+        vector = (
+            (1.0 - fraction) * base_e_vector
+            + fraction * target_e_vector
+        )
+        eccentricity = float(np.linalg.norm(vector))
+        perihelion = (
+            math.degrees(math.atan2(vector[1], vector[0])) % 360.0
+            if eccentricity > 0.0
+            else 0.0
+        )
+        morph_keyframes.append({
+            "fraction": fraction,
+            "eccentricity": eccentricity,
+            "perihelionSolarLongitudeDegrees": perihelion,
+            "eccentricityVector": [float(vector[0]), float(vector[1])],
+        })
+
     accepted = (
         target_e_difference < 5e-5
         and target_peri_difference_degrees < 1.0
@@ -483,6 +507,14 @@ def main() -> None:
                 ),
                 "ratioToObservedFirstHarmonicAmplitude": amplitude_ratio,
             },
+        },
+        "visualizationMorphContract": {
+            "shapeCoordinates": "eccentricity vector [e cos(varpi), e sin(varpi)]",
+            "interpolation": "v(s) = (1-s) v_2026 + s v_26026",
+            "keyframes": morph_keyframes,
+            "commonPhaseOffsetDays": float(np.mean(drift_days)),
+            "phaseMustRemainSeparateFromEllipseShape": True,
+            "physicalIntermediateYearsClaimed": False,
         },
         "summary": {
             "accepted": accepted,
