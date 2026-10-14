@@ -20,10 +20,18 @@ test("Research 02 makes the fixed +24k case primary before dynamic astronomy too
     dynamicPanelStart > prototypeStart &&
     evidenceStart > dynamicPanelStart
   );
-  assert.ok(html.includes("主案例 · 固定 +24,000 年 · 不受上方 Δ 影響"));
+  assert.ok(html.includes("主案例 · +24,000 年離散閉合"));
   assert.match(html, /其他 Δ · 快速形狀模型/);
   assert.match(html, /data-seasonal-drift-mode="total"/);
   assert.match(html, /data-seasonal-drift-mode="split"/);
+});
+
+test("prototype only expands when the canonical Research state matches 2026 + 24k", () => {
+  assert.match(html, /id="seasonal-drift-case-gate-title"/);
+  assert.match(html, /id="seasonal-drift-use-case"/);
+  assert.match(view, /baseYear === DATA\.baseYear && delta === 24000/);
+  assert.match(view, /#discrete-derivation-steps \[data-delta-years="24000"\]/);
+  assert.match(css, /data-case-aligned="false"[\s\S]*\.seasonal-drift-case-content\s*\{\s*display:none/);
 });
 
 test("prototype keeps common phase separate from timing-equivalent orbit shape", () => {
@@ -32,7 +40,7 @@ test("prototype keeps common phase separate from timing-equivalent orbit shape",
   assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.commonPhaseDays/);
   assert.match(html, /右側只畫 timing 反演的等效 shape/);
   assert.match(html, /共同位移硬畫成軌道變形/);
-  assert.match(css, /data-mode="total"[\s\S]*#seasonal-drift-orbit[\s\S]*opacity:\.2/);
+  assert.match(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
 });
 
 test("curve and orbit share one longitude cursor without calling it a physical Earth position", () => {
