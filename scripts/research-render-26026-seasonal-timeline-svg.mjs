@@ -2,7 +2,8 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
 const input = process.env.TIMELINE_JSON ?? "tmp/rebound-26026-full-seasonal-timeline.json";
-const curveOutput = process.env.CURVE_SVG ?? "tmp/rebound-26026-seasonal-drift-curve.svg";
+const curveOverviewOutput = process.env.CURVE_OVERVIEW_SVG ?? "tmp/rebound-26026-seasonal-drift-curve-overview.svg";
+const curveDetailOutput = process.env.CURVE_DETAIL_SVG ?? "tmp/rebound-26026-seasonal-drift-curve-detail.svg";
 const orbitOutput = process.env.ORBIT_SVG ?? "tmp/rebound-26026-seasonal-orbit-overview.svg";
 
 const data = JSON.parse(readFileSync(input, "utf8"));
@@ -23,7 +24,7 @@ function write(path, body) {
   writeFileSync(path, body);
 }
 
-function renderCurve() {
+function renderCurve({ overview }) {
   const width = 1500;
   const height = 760;
   const margin = { left:110, right:50, top:80, bottom:115 };
@@ -31,8 +32,12 @@ function renderCurve() {
   const plotH = height - margin.top - margin.bottom;
   const points = data.curve;
   const values = points.map(p => p.gregorianCycleDriftDays);
-  const lo = Math.floor(Math.min(...values) - 0.5);
-  const hi = Math.ceil(Math.max(...values) + 0.5);
+  const lo = overview
+    ? Math.floor(Math.min(...values) - 0.5)
+    : Math.floor(Math.min(...values) - 0.5);
+  const hi = overview
+    ? 0
+    : Math.ceil(Math.max(...values) + 0.5);
   const y = value => margin.top + (hi - value) / (hi - lo) * plotH;
   const x = index => margin.left + index / (points.length - 1) * plotW;
   const path = points.map((p,i) =>
@@ -40,7 +45,10 @@ function renderCurve() {
   ).join(" ");
 
   const yTicks = [];
-  for (let v = Math.ceil(lo); v <= Math.floor(hi); v += 1) yTicks.push(v);
+  const tickStep = overview ? 3 : 1;
+  for (let v = Math.ceil(lo / tickStep) * tickStep; v <= Math.floor(hi); v += tickStep) {
+    yTicks.push(v);
+  }
 
   const termMarks = data.terms.map(term => {
     const index = points.findIndex(p => p.longitudeDegrees === term.longitudeDegrees);
@@ -53,8 +61,8 @@ function renderCurve() {
     text{font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;fill:#111}
     .muted{fill:#666}.grid{stroke:#ddd;stroke-width:1}.axis{stroke:#333;stroke-width:1.5}
   </style>
-  <text x="${margin.left}" y="38" font-size="28" font-weight="700">2026 → 26026 全年節氣相位漂移</text>
-  <text x="${margin.left}" y="66" font-size="16" class="muted">Δt = T26026(λ) − [T2026(λ) + 24,000 Gregorian years] · TT · 1° sampling</text>
+  <text x="${margin.left}" y="38" font-size="28" font-weight="700">2026 → 26026 全年節氣相位漂移${overview ? "｜距離 0 天總覽" : "｜季節內細節"}</text>
+  <text x="${margin.left}" y="66" font-size="16" class="muted">Δt = T26026(λ) − [T2026(λ) + 24,000 Gregorian years] · TT · 1° sampling${overview ? " · 0 天 = 完全回到 Gregorian 相位" : " · 縮放顯示約 4 天的季節內起伏"}</text>
   ${yTicks.map(v => `
     <line class="grid" x1="${margin.left}" x2="${width-margin.right}" y1="${y(v)}" y2="${y(v)}"/>
     <text x="${margin.left-15}" y="${y(v)+5}" font-size="14" text-anchor="end">${v} d</text>`).join("")}
@@ -145,11 +153,13 @@ function renderOrbit() {
   </svg>`;
 }
 
-write(curveOutput, renderCurve());
+write(curveOverviewOutput, renderCurve({ overview:true }));
+write(curveDetailOutput, renderCurve({ overview:false }));
 write(orbitOutput, renderOrbit());
 
 console.log(JSON.stringify({
-  curveOutput,
+  curveOverviewOutput,
+  curveDetailOutput,
   orbitOutput,
   curvePoints:data.curve.length,
   namedTerms:data.terms.length,
