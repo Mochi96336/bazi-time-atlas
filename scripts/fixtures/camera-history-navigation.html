@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>Home / Research camera history regression</title>
+  <style>
+    body { margin:0; background:#090b0f; color:#ddd; }
+    iframe { display:block; width:390px; height:844px; border:0; }
+    body[data-mode="desktop"] iframe { width:1440px; height:900px; }
+    pre { display:none; }
+  </style>
+</head>
+<body>
+<iframe id="stage" title="Actual BaZi Time Atlas"></iframe>
+<pre id="proof" data-ready="false"></pre>
+<script type="module">
+import { responsiveInstrumentCamera, viewBoxString } from "../../src/wheel/camera.js";
+import { WHEEL_CENTER, RADII } from "../../src/wheel/ring-model.js";
+
+const stage = document.querySelector("#stage");
+const proof = document.querySelector("#proof");
+const mode = new URLSearchParams(location.search).get("mode") === "desktop" ? "desktop" : "mobile";
+document.body.dataset.mode = mode;
+const home = new URL("../../?instant=2026-10-14T09%3A00%3A00.000Z", location.href);
+const research = new URL("../../recurrence.html", location.href);
+const sleep = delay => new Promise(resolve => setTimeout(resolve, delay));
+const frame = win => new Promise(resolve => win.requestAnimationFrame(resolve));
+let lastError = "";
+
+async function until(check, label) {
+  for (let n = 0; n < 180; n++) {
+    try {
+      if (check()) return;
+    } catch (error) {
+      lastError = String(error);
+    }
+    await sleep(75);
+  }
+  throw new Error(label + ": " + lastError);
+}
+
+function projected(svg, x, y) {
+  const m = svg.getScreenCTM();
+  if (!m) throw new Error("SVG getScreenCTM unavailable");
+  return [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f];
+}
+
+function snapshot() {
+  const doc = stage.contentDocument, win = stage.contentWindow;
+  const instrument = doc.querySelector("#kinetic-instrument");
+  const wheel = doc.querySelector("#kinetic-wheel");
+  const orbital = doc.querySelector("#orbital-background .orbital-space");
+  if (!wheel || !orbital || !instrument?.dataset.geometryCameraMode) {
+    throw new Error("instrument/camera not initialized");
+  }
+  const rect = wheel.getBoundingClientRect();
+  if (!(rect.width > 0 && rect.height > 0)) throw new Error("zero-size wheel");
+  const expected = viewBoxString(responsiveInstrumentCamera({
+    center: WHEEL_CENTER, outerRadius: RADII.outer,
+    viewportWidth: win.innerWidth, viewportAspect: rect.width / rect.height
+  }).viewBox);
+  const actual = wheel.getAttribute("viewBox"), backdrop = orbital.getAttribute("viewBox");
+  if (actual !== expected || backdrop !== actual) {
+    throw new Error("camera mismatch: " + JSON.stringify({ expected, actual, backdrop }));
+  }
+  const points = [[600,1360],[600,178],[0,760]].map(([x,y]) => projected(wheel,x,y));
+  const backgroundPoints = [[600,1360],[600,178],[0,760]].map(([x,y]) => projected(orbital,x,y));
+  let maxAlignmentError = 0;
+  for (let i = 0; i < points.length; i++) {
+    maxAlignmentError = Math.max(maxAlignmentError,
+      Math.abs(points[i][0]-backgroundPoints[i][0]),
+      Math.abs(points[i][1]-backgroundPoints[i][1]));
+  }
+  if (maxAlignmentError > .3) throw new Error("backdrop projection differs: " + maxAlignmentError);
+  return {
+    viewBox:actual,
+    mode:instrument.dataset.geometryCameraMode,
+    selectedMs:instrument.dataset.selectedInstantMs,
+    pixels:points,
+    svgBox:[rect.width,rect.height],
+    maxAlignmentError
+  };
+}
+
+async function settledHome() {
+  await until(() => {
+    const pathname = stage.contentWindow.location.pathname;
+    if (pathname !== home.pathname) return false;
+    snapshot();
+    return true;
+  }, "home camera never settled");
+  await frame(stage.contentWindow);
+  await frame(stage.contentWindow);
+  return snapshot();
+}
+
+function assertEquivalent(baseline, after, label) {
+  if (baseline.viewBox !== after.viewBox || baseline.mode !== after.mode
+    || baseline.selectedMs !== after.selectedMs) {
+    throw new Error(label + " changed camera/time: " + JSON.stringify({ baseline, after }));
+  }
+  let pixelDrift = 0;
+  for (let i=0;i<baseline.pixels.length;i++) {
+    for (let j=0;j<2;j++) pixelDrift = Math.max(pixelDrift,
+      Math.abs(baseline.pixels[i][j]-after.pixels[i][j]));
+  }
+  if (pixelDrift > .75) throw new Error(label + " drifted " + pixelDrift + "px");
+  return pixelDrift;
+}
+
+async function goToResearch() {
+  const link = stage.contentDocument.querySelector(".site-nav .research-link");
+  if (!link) throw new Error("home Research link missing");
+  link.click();
+  await until(() => stage.contentWindow.location.pathname === research.pathname
+    && stage.contentDocument.readyState === "complete",
+    "research navigation did not complete");
+}
+
+try {
+  stage.src = home.href;
+  const baseline = await settledHome();
+  let persisted = false;
+  stage.contentWindow.addEventListener("pageshow", event => {
+    if (event.persisted) persisted = true;
+  }, { passive:true });
+  await goToResearch();
+  stage.contentWindow.history.back();
+  const browserBack = await settledHome();
+  const backDrift = assertEquivalent(baseline, browserBack, "history.back");
+  await goToResearch();
+  const homeLink = stage.contentDocument.querySelector('.site-nav a[href="./"]');
+  if (!homeLink) throw new Error("Research home link missing");
+  homeLink.click();
+  const siteLink = await settledHome();
+  const navDrift = assertEquivalent(baseline, siteLink, "research navigation link");
+  proof.textContent = JSON.stringify({
+    mode, browserBack:true, researchNav:true, persisted,
+    viewBox:baseline.viewBox, baselineMode:baseline.mode,
+    backDriftPx:backDrift, navigationDriftPx:navDrift,
+    backgroundCameraAligned:true
+  });
+  proof.dataset.ready = "true";
+} catch (error) {
+  proof.dataset.error = String(error.message);
+  proof.textContent = String(error.stack);
+}
+</script>
+</body>
+</html>
