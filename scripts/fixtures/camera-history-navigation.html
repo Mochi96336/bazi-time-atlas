@@ -32,13 +32,13 @@ async function until(check, label) {
   proof.dataset.phase = label;
   for (let n = 0; n < 180; n++) {
     proof.dataset.poll = String(n);
+    if (lastError) proof.dataset.lastError = lastError.slice(0, 300);
     try {
       if (check()) return;
     } catch (error) {
       lastError = String(error);
     }
-    await frame(window);
-    await sleep(30);
+    await sleep(65);
   }
   throw new Error(label + ": " + lastError);
 }
@@ -93,8 +93,7 @@ async function settledHome() {
     snapshot();
     return true;
   }, "home camera never settled");
-  await frame(stage.contentWindow);
-  await frame(stage.contentWindow);
+  await sleep(120);
   return snapshot();
 }
 
