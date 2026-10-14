@@ -21,9 +21,16 @@ test("Research 02 makes the fixed +24k case primary before dynamic astronomy too
     evidenceStart > dynamicPanelStart
   );
   assert.ok(html.includes("主案例 · +24,000 年離散閉合"));
-  assert.match(html, /其他 Δ · 快速形狀模型/);
+  assert.match(html, /id="secondary-astronomy-tools"/);
+  assert.match(html, /其他 Δ \/ 快速模型/);
   assert.match(html, /data-seasonal-drift-mode="total"/);
   assert.match(html, /data-seasonal-drift-mode="split"/);
+});
+
+test("secondary astronomy tools fold away only for the aligned +24k main case", () => {
+  assert.match(view, /secondaryTools\.open = !aligned/);
+  assert.match(view, /secondaryTools\.dataset\.caseState/);
+  assert.match(css, /\.secondary-astronomy-tools > summary/);
 });
 
 test("prototype only expands when the canonical Research state matches 2026 + 24k", () => {
