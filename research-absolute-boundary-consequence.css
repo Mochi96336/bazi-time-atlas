@@ -335,8 +335,8 @@
   .absolute-boundary-strip-key { display:block; }
   .absolute-boundary-strip-key strong { display:block; margin-top:2px; }
   #absolute-boundary-strip { min-height:132px; }
-  .absolute-boundary-term { font-size:18px; }
-  .absolute-boundary-axis-label { font-size:15px; }
+  .absolute-boundary-term { font-size:30px; }
+  .absolute-boundary-axis-label { font-size:24px; }
   .absolute-boundary-buttons { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .absolute-boundary-buttons button:nth-child(4n) { border-right:1px solid rgba(238,242,237,.04); }
   .absolute-boundary-buttons button:nth-child(3n) { border-right:0; }
