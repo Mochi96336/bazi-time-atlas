@@ -10,7 +10,8 @@ const curveSvg = document.querySelector("#seasonal-drift-curve");
 const orbitSvg = document.querySelector("#seasonal-drift-orbit");
 const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
-const secondaryRail = document.querySelector(".seasonal-drift-secondary-rail");
+const secondaryTools = document.querySelector("#secondary-astronomy-tools");
+const secondaryToolsMeta = document.querySelector("#secondary-astronomy-tools-meta");
 const caseButton = document.querySelector("#seasonal-drift-use-case");
 const caseGateTitle = document.querySelector("#seasonal-drift-case-gate-title");
 const caseGateCopy = document.querySelector("#seasonal-drift-case-gate-copy");
@@ -109,12 +110,18 @@ if (root && curveSvg && orbitSvg && scrub) {
   }
 
   function syncSecondaryDeltaLabel() {
-    const label = secondaryRail?.querySelector("strong");
     const delta = Number(instrument?.dataset.deltaYears);
-    if (!label || !Number.isFinite(delta)) return;
-    label.textContent = delta === 24000
-      ? "目前也是 +24,000 年；以下只看 Berger 的 shape-only 快速模型，對應上圖拆解後的年內起伏。"
-      : `以下跟隨上方時間軸目前 Δ = ${delta.toLocaleString("en-US")} 年；主案例需切到 +24,000 年才展開。`;
+    if (!secondaryToolsMeta || !Number.isFinite(delta)) return;
+    const aligned = currentBaseYear() === DATA.baseYear && delta === 24000;
+    secondaryToolsMeta.textContent = aligned
+      ? "已收起 · Berger shape-only / 近回歸工具"
+      : `目前 Δ = ${delta.toLocaleString("en-US")} 年 · 展開快速模型`;
+
+    if (!secondaryTools) return;
+    const state = aligned ? "aligned" : "other";
+    if (secondaryTools.dataset.caseState === state) return;
+    secondaryTools.dataset.caseState = state;
+    secondaryTools.open = !aligned;
   }
 
   function syncModeButtons() {
