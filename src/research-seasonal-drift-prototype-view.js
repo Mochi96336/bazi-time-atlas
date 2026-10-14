@@ -17,7 +17,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     exaggerate:true
   };
 
-  const CURVE = Object.freeze({
+  const CURVE = {
     width:760,
     height:330,
     left:62,
