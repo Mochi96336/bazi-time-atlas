@@ -26,15 +26,19 @@ const research = new URL("../../recurrence.html", location.href);
 const sleep = delay => new Promise(resolve => setTimeout(resolve, delay));
 const frame = win => new Promise(resolve => win.requestAnimationFrame(resolve));
 let lastError = "";
+proof.dataset.phase = "module-imported";
 
 async function until(check, label) {
+  proof.dataset.phase = label;
   for (let n = 0; n < 180; n++) {
+    proof.dataset.poll = String(n);
     try {
       if (check()) return;
     } catch (error) {
       lastError = String(error);
     }
-    await sleep(75);
+    await frame(window);
+    await sleep(30);
   }
   throw new Error(label + ": " + lastError);
 }
@@ -118,21 +122,27 @@ async function goToResearch() {
 }
 
 try {
+  proof.dataset.phase = "home-requested";
   stage.src = home.href;
   const baseline = await settledHome();
+  proof.dataset.phase = "baseline-ready";
   let persisted = false;
   stage.contentWindow.addEventListener("pageshow", event => {
     if (event.persisted) persisted = true;
   }, { passive:true });
   await goToResearch();
+  proof.dataset.phase = "research-ready-before-back";
   stage.contentWindow.history.back();
   const browserBack = await settledHome();
+  proof.dataset.phase = "browser-back-ready";
   const backDrift = assertEquivalent(baseline, browserBack, "history.back");
   await goToResearch();
+  proof.dataset.phase = "research-ready-before-home-link";
   const homeLink = stage.contentDocument.querySelector('.site-nav a[href="./"]');
   if (!homeLink) throw new Error("Research home link missing");
   homeLink.click();
   const siteLink = await settledHome();
+  proof.dataset.phase = "site-link-ready";
   const navDrift = assertEquivalent(baseline, siteLink, "research navigation link", { checkTime:false });
   proof.textContent = JSON.stringify({
     mode, browserBack:true, researchNav:true, persisted,
@@ -140,8 +150,10 @@ try {
     backDriftPx:backDrift, navigationDriftPx:navDrift,
     backgroundCameraAligned:true
   });
+  proof.dataset.phase = "pass";
   proof.dataset.ready = "true";
 } catch (error) {
+  proof.dataset.phase = "failed";
   proof.dataset.error = String(error.message);
   proof.textContent = String(error.stack);
 }
