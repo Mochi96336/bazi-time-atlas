@@ -96,6 +96,8 @@ test("B1 stays decorative and consumes only rendered year-ring velocity", () => 
   assert.equal((html.match(/class="orbital-static-ring orbital-static-ring-/g) ?? []).length, 6);
   assert.match(css, /#orbital-background\s*\{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.orbital-field\s*\{[\s\S]*?will-change:\s*auto;/);
+  assert.doesNotMatch(css, /\.orbital-field\s*\{[^}]*transform-origin:/,
+    "CSS must not redefine a viewBox-relative rotation pivot");
   assert.match(css, /data-orbital-kinetic="true"[\s\S]*?will-change:\s*transform;/);
   assert.doesNotMatch(html, /class="orbital-grain"/);
   const orbitalCss = css.slice(
@@ -108,6 +110,7 @@ test("B1 stays decorative and consumes only rendered year-ring velocity", () => 
   const orbital = readFileSync(new URL("../src/orbital-background.js", import.meta.url), "utf8");
   assert.match(orbital, /idleTickMs:125/);
   assert.match(orbital, /setCircleGeometry\(occlusionDisc, occlusionRadiusWorld\)/);
+  assert.match(orbital, /field\.setAttribute\("transform", `rotate\(/);
   assert.match(orbital, /const targetIntensity = orbitalKineticIntensity\(sourceVelocity, config\)/);
   assert.match(orbital, /veil\.style\.strokeWidth/);
   assert.match(orbital, /veil\.style\.opacity/);
@@ -130,10 +133,12 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
   Object.defineProperty(globalThis, "innerWidth", { configurable:true, value:390 });
   t.after(() => priorWidth ? Object.defineProperty(globalThis, "innerWidth", priorWidth) : delete globalThis.innerWidth);
   const frames = new Map(), timers = new Map();
-  let frameSequence = 0, timerSequence = 0, writes = 0, velocity = 0;
+  let frameSequence = 0, timerSequence = 0, writes = 0, velocity = 0, lastTransform = "";
   const node = () => ({ style:{}, setAttribute() {}, getAttribute:() => "0 0 1200 760" });
   const field = node();
-  field.style = new Proxy({}, { set(target, key, value) { if (key === "transform") writes++; target[key] = value; return true; } });
+  field.setAttribute = (name, value) => {
+    if (name === "transform") { writes++; lastTransform = value; }
+  };
   const space = node(), disc = node();
   const veils = Array.from({ length:3 }, node), rings = Array.from({ length:6 }, node);
   const root = { dataset:{},
@@ -163,7 +168,9 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
     frames.delete(id);
     callback(n * 1000 / 120);
   }
-  assert.ok(writes <= 31, `background writes=${writes}`);
+  assert.ok(writes > 0 && writes <= 31, `background writes=${writes}`);
+  assert.match(lastTransform, /^rotate\([-\d.]+ 600 1360\)$/,
+    "moving veils must rotate about the fixed SVG-world center");
   assert.ok(background.backgroundAngleDeg > 0);
   visibilityTarget.hidden = true;
   visibilityTarget.dispatchEvent(new Event("visibilitychange"));
