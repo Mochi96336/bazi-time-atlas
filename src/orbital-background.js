@@ -13,14 +13,15 @@ const DEFAULTS = Object.freeze({
   energyReleaseRate:3.0,
   energySettleEpsilon:0.012,
   occlusionPaddingWorld:18,
+  occlusionClearanceRatio:0.16,
   idleTickMs:125,
   idleSettleEpsilonDegPerSec:0.04,
   maxFrameDeltaSec:0.05,
   maxIdleDeltaSec:0.25
 });
 
-const ORBIT_RADIUS_MULTIPLIERS = Object.freeze([1.035, 1.088, 1.155, 1.242, 1.355, 1.495]);
-const VEIL_RADIUS_MULTIPLIERS = Object.freeze([1.066, 1.225, 1.425]);
+const ORBIT_RADIUS_MULTIPLIERS = Object.freeze([1.185, 1.238, 1.305, 1.392, 1.505, 1.645]);
+const VEIL_RADIUS_MULTIPLIERS = Object.freeze([1.205, 1.365, 1.565]);
 const VEIL_PROFILES = Object.freeze([
   Object.freeze({ idleWidth:0.85, hotWidth:5.20, idleOpacity:0.27, hotOpacity:0.92 }),
   Object.freeze({ idleWidth:1.10, hotWidth:3.60, idleOpacity:0.22, hotOpacity:0.74 }),
@@ -104,13 +105,15 @@ export function orbitalRadiiWorld(wheelOuterRadius) {
 
 export function orbitalOcclusionRadiusWorld(
   wheelOuterRadius,
-  paddingWorld = DEFAULTS.occlusionPaddingWorld
+  paddingWorld = DEFAULTS.occlusionPaddingWorld,
+  clearanceRatio = DEFAULTS.occlusionClearanceRatio
 ) {
   if (!Number.isFinite(wheelOuterRadius) || wheelOuterRadius <= 0
-    || !Number.isFinite(paddingWorld) || paddingWorld < 0) {
+    || !Number.isFinite(paddingWorld) || paddingWorld < 0
+    || !Number.isFinite(clearanceRatio) || clearanceRatio < 0) {
     throw new RangeError("orbital occlusion inputs must be finite and non-negative");
   }
-  return wheelOuterRadius + paddingWorld;
+  return wheelOuterRadius * (1 + clearanceRatio) + paddingWorld;
 }
 
 export function orbitalKineticIntensity(
@@ -259,7 +262,8 @@ export function createOrbitalBackground({
   );
   const occlusionRadiusWorld = orbitalOcclusionRadiusWorld(
     wheelOuterRadius,
-    config.occlusionPaddingWorld
+    config.occlusionPaddingWorld,
+    config.occlusionClearanceRatio
   );
 
   let backgroundAngleDeg = 0;
