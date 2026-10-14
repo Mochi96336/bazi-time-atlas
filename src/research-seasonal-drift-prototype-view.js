@@ -9,12 +9,15 @@ const root = document.querySelector("#seasonal-drift-prototype");
 const curveSvg = document.querySelector("#seasonal-drift-curve");
 const orbitSvg = document.querySelector("#seasonal-drift-orbit");
 const scrub = document.querySelector("#seasonal-drift-scrub");
+const instrument = document.querySelector("#recurrence-instrument");
+const secondaryRail = document.querySelector(".seasonal-drift-secondary-rail");
 
 if (root && curveSvg && orbitSvg && scrub) {
+  const initialParams = new URLSearchParams(location.search);
   const state = {
     index:indexForLongitude(315),
-    mode:"total",
-    exaggerate:true
+    mode:initialParams.get("seasonalView") === "split" ? "split" : "total",
+    exaggerate:initialParams.get("seasonalOrbitScale") !== "true"
   };
 
   const CURVE = {
@@ -65,6 +68,26 @@ if (root && curveSvg && orbitSvg && scrub) {
 
   function selectedShape() {
     return selectedDrift() - DATA.commonPhaseDays;
+  }
+
+  function humanDrift(value, digits = 3) {
+    if (!Number.isFinite(value)) return "—";
+    if (Math.abs(value) < 0.0005) return "幾乎重合";
+    return `${value < 0 ? "提前" : "延後"} ${Math.abs(value).toFixed(digits)} 天`;
+  }
+
+  function syncSecondaryDeltaLabel() {
+    const label = secondaryRail?.querySelector("strong");
+    const delta = Number(instrument?.dataset.deltaYears);
+    if (!label || !Number.isFinite(delta)) return;
+    label.textContent = `以下跟隨上方時間軸目前 Δ = ${delta.toLocaleString("en-US")} 年，不是固定 +24,000 年主案例。`;
+  }
+
+  function syncModeButtons() {
+    root.querySelectorAll("[data-seasonal-drift-mode]").forEach(item => {
+      const active = item.dataset.seasonalDriftMode === state.mode;
+      item.setAttribute("aria-pressed",String(active));
+    });
   }
 
   function curveX(index) {
@@ -168,6 +191,25 @@ if (root && curveSvg && orbitSvg && scrub) {
 
     const cursorX = curveX(state.index);
     const cursorY = curveY(values[state.index]);
+
+    if (state.mode === "total") {
+      const zeroY = totalY(0);
+      svgEl("line", {
+        x1:cursorX,
+        x2:cursorX,
+        y1:zeroY,
+        y2:cursorY,
+        class:"seasonal-drift-gap-line"
+      }, curveSvg);
+      const gapLabel = svgEl("text", {
+        x:cursorX > CURVE.width - 150 ? cursorX - 10 : cursorX + 10,
+        y:(zeroY + cursorY) / 2,
+        class:"seasonal-drift-gap-label",
+        "text-anchor":cursorX > CURVE.width - 150 ? "end" : "start"
+      }, curveSvg);
+      gapLabel.textContent = humanDrift(values[state.index],2);
+    }
+
     svgEl("line", {
       x1:cursorX,
       x2:cursorX,
@@ -361,6 +403,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     set("seasonal-drift-selected-name",termName);
     set("seasonal-drift-selected-longitude",`${longitude}°`);
     set("seasonal-drift-selected-total",signedDays(drift,3));
+    set("seasonal-drift-selected-total-human",humanDrift(drift,3));
     set("seasonal-drift-selected-shape",signedDays(shape,3));
     set("seasonal-drift-phase-value",signedDays(DATA.commonPhaseDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
@@ -371,6 +414,8 @@ if (root && curveSvg && orbitSvg && scrub) {
     scrub.value = String(state.index);
     root.dataset.mode = state.mode;
     root.dataset.orbitScale = state.exaggerate ? "exaggerated" : "true";
+    syncModeButtons();
+    syncSecondaryDeltaLabel();
   }
 
   function render() {
@@ -390,10 +435,6 @@ if (root && curveSvg && orbitSvg && scrub) {
   root.querySelectorAll("[data-seasonal-drift-mode]").forEach(button => {
     button.addEventListener("click", () => {
       state.mode = button.dataset.seasonalDriftMode === "split" ? "split" : "total";
-      root.querySelectorAll("[data-seasonal-drift-mode]").forEach(item => {
-        const active = item.dataset.seasonalDriftMode === state.mode;
-        item.setAttribute("aria-pressed",String(active));
-      });
       render();
     });
   });
@@ -412,6 +453,13 @@ if (root && curveSvg && orbitSvg && scrub) {
     event.preventDefault();
     setIndex(state.index + (event.key === "ArrowRight" ? 1 : -1),"keyboard");
   });
+
+  if (instrument) {
+    new MutationObserver(syncSecondaryDeltaLabel).observe(instrument, {
+      attributes:true,
+      attributeFilter:["data-delta-years"]
+    });
+  }
 
   root.dataset.ready = "true";
   render();
