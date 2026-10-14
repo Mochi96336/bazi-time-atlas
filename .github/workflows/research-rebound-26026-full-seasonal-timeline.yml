@@ -179,13 +179,16 @@ jobs:
       - name: Render research visual prototypes
         env:
           TIMELINE_JSON: tmp/rebound-26026-full-timeline/timeline.json
-          CURVE_SVG: tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+          CURVE_OVERVIEW_SVG: tmp/rebound-26026-full-timeline/seasonal-drift-curve-overview.svg
+          CURVE_DETAIL_SVG: tmp/rebound-26026-full-timeline/seasonal-drift-curve-detail.svg
           ORBIT_SVG: tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
         run: |
           node scripts/research-render-26026-seasonal-timeline-svg.mjs
-          test -s tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+          test -s tmp/rebound-26026-full-timeline/seasonal-drift-curve-overview.svg
+          test -s tmp/rebound-26026-full-timeline/seasonal-drift-curve-detail.svg
           test -s tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
-          grep -q '2026 → 26026' tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+          grep -q '距離 0 天總覽' tmp/rebound-26026-full-timeline/seasonal-drift-curve-overview.svg
+          grep -q '季節內細節' tmp/rebound-26026-full-timeline/seasonal-drift-curve-detail.svg
           grep -q '太陽系俯視概念圖' tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
 
       - name: Remove large source kernel
@@ -200,7 +203,8 @@ jobs:
           path: |
             tmp/rebound-26026-full-timeline/state.json
             tmp/rebound-26026-full-timeline/timeline.json
-            tmp/rebound-26026-full-timeline/seasonal-drift-curve.svg
+            tmp/rebound-26026-full-timeline/seasonal-drift-curve-overview.svg
+            tmp/rebound-26026-full-timeline/seasonal-drift-curve-detail.svg
             tmp/rebound-26026-full-timeline/seasonal-orbit-overview.svg
           if-no-files-found: warn
           retention-days: 14
