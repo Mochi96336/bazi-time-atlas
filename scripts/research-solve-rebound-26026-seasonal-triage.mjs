@@ -326,7 +326,7 @@ const result = Object.freeze({
   schemaVersion:1,
   researchOnly:true,
   catalogueYear:TARGET_YEAR,
-  purpose:"day-boundary triage before deeper asteroid343 propagation",
+  purpose:"test day-level Gregorian seasonal recurrence before any deeper asteroid343 propagation",
   referenceSemantics:"geocentric-apparent-solar-longitude-mean-ecliptic-of-date",
   timeScale:"TT",
   sourceProjection:Object.freeze({
@@ -352,7 +352,7 @@ const result = Object.freeze({
     allThreeCrossingsMoreThanOneDayFromGregorianCycle:
       minAbsGregorianCycleDriftHours > 24,
     asteroid343Deferred:true,
-    decisionRule:"inspect uniform-TT day-boundary distance first; only deepen small-body modeling if the seasonal crossing is close enough to a day boundary to affect the research conclusion"
+    decisionRule:"compare year-26026 crossings against true year-2026 seasonal TT plus the exact 24,000-year Gregorian span; defer asteroid343 when the drift is already safely larger than one day"
   }),
   events:Object.freeze(events),
   claimBoundary:Object.freeze({
