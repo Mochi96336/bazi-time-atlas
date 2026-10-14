@@ -144,8 +144,9 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
   instrument.dataset = {};
   const visibilityTarget = new EventTarget();
   visibilityTarget.hidden = false;
+  const pageTarget = new EventTarget();
   const background = createOrbitalBackground({ root, instrument, svg:node(), wheelCenter:{ x:600, y:1360 },
-    wheelOuterRadius:1182, visibilityTarget,
+    wheelOuterRadius:1182, visibilityTarget, pageTarget,
     getSourceAngularVelocityDegPerSec:() => velocity,
     reducedMotionQuery:{ matches:false }, ResizeObserverCtor:null, MutationObserverCtor:null,
     requestFrame(callback) { const id = ++frameSequence; frames.set(id, callback); return id; },
@@ -174,6 +175,10 @@ test("mobile orbital painting is bounded and visibility stops both idle and inte
   visibilityTarget.hidden = false;
   visibilityTarget.dispatchEvent(new Event("visibilitychange"));
   assert.equal(timers.size, 1);
+  const priorWrites = writes;
+  pageTarget.dispatchEvent(new Event("pageshow"));
+  assert.ok(writes > priorWrites, "history restoration must reassert orbital visual pose");
+  assert.equal(timers.size, 1, "page restoration must keep exactly one idle timer");
   background.destroy();
   assert.equal(timers.size, 0);
   assert.equal(frames.size, 0);
