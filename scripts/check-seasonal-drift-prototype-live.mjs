@@ -13,11 +13,12 @@ function findBrowser(){
 
 const browser=findBrowser();
 
-function dump(seasonalView,delta=24000){
+function dump(seasonalView,delta=24000,hash=""){
   const url=new URL("recurrence.html",base);
   url.searchParams.set("date","2026-09-13");
   url.searchParams.set("delta",String(delta));
   if(seasonalView)url.searchParams.set("seasonalView",seasonalView);
+  if(hash)url.hash=hash;
 
   const result=spawnSync(browser,[
     "--headless=new",
@@ -109,4 +110,14 @@ if(identity.dom.includes("shape-only-secondary")){
   throw Error("non-24k state incorrectly demoted canonical determinacy: "+identity.url);
 }
 
-console.log("[seasonal-drift-prototype] PASS total + split + non-24k gating and Research 03 handoff");
+const deep=dump("total",24000,"near-recurrence-detail");
+requireTokens(deep,[
+  'id="near-recurrence-detail"',
+  'id="secondary-astronomy-tools"'
+],"folded astronomy deep link");
+const deepToolsTag=deep.dom.match(/<details[^>]*id="secondary-astronomy-tools"[^>]*>/)?.[0]??"";
+if(!deepToolsTag||!/\sopen(?:\s|=|>)/.test(deepToolsTag)){
+  throw Error("deep link did not reopen folded secondary astronomy tools: "+deep.url);
+}
+
+console.log("[seasonal-drift-prototype] PASS total + split + non-24k gating + deep-link reveal and Research 03 handoff");
