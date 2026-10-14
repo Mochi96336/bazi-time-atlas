@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   timeline:
@@ -46,7 +47,28 @@ jobs:
         run: |
           python -m py_compile             scripts/research-rebound-26026-full-year-state.py             scripts/research-rebound-26026-massloss-state.py
 
+      - name: Reuse accepted full-year state from prior attempt
+        id: reuse_state
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: "11882799847"
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/rebound-26026-full-timeline
+          curl --fail --location --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
+            --output tmp/rebound-26026-full-timeline-state.zip
+          unzip -q -o tmp/rebound-26026-full-timeline-state.zip \
+            -d tmp/rebound-26026-full-timeline
+          test -s tmp/rebound-26026-full-timeline/state.json
+
       - name: Download official DE441 positive-time kernel
+        if: steps.reuse_state.outcome != 'success'
         env:
           KERNEL_URL: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de441_part-2.bsp
         run: |
@@ -55,6 +77,7 @@ jobs:
           printf '%s  %s\n'             'ad8dfa4e505ef0e3a5d587a5b4705632'             'tmp/rebound-26026-full-timeline/de441_part-2.bsp' | md5sum --check -
 
       - name: Project continuous catalogue-year state window
+        if: steps.reuse_state.outcome != 'success'
         timeout-minutes: 55
         run: |
           python scripts/research-rebound-26026-full-year-state.py             --kernel tmp/rebound-26026-full-timeline/de441_part-2.bsp             --output tmp/rebound-26026-full-timeline/state.json
