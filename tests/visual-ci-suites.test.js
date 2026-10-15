@@ -40,7 +40,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.match(workflow, /suite: \[shader, home, research, capture-pages, capture-interactions, capture-material, capture-responsive\]/);
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
-  assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-prototype-live.mjs"));
+  assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
 });
 
 test("parallel visual gate preserves prior CI protection and combined PNG artifact", () => {
