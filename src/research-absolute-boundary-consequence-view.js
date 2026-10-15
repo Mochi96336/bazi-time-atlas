@@ -39,7 +39,7 @@ function ensurePanel(){
     '<div class="absolute-boundary-strip-wrap">',
       '<div class="absolute-boundary-strip-key"><span>立春錨定 · 365.2425-day Gregorian mean-year · TT phase</span><strong>淡帶＝同一 reference phase 落在不同節界 sector 的區間</strong></div>',
       '<svg id="absolute-boundary-strip" viewBox="0 0 1200 190" role="img" aria-label="+24,000 年十二個八字節界的 absolute disagreement windows"></svg>',
-      '<details class="absolute-boundary-detail-list">',
+      '<details id="absolute-boundary-detail-list" class="absolute-boundary-detail-list">',
         '<summary><span>查看 12 節詳細數值</span><strong>逐節位移與月界轉換</strong></summary>',
         '<div id="absolute-boundary-buttons" class="absolute-boundary-buttons" aria-label="十二節邊界；點選可同步 02 的黃經游標"></div>',
       '</details>',
