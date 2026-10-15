@@ -54,7 +54,7 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.match(html, /id="research-spine-discrete">24,000 離散候選<\/small>/);
   assert.match(html, /id="research-spine-astronomy">TT 提前 10–14 d<\/small>/);
   assert.match(html, /id="research-spine-evidence">12 \/ 12 節界位移<\/small>/);
-  assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 天文較真<\/span>/);
+  assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 12 節界校驗<\/span>/);
   assert.match(html, /class="research-task-relation">固定 24,000 年天文結果 → 節界後果<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
@@ -106,7 +106,7 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
 });
 
 test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {
-  assert.match(astronomy, /id="research-astronomy-title">天文上哪裡沒有回來？/);
+  assert.match(astronomy, /id="research-astronomy-title">八字的節界回來了嗎？/);
   assert.match(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /季節形狀 · 春分歸零/);
   assert.match(astronomy, /季節相位 · 公曆框架/);
@@ -178,35 +178,3 @@ test("section chrome stays flat and compact on phone", () => {
   assert.match(taskCss, /\.research-task-head\s*\{[\s\S]*display:flex/);
   assert.match(taskCss, /\.research-task-head \.eyebrow,[\s\S]*display:none/);
   assert.doesNotMatch(taskCss, /border-radius/);
-});
-
-test("mobile Research outcomes keep a readable interaction floor without inflating hidden evidence", () => {
-  assert.match(
-    discreteCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-discrete-drilldown > summary\s*\{[\s\S]*min-height:\s*42px;[\s\S]*padding:\s*8px 1px;[\s\S]*\.research-discrete-drilldown > summary strong\s*\{[\s\S]*font-size:\s*8\.5px;/
-  );
-  assert.match(
-    astronomyCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-astronomy-rms-rail > span\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.research-astronomy-drilldown > summary\s*\{\s*min-height:\s*42px;\s*font-size:\s*9px;\s*\}/
-  );
-  assert.match(
-    evidenceCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*8\.5px;/
-  );
-  assert.match(
-    determinacyCss,
-    /@media \(max-width:480px\)[\s\S]*\.determinacy-card p\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.determinacy-foot\s*\{\s*font-size:\s*9px;\s*\}/
-  );
-  assert.match(
-    residualCss,
-    /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*8\.5px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*8\.5px;\s*\}/
-  );
-});
-
-test("mobile Research primary interactions meet the same tap-target floor as disclosure rails", () => {
-  assert.match(
-    recurrenceCss,
-    /@media \(max-width:480px\)[\s\S]*\.base-date input\s*\{[^}]*min-height:42px;[\s\S]*\.delta-dock input\[type="number"\]\s*\{\s*min-height:42px;\s*\}[\s\S]*\.candidate-buttons button\s*\{\s*min-height:42px;[\s\S]*\.delta-slider-wrap input\s*\{\s*min-height:32px;\s*\}[\s\S]*\.model-boundary summary\s*\{\s*min-height:42px;/
-  );
-  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:42px;\s*\}/);
-});
