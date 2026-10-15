@@ -171,12 +171,19 @@ if (root) {
 
   function syncOwnerFromViewport() {
     viewportSyncQueued = false;
+    syncStickyPresentation();
     const owner = ownerAtReadingLine();
     if (owner === activeOwner) return;
     const selection = owner === "seasonal"
       ? seasonalSelectionFromDom()
       : discreteSelectionFromDom();
     if (selection) renderSelection(selection);
+  }
+
+  function syncStickyPresentation() {
+    const top = Number.parseFloat(getComputedStyle(root).top) || 0;
+    const rect = root.getBoundingClientRect();
+    root.dataset.stuck = String(window.scrollY > 0 && rect.top <= top + 1);
   }
 
   function queueViewportSync() {
@@ -187,6 +194,7 @@ if (root) {
 
   const initialSelection = discreteSelectionFromDom();
   if (initialSelection) renderSelection(initialSelection);
+  root.dataset.stuck = "false";
   queueViewportSync();
   window.addEventListener("scroll",queueViewportSync,{ passive:true });
   window.addEventListener("resize",queueViewportSync);
