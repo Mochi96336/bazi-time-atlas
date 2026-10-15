@@ -145,8 +145,8 @@ function baseSeasonalSide(longitudeDegrees) {
     pillars:freeze({
       year:yearMonth.year,
       month:yearMonth.month,
-      day:resolvedPillar(dayHour.pillars.day.name, "2026 crossing 已確定投影到目前主頁相同的地方鐘面與日界規則。"),
-      hour:resolvedPillar(dayHour.pillars.hour.name, "2026 crossing 已確定投影到目前主頁相同的地方鐘面與時柱規則。")
+      day:resolvedPillar(dayHour.pillars.day.name, "2026 同一太陽黃經時刻已確定投影到目前主頁相同的地方鐘面與日界規則。"),
+      hour:resolvedPillar(dayHour.pillars.hour.name, "2026 同一太陽黃經時刻已確定投影到目前主頁相同的地方鐘面與時柱規則。")
     }),
     activeLiChunYear:yearMonth.activeLiChunYear,
     monthBranch:yearMonth.monthBranch
@@ -180,7 +180,7 @@ function targetSeasonalSide(longitudeDegrees, ttJulianDay) {
     pillars:freeze({
       year:yearMonth.year,
       month:yearMonth.month,
-      day:unresolvedPillar("26026 的 TT crossing 尚無可唯一決定民用日相位的 Earth-rotation / civil-time bridge。"),
+      day:unresolvedPillar("26026 的 TT 到達時刻仍缺少能唯一換算民用日相位的地球自轉／民用時間資料。"),
       hour:unresolvedPillar("時柱還需要已解析日干與唯一地方鐘面；深時間 UT1 目前只有帶不確定性的估計。")
     }),
     activeLiChunYear:yearMonth.activeLiChunYear,
