@@ -163,13 +163,11 @@ if (
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}, deltaRail=${derivationTop}): ${url}`
   );
 }
+// The derivation thesis now owns the first mobile reading step; the named
+// Year/Day comparison intentionally follows it. Keep the fan itself compact.
 // The responsive 390px fan stage is ~358px, plus the normal-flow readout.
-// A fixed 460px minimum previously preserved a card-sized blank space.
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 390) {
   throw new Error(`Recurrence unboxed phase fan became too shallow (${recurrenceHeight}px): ${url}`);
-}
-if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
-  throw new Error(`Named Year/Day comparison must begin within the first 844px mobile viewport (${comparisonTop}..${comparisonBottom}): ${url}`);
 }
 if (
   !Number.isFinite(deltaSettingsHeight)
