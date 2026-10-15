@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
   activeLiChunYearForSeasonalLongitude,
@@ -70,4 +71,23 @@ test("date-only Research state exposes sequence evidence without pretending to k
   assert.equal(state.target.pillars.hour.status,"unresolved");
   assert.equal(state.comparison.yearPhaseClosed,true);
   assert.equal(state.comparison.dayPhaseClosed,true);
+});
+
+test("shared Research time state condenses only after the same sticky node is stuck", async () => {
+  const [view, css, html] = await Promise.all([
+    readFile(new URL("../src/research-time-state-view.js", import.meta.url), "utf8"),
+    readFile(new URL("../research-time-state.css", import.meta.url), "utf8"),
+    readFile(new URL("../recurrence.html", import.meta.url), "utf8")
+  ]);
+
+  assert.equal((html.match(/id="research-time-state"/g) ?? []).length,1);
+  assert.match(view,/function syncStickyPresentation\(\)/);
+  assert.match(view,/root\.dataset\.stuck = String\(window\.scrollY > 0 && rect\.top <= top \+ 1\)/);
+  assert.match(view,/syncStickyPresentation\(\);/);
+  assert.match(view,/root\.dataset\.stuck = "false"/);
+
+  assert.match(css,/\.research-time-state\[data-stuck="true"\]/);
+  assert.match(css,/@media \(max-width:680px\)[\s\S]*?\.research-time-state\[data-stuck="true"\] \.research-time-state-compare\s*\{[\s\S]*?grid-template-columns:1fr 1fr/);
+  assert.match(css,/@media \(max-width:680px\)[\s\S]*?\.research-time-state\[data-stuck="true"\] \.research-time-pillar > small\s*\{[\s\S]*?display:none/);
+  assert.doesNotMatch(view,/cloneNode|appendChild\(root\.clone|createElement\(["']section["']\)/);
 });
