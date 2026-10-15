@@ -122,22 +122,32 @@ function renderPillar(name, pillar) {
 
 function refresh() {
   if (!instrument || !panel) return;
-  const deltaYears = Number(instrument.dataset.deltaYears);
-  const discreteYearSequenceClosed = boolDataset("yearSequenceClosed");
-  const discreteDayClosed = boolDataset("dayClosed");
+  const explorerDeltaYears = Number(instrument.dataset.deltaYears);
+  const liveYearSequenceClosed = boolDataset("yearSequenceClosed");
+  const liveDayClosed = boolDataset("dayClosed");
   const astronomyValidity = instrument.dataset.astronomyValidity;
+  const absolutePrimary = absoluteReferencePrimary();
 
-  if (!Number.isInteger(deltaYears) || discreteYearSequenceClosed === null || discreteDayClosed === null || !astronomyValidity) {
+  if (!Number.isInteger(explorerDeltaYears) || liveYearSequenceClosed === null || liveDayClosed === null || !astronomyValidity) {
     renderPending();
     return;
   }
+
+  // This panel belongs to the fixed +24,000-year argument whenever the
+  // absolute Research evidence is published. The current Δ above is only an
+  // explorer/sandbox and must not turn the main 03 conclusion back into Δ=0
+  // identity.
+  const deltaYears = absolutePrimary ? 24000 : explorerDeltaYears;
+  const discreteYearSequenceClosed = absolutePrimary ? true : liveYearSequenceClosed;
+  const discreteDayClosed = absolutePrimary ? true : liveDayClosed;
+  const astronomyWithinRange = absolutePrimary ? true : astronomyValidity === "within-range";
 
   const result = fourPillarDeterminacy({
     deltaYears,
     yearSequenceAligned: deltaYears % 60 === 0,
     discreteYearSequenceClosed,
     discreteDayClosed,
-    astronomyWithinRange: astronomyValidity === "within-range"
+    astronomyWithinRange
   });
 
   for (const name of Object.keys(LABELS)) renderPillar(name, result.pillars[name]);
@@ -161,7 +171,8 @@ function refresh() {
   instrument.dataset.fourPillarAbsoluteCivilPhasePreserved = String(result.absoluteCivilPhasePreserved);
   instrument.dataset.fourPillarLocalClockModeled = String(result.localClockModeled);
 
-  const absolutePrimary = absoluteReferencePrimary();
+  panel.dataset.explorerDeltaYears = String(explorerDeltaYears);
+  panel.dataset.argumentDeltaYears = String(deltaYears);
   setText(
     "determinacy-scope-value",
     result.identity
