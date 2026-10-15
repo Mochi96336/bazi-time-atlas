@@ -211,6 +211,25 @@
   stroke-linecap:round;
   stroke-linejoin:round;
 }
+.seasonal-drift-jie-guide {
+  stroke:rgba(197,207,201,.08);
+  stroke-width:.8;
+  vector-effect:non-scaling-stroke;
+}
+.seasonal-drift-jie-guide.is-selected {
+  stroke:rgba(229,194,148,.34);
+  stroke-width:1.2;
+}
+.seasonal-drift-jie-dot {
+  fill:#0f1512;
+  stroke:rgba(176,190,181,.48);
+  stroke-width:1.15;
+  vector-effect:non-scaling-stroke;
+}
+.seasonal-drift-jie-dot.is-selected {
+  stroke:#e2c095;
+  stroke-width:1.7;
+}
 .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-curve-path { stroke:#d2a06c; }
 .seasonal-drift-gap-line {
   stroke:rgba(223,180,128,.46);
