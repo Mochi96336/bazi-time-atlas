@@ -49,12 +49,12 @@ test("prototype only expands when the canonical Research state matches 2026 + 24
   assert.match(css, /data-case-aligned="false"[\s\S]*\.seasonal-drift-case-content\s*\{\s*display:none/);
 });
 
-test("prototype keeps common phase separate from timing-equivalent orbit shape", () => {
-  assert.match(data, /meanDriftDays//);
+test("prototype keeps mean drift separate from timing-equivalent orbit shape", () => {
+  assert.match(data, /meanDriftDays:SUMMARY\.meanDriftDays/);
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
-  assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays//);
+  assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays/);
   assert.match(html, /右側只畫 timing 反演的等效 shape/);
-  assert.match(html, /全年平均位移硬畫成軌道變形//);
+  assert.match(html, /全年平均位移硬畫成軌道變形/);
   assert.match(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
 });
 
