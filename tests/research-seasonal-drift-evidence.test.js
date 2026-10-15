@@ -22,7 +22,7 @@ test("Research 02 keeps the fixed +24k story visible before the delta sandbox", 
     researchEvidenceStart > dynamicPanelStart
   );
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
-  assert.match(html, /不跟隨上方 Δ 探索工具/);
+  assert.match(html, /上面的 Δ 可以自由探索；以下回到 01 找出的 24,000 年候選/);
   assert.doesNotMatch(html, /seasonal-drift-case-gate|seasonal-drift-use-case|data-case-aligned/);
   assert.doesNotMatch(css, /seasonal-drift-case-gate|data-case-aligned/);
   assert.doesNotMatch(view, /syncCaseAlignment|caseButton|caseGateTitle|caseGateCopy/);
