@@ -482,8 +482,8 @@
    below it rather than reintroducing the old internal letterbox. */
 @media(max-width:480px) {
   .research-task-primary #recurrence-wheel {
-    top:70px;
-    height:calc(100% - 70px);
+    top:80px;
+    height:calc(100% - 80px);
   }
 }
 
