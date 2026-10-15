@@ -185,30 +185,6 @@ function render(){
   rendered=true;
 }
 
-function demoteDeterminacy(){
-  let details=determinacy.querySelector(":scope > .shape-only-determinacy-details");
-  if(details)return;
-  const grid=determinacy.querySelector(":scope > .determinacy-grid");
-  const foot=determinacy.querySelector(":scope > .determinacy-foot");
-  if(!grid||!foot)return;
-  details=document.createElement("details");
-  details.className="shape-only-determinacy-details";
-  const summary=document.createElement("summary");
-  summary.innerHTML="<span>展開 shape-only 四柱卡片</span><strong>僅解釋共同 phase 扣除後的年內 shape</strong>";
-  grid.insertAdjacentElement("beforebegin",details);
-  details.append(summary,grid,foot);
-}
-
-function restoreDeterminacy(){
-  const details=determinacy.querySelector(":scope > .shape-only-determinacy-details");
-  if(!details)return;
-  const grid=details.querySelector(".determinacy-grid");
-  const foot=details.querySelector(".determinacy-foot");
-  if(grid)details.insertAdjacentElement("beforebegin",grid);
-  if(foot)details.insertAdjacentElement("beforebegin",foot);
-  details.remove();
-}
-
 function sync(){
   const root=ensurePanel();
   if(!root)return;
@@ -224,34 +200,14 @@ function sync(){
     instrument.dataset.absoluteBoundaryUnionDays=CONSEQUENCE.unionWindowDays.toFixed(6);
     instrument.dataset.absoluteBoundaryUnionPercent=CONSEQUENCE.unionWindowPercent.toFixed(6);
 
-    determinacy.classList.add("shape-only-secondary");
-    determinacy.dataset.absolutePrimary="true";
-    const label=determinacy.querySelector(".determinacy-label");
-    const scopeLabel=determinacy.querySelector(".determinacy-scope span");
-    if(label)label.textContent="shape-only 輔助判定";
-    if(scopeLabel)scopeLabel.textContent="春分歸零後的舊模型內結論";
-    let note=determinacy.querySelector(".determinacy-secondary-note");
-    if(!note){
-      note=document.createElement("div");
-      note.className="determinacy-secondary-note";
-      determinacy.querySelector(".determinacy-head")?.insertAdjacentElement("afterend",note);
-    }
-    note.textContent="下列卡片只保留「共同 phase 已扣除」後的 shape-only 歸因；+24,000 的年／月界主結論以上方 absolute boundary consequence 為準。";
-    demoteDeterminacy();
+
   }else{
     delete instrument.dataset.absoluteBoundaryConsequence;
     delete instrument.dataset.absoluteBoundaryReferenceJie;
     delete instrument.dataset.absoluteBoundaryUnionDays;
     delete instrument.dataset.absoluteBoundaryUnionPercent;
 
-    determinacy.classList.remove("shape-only-secondary");
-    delete determinacy.dataset.absolutePrimary;
-    const label=determinacy.querySelector(".determinacy-label");
-    const scopeLabel=determinacy.querySelector(".determinacy-scope span");
-    if(label)label.textContent="可判定範圍";
-    if(scopeLabel)scopeLabel.textContent="目前可支持的最強結論";
-    determinacy.querySelector(".determinacy-secondary-note")?.remove();
-    restoreDeterminacy();
+
   }
 }
 
