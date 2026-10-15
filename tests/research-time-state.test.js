@@ -88,6 +88,7 @@ test("shared Research time state condenses only after the same sticky node is st
 
   assert.match(css,/\.research-time-state\[data-stuck="true"\]/);
   assert.match(css,/@media \(max-width:680px\)[\s\S]*?\.research-time-state\[data-stuck="true"\] \.research-time-state-compare\s*\{[\s\S]*?grid-template-columns:1fr 1fr/);
+  assert.match(css,/@media \(max-width:680px\)[\s\S]*?\.research-time-state\[data-stuck="true"\] \.research-time-side > header\s*\{[\s\S]*?grid-template-columns:auto minmax\(0,1fr\)/);
   assert.match(css,/@media \(max-width:680px\)[\s\S]*?\.research-time-state\[data-stuck="true"\] \.research-time-pillar > small\s*\{[\s\S]*?display:none/);
   assert.doesNotMatch(view,/cloneNode|appendChild\(root\.clone|createElement\(["']section["']\)/);
 });
