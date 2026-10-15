@@ -12,6 +12,9 @@ test("absolute +24k consequence maps all 12 BaZi Jie boundaries",()=>{
   assert.equal(consequence.baseYear,2026);
   assert.equal(consequence.targetYear,26026);
   assert.equal(consequence.deltaYears,24000);
+  assert.equal(consequence.referenceCycle.days,365.2425);
+  assert.equal(consequence.referenceCycle.isActualNextLiChunInterval,false);
+  assert.match(consequence.referenceCycle.definition,/Gregorian mean-year phase/);
   assert.equal(consequence.boundaries.length,12);
   assert.equal(consequence.allTargetEarlier,true);
   assert.equal(consequence.boundaries.filter(item=>item.isYearBoundary).length,1);
@@ -33,6 +36,7 @@ test("absolute boundary windows reproduce the research timeline magnitudes",()=>
 test("absolute boundary consequence remains research-only and does not resolve Day or Hour",()=>{
   assert.equal(consequence.claimBoundary.researchOnly,true);
   assert.equal(consequence.claimBoundary.populationProbability,false);
+  assert.equal(consequence.claimBoundary.civilTimePillarVerdict,false);
   assert.equal(consequence.claimBoundary.civilTimeResolved,false);
   assert.equal(consequence.claimBoundary.dayPillarResolved,false);
   assert.equal(consequence.claimBoundary.hourPillarResolved,false);
