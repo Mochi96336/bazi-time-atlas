@@ -38,6 +38,7 @@ test("Research product labels use Chinese while canonical research terms stay re
     "年序／日序",
     "離散推導",
     "節界校驗",
+    "四柱結論",
     "固定推進 24,000 個公曆年"
   ]) assert.ok(html.includes(text), `missing visible Research label: ${text}`);
 
@@ -60,6 +61,11 @@ test("Research product labels use Chinese while canonical research terms stay re
     "Year / Day cycles",
     "Discrete derivation",
     "Seasonal check",
+    "Four-pillar recurrence",
+    "<span>Year</span>",
+    "<span>Month</span>",
+    "<span>Day</span>",
+    "<span>Hour</span>",
     "Gregorian years"
   ]) assert.ok(!html.includes(stale), `stale product copy returned: ${stale}`);
 });
