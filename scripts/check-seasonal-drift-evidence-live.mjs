@@ -55,6 +55,8 @@ for(const delta of [0,400,1980,24000]){
     'data-mode="total"',
     'class="seasonal-drift-curve-path"',
     'class="seasonal-drift-gap-line"',
+    '0 = 完全重合',
+    '先看結論 · 八字節界',
     'id="seasonal-drift-selected-total-human">提前 10.883 天',
     'id="absolute-boundary-consequence"',
     'research-recurrence-conclusion',
@@ -76,6 +78,11 @@ for(const delta of [0,400,1980,24000]){
     throw Error("other-delta sandbox must stay closed by default: "+total.url);
   }
 }
+  const decomposition=detailsTag(total.dom,"seasonal-drift-decomposition");
+  if(!decomposition||/\sopen(?:\s|=|>)/.test(decomposition)){
+    throw Error("drift decomposition must stay folded in the main 02 story: "+total.url);
+  }
+
 
 const split=dump("split",0);
 requireTokens(split,[
@@ -83,8 +90,13 @@ requireTokens(split,[
   'id="seasonal-drift-selected-shape">+1.322 d',
   'id="seasonal-drift-shape-span">4.022 d',
   'data-seasonal-drift-mode="split" aria-pressed="true"',
+  '深入：為什麼不是固定提前 12 天？',
   'seasonal-orbit-target'
-],"split fixed main story");
+],"split fixed deep-dive story");
+const splitDecomposition=detailsTag(split.dom,"seasonal-drift-decomposition");
+if(!splitDecomposition||!/\sopen(?:\s|=|>)/.test(splitDecomposition)){
+  throw Error("split query must open the drift decomposition detail: "+split.url);
+}
 if(split.dom.includes('class="seasonal-drift-gap-line"')){
   throw Error("split view kept the total-view zero-gap marker: "+split.url);
 }
