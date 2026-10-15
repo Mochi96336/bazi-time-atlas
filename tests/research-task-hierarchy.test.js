@@ -39,12 +39,12 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.ok(evidenceStart > astronomyStart);
   assert.doesNotMatch(html, /class="research-task-nav"/);
   assert.match(html, /class="research-outline"[^>]*aria-label="研究項目"/);
-  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?年日週期/);
-  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?節氣校驗/);
-  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?四柱重現/);
-  assert.match(html, />年日週期</);
-  assert.match(html, />節氣校驗</);
-  assert.match(html, />四柱重現</);
+  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?粗略週期/);
+  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?天文偏移/);
+  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?八字後果/);
+  assert.match(html, />粗略週期</);
+  assert.match(html, />天文偏移</);
+  assert.match(html, />八字後果</);
   assert.match(html, /八字多久會重複一次？/);
   assert.match(html, /四柱都落在六十甲子序列上/);
   assert.match(html, /data-alignment="year-month"[\s\S]*同一節令下固定對齊/);
@@ -76,7 +76,7 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
   assert.match(discrete, /先找 60 年序與 60 日序何時一起回到原位；公曆 400 年只作日數結構參考，不是年日重遇的必要閉合條件。節氣與真正年柱留到下一步校驗。/);
-  assert.match(discrete, /id="research-year-strip-title">年度時間條/);
+  assert.match(discrete, /id="research-discrete-title">粗略週期從哪裡來？/);\n  assert.match(discrete, /id="research-year-strip-title">年度時間條/);
   assert.match(discrete, /id="research-year-full-cycle"/);
   assert.match(discrete, /id="research-year-selected-day"/);
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
@@ -104,7 +104,7 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);
 });
 
-test("astronomy task owns phase/shape refinement and keeps near-recurrence ranking terse", () => {
+test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {\n  assert.match(astronomy, /id="research-astronomy-title">天文上哪裡沒有回來？/);
   assert.match(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /季節形狀 · 春分歸零/);
   assert.match(astronomy, /季節相位 · 公曆框架/);
@@ -118,7 +118,7 @@ test("astronomy task owns phase/shape refinement and keeps near-recurrence ranki
   assert.doesNotMatch(astronomy, /id="four-pillar-determinacy"/);
 });
 
-test("evidence task keeps authority but removes repeated report-style preambles", () => {
+test("evidence task answers what the fixed result means for BaZi without overclaiming", () => {\n  assert.match(evidence, /id="research-evidence-title">對八字意味著什麼？/);
   assert.match(evidence, /id="four-pillar-determinacy"/);
   assert.match(evidence, /class="determinacy-label">可判定範圍/);
   assert.match(evidence, /class="model-boundary research-evidence-appendix"/);
