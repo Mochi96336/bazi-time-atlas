@@ -51,12 +51,12 @@ function sync() {
   const astronomyValidity = instrument.dataset.astronomyValidity;
   const astronomyClosed = boolDataset("astronomyShapeClosed");
   const absoluteBoundary = instrument.dataset.absoluteBoundaryConsequence;
-  const absoluteYearMonth = instrument.dataset.absoluteBoundaryYearMonthRecurrence;
+  const absoluteReferenceJie = instrument.dataset.absoluteBoundaryReferenceJie;
 
   if (identity) {
     setOutcome("astronomy", "同一參照", "identity");
   } else if (absoluteBoundary === "year-26026-research") {
-    setOutcome("astronomy", "提前 10–14 d", "offset");
+    setOutcome("astronomy", "TT 提前 10–14 d", "offset");
   } else if (astronomyValidity === "outside-range") {
     setOutcome("astronomy", "模型範圍外", "unavailable");
   } else if (astronomyValidity === "within-range" && astronomyClosed !== null) {
@@ -71,8 +71,8 @@ function sync() {
 
   if (identity) {
     setOutcome("evidence", "4 / 4 同一", "identity");
-  } else if (absoluteYearMonth === "displaced") {
-    setOutcome("evidence", "年／月界未重現", "offset");
+  } else if (absoluteReferenceJie === "displaced") {
+    setOutcome("evidence", "TT 節界未重現", "offset");
   } else {
     const resolved = Number(instrument.dataset.fourPillarResolvedCount);
     if (Number.isInteger(resolved) && resolved >= 0 && resolved <= 4) {
@@ -105,7 +105,7 @@ if (instrument) {
       "data-astronomy-shape-closed",
       "data-four-pillar-resolved-count",
       "data-absolute-boundary-consequence",
-      "data-absolute-boundary-year-month-recurrence"
+      "data-absolute-boundary-reference-jie"
     ]
   });
   scheduleSync();
