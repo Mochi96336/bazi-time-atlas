@@ -166,6 +166,40 @@
   font-size:8px;
 }
 
+.absolute-boundary-detail-list {
+  margin-top:2px;
+  border-top:1px solid rgba(238,242,237,.045);
+}
+.absolute-boundary-detail-list > summary {
+  min-height:34px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:10px;
+  align-items:center;
+  padding:5px 2px;
+  color:#74838d;
+  cursor:pointer;
+  list-style:none;
+}
+.absolute-boundary-detail-list > summary::-webkit-details-marker { display:none; }
+.absolute-boundary-detail-list > summary span {
+  color:#8b9aa5;
+  font-size:8.5px;
+  font-weight:650;
+}
+.absolute-boundary-detail-list > summary strong {
+  color:#687680;
+  font-size:8px;
+  font-weight:500;
+  text-align:right;
+}
+.absolute-boundary-detail-list > summary::after {
+  content:"+";
+  color:#687680;
+  font-size:13px;
+}
+.absolute-boundary-detail-list[open] > summary::after { content:"−"; }
+
 .absolute-boundary-buttons {
   display:grid;
   grid-template-columns:repeat(6,minmax(0,1fr));
@@ -377,6 +411,16 @@
   #absolute-boundary-strip { min-height:132px; }
   .absolute-boundary-term { font-size:30px; }
   .absolute-boundary-axis-label { font-size:24px; }
+  .absolute-boundary-detail-list > summary {
+    min-height:42px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:5px;
+  }
+  .absolute-boundary-detail-list > summary strong {
+    grid-column:1 / -1;
+    text-align:left;
+    font-size:8.5px;
+  }
   .absolute-boundary-buttons { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .absolute-boundary-buttons button:nth-child(4n) { border-right:1px solid rgba(238,242,237,.04); }
   .absolute-boundary-buttons button:nth-child(3n) { border-right:0; }
