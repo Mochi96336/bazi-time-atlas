@@ -19,7 +19,7 @@ function ensurePanel(){
   panel.innerHTML=[
     '<header class="absolute-boundary-head research-conclusion-head">',
       '<div>',
-        '<div class="eyebrow">Research conclusion · 01 → 02 → 03</div>',
+        '<div class="eyebrow">研究結論 · 01 → 02 → 03</div>',
         '<h3>24,000 年不是完整「時間 → 八字」映射的精確週期。</h3>',
         '<p>01 的離散年序／日序可以閉合；在 02 選同一太陽黃經位置時，年序也回到原位，月支又由同一黃經決定，所以年柱與月柱可以回到同柱。可是這些節界相對固定推進 24,000 個公曆年全部提前約 10–14 天，因此公曆／TT 時間落到八字節界的映射沒有一起重現。</p>',
       '</div>',
