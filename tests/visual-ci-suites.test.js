@@ -33,13 +33,14 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 47, "keep the full 34 browser + 13 screenshot checks");
+  assert.equal(scripts.length, 48, "keep the full browser + screenshot checks, including seasonal Research");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
   assert.match(workflow, /suite: \[shader, home, research, capture-pages, capture-interactions, capture-material, capture-responsive\]/);
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
+  assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
 });
 
 test("parallel visual gate preserves prior CI protection and combined PNG artifact", () => {

@@ -111,8 +111,14 @@ const global = expectState(24000, {
   "data-four-pillar-absolute-civil-phase-preserved":"false",
   "data-four-pillar-local-clock-modeled":"false"
 }, "24000-year exact discrete closure");
-if (!global.dom.includes("年柱＋月柱可隔離 · 日柱＋時柱未解")) {
-  throw new Error(`24000-year exact discrete closure: strongest-claim summary missing: ${global.url}`);
+if (!global.dom.includes("shape-only：年／月交界可隔離")) {
+  throw new Error(`24000-year exact discrete closure: shape-only demotion summary missing: ${global.url}`);
+}
+if (!global.dom.includes("+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準")) {
+  throw new Error(`24000-year exact discrete closure: TT-reference handoff guard missing: ${global.url}`);
+}
+if (!global.dom.includes("不能直接升格成未來 civil-time 四柱")) {
+  throw new Error(`24000-year exact discrete closure: civil-time claim guard missing: ${global.url}`);
 }
 if (!global.dom.includes("即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論")) {
   throw new Error(`24000-year exact discrete closure: anti-overclaim footnote missing: ${global.url}`);

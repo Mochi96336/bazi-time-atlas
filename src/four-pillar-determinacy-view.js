@@ -36,6 +36,63 @@ function setText(id, value) {
   if (node) node.textContent = value;
 }
 
+function absoluteReferencePrimary() {
+  return instrument?.dataset.absoluteBoundaryConsequence === "year-26026-research" &&
+    instrument?.dataset.absoluteBoundaryReferenceJie === "displaced";
+}
+
+function ensureShapeOnlyDetails() {
+  let details = panel?.querySelector(":scope > .shape-only-determinacy-details");
+  if (details) return details;
+  const grid = panel?.querySelector(":scope > .determinacy-grid");
+  const foot = panel?.querySelector(":scope > .determinacy-foot");
+  if (!panel || !grid || !foot) return null;
+
+  details = document.createElement("details");
+  details.className = "shape-only-determinacy-details";
+  const summary = document.createElement("summary");
+  summary.innerHTML = "<span>展開 shape-only 四柱卡片</span><strong>只看全年平均位移扣除後的年內 shape</strong>";
+  grid.insertAdjacentElement("beforebegin", details);
+  details.append(summary, grid, foot);
+  return details;
+}
+
+function restoreShapeOnlyDetails() {
+  const details = panel?.querySelector(":scope > .shape-only-determinacy-details");
+  if (!details) return;
+  const grid = details.querySelector(".determinacy-grid");
+  const foot = details.querySelector(".determinacy-foot");
+  if (grid) details.insertAdjacentElement("beforebegin", grid);
+  if (foot) details.insertAdjacentElement("beforebegin", foot);
+  details.remove();
+}
+
+function syncAbsolutePresentation() {
+  if (!panel) return;
+  const active = absoluteReferencePrimary();
+  panel.classList.toggle("shape-only-secondary", active);
+  panel.dataset.absolutePrimary = String(active);
+
+  const label = panel.querySelector(".determinacy-label");
+  const scopeLabel = panel.querySelector(".determinacy-scope span");
+  if (label) label.textContent = active ? "shape-only 輔助判定" : "可判定範圍";
+  if (scopeLabel) scopeLabel.textContent = active ? "春分歸零後的舊模型內結論" : "目前可支持的最強結論";
+
+  let note = panel.querySelector(".determinacy-secondary-note");
+  if (active) {
+    if (!note) {
+      note = document.createElement("div");
+      note.className = "determinacy-secondary-note";
+      panel.querySelector(".determinacy-head")?.insertAdjacentElement("afterend", note);
+    }
+    note.textContent = "這組卡片只保留「全年平均位移已扣除」後的 shape-only 歸因；+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準。";
+    ensureShapeOnlyDetails();
+  } else {
+    note?.remove();
+    restoreShapeOnlyDetails();
+  }
+}
+
 function renderPending() {
   if (!panel) return;
   panel.dataset.ready = "false";
@@ -104,22 +161,26 @@ function refresh() {
   instrument.dataset.fourPillarAbsoluteCivilPhasePreserved = String(result.absoluteCivilPhasePreserved);
   instrument.dataset.fourPillarLocalClockModeled = String(result.localClockModeled);
 
+  const absolutePrimary = absoluteReferencePrimary();
   setText(
     "determinacy-scope-value",
     result.identity
       ? "同一比較狀態 · 4 / 4 相同"
-      : resolvedCount === 2
-        ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
-        : resolvedCount === 0
-          ? "沒有完整四柱可作純交界歸因"
-          : `${resolvedCount} / 4 柱可由此層解析`
+      : absolutePrimary
+        ? "shape-only：年／月交界可隔離"
+        : resolvedCount === 2
+          ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
+          : resolvedCount === 0
+            ? "沒有完整四柱可作純交界歸因"
+            : `${resolvedCount} / 4 柱可由此層解析`
   );
   setText(
     "determinacy-footnote",
     result.identity
       ? "Δ=0 是同一狀態，因此四柱相同是定義上的 identity，不是深時間模型推導。"
-      : `比較框架＝春分共同歸零的季節內形狀。絕對民用日相位：未保留；地方時：未建模；ΔT：未建模。${discreteDayClosed ? " 即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論。" : ""}`
+      : `${absolutePrimary ? "此卡片已降為 shape-only 輔助證據；+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準，不能直接升格成未來 civil-time 四柱。 " : ""}比較框架＝春分共同歸零的季節內形狀。絕對民用日相位：未保留；地方時：未建模；ΔT：未建模。${discreteDayClosed ? " 即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論。" : ""}`
   );
+  syncAbsolutePresentation();
 }
 
 let queued = false;
@@ -139,7 +200,9 @@ if (instrument && panel) {
       "data-delta-years",
       "data-year-sequence-closed",
       "data-day-closed",
-      "data-astronomy-validity"
+      "data-astronomy-validity",
+      "data-absolute-boundary-consequence",
+      "data-absolute-boundary-reference-jie"
     ]
   });
   scheduleRefresh();

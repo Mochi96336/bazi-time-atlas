@@ -1,0 +1,440 @@
+.seasonal-drift-evidence {
+  margin-top:8px;
+  padding:14px 0 16px;
+  border-top:1px solid rgba(238,242,237,.07);
+  border-bottom:1px solid rgba(238,242,237,.09);
+}
+.seasonal-drift-evidence[data-ready="false"] { min-height:260px; }
+
+.seasonal-drift-case-gate {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-top:12px;
+  padding:12px 2px 2px;
+  border-top:1px solid rgba(238,242,237,.055);
+}
+.seasonal-drift-case-gate span,
+.seasonal-drift-case-gate small {
+  display:block;
+  color:#6e7a73;
+  font-size:8px;
+  line-height:1.45;
+}
+.seasonal-drift-case-gate strong {
+  display:block;
+  margin-top:3px;
+  color:#c7d0ca;
+  font-size:13px;
+  font-weight:650;
+}
+.seasonal-drift-case-gate button {
+  flex:0 0 auto;
+  min-height:31px;
+  padding:0 11px;
+  border:1px solid rgba(213,159,104,.22);
+  border-radius:8px;
+  color:#e1c39f;
+  background:rgba(213,159,104,.055);
+  font:inherit;
+  font-size:8.5px;
+  cursor:pointer;
+}
+.seasonal-drift-case-gate button:hover,
+.seasonal-drift-case-gate button:focus-visible {
+  outline:none;
+  background:rgba(213,159,104,.1);
+  border-color:rgba(213,159,104,.34);
+}
+.seasonal-drift-evidence[data-case-aligned="true"] .seasonal-drift-case-gate { display:none; }
+.seasonal-drift-evidence[data-case-aligned="false"] .seasonal-drift-case-content { display:none; }
+.seasonal-drift-evidence[data-case-aligned="false"] .seasonal-drift-controls { display:none; }
+
+.seasonal-drift-evidence-head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:18px;
+  align-items:start;
+  padding:0 2px;
+}
+.seasonal-drift-evidence-copy .eyebrow {
+  color:#708079;
+  font-size:8px;
+  font-weight:760;
+  letter-spacing:.08em;
+}
+.seasonal-drift-evidence-copy h3 {
+  margin:4px 0 5px;
+  color:#e1e6e2;
+  font-size:19px;
+  line-height:1.18;
+  letter-spacing:-.015em;
+  font-weight:660;
+}
+.seasonal-drift-evidence-copy p {
+  margin:0;
+  max-width:800px;
+  color:#7d8981;
+  font-size:9px;
+  line-height:1.6;
+}
+.seasonal-drift-evidence-copy p strong { color:#b4bdb7; font-weight:650; }
+
+.seasonal-drift-controls {
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding:2px;
+  border:1px solid rgba(238,242,237,.085);
+  border-radius:9px;
+  background:rgba(255,255,255,.012);
+}
+.seasonal-drift-controls button,
+#seasonal-drift-orbit-scale {
+  min-height:28px;
+  padding:0 10px;
+  border:0;
+  border-radius:7px;
+  color:#7d8982;
+  background:transparent;
+  font:inherit;
+  font-size:8px;
+  cursor:pointer;
+}
+.seasonal-drift-controls button:hover,
+.seasonal-drift-controls button:focus-visible,
+#seasonal-drift-orbit-scale:hover,
+#seasonal-drift-orbit-scale:focus-visible {
+  color:#e2e8e3;
+  outline:none;
+  background:rgba(255,255,255,.035);
+}
+.seasonal-drift-controls button[aria-pressed="true"] {
+  color:#ead5b8;
+  background:rgba(213,159,104,.09);
+}
+#seasonal-drift-orbit-scale {
+  min-height:24px;
+  padding:0 7px;
+  border:1px solid rgba(238,242,237,.08);
+  font-size:7.5px;
+}
+#seasonal-drift-orbit-scale[aria-pressed="false"] { color:#9aa69f; }
+
+.seasonal-drift-summary {
+  display:grid;
+  align-items:end;
+  gap:0;
+  margin-top:12px;
+  border-top:1px solid rgba(238,242,237,.055);
+  border-bottom:1px solid rgba(238,242,237,.055);
+}
+.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-summary {
+  grid-template-columns:minmax(210px,1.2fr) minmax(210px,.8fr);
+}
+.seasonal-drift-evidence[data-mode="split"] .seasonal-drift-summary {
+  grid-template-columns:minmax(210px,1.15fr) repeat(2,minmax(150px,.7fr));
+}
+.seasonal-drift-stat {
+  min-width:0;
+  padding:9px 10px 10px;
+}
+.seasonal-drift-stat + .seasonal-drift-stat {
+  border-left:1px solid rgba(238,242,237,.055);
+}
+.seasonal-drift-stat > span {
+  display:block;
+  color:#68756d;
+  font-size:7.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.seasonal-drift-stat strong {
+  display:block;
+  margin-top:3px;
+  color:#ced6d0;
+  font-size:14px;
+  font-weight:690;
+}
+.seasonal-drift-stat small {
+  display:block;
+  margin-top:2px;
+  color:#6d7971;
+  font-size:8px;
+  line-height:1.45;
+}
+.seasonal-drift-stat.primary strong {
+  color:#e5c294;
+  font-size:18px;
+}
+.seasonal-drift-stat.range strong { color:#d8ddd9; }
+
+.seasonal-drift-evidence[data-mode="total"] .split-only { display:none !important; }
+.seasonal-drift-evidence[data-mode="split"] .total-only { display:none !important; }
+
+.seasonal-drift-linked-layout {
+  display:grid;
+  gap:18px;
+  margin-top:12px;
+}
+.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-linked-layout {
+  grid-template-columns:minmax(0,1fr);
+}
+.seasonal-drift-evidence[data-mode="split"] .seasonal-drift-linked-layout {
+  grid-template-columns:minmax(0,1.62fr) minmax(300px,.78fr);
+}
+.seasonal-drift-plot,
+.seasonal-drift-orbit-panel {
+  min-width:0;
+  position:relative;
+  background:transparent;
+}
+.seasonal-drift-plot {
+  padding:3px 0 0;
+  border-right:1px solid rgba(238,242,237,.055);
+}
+.seasonal-drift-orbit-panel {
+  display:grid;
+  grid-template-rows:auto 1fr;
+  align-content:start;
+  padding:2px 0 0;
+}
+.seasonal-drift-orbit-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  min-height:42px;
+  padding:0 3px;
+  transition:opacity .18s ease;
+}
+.seasonal-drift-orbit-head span,
+.seasonal-drift-orbit-head small {
+  display:block;
+  color:#69766e;
+  font-size:8px;
+}
+.seasonal-drift-orbit-head strong {
+  display:block;
+  margin-top:2px;
+  color:#b9c3bd;
+  font-size:10px;
+  font-weight:650;
+}
+.seasonal-drift-orbit-head b { color:#98a69d; font-weight:650; }
+.seasonal-drift-orbit-tools {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+.seasonal-drift-orbit-tools > small {
+  text-align:right;
+  line-height:1.35;
+}
+
+.seasonal-drift-svg {
+  display:block;
+  width:100%;
+  height:auto;
+  overflow:visible;
+  touch-action:none;
+  user-select:none;
+}
+#seasonal-drift-curve { min-height:250px; }
+#seasonal-drift-orbit {
+  min-height:285px;
+  transition:opacity .18s ease, filter .18s ease;
+}
+.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-orbit-panel { display:none; }
+
+.seasonal-drift-grid { stroke:rgba(238,242,237,.05); stroke-width:1; }
+.seasonal-drift-zero { stroke:rgba(238,242,237,.2); stroke-width:1.25; }
+.seasonal-drift-axis-tick { stroke:rgba(238,242,237,.13); stroke-width:1; }
+.seasonal-drift-axis-label { fill:#66736b; font-size:9px; }
+.seasonal-drift-term-axis { fill:#7b8880; font-weight:650; }
+.seasonal-drift-curve-path {
+  fill:none;
+  stroke:#b0bec1;
+  stroke-width:2.35;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.seasonal-drift-evidence[data-mode="split"] .seasonal-drift-curve-path { stroke:#d2a06c; }
+.seasonal-drift-gap-line {
+  stroke:rgba(223,180,128,.46);
+  stroke-width:2.2;
+}
+.seasonal-drift-gap-label {
+  fill:#c99f72;
+  font-size:9px;
+  font-weight:650;
+}
+.seasonal-drift-cursor-line { stroke:rgba(232,223,207,.32); stroke-width:1; stroke-dasharray:3 4; }
+.seasonal-drift-cursor-dot { fill:#101512; stroke:#ead7b9; stroke-width:2; }
+.seasonal-drift-cursor-label { fill:#dec3a0; font-size:9px; font-weight:700; }
+.seasonal-drift-hit { fill:transparent; cursor:ew-resize; }
+
+.seasonal-orbit-reference {
+  fill:none;
+  stroke:rgba(238,242,237,.055);
+  stroke-width:1;
+  stroke-dasharray:3 5;
+}
+.seasonal-orbit-guide { stroke:rgba(238,242,237,.045); stroke-width:1; }
+.seasonal-orbit-path { fill:none; stroke-width:2; vector-effect:non-scaling-stroke; }
+.seasonal-orbit-base { stroke:rgba(169,184,188,.42); stroke-dasharray:5 5; }
+.seasonal-orbit-target { stroke:rgba(213,159,104,.82); }
+.seasonal-orbit-selection-ray { stroke:rgba(224,205,178,.28); stroke-width:1; }
+.seasonal-orbit-sun { fill:#d4b06f; stroke:#f0d7a6; stroke-width:1; }
+.seasonal-orbit-point { vector-effect:non-scaling-stroke; }
+.seasonal-orbit-point-base { fill:#101512; stroke:#93a7ad; stroke-width:2; }
+.seasonal-orbit-point-target { fill:#101512; stroke:#e1ad76; stroke-width:2.2; }
+.seasonal-orbit-point-label { fill:#dec3a0; font-size:9px; font-weight:700; }
+.seasonal-orbit-hit { fill:transparent; cursor:grab; touch-action:none; }
+.seasonal-orbit-hit:active { cursor:grabbing; }
+
+.seasonal-drift-scrub-row {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:2px;
+  padding:0 6px 3px;
+}
+.seasonal-drift-scrub-row > span {
+  flex:0 0 auto;
+  color:#68756d;
+  font-size:8px;
+}
+#seasonal-drift-scrub {
+  width:100%;
+  accent-color:#c89a68;
+}
+
+.seasonal-drift-evidence-note {
+  margin:9px 2px 0;
+  padding-top:8px;
+  border-top:1px solid rgba(238,242,237,.05);
+  color:#6c7870;
+  font-size:8px;
+  line-height:1.55;
+}
+.seasonal-drift-evidence-note strong { color:#8f9b94; font-weight:650; }
+
+.secondary-astronomy-tools {
+  margin-top:15px;
+  border-top:1px solid rgba(238,242,237,.06);
+  border-bottom:1px solid rgba(238,242,237,.055);
+}
+.secondary-astronomy-tools > summary {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:10px;
+  align-items:center;
+  min-height:38px;
+  padding:7px 2px;
+  color:#77847c;
+  cursor:pointer;
+  list-style:none;
+}
+.secondary-astronomy-tools > summary::-webkit-details-marker { display:none; }
+.secondary-astronomy-tools > summary span {
+  color:#7f8c84;
+  font-size:8.5px;
+  font-weight:700;
+  letter-spacing:.04em;
+}
+.secondary-astronomy-tools > summary strong {
+  color:#68756d;
+  font-size:8px;
+  font-weight:500;
+  text-align:right;
+}
+.secondary-astronomy-tools > summary::after {
+  content:"+";
+  color:#667169;
+  font-size:13px;
+}
+.secondary-astronomy-tools[open] > summary::after { content:"−"; }
+.secondary-astronomy-tools[open] > summary {
+  border-bottom:1px solid rgba(238,242,237,.045);
+}
+.secondary-astronomy-tools > .astronomy-panel { margin-top:3px; }
+.secondary-astronomy-tools > .near-search-panel { margin-bottom:10px; }
+
+@media (max-width:900px) {
+  .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-linked-layout { grid-template-columns:1fr; gap:12px; }
+  .seasonal-drift-plot { border-right:0; border-bottom:1px solid rgba(238,242,237,.055); padding-bottom:8px; }
+  .seasonal-drift-orbit-panel { max-width:560px; width:100%; margin:0 auto; }
+}
+
+@media (max-width:680px) {
+  .seasonal-drift-evidence { padding:12px 0 13px; }
+  .seasonal-drift-evidence-head { grid-template-columns:1fr; gap:9px; }
+  .seasonal-drift-case-gate { align-items:flex-start; gap:10px; }
+  .seasonal-drift-case-gate strong { font-size:12px; }
+  .seasonal-drift-evidence-copy .eyebrow { font-size:8.5px; }
+  .seasonal-drift-evidence-copy p { font-size:9.5px; }
+  .seasonal-drift-controls {
+    width:max-content;
+    max-width:100%;
+  }
+  .seasonal-drift-controls button {
+    white-space:normal;
+    line-height:1.2;
+    min-height:32px;
+    font-size:8.5px;
+  }
+  .seasonal-drift-evidence[data-mode="total"] .seasonal-drift-summary {
+    grid-template-columns:1fr 1fr;
+  }
+  .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-summary {
+    grid-template-columns:1fr 1fr;
+  }
+  .seasonal-drift-stat.primary {
+    grid-column:1 / -1;
+    border-bottom:1px solid rgba(238,242,237,.045);
+  }
+  .seasonal-drift-stat:nth-child(2) { border-left:0; }
+  .seasonal-drift-stat > span { font-size:8px; }
+  .seasonal-drift-stat small { font-size:8.5px; }
+  #seasonal-drift-curve { min-height:205px; }
+  .seasonal-drift-axis-label { font-size:18px; }
+  .seasonal-drift-gap-label,
+  .seasonal-drift-cursor-label { font-size:17px; }
+  .seasonal-drift-orbit-point-label { font-size:15px; }
+  .secondary-astronomy-tools > summary {
+    min-height:42px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:6px;
+  }
+  .secondary-astronomy-tools > summary strong {
+    grid-column:1 / -1;
+    text-align:left;
+    font-size:8.5px;
+  }
+}
+
+@media (max-width:480px) {
+  .seasonal-drift-evidence-copy h3 { font-size:16px; }
+  .seasonal-drift-stat { padding:7px 5px 8px; }
+  .seasonal-drift-stat strong { font-size:12.5px; }
+  .seasonal-drift-stat.primary strong { font-size:16.5px; }
+  .seasonal-drift-controls {
+    display:grid;
+    grid-template-columns:1fr 1.5fr;
+    width:100%;
+  }
+  .seasonal-drift-controls button { padding:0 7px; }
+  #seasonal-drift-curve { min-height:190px; }
+  #seasonal-drift-orbit { min-height:235px; }
+  .seasonal-drift-axis-label { font-size:21px; }
+  .seasonal-drift-gap-label,
+  .seasonal-drift-cursor-label { font-size:19px; }
+  .seasonal-drift-orbit-head { min-height:48px; }
+  .seasonal-drift-orbit-head span,
+  .seasonal-drift-orbit-head small { font-size:8.5px; }
+  .seasonal-drift-orbit-head strong { font-size:10.5px; }
+  .seasonal-drift-orbit-tools { gap:5px; }
+  #seasonal-drift-orbit-scale { font-size:7.5px; padding:0 5px; }
+}
