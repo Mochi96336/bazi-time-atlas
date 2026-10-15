@@ -122,3 +122,12 @@ test("Research 02 stays framed as a BaZi boundary question", () => {
   assert.match(html, /12 個「節」界 × 同一太陽黃經/);
   assert.match(html, /立春同時也是年柱切換界/);
 });
+
+test("curve and orbit expose the same canonical Jie structure", () => {
+  assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary =>/);
+  assert.match(view, /seasonal-drift-jie-guide/);
+  assert.match(view, /seasonal-drift-jie-dot/);
+  assert.match(view, /root\.dataset\.baziMonthBranch = month\.branch/);
+  assert.match(css, /\.seasonal-drift-jie-guide/);
+  assert.match(css, /\.seasonal-drift-jie-dot/);
+});
