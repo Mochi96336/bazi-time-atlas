@@ -49,11 +49,22 @@ test("Research outline ends in the recurrence conclusion rather than repeating t
   assert.doesNotMatch(spine,/dataset\.deltaYears|yearSequenceClosed|fourPillarResolvedCount/);
 });
 
-test("Research 03 states the distinction between same solar position and fixed elapsed calendar time",()=>{
+test("Research 03 states the distinction without repeating the same verdict twice",()=>{
   assert.match(view,/對齊太陽位置/);
   assert.match(view,/年／月可回到同柱/);
   assert.match(view,/對齊公曆／TT 相位/);
   assert.match(view,/日／時仍未定/);
+  assert.match(view,/判讀邊界/);
   assert.match(view,/不代表每一個相隔 24,000 年的具體時刻都必然得到不同四柱/);
+  assert.doesNotMatch(view,/absolute-boundary-verdict|回答研究題目|24,000 ≠ 整套映射精確週期/);
+  assert.doesNotMatch(css,/\.absolute-boundary-verdict/);
   assert.match(css,/\.research-conclusion-grid/);
+});
+
+test("Research 03 visible pillar labels stay Chinese",()=>{
+  assert.match(html,/class="eyebrow">四柱結論<\/div>/);
+  for(const label of ["年","月","日","時"]){
+    assert.match(html,new RegExp(`<header><span>${label}<\\/span><strong>${label}柱<\\/strong><\\/header>`));
+  }
+  assert.doesNotMatch(html,/Four-pillar recurrence|<span>Year<\/span>|<span>Month<\/span>|<span>Day<\/span>|<span>Hour<\/span>/);
 });
