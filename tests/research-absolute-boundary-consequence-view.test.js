@@ -51,7 +51,7 @@ test("Research 03 keeps the repeated 12-term values behind one closed disclosure
 });
 
 test("Research 03 explicitly withholds a civil-time pillar verdict",()=>{
-  assert.match(view,/不是西元 26026 某個真實民用年月日時的四柱判決/);
+  assert.match(view,/不是直接判定西元 26026 某個真實民用時刻的完整四柱/);
   assert.match(view,/不能直接升格成西元 26026 某個真實民用年月日時的年／月柱結論/);
   assert.match(view,/boundary-window union/);
   assert.match(css,/\.absolute-boundary-metrics/);
