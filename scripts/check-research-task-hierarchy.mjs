@@ -73,8 +73,8 @@ for (const expected of [
   "離散候選 → 天文較真",
   "節氣校驗 → 四柱比較",
   "3 / 3 exact",
-  "提前 10–14 d",
-  "年／月界未重現"
+  "TT 提前 10–14 d",
+  "TT 節界未重現"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
@@ -202,7 +202,7 @@ for (const expected of [
   "60 年序",
   "60 日序",
   "季節形狀 RMS",
-  "年／月界未重現",
+  "12 / 12 節界未重現",
   "shape-only 輔助判定",
   "春分歸零後的舊模型內結論",
   "shape-only：年／月交界可隔離"
