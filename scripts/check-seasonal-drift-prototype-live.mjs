@@ -68,9 +68,10 @@ requireTokens(total,[
   'data-case-state="aligned"',
   'id="absolute-boundary-consequence"',
   'data-ready="true"',
+  '12 / 12 節界未重現',
   'id="absolute-boundary-union">146.481 d',
-  '全年 TT 相位 40.105% · 非人口機率',
-  '年／月界未重現',
+  '= 40.105% of this reference cycle',
+  '不能直接升格成西元 26026 某個真實民用年月日時的年／月柱結論',
   'shape-only-secondary',
   'shape-only-determinacy-details'
 ],"total seasonal prototype");
