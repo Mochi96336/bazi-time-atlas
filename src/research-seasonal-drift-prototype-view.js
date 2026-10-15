@@ -71,7 +71,7 @@ if (root && curveSvg && orbitSvg && scrub) {
   }
 
   function selectedShape() {
-    return selectedDrift() - DATA.commonPhaseDays;
+    return selectedDrift() - DATA.meanDriftDays;
   }
 
   function humanDrift(value, digits = 3) {
@@ -173,7 +173,7 @@ if (root && curveSvg && orbitSvg && scrub) {
 
     const values = state.mode === "total"
       ? DATA.driftDays
-      : DATA.driftDays.map(value => value - DATA.commonPhaseDays);
+      : DATA.driftDays.map(value => value - DATA.meanDriftDays);
 
     const ticks = state.mode === "total"
       ? [0,-3,-6,-9,-12,-15]
@@ -195,24 +195,6 @@ if (root && curveSvg && orbitSvg && scrub) {
         "text-anchor":"end"
       }, curveSvg);
       label.textContent = `${tick} d`;
-    }
-
-    if (state.mode === "total") {
-      const phaseY = totalY(DATA.commonPhaseDays);
-      svgEl("line", {
-        x1:CURVE.left,
-        x2:CURVE.width-CURVE.right,
-        y1:phaseY,
-        y2:phaseY,
-        class:"seasonal-drift-phase-line"
-      }, curveSvg);
-      const phaseLabel = svgEl("text", {
-        x:CURVE.width-CURVE.right-4,
-        y:phaseY-8,
-        class:"seasonal-drift-phase-label",
-        "text-anchor":"end"
-      }, curveSvg);
-      phaseLabel.textContent = `共同 phase ${signedDays(DATA.commonPhaseDays,2)}`;
     }
 
     const path = values.map((value,index) =>
@@ -322,12 +304,20 @@ if (root && curveSvg && orbitSvg && scrub) {
     return (1-e*e) / (1 + e*Math.cos(theta-peri));
   }
 
+  function heliocentricEarthAngleDegrees(solarLongitudeDegrees) {
+    return ((solarLongitudeDegrees + 180) % 360 + 360) % 360;
+  }
+
+  function solarLongitudeFromHeliocentricAngleDegrees(angleDegrees) {
+    return ((angleDegrees - 180) % 360 + 360) % 360;
+  }
+
   function orbitXY(parameters, longitudeDegrees, exaggeration = 1) {
-    const theta = longitudeDegrees * Math.PI / 180;
+    const earthAngle = heliocentricEarthAngleDegrees(longitudeDegrees) * Math.PI / 180;
     const radius = ellipseRadius(parameters,longitudeDegrees,exaggeration) * ORBIT.baseRadius;
     return {
-      x:ORBIT.cx + Math.cos(theta)*radius,
-      y:ORBIT.cy - Math.sin(theta)*radius
+      x:ORBIT.cx + Math.cos(earthAngle)*radius,
+      y:ORBIT.cy - Math.sin(earthAngle)*radius
     };
   }
 
@@ -376,9 +366,10 @@ if (root && curveSvg && orbitSvg && scrub) {
       }, orbitSvg);
     });
 
+    const earthAngleRadians = heliocentricEarthAngleDegrees(longitude) * Math.PI / 180;
     const rayEnd = {
-      x:ORBIT.cx + Math.cos(longitude*Math.PI/180)*(ORBIT.baseRadius+38),
-      y:ORBIT.cy - Math.sin(longitude*Math.PI/180)*(ORBIT.baseRadius+38)
+      x:ORBIT.cx + Math.cos(earthAngleRadians)*(ORBIT.baseRadius+38),
+      y:ORBIT.cy - Math.sin(earthAngleRadians)*(ORBIT.baseRadius+38)
     };
     svgEl("line", {
       x1:ORBIT.cx,
@@ -440,8 +431,8 @@ if (root && curveSvg && orbitSvg && scrub) {
     const rect = orbitSvg.getBoundingClientRect();
     const x = (event.clientX-rect.left)/rect.width*ORBIT.width;
     const y = (event.clientY-rect.top)/rect.height*ORBIT.height;
-    const angle = Math.atan2(ORBIT.cy-y,x-ORBIT.cx)*180/Math.PI;
-    const longitude = ((Math.round(angle)%360)+360)%360;
+    const earthAngle = Math.atan2(ORBIT.cy-y,x-ORBIT.cx)*180/Math.PI;
+    const longitude = Math.round(solarLongitudeFromHeliocentricAngleDegrees(earthAngle));
     setIndex(indexForLongitude(longitude),"orbit");
   }
 
@@ -461,7 +452,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     set("seasonal-drift-selected-total",signedDays(drift,3));
     set("seasonal-drift-selected-total-human",humanDrift(drift,3));
     set("seasonal-drift-selected-shape",signedDays(shape,3));
-    set("seasonal-drift-phase-value",signedDays(DATA.commonPhaseDays,3));
+    set("seasonal-drift-phase-value",signedDays(DATA.meanDriftDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
     set("seasonal-drift-orbit-base-e",DATA.baseEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-orbit-target-e",DATA.targetEllipse.eccentricity.toFixed(5));
