@@ -12,14 +12,14 @@ const [html, view, data, css] = await Promise.all([
 
 test("Research 02 makes the fixed +24k case primary before dynamic astronomy tools", () => {
   const astronomyStart = html.indexOf('id="research-astronomy"');
-  const evidenceStart = html.indexOf('id="seasonal-drift-evidence"');
+  const seasonalEvidenceStart = html.indexOf('id="seasonal-drift-evidence"');
   const dynamicPanelStart = html.indexOf('class="astronomy-panel"', astronomyStart);
-  const evidenceStart = html.indexOf('id="research-evidence"');
+  const researchEvidenceStart = html.indexOf('id="research-evidence"');
   assert.ok(
     astronomyStart >= 0 &&
-    evidenceStart > astronomyStart &&
-    dynamicPanelStart > evidenceStart &&
-    evidenceStart > dynamicPanelStart
+    seasonalEvidenceStart > astronomyStart &&
+    dynamicPanelStart > seasonalEvidenceStart &&
+    researchEvidenceStart > dynamicPanelStart
   );
   assert.ok(html.includes("主案例 · +24,000 年離散閉合"));
   assert.match(html, /id="secondary-astronomy-tools"/);
