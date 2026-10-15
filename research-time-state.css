@@ -236,16 +236,19 @@
     border-left:1px solid rgba(238,242,237,.045);
   }
   .research-time-state[data-stuck="true"] .research-time-side > header {
-    display:block;
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:baseline;
+    gap:4px;
     margin-bottom:2px;
   }
   .research-time-state[data-stuck="true"] .research-time-side > header span {
-    display:inline;
-    margin-right:4px;
+    display:block;
+    margin-right:0;
     font-size:6.2px;
   }
   .research-time-state[data-stuck="true"] .research-time-side > header strong {
-    display:inline;
+    display:block;
     max-width:100%;
     font-size:6.7px;
   }
