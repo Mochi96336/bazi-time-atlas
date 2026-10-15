@@ -282,6 +282,18 @@ for (const stale of [
   }
 }
 
+const stickyTimeProbe = dump("recurrence.html?delta=24000#research-astronomy");
+const stickyTimeTag = stickyTimeProbe.dom.match(/<section[^>]*id="research-time-state"[^>]*>/)?.[0] ?? "";
+if (!stickyTimeTag.includes('data-stuck="true"')) {
+  throw new Error(`shared Research time state did not condense after anchor-scroll sticky activation: ${stickyTimeProbe.url}`);
+}
+if (!stickyTimeTag.includes('data-owner="seasonal"')) {
+  throw new Error(`sticky Research time state did not switch to the seasonal owner while reading 02: ${stickyTimeProbe.url}`);
+}
+if ((stickyTimeProbe.dom.match(/id="research-time-state"/g) ?? []).length !== 1) {
+  throw new Error(`Research time state must remain one shared DOM owner while sticky: ${stickyTimeProbe.url}`);
+}
+
 const cycleDeepLink = dump("recurrence.html#research-sexagenary-cycle");
 const cycleDeepLinkDetail = detailsById(cycleDeepLink.dom, "discrete-sexagenary-details");
 if (!cycleDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(cycleDeepLinkDetail)) {
