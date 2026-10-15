@@ -12,13 +12,13 @@ const [html, view, data, css] = await Promise.all([
 
 test("Research 02 makes the fixed +24k case primary before dynamic astronomy tools", () => {
   const astronomyStart = html.indexOf('id="research-astronomy"');
-  const prototypeStart = html.indexOf('id="seasonal-drift-evidence"');
+  const evidenceStart = html.indexOf('id="seasonal-drift-evidence"');
   const dynamicPanelStart = html.indexOf('class="astronomy-panel"', astronomyStart);
   const evidenceStart = html.indexOf('id="research-evidence"');
   assert.ok(
     astronomyStart >= 0 &&
-    prototypeStart > astronomyStart &&
-    dynamicPanelStart > prototypeStart &&
+    evidenceStart > astronomyStart &&
+    dynamicPanelStart > evidenceStart &&
     evidenceStart > dynamicPanelStart
   );
   assert.ok(html.includes("主案例 · +24,000 年離散閉合"));
@@ -42,7 +42,7 @@ test("direct hashes reopen the folded secondary astronomy lane", () => {
   assert.match(view, /addEventListener\("load"/);
 });
 
-test("prototype only expands when the canonical Research state matches 2026 + 24k", () => {
+test("seasonal evidence only expands when the canonical Research state matches 2026 + 24k", () => {
   assert.match(html, /id="seasonal-drift-case-gate-title"/);
   assert.match(html, /id="seasonal-drift-use-case"/);
   assert.match(view, /baseYear === DATA\.baseYear && delta === 24000/);
@@ -50,7 +50,7 @@ test("prototype only expands when the canonical Research state matches 2026 + 24
   assert.match(css, /data-case-aligned="false"[\s\S]*\.seasonal-drift-case-content\s*\{\s*display:none/);
 });
 
-test("prototype keeps mean drift separate from timing-equivalent orbit shape", () => {
+test("seasonal evidence keeps mean drift separate from timing-equivalent orbit shape", () => {
   assert.match(data, /meanDriftDays:SUMMARY\.meanDriftDays/);
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
   assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays/);
