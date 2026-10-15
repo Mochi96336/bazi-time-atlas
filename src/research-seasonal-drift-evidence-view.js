@@ -4,6 +4,11 @@ import {
   longitudeForIndex
 } from "./research/seasonal-drift-26026-research-data.js";
 import { publishResearchTimeSelection } from "./research/research-time-state.js";
+import {
+  BAZI_JIE_BOUNDARIES,
+  baziJieDriftSummary,
+  baziMonthContextAtLongitude
+} from "./research/bazi-seasonal-boundaries.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const root = document.querySelector("#seasonal-drift-evidence");
@@ -13,6 +18,7 @@ const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
 const secondaryTools = document.querySelector("#secondary-astronomy-tools");
 const secondaryToolsMeta = document.querySelector("#secondary-astronomy-tools-meta");
+const JIE_SUMMARY = baziJieDriftSummary(DATA.driftDays,indexForLongitude);
 
 if (root && curveSvg && orbitSvg && scrub) {
   const initialParams = new URLSearchParams(location.search);
@@ -293,11 +299,61 @@ if (root && curveSvg && orbitSvg && scrub) {
     return points.join(" ") + " Z";
   }
 
+  function orbitDirectionXY(longitudeDegrees, radius) {
+    const angle = heliocentricEarthAngleDegrees(longitudeDegrees) * Math.PI / 180;
+    return {
+      x:ORBIT.cx + Math.cos(angle)*radius,
+      y:ORBIT.cy - Math.sin(angle)*radius
+    };
+  }
+
+  function longitudeArcPath(startLongitude, endLongitude, radius) {
+    const span = ((endLongitude-startLongitude)%360+360)%360 || 360;
+    const points = [];
+    const steps = Math.max(2,Math.ceil(span/3));
+    for (let step=0; step<=steps; step+=1) {
+      const longitude = startLongitude + span*(step/steps);
+      const p = orbitDirectionXY(longitude,radius);
+      points.push(`${step === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`);
+    }
+    return points.join(" ");
+  }
+
+  function drawBaziBoundaries(longitude) {
+    const month = baziMonthContextAtLongitude(longitude);
+    svgEl("path", {
+      d:longitudeArcPath(month.startLongitudeDegrees,month.endLongitudeDegrees,ORBIT.baseRadius+20),
+      class:"seasonal-orbit-bazi-month-arc"
+    }, orbitSvg);
+
+    for (const boundary of BAZI_JIE_BOUNDARIES) {
+      const selected = boundary.longitudeDegrees === longitude;
+      const rayEnd = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.baseRadius+30);
+      const labelPoint = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.baseRadius+48);
+      svgEl("line", {
+        x1:ORBIT.cx,
+        y1:ORBIT.cy,
+        x2:rayEnd.x,
+        y2:rayEnd.y,
+        class:`seasonal-orbit-bazi-boundary${selected ? " is-selected" : ""}`
+      }, orbitSvg);
+      const label = svgEl("text", {
+        x:labelPoint.x,
+        y:labelPoint.y+3,
+        class:`seasonal-orbit-bazi-label${selected ? " is-selected" : ""}`,
+        "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12 ? "middle" : labelPoint.x<ORBIT.cx ? "end" : "start"
+      }, orbitSvg);
+      label.textContent = `${boundary.termName} · ${boundary.branch}`;
+    }
+  }
+
   function drawOrbit() {
     clear(orbitSvg);
     orbitSvg.setAttribute("viewBox", `0 0 ${ORBIT.width} ${ORBIT.height}`);
     const exaggeration = state.exaggerate ? 10 : 1;
     const longitude = longitudeForIndex(state.index);
+
+    drawBaziBoundaries(longitude);
 
     svgEl("circle", {
       cx:ORBIT.cx,
@@ -403,7 +459,11 @@ if (root && curveSvg && orbitSvg && scrub) {
     const longitude = longitudeForIndex(state.index);
     const drift = selectedDrift();
     const shape = selectedShape();
-    const termName = DATA.termNames[String(longitude)] ?? "任意黃經";
+    const month = baziMonthContextAtLongitude(longitude);
+    const namedTerm = DATA.termNames[String(longitude)] ?? null;
+    const termName = namedTerm
+      ? `${namedTerm} · ${month.boundary ? `${month.branch}月界` : `${month.branch}月`}`
+      : `${month.branch}月區段`;
 
     const set = (id,value) => {
       const node = document.querySelector(`#${id}`);
@@ -412,6 +472,17 @@ if (root && curveSvg && orbitSvg && scrub) {
 
     set("seasonal-drift-selected-name",termName);
     set("seasonal-drift-selected-longitude",`${longitude}°`);
+    set(
+      "seasonal-drift-selected-bazi",
+      month.boundary
+        ? `${month.boundary.yearBoundary ? "年界＋" : ""}${month.branch}月起點`
+        : `${month.branch}月 · 下一界 ${month.endTerm}`
+    );
+    set("seasonal-drift-jie-count",`${JIE_SUMMARY.displacedCount} / ${JIE_SUMMARY.count}`);
+    set(
+      "seasonal-drift-jie-range",
+      `提前 ${JIE_SUMMARY.minAdvanceDays.toFixed(3)}–${JIE_SUMMARY.maxAdvanceDays.toFixed(3)} 天`
+    );
     set("seasonal-drift-selected-total",signedDays(drift,3));
     set("seasonal-drift-selected-total-human",humanDrift(drift,3));
     set("seasonal-drift-selected-shape",signedDays(shape,3));
