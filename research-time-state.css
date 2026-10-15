@@ -133,3 +133,135 @@
   .research-time-pillar > strong { font-size:12px; }
   .research-time-pillar > small { font-size:6.8px; }
 }
+
+/* The full card explains the shared Research time state at its source
+   position. Once sticky, the same DOM becomes a compact persistent summary. */
+.research-time-state[data-stuck="true"] {
+  margin-top:4px;
+  margin-bottom:12px;
+  border-radius:9px;
+  box-shadow:0 10px 30px rgba(0,0,0,.30);
+}
+.research-time-state[data-stuck="true"] .research-time-state-head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:baseline;
+  gap:10px;
+  padding:5px 8px 4px;
+}
+.research-time-state[data-stuck="true"] .research-time-state-head > div {
+  display:flex;
+  min-width:0;
+  align-items:baseline;
+  gap:7px;
+}
+.research-time-state[data-stuck="true"] .research-time-state-head span {
+  flex:0 0 auto;
+  font-size:6.5px;
+}
+.research-time-state[data-stuck="true"] .research-time-state-head strong {
+  min-width:0;
+  margin-top:0;
+  overflow:hidden;
+  color:#e0e6e2;
+  font-size:10.5px;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.research-time-state[data-stuck="true"] .research-time-state-head > small {
+  display:none;
+}
+.research-time-state[data-stuck="true"] .research-time-side {
+  padding:4px 8px 5px;
+}
+.research-time-state[data-stuck="true"] .research-time-side > header {
+  min-width:0;
+  margin-bottom:3px;
+}
+.research-time-state[data-stuck="true"] .research-time-side > header span {
+  font-size:6.8px;
+}
+.research-time-state[data-stuck="true"] .research-time-side > header strong {
+  min-width:0;
+  overflow:hidden;
+  font-size:7.5px;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.research-time-state[data-stuck="true"] .research-time-pillars {
+  gap:2px;
+}
+.research-time-state[data-stuck="true"] .research-time-pillar {
+  padding:2px 3px 3px;
+  border-radius:5px;
+}
+.research-time-state[data-stuck="true"] .research-time-pillar > span {
+  font-size:6px;
+}
+.research-time-state[data-stuck="true"] .research-time-pillar > strong {
+  margin-top:0;
+  font-size:10.5px;
+}
+.research-time-state[data-stuck="true"] .research-time-pillar > small {
+  font-size:6px;
+}
+
+@media (max-width:680px) {
+  .research-time-state[data-stuck="true"] {
+    top:3px;
+    margin:3px 0 9px;
+    border-radius:8px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-state-head {
+    display:block;
+    padding:4px 6px 3px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-state-head > div {
+    gap:5px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-state-head span {
+    font-size:6px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-state-head strong {
+    font-size:9.5px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-state-compare {
+    grid-template-columns:1fr 1fr;
+  }
+  .research-time-state[data-stuck="true"] .research-time-side {
+    padding:3px 5px 4px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-side + .research-time-side {
+    border-top:0;
+    border-left:1px solid rgba(238,242,237,.045);
+  }
+  .research-time-state[data-stuck="true"] .research-time-side > header {
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:baseline;
+    gap:4px;
+    margin-bottom:2px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-side > header span {
+    display:block;
+    margin-right:0;
+    font-size:6.2px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-side > header strong {
+    display:block;
+    max-width:100%;
+    font-size:6.7px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-pillar {
+    padding:2px 2px 3px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-pillar > span {
+    font-size:5.7px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-pillar > strong {
+    font-size:9.5px;
+  }
+  .research-time-state[data-stuck="true"] .research-time-pillar > small {
+    display:none;
+  }
+}
