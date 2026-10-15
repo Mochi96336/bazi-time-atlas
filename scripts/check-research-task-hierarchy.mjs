@@ -226,6 +226,7 @@ for (const expected of [
   "目前選定太陽位置",
   "固定 +24,000 · 同一太陽黃經",
   "年／月可判 · 日／時未定",
+  "四柱結論",
   "研究時間",
   "年序／日序",
   "離散推導",
@@ -252,6 +253,11 @@ for (const stale of [
   "Year / Day cycles",
   "Discrete derivation",
   "Seasonal check",
+  "Four-pillar recurrence",
+  "<span>Year</span>",
+  "<span>Month</span>",
+  "<span>Day</span>",
+  "<span>Hour</span>",
   "Research conclusion · 01 → 02 → 03",
   "Gregorian years"
 ]) {
