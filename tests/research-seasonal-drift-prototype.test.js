@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { SEASONAL_DRIFT_26026_RESEARCH as evidence } from "../src/research/seasonal-drift-26026-research-data.js";
 
 const [html, view, data, css] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
@@ -94,4 +95,18 @@ test("orbit deformation is explicitly visual and reversible", () => {
   assert.match(html, /id="seasonal-drift-orbit-scale"/);
   assert.match(html, /示意放大 ×10/);
   assert.match(css, /#seasonal-drift-orbit-scale\[aria-pressed="false"\]/);
+});
+
+test("pinned seasonal evidence derives summary metrics from one drift array and carries provenance", () => {
+  const mean=evidence.driftDays.reduce((sum,value)=>sum+value,0)/evidence.driftDays.length;
+  const min=Math.min(...evidence.driftDays);
+  const max=Math.max(...evidence.driftDays);
+  assert.equal(evidence.driftDays.length,360);
+  assert.ok(Math.abs(evidence.meanDriftDays-mean)<1e-12);
+  assert.equal(evidence.minDriftDays,min);
+  assert.equal(evidence.maxDriftDays,max);
+  assert.ok(Math.abs(evidence.peakToPeakDays-(max-min))<1e-12);
+  assert.equal(evidence.provenance.timeline.pullRequest,572);
+  assert.equal(evidence.provenance.timeline.artifactDigest,"sha256:285e3cc1edb09f9bc07268a149cdfa137f41a56b0525229f759daba31c50ef3d");
+  assert.equal(evidence.provenance.inverseEllipse.pullRequest,574);
 });
