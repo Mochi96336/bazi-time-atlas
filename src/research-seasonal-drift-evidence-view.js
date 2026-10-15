@@ -171,6 +171,26 @@ if (root && curveSvg && orbitSvg && scrub) {
     ).join(" ");
     svgEl("path", { d:path, class:"seasonal-drift-curve-path" }, curveSvg);
 
+    BAZI_JIE_BOUNDARIES.forEach(boundary => {
+      const boundaryIndex = indexForLongitude(boundary.longitudeDegrees);
+      const x = curveX(boundaryIndex);
+      const y = curveY(values[boundaryIndex]);
+      const selected = boundaryIndex === state.index;
+      svgEl("line", {
+        x1:x,
+        x2:x,
+        y1:y,
+        y2:CURVE.height-CURVE.bottom,
+        class:`seasonal-drift-jie-guide${selected ? " is-selected" : ""}`
+      }, curveSvg);
+      svgEl("circle", {
+        cx:x,
+        cy:y,
+        r:selected ? 4 : 2.6,
+        class:`seasonal-drift-jie-dot${selected ? " is-selected" : ""}`
+      }, curveSvg);
+    });
+
     const major = [
       {longitude:270,label:"冬至"},
       {longitude:0,label:"春分"},
@@ -494,6 +514,8 @@ if (root && curveSvg && orbitSvg && scrub) {
 
     scrub.value = String(state.index);
     root.dataset.selectedLongitude = String(longitude);
+    root.dataset.baziMonthBranch = month.branch;
+    root.dataset.baziBoundary = month.boundary?.termName ?? "";
     root.dataset.mode = state.mode;
     root.dataset.orbitScale = state.exaggerate ? "exaggerated" : "true";
     syncModeButtons();
