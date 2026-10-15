@@ -17,7 +17,7 @@ function dumpDom(path) {
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
-    "--virtual-time-budget=2400",
+    "--virtual-time-budget=3000",
     "--dump-dom",
     url
   ], { encoding:"utf8", maxBuffer:8 * 1024 * 1024 });
@@ -52,49 +52,62 @@ function expectState(delta, exact, label) {
   return { ...result, instrument, panel };
 }
 
-function pillarTag(dom, pillar) {
-  return dom.match(new RegExp(`<article[^>]*data-determinacy-pillar="${pillar}"[^>]*>`))?.[0] ?? "";
-}
-
-const fixedShapeExpected = {
-  "data-four-pillar-year-status":"boundary-resolved",
-  "data-four-pillar-month-status":"boundary-resolved",
-  "data-four-pillar-day-status":"not-resolved-by-shape-model",
-  "data-four-pillar-hour-status":"not-resolved-by-shape-model",
+const fixedSeasonalExpected = {
+  "data-four-pillar-year-status":"research-resolved",
+  "data-four-pillar-month-status":"research-resolved",
+  "data-four-pillar-day-status":"unresolved",
+  "data-four-pillar-hour-status":"unresolved",
   "data-four-pillar-resolved-count":"2",
   "data-four-pillar-absolute-civil-phase-preserved":"false",
   "data-four-pillar-local-clock-modeled":"false"
 };
 
 for (const delta of [0,400,1980,24000]) {
-  const fixed = expectState(delta, fixedShapeExpected, `fixed +24k shape-only @ explorer Δ=${delta}`);
+  const fixed = expectState(delta, fixedSeasonalExpected, `fixed +24k selected crossing @ explorer Δ=${delta}`);
+  if (attr(fixed.panel, "data-mode") !== "shared-seasonal") {
+    throw new Error(`03 stopped reading the shared seasonal state at explorer Δ=${delta}: ${fixed.url}`);
+  }
   if (attr(fixed.panel, "data-argument-delta-years") !== "24000") {
-    throw new Error(`shape-only panel escaped the fixed +24k argument at explorer Δ=${delta}: ${fixed.url}`);
+    throw new Error(`03 escaped the fixed +24k argument at explorer Δ=${delta}: ${fixed.url}`);
   }
   if (attr(fixed.panel, "data-explorer-delta-years") !== String(delta)) {
-    throw new Error(`shape-only panel lost explorer provenance at Δ=${delta}: ${fixed.url}`);
+    throw new Error(`03 lost explorer provenance at Δ=${delta}: ${fixed.url}`);
   }
-  if (!fixed.dom.includes("shape-only：年／月交界可隔離")) {
-    throw new Error(`fixed +24k shape-only summary missing at explorer Δ=${delta}: ${fixed.url}`);
+  if (attr(fixed.panel, "data-selected-longitude") !== "315") {
+    throw new Error(`03 did not initialize from the default Li Chun crossing at Δ=${delta}: ${fixed.url}`);
+  }
+  for (const expected of [
+    "年／月可判 · 日／時未定",
+    "立春 · 315°",
+    "24,000 年不是完整「時間 → 八字」映射的精確週期"
+  ]) {
+    if (!fixed.dom.includes(expected)) {
+      throw new Error(`fixed +24k selected-crossing conclusion missing "${expected}" at Δ=${delta}: ${fixed.url}`);
+    }
   }
   if (fixed.dom.includes("同一比較狀態 · 4 / 4 相同")) {
     throw new Error(`explorer identity leaked into fixed +24k Research evidence at Δ=${delta}: ${fixed.url}`);
   }
+  if (fixed.dom.includes("shape-only 輔助判定")) {
+    throw new Error(`retired shape-only primary result returned at Δ=${delta}: ${fixed.url}`);
+  }
 }
 
 const global = expectState(24000, {
-  ...fixedShapeExpected,
+  ...fixedSeasonalExpected,
   "data-global-closed":"true",
   "data-year-sequence-closed":"true",
   "data-day-closed":"true"
 }, "24000-year exact discrete closure");
-if (!global.dom.includes("+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準")) {
-  throw new Error(`24000-year exact discrete closure: TT-reference handoff guard missing: ${global.url}`);
+
+for (const expected of [
+  "同一太陽位置的年／月柱可重現",
+  "相隔固定 24,000 年的所有時間都回到同一八字",
+  "日／時仍不能由帶不確定性的深時間 UT1／地方鐘面唯一決定"
+]) {
+  if (!global.dom.includes(expected)) {
+    throw new Error(`24000-year conclusion lost guard "${expected}": ${global.url}`);
+  }
 }
-if (!global.dom.includes("不能直接升格成未來 civil-time 四柱")) {
-  throw new Error(`24000-year exact discrete closure: civil-time claim guard missing: ${global.url}`);
-}
-if (!global.dom.includes("即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論")) {
-  throw new Error(`24000-year exact discrete closure: anti-overclaim footnote missing: ${global.url}`);
-}
-console.log(`[four-pillar] PASS fixed +24k shape-only evidence is independent of explorer Δ and does not overclaim Day/Hour: ${global.url}`);
+
+console.log(`[four-pillar] PASS fixed +24k selected seasonal state resolves Year/Month, withholds Day/Hour, and stays independent of explorer Δ: ${global.url}`);
