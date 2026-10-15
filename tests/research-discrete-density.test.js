@@ -146,7 +146,7 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(recurrenceView,/function syncFanViewport\(\)/);
   assert.match(recurrenceView,/svg\.setAttribute\("viewBox", mobile \? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX\)/);
   assert.match(layout,/height:clamp\(235px,calc\(52\.5vw \+ 64px\),270px\)/);
-  assert.match(layout,/top:70px;[\s\S]*?height:calc\(100% - 70px\)/);
+  assert.match(layout,/top:80px;[\s\S]*?height:calc\(100% - 80px\)/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
 });
 
