@@ -133,11 +133,9 @@
   gap:18px;
   margin-top:12px;
 }
-.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-linked-layout {
-  grid-template-columns:minmax(0,1fr);
-}
+.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-linked-layout,
 .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-linked-layout {
-  grid-template-columns:minmax(0,1.62fr) minmax(300px,.78fr);
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);
 }
 .seasonal-drift-plot,
 .seasonal-drift-orbit-panel {
@@ -201,8 +199,6 @@
   min-height:285px;
   transition:opacity .18s ease, filter .18s ease;
 }
-.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-orbit-panel { display:none; }
-
 .seasonal-drift-grid { stroke:rgba(238,242,237,.05); stroke-width:1; }
 .seasonal-drift-zero { stroke:rgba(238,242,237,.2); stroke-width:1.25; }
 .seasonal-drift-axis-tick { stroke:rgba(238,242,237,.13); stroke-width:1; }
@@ -237,6 +233,34 @@
   stroke-dasharray:3 5;
 }
 .seasonal-orbit-guide { stroke:rgba(238,242,237,.045); stroke-width:1; }
+.seasonal-orbit-bazi-boundary {
+  stroke:rgba(195,205,198,.12);
+  stroke-width:.85;
+  stroke-dasharray:2 5;
+  vector-effect:non-scaling-stroke;
+}
+.seasonal-orbit-bazi-boundary.is-selected {
+  stroke:rgba(232,204,167,.62);
+  stroke-width:1.55;
+  stroke-dasharray:none;
+}
+.seasonal-orbit-bazi-month-arc {
+  fill:none;
+  stroke:rgba(213,159,104,.48);
+  stroke-width:5;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+.seasonal-orbit-bazi-label {
+  fill:#68766d;
+  font-size:8px;
+  font-weight:600;
+}
+.seasonal-orbit-bazi-label.is-selected {
+  fill:#e1c39e;
+  font-size:9px;
+  font-weight:760;
+}
 .seasonal-orbit-path { fill:none; stroke-width:2; vector-effect:non-scaling-stroke; }
 .seasonal-orbit-base { stroke:rgba(169,184,188,.42); stroke-dasharray:5 5; }
 .seasonal-orbit-target { stroke:rgba(213,159,104,.82); }
@@ -318,7 +342,7 @@
 .secondary-astronomy-tools > .near-search-panel { margin-bottom:10px; }
 
 @media (max-width:900px) {
-  .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-linked-layout { grid-template-columns:1fr; gap:12px; }
+  .seasonal-drift-linked-layout { grid-template-columns:1fr !important; gap:12px; }
   .seasonal-drift-plot { border-right:0; border-bottom:1px solid rgba(238,242,237,.055); padding-bottom:8px; }
   .seasonal-drift-orbit-panel { max-width:560px; width:100%; margin:0 auto; }
 }
@@ -356,6 +380,8 @@
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:17px; }
   .seasonal-drift-orbit-point-label { font-size:15px; }
+  .seasonal-orbit-bazi-label { font-size:12px; }
+  .seasonal-orbit-bazi-label.is-selected { font-size:13px; }
   .secondary-astronomy-tools > summary {
     min-height:42px;
     grid-template-columns:minmax(0,1fr) auto;
@@ -385,6 +411,8 @@
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:19px; }
   .seasonal-drift-orbit-head { min-height:48px; }
+  .seasonal-orbit-bazi-label { font-size:13px; }
+  .seasonal-orbit-bazi-label.is-selected { font-size:14px; }
   .seasonal-drift-orbit-head span,
   .seasonal-drift-orbit-head small { font-size:8.5px; }
   .seasonal-drift-orbit-head strong { font-size:10.5px; }
