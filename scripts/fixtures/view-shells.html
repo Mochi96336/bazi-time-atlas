@@ -143,6 +143,7 @@
       const candidateButton = candidateButtons?.querySelector("button");
       const baseDateInput = recurrenceDoc.querySelector(".base-date input");
       const modelBoundarySummary = recurrenceDoc.querySelector(".model-boundary summary");
+      const derivationThesis = recurrenceDoc.querySelector("#research-discrete-thesis");
       const derivation = recurrenceDoc.querySelector(".discrete-derivation");
       const derivationSteps = recurrenceDoc.querySelector("#discrete-derivation-steps");
       const zeroDeltaStep = derivationSteps?.querySelector('[data-delta-years="0"]');
@@ -152,6 +153,7 @@
       const yearCardRect = baseRow?.getBoundingClientRect();
       const dayCardRect = targetRow?.getBoundingClientRect();
       const originalStripRect = originalYearStrip?.getBoundingClientRect();
+      const derivationThesisRect = derivationThesis?.getBoundingClientRect();
       const controlsRect = compactControls?.getBoundingClientRect();
       const controlsClosedOnEntry = Boolean(compactControls && !compactControls.open);
       const selectedDateInput=recurrenceDoc.querySelector("#research-target-date-input");
@@ -219,11 +221,20 @@
         !recurrenceYearCard && !recurrenceDayCard &&
         Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
       );
-      probe.dataset.recurrenceYearDayFullyVisible = String(Boolean(
-        baseRow && targetRow && dayCardRect && targetRow.checkVisibility()
-        && ((recurrenceComparison?.dataset.readoutMode==="single" && !baseRow.checkVisibility())
-          || (recurrenceComparison?.dataset.readoutMode==="comparison" && baseRow.checkVisibility()))
-        && dayCardRect.top >= 0 && dayCardRect.bottom <= viewportHeight
+      probe.dataset.recurrenceDerivationThesisStartsInFirstViewport = String(Boolean(
+        derivationThesisRect &&
+        derivationThesisRect.top >= 0 &&
+        derivationThesisRect.top < viewportHeight &&
+        originalStripRect &&
+        derivationThesisRect.bottom <= originalStripRect.top
+      ));
+      probe.dataset.recurrenceYearDaySingleOwner = String(Boolean(
+        baseRow && targetRow && recurrenceComparison && originalYearStrip &&
+        originalYearStrip.contains(recurrenceComparison) &&
+        recurrenceComparison.dataset.readoutMode==="single" &&
+        !baseRow.checkVisibility() &&
+        targetRow.checkVisibility() &&
+        !originalYearStrip.contains(zeroDeltaStep)
       ));
       probe.dataset.recurrenceComparisonBeforeFan = String(Boolean(
         comparisonRect && recurrenceRect && comparisonRect.bottom <= recurrenceRect.top

@@ -94,11 +94,12 @@ requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true",
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
-requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year displacement must stay the active first item in the six-step derivation rail", url);
+requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year baseline must stay the active first item in the six-step derivation thesis", url);
 requireEqual(attr(probe, "data-recurrence-local-year-day-visible"), "true", "The first local Year+Day recurrence must be visible and identified in the derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
-requireEqual(attr(probe, "data-recurrence-year-day-fully-visible"), "true", "The selected date must be visible without duplicating its zero-year baseline", url);
+requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research 01 derivation thesis must start in the first mobile viewport before the date explorer", url);
+requireEqual(attr(probe, "data-recurrence-year-day-single-owner"), "true", "Single-date Year/Day evidence must keep one owner without duplicating the zero-year baseline", url);
 requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
@@ -162,13 +163,11 @@ if (
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}, deltaRail=${derivationTop}): ${url}`
   );
 }
+// The derivation thesis now owns the first mobile reading step; the named
+// Year/Day comparison intentionally follows it. Keep the fan itself compact.
 // The responsive 390px fan stage is ~358px, plus the normal-flow readout.
-// A fixed 460px minimum previously preserved a card-sized blank space.
 if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 390) {
   throw new Error(`Recurrence unboxed phase fan became too shallow (${recurrenceHeight}px): ${url}`);
-}
-if (!(comparisonTop < 844 && comparisonBottom > comparisonTop)) {
-  throw new Error(`Named Year/Day comparison must begin within the first 844px mobile viewport (${comparisonTop}..${comparisonBottom}): ${url}`);
 }
 if (
   !Number.isFinite(deltaSettingsHeight)
