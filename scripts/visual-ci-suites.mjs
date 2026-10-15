@@ -40,7 +40,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "check-recurrence-longitude-controls.mjs",
     "check-seasonal-epoch-source-audit.mjs",
     "check-near-recurrence.mjs",
-    "check-seasonal-drift-prototype-live.mjs"
+    "check-seasonal-drift-evidence-live.mjs"
   ],
   "capture-pages": [
     "check-tools-human-ux.mjs",
