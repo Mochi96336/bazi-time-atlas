@@ -67,15 +67,15 @@ for (const expected of [
   "同一節令下固定對齊",
   "同一時辰下固定對齊",
   "年柱 × 日柱",
-  "年日週期",
-  "節氣校驗",
-  "四柱重現",
-  "離散候選 → 天文較真",
-  "節氣校驗 → 四柱比較",
+  "粗略週期從哪裡來？",
+  "天文上哪裡沒有回來？",
+  "對八字意味著什麼？",
+  "固定 24,000 年候選 → 天文較真",
+  "固定 24,000 年天文結果 → 節界後果",
   "只先算離散候選，不直接等同完整四柱週期",
-  "3 / 3 exact",
+  "24,000 離散候選",
   "TT 提前 10–14 d",
-  "TT 節界未重現"
+  "12 / 12 節界位移"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
@@ -83,10 +83,20 @@ for (const expected of [
 }
 
 const identityProbe = dump("recurrence.html?delta=0");
-for (const expected of ["基準狀態", "同一參照", "4 / 4 同一"]) {
+for (const expected of [
+  "24,000 離散候選",
+  "TT 提前 10–14 d",
+  "12 / 12 節界位移",
+  "主線案例 · 固定 2026 → 26026",
+  "12 / 12 節界未重現"
+]) {
   if (!identityProbe.dom.includes(expected)) {
-    throw new Error(`Research identity spine missing "${expected}": ${identityProbe.url}`);
+    throw new Error(`Research fixed main story missing at default delta=0 "${expected}": ${identityProbe.url}`);
   }
+}
+const identitySandbox = detailsById(identityProbe.dom, "secondary-astronomy-tools");
+if (!identitySandbox || /^<details[^>]*\sopen(?:\s|=|>)/.test(identitySandbox)) {
+  throw new Error(`other-delta sandbox must stay closed on the default Research page: ${identityProbe.url}`);
 }
 
 if (!discrete || !astronomy || !evidence) throw new Error(`three Research ownership sections were not rendered: ${probe.url}`);

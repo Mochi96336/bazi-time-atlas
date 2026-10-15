@@ -163,6 +163,8 @@
 .research-outline a:hover::after,
 .research-outline a:focus-visible::after { opacity:.72; }
 
+.research-fan-graphic #astronomy-residual-ring { display:none; }
+
 .research-task {
   scroll-margin-top:18px;
   margin-top:50px;

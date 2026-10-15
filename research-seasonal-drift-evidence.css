@@ -6,51 +6,6 @@
 }
 .seasonal-drift-evidence[data-ready="false"] { min-height:260px; }
 
-.seasonal-drift-case-gate {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  margin-top:12px;
-  padding:12px 2px 2px;
-  border-top:1px solid rgba(238,242,237,.055);
-}
-.seasonal-drift-case-gate span,
-.seasonal-drift-case-gate small {
-  display:block;
-  color:#6e7a73;
-  font-size:8px;
-  line-height:1.45;
-}
-.seasonal-drift-case-gate strong {
-  display:block;
-  margin-top:3px;
-  color:#c7d0ca;
-  font-size:13px;
-  font-weight:650;
-}
-.seasonal-drift-case-gate button {
-  flex:0 0 auto;
-  min-height:31px;
-  padding:0 11px;
-  border:1px solid rgba(213,159,104,.22);
-  border-radius:8px;
-  color:#e1c39f;
-  background:rgba(213,159,104,.055);
-  font:inherit;
-  font-size:8.5px;
-  cursor:pointer;
-}
-.seasonal-drift-case-gate button:hover,
-.seasonal-drift-case-gate button:focus-visible {
-  outline:none;
-  background:rgba(213,159,104,.1);
-  border-color:rgba(213,159,104,.34);
-}
-.seasonal-drift-evidence[data-case-aligned="true"] .seasonal-drift-case-gate { display:none; }
-.seasonal-drift-evidence[data-case-aligned="false"] .seasonal-drift-case-content { display:none; }
-.seasonal-drift-evidence[data-case-aligned="false"] .seasonal-drift-controls { display:none; }
-
 .seasonal-drift-evidence-head {
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
@@ -371,8 +326,6 @@
 @media (max-width:680px) {
   .seasonal-drift-evidence { padding:12px 0 13px; }
   .seasonal-drift-evidence-head { grid-template-columns:1fr; gap:9px; }
-  .seasonal-drift-case-gate { align-items:flex-start; gap:10px; }
-  .seasonal-drift-case-gate strong { font-size:12px; }
   .seasonal-drift-evidence-copy .eyebrow { font-size:8.5px; }
   .seasonal-drift-evidence-copy p { font-size:9.5px; }
   .seasonal-drift-controls {

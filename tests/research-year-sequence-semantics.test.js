@@ -41,5 +41,5 @@ test("Research production code does not revive the ambiguous year-closure datase
   assert.match(view, /dataset\.yearSequenceClosed/);
   assert.match(view, /dataset\.yearSequencePhase/);
   assert.match(determinacyView, /boolDataset\("yearSequenceClosed"\)/);
-  assert.match(spine, /boolDataset\("yearSequenceClosed"\)/);
+  assert.doesNotMatch(spine, /yearSequenceClosed|yearClosed/);
 });

@@ -10,23 +10,12 @@ const determinacy=document.querySelector("#four-pillar-determinacy");
 let panel=null;
 let rendered=false;
 
-function baseYear(){
-  const match=/^(\d{1,7})-/.exec(instrument?.dataset.baseDate??"");
-  return match?Number(match[1]):null;
-}
-
-function aligned(){
-  return baseYear()===CONSEQUENCE.baseYear &&
-    Number(instrument?.dataset.deltaYears)===CONSEQUENCE.deltaYears;
-}
-
 function ensurePanel(){
   if(panel?.isConnected)return panel;
   if(!evidence||!determinacy)return null;
   panel=document.createElement("section");
   panel.id="absolute-boundary-consequence";
   panel.className="absolute-boundary-consequence";
-  panel.hidden=true;
   panel.dataset.ready="false";
   panel.setAttribute("aria-label","+24,000 年 absolute 節氣邊界對年柱與月柱的研究後果");
   panel.innerHTML=[
@@ -176,36 +165,19 @@ function render(){
   rendered=true;
 }
 
-function sync(){
+function publishFixedEvidence(){
   const root=ensurePanel();
   if(!root)return;
-  const active=aligned();
-  root.hidden=!active;
-  root.dataset.active=String(active);
+  root.hidden=false;
+  root.dataset.active="true";
+  if(!rendered)render();
 
-  if(active&&!rendered)render();
-
-  if(active){
-    instrument.dataset.absoluteBoundaryConsequence="year-26026-research";
-    instrument.dataset.absoluteBoundaryReferenceJie="displaced";
-    instrument.dataset.absoluteBoundaryUnionDays=CONSEQUENCE.unionWindowDays.toFixed(6);
-    instrument.dataset.absoluteBoundaryUnionPercent=CONSEQUENCE.unionWindowPercent.toFixed(6);
-
-
-  }else{
-    delete instrument.dataset.absoluteBoundaryConsequence;
-    delete instrument.dataset.absoluteBoundaryReferenceJie;
-    delete instrument.dataset.absoluteBoundaryUnionDays;
-    delete instrument.dataset.absoluteBoundaryUnionPercent;
-
-
-  }
+  instrument.dataset.absoluteBoundaryConsequence="year-26026-research";
+  instrument.dataset.absoluteBoundaryReferenceJie="displaced";
+  instrument.dataset.absoluteBoundaryUnionDays=CONSEQUENCE.unionWindowDays.toFixed(6);
+  instrument.dataset.absoluteBoundaryUnionPercent=CONSEQUENCE.unionWindowPercent.toFixed(6);
 }
 
 if(evidence&&instrument&&determinacy){
-  sync();
-  new MutationObserver(sync).observe(instrument,{
-    attributes:true,
-    attributeFilter:["data-base-date","data-delta-years"]
-  });
+  publishFixedEvidence();
 }

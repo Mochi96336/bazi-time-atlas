@@ -73,7 +73,7 @@ function expectFixedGauge(dom, url) {
   if (attr(instrument, "data-phase-geometry") !== "signed-shortest-fan") {
     throw new Error(`recurrence instrument is not using signed-shortest fan geometry: ${url}`);
   }
-  if (attr(instrument, "data-phase-radial-order") !== "day,year,gregorian,astronomy") {
+  if (attr(instrument, "data-phase-radial-order") !== "day,year,gregorian") {
     throw new Error(`recurrence radial scale order is wrong: ${url}`);
   }
   if (attr(instrument, "data-phase-display") !== "signed-shortest") {
@@ -118,8 +118,8 @@ function expectDiscreteComprehension(dom, url) {
       throw new Error(`phase gauge is missing the direct ${key} ring label: ${url}`);
     }
   }
-  if (!dom.includes('data-astronomy-layer-label="1"') || !dom.includes(">十二節 · 天文殘差</text>")) {
-    throw new Error(`astronomy comparison is not labeled directly on the fan: ${url}`);
+  if (dom.includes('data-astronomy-layer-label="1"') || dom.includes(">十二節 · 天文殘差</text>")) {
+    throw new Error(`01 must not label the old astronomy comparison on the discrete fan: ${url}`);
   }
   for (const delta of ["400", "1200", "1980", "8000", "24000"]) {
     if (!new RegExp(`class="discrete-derivation-step[^"]*"[^>]*data-delta-years="${delta}"`).test(dom)) {

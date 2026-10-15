@@ -10,7 +10,7 @@ const [html, view, data, css] = await Promise.all([
   readFile(new URL("../research-seasonal-drift-evidence.css", import.meta.url), "utf8")
 ]);
 
-test("Research 02 makes the fixed +24k case primary before dynamic astronomy tools", () => {
+test("Research 02 keeps the fixed +24k story visible before the delta sandbox", () => {
   const astronomyStart = html.indexOf('id="research-astronomy"');
   const seasonalEvidenceStart = html.indexOf('id="seasonal-drift-evidence"');
   const dynamicPanelStart = html.indexOf('class="astronomy-panel"', astronomyStart);
@@ -21,33 +21,28 @@ test("Research 02 makes the fixed +24k case primary before dynamic astronomy too
     dynamicPanelStart > seasonalEvidenceStart &&
     researchEvidenceStart > dynamicPanelStart
   );
-  assert.ok(html.includes("主案例 · +24,000 年離散閉合"));
-  assert.match(html, /id="secondary-astronomy-tools"/);
-  assert.match(html, /其他 Δ \/ 快速模型/);
-  assert.match(html, /data-seasonal-drift-mode="total"/);
-  assert.match(html, /data-seasonal-drift-mode="split"/);
+  assert.match(html, /主線案例 · 固定 2026 → 26026/);
+  assert.match(html, /不跟隨上方 Δ 探索工具/);
+  assert.doesNotMatch(html, /seasonal-drift-case-gate|seasonal-drift-use-case|data-case-aligned/);
+  assert.doesNotMatch(css, /seasonal-drift-case-gate|data-case-aligned/);
+  assert.doesNotMatch(view, /syncCaseAlignment|caseButton|caseGateTitle|caseGateCopy/);
 });
 
-test("secondary astronomy tools fold away only for the aligned +24k main case", () => {
-  assert.match(view, /secondaryTools\.open = Boolean\(secondaryHashTarget\(\)\) \|\| !aligned/);
-  assert.match(view, /secondaryTools\.dataset\.caseState/);
+test("other-delta astronomy is a closed sandbox, not the owner of the main story", () => {
+  assert.match(html, /<details id="secondary-astronomy-tools" class="secondary-astronomy-tools">/);
+  assert.doesNotMatch(html, /<details id="secondary-astronomy-tools" class="secondary-astronomy-tools" open>/);
+  assert.match(view, /探索工具 · 目前 Δ =/);
+  assert.match(view, /不影響上方固定 24,000 年主線/);
+  assert.doesNotMatch(view, /secondaryTools\.open = Boolean\(secondaryHashTarget\(\)\) \|\| !aligned/);
   assert.match(css, /\.secondary-astronomy-tools > summary/);
 });
 
-test("direct hashes reopen the folded secondary astronomy lane", () => {
+test("direct hashes can still reopen the folded delta sandbox", () => {
   assert.match(view, /function secondaryHashTarget\(\)/);
   assert.match(view, /secondaryTools\.contains\(target\)/);
-  assert.match(view, /secondaryTools\.open = Boolean\(secondaryHashTarget\(\)\) \|\| !aligned/);
+  assert.match(view, /secondaryTools\.open = true/);
   assert.match(view, /addEventListener\("hashchange"/);
   assert.match(view, /addEventListener\("load"/);
-});
-
-test("seasonal evidence only expands when the canonical Research state matches 2026 + 24k", () => {
-  assert.match(html, /id="seasonal-drift-case-gate-title"/);
-  assert.match(html, /id="seasonal-drift-use-case"/);
-  assert.match(view, /baseYear === DATA\.baseYear && delta === 24000/);
-  assert.match(view, /#discrete-derivation-steps \[data-delta-years="24000"\]/);
-  assert.match(css, /data-case-aligned="false"[\s\S]*\.seasonal-drift-case-content\s*\{\s*display:none/);
 });
 
 test("seasonal evidence keeps mean drift separate from timing-equivalent orbit shape", () => {

@@ -13,7 +13,7 @@ function findBrowser(){
 
 const browser=findBrowser();
 
-function dump(seasonalView,delta=24000,hash=""){
+function dump(seasonalView,delta=0,hash=""){
   const url=new URL("recurrence.html",base);
   url.searchParams.set("date","2026-09-13");
   url.searchParams.set("delta",String(delta));
@@ -37,88 +37,59 @@ function dump(seasonalView,delta=24000,hash=""){
   return {url:url.href,dom:result.stdout??"",stderr:result.stderr??""};
 }
 
-function fragment(dom){
-  const start=dom.indexOf('id="seasonal-drift-evidence"');
-  const end=start>=0?dom.indexOf('class="seasonal-drift-secondary-rail"',start):-1;
-  return start>=0?dom.slice(start,end>start?end:start+16000):dom.slice(0,16000);
-}
-
 function requireTokens(probe,tokens,label){
   const missing=tokens.filter(token=>!probe.dom.includes(token));
   if(!missing.length)return;
-  throw Error(
-    label+" missing "+missing.join(", ")+"\n"+
-    "url: "+probe.url+"\n"+
-    "stderr:\n"+probe.stderr.slice(-5000)+"\n"+
-    "seasonal evidence DOM:\n"+fragment(probe.dom).slice(0,16000)
-  );
+  throw Error(label+" missing "+missing.join(", ")+"\nurl: "+probe.url);
 }
 
-const total=dump("total");
-requireTokens(total,[
-  'data-ready="true"',
-  'data-mode="total"',
-  'class="seasonal-drift-curve-path"',
-  'seasonal-orbit-target',
-  'class="seasonal-drift-gap-line"',
-  'id="seasonal-drift-selected-total-human">提前 10.883 天',
-  'id="seasonal-drift-phase-value">−12.206 d',
-  'data-case-aligned="true"',
-  '已收起 · Berger shape-only / 近回歸工具',
-  'data-case-state="aligned"',
-  'id="absolute-boundary-consequence"',
-  'data-ready="true"',
-  '12 / 12 節界未重現',
-  'id="absolute-boundary-union">146.481 d',
-  '= 40.105% of this reference cycle',
-  '不能直接升格成西元 26026 某個真實民用年月日時的年／月柱結論',
-  'shape-only-secondary',
-  'shape-only-determinacy-details'
-],"total seasonal evidence");
-
-const alignedToolsTag=total.dom.match(/<details[^>]*id="secondary-astronomy-tools"[^>]*>/)?.[0]??"";
-if(!alignedToolsTag||/\sopen(?:\s|=|>)/.test(alignedToolsTag)){
-  throw Error("aligned +24k state did not collapse secondary astronomy tools: "+total.url);
+function detailsTag(dom,id){
+  return dom.match(new RegExp('<details[^>]*id="'+id+'"[^>]*>'))?.[0]??"";
 }
 
-const split=dump("split");
+for(const delta of [0,400,1980,24000]){
+  const total=dump("total",delta);
+  requireTokens(total,[
+    'id="seasonal-drift-evidence"',
+    'data-ready="true"',
+    'data-mode="total"',
+    'class="seasonal-drift-curve-path"',
+    'class="seasonal-drift-gap-line"',
+    'id="seasonal-drift-selected-total-human">提前 10.883 天',
+    'id="absolute-boundary-consequence"',
+    'data-active="true"',
+    '12 / 12 節界未重現',
+    'shape-only-secondary',
+    'shape-only-determinacy-details',
+    '探索工具 · 目前 Δ = '+delta.toLocaleString("en-US")+' 年 · 不影響上方固定 24,000 年主線'
+  ],"always-visible main story @ delta="+delta);
+
+  if(total.dom.includes("seasonal-drift-case-gate")||total.dom.includes("data-case-aligned")){
+    throw Error("retired +24k gate returned: "+total.url);
+  }
+
+  const tools=detailsTag(total.dom,"secondary-astronomy-tools");
+  if(!tools||/\sopen(?:\s|=|>)/.test(tools)){
+    throw Error("other-delta sandbox must stay closed by default: "+total.url);
+  }
+}
+
+const split=dump("split",0);
 requireTokens(split,[
-  'data-ready="true"',
   'data-mode="split"',
   'id="seasonal-drift-selected-shape">+1.322 d',
   'id="seasonal-drift-shape-span">4.022 d',
   'data-seasonal-drift-mode="split" aria-pressed="true"',
   'seasonal-orbit-target'
-],"split seasonal evidence");
-
+],"split fixed main story");
 if(split.dom.includes('class="seasonal-drift-gap-line"')){
-  throw Error("split seasonal evidence kept the total-view zero-gap marker: "+split.url);
+  throw Error("split view kept the total-view zero-gap marker: "+split.url);
 }
 
-const identity=dump("total",0);
-requireTokens(identity,[
-  'data-case-aligned="false"',
-  'id="absolute-boundary-consequence"',
-  'data-active="false"',
-  'data-case-state="other"',
-  '目前 Δ = 0 年 · 展開快速模型'
-],"non-24k seasonal evidence");
-const otherToolsTag=identity.dom.match(/<details[^>]*id="secondary-astronomy-tools"[^>]*>/)?.[0]??"";
-if(!otherToolsTag||!/\sopen(?:\s|=|>)/.test(otherToolsTag)){
-  throw Error("non-24k state did not keep secondary astronomy tools open: "+identity.url);
-}
-if(identity.dom.includes("shape-only-secondary")){
-  throw Error("non-24k state incorrectly demoted canonical determinacy: "+identity.url);
+const deep=dump("total",0,"near-recurrence-detail");
+const deepTools=detailsTag(deep.dom,"secondary-astronomy-tools");
+if(!deepTools||!/\sopen(?:\s|=|>)/.test(deepTools)){
+  throw Error("deep link did not reopen the folded delta sandbox: "+deep.url);
 }
 
-const deep=dump("total",24000,"near-recurrence-detail");
-requireTokens(deep,[
-  'id="near-recurrence-detail"',
-  'id="secondary-astronomy-tools"'
-],"folded astronomy deep link");
-const deepToolsTag=deep.dom.match(/<details[^>]*id="secondary-astronomy-tools"[^>]*>/)?.[0]??"";
-if(!deepToolsTag||!/\sopen(?:\s|=|>)/.test(deepToolsTag)){
-  throw Error("deep link did not reopen folded secondary astronomy tools: "+deep.url);
-}
-
-console.log("[seasonal-drift-evidence] PASS total + split + non-24k gating + deep-link reveal and Research 03 handoff");
+console.log("[seasonal-drift-evidence] PASS fixed +24k story stays visible across delta sandbox states");

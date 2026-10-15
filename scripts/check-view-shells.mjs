@@ -112,9 +112,9 @@ requireEqual(attr(probe, "data-recurrence-question-text"), "八字多久會重�
 requireEqual(attr(probe, "data-recurrence-alignment-count"), "2", "Research header must keep exactly two compact alignment relations", url);
 requireEqual(attr(probe, "data-recurrence-alignment-text"), "年柱60 同一節令下固定對齊 月柱60|日柱60 同一時辰下固定對齊 時柱60", "Research alignment explanation changed", url);
 requireEqual(attr(probe, "data-recurrence-next-text"), "所以先找年柱 × 日柱何時一起回來，再檢查節氣位置；24,000 年若成為共同格點，也只先算離散候選，不直接等同完整四柱週期。", "Research inference line changed", url);
-requireEqual(attr(probe, "data-recurrence-spine-discrete"), "基準狀態", "Research discrete spine lost identity state", url);
-requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "同一參照", "Research astronomy spine lost identity state", url);
-requireEqual(attr(probe, "data-recurrence-spine-evidence"), "4 / 4 同一", "Research evidence spine lost identity state", url);
+requireEqual(attr(probe, "data-recurrence-spine-discrete"), "24,000 離散候選", "Research discrete spine lost fixed main-story state", url);
+requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "TT 提前 10–14 d", "Research astronomy spine lost fixed main-story state", url);
+requireEqual(attr(probe, "data-recurrence-spine-evidence"), "12 / 12 節界位移", "Research evidence spine lost fixed main-story state", url);
 
 for (const [label, dataName, minHeight] of [
   ["research outline link", "data-recurrence-outline-link-height", 42],
