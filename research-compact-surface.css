@@ -469,23 +469,21 @@
   }
 }
 
-/* R5: fixed 465px mobile stage letterboxed the 1200:720 SVG at 320px.
-   Size the drawing stage to the available width; the result rail is already
-   in normal flow and follows it rather than leaving an empty card-shaped gap. */
+/* R12: mobile now crops the SVG viewBox above y=90, where the fan has
+   no visible geometry. Match the CSS viewport to that 1200:630 crop instead
+   of reserving a tall box for coordinates that cannot render anything. */
 @media(max-width:480px) {
   .research-task-primary .research-fan-graphic {
-    height:clamp(315px,calc(70vw + 85px),385px);
+    height:clamp(235px,calc(52.5vw + 64px),270px);
   }
 }
 
-/* Reserve an actual header band for the legend and caption. Simply
-   shortening the SVG stage moved the outer arc *behind* the legend at
-   320/390px. Preserve the responsive total height while giving the SVG
-   its own vertical region beneath the readings. */
+/* Keep the legend/caption in their own band; the cropped fan begins directly
+   below it rather than reintroducing the old internal letterbox. */
 @media(max-width:480px) {
   .research-task-primary #recurrence-wheel {
-    top:74px;
-    height:calc(100% - 74px);
+    top:70px;
+    height:calc(100% - 70px);
   }
 }
 
