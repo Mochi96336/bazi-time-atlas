@@ -141,7 +141,7 @@ function renderStrip(){
       if(!(scrub instanceof HTMLInputElement))return;
       scrub.value=String(indexForLongitude(boundary.longitude));
       scrub.dispatchEvent(new Event("input",{bubbles:true}));
-      document.querySelector("#seasonal-drift-prototype")?.scrollIntoView({behavior:"smooth",block:"center"});
+      document.querySelector("#seasonal-drift-evidence")?.scrollIntoView({behavior:"smooth",block:"center"});
     });
     buttons.appendChild(button);
   }
