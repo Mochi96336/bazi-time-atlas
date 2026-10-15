@@ -13,6 +13,8 @@ import {
 } from "./seasonal-drift-26026-research-data.js";
 
 export const RESEARCH_TIME_SELECTION_EVENT = "bazi-research-time-selection";
+const seasonalStateCache = new Map();
+
 export const RESEARCH_TIME_STATE_CONTRACT = Object.freeze({
   id:"research-time-state-v1",
   owners:Object.freeze(["discrete","seasonal"]),
@@ -188,6 +190,7 @@ function targetSeasonalSide(longitudeDegrees, ttJulianDay) {
 
 export function researchSeasonalTimeState(longitudeDegrees) {
   const index = indexForLongitude(longitudeDegrees);
+  if (seasonalStateCache.has(index)) return seasonalStateCache.get(index);
   const longitude = longitudeForIndex(index);
   const driftDays = SEASONAL_DATA.driftDays[index];
   const base = baseSeasonalSide(longitude);
@@ -200,7 +203,7 @@ export function researchSeasonalTimeState(longitudeDegrees) {
   const term = termAtLongitude(longitude);
   const month = baziMonthAtLongitude(longitude);
 
-  return freeze({
+  const state = freeze({
     contract:RESEARCH_TIME_STATE_CONTRACT.id,
     owner:"seasonal",
     selection:freeze({
@@ -220,6 +223,8 @@ export function researchSeasonalTimeState(longitudeDegrees) {
     base,
     target
   });
+  seasonalStateCache.set(index,state);
+  return state;
 }
 
 function sequencePillar(name, reason) {
