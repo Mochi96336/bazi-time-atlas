@@ -459,10 +459,13 @@ function derivationPhase(label, closed, phase, modulus) {
 }
 
 function visibleDerivationDeltas(localYears) {
+  // Keep the explanatory chain structural-first. A base-date-specific
+  // Year+Day recurrence is useful evidence, but it is not one of the steps
+  // that derives the global 24,000-year discrete closure.
   return [...new Set([
     ...DERIVATION_STRUCTURAL_DELTAS,
     ...(Number.isInteger(localYears) ? [localYears] : [])
-  ])].sort((a,b) => a-b);
+  ])];
 }
 
 function derivationMeaning(deltaYears, localYears) {
@@ -475,7 +478,7 @@ function derivationMeaning(deltaYears, localYears) {
   if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0；60 日序仍未回來";
   if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0；60 年序仍未回來";
   if (deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD) {
-    return "三個離散曆法相位全歸零；不是四柱重現必須等待的條件";
+    return "LCM(1,200, 8,000) = 24,000；三個離散曆法相位全歸零，但仍只是天文校驗前的候選";
   }
   return "離散相位比較";
 }
