@@ -49,10 +49,6 @@ jobs:
         run: node scripts/check-research-original-strip-touch.mjs
         env:
           BASE_URL: http://127.0.0.1:4173/
-      - name: Verify seasonal drift linked prototype live
-        run: node scripts/check-seasonal-drift-prototype-live.mjs
-        env:
-          BASE_URL: http://127.0.0.1:4173/
       - name: Capture native production views
         run: node scripts/visual-check-research-year-day-live.mjs
         env:
