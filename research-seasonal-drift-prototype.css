@@ -250,8 +250,6 @@
 
 .seasonal-drift-grid { stroke:rgba(238,242,237,.05); stroke-width:1; }
 .seasonal-drift-zero { stroke:rgba(238,242,237,.2); stroke-width:1.25; }
-.seasonal-drift-phase-line { stroke:rgba(213,159,104,.32); stroke-width:1.15; stroke-dasharray:5 6; }
-.seasonal-drift-phase-label { fill:#8f775f; font-size:9px; }
 .seasonal-drift-axis-tick { stroke:rgba(238,242,237,.13); stroke-width:1; }
 .seasonal-drift-axis-label { fill:#66736b; font-size:9px; }
 .seasonal-drift-term-axis { fill:#7b8880; font-weight:650; }
@@ -402,7 +400,6 @@
   .seasonal-drift-stat small { font-size:8.5px; }
   #seasonal-drift-curve { min-height:205px; }
   .seasonal-drift-axis-label { font-size:18px; }
-  .seasonal-drift-phase-label,
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:17px; }
   .seasonal-drift-orbit-point-label { font-size:15px; }
@@ -432,7 +429,6 @@
   #seasonal-drift-curve { min-height:190px; }
   #seasonal-drift-orbit { min-height:235px; }
   .seasonal-drift-axis-label { font-size:21px; }
-  .seasonal-drift-phase-label,
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:19px; }
   .seasonal-drift-orbit-head { min-height:48px; }
