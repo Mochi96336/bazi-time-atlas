@@ -14,6 +14,7 @@ import {
   phaseFanCells,
   signedShortestPhase
 } from "./recurrence/phase-fan-geometry.js";
+import { publishResearchTimeSelection } from "./research/research-time-state.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -592,6 +593,12 @@ function renderState() {
   instrument.dataset.dayClosed = String(state.closed.day);
   instrument.dataset.globalClosed = String(state.closed.gregorian && state.closed.yearSequence && state.closed.day);
   syncShiftToolbar(state);
+
+  publishResearchTimeSelection({
+    owner:"discrete",
+    baseDate:{ ...currentBase },
+    deltaYears:currentDelta
+  });
 
   candidateButtons.querySelectorAll("button").forEach(button => button.classList.toggle("active", Number(button.dataset.deltaYears) === currentDelta));
   derivationSteps?.querySelectorAll(".discrete-derivation-step").forEach(step => step.classList.toggle("active", Number(step.dataset.deltaYears) === currentDelta));
