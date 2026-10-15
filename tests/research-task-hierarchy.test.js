@@ -51,28 +51,21 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.match(html, /data-alignment="day-hour"[\s\S]*同一時辰下固定對齊/);
   assert.match(html, /年柱 × 日柱/);
   assert.doesNotMatch(html, /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊/);
-  assert.match(html, /id="research-spine-discrete">等待狀態<\/small>/);
-  assert.match(html, /id="research-spine-astronomy">等待狀態<\/small>/);
-  assert.match(html, /id="research-spine-evidence">等待狀態<\/small>/);
-  assert.match(html, /class="research-task-relation">離散候選 → 天文較真<\/span>/);
-  assert.match(html, /class="research-task-relation">節氣校驗 → 四柱比較<\/span>/);
+  assert.match(html, /id="research-spine-discrete">24,000 離散候選<\/small>/);
+  assert.match(html, /id="research-spine-astronomy">TT 提前 10–14 d<\/small>/);
+  assert.match(html, /id="research-spine-evidence">12 \/ 12 節界位移<\/small>/);
+  assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 天文較真<\/span>/);
+  assert.match(html, /class="research-task-relation">固定 24,000 年天文結果 → 節界後果<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
 
 
-test("Research narrative spine is a live read-only summary of existing authorities", () => {
+test("Research narrative spine summarizes the fixed argument rather than the current delta sandbox", () => {
   assert.match(html, /research-narrative-spine-view\.js/);
-  assert.match(spineJs, /instrument\.dataset\.deltaYears/);
-  assert.match(spineJs, /boolDataset\("gregorianClosed"\)/);
-  assert.match(spineJs, /boolDataset\("yearSequenceClosed"\)/);
-  assert.match(spineJs, /boolDataset\("dayClosed"\)/);
-  assert.match(spineJs, /instrument\.dataset\.astronomyValidity/);
-  assert.match(spineJs, /boolDataset\("astronomyShapeClosed"\)/);
-  assert.match(spineJs, /instrument\.dataset\.fourPillarResolvedCount/);
-  for (const copy of ["基準狀態", "3 / 3 exact", "仍有偏移", "4 / 4 同一", "可解析", "模型範圍外"]) {
-    assert.ok(spineJs.includes(copy), `missing live-spine outcome: ${copy}`);
+  for (const copy of ["24,000 離散候選", "TT 提前 10–14 d", "12 / 12 節界位移"]) {
+    assert.ok(spineJs.includes(copy), `missing fixed-spine outcome: ${copy}`);
   }
-  assert.doesNotMatch(spineJs, /solarTermShapeResiduals|fourPillarDeterminacy|rankExactDiscreteAstronomyCandidates|recurrenceStateForDelta/);
+  assert.doesNotMatch(spineJs, /instrument\.dataset|boolDataset|fourPillarResolvedCount|astronomyValidity/);
 });
 
 test("discrete task owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
