@@ -73,9 +73,10 @@ function ensureSexagenaryDrilldown() {
     details.append(summary, cycle);
   }
 
-  // Keep the large 60-pair diagram as supporting evidence *after* the
-  // main Δ selector. This keeps the first-screen recurrence story compact:
-  // Year strip → phase fan → visible Δ slider/milestones → optional source.
+  // Keep the large 60-pair diagram as supporting evidence after the
+  // explorer. The reading spine is now:
+  // derivation thesis → date/year verification → phase fan → Δ explorer
+  // → optional 60-pair source.
   const derivation = researchDiscrete?.querySelector(".discrete-derivation");
   const transition = researchDiscrete?.querySelector(".discrete-to-astronomy");
   if (transition && details.previousElementSibling !== transition) {
