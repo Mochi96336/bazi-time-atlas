@@ -182,7 +182,7 @@ function renderLegacy(){
     "determinacy-footnote",
     result.identity
       ? "Δ=0 是同一狀態，因此四柱相同是定義上的 identity。"
-      : "一般 Δ explorer 仍使用春分共同歸零的 shape-only 比較；完整固定 +24,000 結論請以上方主線為準。"
+      : "一般 Δ 探索仍使用春分共同歸零後的季節形狀比較；完整固定 +24,000 結論請以上方主線為準。"
   );
   return true;
 }

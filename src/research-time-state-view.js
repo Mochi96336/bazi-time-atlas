@@ -102,11 +102,11 @@ if (root) {
       : "";
     setText(
       "research-time-target-coordinate",
-      `26026 crossing · TT${targetUncertainty}`
+      `26026 太陽位置到達 · TT${targetUncertainty}`
     );
     setText(
       "research-time-basis",
-      `同一太陽黃經；26026 相對 24,000 Gregorian years 提前 ${Math.abs(state.comparison.driftDays).toFixed(3)} 天。年／月可由節界判定，日／時不以深時間點估計冒充確定值。`
+      `同一太陽黃經；26026 相對固定推進 24,000 個公曆年提前 ${Math.abs(state.comparison.driftDays).toFixed(3)} 天。年／月可由節界判定，日／時不以深時間點估計冒充確定值。`
     );
     renderPillars("base",state.base);
     renderPillars("target",state.target);

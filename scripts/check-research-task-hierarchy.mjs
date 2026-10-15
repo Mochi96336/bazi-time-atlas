@@ -225,7 +225,13 @@ for (const expected of [
   "12 / 12 節界未重現",
   "目前選定太陽位置",
   "固定 +24,000 · 同一太陽黃經",
-  "年／月可判 · 日／時未定"
+  "年／月可判 · 日／時未定",
+  "研究時間",
+  "年序／日序",
+  "離散推導",
+  "節界校驗",
+  "研究結論 · 01 → 02 → 03",
+  "固定推進 24,000 個公曆年"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`localized Research terminology missing "${expected}": ${probe.url}`);
@@ -241,7 +247,13 @@ for (const stale of [
   "RMS residual",
   "Strongest supported claim",
   "Year + Month 可隔離 · Day + Hour 未解",
-  "model unavailable"
+  "model unavailable",
+  "Research time",
+  "Year / Day cycles",
+  "Discrete derivation",
+  "Seasonal check",
+  "Research conclusion · 01 → 02 → 03",
+  "Gregorian years"
 ]) {
   if (probe.dom.includes(stale)) {
     throw new Error(`prototype Research copy returned "${stale}": ${probe.url}`);
@@ -292,6 +304,14 @@ if (!stickyTimeTag.includes('data-owner="seasonal"')) {
 }
 if ((stickyTimeProbe.dom.match(/id="research-time-state"/g) ?? []).length !== 1) {
   throw new Error(`Research time state must remain one shared DOM owner while sticky: ${stickyTimeProbe.url}`);
+}
+if (!stickyTimeProbe.dom.includes("26026 太陽位置到達 · TT") ||
+    !stickyTimeProbe.dom.includes("固定推進 24,000 個公曆年")) {
+  throw new Error(`seasonal sticky Research time copy did not localize on the seasonal owner: ${stickyTimeProbe.url}`);
+}
+if (stickyTimeProbe.dom.includes("26026 crossing · TT") ||
+    stickyTimeProbe.dom.includes("Gregorian years")) {
+  throw new Error(`prototype seasonal Research time copy returned on the seasonal owner: ${stickyTimeProbe.url}`);
 }
 
 const cycleDeepLink = dump("recurrence.html#research-sexagenary-cycle");
