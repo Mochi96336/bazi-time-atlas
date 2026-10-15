@@ -171,15 +171,6 @@ function renderRing(key) {
 function renderCursor() {
   const inner = polar(258, CURSOR_ANGLE);
   const outer = polar(575, CURSOR_ANGLE);
-  const astronomyLabelPoint = polar(655, CURSOR_ANGLE);
-  const astronomyLabel = svgEl("text", {
-    x:astronomyLabelPoint.x,
-    y:astronomyLabelPoint.y,
-    class:"astronomy-layer-label",
-    "data-astronomy-layer-label":"1"
-  }, cursorGroup);
-  astronomyLabel.textContent = "十二節 · 天文殘差";
-
   svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
   svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
   const labelPoint = polar(595, CURSOR_ANGLE);
@@ -793,7 +784,7 @@ function initialize() {
   renderRing("gregorian");
   renderCursor();
   instrument.dataset.phaseGeometry = "signed-shortest-fan";
-  instrument.dataset.phaseRadialOrder = "day,year,gregorian,astronomy";
+  instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
   bindControls();
   instrument.dataset.baseDateValid = "true";
