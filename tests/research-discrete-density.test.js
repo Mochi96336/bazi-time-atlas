@@ -39,7 +39,9 @@ test("discrete presentation removes duplicate top scope copy", () => {
   assert.match(view, /\.remove\(\)/);
 });
 
-test("selected date owns the top rail; Δ controls move to the lower derivation rail", async () => {
+test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower explorer", async () => {
+  const thesisStart=recurrenceHtml.indexOf('id="research-discrete-thesis"');
+  const stepsStart=recurrenceHtml.indexOf('id="discrete-derivation-steps"');
   const stripStart=recurrenceHtml.indexOf('id="research-year-strip"');
   const selectedStart=recurrenceHtml.indexOf('id="research-target-date-form"');
   const trackStart=recurrenceHtml.indexOf('class="research-year-track"');
@@ -51,10 +53,12 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
   const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
   const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
-  assert.ok(stripStart>=0 && selectedStart>stripStart && trackStart>selectedStart,
+  assert.ok(thesisStart>=0 && stepsStart>thesisStart && stripStart>stepsStart,
+    "the existing milestone derivation must lead before the date explorer");
+  assert.ok(selectedStart>stripStart && trackStart>selectedStart,
     "selected date must stay inside the original year-strip header");
   assert.ok(comparisonStart>trackStart && instrumentStart>comparisonStart && derivationStart>instrumentStart,
-    "year-strip evidence must precede the fan and lower Δ derivation");
+    "date evidence and the fan must remain the verification path before lower Δ controls");
   const derivationMarkup=recurrenceHtml.slice(derivationStart);
   assert.ok(derivationMarkup.includes('id="delta-slider"') &&
     derivationMarkup.includes('id="research-controls"') &&
@@ -84,7 +88,9 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-play\s*\{[\s\S]*?min-height:32px/);
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-public-slider output\s*\{display:none\}/);
   assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
-  assert.match(recurrenceHtml,/id="discrete-derivation-title">時間推演<\/strong>/);
+  assert.match(recurrenceHtml,/id="research-discrete-thesis-title">先看 24,000 年怎麼得到<\/h3>/);
+  assert.match(recurrenceHtml,/LCM\(1,200, 8,000\) = 24,000/);
+  assert.match(recurrenceHtml,/id="discrete-derivation-title">用 Δ 驗算<\/strong>/);
   assert.match(recurrenceHtml,/id="research-delta-play"[\s\S]*?aria-pressed="false"[\s\S]*?aria-label="播放時間推演"/);
   assert.match(recurrenceHtml,/id="delta-slider"[^>]*step="1"/);
   assert.match(recurrenceHtml,/summary><span>其他時間<\/span><\/summary>/);
@@ -105,7 +111,8 @@ test("selected date owns the top rail; Δ controls move to the lower derivation 
   assert.match(layout,/background:#0a0f12/);
   assert.match(layout,/border:1px solid rgba\(196,207,215,\.14\)/);
   assert.match(layout,/\.discrete-derivation \.research-derivation-controls > summary[\s\S]*?min-height:34px/);
-  assert.match(layout,/\.discrete-derivation-steps\s*\{[\s\S]*?repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.research-discrete-thesis\s*\{[\s\S]*?border-top:/);
+  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-steps\s*\{[\s\S]*?margin-top:12px/);
   assert.equal((css.match(/width:\s*min\(980px,100%\)/g)||[]).length,0);
   assert.ok(recurrenceCss.includes(".delta-dock {"));
 });
@@ -151,9 +158,10 @@ test("year-day local recurrence is promoted into the visible derivation rail",()
   assert.match(recurrenceView,/deltaYears === 0 \? "0 年"/);
   assert.match(recurrenceView,/選定日期本身 · 三個離散相位的基準點/);
   assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
-  assert.match(css,/grid-template-columns:minmax\(82px,\.55fr\) repeat\(5,minmax\(0,1fr\)\)/);
-  assert.match(css,/\.discrete-derivation-step\.is-local-recurrence/);
-  assert.match(css,/@media\(max-width:820px\)[\s\S]*?grid-auto-flow:column;[\s\S]*?overflow-x:auto/);
+  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\[data-delta-years="0"\][\s\S]*?grid-column:1 \/ -1/);
+  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\[data-milestone="global-discrete"\]/);
+  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\.is-local-recurrence[\s\S]*?grid-column:1 \/ -1/);
+  assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.research-discrete-thesis \.discrete-derivation-steps[\s\S]*?grid-auto-flow:row;[\s\S]*?overflow-x:visible/);
   assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
 });
 
@@ -322,17 +330,18 @@ test("60-day wheel is the selector: direct sector click, pointer scrub, and keyb
   assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*none;/);
 });
 
-test("reading order leads with paired names and phase wheel, then delta derivation before the 60-day source", () => {
+test("reading order explains the global candidate before date/fan verification and lower delta controls", () => {
+  const thesisStart = recurrenceHtml.indexOf('id="research-discrete-thesis"');
   const comparisonStart = recurrenceHtml.indexOf('id="research-cycle-comparison"');
   const stateStart = recurrenceHtml.indexOf('class="recurrence-readout research-current-state"');
   const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
-  assert.ok(stripStart >= 0 && comparisonStart > stripStart &&
+  assert.ok(thesisStart >= 0 && stripStart > thesisStart && comparisonStart > stripStart &&
     stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
-  assert.match(recurrenceView, /三個離散曆法相位全歸零；不是四柱重現必須等待的條件/);
+  assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
   assert.match(recurrenceHtml, /年序 0 ＋ 日序 0 即成立；公曆 400 年相位不必歸零/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
