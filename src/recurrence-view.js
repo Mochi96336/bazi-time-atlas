@@ -27,6 +27,9 @@ const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
+const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
+const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
+const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -751,6 +754,13 @@ function submitSelectedDate(event) {
   setDelta(currentDelta,{source:"explicit-selected-date"});
 }
 
+function syncFanViewport() {
+  const mobile = mobileFanMedia.matches;
+  svg.setAttribute("viewBox", mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX);
+  svg.dataset.mobileCrop = String(mobile);
+  instrument.dataset.fanViewBox = svg.getAttribute("viewBox");
+}
+
 function bindControls() {
   selectedDateForm?.addEventListener("submit",submitSelectedDate);
   deltaPlayButton?.addEventListener("click", () => deltaPlaybackController?.toggle());
@@ -770,6 +780,7 @@ function bindControls() {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) deltaPlaybackController?.stop();
   });
+  mobileFanMedia.addEventListener?.("change", syncFanViewport);
 }
 
 function initialize() {
@@ -788,6 +799,7 @@ function initialize() {
       if (commit) syncQueryState();
     }
   });
+  syncFanViewport();
   renderGuides();
   renderRing("day");
   renderRing("year");
