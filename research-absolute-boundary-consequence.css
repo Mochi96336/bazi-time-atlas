@@ -247,6 +247,46 @@
 .absolute-boundary-pillar-summary [data-pillar="day"],
 .absolute-boundary-pillar-summary [data-pillar="hour"] { opacity:.76; }
 
+
+.absolute-boundary-metrics {
+  margin:9px 2px 0;
+  border-top:1px solid rgba(238,242,237,.045);
+}
+.absolute-boundary-metrics > summary {
+  min-height:31px;
+  display:flex;
+  align-items:center;
+  color:#71808a;
+  font-size:8px;
+  cursor:pointer;
+  list-style:none;
+}
+.absolute-boundary-metrics > summary::-webkit-details-marker { display:none; }
+.absolute-boundary-metrics > summary::after {
+  content:"+";
+  margin-left:auto;
+  color:#67747d;
+  font-size:12px;
+}
+.absolute-boundary-metrics[open] > summary::after { content:"−"; }
+.absolute-boundary-metrics > div {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:2px 0 7px;
+}
+.absolute-boundary-metrics strong {
+  color:#aab8c1;
+  font-size:11px;
+  font-weight:650;
+}
+.absolute-boundary-metrics span,
+.absolute-boundary-metrics small {
+  color:#6c7a84;
+  font-size:8px;
+  line-height:1.45;
+}
 .absolute-boundary-note {
   margin:8px 2px 0;
   color:#697782;
