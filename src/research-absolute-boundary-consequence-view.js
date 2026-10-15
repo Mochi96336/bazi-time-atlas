@@ -10,15 +10,6 @@ const determinacy=document.querySelector("#four-pillar-determinacy");
 let panel=null;
 let rendered=false;
 
-function ensureStyles(){
-  if(document.querySelector('link[data-absolute-boundary-consequence-styles]'))return;
-  const link=document.createElement("link");
-  link.rel="stylesheet";
-  link.href="./research-absolute-boundary-consequence.css";
-  link.dataset.absoluteBoundaryConsequenceStyles="1";
-  document.head.appendChild(link);
-}
-
 function baseYear(){
   const match=/^(\d{1,7})-/.exec(instrument?.dataset.baseDate??"");
   return match?Number(match[1]):null;
@@ -212,7 +203,6 @@ function sync(){
 }
 
 if(evidence&&instrument&&determinacy){
-  ensureStyles();
   sync();
   new MutationObserver(sync).observe(instrument,{
     attributes:true,
