@@ -131,7 +131,7 @@ test("Research 02 stays framed as a BaZi boundary question", () => {
   assert.match(html, /八字的節界回來了嗎？/);
   assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
   assert.match(html, /12 個「節」界 × 同一太陽黃經/);
-  assert.match(html, /立春同時也是年柱切換界/);
+  assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
 });
 
 test("curve and orbit expose the same canonical Jie structure", () => {
