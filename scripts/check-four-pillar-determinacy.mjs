@@ -56,35 +56,7 @@ function pillarTag(dom, pillar) {
   return dom.match(new RegExp(`<article[^>]*data-determinacy-pillar="${pillar}"[^>]*>`))?.[0] ?? "";
 }
 
-const zero = expectState(0, {
-  "data-four-pillar-year-status":"identical-by-definition",
-  "data-four-pillar-month-status":"identical-by-definition",
-  "data-four-pillar-day-status":"identical-by-definition",
-  "data-four-pillar-hour-status":"identical-by-definition",
-  "data-four-pillar-resolved-count":"4"
-}, "zero identity");
-if (!zero.dom.includes("同一比較狀態 · 4 / 4 相同")) {
-  throw new Error(`zero identity: identity scope copy missing: ${zero.url}`);
-}
-console.log(`[four-pillar] PASS zero identity: ${zero.url}`);
-
-const gregorianOnly = expectState(400, {
-  "data-gregorian-closed":"true",
-  "data-year-sequence-closed":"false",
-  "data-four-pillar-year-status":"mixed-with-year-sequence",
-  "data-four-pillar-month-status":"branch-resolved-stem-mixed",
-  "data-four-pillar-day-status":"not-resolved-by-shape-model",
-  "data-four-pillar-hour-status":"not-resolved-by-shape-model",
-  "data-four-pillar-resolved-count":"0"
-}, "400-year Gregorian closure");
-if (attr(pillarTag(gregorianOnly.dom, "month"), "data-resolved") !== "false" || !gregorianOnly.dom.includes("月支可判 · 月干混合")) {
-  throw new Error(`400-year Gregorian closure: mixed month determinacy not rendered: ${gregorianOnly.url}`);
-}
-console.log(`[four-pillar] PASS 400-year mixed year/month attribution: ${gregorianOnly.url}`);
-
-const local = expectState(1980, {
-  "data-year-sequence-closed":"true",
-  "data-day-closed":"true",
+const fixedShapeExpected = {
   "data-four-pillar-year-status":"boundary-resolved",
   "data-four-pillar-month-status":"boundary-resolved",
   "data-four-pillar-day-status":"not-resolved-by-shape-model",
@@ -92,28 +64,30 @@ const local = expectState(1980, {
   "data-four-pillar-resolved-count":"2",
   "data-four-pillar-absolute-civil-phase-preserved":"false",
   "data-four-pillar-local-clock-modeled":"false"
-}, "1980-year local recurrence");
-const localDay = pillarTag(local.dom, "day");
-if (attr(localDay, "data-discrete-phase-closed") !== "true" || !local.dom.includes("離散日序雖回到 0，但交節窗口內的民用日相位未被此模型保留")) {
-  throw new Error(`1980-year local recurrence: closed-day guard missing: ${local.url}`);
+};
+
+for (const delta of [0,400,1980,24000]) {
+  const fixed = expectState(delta, fixedShapeExpected, `fixed +24k shape-only @ explorer Δ=${delta}`);
+  if (attr(fixed.panel, "data-argument-delta-years") !== "24000") {
+    throw new Error(`shape-only panel escaped the fixed +24k argument at explorer Δ=${delta}: ${fixed.url}`);
+  }
+  if (attr(fixed.panel, "data-explorer-delta-years") !== String(delta)) {
+    throw new Error(`shape-only panel lost explorer provenance at Δ=${delta}: ${fixed.url}`);
+  }
+  if (!fixed.dom.includes("shape-only：年／月交界可隔離")) {
+    throw new Error(`fixed +24k shape-only summary missing at explorer Δ=${delta}: ${fixed.url}`);
+  }
+  if (fixed.dom.includes("同一比較狀態 · 4 / 4 相同")) {
+    throw new Error(`explorer identity leaked into fixed +24k Research evidence at Δ=${delta}: ${fixed.url}`);
+  }
 }
-console.log(`[four-pillar] PASS 1980-year closed-day guard: ${local.url}`);
 
 const global = expectState(24000, {
+  ...fixedShapeExpected,
   "data-global-closed":"true",
   "data-year-sequence-closed":"true",
-  "data-day-closed":"true",
-  "data-four-pillar-year-status":"boundary-resolved",
-  "data-four-pillar-month-status":"boundary-resolved",
-  "data-four-pillar-day-status":"not-resolved-by-shape-model",
-  "data-four-pillar-hour-status":"not-resolved-by-shape-model",
-  "data-four-pillar-resolved-count":"2",
-  "data-four-pillar-absolute-civil-phase-preserved":"false",
-  "data-four-pillar-local-clock-modeled":"false"
+  "data-day-closed":"true"
 }, "24000-year exact discrete closure");
-if (!global.dom.includes("shape-only：年／月交界可隔離")) {
-  throw new Error(`24000-year exact discrete closure: shape-only demotion summary missing: ${global.url}`);
-}
 if (!global.dom.includes("+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準")) {
   throw new Error(`24000-year exact discrete closure: TT-reference handoff guard missing: ${global.url}`);
 }
@@ -123,4 +97,4 @@ if (!global.dom.includes("不能直接升格成未來 civil-time 四柱")) {
 if (!global.dom.includes("即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論")) {
   throw new Error(`24000-year exact discrete closure: anti-overclaim footnote missing: ${global.url}`);
 }
-console.log(`[four-pillar] PASS 24000-year exact closure does not overclaim Day/Hour: ${global.url}`);
+console.log(`[four-pillar] PASS fixed +24k shape-only evidence is independent of explorer Δ and does not overclaim Day/Hour: ${global.url}`);
