@@ -167,16 +167,16 @@ test("R7 compresses the fan header space without removing its legend",async()=>{
   assert.match(recurrenceHtml,/class="phase-gauge-caption"/);
 });
 
-test("fan explains its own rings, datum and astronomy layer without a separate tutorial", () => {
+test("fan explains only its discrete rings and datum without leaking task 02", () => {
   assert.match(recurrenceHtml,/0 = 與基準同相位/);
   assert.match(recurrenceView,/label\.textContent = "基準 · 0"/);
   assert.match(recurrenceView,/displayLabel:"公曆 · 400 年"/);
   assert.match(recurrenceView,/displayLabel:"年序 · 60 年"/);
   assert.match(recurrenceView,/displayLabel:"日序 · 60 日"/);
-  assert.match(recurrenceView,/astronomyLabel\.textContent = "十二節 · 天文殘差"/);
+  assert.doesNotMatch(recurrenceView,/astronomyLabel|十二節 · 天文殘差/);
   assert.match(recurrenceView,/return-marker-zero-node/);
   assert.match(recurrenceCss,/\.phase-ring-name\s*\{/);
-  assert.match(recurrenceCss,/\.astronomy-layer-label\s*\{/);
+  assert.match(recurrenceHtml,/id="astronomy-residual-ring" aria-hidden="true"/);
   assert.match(recurrenceCss,/\.return-marker-zero-node\s*\{/);
 });
 
