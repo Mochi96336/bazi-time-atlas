@@ -3,6 +3,7 @@ import {
   indexForLongitude,
   longitudeForIndex
 } from "./research/seasonal-drift-26026-research-data.js";
+import { publishResearchTimeSelection } from "./research/research-time-state.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const root = document.querySelector("#seasonal-drift-evidence");
@@ -421,6 +422,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     set("seasonal-drift-scale-label",state.exaggerate ? "形變 ×10" : "真實比例");
 
     scrub.value = String(state.index);
+    root.dataset.selectedLongitude = String(longitude);
     root.dataset.mode = state.mode;
     root.dataset.orbitScale = state.exaggerate ? "exaggerated" : "true";
     syncModeButtons();
@@ -439,6 +441,11 @@ if (root && curveSvg && orbitSvg && scrub) {
     state.index = next;
     root.dataset.cursorSource = source;
     render();
+    publishResearchTimeSelection({
+      owner:"seasonal",
+      longitudeDegrees:longitudeForIndex(state.index),
+      source
+    });
   }
 
   root.querySelectorAll("[data-seasonal-drift-mode]").forEach(button => {
@@ -481,4 +488,9 @@ if (root && curveSvg && orbitSvg && scrub) {
 
   root.dataset.ready = "true";
   render();
+  publishResearchTimeSelection({
+    owner:"seasonal",
+    longitudeDegrees:longitudeForIndex(state.index),
+    source:"init"
+  });
 }

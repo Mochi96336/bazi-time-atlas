@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="./research-color-calibration.css">
   <link rel="stylesheet" href="./research-seasonal-drift-evidence.css">
   <link rel="stylesheet" href="./research-absolute-boundary-consequence.css">
+  <link rel="stylesheet" href="./research-time-state.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -68,6 +69,36 @@
       <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>天文偏移</strong><small id="research-spine-astronomy">TT 提前 10–14 d</small></a>
       <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>八字後果</strong><small id="research-spine-evidence">12 / 12 節界位移</small></a>
     </nav>
+
+    <section id="research-time-state" class="research-time-state" data-ready="false" data-owner="discrete" aria-label="目前研究時間與干支">
+      <header class="research-time-state-head">
+        <div>
+          <span id="research-time-kicker">Research time</span>
+          <strong id="research-time-title">等待研究時間狀態</strong>
+        </div>
+        <small id="research-time-basis">01、02、03 共用同一個時間狀態；能判定的柱才顯示干支。</small>
+      </header>
+      <div class="research-time-state-compare">
+        <article class="research-time-side" data-research-time-side="base">
+          <header><span>基準</span><strong id="research-time-base-coordinate">—</strong></header>
+          <div class="research-time-pillars" aria-label="基準四柱">
+            <div class="research-time-pillar" data-research-time-pillar="year" data-status="unresolved"><span>年</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-research-time-pillar="month" data-status="unresolved"><span>月</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-research-time-pillar="day" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-research-time-pillar="hour" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
+          </div>
+        </article>
+        <article class="research-time-side" data-research-time-side="target">
+          <header><span>比較</span><strong id="research-time-target-coordinate">—</strong></header>
+          <div class="research-time-pillars" aria-label="比較四柱">
+            <div class="research-time-pillar" data-research-time-pillar="year" data-status="unresolved"><span>年</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-research-time-pillar="month" data-status="unresolved"><span>月</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-research-time-pillar="day" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-research-time-pillar="hour" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
+          </div>
+        </article>
+      </div>
+    </section>
 
     <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
       <header class="research-task-head">
@@ -446,5 +477,6 @@
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>
   <script type="module" src="./src/research-narrative-spine-view.js"></script>
+  <script type="module" src="./src/research-time-state-view.js"></script>
 </body>
 </html>
