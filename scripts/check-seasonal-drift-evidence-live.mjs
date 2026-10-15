@@ -77,11 +77,12 @@ for(const delta of [0,400,1980,24000]){
   if(!tools||/\sopen(?:\s|=|>)/.test(tools)){
     throw Error("other-delta sandbox must stay closed by default: "+total.url);
   }
-}
+
   const decomposition=detailsTag(total.dom,"seasonal-drift-decomposition");
   if(!decomposition||/\sopen(?:\s|=|>)/.test(decomposition)){
     throw Error("drift decomposition must stay folded in the main 02 story: "+total.url);
   }
+}
 
 
 const split=dump("split",0);
