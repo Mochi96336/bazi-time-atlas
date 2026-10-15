@@ -399,8 +399,8 @@
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:17px; }
   .seasonal-drift-orbit-point-label { font-size:15px; }
-  .seasonal-orbit-bazi-label { font-size:12px; }
-  .seasonal-orbit-bazi-label.is-selected { font-size:13px; }
+  .seasonal-orbit-bazi-label { font-size:11px; }
+  .seasonal-orbit-bazi-label.is-selected { font-size:12px; }
   .secondary-astronomy-tools > summary {
     min-height:42px;
     grid-template-columns:minmax(0,1fr) auto;
@@ -430,8 +430,8 @@
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:19px; }
   .seasonal-drift-orbit-head { min-height:48px; }
-  .seasonal-orbit-bazi-label { font-size:13px; }
-  .seasonal-orbit-bazi-label.is-selected { font-size:14px; }
+  .seasonal-orbit-bazi-label { font-size:11.5px; }
+  .seasonal-orbit-bazi-label.is-selected { font-size:12.5px; }
   .seasonal-drift-orbit-head span,
   .seasonal-drift-orbit-head small { font-size:8.5px; }
   .seasonal-drift-orbit-head strong { font-size:10.5px; }
