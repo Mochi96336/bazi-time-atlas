@@ -16,4 +16,4 @@ function setOutcome(name, text, state) {
 // selected in the 01 sandbox. The live explorer has its own readouts.
 setOutcome("discrete", "24,000 離散候選", "candidate");
 setOutcome("astronomy", "TT 提前 10–14 d", "offset");
-setOutcome("evidence", "12 / 12 節界位移", "offset");
+setOutcome("evidence", "24,000 ≠ 完整週期", "conclusion");
