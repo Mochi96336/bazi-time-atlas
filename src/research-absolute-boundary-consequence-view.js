@@ -42,31 +42,32 @@ function ensurePanel(){
     '<header class="absolute-boundary-head">',
       '<div>',
         '<div class="eyebrow">02 → 03 · Absolute boundary consequence</div>',
-        '<h3>曆法三層回來了，但年／月柱的節氣邊界沒有回來。</h3>',
-        '<p>把 02 的全年 absolute seasonal drift 直接放到八字使用的 12 個「節」。這裡回答的是邊界是否重現，不把 shape-only 結果當完整節氣誤差。</p>',
+        '<h3>離散三層回來了，但 12 個「節」在 TT / Gregorian 參考格上沒有回到原相位。</h3>',
+        '<p>把 02 的全年 absolute seasonal drift 放到八字使用的 12 個「節」，只回答 TT 參考格上的節界是否重現。它不是西元 26026 某個真實民用年月日時的四柱判決。</p>',
       '</div>',
       '<div class="absolute-boundary-verdict">',
-        '<span>目前最強結論</span>',
-        '<strong>年／月界未重現</strong>',
-        '<small>特定民用時刻的完整四柱仍需 Day / Hour 與深時間 civil-time 證據。</small>',
+        '<span>TT / Gregorian reference</span>',
+        '<strong>12 / 12 節界未重現</strong>',
+        '<small>要落到未來民用時刻的年／月柱，仍需 deep-time Earth rotation / civil-time 對應；Day / Hour 也仍未解。</small>',
       '</div>',
     '</header>',
     '<div class="absolute-boundary-stats">',
-      '<div class="primary"><span>12 個節的全年相位窗口</span><strong id="absolute-boundary-union">—</strong><small id="absolute-boundary-union-percent">—</small></div>',
-      '<div><span>立春 · 年＋月界</span><strong id="absolute-boundary-li-chun">—</strong><small>目標邊界相對 Gregorian cycle 提前</small></div>',
-      '<div><span>12 節提前範圍</span><strong id="absolute-boundary-range">—</strong><small id="absolute-boundary-largest">—</small></div>',
+      '<div class="primary"><span>節界覆蓋</span><strong>12 / 12</strong><small>全部 target crossing 都離開原 TT reference phase</small></div>',
+      '<div><span>12 節位移範圍</span><strong id="absolute-boundary-range">—</strong><small id="absolute-boundary-largest">—</small></div>',
+      '<div><span>立春 · year/month reference boundary</span><strong id="absolute-boundary-li-chun">—</strong><small>相對 365.2425-day Gregorian mean-year lattice</small></div>',
     '</div>',
     '<div class="absolute-boundary-strip-wrap">',
-      '<div class="absolute-boundary-strip-key"><span>一個回歸年 · Li Chun → next Li Chun · TT phase</span><strong>淡帶＝相同公曆相位會落在不同月界 sector 的區間</strong></div>',
+      '<div class="absolute-boundary-strip-key"><span>立春錨定 · 365.2425-day Gregorian mean-year · TT phase</span><strong>淡帶＝同一 reference phase 落在不同節界 sector 的區間</strong></div>',
       '<svg id="absolute-boundary-strip" viewBox="0 0 1200 190" role="img" aria-label="+24,000 年十二個八字節界的 absolute disagreement windows"></svg>',
       '<div id="absolute-boundary-buttons" class="absolute-boundary-buttons" aria-label="十二節邊界；點選可同步 02 的黃經游標"></div>',
     '</div>',
     '<div class="absolute-boundary-pillar-summary">',
-      '<div data-pillar="year"><span>年柱</span><strong>立春界位移 10.883 天</strong><small>不能再把 +24,000 當作年界 exact recurrence。</small></div>',
-      '<div data-pillar="month"><span>月柱</span><strong>12 個月界全部位移</strong><small>各節提前 10.235–14.177 天。</small></div>',
-      '<div data-pillar="day"><span>日柱</span><strong>仍未由此層解析</strong><small>需要 absolute civil-day phase 與日界約定。</small></div>',
-      '<div data-pillar="hour"><span>時柱</span><strong>仍未由此層解析</strong><small>還需要地方時計時、經度與已解析日干。</small></div>',
+      '<div data-pillar="year"><span>Year boundary · TT reference</span><strong>立春界位移 10.883 天</strong><small>證明 reference lattice 不閉合；尚未直接判定未來 civil-time 年柱。</small></div>',
+      '<div data-pillar="month"><span>Month boundaries · TT reference</span><strong>12 個節界全部位移</strong><small>各節提前 10.235–14.177 天；尚未直接判定特定民用時刻月柱。</small></div>',
+      '<div data-pillar="day"><span>日柱</span><strong>仍未由此層解析</strong><small>需要 Earth-rotation / civil-day phase 與日界約定。</small></div>',
+      '<div data-pillar="hour"><span>時柱</span><strong>仍未由此層解析</strong><small>還需要 civil/local time、經度與已解析日干。</small></div>',
     '</div>',
+    '<details class="absolute-boundary-metrics"><summary>技術量 · boundary-window union</summary><div><strong id="absolute-boundary-union">—</strong><span id="absolute-boundary-union-percent">—</span><small>這只是 reference-phase 幾何窗口，不是人口機率，也不是「40% 的八字不同」。</small></div></details>',
     '<p class="absolute-boundary-note"><strong>限制：</strong><span id="absolute-boundary-note-copy">—</span></p>'
   ].join("");
   determinacy.insertAdjacentElement("beforebegin",panel);
@@ -157,7 +158,7 @@ function renderStrip(){
   const start=svgEl("text",{x:52,y:174,class:"absolute-boundary-axis-label","text-anchor":"start"},svg);
   start.textContent="立春";
   const end=svgEl("text",{x:1148,y:174,class:"absolute-boundary-axis-label","text-anchor":"end"},svg);
-  end.textContent="next 立春";
+  end.textContent="365.2425 d";
 }
 
 function setText(id,value){
@@ -169,15 +170,15 @@ function render(){
   const root=ensurePanel();
   if(!root)return;
   setText("absolute-boundary-union",CONSEQUENCE.unionWindowDays.toFixed(3)+" d");
-  setText("absolute-boundary-union-percent","全年 TT 相位 "+CONSEQUENCE.unionWindowPercent.toFixed(3)+"% · 非人口機率");
+  setText("absolute-boundary-union-percent","= "+CONSEQUENCE.unionWindowPercent.toFixed(3)+"% of this reference cycle");
   setText("absolute-boundary-li-chun","提前 "+CONSEQUENCE.liChunBoundary.widthDays.toFixed(3)+" d");
   setText("absolute-boundary-range",CONSEQUENCE.minBoundaryDays.toFixed(3)+"–"+CONSEQUENCE.maxBoundaryDays.toFixed(3)+" d");
   setText("absolute-boundary-largest","最大："+CONSEQUENCE.largestBoundary.name+" · "+CONSEQUENCE.largestBoundary.widthDays.toFixed(3)+" d");
   setText(
     "absolute-boundary-note-copy",
-    "這是 uniform-TT / Gregorian-cycle 下的幾何 boundary window："+
-    CONSEQUENCE.boundaries.length+" 個節界的聯集為 "+CONSEQUENCE.unionWindowDays.toFixed(3)+
-    " 天。它不是人口上的錯誤率，也不是西元 26026 的 UTC／政治時區預測；year-26026 frame 尚未獨立驗證，因此維持 research-only。"
+    "這是立春錨定、365.2425-day proleptic-Gregorian mean-year 的 uniform-TT reference lattice。"+
+    CONSEQUENCE.boundaries.length+" 個節界在此參考格上的 union 為 "+CONSEQUENCE.unionWindowDays.toFixed(3)+
+    " 天；它不能直接升格成西元 26026 某個真實民用年月日時的年／月柱結論，也不是人口錯誤率。year-26026 frame 尚未在目標年獨立驗證，因此維持 research-only。"
   );
   renderStrip();
   root.dataset.ready="true";
@@ -219,7 +220,7 @@ function sync(){
 
   if(active){
     instrument.dataset.absoluteBoundaryConsequence="year-26026-research";
-    instrument.dataset.absoluteBoundaryYearMonthRecurrence="displaced";
+    instrument.dataset.absoluteBoundaryReferenceJie="displaced";
     instrument.dataset.absoluteBoundaryUnionDays=CONSEQUENCE.unionWindowDays.toFixed(6);
     instrument.dataset.absoluteBoundaryUnionPercent=CONSEQUENCE.unionWindowPercent.toFixed(6);
 
@@ -239,7 +240,7 @@ function sync(){
     demoteDeterminacy();
   }else{
     delete instrument.dataset.absoluteBoundaryConsequence;
-    delete instrument.dataset.absoluteBoundaryYearMonthRecurrence;
+    delete instrument.dataset.absoluteBoundaryReferenceJie;
     delete instrument.dataset.absoluteBoundaryUnionDays;
     delete instrument.dataset.absoluteBoundaryUnionPercent;
 
