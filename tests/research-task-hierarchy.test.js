@@ -105,7 +105,8 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);
 });
 
-test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {\n  assert.match(astronomy, /id="research-astronomy-title">天文上哪裡沒有回來？/);
+test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {
+  assert.match(astronomy, /id="research-astronomy-title">天文上哪裡沒有回來？/);
   assert.match(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /季節形狀 · 春分歸零/);
   assert.match(astronomy, /季節相位 · 公曆框架/);
@@ -119,7 +120,8 @@ test("astronomy task answers where the +24k candidate fails and keeps the sandbo
   assert.doesNotMatch(astronomy, /id="four-pillar-determinacy"/);
 });
 
-test("evidence task answers what the fixed result means for BaZi without overclaiming", () => {\n  assert.match(evidence, /id="research-evidence-title">對八字意味著什麼？/);
+test("evidence task answers what the fixed result means for BaZi without overclaiming", () => {
+  assert.match(evidence, /id="research-evidence-title">對八字意味著什麼？/);
   assert.match(evidence, /id="four-pillar-determinacy"/);
   assert.match(evidence, /class="determinacy-label">可判定範圍/);
   assert.match(evidence, /class="model-boundary research-evidence-appendix"/);
