@@ -6,9 +6,15 @@ import {
 
 const root = document.querySelector("#research-time-state");
 const instrument = document.querySelector("#recurrence-instrument");
+const discreteSection = document.querySelector("#research-discrete");
+const astronomySection = document.querySelector("#research-astronomy");
+const evidenceSection = document.querySelector("#research-evidence");
+const seasonalRoot = document.querySelector("#seasonal-drift-evidence");
 
 if (root) {
   const PILLARS = ["year","month","day","hour"];
+  let activeOwner = null;
+  let viewportSyncQueued = false;
   const labels = Object.freeze({
     year:"年",
     month:"月",
@@ -112,6 +118,7 @@ if (root) {
     try {
       if (detail.owner === "seasonal") {
         renderSeasonal(researchSeasonalTimeState(detail.longitudeDegrees));
+        activeOwner = "seasonal";
         return true;
       }
       if (detail.owner === "discrete") {
@@ -121,6 +128,7 @@ if (root) {
           : Number(instrument?.dataset.deltaYears);
         if (!baseDate || !Number.isInteger(deltaYears)) return false;
         renderDiscrete(researchDiscreteDateState(baseDate,deltaYears));
+        activeOwner = "discrete";
         return true;
       }
     } catch (error) {
@@ -134,9 +142,52 @@ if (root) {
     renderSelection(event.detail);
   });
 
-  const initialBase = parseDate(instrument?.dataset.baseDate);
-  const initialDelta = Number(instrument?.dataset.deltaYears);
-  if (initialBase && Number.isInteger(initialDelta)) {
-    renderSelection({ owner:"discrete", baseDate:initialBase, deltaYears:initialDelta });
+  function discreteSelectionFromDom() {
+    const baseDate = parseDate(instrument?.dataset.baseDate);
+    const deltaYears = Number(instrument?.dataset.deltaYears);
+    return baseDate && Number.isInteger(deltaYears)
+      ? { owner:"discrete", baseDate, deltaYears }
+      : null;
   }
+
+  function seasonalSelectionFromDom() {
+    const longitudeDegrees = Number(seasonalRoot?.dataset.selectedLongitude);
+    return Number.isFinite(longitudeDegrees)
+      ? { owner:"seasonal", longitudeDegrees, source:"viewport" }
+      : null;
+  }
+
+  function ownerAtReadingLine() {
+    const readingY = Math.min(window.innerHeight * 0.30, 240);
+    const contains = section => {
+      if (!section) return false;
+      const rect = section.getBoundingClientRect();
+      return rect.top <= readingY && rect.bottom > readingY;
+    };
+    if (contains(astronomySection) || contains(evidenceSection)) return "seasonal";
+    if (contains(discreteSection)) return "discrete";
+    return activeOwner ?? "discrete";
+  }
+
+  function syncOwnerFromViewport() {
+    viewportSyncQueued = false;
+    const owner = ownerAtReadingLine();
+    if (owner === activeOwner) return;
+    const selection = owner === "seasonal"
+      ? seasonalSelectionFromDom()
+      : discreteSelectionFromDom();
+    if (selection) renderSelection(selection);
+  }
+
+  function queueViewportSync() {
+    if (viewportSyncQueued) return;
+    viewportSyncQueued = true;
+    requestAnimationFrame(syncOwnerFromViewport);
+  }
+
+  const initialSelection = discreteSelectionFromDom();
+  if (initialSelection) renderSelection(initialSelection);
+  queueViewportSync();
+  window.addEventListener("scroll",queueViewportSync,{ passive:true });
+  window.addEventListener("resize",queueViewportSync);
 }
