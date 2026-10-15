@@ -319,7 +319,7 @@
           <div class="seasonal-drift-prototype-copy">
             <div class="eyebrow">主案例 · +24,000 年離散閉合</div>
             <h3 id="seasonal-drift-prototype-title">離散都回來了，季節回來了嗎？</h3>
-            <p>固定比較 <strong>2026 → 26026</strong>。先看每個太陽黃經離「完全回到同一公曆季節」還差多少；再把共同位移扣掉，才看一年內的軌道形狀差異。</p>
+            <p>固定比較 <strong>2026 → 26026</strong>。先看每個太陽黃經離「完全回到同一 Gregorian/TT 參考相位」還差多少；再扣掉全年平均位移，才看一年內的軌道形狀差異。</p>
           </div>
           <div class="seasonal-drift-controls" role="group" aria-label="節氣漂移閱讀模式">
             <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">完整差異</button>
@@ -350,9 +350,9 @@
               <small>沒有任何季節位置回到 0 天</small>
             </div>
             <div class="seasonal-drift-stat split-only phase">
-              <span>共同位移 · 全年平均</span>
+              <span>全年平均位移</span>
               <strong id="seasonal-drift-phase-value">—</strong>
-              <small>先把整圈一起提前的部分抽掉</small>
+              <small>360 點漂移曲線的平均／DC component</small>
             </div>
             <div class="seasonal-drift-stat split-only shape">
               <span>剩下的年內起伏</span>
@@ -376,7 +376,7 @@
             <div class="seasonal-drift-orbit-panel">
               <div class="seasonal-drift-orbit-head">
                 <div>
-                  <span>同一黃經 · 兩個 timing 等效軌道</span>
+                  <span>同一太陽黃經對應的日心方向 · timing 等效軌道</span>
                   <strong>拖等效位置也能選黃經</strong>
                   <small>e：<b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b></small>
                 </div>
@@ -386,11 +386,11 @@
                 </div>
               </div>
               <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
-                aria-label="2026 與 26026 的 timing 等效橢圓比較；預設將形狀差異放大十倍顯示"></svg>
+                aria-label="2026 與 26026 的 timing 等效橢圓比較；角度由太陽視黃經轉成相對的日心地球方向，形狀差異預設放大十倍顯示"></svg>
             </div>
           </div>
 
-          <p class="seasonal-drift-prototype-note"><strong>怎麼讀：</strong>「完整差異」保留 0 天，先回答 24,000 年後季節有沒有真正回來；「拆成共同位移＋年內起伏」才把全年平均約 12.2 天抽掉。右側只畫 timing 反演的等效 shape，不把共同位移硬畫成軌道變形。</p>
+          <p class="seasonal-drift-prototype-note"><strong>怎麼讀：</strong>「完整差異」保留 0 天，先回答 24,000 年後季節有沒有真正回來；「拆成共同位移＋年內起伏」才把全年平均約 12.2 天抽掉。右側只畫 timing 反演的等效 shape；角度以太陽視黃經 +180° 轉成日心地球方向，不把全年平均位移硬畫成軌道變形。</p>
         </div>
       </section>
 
@@ -443,7 +443,7 @@
         <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
       </section>
 
-      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian cycle 的 10–14 天位移與年／月界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區、日柱與時柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
+      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian/TT reference lattice 的 10–14 天位移與節界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區，以及由民用時刻定義的完整四柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
     </section>
   </main>
 
