@@ -138,8 +138,8 @@ function expectDiscreteComprehension(dom, url) {
   if (!dom.includes("年序 0 ＋ 日序 0 即成立；公曆 400 年相位不必歸零")) {
     throw new Error(`Year+Day recurrence rule still implies Gregorian closure is required: ${url}`);
   }
-  if (!dom.includes("三個離散曆法相位全歸零；不是四柱重現必須等待的條件")) {
-    throw new Error(`global discrete closure still implies Gregorian closure is required for recurrence: ${url}`);
+  if (!dom.includes("LCM(1,200, 8,000) = 24,000；三個離散曆法相位全歸零")) {
+    throw new Error(`global 24,000-year derivation lost its explicit LCM closure: ${url}`);
   }
 }
 
