@@ -29,6 +29,7 @@ export const SEASONAL_DRIFT_26026_RESEARCH = Object.freeze({
   }),
   baseYear:2026,
   targetYear:26026,
+  gregorianDaySpanDays:8765820,
   meanDriftDays:SUMMARY.meanDriftDays,
   minDriftDays:SUMMARY.minDriftDays,
   maxDriftDays:SUMMARY.maxDriftDays,
