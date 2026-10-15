@@ -15,7 +15,8 @@ const [html, discreteView, astronomyView, nearView, residualView, determinacyVie
 
 test("Research product labels use Chinese while canonical research terms stay recognizable", () => {
   for (const text of [
-    "時間推演",
+    "先看 24,000 年怎麼得到",
+    "用 Δ 驗算",
     "其他時間",
     "超出滑桿範圍",
     "公曆結構",
