@@ -2,7 +2,10 @@ import { spawnSync } from "node:child_process";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 const launchAttempts = 2;
-const launchTimeoutMs = 45_000;
+// A hung first SwiftShader startup previously consumed 45s before a healthy retry.
+// Fail over promptly, but preserve the full 45s on the final attempt for busy CI hosts.
+const firstAttemptTimeoutMs = 15_000;
+const finalAttemptTimeoutMs = 45_000;
 
 function findBrowser() {
   if (process.env.CHROMIUM_BIN) return process.env.CHROMIUM_BIN;
@@ -30,9 +33,10 @@ function launchMaterialProbe(browser, url) {
   let lastResult = null;
 
   for (let attempt = 1; attempt <= launchAttempts; attempt += 1) {
+    const timeoutMs = attempt === 1 ? firstAttemptTimeoutMs : finalAttemptTimeoutMs;
     const result = spawnSync(browser, args, {
       encoding:"utf8",
-      timeout:launchTimeoutMs,
+      timeout:timeoutMs,
       killSignal:"SIGKILL"
     });
     if (result.status === 0) return result;
@@ -40,7 +44,7 @@ function launchMaterialProbe(browser, url) {
     lastResult = result;
     const timedOut = result.error?.code === "ETIMEDOUT";
     const reason = timedOut
-      ? `timed out after ${launchTimeoutMs} ms`
+      ? `timed out after ${timeoutMs} ms`
       : `exited with status ${result.status ?? "unknown"}${result.signal ? ` / ${result.signal}` : ""}`;
     if (attempt < launchAttempts) {
       console.warn(`[material-shader] RETRY launch: attempt ${attempt}/${launchAttempts} ${reason}`);
