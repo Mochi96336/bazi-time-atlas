@@ -41,7 +41,7 @@ test("legacy determinacy owns its own shape-only demotion when absolute evidence
 test("Research spine prefers absolute +24k verdicts",()=>{
   assert.match(spine,/absoluteBoundary === "year-26026-research"/);
   assert.match(spine,/TT 提前 10–14 d/);
-  assert.match(spine,/absoluteYearMonth === "displaced"/);
+  assert.match(spine,/absoluteReferenceJie === "displaced"/);
   assert.match(spine,/TT 節界未重現/);
 });
 
