@@ -54,9 +54,11 @@ test("seasonal evidence keeps mean drift separate from timing-equivalent orbit s
   assert.match(data, /meanDriftDays:SUMMARY\.meanDriftDays/);
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
   assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays/);
-  assert.match(html, /右側只畫 timing 反演的等效 shape/);
-  assert.match(html, /全年平均位移硬畫成軌道變形/);
-  assert.match(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
+  assert.match(html, /右側橢圓只畫 timing 反演的等效 shape/);
+  assert.match(html, /共同時間位移硬畫成軌道變形/);
+  assert.doesNotMatch(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
+  assert.match(css, /\.seasonal-orbit-bazi-boundary/);
+  assert.match(css, /\.seasonal-orbit-bazi-month-arc/);
 });
 
 test("equivalent orbit converts apparent solar longitude to heliocentric Earth direction", () => {
@@ -77,15 +79,18 @@ test("curve and orbit share one longitude cursor without calling it a physical E
   assert.match(view, /setIndex\(indexForLongitude\(longitude\),"orbit"\)/);
   assert.match(view, /longitudeForIndex\(state\.index\)/);
   assert.match(view, /scrub\.addEventListener\("input"/);
-  assert.match(html, /拖等效位置也能選黃經/);
+  assert.match(html, /拖俯視圖選時間，上方干支同步更新/);
+  assert.match(view, /drawBaziBoundaries/);
+  assert.match(view, /BAZI_JIE_BOUNDARIES/);
   assert.doesNotMatch(html, /拖地球也能選位置/);
 });
 
 test("total view explicitly visualizes distance from zero before shape decomposition", () => {
   assert.match(view, /class:"seasonal-drift-gap-line"/);
   assert.match(view, /gapLabel\.textContent = humanDrift/);
-  assert.match(html, /全年結果/);
-  assert.match(html, /提前 10\.20–14\.22 天/);
+  assert.match(html, /八字節界/);
+  assert.match(html, /12 \/ 12/);
+  assert.match(html, /提前 10\.235–14\.177 天/);
   assert.match(css, /\.seasonal-drift-gap-line/);
 });
 
@@ -109,4 +114,20 @@ test("pinned seasonal evidence derives summary metrics from one drift array and 
   assert.equal(evidence.provenance.timeline.pullRequest,572);
   assert.equal(evidence.provenance.timeline.artifactDigest,"sha256:285e3cc1edb09f9bc07268a149cdfa137f41a56b0525229f759daba31c50ef3d");
   assert.equal(evidence.provenance.inverseEllipse.pullRequest,574);
+});
+
+test("Research 02 stays framed as a BaZi boundary question", () => {
+  assert.match(html, /八字的節界回來了嗎？/);
+  assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
+  assert.match(html, /12 個「節」界 × 同一太陽黃經/);
+  assert.match(html, /立春同時也是年柱切換界/);
+});
+
+test("curve and orbit expose the same canonical Jie structure", () => {
+  assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary =>/);
+  assert.match(view, /seasonal-drift-jie-guide/);
+  assert.match(view, /seasonal-drift-jie-dot/);
+  assert.match(view, /root\.dataset\.baziMonthBranch = month\.branch/);
+  assert.match(css, /\.seasonal-drift-jie-guide/);
+  assert.match(css, /\.seasonal-drift-jie-dot/);
 });

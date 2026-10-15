@@ -54,7 +54,7 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.match(html, /id="research-spine-discrete">24,000 離散候選<\/small>/);
   assert.match(html, /id="research-spine-astronomy">TT 提前 10–14 d<\/small>/);
   assert.match(html, /id="research-spine-evidence">12 \/ 12 節界位移<\/small>/);
-  assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 天文較真<\/span>/);
+  assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 12 節界校驗<\/span>/);
   assert.match(html, /class="research-task-relation">固定 24,000 年天文結果 → 節界後果<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
@@ -106,7 +106,7 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
 });
 
 test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {
-  assert.match(astronomy, /id="research-astronomy-title">天文上哪裡沒有回來？/);
+  assert.match(astronomy, /id="research-astronomy-title">八字的節界回來了嗎？/);
   assert.match(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /季節形狀 · 春分歸零/);
   assert.match(astronomy, /季節相位 · 公曆框架/);
