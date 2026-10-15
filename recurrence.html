@@ -361,36 +361,49 @@
             <h3 id="seasonal-drift-evidence-title">24,000 年後，年界與月界還在原位嗎？</h3>
             <p><strong>上面的 Δ 可以自由探索；以下回到 01 找出的 24,000 年候選。</strong>八字年柱在立春切換，月柱在十二個「節」切換。固定比較 2026 → 26026，直接檢查這 12 條界線是否仍落在原本的時間位置；再往下才拆解為何各節的提前量不完全相同。</p>
           </div>
-          <div class="seasonal-drift-controls" role="group" aria-label="節氣漂移閱讀模式">
-            <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">節界偏移</button>
-            <button type="button" data-seasonal-drift-mode="split" aria-pressed="false">拆解年內起伏</button>
-          </div>
         </header>
 
           <div class="seasonal-drift-summary" aria-live="polite">
-            <div class="seasonal-drift-stat primary">
-              <span>目前位置</span>
+            <div class="seasonal-drift-stat verdict">
+              <span>先看結論 · 八字節界</span>
+              <strong><b id="seasonal-drift-jie-count">12 / 12</b> 全部提前</strong>
+              <small><b id="seasonal-drift-jie-range">提前 10.235–14.177 天</b> · 沒有任何一條回到原時間位置</small>
+            </div>
+            <div class="seasonal-drift-stat cursor">
+              <span>目前游標</span>
               <strong><i id="seasonal-drift-selected-name">立春</i> · <b id="seasonal-drift-selected-longitude">315°</b></strong>
-              <small class="total-only">相對完全重現：<b id="seasonal-drift-selected-total-human">—</b></small>
-              <small class="split-only">完整差異 <b id="seasonal-drift-selected-total">—</b> · 年內起伏 <b id="seasonal-drift-selected-shape">—</b></small>
+              <small class="total-only">這一刻：<b id="seasonal-drift-selected-total-human">—</b></small>
+              <small class="split-only">完整差異 <b id="seasonal-drift-selected-total">—</b> · 去平均後 <b id="seasonal-drift-selected-shape">—</b></small>
               <small id="seasonal-drift-selected-bazi">—</small>
             </div>
-            <div class="seasonal-drift-stat total-only range">
-              <span>八字節界</span>
-              <strong id="seasonal-drift-jie-count">12 / 12</strong>
-              <small><b id="seasonal-drift-jie-range">提前 10.235–14.177 天</b> · 全部未回到原時間位置</small>
-            </div>
-            <div class="seasonal-drift-stat split-only phase">
-              <span>全年平均位移</span>
-              <strong id="seasonal-drift-phase-value">—</strong>
-              <small>360 點漂移曲線的平均／DC component</small>
-            </div>
-            <div class="seasonal-drift-stat split-only shape">
-              <span>剩下的年內起伏</span>
-              <strong id="seasonal-drift-shape-span">—</strong>
-              <small>全年 peak-to-peak</small>
-            </div>
           </div>
+
+          <details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">
+            <summary>
+              <span>深入：為什麼不是固定提前 12 天？</span>
+              <strong>共同位移 ＋ 年內起伏</strong>
+            </summary>
+            <div class="seasonal-drift-decomposition-body">
+              <p>主線已經證明 12 個節界都往同一方向移動。這裡才把全年共同提前量扣掉，單獨看不同黃經之間約 4 天的年內差異；這個「去平均」視圖不能拿來判斷節界有沒有回到原位。</p>
+              <small class="seasonal-drift-decomposition-note">座標說明：完整偏移仍以 26026 相對固定推進 24,000 個公曆年計算；右側等效軌道角度以太陽視黃經 +180° 轉成日心地球方向，只用來表達年內形狀差異。</small>
+              <div class="seasonal-drift-controls" role="group" aria-label="節氣漂移深入閱讀模式">
+                <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">看完整節界偏移</button>
+                <button type="button" data-seasonal-drift-mode="split" aria-pressed="false">扣除平均，看年內起伏</button>
+              </div>
+              <div class="seasonal-drift-decomposition-metrics">
+                <div class="seasonal-drift-stat phase">
+                  <span>全年共同位移</span>
+                  <strong id="seasonal-drift-phase-value">—</strong>
+                  <small>360 個黃經位置的平均</small>
+                </div>
+                <div class="seasonal-drift-stat shape">
+                  <span>去平均後的年內起伏</span>
+                  <strong id="seasonal-drift-shape-span">—</strong>
+                  <small>全年最大－最小</small>
+                </div>
+              </div>
+            </div>
+          </details>
 
           <div class="seasonal-drift-linked-layout">
             <div class="seasonal-drift-plot">
@@ -407,7 +420,7 @@
             <div class="seasonal-drift-orbit-panel">
               <div class="seasonal-drift-orbit-head">
                 <div>
-                  <span>12 個「節」界 × 同一太陽黃經 · timing 等效軌道</span>
+                  <span>12 個「節」界 × 同一太陽黃經 · 時間等效軌道</span>
                   <strong>拖俯視圖選時間，上方干支同步更新</strong>
                   <small>e：<b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b></small>
                 </div>
@@ -417,11 +430,11 @@
                 </div>
               </div>
               <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
-                aria-label="2026 與 26026 的 timing 等效橢圓與十二個八字節界；角度由太陽視黃經轉成相對的日心地球方向，形狀差異預設放大十倍顯示"></svg>
+                aria-label="2026 與 26026 的時間等效橢圓與十二個八字節界；角度由太陽視黃經轉成相對的日心地球方向，形狀差異預設放大十倍顯示"></svg>
             </div>
           </div>
 
-          <p class="seasonal-drift-evidence-note"><strong>怎麼讀：</strong>俯視圖外圍 12 條射線就是八字月柱使用的十二「節」，其中立春同時也是年柱切換界。曲線量化同一太陽黃經在 26026 相對固定推進 24,000 個公曆年的時間提前量；切到「拆解年內起伏」才把全年共同位移抽掉。右側橢圓只畫由時間偏移反演得到的等效軌道形狀；角度以太陽視黃經 +180° 轉成日心地球方向，不把 10–14 天的共同時間位移硬畫成軌道變形。</p>
+          <p class="seasonal-drift-evidence-note"><strong>主線怎麼讀：</strong>左圖的 0 天就是「完全重合」；十二個八字節界全部離 0 有 10–14 天，而且方向都是提前。右側俯視圖保留同一組十二「節」與目前八字月份，拖曳任一圖都會同步上方干支。若要研究為什麼每一節不是剛好都提前同樣天數，再展開上面的深入層。</p>
       </section>
 
       <details id="secondary-astronomy-tools" class="secondary-astronomy-tools">

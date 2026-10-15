@@ -18,6 +18,7 @@ const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
 const secondaryTools = document.querySelector("#secondary-astronomy-tools");
 const secondaryToolsMeta = document.querySelector("#secondary-astronomy-tools-meta");
+const decomposition = document.querySelector("#seasonal-drift-decomposition");
 const JIE_SUMMARY = baziJieDriftSummary(DATA.driftDays,indexForLongitude);
 
 if (root && curveSvg && orbitSvg && scrub) {
@@ -120,8 +121,8 @@ if (root && curveSvg && orbitSvg && scrub) {
   }
 
   function totalY(value) {
-    const min = -15;
-    const max = 0;
+    const min = 0;
+    const max = 15;
     return CURVE.top + ((max - value) / (max - min)) * CURVE.plotHeight;
   }
 
@@ -141,11 +142,11 @@ if (root && curveSvg && orbitSvg && scrub) {
     curveSvg.dataset.mode = state.mode;
 
     const values = state.mode === "total"
-      ? DATA.driftDays
+      ? DATA.driftDays.map(value => -value)
       : DATA.driftDays.map(value => value - DATA.meanDriftDays);
 
     const ticks = state.mode === "total"
-      ? [0,-3,-6,-9,-12,-15]
+      ? [15,12,9,6,3,0]
       : [2,1,0,-1,-2];
 
     for (const tick of ticks) {
@@ -163,7 +164,19 @@ if (root && curveSvg && orbitSvg && scrub) {
         class:"seasonal-drift-axis-label",
         "text-anchor":"end"
       }, curveSvg);
-      label.textContent = `${tick} d`;
+      label.textContent = tick === 0 && state.mode === "total"
+        ? "0 d"
+        : `${tick} d`;
+    }
+
+    if (state.mode === "total") {
+      const zeroCaption = svgEl("text", {
+        x:CURVE.width-CURVE.right,
+        y:totalY(0)-8,
+        class:"seasonal-drift-zero-caption",
+        "text-anchor":"end"
+      }, curveSvg);
+      zeroCaption.textContent = "0 = 完全重合";
     }
 
     const path = values.map((value,index) =>
@@ -234,7 +247,7 @@ if (root && curveSvg && orbitSvg && scrub) {
         class:"seasonal-drift-gap-label",
         "text-anchor":cursorX > CURVE.width - 150 ? "end" : "start"
       }, curveSvg);
-      gapLabel.textContent = humanDrift(values[state.index],2);
+      gapLabel.textContent = humanDrift(selectedDrift(),2);
     }
 
     svgEl("line", {
@@ -544,9 +557,20 @@ if (root && curveSvg && orbitSvg && scrub) {
   root.querySelectorAll("[data-seasonal-drift-mode]").forEach(button => {
     button.addEventListener("click", () => {
       state.mode = button.dataset.seasonalDriftMode === "split" ? "split" : "total";
+      if (state.mode === "split" && decomposition) decomposition.open = true;
       render();
     });
   });
+
+  decomposition?.addEventListener("toggle", () => {
+    if (decomposition.open) return;
+    if (state.mode !== "total") {
+      state.mode = "total";
+      render();
+    }
+  });
+
+  if (state.mode === "split" && decomposition) decomposition.open = true;
 
   document.querySelector("#seasonal-drift-orbit-scale")?.addEventListener("click", event => {
     state.exaggerate = !state.exaggerate;
