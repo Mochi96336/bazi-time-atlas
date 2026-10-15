@@ -5,7 +5,7 @@ import {
   indexForLongitude
 } from "./seasonal-drift-26026-research-data.js";
 
-export const ABSOLUTE_BOUNDARY_CYCLE_DAYS = 365.2425;
+export const ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS = 365.2425;
 const LI_CHUN_LONGITUDE = 315;
 const JIE_LONGITUDES = Object.freeze([315,345,15,45,75,105,135,165,195,225,255,285]);
 
@@ -66,14 +66,14 @@ export function absoluteBoundaryConsequence24000(){
     });
     const driftDays=DATA.driftDays[indexForLongitude(longitude)];
     const widthDays=Math.abs(driftDays);
-    const basePhaseDay=mod(base.ttJulianDay-liChun.ttJulianDay,ABSOLUTE_BOUNDARY_CYCLE_DAYS);
+    const basePhaseDay=mod(base.ttJulianDay-liChun.ttJulianDay,ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS);
     const targetPhaseUnwrapped=basePhaseDay+driftDays;
-    const targetPhaseDay=mod(targetPhaseUnwrapped,ABSOLUTE_BOUNDARY_CYCLE_DAYS);
+    const targetPhaseDay=mod(targetPhaseUnwrapped,ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS);
     const direction=driftDays<0?"target-earlier":driftDays>0?"target-later":"aligned";
     const intervalStart=direction==="target-earlier"
       ? basePhaseDay-widthDays
       : basePhaseDay;
-    const pieces=splitCircularInterval(intervalStart,widthDays,ABSOLUTE_BOUNDARY_CYCLE_DAYS);
+    const pieces=splitCircularInterval(intervalStart,widthDays,ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS);
     const transition=transitionAtLongitude(longitude);
     const isYearBoundary=longitude===LI_CHUN_LONGITUDE;
 
@@ -113,17 +113,23 @@ export function absoluteBoundaryConsequence24000(){
     baseYear:DATA.baseYear,
     targetYear:DATA.targetYear,
     deltaYears:DATA.targetYear-DATA.baseYear,
-    cycleDays:ABSOLUTE_BOUNDARY_CYCLE_DAYS,
+    cycleDays:ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS,
+    referenceCycle:Object.freeze({
+      anchor:"2026 Li Chun TT",
+      definition:"Li-Chun-anchored proleptic-Gregorian mean-year phase",
+      days:ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS,
+      isActualNextLiChunInterval:false
+    }),
     boundaries:Object.freeze(boundaries),
     mergedIntervals:Object.freeze(merged.map(item=>Object.freeze(item))),
     rawWindowDays,
     unionWindowDays,
     overlapDays,
-    unionWindowPercent:unionWindowDays/ABSOLUTE_BOUNDARY_CYCLE_DAYS*100,
+    unionWindowPercent:unionWindowDays/ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS*100,
     monthOnlyWindowDays,
-    monthOnlyWindowPercent:monthOnlyWindowDays/ABSOLUTE_BOUNDARY_CYCLE_DAYS*100,
+    monthOnlyWindowPercent:monthOnlyWindowDays/ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS*100,
     yearMonthWindowDays:liChunBoundary?.widthDays??0,
-    yearMonthWindowPercent:(liChunBoundary?.widthDays??0)/ABSOLUTE_BOUNDARY_CYCLE_DAYS*100,
+    yearMonthWindowPercent:(liChunBoundary?.widthDays??0)/ABSOLUTE_BOUNDARY_REFERENCE_CYCLE_DAYS*100,
     minBoundaryDays:Math.min(...boundaries.map(boundary=>boundary.widthDays)),
     maxBoundaryDays:Math.max(...boundaries.map(boundary=>boundary.widthDays)),
     largestBoundary,
@@ -131,8 +137,9 @@ export function absoluteBoundaryConsequence24000(){
     allTargetEarlier:boundaries.every(boundary=>boundary.direction==="target-earlier"),
     claimBoundary:Object.freeze({
       researchOnly:true,
-      geometry:"same-solar-longitude boundary displacement in uniform-TT/Gregorian-cycle comparison",
+      geometry:"same-solar-longitude boundary displacement in a Li-Chun-anchored uniform-TT / proleptic-Gregorian mean-year reference lattice",
       populationProbability:false,
+      civilTimePillarVerdict:false,
       civilTimeResolved:false,
       dayPillarResolved:false,
       hourPillarResolved:false,
