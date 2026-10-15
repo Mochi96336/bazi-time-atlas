@@ -1,184 +1,55 @@
 import {
   ABSOLUTE_BOUNDARY_CONSEQUENCE_24000 as CONSEQUENCE
 } from "./research/seasonal-absolute-boundary-consequence.js";
-import { indexForLongitude } from "./research/seasonal-drift-26026-research-data.js";
 
-const NS="http://www.w3.org/2000/svg";
 const evidence=document.querySelector("#research-evidence");
 const instrument=document.querySelector("#recurrence-instrument");
 const determinacy=document.querySelector("#four-pillar-determinacy");
 let panel=null;
-let rendered=false;
 
 function ensurePanel(){
   if(panel?.isConnected)return panel;
   if(!evidence||!determinacy)return null;
+
   panel=document.createElement("section");
   panel.id="absolute-boundary-consequence";
-  panel.className="absolute-boundary-consequence";
-  panel.dataset.ready="false";
-  panel.setAttribute("aria-label","+24,000 年 absolute 節氣邊界對年柱與月柱的研究後果");
+  panel.className="absolute-boundary-consequence research-recurrence-conclusion";
+  panel.dataset.ready="true";
+  panel.setAttribute("aria-label","+24,000 年對時間到八字映射的研究結論");
   panel.innerHTML=[
-    '<header class="absolute-boundary-head">',
+    '<header class="absolute-boundary-head research-conclusion-head">',
       '<div>',
-        '<div class="eyebrow">02 → 03 · Absolute boundary consequence</div>',
-        '<h3>24,000 年沒有把節氣邊界一起帶回來。</h3>',
-        '<p>把 02 的全年漂移套到八字使用的 12 個「節」：12 個節界全部離開原本的 TT / Gregorian 參考相位。這先回答「邊界有沒有回來」，不是直接判定西元 26026 某個真實民用時刻的完整四柱。</p>',
+        '<div class="eyebrow">Research conclusion · 01 → 02 → 03</div>',
+        '<h3>24,000 年不是完整「時間 → 八字」映射的精確週期。</h3>',
+        '<p>01 的離散年序／日序可以閉合；在 02 選同一太陽黃經位置時，年序也回到原位，月支又由同一黃經決定，所以年柱與月柱可以回到同柱。可是這些節界相對固定推進 24,000 個公曆年全部提前約 10–14 天，因此公曆／TT 時間落到八字節界的映射沒有一起重現。</p>',
       '</div>',
       '<div class="absolute-boundary-verdict">',
-        '<span>TT / Gregorian reference</span>',
-        '<strong>12 / 12 節界未重現</strong>',
-        '<small>要落到未來民用時刻的年／月柱，仍需 deep-time Earth rotation / civil-time 對應；Day / Hour 也仍未解。</small>',
+        '<span>回答研究題目</span>',
+        '<strong>24,000 ≠ 整套映射精確週期</strong>',
+        '<small>這否定的是整套固定週期，不代表每一個相隔 24,000 年的具體時刻都必然得到不同四柱。</small>',
       '</div>',
     '</header>',
-    '<div class="absolute-boundary-stats">',
-      '<div class="primary"><span>節界覆蓋</span><strong>12 / 12</strong><small>全部 target crossing 都離開原 TT reference phase</small></div>',
-      '<div><span>12 節位移範圍</span><strong id="absolute-boundary-range">—</strong><small id="absolute-boundary-largest">—</small></div>',
-      '<div><span>立春 · year/month reference boundary</span><strong id="absolute-boundary-li-chun">—</strong><small>相對 365.2425-day Gregorian mean-year lattice</small></div>',
+    '<div class="research-conclusion-grid">',
+      '<article data-conclusion="solar"><span>對齊太陽位置</span><strong>年／月可回到同柱</strong><small>同一黃經 + 60 年序閉合；目前選定太陽位置的實際干支看下方。</small></article>',
+      '<article data-conclusion="calendar"><span>對齊公曆／TT 相位</span><strong>12 / 12 節界未重現</strong><small>十二「節」提前 '+CONSEQUENCE.minBoundaryDays.toFixed(3)+'–'+CONSEQUENCE.maxBoundaryDays.toFixed(3)+' 天；證據已在 02 顯示，不在 03 重畫。</small></article>',
+      '<article data-conclusion="full"><span>完整四柱</span><strong>日／時仍未定</strong><small>深時間地球自轉、民用／地方鐘面與日界仍不足以唯一判定日柱／時柱。</small></article>',
     '</div>',
-    '<div class="absolute-boundary-strip-wrap">',
-      '<div class="absolute-boundary-strip-key"><span>立春錨定 · 365.2425-day Gregorian mean-year · TT phase</span><strong>淡帶＝同一 reference phase 落在不同節界 sector 的區間</strong></div>',
-      '<svg id="absolute-boundary-strip" viewBox="0 0 1200 190" role="img" aria-label="+24,000 年十二個八字節界的 absolute disagreement windows"></svg>',
-      '<details id="absolute-boundary-detail-list" class="absolute-boundary-detail-list">',
-        '<summary><span>查看 12 節詳細數值</span><strong>逐節位移與月界轉換</strong></summary>',
-        '<div id="absolute-boundary-buttons" class="absolute-boundary-buttons" aria-label="十二節邊界；點選可同步 02 的黃經游標"></div>',
-      '</details>',
-    '</div>',
-    '<div class="absolute-boundary-pillar-summary">',
-      '<div data-pillar="year"><span>Year boundary · TT reference</span><strong>立春界位移 10.883 天</strong><small>證明 reference lattice 不閉合；尚未直接判定未來 civil-time 年柱。</small></div>',
-      '<div data-pillar="month"><span>Month boundaries · TT reference</span><strong>12 個節界全部位移</strong><small>各節提前 10.235–14.177 天；尚未直接判定特定民用時刻月柱。</small></div>',
-      '<div data-pillar="day"><span>日柱</span><strong>仍未由此層解析</strong><small>需要 Earth-rotation / civil-day phase 與日界約定。</small></div>',
-      '<div data-pillar="hour"><span>時柱</span><strong>仍未由此層解析</strong><small>還需要 civil/local time、經度與已解析日干。</small></div>',
-    '</div>',
-    '<details class="absolute-boundary-metrics"><summary>技術量 · boundary-window union</summary><div><strong id="absolute-boundary-union">—</strong><span id="absolute-boundary-union-percent">—</span><small>這只是 reference-phase 幾何窗口，不是人口機率，也不是「40% 的八字不同」。</small></div></details>',
-    '<p class="absolute-boundary-note"><strong>限制：</strong><span id="absolute-boundary-note-copy">—</span></p>'
+    '<p class="absolute-boundary-note"><strong>關鍵差別：</strong>「同一太陽位置的年／月柱可重現」與「相隔固定 24,000 年的所有時間都回到同一八字」不是同一件事。</p>'
   ].join("");
+
   determinacy.insertAdjacentElement("beforebegin",panel);
   return panel;
-}
-
-function svgEl(tag,attrs,parent){
-  const node=document.createElementNS(NS,tag);
-  for(const [key,value] of Object.entries(attrs))node.setAttribute(key,String(value));
-  parent.appendChild(node);
-  return node;
-}
-
-function phaseX(day){
-  const left=52;
-  const right=1148;
-  return left+(day/CONSEQUENCE.cycleDays)*(right-left);
-}
-
-function renderStrip(){
-  const svg=panel?.querySelector("#absolute-boundary-strip");
-  const buttons=panel?.querySelector("#absolute-boundary-buttons");
-  if(!svg||!buttons)return;
-  svg.replaceChildren();
-  buttons.replaceChildren();
-
-  const y=78;
-  svgEl("line",{x1:52,x2:1148,y1:y,y2:y,class:"absolute-boundary-axis"},svg);
-
-  for(const boundary of CONSEQUENCE.boundaries){
-    for(const piece of boundary.pieces){
-      const x1=phaseX(piece.start);
-      const x2=phaseX(piece.end);
-      svgEl("rect",{
-        x:x1,
-        y:y-12,
-        width:Math.max(1,x2-x1),
-        height:24,
-        rx:3,
-        class:boundary.isYearBoundary
-          ?"absolute-boundary-window year-boundary"
-          :"absolute-boundary-window"
-      },svg);
-    }
-
-    const baseX=phaseX(boundary.basePhaseDay);
-    const targetX=phaseX(boundary.targetPhaseDay);
-    svgEl("line",{
-      x1:baseX,x2:baseX,y1:y-22,y2:y+24,
-      class:boundary.isYearBoundary
-        ?"absolute-boundary-base-tick year-boundary"
-        :"absolute-boundary-base-tick"
-    },svg);
-    svgEl("circle",{
-      cx:targetX,cy:y,r:3.8,
-      class:boundary.isYearBoundary
-        ?"absolute-boundary-target-dot year-boundary"
-        :"absolute-boundary-target-dot"
-    },svg);
-
-    const label=svgEl("text",{
-      x:baseX,
-      y:boundary.isYearBoundary?42:(Math.round(boundary.basePhaseDay/30)%2===0?118:139),
-      class:boundary.isYearBoundary
-        ?"absolute-boundary-term year-boundary"
-        :"absolute-boundary-term",
-      "text-anchor":"middle"
-    },svg);
-    label.textContent=boundary.name;
-
-    const button=document.createElement("button");
-    button.type="button";
-    button.dataset.longitude=String(boundary.longitude);
-    button.dataset.yearBoundary=String(boundary.isYearBoundary);
-    button.innerHTML='<span>'+boundary.name+(boundary.isYearBoundary?" · 年界":"")+'</span>'+
-      '<strong>提前 '+boundary.widthDays.toFixed(3)+' d</strong>'+
-      '<small>'+boundary.monthTransition+'</small>';
-    button.addEventListener("click",()=>{
-      const scrub=document.querySelector("#seasonal-drift-scrub");
-      if(!(scrub instanceof HTMLInputElement))return;
-      scrub.value=String(indexForLongitude(boundary.longitude));
-      scrub.dispatchEvent(new Event("input",{bubbles:true}));
-      document.querySelector("#seasonal-drift-evidence")?.scrollIntoView({behavior:"smooth",block:"center"});
-    });
-    buttons.appendChild(button);
-  }
-
-  const start=svgEl("text",{x:52,y:174,class:"absolute-boundary-axis-label","text-anchor":"start"},svg);
-  start.textContent="立春";
-  const end=svgEl("text",{x:1148,y:174,class:"absolute-boundary-axis-label","text-anchor":"end"},svg);
-  end.textContent="365.2425 d";
-}
-
-function setText(id,value){
-  const node=document.querySelector("#"+id);
-  if(node)node.textContent=value;
-}
-
-function render(){
-  const root=ensurePanel();
-  if(!root)return;
-  setText("absolute-boundary-union",CONSEQUENCE.unionWindowDays.toFixed(3)+" d");
-  setText("absolute-boundary-union-percent","= "+CONSEQUENCE.unionWindowPercent.toFixed(3)+"% of this reference cycle");
-  setText("absolute-boundary-li-chun","提前 "+CONSEQUENCE.liChunBoundary.widthDays.toFixed(3)+" d");
-  setText("absolute-boundary-range",CONSEQUENCE.minBoundaryDays.toFixed(3)+"–"+CONSEQUENCE.maxBoundaryDays.toFixed(3)+" d");
-  setText("absolute-boundary-largest","最大："+CONSEQUENCE.largestBoundary.name+" · "+CONSEQUENCE.largestBoundary.widthDays.toFixed(3)+" d");
-  setText(
-    "absolute-boundary-note-copy",
-    "這是立春錨定、365.2425-day proleptic-Gregorian mean-year 的 uniform-TT reference lattice。"+
-    CONSEQUENCE.boundaries.length+" 個節界在此參考格上的 union 為 "+CONSEQUENCE.unionWindowDays.toFixed(3)+
-    " 天；它不能直接升格成西元 26026 某個真實民用年月日時的年／月柱結論，也不是人口錯誤率。year-26026 frame 尚未在目標年獨立驗證，因此維持 research-only。"
-  );
-  renderStrip();
-  root.dataset.ready="true";
-  rendered=true;
 }
 
 function publishFixedEvidence(){
   const root=ensurePanel();
   if(!root)return;
-  root.hidden=false;
-  root.dataset.active="true";
-  if(!rendered)render();
 
   instrument.dataset.absoluteBoundaryConsequence="year-26026-research";
   instrument.dataset.absoluteBoundaryReferenceJie="displaced";
-  instrument.dataset.absoluteBoundaryUnionDays=CONSEQUENCE.unionWindowDays.toFixed(6);
-  instrument.dataset.absoluteBoundaryUnionPercent=CONSEQUENCE.unionWindowPercent.toFixed(6);
+  instrument.dataset.absoluteBoundaryJieCount=String(CONSEQUENCE.boundaries.length);
+  instrument.dataset.absoluteBoundaryMinDays=CONSEQUENCE.minBoundaryDays.toFixed(6);
+  instrument.dataset.absoluteBoundaryMaxDays=CONSEQUENCE.maxBoundaryDays.toFixed(6);
 }
 
 if(evidence&&instrument&&determinacy){

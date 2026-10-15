@@ -57,10 +57,13 @@ for(const delta of [0,400,1980,24000]){
     'class="seasonal-drift-gap-line"',
     'id="seasonal-drift-selected-total-human">提前 10.883 天',
     'id="absolute-boundary-consequence"',
-    'data-active="true"',
+    'research-recurrence-conclusion',
+    '24,000 年不是完整「時間 → 八字」映射的精確週期',
     '12 / 12 節界未重現',
-    'shape-only-secondary',
-    'shape-only-determinacy-details',
+    'id="four-pillar-determinacy"',
+    'data-mode="shared-seasonal"',
+    'data-selected-longitude="315"',
+    '年／月可判 · 日／時未定',
     '探索工具 · 目前 Δ = '+delta.toLocaleString("en-US")+' 年 · 不影響上方固定 24,000 年主線'
   ],"always-visible main story @ delta="+delta);
 

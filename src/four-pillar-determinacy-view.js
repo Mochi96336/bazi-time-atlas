@@ -1,4 +1,8 @@
 import { fourPillarDeterminacy } from "./recurrence/four-pillar-determinacy.js";
+import {
+  RESEARCH_TIME_SELECTION_EVENT,
+  researchSeasonalTimeState
+} from "./research/research-time-state.js";
 import "./day-hour-proof-chain-view.js";
 import "./research-evidence-drilldown-view.js";
 import "./research-astronomy-drilldown-view.js";
@@ -7,6 +11,7 @@ import "./eot-observed-clearance-diagnostic-view.js";
 
 const instrument = document.querySelector("#recurrence-instrument");
 const panel = document.querySelector("#four-pillar-determinacy");
+const seasonalRoot = document.querySelector("#seasonal-drift-evidence");
 
 const LABELS = Object.freeze({
   year:{ zh:"年柱", en:"Year" },
@@ -16,6 +21,9 @@ const LABELS = Object.freeze({
 });
 
 const STATUS_LABELS = Object.freeze({
+  "research-resolved":"研究可判",
+  "resolved":"已解析",
+  "unresolved":"未定",
   "identical-by-definition":"同一狀態",
   "boundary-resolved":"交界可判定",
   "mixed-with-year-sequence":"混入年序偏移",
@@ -23,6 +31,8 @@ const STATUS_LABELS = Object.freeze({
   "astronomy-unavailable":"天文模型外",
   "not-resolved-by-shape-model":"此模型不可判"
 });
+
+let currentSeasonalState=null;
 
 function boolDataset(name) {
   const value = instrument?.dataset?.[name];
@@ -41,171 +51,183 @@ function absoluteReferencePrimary() {
     instrument?.dataset.absoluteBoundaryReferenceJie === "displaced";
 }
 
-function ensureShapeOnlyDetails() {
-  let details = panel?.querySelector(":scope > .shape-only-determinacy-details");
-  if (details) return details;
-  const grid = panel?.querySelector(":scope > .determinacy-grid");
-  const foot = panel?.querySelector(":scope > .determinacy-foot");
-  if (!panel || !grid || !foot) return null;
-
-  details = document.createElement("details");
-  details.className = "shape-only-determinacy-details";
-  const summary = document.createElement("summary");
-  summary.innerHTML = "<span>展開 shape-only 四柱卡片</span><strong>只看全年平均位移扣除後的年內 shape</strong>";
-  grid.insertAdjacentElement("beforebegin", details);
-  details.append(summary, grid, foot);
-  return details;
-}
-
-function restoreShapeOnlyDetails() {
-  const details = panel?.querySelector(":scope > .shape-only-determinacy-details");
-  if (!details) return;
-  const grid = details.querySelector(".determinacy-grid");
-  const foot = details.querySelector(".determinacy-foot");
-  if (grid) details.insertAdjacentElement("beforebegin", grid);
-  if (foot) details.insertAdjacentElement("beforebegin", foot);
-  details.remove();
-}
-
-function syncAbsolutePresentation() {
-  if (!panel) return;
-  const active = absoluteReferencePrimary();
-  panel.classList.toggle("shape-only-secondary", active);
-  panel.dataset.absolutePrimary = String(active);
-
-  const label = panel.querySelector(".determinacy-label");
-  const scopeLabel = panel.querySelector(".determinacy-scope span");
-  if (label) label.textContent = active ? "shape-only 輔助判定" : "可判定範圍";
-  if (scopeLabel) scopeLabel.textContent = active ? "春分歸零後的舊模型內結論" : "目前可支持的最強結論";
-
-  let note = panel.querySelector(".determinacy-secondary-note");
-  if (active) {
-    if (!note) {
-      note = document.createElement("div");
-      note.className = "determinacy-secondary-note";
-      panel.querySelector(".determinacy-head")?.insertAdjacentElement("afterend", note);
-    }
-    note.textContent = "這組卡片只保留「全年平均位移已扣除」後的 shape-only 歸因；+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準。";
-    ensureShapeOnlyDetails();
-  } else {
-    note?.remove();
-    restoreShapeOnlyDetails();
-  }
-}
-
 function renderPending() {
   if (!panel) return;
   panel.dataset.ready = "false";
-  setText("determinacy-scope-value", "等待回歸／天文狀態");
+  setText("determinacy-scope-value", "等待研究時間狀態");
   setText("determinacy-footnote", "—");
 }
 
-function renderPillar(name, pillar) {
+function renderCard(name,{ pillarName=null, status, reason, resolved=false }) {
   const card = panel?.querySelector(`[data-determinacy-pillar="${name}"]`);
   if (!card) return;
-  card.dataset.status = pillar.status;
-  card.dataset.resolved = String(pillar.resolved);
-  card.dataset.determinacyPureBoundaryAttribution = String(pillar.pureBoundaryAttribution);
-  if ("discretePhaseClosed" in pillar) {
-    card.dataset.discretePhaseClosed = String(pillar.discretePhaseClosed);
-  } else {
-    delete card.dataset.discretePhaseClosed;
-  }
-  if ("discreteDayPhaseClosed" in pillar) {
-    card.dataset.discreteDayPhaseClosed = String(pillar.discreteDayPhaseClosed);
-  } else {
-    delete card.dataset.discreteDayPhaseClosed;
-  }
-  card.querySelector(".determinacy-status").textContent = STATUS_LABELS[pillar.status] ?? pillar.status;
-  card.querySelector("p").textContent = pillar.summary;
+
+  card.dataset.status = status;
+  card.dataset.resolved = String(resolved);
+  card.dataset.determinacyPureBoundaryAttribution = String(resolved && (name === "year" || name === "month"));
+
+  const statusNode=card.querySelector(".determinacy-status");
+  const summary=card.querySelector("p");
+  const label=STATUS_LABELS[status] ?? status;
+  if(statusNode) statusNode.textContent=pillarName ? `${pillarName} · ${label}` : label;
+  if(summary) summary.textContent=reason;
 }
 
-function refresh() {
-  if (!instrument || !panel) return;
-  const explorerDeltaYears = Number(instrument.dataset.deltaYears);
-  const liveYearSequenceClosed = boolDataset("yearSequenceClosed");
-  const liveDayClosed = boolDataset("dayClosed");
-  const astronomyValidity = instrument.dataset.astronomyValidity;
-  const absolutePrimary = absoluteReferencePrimary();
+function writeInstrumentStatus(states,resolvedCount){
+  instrument.dataset.fourPillarYearStatus=states.year.status;
+  instrument.dataset.fourPillarMonthStatus=states.month.status;
+  instrument.dataset.fourPillarDayStatus=states.day.status;
+  instrument.dataset.fourPillarHourStatus=states.hour.status;
+  instrument.dataset.fourPillarResolvedCount=String(resolvedCount);
+}
 
-  if (!Number.isInteger(explorerDeltaYears) || liveYearSequenceClosed === null || liveDayClosed === null || !astronomyValidity) {
-    renderPending();
-    return;
+function renderSharedSeasonal(state){
+  if(!panel||!instrument||!state?.target)return false;
+
+  const target=state.target.pillars;
+  const selected=state.selection;
+  const states={};
+
+  for(const name of Object.keys(LABELS)){
+    const pillar=target[name];
+    const resolved=pillar.status==="research-resolved"||pillar.status==="resolved";
+    states[name]={ status:pillar.status, resolved };
+    renderCard(name,{
+      pillarName:pillar.name,
+      status:pillar.status,
+      reason:pillar.reason,
+      resolved
+    });
   }
 
-  // This panel belongs to the fixed +24,000-year argument whenever the
-  // absolute Research evidence is published. The current Δ above is only an
-  // explorer/sandbox and must not turn the main 03 conclusion back into Δ=0
-  // identity.
-  const deltaYears = absolutePrimary ? 24000 : explorerDeltaYears;
-  const discreteYearSequenceClosed = absolutePrimary ? true : liveYearSequenceClosed;
-  const discreteDayClosed = absolutePrimary ? true : liveDayClosed;
-  const astronomyWithinRange = absolutePrimary ? true : astronomyValidity === "within-range";
+  const resolvedCount=Object.values(states).filter(item=>item.resolved).length;
+  const label=panel.querySelector(".determinacy-label");
+  const scopeLabel=panel.querySelector(".determinacy-scope span");
+  if(label)label.textContent="目前選定太陽位置";
+  if(scopeLabel)scopeLabel.textContent="固定 +24,000 · 同一太陽黃經";
+
+  const selectionLabel=selected.termName
+    ? `${selected.termName} · ${selected.longitudeDegrees}°`
+    : `${selected.longitudeDegrees}° · ${selected.baziMonthBranch}月`;
+
+  setText("determinacy-scope-value","年／月可判 · 日／時未定");
+  setText(
+    "determinacy-footnote",
+    `${selectionLabel}：這裡比較的是同一太陽黃經位置，所以年／月可由 60 年序與節界規則推出；但 02 已證明這個太陽位置的到達時刻，相對固定推進 24,000 個公曆年提前 ${Math.abs(state.comparison.driftDays).toFixed(3)} 天。日／時仍不能由帶不確定性的深時間 UT1／地方鐘面唯一決定。`
+  );
+
+  panel.dataset.ready="true";
+  panel.dataset.mode="shared-seasonal";
+  panel.dataset.argumentDeltaYears="24000";
+  panel.dataset.explorerDeltaYears=instrument.dataset.deltaYears ?? "";
+  panel.dataset.selectedLongitude=String(selected.longitudeDegrees);
+  panel.dataset.resolvedPillarCount=String(resolvedCount);
+  panel.dataset.yearStatus=states.year.status;
+  panel.dataset.monthStatus=states.month.status;
+  panel.dataset.dayStatus=states.day.status;
+  panel.dataset.hourStatus=states.hour.status;
+
+  writeInstrumentStatus(states,resolvedCount);
+  instrument.dataset.fourPillarAbsoluteCivilPhasePreserved="false";
+  instrument.dataset.fourPillarLocalClockModeled="false";
+  return true;
+}
+
+function renderLegacy(){
+  if (!instrument || !panel) return false;
+  const deltaYears = Number(instrument.dataset.deltaYears);
+  const yearSequenceClosed = boolDataset("yearSequenceClosed");
+  const dayClosed = boolDataset("dayClosed");
+  const astronomyValidity = instrument.dataset.astronomyValidity;
+
+  if (!Number.isInteger(deltaYears) || yearSequenceClosed === null || dayClosed === null || !astronomyValidity) {
+    renderPending();
+    return false;
+  }
 
   const result = fourPillarDeterminacy({
     deltaYears,
-    yearSequenceAligned: deltaYears % 60 === 0,
-    discreteYearSequenceClosed,
-    discreteDayClosed,
-    astronomyWithinRange
+    yearSequenceAligned:deltaYears % 60 === 0,
+    discreteYearSequenceClosed:yearSequenceClosed,
+    discreteDayClosed:dayClosed,
+    astronomyWithinRange:astronomyValidity === "within-range"
   });
 
-  for (const name of Object.keys(LABELS)) renderPillar(name, result.pillars[name]);
-  const resolvedCount = Object.values(result.pillars).filter(pillar => pillar.resolved).length;
+  const states={};
+  for(const name of Object.keys(LABELS)){
+    const pillar=result.pillars[name];
+    states[name]={status:pillar.status,resolved:pillar.resolved};
+    renderCard(name,{
+      status:pillar.status,
+      reason:pillar.summary,
+      resolved:pillar.resolved
+    });
+  }
+  const resolvedCount=Object.values(states).filter(item=>item.resolved).length;
+  writeInstrumentStatus(states,resolvedCount);
 
-  panel.dataset.ready = "true";
-  panel.dataset.deltaYears = String(deltaYears);
-  panel.dataset.identity = String(result.identity);
-  panel.dataset.yearSequenceAligned = String(result.yearSequenceAligned);
-  panel.dataset.comparisonFrame = result.comparisonFrame;
-  panel.dataset.absoluteCivilPhasePreserved = String(result.absoluteCivilPhasePreserved);
-  panel.dataset.localClockModeled = String(result.localClockModeled);
-  panel.dataset.deltaTModeled = String(result.deltaTModeled);
-  panel.dataset.resolvedPillarCount = String(resolvedCount);
-
-  instrument.dataset.fourPillarYearStatus = result.pillars.year.status;
-  instrument.dataset.fourPillarMonthStatus = result.pillars.month.status;
-  instrument.dataset.fourPillarDayStatus = result.pillars.day.status;
-  instrument.dataset.fourPillarHourStatus = result.pillars.hour.status;
-  instrument.dataset.fourPillarResolvedCount = String(resolvedCount);
-  instrument.dataset.fourPillarAbsoluteCivilPhasePreserved = String(result.absoluteCivilPhasePreserved);
-  instrument.dataset.fourPillarLocalClockModeled = String(result.localClockModeled);
-
-  panel.dataset.explorerDeltaYears = String(explorerDeltaYears);
-  panel.dataset.argumentDeltaYears = String(deltaYears);
+  panel.dataset.ready="true";
+  panel.dataset.mode="legacy-explorer";
+  panel.dataset.argumentDeltaYears=String(deltaYears);
+  panel.dataset.resolvedPillarCount=String(resolvedCount);
   setText(
     "determinacy-scope-value",
     result.identity
       ? "同一比較狀態 · 4 / 4 相同"
-      : absolutePrimary
-        ? "shape-only：年／月交界可隔離"
-        : resolvedCount === 2
-          ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
-          : resolvedCount === 0
-            ? "沒有完整四柱可作純交界歸因"
-            : `${resolvedCount} / 4 柱可由此層解析`
+      : resolvedCount === 2
+        ? "年柱＋月柱可隔離 · 日柱＋時柱未解"
+        : `${resolvedCount} / 4 柱可由此層解析`
   );
   setText(
     "determinacy-footnote",
     result.identity
-      ? "Δ=0 是同一狀態，因此四柱相同是定義上的 identity，不是深時間模型推導。"
-      : `${absolutePrimary ? "此卡片已降為 shape-only 輔助證據；+24,000 的 TT/Gregorian reference 節界結果以上方主結果為準，不能直接升格成未來 civil-time 四柱。 " : ""}比較框架＝春分共同歸零的季節內形狀。絕對民用日相位：未保留；地方時：未建模；ΔT：未建模。${discreteDayClosed ? " 即使內圈日序顯示 0/60，也不能把它直接升格成此交節窗口內的日柱結論。" : ""}`
+      ? "Δ=0 是同一狀態，因此四柱相同是定義上的 identity。"
+      : "一般 Δ explorer 仍使用春分共同歸零的 shape-only 比較；完整固定 +24,000 結論請以上方主線為準。"
   );
-  syncAbsolutePresentation();
+  return true;
 }
 
-let queued = false;
-function scheduleRefresh() {
-  if (queued) return;
-  queued = true;
-  queueMicrotask(() => {
-    queued = false;
+function stateFromSeasonalDom(){
+  const longitude=Number(seasonalRoot?.dataset.selectedLongitude);
+  if(!Number.isFinite(longitude))return null;
+  try{
+    return researchSeasonalTimeState(longitude);
+  }catch{
+    return null;
+  }
+}
+
+function refresh(){
+  if(!instrument||!panel)return;
+  if(absoluteReferencePrimary()){
+    currentSeasonalState=currentSeasonalState??stateFromSeasonalDom();
+    if(currentSeasonalState&&renderSharedSeasonal(currentSeasonalState))return;
+  }
+  renderLegacy();
+}
+
+let queued=false;
+function scheduleRefresh(){
+  if(queued)return;
+  queued=true;
+  queueMicrotask(()=>{
+    queued=false;
     refresh();
   });
 }
 
-if (instrument && panel) {
-  new MutationObserver(scheduleRefresh).observe(instrument, {
+if(instrument&&panel){
+  document.addEventListener(RESEARCH_TIME_SELECTION_EVENT,event=>{
+    if(event.detail?.owner!=="seasonal")return;
+    try{
+      currentSeasonalState=researchSeasonalTimeState(event.detail.longitudeDegrees);
+    }catch{
+      currentSeasonalState=null;
+    }
+    scheduleRefresh();
+  });
+
+  new MutationObserver(scheduleRefresh).observe(instrument,{
     attributes:true,
     attributeFilter:[
       "data-delta-years",
@@ -216,5 +238,17 @@ if (instrument && panel) {
       "data-absolute-boundary-reference-jie"
     ]
   });
+
+  if(seasonalRoot){
+    new MutationObserver(()=>{
+      currentSeasonalState=stateFromSeasonalDom();
+      scheduleRefresh();
+    }).observe(seasonalRoot,{
+      attributes:true,
+      attributeFilter:["data-selected-longitude"]
+    });
+  }
+
+  currentSeasonalState=stateFromSeasonalDom();
   scheduleRefresh();
 }

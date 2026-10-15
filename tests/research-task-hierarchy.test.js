@@ -53,16 +53,16 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.doesNotMatch(html, /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊/);
   assert.match(html, /id="research-spine-discrete">24,000 離散候選<\/small>/);
   assert.match(html, /id="research-spine-astronomy">TT 提前 10–14 d<\/small>/);
-  assert.match(html, /id="research-spine-evidence">12 \/ 12 節界位移<\/small>/);
+  assert.match(html, /id="research-spine-evidence">24,000 ≠ 完整週期<\/small>/);
   assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 12 節界校驗<\/span>/);
-  assert.match(html, /class="research-task-relation">固定 24,000 年天文結果 → 節界後果<\/span>/);
+  assert.match(html, /class="research-task-relation">12 \/ 12 節界位移 → 四柱可判範圍<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
 
 
 test("Research narrative spine summarizes the fixed argument rather than the current delta sandbox", () => {
   assert.match(html, /research-narrative-spine-view\.js/);
-  for (const copy of ["24,000 離散候選", "TT 提前 10–14 d", "12 / 12 節界位移"]) {
+  for (const copy of ["24,000 離散候選", "TT 提前 10–14 d", "24,000 ≠ 完整週期"]) {
     assert.ok(spineJs.includes(copy), `missing fixed-spine outcome: ${copy}`);
   }
   assert.doesNotMatch(spineJs, /instrument\.dataset|boolDataset|fourPillarResolvedCount|astronomyValidity/);
@@ -123,7 +123,7 @@ test("astronomy task answers where the +24k candidate fails and keeps the sandbo
 test("evidence task answers what the fixed result means for BaZi without overclaiming", () => {
   assert.match(evidence, /id="research-evidence-title">對八字意味著什麼？/);
   assert.match(evidence, /id="four-pillar-determinacy"/);
-  assert.match(evidence, /class="determinacy-label">可判定範圍/);
+  assert.match(evidence, /class="determinacy-label">目前選定太陽位置/);
   assert.match(evidence, /class="model-boundary research-evidence-appendix"/);
   assert.doesNotMatch(evidence, /目前能證到哪裡|矩陣只列模型已有證據的柱位/);
   assert.doesNotMatch(evidence, /class="near-search-panel"/);

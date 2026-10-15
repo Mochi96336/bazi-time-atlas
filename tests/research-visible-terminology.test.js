@@ -25,7 +25,7 @@ test("Research product labels use Chinese while canonical research terms stay re
     "季節相位 · 公曆框架",
     "軌道參數",
     "視覺尺度",
-    "目前可支持的最強結論",
+    "固定 +24,000 · 同一太陽黃經",
     "季節形狀最大值 → RMS",
     "最大絕對值 / RMS",
     "搜尋最佳",

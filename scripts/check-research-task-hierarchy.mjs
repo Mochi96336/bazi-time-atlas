@@ -71,11 +71,11 @@ for (const expected of [
   "八字的節界回來了嗎？",
   "對八字意味著什麼？",
   "固定 24,000 年候選 → 12 節界校驗",
-  "固定 24,000 年天文結果 → 節界後果",
+  "12 / 12 節界位移 → 四柱可判範圍",
   "只先算離散候選，不直接等同完整四柱週期",
   "24,000 離散候選",
   "TT 提前 10–14 d",
-  "12 / 12 節界位移"
+  "24,000 ≠ 完整週期"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
@@ -86,7 +86,7 @@ const identityProbe = dump("recurrence.html?delta=0");
 for (const expected of [
   "24,000 離散候選",
   "TT 提前 10–14 d",
-  "12 / 12 節界位移",
+  "24,000 ≠ 完整週期",
   "主線案例 · 固定 2026 → 26026",
   "12 / 12 節界未重現"
 ]) {
@@ -214,9 +214,9 @@ for (const expected of [
   "60 日序",
   "季節形狀 RMS",
   "12 / 12 節界未重現",
-  "shape-only 輔助判定",
-  "春分歸零後的舊模型內結論",
-  "shape-only：年／月交界可隔離"
+  "目前選定太陽位置",
+  "固定 +24,000 · 同一太陽黃經",
+  "年／月可判 · 日／時未定"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`localized Research terminology missing "${expected}": ${probe.url}`);
