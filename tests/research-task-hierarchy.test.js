@@ -71,6 +71,7 @@ test("Research narrative spine summarizes the fixed argument rather than the cur
 test("discrete task owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
   assert.match(discrete, /id="recurrence-instrument"/);
   assert.match(discrete, /class="recurrence-readout research-current-state"/);
+  assert.match(discrete, /id="research-discrete-thesis"/);
   assert.match(discrete, /id="research-year-strip"/);
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
@@ -83,10 +84,11 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
   assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
   assert.match(discrete, /id="research-cycle-comparison"/);
+  assert.ok(discrete.indexOf('id="research-discrete-thesis"') < discrete.indexOf('id="research-year-strip"'));
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('id="recurrence-instrument"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
-  assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('class="discrete-derivation"'));
+  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('class="discrete-derivation"'));
   assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
   assert.doesNotMatch(discrete, /class="astronomy-panel"/);
