@@ -54,7 +54,8 @@ test("seasonal evidence keeps mean drift separate from timing-equivalent orbit s
   assert.match(data, /meanDriftDays:SUMMARY\.meanDriftDays/);
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
   assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays/);
-  assert.match(html, /右側橢圓只畫 timing 反演的等效 shape/);
+  assert.match(html, /右側橢圓只畫由時間偏移反演得到的等效軌道形狀/);
+  assert.doesNotMatch(html, /timing 反演的等效 shape/);
   assert.match(html, /共同時間位移硬畫成軌道變形/);
   assert.doesNotMatch(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
   assert.match(css, /\.seasonal-orbit-bazi-boundary/);
