@@ -28,6 +28,10 @@ test("legacy determinacy owns its own shape-only demotion under the fixed main e
   assert.match(fourPillarView,/shape-only 輔助判定/);
   assert.match(fourPillarView,/全年平均位移已扣除/);
   assert.match(fourPillarView,/shape-only-determinacy-details/);
+  assert.match(fourPillarView,/const deltaYears = absolutePrimary \? 24000 : explorerDeltaYears/);
+  assert.match(fourPillarView,/const discreteYearSequenceClosed = absolutePrimary \? true : liveYearSequenceClosed/);
+  assert.match(fourPillarView,/const discreteDayClosed = absolutePrimary \? true : liveDayClosed/);
+  assert.match(fourPillarView,/data\.argumentDeltaYears|dataset\.argumentDeltaYears/);
   assert.match(css,/\.shape-only-determinacy-details/);
 });
 
