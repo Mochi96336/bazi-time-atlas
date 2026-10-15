@@ -50,12 +50,24 @@ test("prototype only expands when the canonical Research state matches 2026 + 24
 });
 
 test("prototype keeps common phase separate from timing-equivalent orbit shape", () => {
-  assert.match(data, /commonPhaseDays:-12\.205535425/);
-  assert.match(data, /peakToPeakDays:4\.022387715056539/);
-  assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.commonPhaseDays/);
+  assert.match(data, /meanDriftDays//);
+  assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
+  assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays//);
   assert.match(html, /右側只畫 timing 反演的等效 shape/);
-  assert.match(html, /共同位移硬畫成軌道變形/);
+  assert.match(html, /全年平均位移硬畫成軌道變形//);
   assert.match(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
+});
+
+test("equivalent orbit converts apparent solar longitude to heliocentric Earth direction", () => {
+  assert.match(view, /heliocentricEarthAngleDegrees/);
+  assert.match(view, /solarLongitudeDegrees \+ 180/);
+  assert.match(view, /solarLongitudeFromHeliocentricAngleDegrees/);
+  assert.match(html, /太陽視黃經 \+180°/);
+});
+
+test("total view does not reveal the mean-drift decomposition before split mode", () => {
+  assert.doesNotMatch(view, /seasonal-drift-phase-line/);
+  assert.match(html, /全年平均位移/);
 });
 
 test("curve and orbit share one longitude cursor without calling it a physical Earth position", () => {
