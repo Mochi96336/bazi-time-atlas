@@ -80,3 +80,84 @@ With the old `Rin = 686`, moving the origin closer necessarily created almost th
 The horizontal camera dimension should follow the actual rendered SVG aspect ratio. Camera code owns radial framing, not page layout.
 
 ## Rendering hierarchy
+
+The reset should converge on four mark roles rather than one opacity value for a whole SVG group:
+
+1. **surface** — the resting identity of a ring;
+2. **structure** — major divisions and reference geometry;
+3. **context** — sparse static labels / minor information;
+4. **active** — Selected Instant, active identity, next boundary and interaction feedback.
+
+Scale focus (`48h`, `1y`, `60y`) may reduce surface/structure/context weight, but active Selected-Instant information must retain an explicit readability floor. Group-wide opacity should not be the long-term primary emphasis mechanism.
+
+## Planned implementation order
+
+### A. Reset contract
+
+- remove tests that freeze aesthetic numeric geometry as correctness;
+- retain semantic topology, hit testing, phase and alignment gates;
+- record the old PNGs as pre-reset evidence rather than immutable visual targets.
+
+### B. Radial composition
+
+Change inner radius, primary ring thickness and camera framing together while keeping the outer envelope, fan aperture and all time semantics fixed. The acceptance question is whether the five layers occupy enough radial depth to read as one concentric mechanism **without** creating a large dead inner-disk field.
+
+### C. Fan aperture
+
+Evaluate the fan angle as the instrument's frame after camera and ring geometry are stable.
+
+### D. Rendering density
+
+Reduce resting minor-sector/tick noise while retaining precise active and interactive detail.
+
+### E. Mark-level emphasis
+
+Replace whole-track fading with role-specific emphasis.
+
+### F. Color grammar
+
+Use color semantically: Ganzhi structure, annual solar coordinate, Selected Instant datum, and optional classification overlays should be distinguishable by role rather than by assigning every ring an unrelated muted hue.
+
+### G. Integrated labels
+
+Move layer identity into the instrument so a detached legend is no longer required to understand radial order.
+
+### H. Selected Instant consolidation
+
+Make the radial datum/read-head the primary current-state reading and remove duplicate state presentations where they no longer add information.
+
+### I. HUD hierarchy
+
+Keep direct time controls primary. Move analysis lenses such as classification/reference/compare into secondary disclosure.
+
+### J. Mobile composition
+
+Use the same semantic/world model but give portrait mobile its own camera/composition contract rather than treating it as desktop plus horizontal crop.
+
+### K. Debt cleanup
+
+Only after the new architecture stabilizes, remove obsolete visual overrides and old assumptions.
+
+## Review protocol
+
+Each visual PR should answer exactly one primary visual question. Review must include deterministic screenshots at minimum for:
+
+- 1440x900 and 390x844;
+- `48h`, `1y`, and `60y` focus where the owned layer can affect them;
+- a fixed Selected Instant for direct before/after comparison.
+
+Review screenshots against the PR's stated visual question, not against pixel identity with the pre-reset baseline.
+
+Existing semantic/browser/unit gates remain mandatory. A prettier screenshot is never sufficient evidence for a semantic change.
+
+## Success criteria
+
+Without reading explanatory copy, a first-time viewer should be able to infer in this order:
+
+1. this is one concentric/radial time mechanism;
+2. larger temporal scales live farther out;
+3. one common Selected Instant crosses every layer;
+4. the layers move at different rates;
+5. deeper classifications and comparison tools are optional analysis lenses.
+
+If controls, legends or explanatory text must be read before the radial mechanism is understood, the reset is not complete.
