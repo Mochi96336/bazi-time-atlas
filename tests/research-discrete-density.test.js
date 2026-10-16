@@ -189,7 +189,7 @@ test("R7 compresses the fan header space without removing its legend",async()=>{
 test("fan explains only its discrete rings and datum without leaking task 02", () => {
   assert.match(recurrenceHtml,/0 = 與基準同相位/);
   assert.match(recurrenceView,/label\.textContent = "基準 · 0"/);
-  assert.match(recurrenceView,/displayLabel:"公曆 · 400 年"/);
+  assert.match(recurrenceView,/displayLabel:"公曆結構 · 400 年"/);
   assert.match(recurrenceView,/displayLabel:"年序 · 60 年"/);
   assert.match(recurrenceView,/displayLabel:"日序 · 60 日"/);
   assert.doesNotMatch(recurrenceView,/astronomyLabel|十二節 · 天文殘差/);
