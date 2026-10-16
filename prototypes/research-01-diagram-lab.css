@@ -962,3 +962,84 @@ body {
     margin-top:var(--research-space-8);
   }
 }
+
+
+/* Round 3 — fair comparison polish */
+
+/* C should still be origin-first, but the consequence belongs immediately
+   beneath the source relation; explanatory prose can follow the diagram. */
+.diagram-direction[data-direction="origin"].is-active {
+  display:flex;
+  flex-direction:column;
+}
+
+.diagram-direction[data-direction="origin"] > .direction-head { order:0; }
+.diagram-direction[data-direction="origin"] > .solar-origin-map { order:1; }
+.diagram-direction[data-direction="origin"] > .origin-escalation { order:2; }
+.diagram-direction[data-direction="origin"] > .origin-thesis { order:3; }
+
+.diagram-direction[data-direction="origin"] .origin-escalation {
+  margin-top:var(--research-space-8);
+}
+
+.diagram-direction[data-direction="origin"] .origin-thesis {
+  margin-top:var(--research-space-6);
+}
+
+/* B mobile: keep both candidate labels, but separate them vertically so the
+   comparison fails or succeeds on the grammar rather than on a collision. */
+@media (max-width:680px) {
+  .phase-track[data-track="gregorian"] .track-point.is-local b {
+    transform:translate(-16px,-2px);
+  }
+
+  .phase-track[data-track="gregorian"] .track-point.is-local small {
+    transform:translate(-10px,-2px);
+  }
+
+  .phase-track[data-track="gregorian"] .track-point.is-global b {
+    transform:translate(-28px,24px);
+  }
+
+  .phase-track[data-track="gregorian"] .track-point.is-global small {
+    transform:translate(-10px,24px);
+  }
+
+  /* A mobile: preserve the full argument while shortening the bridge enough
+     that +24,000 appears materially sooner in the reading flow. */
+  .ladder-origin-cue {
+    margin-bottom:var(--research-space-4);
+  }
+
+  .ladder-origin-cue > small {
+    display:none;
+  }
+
+  .state-phases small {
+    min-height:0;
+  }
+
+  .condition-bridge {
+    gap:var(--research-space-2);
+    padding:var(--research-space-3) var(--research-space-4);
+  }
+
+  .condition-bridge > i {
+    height:28px;
+  }
+
+  .condition-bridge strong {
+    font-size:var(--research-type-compact);
+    line-height:var(--research-leading-compact);
+  }
+
+  .condition-bridge > div > b {
+    margin:var(--research-space-1) 0;
+    font-size:1.375rem;
+  }
+
+  .condition-bridge p {
+    font-size:var(--research-type-meta);
+    line-height:var(--research-leading-meta);
+  }
+}
