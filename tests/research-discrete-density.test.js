@@ -88,8 +88,10 @@ test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-play\s*\{[\s\S]*?min-height:32px/);
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-public-slider output\s*\{display:none\}/);
   assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
-  assert.match(recurrenceHtml,/id="research-discrete-thesis-title">先看 24,000 年怎麼得到<\/h3>/);
-  assert.match(recurrenceHtml,/LCM\(1,200, 8,000\) = 24,000/);
+  assert.match(recurrenceHtml,/id="research-discrete-thesis-title">從局部重遇，怎麼一路補到 24,000？<\/h3>/);
+  assert.match(recurrenceHtml,/公曆 400 年結構/);
+  assert.match(recurrenceHtml,/同源：太陽年/);
+  assert.match(recurrenceHtml,/十二節／八字月序/);
   assert.match(recurrenceHtml,/id="discrete-derivation-title">用 Δ 驗算<\/strong>/);
   assert.match(recurrenceHtml,/id="research-delta-play"[\s\S]*?aria-pressed="false"[\s\S]*?aria-label="播放時間推演"/);
   assert.match(recurrenceHtml,/id="delta-slider"[^>]*step="1"/);
@@ -153,17 +155,23 @@ test("default single-date readout and responsive fan preserve paired comparisons
 test("year-day local recurrence is promoted into the visible derivation rail",()=>{
   assert.match(recurrenceView,/DERIVATION_STRUCTURAL_DELTAS = Object\.freeze\(\[0, 400, 1200, 8000, 24_000\]\)/);
   assert.match(recurrenceView,/visibleDerivationDeltas\(localYears\)/);
-  assert.match(recurrenceView,/\.\.\.\(Number\.isInteger\(localYears\) \? \[localYears\] : \[\]\)/);
+  assert.match(recurrenceView,/Number\.isInteger\(localYears\) && localYears !== global \? \[localYears\] : \[\]/);
   assert.match(recurrenceView,/data\.milestone|dataset\.milestone/);
   assert.match(recurrenceView,/local-year-day/);
-  assert.match(recurrenceView,/60 年序＋60 日序首次重遇；公曆 400 年相位不必歸零/);
+  assert.match(recurrenceView,/60 年序＋60 日序首次重遇；公曆／季節代理尚未回到基準/);
   assert.match(recurrenceView,/deltaYears === 0[\s\S]*?\? recurrenceState\(currentBase,0\)/);
   assert.match(recurrenceView,/deltaYears === 0 \? "0 年"/);
   assert.match(recurrenceView,/選定日期本身 · 三個離散相位的基準點/);
   assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
+  assert.match(recurrenceView,/className = "discrete-derivation-bridge"/);
+  assert.match(recurrenceView,/公曆 \${formatSigned\(gregorianSigned\)} → 0/);
+  assert.match(recurrenceView,/年＋日已對上；再把季節／月序的離散代理拉回基準/);
+  assert.match(recurrenceView,/\.\.\.structural,[\s\S]*?\[localYears\][\s\S]*?global/);
   assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\[data-delta-years="0"\][\s\S]*?grid-column:1 \/ -1/);
   assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\[data-milestone="global-discrete"\]/);
-  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\.is-local-recurrence[\s\S]*?grid-column:1 \/ -1/);
+  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\.is-local-recurrence[\s\S]*?grid-column:span 5/);
+  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\.is-global-closure[\s\S]*?grid-column:span 5/);
+  assert.match(css,/\.discrete-derivation-bridge[\s\S]*?grid-column:span 2/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.research-discrete-thesis \.discrete-derivation-steps[\s\S]*?grid-auto-flow:row;[\s\S]*?overflow-x:visible/);
   assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
 });
@@ -345,10 +353,23 @@ test("reading order explains the global candidate before date/fan verification a
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
-  assert.match(recurrenceHtml, /年序 0 ＋ 日序 0 即成立；公曆 400 年相位不必歸零/);
+  assert.match(recurrenceHtml, /先對上：<\/strong>年序 0 ＋ 日序 0/);
+  assert.match(recurrenceHtml, /再提高條件：<\/strong>連公曆／季節代理也回到 0/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
 test("research integration still loads the discrete presentation layer", () => {
   assert.match(host, /import "\.\/research-discrete-density-view\.js";/);
+});
+
+test("default 2026-09-13 story visibly escalates from +1980 local recurrence to +24000 global closure", async () => {
+  const { recurrenceState } = await import("../src/recurrence/gregorian-cycle.js");
+  const local = recurrenceState({year:2026,month:9,day:13},1980);
+  const global = recurrenceState({year:2026,month:9,day:13},24000);
+
+  assert.deepEqual(local.phases,{yearSequence:0,gregorian:380,day:0});
+  assert.deepEqual(global.phases,{yearSequence:0,gregorian:0,day:0});
+  assert.match(recurrenceView,/signedShortestPhase\(localState\.phases\.gregorian,400\)/);
+  assert.match(recurrenceHtml,/01 用左邊作離散代理 · 02 用太陽黃經直接驗真/);
+  assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.discrete-derivation-bridge::before[\s\S]*?content:"↓"/);
 });
