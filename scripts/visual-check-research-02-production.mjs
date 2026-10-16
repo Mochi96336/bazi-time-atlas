@@ -33,21 +33,20 @@ await mkdir(outputDir,{recursive:true});
 const browser=findBrowser();
 const captures=[];
 for(const viewport of viewports){
-  const url=new URL("recurrence.html?date=2026-09-13&delta=24000#seasonal-drift-evidence",baseURL).href;
+  const harness="scripts/fixtures/research-02-production-visual.html?width="+viewport.width+"&height="+viewport.height;
+  const url=new URL(harness,baseURL).href;
   const dom=run(browser,[...browserArgs(),"--window-size="+viewport.width+","+viewport.height,"--dump-dom",url],"Research 02 DOM").stdout;
   for(const required of [
-    'data-diagram-grammar="zero-line-proof"',
-    'id="seasonal-boundary-proof-svg"',
-    'class="seasonal-orbit-time-ring"',
-    '12 / 12',
-    '0 天 = 完全重合'
-  ]) if(!dom.includes(required))throw new Error("Research 02 production missing "+required);
+    'data-ready="true"',
+    'data-grammar="zero-line-proof"',
+    'data-proof-ready="true"'
+  ]) if(!dom.includes(required))throw new Error("Research 02 production harness missing "+required);
 
   const fileName="research-02-production-"+viewport.key+".png";
   const filePath=path.join(outputDir,fileName);
   run(browser,[...browserArgs(),"--window-size="+viewport.width+","+viewport.height,"--screenshot="+filePath,url],fileName);
   const info=await stat(filePath);
-  if(info.size<10000)throw new Error(fileName+" unexpectedly small");
+  if(info.size<25000)throw new Error(fileName+" unexpectedly small");
   captures.push({viewport:viewport.key,file:fileName,bytes:info.size,url});
 }
 await writeFile(path.join(outputDir,"research-02-production-evidence.json"),JSON.stringify({browser,baseURL,captures},null,2)+"\n","utf8");

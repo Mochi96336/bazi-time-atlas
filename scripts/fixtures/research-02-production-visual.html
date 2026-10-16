@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Research 02 production visual harness</title>
+  <style>
+    html,body{margin:0;overflow:hidden;background:#0a0e12}
+    #stage{display:block;border:0;background:#0a0e12}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Research 02 production viewport"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const params=new URLSearchParams(location.search);
+    const width=Math.max(320,Math.min(2047,Number(params.get("width"))||1440));
+    const height=Math.max(480,Math.min(2400,Number(params.get("height"))||900));
+    const frame=document.querySelector("#stage");
+    const probe=document.querySelector("#probe");
+    document.documentElement.style.width=(width<=390?500:width)+"px";
+    document.body.style.width=(width<=390?500:width)+"px";
+    document.documentElement.style.height=height+"px";
+    document.body.style.height=height+"px";
+    frame.style.width=width+"px";
+    frame.style.height=height+"px";
+    frame.src=new URL("../../recurrence.html?date=2026-09-13&delta=24000",location.href).href;
+    const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    frame.addEventListener("load",async()=>{
+      try{
+        const doc=frame.contentDocument;
+        const win=frame.contentWindow;
+        for(let i=0;i<180;i++){
+          const root=doc?.getElementById("seasonal-drift-evidence");
+          const proof=doc?.getElementById("seasonal-boundary-proof-svg");
+          if(root?.dataset.ready==="true"&&proof?.dataset.ready==="true")break;
+          await wait(40);
+        }
+        const root=doc?.getElementById("seasonal-drift-evidence");
+        const proof=doc?.getElementById("seasonal-boundary-proof-svg");
+        if(!root||root.dataset.ready!=="true"||proof?.dataset.ready!=="true"){
+          throw new Error("Research 02 did not become ready");
+        }
+        root.scrollIntoView({block:"start"});
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+        await wait(120);
+        probe.dataset.ready="true";
+        probe.dataset.grammar=root.dataset.diagramGrammar||"";
+        probe.dataset.proofReady=proof.dataset.ready||"";
+        probe.dataset.innerWidth=String(win.innerWidth);
+        probe.dataset.scrollY=String(Math.round(win.scrollY));
+      }catch(error){
+        probe.dataset.ready="error";
+        probe.dataset.error=String(error);
+      }
+    });
+  </script>
+</body>
+</html>

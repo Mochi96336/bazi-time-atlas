@@ -22,7 +22,7 @@ test("Research 02 keeps the fixed +24k story visible before the delta sandbox", 
     researchEvidenceStart > dynamicPanelStart
   );
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
-  assert.match(html, /上面的 Δ 可以自由探索；以下回到 01 找出的 24,000 年候選/);
+  assert.match(html, /01 找到的是離散候選；02 把 0 天定義成真正重合/);
   assert.doesNotMatch(html, /seasonal-drift-case-gate|seasonal-drift-use-case|data-case-aligned/);
   assert.doesNotMatch(css, /seasonal-drift-case-gate|data-case-aligned/);
   assert.doesNotMatch(view, /syncCaseAlignment|caseButton|caseGateTitle|caseGateCopy/);
@@ -30,7 +30,7 @@ test("Research 02 keeps the fixed +24k story visible before the delta sandbox", 
 
 test("02 explicitly bridges from the free delta explorer back to the fixed +24k argument", () => {
   assert.match(html, /上面的 Δ 可以自由探索；以下回到 01 找出的 24,000 年候選/);
-  assert.match(html, /固定比較 2026 → 26026/);
+  assert.match(html, /主線案例 · 固定 2026 → 26026/);
 });
 
 test("other-delta astronomy is a closed sandbox, not the owner of the main story", () => {
@@ -55,8 +55,8 @@ test("seasonal evidence keeps mean drift inside the explicit decomposition layer
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
   assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays/);
   assert.match(html, /深入：為什麼不是固定提前 12 天？/);
-  assert.match(html, /主線已經證明 12 個節界都往同一方向移動/);
-  assert.match(html, /右側俯視圖保留同一組十二「節」與目前八字月份/);
+  assert.match(html, /主圖已經用十二個節界判定「沒有回到 0」/);
+  assert.match(html, /全年曲線 · 共同位移 ＋ 年內起伏/);
   assert.doesNotMatch(html, /timing 反演的等效 shape/);
   assert.doesNotMatch(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
   assert.match(css, /\.seasonal-orbit-bazi-boundary/);
@@ -86,7 +86,7 @@ test("curve and orbit share one longitude cursor without calling it a physical E
   assert.match(view, /setIndex\(indexForLongitude\(longitude\),"orbit"\)/);
   assert.match(view, /longitudeForIndex\(state\.index\)/);
   assert.match(view, /scrub\.addEventListener\("input"/);
-  assert.match(html, /拖俯視圖選時間，上方干支同步更新/);
+  assert.match(html, /拖俯視圖仍可選黃經，上方干支同步更新/);
   assert.match(view, /drawBaziBoundaries/);
   assert.match(view, /BAZI_JIE_BOUNDARIES/);
   assert.doesNotMatch(html, /拖地球也能選位置/);
@@ -151,7 +151,7 @@ test("pinned seasonal evidence derives summary metrics from one drift array and 
 test("Research 02 stays framed as a BaZi boundary question", () => {
   assert.match(html, /八字的節界回來了嗎？/);
   assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
-  assert.match(html, /12 個「節」界 × 同一太陽黃經/);
+  assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
   assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
 });
 
