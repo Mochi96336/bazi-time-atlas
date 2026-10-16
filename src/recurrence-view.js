@@ -462,12 +462,15 @@ function derivationPhase(label, closed, phase, modulus) {
 }
 
 function visibleDerivationDeltas(localYears) {
-  // Keep the explanatory chain structural-first. A base-date-specific
-  // Year+Day recurrence is useful evidence, but it is not one of the steps
-  // that derives the global 24,000-year discrete closure.
+  // Structural milestones explain the pieces first. Then place the
+  // base-date-specific Year+Day recurrence immediately before the global
+  // closure so the reader can see which extra condition remains.
+  const global = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
+  const structural = DERIVATION_STRUCTURAL_DELTAS.filter(deltaYears => deltaYears !== global);
   return [...new Set([
-    ...DERIVATION_STRUCTURAL_DELTAS,
-    ...(Number.isInteger(localYears) ? [localYears] : [])
+    ...structural,
+    ...(Number.isInteger(localYears) && localYears !== global ? [localYears] : []),
+    global
   ])];
 }
 
@@ -476,7 +479,7 @@ function derivationMeaning(deltaYears, localYears) {
   if (deltaYears === localYears && deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD) {
     return "60 年序＋60 日序首次重遇，且公曆結構也同時歸零";
   }
-  if (deltaYears === localYears) return "60 年序＋60 日序首次重遇；公曆 400 年相位不必歸零";
+  if (deltaYears === localYears) return "60 年序＋60 日序首次重遇；公曆／季節代理尚未回到基準";
   if (deltaYears === 400) return "400 年＝146,097 日；公曆結構回到 0，只是日數結構里程碑";
   if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0；60 日序仍未回來";
   if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0；60 年序仍未回來";
@@ -489,15 +492,32 @@ function derivationMeaning(deltaYears, localYears) {
 function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
   derivationSteps.replaceChildren();
+  const localState = Number.isInteger(localYears)
+    ? recurrenceState(currentBase,localYears)
+    : null;
+
   for (const deltaYears of visibleDerivationDeltas(localYears)) {
     const state = deltaYears === 0
       ? recurrenceState(currentBase,0)
       : states.find(candidate => candidate.deltaYears === deltaYears);
     if (!state) continue;
+
+    if (deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD &&
+        localState &&
+        localYears !== GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD) {
+      const bridge = document.createElement("div");
+      const gregorianSigned = signedShortestPhase(localState.phases.gregorian,400);
+      bridge.className = "discrete-derivation-bridge";
+      bridge.dataset.fromDeltaYears = String(localYears);
+      bridge.dataset.toDeltaYears = String(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD);
+      bridge.innerHTML = `<span>再補上同源的太陽年結構</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>年＋日已對上；再把季節／月序的離散代理拉回基準</small>`;
+      derivationSteps.appendChild(bridge);
+    }
+
     const button = document.createElement("button");
     const isLocalYearDay = deltaYears === localYears && state.closed.yearSequence && state.closed.day;
     button.type = "button";
-    button.className = `discrete-derivation-step${isLocalYearDay ? " is-local-recurrence" : ""}`;
+    button.className = `discrete-derivation-step${isLocalYearDay ? " is-local-recurrence" : ""}${deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD ? " is-global-closure" : ""}`;
     button.dataset.deltaYears = String(deltaYears);
     button.dataset.milestone = isLocalYearDay
       ? "local-year-day"
