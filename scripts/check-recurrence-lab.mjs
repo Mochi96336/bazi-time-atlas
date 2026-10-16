@@ -113,7 +113,7 @@ function expectDiscreteComprehension(dom, url) {
   if (!dom.includes(">基準 · 0</text>")) {
     throw new Error(`phase gauge zero reference is not labeled as the shared datum: ${url}`);
   }
-  for (const [key, label] of [["gregorian","公曆 · 400 年"],["year","年序 · 60 年"],["day","日序 · 60 日"]]) {
+  for (const [key, label] of [["gregorian","公曆結構 · 400 年"],["year","年序 · 60 年"],["day","日序 · 60 日"]]) {
     if (!dom.includes(`data-phase-ring-label="${key}"`) || !dom.includes(`>${label}</text>`)) {
       throw new Error(`phase gauge is missing the direct ${key} ring label: ${url}`);
     }
@@ -126,7 +126,7 @@ function expectDiscreteComprehension(dom, url) {
       throw new Error(`visible discrete derivation is missing +${delta}: ${url}`);
     }
   }
-  if (!dom.includes("400 年＝146,097 日；公曆結構回到 0，只是日數結構里程碑")) {
+  if (!dom.includes("400 年＝146,097 日；公曆結構回到 0，作為季節／月序的離散代理里程碑")) {
     throw new Error(`400-year Gregorian/day bridge is not visible: ${url}`);
   }
   if (!dom.includes("60 年序＋60 日序首次重遇；公曆／季節代理尚未回到基準")) {
