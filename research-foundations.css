@@ -1,0 +1,75 @@
+/* Research visual foundations
+   Semantic tokens only. This file must not own component layout or geometry.
+   Research presentation styles consume these roles; they do not invent new
+   colors, type sizes or spacing values ad hoc. */
+:root {
+  /* Neutral surfaces */
+  --research-bg-page: #0a0e12;
+  --research-bg-layer-1: #0f151b;
+  --research-bg-layer-2: #151d24;
+
+  /* Text */
+  --research-text-primary: #eef2f2;
+  --research-text-secondary: #b2bdc1;
+  --research-text-muted: #7b878e;
+
+  /* Structural lines */
+  --research-line-subtle: rgba(224, 234, 238, .08);
+  --research-line-strong: rgba(224, 234, 238, .18);
+
+  /* Semantic accents */
+  --research-current: #7ec8d8;
+  --research-candidate: #d6b26f;
+  --research-unresolved: #7c878d;
+  --research-danger: #cf8276;
+  --research-focus: #edf4f5;
+
+  /* Diagram mark roles */
+  --research-diagram-surface: rgba(224, 234, 238, .045);
+  --research-diagram-structure: rgba(224, 234, 238, .18);
+  --research-diagram-context: rgba(178, 189, 193, .62);
+  --research-diagram-active-current: var(--research-current);
+  --research-diagram-active-candidate: var(--research-candidate);
+  --research-diagram-unresolved: var(--research-unresolved);
+  --research-diagram-line-hairline: 1px;
+  --research-diagram-line-strong: 1.5px;
+  --research-diagram-line-active: 2px;
+
+  /* Typography */
+  --research-type-display: clamp(2.5rem, 4vw, 3rem);
+  --research-type-section: clamp(1.625rem, 2.4vw, 1.875rem);
+  --research-type-subsection: 1.125rem;
+  --research-type-body: .9375rem;
+  --research-type-compact: .875rem;
+  --research-type-meta: .75rem;
+  --research-type-plot: .6875rem;
+
+  --research-leading-display: 1.05;
+  --research-leading-section: 1.15;
+  --research-leading-subsection: 1.3;
+  --research-leading-body: 1.6;
+  --research-leading-compact: 1.5;
+  --research-leading-meta: 1.45;
+  --research-leading-plot: 1.3;
+
+  --research-weight-display: 660;
+  --research-weight-section: 650;
+  --research-weight-subsection: 620;
+  --research-weight-body: 450;
+  --research-weight-emphasis: 680;
+
+  /* 4/8-based spacing vocabulary */
+  --research-space-1: 4px;
+  --research-space-2: 8px;
+  --research-space-3: 12px;
+  --research-space-4: 16px;
+  --research-space-6: 24px;
+  --research-space-8: 32px;
+  --research-space-12: 48px;
+  --research-space-16: 64px;
+  --research-space-20: 80px;
+
+  /* Reading and diagram widths */
+  --research-width-narrative: 860px;
+  --research-width-visual: 1280px;
+}
