@@ -4,6 +4,8 @@
 
 This document defines the visual-redesign boundary for the kinetic atlas. It deliberately separates **semantic correctness** from the current **presentation geometry**.
 
+The Research destination applies the same semantic/presentation separation through `docs/research-visual-constitution.md`. That document extends this reset with Research-specific narrative hierarchy, diagram grammar, typography/spacing/color foundations and a prototype-first design-QA workflow.
+
 The existing production screenshots remain useful regression evidence for the state of the product before this reset, but they are **not aesthetic golden masters**. During the reset, a screenshot is allowed to change when the PR explicitly owns the corresponding visual layer and all semantic gates remain green.
 
 ## Product goal

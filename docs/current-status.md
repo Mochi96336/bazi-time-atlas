@@ -2,7 +2,7 @@
 
 Updated through the current production wheel, deterministic visual evidence, typed Day/Hour proof chain, bounded DE441 seasonal-event runtime work, and the Atlas temporal-context state/control migration on main.
 
-This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is historical design rationale and must not override behavior locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`.
+This document is the **normative current-state checkpoint**. `docs/kinetic-atlas-plan.md` is historical design rationale and must not override behavior locked by current tests. Cross-cutting invariants that should survive future feature work are consolidated in `docs/architecture-contracts.md`. Research-specific presentation work must also follow `docs/research-visual-constitution.md`, which defines the Research visual hierarchy, diagram grammar, typography/spacing/color foundations and design-QA process without overriding semantic contracts.
 
 ## Product state
 
