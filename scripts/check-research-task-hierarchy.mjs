@@ -101,11 +101,14 @@ if (!identitySandbox || /^<details[^>]*\sopen(?:\s|=|>)/.test(identitySandbox)) 
 
 if (!discrete || !astronomy || !evidence) throw new Error(`three Research ownership sections were not rendered: ${probe.url}`);
 const thesisIndex = discrete.indexOf('id="research-discrete-thesis"');
+const solarOriginIndex = discrete.indexOf('class="research-solar-origin"');
+const stepsIndex = discrete.indexOf('id="discrete-derivation-steps"');
 const stripIndex = discrete.indexOf('id="research-year-strip"');
 const fanIndex = discrete.indexOf('id="recurrence-instrument"');
 const explorerIndex = discrete.indexOf('class="discrete-derivation"');
-if (!(thesisIndex >= 0 && stripIndex > thesisIndex && fanIndex > stripIndex && explorerIndex > fanIndex)) {
-  throw new Error(`Research 01 must explain the discrete candidate before date/fan/Δ exploration: ${probe.url}`);
+if (!(thesisIndex >= 0 && solarOriginIndex > thesisIndex && stepsIndex > solarOriginIndex &&
+      stripIndex > stepsIndex && fanIndex > stripIndex && explorerIndex > fanIndex)) {
+  throw new Error(`Research 01 must explain solar-origin context and local→global closure before date/fan/Δ exploration: ${probe.url}`);
 }
 if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="recurrence-readout research-current-state"') || !discrete.includes('id="research-year-strip"') || !discrete.includes('id="research-sexagenary-cycle"')) {
   throw new Error(`discrete task lost instrument, compact current state, year strip, or 60-day cycle: ${probe.url}`);
@@ -214,7 +217,11 @@ if (probe.dom.includes('class="research-task-nav"') || /Recurrence laboratory|<h
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 for (const expected of [
-  "先看 24,000 年怎麼得到",
+  "從局部重遇，怎麼一路補到 24,000？",
+  "同源：太陽年",
+  "十二節／八字月序",
+  "先對上：",
+  "再提高條件：",
   "用 Δ 驗算",
   "LCM(1,200, 8,000) = 24,000",
   "其他時間",
