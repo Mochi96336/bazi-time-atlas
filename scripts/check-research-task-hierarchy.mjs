@@ -217,11 +217,11 @@ if (probe.dom.includes('class="research-task-nav"') || /Recurrence laboratory|<h
   throw new Error(`retired Research task cards or redundant explainer copy returned: ${probe.url}`);
 }
 for (const expected of [
-  "從局部重遇，怎麼一路補到 24,000？",
-  "同源：太陽年",
+  "先看局部重遇缺哪一層，再把條件補滿",
+  "共同追蹤：太陽年",
   "十二節／八字月序",
-  "先對上：",
-  "再提高條件：",
+  "缺季節位置",
+  "局部重遇不是拿來找倍數",
   "用 Δ 驗算",
   "LCM(1,200, 8,000) = 24,000",
   "其他時間",

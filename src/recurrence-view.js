@@ -54,6 +54,7 @@ const baseEditor = document.querySelector("#research-base-editor");
 const shiftFeedback = document.querySelector("#research-shift-feedback");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const derivationSteps = document.querySelector("#discrete-derivation-steps");
+const discreteRouteLocal = document.querySelector("#research-discrete-route-local");
 const cursorGroup = document.querySelector("#recurrence-cursor");
 const DERIVATION_STRUCTURAL_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000]);
 
@@ -492,6 +493,11 @@ function derivationMeaning(deltaYears, localYears) {
 function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
   derivationSteps.replaceChildren();
+  if (discreteRouteLocal) {
+    discreteRouteLocal.textContent = Number.isInteger(localYears)
+      ? `+${localYears.toLocaleString("en-US")}`
+      : "局部重遇";
+  }
   const localState = Number.isInteger(localYears)
     ? recurrenceState(currentBase,localYears)
     : null;
@@ -510,7 +516,7 @@ function renderDerivation(states, localYears) {
       bridge.className = "discrete-derivation-bridge";
       bridge.dataset.fromDeltaYears = String(localYears);
       bridge.dataset.toDeltaYears = String(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD);
-      bridge.innerHTML = `<span>再補上同源的太陽年結構</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>年＋日已對上；再把季節／月序的離散代理拉回基準</small>`;
+      bridge.innerHTML = `<span>還缺：太陽年中的季節位置</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>不是找 ${localYears.toLocaleString("en-US")} 的倍數；而是把判定收緊到季節位置代理也回基準</small>`;
       derivationSteps.appendChild(bridge);
     }
 

@@ -88,9 +88,9 @@ test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-play\s*\{[\s\S]*?min-height:32px/);
   assert.match(layout,/@media\(max-width:480px\)[\s\S]*?\.research-delta-public-slider output\s*\{display:none\}/);
   assert.match(recurrenceHtml,/id="delta-slider-output"[^>]*>0 年<\/output>/);
-  assert.match(recurrenceHtml,/id="research-discrete-thesis-title">從局部重遇，怎麼一路補到 24,000？<\/h3>/);
+  assert.match(recurrenceHtml,/id="research-discrete-thesis-title">先看局部重遇缺哪一層，再把條件補滿<\/h3>/);
   assert.match(recurrenceHtml,/公曆 400 年結構/);
-  assert.match(recurrenceHtml,/同源：太陽年/);
+  assert.match(recurrenceHtml,/共同追蹤：太陽年/);
   assert.match(recurrenceHtml,/十二節／八字月序/);
   assert.match(recurrenceHtml,/id="discrete-derivation-title">用 Δ 驗算<\/strong>/);
   assert.match(recurrenceHtml,/id="research-delta-play"[\s\S]*?aria-pressed="false"[\s\S]*?aria-label="播放時間推演"/);
@@ -165,13 +165,19 @@ test("year-day local recurrence is promoted into the visible derivation rail",()
   assert.match(recurrenceHtml,/id="discrete-derivation-steps"/);
   assert.match(recurrenceView,/className = "discrete-derivation-bridge"/);
   assert.match(recurrenceView,/公曆 \${formatSigned\(gregorianSigned\)} → 0/);
-  assert.match(recurrenceView,/年＋日已對上；再把季節／月序的離散代理拉回基準/);
+  assert.match(recurrenceView,/不是找 \${localYears\.toLocaleString\("en-US"\)} 的倍數；而是把判定收緊到季節位置代理也回基準/);
   assert.match(recurrenceView,/\.\.\.structural,[\s\S]*?\[localYears\][\s\S]*?global/);
-  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\[data-delta-years="0"\][\s\S]*?grid-column:1 \/ -1/);
-  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\[data-milestone="global-discrete"\]/);
-  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\.is-local-recurrence[\s\S]*?grid-column:span 5/);
-  assert.match(css,/\.research-discrete-thesis \.discrete-derivation-step\.is-global-closure[\s\S]*?grid-column:span 5/);
-  assert.match(css,/\.discrete-derivation-bridge[\s\S]*?grid-column:span 2/);
+  assert.match(recurrenceHtml,/data-diagram-grammar="condition-ladder"/);
+  assert.match(recurrenceHtml,/id="research-discrete-route-local"/);
+  assert.match(recurrenceView,/discreteRouteLocal\.textContent = Number\.isInteger\(localYears\)/);
+  assert.match(css,/data-diagram-grammar="condition-ladder"[\s\S]*?data-delta-years="0"[\s\S]*?display:none/);
+  assert.match(css,/data-diagram-grammar="condition-ladder"[\s\S]*?is-local-recurrence[\s\S]*?grid-column:1 \/ span 5/);
+  assert.match(css,/data-diagram-grammar="condition-ladder"[\s\S]*?is-global-closure[\s\S]*?grid-column:8 \/ span 5/);
+  assert.match(css,/data-diagram-grammar="condition-ladder"[\s\S]*?discrete-derivation-bridge[\s\S]*?grid-column:6 \/ span 2/);
+  assert.match(css,/\.research-condition-route\s*\{[\s\S]*?display:none/);
+  assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.research-condition-route\s*\{[\s\S]*?display:grid/);
+  assert.match(css,/var\(--research-current\)/);
+  assert.match(css,/var\(--research-candidate\)/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.research-discrete-thesis \.discrete-derivation-steps[\s\S]*?grid-auto-flow:row;[\s\S]*?overflow-x:visible/);
   assert.doesNotMatch(recurrenceHtml,/summary><span>Δ/);
 });
@@ -353,8 +359,9 @@ test("reading order explains the global candidate before date/fan verification a
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
-  assert.match(recurrenceHtml, /先對上：<\/strong>年序 0 ＋ 日序 0/);
-  assert.match(recurrenceHtml, /再提高條件：<\/strong>連公曆／季節代理也回到 0/);
+  assert.match(recurrenceHtml, /data-diagram-grammar="condition-ladder"/);
+  assert.match(recurrenceHtml, /推導關係：<\/strong>LCM\(1,200, 8,000\) = 24,000/);
+  assert.match(recurrenceHtml, /局部重遇不是拿來找倍數，而是指出「年＋日已回來，還缺季節位置」/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
@@ -370,6 +377,6 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.deepEqual(local.phases,{yearSequence:0,gregorian:380,day:0});
   assert.deepEqual(global.phases,{yearSequence:0,gregorian:0,day:0});
   assert.match(recurrenceView,/signedShortestPhase\(localState\.phases\.gregorian,400\)/);
-  assert.match(recurrenceHtml,/01 用左邊作離散代理 · 02 用太陽黃經直接驗真/);
-  assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.discrete-derivation-bridge::before[\s\S]*?content:"↓"/);
+  assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
+  assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
