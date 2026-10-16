@@ -48,7 +48,14 @@ function runChromium(browser,args,label) {
 }
 
 function labPath(direction) {
-  return "prototypes/research-01-diagram-lab.html?direction=" + encodeURIComponent(direction);
+  const anchor = {
+    ladder:"ladder-title",
+    tracks:"tracks-title",
+    origin:"origin-title"
+  }[direction];
+  return "prototypes/research-01-diagram-lab.html?direction="
+    + encodeURIComponent(direction)
+    + "#" + anchor;
 }
 
 await mkdir(outputDir,{ recursive:true });
