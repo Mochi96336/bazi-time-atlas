@@ -19,7 +19,7 @@ test("parallel visual CI retains every existing screenshot command and determina
   assert.equal(new Set(screenshotChecks).size, screenshotChecks.length, "duplicate screenshot checks");
   assert.deepEqual(
     [...screenshotChecks].sort(),
-    [...priorCommands, "visual-check-determinacy.mjs"].sort(),
+    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs"].sort(),
     "parallel PNG CI must preserve the complete existing visual:check inventory"
   );
   assert.ok(VISUAL_CI_SUITES["capture-material"].indexOf("visual-check-material-prototype.mjs")
@@ -33,7 +33,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 48, "keep the full browser + screenshot checks, including seasonal Research");
+  assert.equal(scripts.length, 49, "keep the full browser + screenshot checks, including seasonal Research and the Research 01 diagram lab");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
@@ -41,6 +41,10 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
   assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
+  assert.ok(
+    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-01-diagram-lab.mjs"),
+    "Research 01 diagram lab must keep deterministic desktop/mobile PNG evidence"
+  );
 });
 
 test("parallel visual gate preserves prior CI protection and combined PNG artifact", () => {
