@@ -713,6 +713,8 @@ Do not restyle the whole page at once.
 
 ### Phase A — foundations only
 
+The canonical Research token vocabulary lives in `research-foundations.css`. It is intentionally token-only: component selectors, layout ownership and diagram geometry belong to later prototype/implementation layers.
+
 Create Research-specific tokens for:
 
 - neutral layers;
@@ -723,9 +725,10 @@ Create Research-specific tokens for:
 - type scale;
 - spacing scale;
 - narrative width;
-- breakout width.
+- breakout width;
+- diagram mark roles (`surface / structure / context / active`).
 
-Do not change domain behavior.
+Do not change domain behavior or component geometry in this phase.
 
 ### Phase B — prototype 01
 
