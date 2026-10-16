@@ -26,7 +26,7 @@ test("Research 03 does not redraw the twelve-Jie evidence already owned by 02",(
   assert.doesNotMatch(view,/absolute-boundary-strip|absolute-boundary-buttons|renderStrip|svgEl\(/);
   assert.doesNotMatch(view,/查看 12 節詳細數值|boundary-window union/);
   assert.doesNotMatch(css,/absolute-boundary-strip|absolute-boundary-buttons|absolute-boundary-window/);
-  assert.match(view,/12 \/ 12 節界未重現/);
+  assert.match(view,/12 \/ 12 節界提前/);
   assert.match(view,/證據已在 02 顯示，不在 03 重畫/);
 });
 
@@ -50,15 +50,15 @@ test("Research outline ends in the recurrence conclusion rather than repeating t
 });
 
 test("Research 03 states the distinction without repeating the same verdict twice",()=>{
-  assert.match(view,/對齊太陽位置/);
+  assert.match(view,/對齊同一太陽黃經/);
   assert.match(view,/年／月可回到同柱/);
-  assert.match(view,/對齊公曆／TT 相位/);
-  assert.match(view,/日／時仍未定/);
-  assert.match(view,/判讀邊界/);
-  assert.match(view,/不代表每一個相隔 24,000 年的具體時刻都必然得到不同四柱/);
+  assert.match(view,/固定推進 24,000 公曆年/);
+  assert.match(view,/日／時仍是「未能判定」/);
+  assert.match(view,/不能直接偷換成/);
+  assert.match(view,/不能直接偷換成「每個相隔 24,000 年的四柱一定不同」/);
   assert.doesNotMatch(view,/absolute-boundary-verdict|回答研究題目|24,000 ≠ 整套映射精確週期/);
   assert.doesNotMatch(css,/\.absolute-boundary-verdict/);
-  assert.match(css,/\.research-conclusion-grid/);
+  assert.match(css,/\.research-alignment-fork/);
 });
 
 test("Research 03 visible pillar labels stay Chinese",()=>{
