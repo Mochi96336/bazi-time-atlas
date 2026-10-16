@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Research 01 Diagram Lab · BaZi Time Atlas</title>
+  <link rel="stylesheet" href="../research-foundations.css">
+  <link rel="stylesheet" href="./research-01-diagram-lab.css">
+</head>
+<body>
+  <main class="diagram-lab">
+    <header class="diagram-lab-head">
+      <div>
+        <div class="lab-eyebrow">Research 01 · diagram lab</div>
+        <h1>同一份資料，三種圖解語言</h1>
+        <p>固定內容：公曆結構與八字月序都追蹤太陽年的季節位置；+1,980 已讓年序與日序回到 0，但季節代理仍未回到基準；+24,000 才得到三層 0 / 0 / 0 的離散候選。</p>
+      </div>
+      <p class="diagram-lab-meta">prototype only · 不在 production 導航<br>只比較 hierarchy / geometry / diagram grammar</p>
+    </header>
+
+    <section class="diagram-direction" data-direction="ladder" aria-labelledby="ladder-title">
+      <header class="direction-head">
+        <div class="lab-eyebrow">A · Condition ladder</div>
+        <h2 id="ladder-title">把「提高條件」本身畫成主角</h2>
+        <p>400 / 1,200 / 8,000 退成結構背景；主視線只走 +1,980 → 缺季節代理 → +24,000。</p>
+      </header>
+
+      <div class="structural-context" aria-label="離散結構里程碑">
+        <article data-milestone="400"><small>公曆結構</small><strong>+400</strong><p></p></article>
+        <article data-milestone="1200"><small>公曆＋年序</small><strong>+1,200</strong><p></p></article>
+        <article data-milestone="8000"><small>公曆＋日序</small><strong>+8,000</strong><p></p></article>
+      </div>
+
+      <div class="condition-ladder">
+        <article class="ladder-state is-local" data-milestone="1980">
+          <header><strong>+1,980</strong><small>這個基準日期的局部重遇</small></header>
+          <div class="state-phases" aria-label="1980 年後離散相位">
+            <span data-phase="gregorian"><small>公曆／季節代理</small><b>—</b></span>
+            <span data-phase="yearSequence"><small>年序</small><b>—</b></span>
+            <span data-phase="day"><small>日序</small><b>—</b></span>
+          </div>
+        </article>
+
+        <div class="condition-bridge">
+          <i aria-hidden="true"></i>
+          <div>
+            <strong>再補上同源的太陽年／季節位置條件</strong>
+            <b><span id="ladder-local-gregorian">—</span> → 0</b>
+            <p>不是找 1,980 的倍數，而是把判定從「年＋日已回來」收緊成「連季節／月序的離散代理也回來」。</p>
+          </div>
+        </div>
+
+        <article class="ladder-state is-global" data-milestone="24000">
+          <header><strong>+24,000</strong><small>全域離散候選</small></header>
+          <div class="state-phases" aria-label="24000 年後離散相位">
+            <span data-phase="gregorian"><small>公曆／季節代理</small><b>—</b></span>
+            <span data-phase="yearSequence"><small>年序</small><b>—</b></span>
+            <span data-phase="day"><small>日序</small><b>—</b></span>
+          </div>
+        </article>
+
+        <p class="diagram-proof"><strong>結構證明</strong> LCM(1,200, 8,000) = 24,000 · 02 再用真正十二節界驗真</p>
+      </div>
+    </section>
+
+    <section class="diagram-direction" data-direction="tracks" aria-labelledby="tracks-title">
+      <header class="direction-head">
+        <div class="lab-eyebrow">B · Phase alignment tracks</div>
+        <h2 id="tracks-title">直接看三個相位有沒有同時對線</h2>
+        <p>把 0 畫成共同回歸線。+1,980 的年序與日序已貼到 0，公曆／季節代理仍偏；+24,000 三條才全部同時回線。</p>
+      </header>
+
+      <div class="phase-track-diagram">
+        <div class="track-scale" aria-hidden="true">
+          <span>偏離基準</span><b>0 · 回到基準</b>
+        </div>
+        <div class="phase-track" data-track="gregorian">
+          <strong>公曆／季節代理</strong>
+          <div class="track-line">
+            <i class="zero-line"></i>
+            <span class="track-point is-local" data-track-point="local"><b>+1,980</b><small>—</small></span>
+            <span class="track-point is-global" data-track-point="global"><b>+24,000</b><small>0</small></span>
+          </div>
+        </div>
+        <div class="phase-track" data-track="yearSequence">
+          <strong>年序</strong>
+          <div class="track-line">
+            <i class="zero-line"></i>
+            <span class="track-point is-local" data-track-point="local"><b>+1,980</b><small>0</small></span>
+            <span class="track-point is-global" data-track-point="global"><b>+24,000</b><small>0</small></span>
+          </div>
+        </div>
+        <div class="phase-track" data-track="day">
+          <strong>日序</strong>
+          <div class="track-line">
+            <i class="zero-line"></i>
+            <span class="track-point is-local" data-track-point="local"><b>+1,980</b><small>0</small></span>
+            <span class="track-point is-global" data-track-point="global"><b>+24,000</b><small>0</small></span>
+          </div>
+        </div>
+        <div class="track-annotation">
+          <span>局部重遇</span>
+          <strong>只差季節代理</strong>
+          <i aria-hidden="true">→</i>
+          <strong>三層同時回到 0</strong>
+          <span>全域候選</span>
+        </div>
+      </div>
+
+      <div class="structural-context is-secondary" aria-label="支撐相位軌的結構里程碑">
+        <article data-milestone="400"><small>公曆回位</small><strong>+400</strong><p></p></article>
+        <article data-milestone="1200"><small>公曆＋年序</small><strong>+1,200</strong><p></p></article>
+        <article data-milestone="8000"><small>公曆＋日序</small><strong>+8,000</strong><p></p></article>
+      </div>
+    </section>
+
+    <section class="diagram-direction" data-direction="origin" aria-labelledby="origin-title">
+      <header class="direction-head">
+        <div class="lab-eyebrow">C · Solar-origin map</div>
+        <h2 id="origin-title">先解釋「為什麼公曆值得拿來對」</h2>
+        <p>把來源關係變成主圖：公曆結構與十二節／八字月序不是同一系統，但都在追蹤太陽年的季節位置。</p>
+      </header>
+
+      <div class="solar-origin-map">
+        <div class="solar-origin-source">
+          <small>共同來源</small>
+          <strong>太陽年</strong>
+          <span>一年中的季節位置</span>
+        </div>
+        <div class="solar-origin-branches" aria-hidden="true"><i></i><i></i></div>
+        <div class="solar-origin-target is-proxy">
+          <small>01 · 離散代理</small>
+          <strong>公曆 400 年結構</strong>
+          <span>把季節位置離散成可計算的曆法結構</span>
+        </div>
+        <div class="solar-origin-target is-actual">
+          <small>02 · 真正驗證</small>
+          <strong>十二節／八字月序</strong>
+          <span>用太陽黃經檢查真正的節界位置</span>
+        </div>
+      </div>
+
+      <p class="origin-thesis">公曆不是額外亂加的第三個週期；01 只是先用同源的太陽年結構作代理，02 才問這個代理是否真的能把八字月界一起帶回來。</p>
+
+      <div class="origin-escalation">
+        <article class="origin-state is-local" data-milestone="1980">
+          <small>先找到局部重遇</small>
+          <strong>+1,980</strong>
+          <p></p>
+        </article>
+        <div class="origin-transition">
+          <span>提高條件</span>
+          <b aria-hidden="true">→</b>
+          <small><span id="origin-local-gregorian">—</span> → 0</small>
+        </div>
+        <article class="origin-state is-global" data-milestone="24000">
+          <small>得到離散候選</small>
+          <strong>+24,000</strong>
+          <p></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <nav class="diagram-lab-nav" aria-label="diagram directions">
+    <a href="?direction=ladder" data-direction-link="ladder">A</a>
+    <a href="?direction=tracks" data-direction-link="tracks">B</a>
+    <a href="?direction=origin" data-direction-link="origin">C</a>
+  </nav>
+
+  <script type="module" src="./research-01-diagram-lab.js"></script>
+</body>
+</html>
