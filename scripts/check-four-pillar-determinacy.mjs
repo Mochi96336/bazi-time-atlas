@@ -77,7 +77,7 @@ for (const delta of [0,400,1980,24000]) {
     throw new Error(`03 did not initialize from the default Li Chun crossing at Δ=${delta}: ${fixed.url}`);
   }
   for (const expected of [
-    "年／月可判 · 日／時未定",
+    "年／月可回同柱 · 日／時未能判定",
     "立春 · 315°",
     "24,000 年不是完整「時間 → 八字」映射的精確週期"
   ]) {
