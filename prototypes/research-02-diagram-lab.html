@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Research 02 Diagram Lab · BaZi Time Atlas</title>
+  <link rel="stylesheet" href="../research-foundations.css">
+  <link rel="stylesheet" href="./research-02-diagram-lab.css">
+</head>
+<body>
+<main class="diagram-lab">
+  <header class="diagram-lab-head">
+    <div>
+      <div class="lab-eyebrow">Research 02 · diagram lab</div>
+      <h1>24,000 閉合之後，十二節為什麼還沒回來？</h1>
+      <p>固定使用 production 的 2026 → 26026 seasonal timeline。主結論不變：十二個八字「節」全部提前約 10–14 天；比較的是哪種圖解最能讓讀者先看懂「0 沒有被命中」，再理解原因。</p>
+    </div>
+    <p class="diagram-lab-meta">prototype only · production untouched<br>same data · three diagram grammars</p>
+  </header>
+
+  <section class="diagram-direction" data-direction="zero" aria-labelledby="zero-title">
+    <header class="direction-head">
+      <div class="lab-eyebrow">A · Zero-line proof</div>
+      <h2 id="zero-title">把「0 天＝真的回到原位」畫成唯一基準</h2>
+      <p>十二個節界全部從 0 往「提前」方向離開。先回答有沒有回來，不先解釋軌道。</p>
+    </header>
+    <div class="verdict-strip">
+      <strong><span id="zero-count">—</span> 全部沒碰到 0</strong>
+      <span id="zero-range">—</span>
+      <small>24,000 是離散候選，不是完整八字週期</small>
+    </div>
+    <div class="diagram-frame"><svg id="zero-proof-svg" role="img" aria-label="十二個八字節界相對零天基準的提前量"></svg></div>
+    <p class="diagram-note"><strong>讀法：</strong>最上面的 0 是「完全重合」。十二條都落在 0 下方，所以只看這張圖就能否定「節界已完整回來」。</p>
+  </section>
+
+  <section class="diagram-direction" data-direction="ring" aria-labelledby="ring-title">
+    <header class="direction-head">
+      <div class="lab-eyebrow">B · Solar-year ring</div>
+      <h2 id="ring-title">同一太陽黃經，卻在公曆／TT 年輪上提早到達</h2>
+      <p>保留俯視太陽年的直覺：十二個節的太陽方向不變，但 26026 到達那些方向的時間相位已往前移。</p>
+    </header>
+    <div class="ring-summary">
+      <div><span>太陽位置</span><strong>同一 12 個「節」黃經</strong></div>
+      <div><span>時間相位</span><strong id="ring-range">—</strong></div>
+      <div><span>軌道形狀</span><strong>2026 / 26026 · 形變 ×10</strong></div>
+    </div>
+    <div class="diagram-frame"><svg id="solar-ring-svg" role="img" aria-label="同一太陽黃經與不同到達時間相位的俯視年輪"></svg></div>
+    <p class="diagram-note"><strong>讀法：</strong>內側兩條橢圓只是幫助理解年內形狀；真正的判斷在外圈：每個 26026 時間標記都比同一黃經的 2026 基準更早。</p>
+  </section>
+
+  <section class="diagram-direction" data-direction="decompose" aria-labelledby="decompose-title">
+    <header class="direction-head">
+      <div class="lab-eyebrow">C · Common shift + shape</div>
+      <h2 id="decompose-title">先把共同提前量拿出來，再看為什麼各節差一點點</h2>
+      <p>這張不是拿來判斷「有沒有回來」，而是解釋 10–14 天不是固定同一個數字。</p>
+    </header>
+    <div class="decompose-layout">
+      <article class="shared-shift">
+        <small>全年共同位移</small>
+        <strong id="mean-advance">—</strong>
+        <div class="shift-arrow" aria-hidden="true"><i></i><b>→</b></div>
+        <p>整條季節時間線一起往前移；這一層已足以讓 0 失守。</p>
+      </article>
+      <article class="shape-panel">
+        <header><small>扣掉平均後</small><strong id="shape-span">—</strong><span>十二節的年內起伏</span></header>
+        <svg id="shape-residual-svg" role="img" aria-label="十二個八字節界扣除共同提前量後的年內殘差"></svg>
+      </article>
+    </div>
+    <p class="diagram-note"><strong>讀法：</strong>共同位移回答「為什麼整批都提前」；右側小殘差才回答「為什麼立春、立夏、立秋等不是剛好都提前同樣天數」。</p>
+  </section>
+</main>
+
+<nav class="diagram-lab-nav" aria-label="diagram directions">
+  <a href="?direction=zero" data-direction-link="zero">A</a>
+  <a href="?direction=ring" data-direction-link="ring">B</a>
+  <a href="?direction=decompose" data-direction-link="decompose">C</a>
+</nav>
+<script type="module" src="./research-02-diagram-lab.js"></script>
+</body>
+</html>
