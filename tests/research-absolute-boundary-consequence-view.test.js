@@ -11,14 +11,15 @@ const [html,view,model,spine,fourPillarView,css]=await Promise.all([
   readFile(new URL("../research-absolute-boundary-consequence.css",import.meta.url),"utf8")
 ]);
 
-test("Research 03 publishes one fixed +24k conclusion before pillar determinacy",()=>{
+test("Research 03 puts the fixed +24k verdict in the pillar band before the alignment fork",()=>{
   const conclusionScript=html.indexOf("research-absolute-boundary-consequence-view.js");
   const determinacyScript=html.indexOf("four-pillar-determinacy-view.js");
   assert.ok(conclusionScript>=0&&determinacyScript>conclusionScript);
-  assert.match(view,/determinacy\.insertAdjacentElement\("beforebegin",panel\)/);
+  assert.match(html,/class="determinacy-verdict"[\s\S]*固定 \+24,000 公曆年[\s\S]*≠ 完整「時間 → 八字」精確週期/);
+  assert.match(view,/determinacy\.insertAdjacentElement\("afterend",panel\)/);
   assert.match(view,/publishFixedEvidence\(\)/);
   assert.match(view,/absoluteBoundaryReferenceJie="displaced"/);
-  assert.match(view,/24,000 年不是完整「時間 → 八字」映射的精確週期/);
+  assert.match(view,/為什麼「年／月可回同柱」與「24,000 不是完整週期」能同時成立/);
   assert.match(model,/deltaYears:DATA\.targetYear-DATA\.baseYear/);
 });
 
