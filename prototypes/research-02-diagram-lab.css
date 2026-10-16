@@ -83,3 +83,14 @@ body{
   .diagram-lab-nav{right:var(--research-space-2);bottom:var(--research-space-2)}
   .diagram-lab-nav a{width:36px;height:36px}
 }
+
+/* Round 2 — responsive evidence geometry */
+.direction-head h2{scroll-margin-top:var(--research-space-4)}
+.lab-time-base.is-year{stroke:var(--research-focus);stroke-width:3}
+.lab-time-target.is-year{stroke:var(--research-focus);stroke-width:3}
+.lab-time-arc.is-year{stroke:var(--research-candidate);stroke-width:4}
+.lab-year-callout{fill:var(--research-candidate);font-size:var(--research-type-compact);font-weight:var(--research-weight-emphasis)}
+@media(max-width:680px){
+  #zero-proof-svg,#solar-ring-svg,#shape-residual-svg{max-height:none}
+  .diagram-frame{padding-top:0}
+}

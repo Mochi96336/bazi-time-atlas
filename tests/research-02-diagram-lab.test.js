@@ -41,5 +41,5 @@ test("Research 02 directions keep one explicit claim each",()=>{
 test("Research 02 lab uses foundation semantics instead of a second raw palette",()=>{
   assert.doesNotMatch(css,/#[0-9a-fA-F]{3,8}\b/);
   assert.doesNotMatch(css,/rgba?\(/);
-  for(const token of ["--research-current","--research-candidate","--research-text-primary","--research-diagram-structure","--research-type-body"])assert.ok(css.includes(token));
+  for(const token of ["--research-diagram-active-current","--research-candidate","--research-text-primary","--research-diagram-structure","--research-type-body"])assert.ok(css.includes(token));
 });
