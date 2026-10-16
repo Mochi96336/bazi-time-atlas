@@ -185,3 +185,13 @@
   .research-alignment-fork strong { font-size:var(--research-type-compact); line-height:var(--research-leading-compact); }
   .research-alignment-fork small { font-size:8.5px; }
 }
+
+
+/* The alignment fork is explanatory follow-up; the pillar band above owns the first verdict. */
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] {
+  margin-top:var(--research-space-5);
+}
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head h3 {
+  font-size:var(--research-type-subsection);
+  line-height:var(--research-leading-subsection);
+}
