@@ -63,7 +63,7 @@ const DERIVATION_STRUCTURAL_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000])
 const ringSpecs = Object.freeze({
   day: { group: document.querySelector("#day-ring"), inner:270, outer:360, sectors:60, phasePerSector:1, modulus:60, className:"day-sector", displayLabel:"日序 · 60 日" },
   year: { group: document.querySelector("#year-ring"), inner:360, outer:450, sectors:60, phasePerSector:1, modulus:60, className:"year-sector", displayLabel:"年序 · 60 年" },
-  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆 · 400 年" }
+  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆結構 · 400 年" }
 });
 
 let currentBase = { year:2026, month:9, day:13 };
@@ -480,7 +480,7 @@ function derivationMeaning(deltaYears, localYears) {
     return "60 年序＋60 日序首次重遇，且公曆結構也同時歸零";
   }
   if (deltaYears === localYears) return "60 年序＋60 日序首次重遇；公曆／季節代理尚未回到基準";
-  if (deltaYears === 400) return "400 年＝146,097 日；公曆結構回到 0，只是日數結構里程碑";
+  if (deltaYears === 400) return "400 年＝146,097 日；公曆結構回到 0，作為季節／月序的離散代理里程碑";
   if (deltaYears === 1200) return "公曆結構＋60 年序同時回到 0；60 日序仍未回來";
   if (deltaYears === 8000) return "公曆結構＋60 日序同時回到 0；60 年序仍未回來";
   if (deltaYears === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD) {
