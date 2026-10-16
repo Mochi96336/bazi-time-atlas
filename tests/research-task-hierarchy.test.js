@@ -76,7 +76,7 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
-  assert.match(discrete, /先找 60 年序與 60 日序何時一起回到原位；公曆 400 年只作日數結構參考，不是年日重遇的必要閉合條件。節氣與真正年柱留到下一步校驗。/);
+  assert.match(discrete, /先找 60 年序與 60 日序何時一起回到原位；公曆 400 年不是另一套無關週期，它和八字月序都在追蹤太陽年的季節位置。01 先拿公曆結構作離散代理，真正的十二節／月序界線留到 02 用太陽黃經校驗。/);
   assert.match(discrete, /id="research-discrete-title">粗略週期從哪裡來？/);
   assert.match(discrete, /id="research-year-strip-title">年度時間條/);
   assert.match(discrete, /id="research-year-full-cycle"/);

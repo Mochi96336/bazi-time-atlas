@@ -113,7 +113,7 @@ function expectDiscreteComprehension(dom, url) {
   if (!dom.includes(">基準 · 0</text>")) {
     throw new Error(`phase gauge zero reference is not labeled as the shared datum: ${url}`);
   }
-  for (const [key, label] of [["gregorian","公曆 · 400 年"],["year","年序 · 60 年"],["day","日序 · 60 日"]]) {
+  for (const [key, label] of [["gregorian","公曆結構 · 400 年"],["year","年序 · 60 年"],["day","日序 · 60 日"]]) {
     if (!dom.includes(`data-phase-ring-label="${key}"`) || !dom.includes(`>${label}</text>`)) {
       throw new Error(`phase gauge is missing the direct ${key} ring label: ${url}`);
     }
@@ -126,18 +126,29 @@ function expectDiscreteComprehension(dom, url) {
       throw new Error(`visible discrete derivation is missing +${delta}: ${url}`);
     }
   }
-  if (!dom.includes("400 年＝146,097 日；公曆結構回到 0，只是日數結構里程碑")) {
+  if (!dom.includes("400 年＝146,097 日；公曆結構回到 0，作為季節／月序的離散代理里程碑")) {
     throw new Error(`400-year Gregorian/day bridge is not visible: ${url}`);
   }
-  if (!dom.includes("60 年序＋60 日序首次重遇；公曆 400 年相位不必歸零")) {
+  if (!dom.includes("60 年序＋60 日序首次重遇；公曆／季節代理尚未回到基準")) {
     throw new Error(`1980-year local Year+Day recurrence meaning is not visible: ${url}`);
   }
   if (!dom.includes('data-milestone="local-year-day"')) {
     throw new Error(`local Year+Day recurrence is not visually promoted in the derivation rail: ${url}`);
   }
-  if (!dom.includes("年序 0 ＋ 日序 0 即成立；公曆 400 年相位不必歸零")) {
-    throw new Error(`Year+Day recurrence rule still implies Gregorian closure is required: ${url}`);
+  if (!dom.includes("先對上：</strong>年序 0 ＋ 日序 0") ||
+      !dom.includes("再提高條件：</strong>連公曆／季節代理也回到 0")) {
+    throw new Error(`local→global recurrence rule did not expose the added Gregorian/seasonal-proxy condition: ${url}`);
   }
+  if (!dom.includes("同源：太陽年") ||
+      !dom.includes("公曆 400 年結構") ||
+      !dom.includes("十二節／八字月序") ||
+      !dom.includes("年＋日已對上；再把季節／月序的離散代理拉回基準")) {
+    throw new Error(`solar-origin month-context bridge is missing from Research 01: ${url}`);
+  }
+  if (!dom.includes("公曆 −20 → 0")) {
+    throw new Error(`default +1980 → +24000 bridge must expose the remaining Gregorian phase: ${url}`);
+  }
+
   if (!dom.includes("LCM(1,200, 8,000) = 24,000；三個離散曆法相位全歸零")) {
     throw new Error(`global 24,000-year derivation lost its explicit LCM closure: ${url}`);
   }

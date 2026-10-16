@@ -166,12 +166,21 @@ iframe.addEventListener("load",async()=>{
       JSON.stringify({outerReference:outerReferenceY,legendBottom,gap:outerReferenceY-legendBottom}));
   }
   const localStep=derivationSteps?.querySelector('[data-milestone="local-year-day"]');
-  check(derivationSteps?.children.length===6 &&
+  const globalStep=derivationSteps?.querySelector('[data-milestone="global-discrete"]');
+  const localToGlobalBridge=derivationSteps?.querySelector(".discrete-derivation-bridge");
+  const milestoneSteps=[...(derivationSteps?.querySelectorAll(".discrete-derivation-step")??[])];
+  check(milestoneSteps.length===6 &&
+    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,400,1200,8000,1980,24000" &&
     zeroStep && zeroStep.textContent.includes("0 年") &&
     localStep && localStep.dataset.deltaYears==="1980" &&
     localStep.textContent.includes("首次重遇") &&
+    globalStep?.dataset.deltaYears==="24000" &&
+    localStep.nextElementSibling===localToGlobalBridge &&
+    localToGlobalBridge?.nextElementSibling===globalStep &&
+    localToGlobalBridge?.textContent.includes("公曆 −20 → 0") &&
+    localToGlobalBridge?.textContent.includes("季節／月序") &&
     (instrument.dataset.deltaYears==="0" ? zeroStep.classList.contains("active") : true),
-    "R6 derivation rail must contain 0/+400/+1200/+1980/+8000/+24000 and promote the local Year+Day recurrence");
+    "R6 derivation must show structural milestones, then +1980 → Gregorian seasonal-proxy bridge → +24000");
   check(publicDeltaSlider && deltaSlider && deltaPlay && publicDeltaSlider.contains(deltaSlider) &&
     deltaSlider.checkVisibility() && deltaPlay.checkVisibility() &&
     !compactControls.contains(deltaSlider) &&
