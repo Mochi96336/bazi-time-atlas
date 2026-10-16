@@ -359,8 +359,9 @@ test("reading order explains the global candidate before date/fan verification a
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
-  assert.match(recurrenceHtml, /先對上：<\/strong>年序 0 ＋ 日序 0/);
-  assert.match(recurrenceHtml, /再提高條件：<\/strong>連公曆／季節代理也回到 0/);
+  assert.match(recurrenceHtml, /data-diagram-grammar="condition-ladder"/);
+  assert.match(recurrenceHtml, /推導關係：<\/strong>LCM\(1,200, 8,000\) = 24,000/);
+  assert.match(recurrenceHtml, /局部重遇不是拿來找倍數，而是指出「年＋日已回來，還缺季節位置」/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
@@ -376,6 +377,6 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.deepEqual(local.phases,{yearSequence:0,gregorian:380,day:0});
   assert.deepEqual(global.phases,{yearSequence:0,gregorian:0,day:0});
   assert.match(recurrenceView,/signedShortestPhase\(localState\.phases\.gregorian,400\)/);
-  assert.match(recurrenceHtml,/01 用左邊作離散代理 · 02 用太陽黃經直接驗真/);
-  assert.match(css,/@media \(max-width:820px\)[\s\S]*?\.discrete-derivation-bridge::before[\s\S]*?content:"↓"/);
+  assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
+  assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
