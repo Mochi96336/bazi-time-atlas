@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Research 03 Diagram Lab · BaZi Time Atlas</title>
+  <link rel="stylesheet" href="../research-foundations.css">
+  <link rel="stylesheet" href="./research-03-diagram-lab.css">
+</head>
+<body>
+<main class="diagram-lab">
+  <header class="diagram-lab-head">
+    <div>
+      <div class="lab-eyebrow">Research 03 · diagram lab</div>
+      <h1>24,000 年對八字到底能說到哪裡？</h1>
+      <p>03 不再重畫 02 的十二節證據。這裡只比較怎麼把三種不同的證據語氣分清楚：可以證、可以否定、目前還不能判。</p>
+    </div>
+    <p class="diagram-lab-meta">prototype only · production untouched<br>same research claims · three evidence grammars</p>
+  </header>
+
+  <section class="diagram-direction" data-direction="pillars" aria-labelledby="pillars-title">
+    <header class="direction-head">
+      <div class="lab-eyebrow">A · Four-pillar verdict band</div>
+      <h2 id="pillars-title">先把八字本身放回第一眼</h2>
+      <p>同一太陽黃經、年序閉合時，年／月可以回到同柱；日／時不是「不同」，而是目前證據不足。</p>
+    </header>
+    <div class="mapping-verdict">
+      <span>固定 +24,000 公曆年</span>
+      <strong>≠ 完整「時間 → 八字」精確週期</strong>
+      <small id="pillar-boundary-range">—</small>
+    </div>
+    <div id="pillar-band" class="pillar-band" aria-label="四柱研究可判定範圍"></div>
+    <p class="diagram-note"><strong>關鍵：</strong>右半邊必須寫「未能判定」，不能畫成叉號或「不同」，因為目前沒有足夠深時間民用日／地方時證據。</p>
+  </section>
+
+  <section class="diagram-direction" data-direction="fork" aria-labelledby="fork-title">
+    <header class="direction-head">
+      <div class="lab-eyebrow">B · Alignment fork</div>
+      <h2 id="fork-title">同一個 +24,000，問法不同，答案也不同</h2>
+      <p>把「對齊太陽位置」與「固定推進公曆時間」拆成兩條路，避免把兩種 reference frame 混成一句話。</p>
+    </header>
+    <div class="fork-diagram">
+      <div class="fork-origin"><small>共同起點</small><strong>+24,000 年離散候選</strong></div>
+      <div class="fork-lines" aria-hidden="true"><i></i><i></i></div>
+      <div class="fork-branches">
+        <article data-branch="solar">
+          <small>對齊同一太陽黃經</small>
+          <strong>年／月可回到同柱</strong>
+          <p>同一節界方向 + 60 年序閉合。</p>
+        </article>
+        <article data-branch="calendar">
+          <small>固定推進 24,000 公曆年</small>
+          <strong>節界時間沒有重現</strong>
+          <p id="fork-calendar-evidence">—</p>
+        </article>
+      </div>
+      <div class="fork-tail">
+        <span>因此完整四柱呢？</span>
+        <strong>日／時仍未能判定；不能把「節界未重現」直接偷換成「每個四柱一定不同」。</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="diagram-direction" data-direction="claims" aria-labelledby="claims-title">
+    <header class="direction-head">
+      <div class="lab-eyebrow">C · Claim ladder</div>
+      <h2 id="claims-title">把「可證、可否定、未知」分成三層</h2>
+      <p>這不是按年／月／日／時排列，而是按研究結論的確定性排列。</p>
+    </header>
+    <div class="claim-ladder">
+      <article data-claim="supported">
+        <span>01 · 可以證</span>
+        <strong>同一太陽位置下，年／月可以回到同柱</strong>
+        <small>條件：60 年序閉合 + 同一太陽黃經。</small>
+      </article>
+      <article data-claim="rejected">
+        <span>02 · 可以否定</span>
+        <strong>固定 24,000 年不是完整時間→八字精確週期</strong>
+        <small id="claim-rejected-evidence">—</small>
+      </article>
+      <article data-claim="unknown">
+        <span>03 · 目前不能說</span>
+        <strong>日／時是否在深時間後回到同柱</strong>
+        <small>還缺絕對民用日相位、日界、地方時／時區、太陽時計時與已解析日干。</small>
+      </article>
+    </div>
+    <p class="diagram-note"><strong>好處：</strong>這個 grammar 最不容易把研究邊界誤讀成結果，但八字四柱的形象會比 A 弱。</p>
+  </section>
+</main>
+
+<nav class="diagram-lab-nav" aria-label="diagram directions">
+  <a href="?direction=pillars" data-direction-link="pillars">A</a>
+  <a href="?direction=fork" data-direction-link="fork">B</a>
+  <a href="?direction=claims" data-direction-link="claims">C</a>
+</nav>
+<script type="module" src="./research-03-diagram-lab.js"></script>
+</body>
+</html>
