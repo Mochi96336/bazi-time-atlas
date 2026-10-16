@@ -29,7 +29,7 @@ test("Research 02 keeps the fixed +24k story visible before the delta sandbox", 
 });
 
 test("02 explicitly bridges from the free delta explorer back to the fixed +24k argument", () => {
-  assert.match(html, /上面的 Δ 可以自由探索；以下回到 01 找出的 24,000 年候選/);
+  assert.match(html, /01 找到的是離散候選；02 把 0 天定義成真正重合/);
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
 });
 
