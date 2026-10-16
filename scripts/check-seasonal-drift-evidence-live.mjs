@@ -51,6 +51,10 @@ for(const delta of [0,400,1980,24000]){
   const total=dump("total",delta);
   requireTokens(total,[
     'id="seasonal-drift-evidence"',
+    'data-diagram-grammar="zero-line-proof"',
+    'id="seasonal-boundary-proof-svg"',
+    'class="seasonal-proof-zero"',
+    'class="seasonal-orbit-time-ring"',
     'data-ready="true"',
     'data-mode="total"',
     'class="seasonal-drift-curve-path"',

@@ -523,3 +523,170 @@
   .seasonal-drift-orbit-tools { gap:5px; }
   #seasonal-drift-orbit-scale { font-size:7.5px; padding:0 5px; }
 }
+
+/* Research 02 selected grammar — zero-line proof → orbit explanation → deep decomposition */
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] {
+  margin-top:var(--research-space-2);
+  padding:var(--research-space-4) 0 var(--research-space-6);
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-strong);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-evidence-copy .eyebrow {
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-evidence-copy h3 {
+  color:var(--research-text-primary);
+  font-size:var(--research-type-section);
+  line-height:var(--research-leading-section);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-evidence-copy p {
+  max-width:var(--research-width-narrative);
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-compact);
+  line-height:var(--research-leading-compact);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-summary {
+  margin-top:var(--research-space-4);
+  border-color:var(--research-line-subtle);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-stat.verdict strong {
+  color:var(--research-candidate);
+}
+.seasonal-boundary-proof {
+  margin-top:20px;
+  padding:var(--research-space-4) 0 var(--research-space-3);
+  border-top:var(--research-diagram-line-active) solid var(--research-candidate);
+  border-bottom:1px solid var(--research-line-subtle);
+}
+.seasonal-boundary-proof-head {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:var(--research-space-6);
+  align-items:end;
+  padding:0 var(--research-space-1);
+}
+.seasonal-boundary-proof-head span {
+  display:block;
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+.seasonal-boundary-proof-head strong {
+  display:block;
+  margin-top:var(--research-space-1);
+  color:var(--research-focus);
+  font-size:var(--research-type-subsection);
+  line-height:var(--research-leading-subsection);
+}
+.seasonal-boundary-proof-head p {
+  margin:0;
+  justify-self:end;
+  max-width:620px;
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+  text-align:right;
+}
+#seasonal-boundary-proof-svg { min-height:280px; margin-top:var(--research-space-2); }
+.seasonal-proof-grid { stroke:var(--research-line-subtle); stroke-width:1; }
+.seasonal-proof-zero { stroke:var(--research-focus); stroke-width:1.5; }
+.seasonal-proof-axis,.seasonal-proof-label,.seasonal-proof-value {
+  fill:var(--research-text-muted);
+  font-size:11px;
+}
+.seasonal-proof-label { font-weight:var(--research-weight-emphasis); }
+.seasonal-proof-value { fill:var(--research-text-secondary); font-weight:var(--research-weight-emphasis); }
+.seasonal-proof-stem { stroke:var(--research-diagram-active-candidate); stroke-width:2; }
+.seasonal-proof-dot {
+  fill:var(--research-bg-page);
+  stroke:var(--research-diagram-active-candidate);
+  stroke-width:2;
+  cursor:pointer;
+}
+.seasonal-proof-hit { fill:transparent; cursor:pointer; }
+.seasonal-proof-group.is-selected .seasonal-proof-stem,
+.seasonal-proof-group.is-selected .seasonal-proof-dot { stroke:var(--research-focus); }
+.seasonal-proof-group.is-year .seasonal-proof-dot { stroke-width:3; }
+.seasonal-drift-orbit-explainer {
+  width:min(820px,100%);
+  margin:var(--research-space-8) auto 0;
+  padding:var(--research-space-4) 0;
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-subtle);
+}
+.seasonal-drift-orbit-explainer .seasonal-drift-orbit-head { min-height:0; margin-bottom:var(--research-space-2); }
+.seasonal-drift-orbit-explainer #seasonal-drift-orbit {
+  width:min(620px,100%);
+  min-height:0;
+  margin:0 auto;
+}
+.seasonal-orbit-time-ring { fill:none; stroke:var(--research-line-strong); stroke-width:1; }
+.seasonal-orbit-time-base { stroke:var(--research-diagram-context); stroke-width:2; }
+.seasonal-orbit-time-target {
+  fill:var(--research-bg-page);
+  stroke:var(--research-diagram-active-candidate);
+  stroke-width:2;
+}
+.seasonal-orbit-time-arc {
+  fill:none;
+  stroke:color-mix(in srgb,var(--research-candidate) 55%,transparent);
+  stroke-width:2;
+}
+.seasonal-orbit-time-label {
+  fill:var(--research-text-muted);
+  font-size:9px;
+  font-weight:var(--research-weight-emphasis);
+}
+.seasonal-orbit-time-group.is-selected .seasonal-orbit-time-target,
+.seasonal-orbit-time-group.is-selected .seasonal-orbit-time-arc { stroke:var(--research-focus); }
+.seasonal-orbit-time-group.is-year .seasonal-orbit-time-target { stroke-width:3; }
+.seasonal-orbit-explainer-note {
+  margin:var(--research-space-2) var(--research-space-1) 0;
+  padding-top:var(--research-space-2);
+  border-top:1px solid var(--research-line-subtle);
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+.seasonal-orbit-explainer-note strong { color:var(--research-text-secondary); }
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-decomposition {
+  margin-top:var(--research-space-6);
+  border-color:var(--research-line-subtle);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-decomposition > summary {
+  min-height:42px;
+  padding:var(--research-space-2) var(--research-space-1);
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-decomposition-body {
+  padding-top:var(--research-space-3);
+}
+.seasonal-drift-plot-detail {
+  margin-top:var(--research-space-4);
+  padding-top:var(--research-space-3);
+  border-top:1px solid var(--research-line-subtle);
+  border-right:0;
+}
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-evidence-note {
+  margin-top:var(--research-space-4);
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+@media (max-width:680px) {
+  .seasonal-boundary-proof-head { grid-template-columns:1fr; gap:var(--research-space-2); }
+  .seasonal-boundary-proof-head p { justify-self:start; text-align:left; }
+  #seasonal-boundary-proof-svg { min-height:420px; }
+  .seasonal-drift-orbit-explainer { margin-top:var(--research-space-6); padding-top:var(--research-space-3); }
+  .seasonal-drift-orbit-explainer .seasonal-drift-orbit-head { min-height:0; }
+  .seasonal-drift-orbit-explainer #seasonal-drift-orbit { width:100%; min-height:300px; }
+  .seasonal-orbit-explainer-note { font-size:8.5px; }
+}
+@media (max-width:480px) {
+  .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] { padding-top:var(--research-space-3); }
+  .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-evidence-copy h3 {
+    font-size:var(--research-type-subsection);
+  }
+  .seasonal-boundary-proof { margin-top:var(--research-space-4); }
+  #seasonal-boundary-proof-svg { min-height:410px; }
+}
