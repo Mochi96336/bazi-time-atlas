@@ -94,3 +94,5 @@ body{
   #zero-proof-svg,#solar-ring-svg,#shape-residual-svg{max-height:none}
   .diagram-frame{padding-top:0}
 }
+html[data-capture="true"] .diagram-lab-head{display:none}
+html[data-capture="true"] .diagram-lab{padding-top:var(--research-space-4)}

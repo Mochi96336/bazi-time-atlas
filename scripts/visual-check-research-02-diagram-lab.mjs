@@ -29,8 +29,7 @@ function run(browser,argv,label){
 await mkdir(outputDir,{recursive:true});
 const browser=findBrowser(),captures=[];
 for(const direction of directions){
-  const anchor={zero:"zero-title",ring:"ring-title",decompose:"decompose-title"}[direction];
-  const url=new URL("prototypes/research-02-diagram-lab.html?direction="+direction+"#"+anchor,baseURL).href;
+  const url=new URL("prototypes/research-02-diagram-lab.html?direction="+direction+"&capture=1",baseURL).href;
   const dom=run(browser,[...args(),"--window-size=1440,900","--dump-dom",url],"Research 02 DOM "+direction).stdout;
   if(!dom.includes('data-diagram-lab-ready="true"')||!dom.includes('data-diagram-direction="'+direction+'"'))throw new Error("wrong Research 02 direction "+direction);
   for(const required of ["24,000","12 / 12","2026","26026"])if(!dom.includes(required))throw new Error("Research 02 lab missing "+required);

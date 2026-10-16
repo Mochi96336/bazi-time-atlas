@@ -25,7 +25,7 @@ test("Research 02 lab compares exactly three independent diagram grammars",()=>{
 
 test("Research 02 lab reads the production seasonal timeline and BaZi Jie boundaries",()=>{
   assert.match(js,/SEASONAL_DRIFT_26026_RESEARCH as DATA/);
-  assert.match(js,/BAZI_JIE_BOUNDARIES/);
+  assert.match(js,/from "\.\.\/src\/research\/bazi-seasonal-boundaries\.js"/);
   assert.match(js,/baziJieDriftSummary/);
   assert.match(js,/targetYearFrameIndependentlyValidated/);
   assert.doesNotMatch(js,/10\.235|14\.177/);

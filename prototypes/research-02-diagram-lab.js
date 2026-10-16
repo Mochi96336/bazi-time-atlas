@@ -100,8 +100,8 @@ function arcPath(cx,cy,r,startDeg,endDeg){
 function drawRing(){
   const svg=document.querySelector("#solar-ring-svg");
   const mobile=isMobile();
-  const W=mobile?390:1080,H=mobile?420:430,cx=W/2,cy=mobile?205:220;
-  const orbitR=mobile?72:112,timeR=mobile?122:178,labelR=mobile?150:206;
+  const W=mobile?390:1080,H=mobile?420:360,cx=W/2,cy=mobile?205:178;
+  const orbitR=mobile?72:90,timeR=mobile?122:145,labelR=mobile?150:171;
   clear(svg,"0 0 "+W+" "+H);
   svgEl("circle",{cx,cy,r:timeR,class:"lab-reference-ring"},svg);
   svgEl("path",{d:orbitPath(cx,cy,orbitR,DATA.baseEllipse,10),class:"lab-orbit-base"},svg);
@@ -133,7 +133,7 @@ function drawRing(){
 
 function drawResidual(){
   const svg=document.querySelector("#shape-residual-svg");
-  const mobile=isMobile(),W=mobile?390:760,H=mobile?410:360;
+  const mobile=isMobile(),W=mobile?390:760,H=mobile?330:360;
   const left=mobile?54:104,right=mobile?24:36,top=mobile?38:34,bottom=mobile?18:26;
   const width=W-left-right,rowH=(H-top-bottom)/rows.length,min=-2.5,max=2.5;
   const xFor=value=>left+(value-min)/(max-min)*width;
@@ -152,6 +152,7 @@ function drawResidual(){
 }
 
 const params=new URLSearchParams(location.search),allowed=new Set(["zero","ring","decompose"]);
+if(params.get("capture")==="1")document.documentElement.dataset.capture="true";
 const requested=params.get("direction")||"zero",direction=allowed.has(requested)?requested:"zero";
 document.querySelectorAll(".diagram-direction").forEach(section=>section.classList.toggle("is-active",section.dataset.direction===direction));
 document.querySelectorAll("[data-direction-link]").forEach(link=>{
@@ -168,5 +169,3 @@ claim.textContent=DATA.claimBoundary.targetYearFrameIndependentlyValidated
 document.querySelector(".diagram-direction.is-active")?.appendChild(claim);
 document.documentElement.dataset.diagramLabReady="true";
 document.documentElement.dataset.diagramDirection=direction;
-const hashTarget=location.hash?document.querySelector(location.hash):null;
-if(hashTarget)requestAnimationFrame(()=>requestAnimationFrame(()=>hashTarget.scrollIntoView({block:"start"})));
