@@ -45,7 +45,8 @@ test("Research 01 lab consumes foundation tokens instead of inventing a second p
 test("diagram directions keep one explicit visual claim each", () => {
   assert.match(html,/A · Condition ladder · selected target/);
   assert.match(html,/先看 \+1,980 缺哪一層，再把條件補滿/);
-  assert.match(html,/class="ladder-mobile-route"/);\n  assert.match(html,/class="ladder-origin-cue"/);
+  assert.match(html,/class="ladder-mobile-route"/);
+  assert.match(html,/class="ladder-origin-cue"/);
   assert.match(html,/共同追蹤：太陽年/);
   assert.match(html,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(html,/直接看三個相位有沒有同時對線/);
