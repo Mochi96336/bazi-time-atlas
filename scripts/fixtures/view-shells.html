@@ -148,6 +148,8 @@
       const derivationSteps = recurrenceDoc.querySelector("#discrete-derivation-steps");
       const zeroDeltaStep = derivationSteps?.querySelector('[data-delta-years="0"]');
       const localYearDayStep = derivationSteps?.querySelector('[data-milestone="local-year-day"]');
+      const globalClosureStep = derivationSteps?.querySelector('[data-milestone="global-discrete"]');
+      const localToGlobalBridge = derivationSteps?.querySelector(".discrete-derivation-bridge");
       const recurrenceRect = recurrenceInstrument?.getBoundingClientRect();
       const comparisonRect = recurrenceComparison?.getBoundingClientRect();
       const yearCardRect = baseRow?.getBoundingClientRect();
@@ -289,14 +291,19 @@
         recurrenceRect.bottom <= derivationRect.top
       ));
       probe.dataset.recurrenceDeltaRailOwnsZero = String(Boolean(
-        zeroDeltaStep && derivationSteps?.children.length===6 &&
+        zeroDeltaStep &&
+        derivationSteps?.querySelectorAll(".discrete-derivation-step").length===6 &&
         zeroDeltaStep.classList.contains("active") &&
         zeroDeltaStep.textContent.includes("0 年")
       ));
       probe.dataset.recurrenceLocalYearDayVisible = String(Boolean(
         localYearDayStep &&
         localYearDayStep.dataset.deltaYears==="1980" &&
-        localYearDayStep.textContent.includes("首次重遇")
+        localYearDayStep.textContent.includes("首次重遇") &&
+        globalClosureStep?.dataset.deltaYears==="24000" &&
+        localYearDayStep.nextElementSibling===localToGlobalBridge &&
+        localToGlobalBridge?.nextElementSibling===globalClosureStep &&
+        localToGlobalBridge.textContent.includes("公曆 −20 → 0")
       ));
       probe.dataset.recurrenceDeltaSettingsHeight = String(Math.round(controlsRect?.height??-1));
       probe.dataset.recurrenceDerivationTop = String(Math.round(derivationRect?.top??-1));
