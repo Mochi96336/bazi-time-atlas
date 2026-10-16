@@ -94,7 +94,8 @@ requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true",
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
-requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year baseline must stay the active first item in the six-step derivation thesis", url);
+requireEqual(attr(probe, "data-recurrence-delta-rail-owns-zero"), "true", "Zero-year baseline must stay in the canonical six-step derivation data even when the selected ladder hides it visually", url);
+requireEqual(attr(probe, "data-recurrence-derivation-grammar"), "condition-ladder", "Research 01 must use the selected condition-ladder grammar", url);
 requireEqual(attr(probe, "data-recurrence-local-year-day-visible"), "true", "The first local Year+Day recurrence must be visible and identified in the derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
@@ -175,14 +176,14 @@ if (
   || !Number.isFinite(publicDeltaSliderWidth)
   || deltaSettingsHeight < 32
   || deltaSettingsHeight > 40
-  || zeroDeltaStepHeight < 64
+  || zeroDeltaStepHeight !== 0
   || publicDeltaSliderWidth < 170
   || !Number.isFinite(shiftToolbarHeight)
   || shiftToolbarHeight < 44
   || shiftToolbarHeight > 52
 ) {
   throw new Error(
-    "Lower time-progression rail must expose a usable slider, readable Play/Other time controls and compact milestone " +
+    "Lower time-progression rail must expose a usable slider, readable Play/Other time controls and keep the superseded zero-year card hidden under the condition ladder " +
     "(settings=" + deltaSettingsHeight + ", sliderW=" + publicDeltaSliderWidth +
     ", zeroStep=" + zeroDeltaStepHeight + ", shiftToolbarH=" + shiftToolbarHeight + "): " + url
   );

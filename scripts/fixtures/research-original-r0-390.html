@@ -178,9 +178,9 @@ iframe.addEventListener("load",async()=>{
     localStep.nextElementSibling===localToGlobalBridge &&
     localToGlobalBridge?.nextElementSibling===globalStep &&
     localToGlobalBridge?.textContent.includes("公曆 −20 → 0") &&
-    localToGlobalBridge?.textContent.includes("季節／月序") &&
+    localToGlobalBridge?.textContent.includes("季節位置代理") &&
     (instrument.dataset.deltaYears==="0" ? zeroStep.classList.contains("active") : true),
-    "R6 derivation must show structural milestones, then +1980 → Gregorian seasonal-proxy bridge → +24000");
+    "R6 derivation must retain six canonical states while the condition ladder promotes +1980 → seasonal-position bridge → +24000");
   check(publicDeltaSlider && deltaSlider && deltaPlay && publicDeltaSlider.contains(deltaSlider) &&
     deltaSlider.checkVisibility() && deltaPlay.checkVisibility() &&
     !compactControls.contains(deltaSlider) &&

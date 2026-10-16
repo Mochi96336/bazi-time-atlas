@@ -223,6 +223,7 @@
         !recurrenceYearCard && !recurrenceDayCard &&
         Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
       );
+      probe.dataset.recurrenceDerivationGrammar = derivationThesis?.dataset.diagramGrammar ?? "missing";
       probe.dataset.recurrenceDerivationThesisStartsInFirstViewport = String(Boolean(
         derivationThesisRect &&
         derivationThesisRect.top >= 0 &&
