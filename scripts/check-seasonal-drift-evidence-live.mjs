@@ -69,7 +69,7 @@ for(const delta of [0,400,1980,24000]){
     'id="four-pillar-determinacy"',
     'data-mode="shared-seasonal"',
     'data-selected-longitude="315"',
-    '年／月可判 · 日／時未定',
+    '年／月可回同柱 · 日／時未能判定',
     '探索工具 · 目前 Δ = '+delta.toLocaleString("en-US")+' 年 · 不影響上方固定 24,000 年主線'
   ],"always-visible main story @ delta="+delta);
 
