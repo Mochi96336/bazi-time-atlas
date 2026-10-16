@@ -36,22 +36,25 @@ iframe.addEventListener("load",async()=>{
   const d=iframe.contentDocument,w=iframe.contentWindow;
   const strip=d.getElementById("research-year-strip");
   const instrument=d.getElementById("recurrence-instrument");
-  for(let i=0;i<180;i++){
+  for(let i=0;i<120;i++){
    if(strip?.dataset.ready==="true" && instrument?.dataset.targetDate &&
      instrument.dataset.targetDate!=="invalid")break;
-   await wait(40);
+   await wait(25);
   }
+  check(strip?.dataset.ready==="true" && instrument?.dataset.targetDate &&
+    instrument.dataset.targetDate!=="invalid",
+    "Research Year/Day owners did not settle before geometry checks");
 
   if(preciseBoundary){
     // Allow the existing Day/Hour owner to publish the explicit time and
     // both readers to consume it. A date-only value cannot pass this gate.
-    for(let i=0;i<180;i++){
+    for(let i=0;i<120;i++){
       const expected=preciseBoundary==="before"?"癸卯":"甲辰";
       const current=d.getElementById("research-cycles-year-target")?.textContent;
       if(instrument.dataset.selectedTargetInstantBound==="true" &&
         strip.dataset.selectedYearPillar===expected &&
         current?.endsWith(expected) && !current.includes("／"))break;
-      await wait(40);
+      await wait(25);
     }
   }
   check(d.documentElement.clientWidth===width,"not a real "+width+"px Research viewport");
