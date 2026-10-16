@@ -72,7 +72,7 @@ test("Research foundations stay token-only and do not own component geometry", (
 });
 
 function tokenHex(name) {
-  const match = css.match(new RegExp(name + String.raw`:\\s*(#[0-9a-fA-F]{6})`));
+  const match = css.match(new RegExp(name + String.raw`:\s*(#[0-9a-fA-F]{6})`));
   assert.ok(match, "missing hex token: " + name);
   return match[1];
 }
