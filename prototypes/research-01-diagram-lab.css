@@ -716,3 +716,249 @@ body {
     height:36px;
   }
 }
+
+/* Round 2 — evidence-led diagram refinement */
+
+/* A: make the actual 1,980 → missing condition → 24,000 argument the first read.
+   Structural milestones move below the argument so they support, rather than lead. */
+.diagram-direction[data-direction="ladder"].is-active {
+  display:flex;
+  flex-direction:column;
+}
+
+.diagram-direction[data-direction="ladder"] > .direction-head { order:0; }
+.diagram-direction[data-direction="ladder"] > .ladder-origin-cue { order:1; }
+.diagram-direction[data-direction="ladder"] > .condition-ladder { order:2; }
+.diagram-direction[data-direction="ladder"] > .structural-context {
+  order:3;
+  margin:var(--research-space-8) 0 0;
+  padding:var(--research-space-4) 0;
+  opacity:.68;
+}
+
+.condition-ladder {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(280px,.94fr) minmax(0,1fr);
+  gap:var(--research-space-6);
+  align-items:stretch;
+}
+
+.ladder-state {
+  display:block;
+  min-width:0;
+  padding:var(--research-space-6) 0;
+}
+
+.ladder-state header {
+  min-height:76px;
+}
+
+.ladder-state header > strong {
+  font-size:clamp(2.5rem,3.6vw,3rem);
+}
+
+.state-phases {
+  gap:var(--research-space-2);
+}
+
+.state-phases > span {
+  min-width:0;
+}
+
+.state-phases small {
+  min-height:2.9em;
+}
+
+.condition-bridge {
+  display:flex;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:var(--research-space-6);
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-subtle);
+  background:var(--research-diagram-surface);
+  flex-direction:column;
+  justify-content:center;
+  gap:var(--research-space-4);
+}
+
+.condition-bridge > i {
+  position:relative;
+  display:block;
+  width:100%;
+  height:var(--research-diagram-line-strong);
+  background:linear-gradient(
+    90deg,
+    var(--research-diagram-active-current),
+    var(--research-diagram-active-candidate)
+  );
+}
+
+.condition-bridge > i::before {
+  content:none;
+}
+
+.condition-bridge > i::after {
+  content:"→";
+  position:absolute;
+  right:0;
+  bottom:auto;
+  left:auto;
+  top:50%;
+  padding-left:var(--research-space-2);
+  color:var(--research-diagram-active-candidate);
+  background:var(--research-bg-layer-1);
+  font-size:var(--research-type-subsection);
+  line-height:1;
+  transform:translateY(-50%);
+}
+
+.condition-bridge > div {
+  display:block;
+  max-width:none;
+}
+
+.condition-bridge strong {
+  display:block;
+}
+
+.condition-bridge > div > b {
+  display:block;
+  margin:var(--research-space-2) 0;
+}
+
+.diagram-proof {
+  grid-column:1 / -1;
+  margin:0;
+  padding-top:var(--research-space-2);
+  text-align:center;
+}
+
+/* B: when +1,980 and +24,000 are both exactly at zero, show that truth as
+   concentric marks instead of printing two labels on top of each other. */
+.phase-track[data-track="yearSequence"] .track-point.is-local,
+.phase-track[data-track="day"] .track-point.is-local {
+  left:100%;
+  z-index:2;
+}
+
+.phase-track[data-track="yearSequence"] .track-point.is-local::before,
+.phase-track[data-track="day"] .track-point.is-local::before {
+  width:24px;
+  height:24px;
+  margin-top:-4px;
+  margin-bottom:var(--research-space-1);
+  border:var(--research-diagram-line-active) solid currentColor;
+  background:transparent;
+  box-shadow:none;
+}
+
+.phase-track[data-track="yearSequence"] .track-point.is-global,
+.phase-track[data-track="day"] .track-point.is-global {
+  z-index:3;
+}
+
+.phase-track[data-track="yearSequence"] .track-point.is-global::before,
+.phase-track[data-track="day"] .track-point.is-global::before {
+  width:10px;
+  height:10px;
+  margin-top:3px;
+  margin-bottom:var(--research-space-2);
+  box-shadow:none;
+}
+
+.phase-track[data-track="yearSequence"] .track-point b,
+.phase-track[data-track="day"] .track-point b {
+  display:none;
+}
+
+.phase-track[data-track="yearSequence"] .track-point small,
+.phase-track[data-track="day"] .track-point small {
+  position:absolute;
+  top:30px;
+  right:0;
+  min-width:56px;
+  color:var(--research-text-secondary);
+}
+
+.phase-track[data-track="yearSequence"] .track-point.is-local small,
+.phase-track[data-track="day"] .track-point.is-local small {
+  transform:translateX(-34px);
+}
+
+.phase-track[data-track="yearSequence"] .track-point.is-global small,
+.phase-track[data-track="day"] .track-point.is-global small {
+  transform:translateX(22px);
+}
+
+/* C: keep the causal source map and its consequence in one visual breath. */
+.origin-thesis {
+  margin-top:var(--research-space-6);
+}
+
+.origin-escalation {
+  margin-top:var(--research-space-8);
+  padding-top:var(--research-space-6);
+}
+
+@media (max-width:680px) {
+  .condition-ladder {
+    grid-template-columns:1fr;
+    gap:var(--research-space-4);
+  }
+
+  .ladder-state {
+    padding:var(--research-space-2) 0;
+  }
+
+  .ladder-state header {
+    min-height:0;
+  }
+
+  .condition-bridge {
+    padding:var(--research-space-4);
+  }
+
+  .condition-bridge > i {
+    width:var(--research-diagram-line-strong);
+    height:52px;
+    margin:0 auto;
+    background:linear-gradient(
+      var(--research-diagram-active-current),
+      var(--research-diagram-active-candidate)
+    );
+  }
+
+  .condition-bridge > i::after {
+    content:"↓";
+    right:auto;
+    left:50%;
+    top:auto;
+    bottom:0;
+    padding:var(--research-space-1) 0 0;
+    transform:translate(-50%,50%);
+  }
+
+  .diagram-proof {
+    text-align:left;
+  }
+
+  .diagram-direction[data-direction="ladder"] > .structural-context {
+    margin-top:var(--research-space-6);
+  }
+
+  .phase-track[data-track="yearSequence"] .track-point.is-local small,
+  .phase-track[data-track="day"] .track-point.is-local small {
+    transform:translateX(-26px);
+  }
+
+  .phase-track[data-track="yearSequence"] .track-point.is-global small,
+  .phase-track[data-track="day"] .track-point.is-global small {
+    transform:translateX(16px);
+  }
+
+  .origin-escalation {
+    margin-top:var(--research-space-8);
+  }
+}
