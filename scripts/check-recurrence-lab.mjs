@@ -135,15 +135,20 @@ function expectDiscreteComprehension(dom, url) {
   if (!dom.includes('data-milestone="local-year-day"')) {
     throw new Error(`local Year+Day recurrence is not visually promoted in the derivation rail: ${url}`);
   }
-  if (!dom.includes("先對上：</strong>年序 0 ＋ 日序 0") ||
-      !dom.includes("再提高條件：</strong>連公曆／季節代理也回到 0")) {
-    throw new Error(`local→global recurrence rule did not expose the added Gregorian/seasonal-proxy condition: ${url}`);
+  if (!dom.includes("推導關係：</strong>LCM(1,200, 8,000) = 24,000") ||
+      !dom.includes('data-diagram-grammar="condition-ladder"')) {
+    throw new Error(`selected local→global condition ladder is missing from Research 01: ${url}`);
   }
-  if (!dom.includes("同源：太陽年") ||
-      !dom.includes("公曆 400 年結構") ||
-      !dom.includes("十二節／八字月序") ||
-      !dom.includes("年＋日已對上；再把季節／月序的離散代理拉回基準")) {
+  if (!dom.includes("共同追蹤：太陽年") ||
+      !dom.includes("公曆 400 年結構 · 01 代理") ||
+      !dom.includes("十二節／八字月序 · 02 驗真") ||
+      !dom.includes("不是找 1,980 的倍數；而是把判定收緊到季節位置代理也回基準")) {
     throw new Error(`solar-origin month-context bridge is missing from Research 01: ${url}`);
+  }
+  if (!dom.includes('id="research-discrete-route-local">+1,980') ||
+      !dom.includes("缺季節位置") ||
+      !dom.includes("<strong>+24,000</strong>")) {
+    throw new Error(`default mobile/compact route does not expose +1980 → missing seasonal position → +24000: ${url}`);
   }
   if (!dom.includes("公曆 −20 → 0")) {
     throw new Error(`default +1980 → +24000 bridge must expose the remaining Gregorian phase: ${url}`);
