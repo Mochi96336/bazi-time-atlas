@@ -125,7 +125,7 @@ test("astronomy task answers where the +24k candidate fails and keeps the sandbo
 test("evidence task answers what the fixed result means for BaZi without overclaiming", () => {
   assert.match(evidence, /id="research-evidence-title">對八字意味著什麼？/);
   assert.match(evidence, /id="four-pillar-determinacy"/);
-  assert.match(evidence, /class="determinacy-label">目前選定太陽位置/);
+  assert.match(evidence, /class="determinacy-label">四柱可判範圍/);
   assert.match(evidence, /class="model-boundary research-evidence-appendix"/);
   assert.doesNotMatch(evidence, /目前能證到哪裡|矩陣只列模型已有證據的柱位/);
   assert.doesNotMatch(evidence, /class="near-search-panel"/);
