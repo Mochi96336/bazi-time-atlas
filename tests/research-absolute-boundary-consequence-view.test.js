@@ -35,7 +35,7 @@ test("fixed Research 03 pillar cards follow the shared selected seasonal state",
   assert.match(fourPillarView,/researchSeasonalTimeState/);
   assert.match(fourPillarView,/event\.detail\?\.owner!==["']seasonal["']/);
   assert.match(fourPillarView,/panel\.dataset\.mode="shared-seasonal"/);
-  assert.match(fourPillarView,/年／月可判 · 日／時未定/);
+  assert.match(fourPillarView,/年／月可回同柱 · 日／時未能判定/);
   assert.match(fourPillarView,/pillar\.status==="research-resolved"/);
   assert.match(fourPillarView,/Math\.abs\(state\.comparison\.driftDays\)/);
   assert.doesNotMatch(fourPillarView,/shape-only-secondary|shape-only-determinacy-details|shape-only 輔助判定/);
