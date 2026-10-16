@@ -88,7 +88,9 @@ for (const expected of [
   "TT 提前 10–14 d",
   "24,000 ≠ 完整週期",
   "主線案例 · 固定 2026 → 26026",
-  "12 / 12 節界未重現"
+  "12 / 12",
+  "全部提前",
+  "0 天 = 完全重合"
 ]) {
   if (!identityProbe.dom.includes(expected)) {
     throw new Error(`Research fixed main story missing at default delta=0 "${expected}": ${identityProbe.url}`);
