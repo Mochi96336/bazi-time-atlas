@@ -21,8 +21,8 @@ function ensurePanel(){
     '<header class="absolute-boundary-head research-conclusion-head">',
       '<div>',
         '<div class="eyebrow">研究結論 · 01 → 02 → 03</div>',
-        '<h3>24,000 年不是完整「時間 → 八字」映射的精確週期。</h3>',
-        '<p>同一個 +24,000 離散候選要分兩種問法：對齊同一太陽黃經時，年／月可以回到同柱；固定推進 24,000 個公曆年時，02 已證明節界到達時間沒有一起重現。</p>',
+        '<h3>為什麼「年／月可回同柱」與「24,000 不是完整週期」能同時成立？</h3>',
+        '<p>因為兩句話對齊的基準不同：一條固定太陽位置，一條固定公曆時間。把 reference frame 分開後，結論並不矛盾。</p>',
       '</div>',
     '</header>',
     '<div class="research-fork-source"><span>同一 +24,000 年離散候選</span></div>',
@@ -33,7 +33,7 @@ function ensurePanel(){
     '<p class="absolute-boundary-note"><strong>日／時仍是「未能判定」：</strong>節界未重現可以否定整套固定精確週期，但不能直接偷換成「每個相隔 24,000 年的四柱一定不同」。深時間民用日、日界與地方時證據仍不足。</p>'
   ].join("");
 
-  determinacy.insertAdjacentElement("beforebegin",panel);
+  determinacy.insertAdjacentElement("afterend",panel);
   return panel;
 }
 
