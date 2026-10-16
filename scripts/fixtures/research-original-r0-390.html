@@ -139,22 +139,31 @@ iframe.addEventListener("load",async()=>{
       "R9 tablet fan retained excess vertical stage: "+fanGraphic.height);
   }
   if(width<=390) {
-    const stageLimit=width<=320?316:359;
+    const stageLimit=width<=320?236:271;
     check(fanGraphic.height<=stageLimit+1,
-      "R5 mobile SVG drawing stage still wastes fixed 465px height: "+
+      "R12 mobile phase fan retained empty pre-geometry height: "+
       fanGraphic.height);
     const wheel=d.getElementById("recurrence-wheel");
     const legend=d.querySelector(".recurrence-legend");
     const transform=wheel.getScreenCTM();
-    // Original outer Gregorian sector apex in canonical SVG space is
-    // (600, 820 - 560) = (600, 260).
+    check(wheel.getAttribute("viewBox")==="0 90 1200 630" &&
+      wheel.dataset.mobileCrop==="true",
+      "R12 mobile fan did not activate the cropped SVG viewport: "+
+      JSON.stringify({viewBox:wheel.getAttribute("viewBox"),crop:wheel.dataset.mobileCrop}));
+    // Canonical geometry remains unchanged: Gregorian apex y=260;
+    // the outer astronomy label/reference reaches y=130.
     const apexY=transform.d*260+transform.f;
     const astronomyApexY=transform.d*195+transform.f;
+    const outerReferenceY=transform.d*130+transform.f;
     const legendBottom=legend.getBoundingClientRect().bottom;
     check(Number.isFinite(apexY) && Number.isFinite(astronomyApexY) &&
-      apexY>=legendBottom+22 && astronomyApexY>=legendBottom+32,
-      "R5 fan or outer astronomy orbit overlaps the mobile legend: "+
+      apexY>=legendBottom+22 && astronomyApexY>=legendBottom+10,
+      "R12 fan or astronomy baseline overlaps the mobile legend: "+
       JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
+    check(Number.isFinite(outerReferenceY) &&
+      outerReferenceY>=legendBottom+2 && outerReferenceY<=legendBottom+42,
+      "R12 mobile fan still leaves a dead band between legend and first visible geometry: "+
+      JSON.stringify({outerReference:outerReferenceY,legendBottom,gap:outerReferenceY-legendBottom}));
   }
   const localStep=derivationSteps?.querySelector('[data-milestone="local-year-day"]');
   check(derivationSteps?.children.length===6 &&

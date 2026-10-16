@@ -164,10 +164,10 @@ if (
   );
 }
 // The derivation thesis now owns the first mobile reading step; the named
-// Year/Day comparison intentionally follows it. Keep the fan itself compact.
-// The responsive 390px fan stage is ~358px, plus the normal-flow readout.
-if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 390) {
-  throw new Error(`Recurrence unboxed phase fan became too shallow (${recurrenceHeight}px): ${url}`);
+// Year/Day comparison intentionally follows it. The cropped 390px fan stage is
+// ~269px plus the normal-flow readout: enough to read, without the old dead band.
+if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 300 || recurrenceHeight > 380) {
+  throw new Error(`Recurrence cropped phase fan escaped its compact readable range (${recurrenceHeight}px): ${url}`);
 }
 if (
   !Number.isFinite(deltaSettingsHeight)
