@@ -13,6 +13,7 @@ import {
 const NS = "http://www.w3.org/2000/svg";
 const root = document.querySelector("#seasonal-drift-evidence");
 const curveSvg = document.querySelector("#seasonal-drift-curve");
+const boundaryProofSvg = document.querySelector("#seasonal-boundary-proof-svg");
 const orbitSvg = document.querySelector("#seasonal-drift-orbit");
 const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -20,8 +21,10 @@ const secondaryTools = document.querySelector("#secondary-astronomy-tools");
 const secondaryToolsMeta = document.querySelector("#secondary-astronomy-tools-meta");
 const decomposition = document.querySelector("#seasonal-drift-decomposition");
 const JIE_SUMMARY = baziJieDriftSummary(DATA.driftDays,indexForLongitude);
+const JIE_BY_LONGITUDE = new Map(JIE_SUMMARY.rows.map(row => [row.longitudeDegrees,row]));
+const compactProofMedia = window.matchMedia("(max-width:680px)");
 
-if (root && curveSvg && orbitSvg && scrub) {
+if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   const initialParams = new URLSearchParams(location.search);
   const state = {
     index:indexForLongitude(315),
@@ -45,7 +48,9 @@ if (root && curveSvg && orbitSvg && scrub) {
     height:420,
     cx:235,
     cy:205,
-    baseRadius:142
+    baseRadius:112,
+    labelRadius:151,
+    timeRadius:178
   });
 
   function svgEl(tag, attrs = {}, parent) {
@@ -114,6 +119,98 @@ if (root && curveSvg && orbitSvg && scrub) {
       const active = item.dataset.seasonalDriftMode === state.mode;
       item.setAttribute("aria-pressed",String(active));
     });
+  }
+
+  function activateBoundary(longitude,source="boundary-proof") {
+    setIndex(indexForLongitude(longitude),source);
+  }
+
+  function drawBoundaryProofDesktop() {
+    boundaryProofSvg.setAttribute("viewBox","0 0 1080 390");
+    const left=72,right=28,top=52,bottom=82,max=15;
+    const width=1080-left-right;
+    const plotHeight=390-top-bottom;
+
+    for (const tick of [0,5,10,15]) {
+      const y=top+(tick/max)*plotHeight;
+      svgEl("line",{
+        x1:left,x2:1080-right,y1:y,y2:y,
+        class:tick===0?"seasonal-proof-zero":"seasonal-proof-grid"
+      },boundaryProofSvg);
+      const label=svgEl("text",{
+        x:left-12,y:y+4,"text-anchor":"end",class:"seasonal-proof-axis"
+      },boundaryProofSvg);
+      label.textContent=tick===0?"0 = 重合":tick+" d";
+    }
+
+    JIE_SUMMARY.rows.forEach((row,index)=>{
+      const advance=-row.driftDays;
+      const x=left+(index+.5)/JIE_SUMMARY.rows.length*width;
+      const y=top+(advance/max)*plotHeight;
+      const selected=indexForLongitude(row.longitudeDegrees)===state.index;
+      const group=svgEl("g",{
+        class:"seasonal-proof-group"+(selected?" is-selected":"")+(row.yearBoundary?" is-year":""),
+        "data-longitude":row.longitudeDegrees
+      },boundaryProofSvg);
+      svgEl("line",{x1:x,x2:x,y1:top,y2:y,class:"seasonal-proof-stem"},group);
+      svgEl("circle",{cx:x,cy:y,r:row.yearBoundary?7:5,class:"seasonal-proof-dot"},group);
+      const value=svgEl("text",{x,y:y+19,"text-anchor":"middle",class:"seasonal-proof-value"},group);
+      value.textContent=advance.toFixed(1);
+      const term=svgEl("text",{x,y:390-bottom+38,"text-anchor":"middle",class:"seasonal-proof-label"},group);
+      term.textContent=row.termName;
+      const hit=svgEl("rect",{
+        x:x-width/JIE_SUMMARY.rows.length/2,y:top-12,
+        width:width/JIE_SUMMARY.rows.length,height:plotHeight+64,class:"seasonal-proof-hit"
+      },group);
+      hit.addEventListener("pointerdown",()=>activateBoundary(row.longitudeDegrees));
+    });
+  }
+
+  function drawBoundaryProofMobile() {
+    boundaryProofSvg.setAttribute("viewBox","0 0 390 430");
+    const left=58,right=34,top=42,bottom=18,max=15;
+    const width=390-left-right;
+    const rowHeight=(430-top-bottom)/JIE_SUMMARY.rows.length;
+    const xFor=value=>left+(value/max)*width;
+
+    for (const tick of [0,5,10,15]) {
+      const x=xFor(tick);
+      svgEl("line",{
+        x1:x,x2:x,y1:top-12,y2:430-bottom,
+        class:tick===0?"seasonal-proof-zero":"seasonal-proof-grid"
+      },boundaryProofSvg);
+      const label=svgEl("text",{x,y:22,"text-anchor":"middle",class:"seasonal-proof-axis"},boundaryProofSvg);
+      label.textContent=tick===0?"0":tick+" d";
+    }
+
+    JIE_SUMMARY.rows.forEach((row,index)=>{
+      const advance=-row.driftDays;
+      const y=top+(index+.5)*rowHeight;
+      const end=xFor(advance);
+      const selected=indexForLongitude(row.longitudeDegrees)===state.index;
+      const group=svgEl("g",{
+        class:"seasonal-proof-group"+(selected?" is-selected":"")+(row.yearBoundary?" is-year":""),
+        "data-longitude":row.longitudeDegrees
+      },boundaryProofSvg);
+      const term=svgEl("text",{x:left-8,y:y+3,"text-anchor":"end",class:"seasonal-proof-label"},group);
+      term.textContent=row.termName;
+      svgEl("line",{x1:xFor(0),x2:end,y1:y,y2:y,class:"seasonal-proof-stem"},group);
+      svgEl("circle",{cx:end,cy:y,r:row.yearBoundary?6:4,class:"seasonal-proof-dot"},group);
+      const value=svgEl("text",{
+        x:end>342?end-7:end+7,y:y+3,
+        "text-anchor":end>342?"end":"start",class:"seasonal-proof-value"
+      },group);
+      value.textContent=advance.toFixed(1);
+      const hit=svgEl("rect",{x:0,y:y-rowHeight/2,width:390,height:rowHeight,class:"seasonal-proof-hit"},group);
+      hit.addEventListener("pointerdown",()=>activateBoundary(row.longitudeDegrees));
+    });
+  }
+
+  function drawBoundaryProof() {
+    clear(boundaryProofSvg);
+    if (compactProofMedia.matches) drawBoundaryProofMobile();
+    else drawBoundaryProofDesktop();
+    boundaryProofSvg.dataset.ready="true";
   }
 
   function curveX(index) {
@@ -362,7 +459,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     for (const boundary of BAZI_JIE_BOUNDARIES) {
       const selected = boundary.longitudeDegrees === longitude;
       const rayEnd = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.baseRadius+30);
-      const labelPoint = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.baseRadius+38);
+      const labelPoint = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.labelRadius);
       svgEl("line", {
         x1:ORBIT.cx,
         y1:ORBIT.cy,
@@ -377,6 +474,62 @@ if (root && curveSvg && orbitSvg && scrub) {
         "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12 ? "middle" : labelPoint.x<ORBIT.cx ? "end" : "start"
       }, orbitSvg);
       label.textContent = `${boundary.termName} · ${boundary.branch}`;
+    }
+  }
+
+  function arrivalTimeArcPath(startLongitude,endLongitude,radius) {
+    const span=endLongitude-startLongitude;
+    const steps=Math.max(2,Math.ceil(Math.abs(span)/2));
+    const points=[];
+    for (let step=0; step<=steps; step+=1) {
+      const longitude=startLongitude+span*(step/steps);
+      const p=orbitDirectionXY(longitude,radius);
+      points.push((step===0?"M":"L")+" "+p.x.toFixed(2)+" "+p.y.toFixed(2));
+    }
+    return points.join(" ");
+  }
+
+  function drawArrivalTimeRing(longitude) {
+    svgEl("circle",{
+      cx:ORBIT.cx,cy:ORBIT.cy,r:ORBIT.timeRadius,class:"seasonal-orbit-time-ring"
+    },orbitSvg);
+
+    for (const boundary of BAZI_JIE_BOUNDARIES) {
+      const evidence=JIE_BY_LONGITUDE.get(boundary.longitudeDegrees);
+      if (!evidence) continue;
+      const advanceDays=-evidence.driftDays;
+      const advanceDegrees=advanceDays*(360/365.2425);
+      const arrivalLongitude=boundary.longitudeDegrees-advanceDegrees;
+      const selected=boundary.longitudeDegrees===longitude;
+      const group=svgEl("g",{
+        class:"seasonal-orbit-time-group"+(selected?" is-selected":"")+(boundary.yearBoundary?" is-year":""),
+        "data-longitude":boundary.longitudeDegrees,
+        "data-advance-days":advanceDays.toFixed(6)
+      },orbitSvg);
+
+      const baseA=orbitDirectionXY(boundary.longitudeDegrees,ORBIT.timeRadius-6);
+      const baseB=orbitDirectionXY(boundary.longitudeDegrees,ORBIT.timeRadius+6);
+      svgEl("line",{
+        x1:baseA.x,y1:baseA.y,x2:baseB.x,y2:baseB.y,class:"seasonal-orbit-time-base"
+      },group);
+      svgEl("path",{
+        d:arrivalTimeArcPath(arrivalLongitude,boundary.longitudeDegrees,ORBIT.timeRadius),
+        class:"seasonal-orbit-time-arc"
+      },group);
+      const target=orbitDirectionXY(arrivalLongitude,ORBIT.timeRadius);
+      svgEl("circle",{
+        cx:target.x,cy:target.y,r:boundary.yearBoundary?5.5:3.5,class:"seasonal-orbit-time-target"
+      },group);
+
+      if (boundary.yearBoundary || selected) {
+        const labelPoint=orbitDirectionXY(boundary.longitudeDegrees,ORBIT.timeRadius+20);
+        const label=svgEl("text",{
+          x:labelPoint.x,y:labelPoint.y+3,
+          "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12?"middle":labelPoint.x<ORBIT.cx?"end":"start",
+          class:"seasonal-orbit-time-label"
+        },group);
+        label.textContent=boundary.termName+" · 提前 "+advanceDays.toFixed(2)+" d";
+      }
     }
   }
 
@@ -403,6 +556,8 @@ if (root && curveSvg && orbitSvg && scrub) {
       d:orbitPath(DATA.targetEllipse,exaggeration),
       class:"seasonal-orbit-path seasonal-orbit-target"
     }, orbitSvg);
+
+    drawArrivalTimeRing(longitude);
 
     [0,90,180,270].forEach(angle => {
       const end = {
@@ -467,7 +622,7 @@ if (root && curveSvg && orbitSvg && scrub) {
     const hit = svgEl("circle", {
       cx:ORBIT.cx,
       cy:ORBIT.cy,
-      r:ORBIT.baseRadius+52,
+      r:ORBIT.timeRadius+18,
       class:"seasonal-orbit-hit"
     }, orbitSvg);
     hit.addEventListener("pointerdown", event => {
@@ -537,6 +692,7 @@ if (root && curveSvg && orbitSvg && scrub) {
 
   function render() {
     updateReadout();
+    drawBoundaryProof();
     drawCurve();
     drawOrbit();
   }
@@ -586,6 +742,8 @@ if (root && curveSvg && orbitSvg && scrub) {
     event.preventDefault();
     setIndex(state.index + (event.key === "ArrowRight" ? 1 : -1),"keyboard");
   });
+
+  compactProofMedia.addEventListener?.("change",render);
 
   if (instrument) {
     new MutationObserver(syncSecondaryDeltaLabel).observe(instrument, {
