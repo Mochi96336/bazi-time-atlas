@@ -20,7 +20,7 @@
 }
 .research-time-state-head span {
   display:block;
-  color:#6e7a72;
+  color:var(--research-text-muted);
   font-size:7.5px;
   letter-spacing:.09em;
   text-transform:uppercase;
@@ -28,13 +28,13 @@
 .research-time-state-head strong {
   display:block;
   margin-top:2px;
-  color:#d8dfda;
+  color:var(--research-text-primary);
   font-size:12px;
   font-weight:680;
 }
 .research-time-state-head > small {
   max-width:630px;
-  color:#78837c;
+  color:var(--research-text-muted);
   font-size:8px;
   line-height:1.45;
   text-align:right;
@@ -58,13 +58,13 @@
   margin-bottom:7px;
 }
 .research-time-side > header span {
-  color:#8b9790;
+  color:var(--research-text-secondary);
   font-size:8px;
   font-weight:700;
   letter-spacing:.06em;
 }
 .research-time-side > header strong {
-  color:#aeb8b1;
+  color:var(--research-text-secondary);
   font-size:8.5px;
   font-weight:560;
   white-space:nowrap;
@@ -82,25 +82,25 @@
 }
 .research-time-pillar > span {
   display:block;
-  color:#657168;
+  color:var(--research-text-muted);
   font-size:7px;
 }
 .research-time-pillar > strong {
   display:block;
   margin-top:1px;
-  color:#d5ddd7;
+  color:var(--research-text-primary);
   font-size:13px;
   font-weight:690;
 }
 .research-time-pillar > small {
   display:block;
   margin-top:1px;
-  color:#6f7b73;
+  color:var(--research-text-muted);
   font-size:7px;
 }
-.research-time-pillar[data-status="research-resolved"] > strong { color:#e0bd8e; }
-.research-time-pillar[data-status="sequence-only"] > strong { color:#abb7b0; }
-.research-time-pillar[data-status="unresolved"] > strong { color:#69746d; }
+.research-time-pillar[data-status="research-resolved"] > strong { color:var(--research-candidate); }
+.research-time-pillar[data-status="sequence-only"] > strong { color:var(--research-text-secondary); }
+.research-time-pillar[data-status="unresolved"] > strong { color:var(--research-diagram-unresolved); }
 .research-time-pillar[data-status="unresolved"] { background:rgba(255,255,255,.009); }
 
 @media (max-width:680px) {
@@ -163,7 +163,7 @@
   min-width:0;
   margin-top:0;
   overflow:hidden;
-  color:#e0e6e2;
+  color:var(--research-text-primary);
   font-size:10.5px;
   white-space:nowrap;
   text-overflow:ellipsis;
