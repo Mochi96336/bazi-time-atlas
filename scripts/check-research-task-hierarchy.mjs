@@ -24,6 +24,21 @@ function dump(path) {
   return { url, dom:result.stdout };
 }
 
+function dumpViewport(path, width, height) {
+  const url = new URL(path, baseURL).href;
+  const browserWidth = width;
+  const result = spawnSync(findBrowser(), [
+    "--headless=new", "--no-sandbox", "--disable-gpu", "--force-device-scale-factor=1", "--hide-scrollbars",
+    "--run-all-compositor-stages-before-draw", "--virtual-time-budget=1200",
+    `--window-size=${browserWidth},${height}`, "--dump-dom", url
+  ], { encoding:"utf8", maxBuffer:16 * 1024 * 1024 });
+  if (result.status !== 0) {
+    process.stderr.write(result.stderr ?? "");
+    throw new Error(`Chromium geometry probe failed: ${url}`);
+  }
+  return { url, dom:result.stdout };
+}
+
 function sectionById(dom, id) {
   const start = dom.indexOf(`id="${id}"`);
   if (start < 0) return "";
@@ -348,6 +363,36 @@ const sourceDeepLink = dump("recurrence.html?delta=24000#seasonal-epoch-source-a
 const sourceDeepLinkDetail = detailsById(sourceDeepLink.dom, "epoch-audit-support-details");
 if (!sourceDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(sourceDeepLinkDetail) || !sourceDeepLinkDetail.includes('id="seasonal-epoch-source-audit"')) {
   throw new Error(`direct source-audit hash did not auto-open supporting evidence: ${sourceDeepLink.url}`);
+}
+
+const anchorViewports = [
+  { key:"desktop", width:1440, height:900 },
+  { key:"mobile", width:390, height:844 }
+];
+for (const target of ["research-astronomy","research-evidence"]) {
+  for (const viewport of anchorViewports) {
+    const geometry = dumpViewport(
+      `scripts/fixtures/research-task-anchor-geometry.html?target=${target}&width=${viewport.width}&height=${viewport.height}`,
+      viewport.width,
+      viewport.height
+    );
+    const probeTag = geometry.dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0] ?? "";
+    if (!probeTag.includes('data-ready="true"')) {
+      const probeError = probeTag.match(/data-error="([^"]*)"/)?.[1] ?? "no probe error";
+      throw new Error(`Research anchor geometry probe did not become ready for ${target} / ${viewport.key}: ${probeError}: ${geometry.url}`);
+    }
+    if (!probeTag.includes('data-stuck="true"')) {
+      throw new Error(`Research time state did not become sticky after outline navigation to ${target} / ${viewport.key}: ${geometry.url}`);
+    }
+    const gap = Number(probeTag.match(/data-heading-gap="([^"]+)"/)?.[1]);
+    if (!Number.isFinite(gap) || gap < 8) {
+      throw new Error(`Research task heading is occluded by sticky time state at ${target} / ${viewport.key}: gap=${gap}: ${geometry.url}`);
+    }
+    const headingTop = Number(probeTag.match(/data-heading-top="([^"]+)"/)?.[1]);
+    if (!Number.isFinite(headingTop) || headingTop > viewport.height * 0.42) {
+      throw new Error(`Research anchor leaves the task heading too far down the viewport at ${target} / ${viewport.key}: top=${headingTop}: ${geometry.url}`);
+    }
+  }
 }
 
 console.log(`[research-hierarchy] PASS outcome-first three-section ownership + closed supporting evidence + query/hash reveal + RMS astronomy headline at 390px: ${probe.url}`);

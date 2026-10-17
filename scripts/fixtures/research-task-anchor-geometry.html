@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Research task anchor geometry probe</title>
+  <link rel="stylesheet" href="../../research-foundations.css">
+  <link rel="stylesheet" href="../../research-tasks.css">
+  <link rel="stylesheet" href="../../research-time-state.css">
+  <style>
+    html,body{margin:0;background:#0a0e12}
+    .fixture-shell{width:min(1360px,calc(100% - 20px));margin:0 auto}
+    .fixture-fill{height:980px}
+    .research-task{min-height:620px}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <main class="fixture-shell">
+    <nav class="research-outline" aria-label="研究項目">
+      <a href="#research-discrete"><span>01</span><strong>粗略週期</strong><small>24,000 離散候選</small></a>
+      <a href="#research-astronomy"><span>02</span><strong>天文偏移</strong><small>TT 提前 10–14 d</small></a>
+      <a href="#research-evidence"><span>03</span><strong>八字後果</strong><small>24,000 ≠ 完整週期</small></a>
+    </nav>
+
+    <section id="research-time-state" class="research-time-state" data-ready="true" data-owner="seasonal" data-stuck="true" aria-label="目前研究時間與干支">
+      <header class="research-time-state-head">
+        <div><span>02 · 太陽黃經／八字節界</span><strong>立春 · 315°</strong></div>
+        <small>同一太陽黃經；固定 24,000 個公曆年比較。</small>
+      </header>
+      <div class="research-time-state-compare">
+        <article class="research-time-side">
+          <header><span>基準</span><strong>2026/02/04 · UTC+08:00</strong></header>
+          <div class="research-time-pillars">
+            <div class="research-time-pillar"><span>年</span><strong>丙午</strong><small>已解析</small></div>
+            <div class="research-time-pillar"><span>月</span><strong>庚寅</strong><small>已解析</small></div>
+            <div class="research-time-pillar"><span>日</span><strong>己丑</strong><small>已解析</small></div>
+            <div class="research-time-pillar"><span>時</span><strong>丙寅</strong><small>已解析</small></div>
+          </div>
+        </article>
+        <article class="research-time-side">
+          <header><span>比較</span><strong>26026 太陽位置到達 · TT</strong></header>
+          <div class="research-time-pillars">
+            <div class="research-time-pillar" data-status="research-resolved"><span>年</span><strong>丙午</strong><small>研究可判</small></div>
+            <div class="research-time-pillar" data-status="research-resolved"><span>月</span><strong>庚寅</strong><small>研究可判</small></div>
+            <div class="research-time-pillar" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
+            <div class="research-time-pillar" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="research-discrete" class="research-task research-task-primary">
+      <header class="research-task-head"><div class="research-task-index">01</div><div><h2>粗略週期從哪裡來？</h2></div></header>
+      <div class="fixture-fill"></div>
+    </section>
+
+    <section id="research-astronomy" class="research-task">
+      <header class="research-task-head"><div class="research-task-index">02</div><div><h2>八字的節界回來了嗎？</h2></div><span class="research-task-relation">固定 24,000 年候選 → 12 節界校驗</span></header>
+      <div class="fixture-fill"></div>
+    </section>
+
+    <section id="research-evidence" class="research-task">
+      <header class="research-task-head"><div class="research-task-index">03</div><div><h2>對八字意味著什麼？</h2></div><span class="research-task-relation">12 / 12 節界位移 → 四柱可判範圍</span></header>
+      <div class="fixture-fill"></div>
+    </section>
+  </main>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const params=new URLSearchParams(location.search);
+    const target=params.get("target")||"research-astronomy";
+    const probe=document.querySelector("#probe");
+    const link=document.querySelector(`.research-outline a[href="#${target}"]`);
+    const task=document.getElementById(target);
+    const heading=task?.querySelector(".research-task-head");
+    const sticky=document.getElementById("research-time-state");
+    if(!link||!task||!heading||!sticky){
+      probe.dataset.ready="error";
+      probe.dataset.error="missing geometry fixture element";
+    }else{
+      link.click();
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        setTimeout(()=>{
+          const headingRect=heading.getBoundingClientRect();
+          const stickyRect=sticky.getBoundingClientRect();
+          probe.dataset.target=target;
+          probe.dataset.stuck=sticky.dataset.stuck||"false";
+          probe.dataset.headingTop=headingRect.top.toFixed(2);
+          probe.dataset.stickyBottom=stickyRect.bottom.toFixed(2);
+          probe.dataset.headingGap=(headingRect.top-stickyRect.bottom).toFixed(2);
+          probe.dataset.ready="true";
+        },80);
+      }));
+    }
+  </script>
+</body>
+</html>

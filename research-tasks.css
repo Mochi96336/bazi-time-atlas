@@ -166,7 +166,8 @@
 .research-fan-graphic #astronomy-residual-ring { display:none; }
 
 .research-task {
-  scroll-margin-top:18px;
+  /* Keep outline/hash targets below the condensed sticky Research time state. */
+  scroll-margin-top:112px;
   margin-top:50px;
   padding-top:22px;
   border-top:1px solid rgba(238,242,237,.11);
@@ -223,10 +224,11 @@
   }
 }
 @media (max-width:820px) {
-  .research-task { margin-top:34px; padding-top:18px; }
+  .research-task { scroll-margin-top:96px; margin-top:34px; padding-top:18px; }
   .research-task-primary { margin-top:0; padding-top:0; }
 }
 @media (max-width:480px) {
+  .research-task { scroll-margin-top:88px; }
   .research-question-intro { margin:7px 0 10px; row-gap:0; }
   .research-question-intro h1 { font-size:24px; }
   .research-question-intro .lede { margin-top:5px; font-size:11px; line-height:1.45; }
