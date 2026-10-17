@@ -126,6 +126,10 @@ test("visible orbit explains arrival-time phase without pretending it is a physi
   assert.match(css,/\.seasonal-orbit-time-ring/);
 });
 
+test("Research 02 CSS drops the retired linked two-column layout", () => {
+  assert.doesNotMatch(css, /seasonal-drift-linked-layout/);
+});
+
 test("orbit deformation is explicitly visual and reversible", () => {
   assert.match(data, /morphIntermediateYearsPhysical:false/);
   assert.match(view, /state\.exaggerate \? 10 : 1/);
