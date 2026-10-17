@@ -137,6 +137,7 @@
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
       const phaseFanDetails = recurrenceDoc.querySelector("#discrete-phase-fan-details");
       const sexagenaryDetails = recurrenceDoc.querySelector("#discrete-sexagenary-details");
+      const astronomyTransition = recurrenceDoc.querySelector(".discrete-to-astronomy");
       const astronomyTaskHead = recurrenceDoc.querySelector("#research-astronomy > .research-task-head");
       const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
       const discreteTaskHead = recurrenceDoc.querySelector("#research-discrete > .research-task-head");
@@ -167,7 +168,9 @@
       if (baseEditor)baseEditor.open=true;
       const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
+      const phaseFanDetailsRect = phaseFanDetails?.getBoundingClientRect();
       const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
+      const astronomyTransitionRect = astronomyTransition?.getBoundingClientRect();
       const astronomyTaskHeadRect = astronomyTaskHead?.getBoundingClientRect();
       const taskNavRect = researchTaskNav?.getBoundingClientRect();
       const taskHeadRect = discreteTaskHead?.getBoundingClientRect();
@@ -206,12 +209,15 @@
       probe.dataset.recurrenceOutlineBottom = String(Math.round(outlineRect?.bottom ?? -1));
       probe.dataset.recurrenceOutlineHeight = String(Math.round(outlineRect?.height ?? -1));
       probe.dataset.recurrencePhaseFanDetailsOpen = String(Boolean(phaseFanDetails?.open));
+      probe.dataset.recurrencePhaseFanDetailsTop = String(Math.round(phaseFanDetailsRect?.top ?? -1));
+      probe.dataset.recurrencePhaseFanDetailsHeight = String(Math.round(phaseFanDetailsRect?.height ?? -1));
       probe.dataset.recurrenceSexagenaryDetailsOpen = String(Boolean(sexagenaryDetails?.open));
       probe.dataset.recurrenceSexagenaryDetailsHeight = String(Math.round(sexagenaryDetailsRect?.height ?? -1));
       probe.dataset.recurrenceSexagenaryAfterDerivation = String(Boolean(
         derivationRect && sexagenaryDetailsRect &&
         derivationRect.bottom <= sexagenaryDetailsRect.top
       ));
+      probe.dataset.recurrenceAstronomyTransitionBottom = String(Math.round(astronomyTransitionRect?.bottom ?? -1));
       probe.dataset.recurrenceAstronomyTaskTop = String(Math.round(astronomyTaskHeadRect?.top ?? -1));
       probe.dataset.recurrenceTaskNavVisible = String(Boolean(researchTaskNav && !hidden(recurrenceWin, researchTaskNav)));
       probe.dataset.recurrenceTaskNavTop = String(Math.round(taskNavRect?.top ?? -1));
