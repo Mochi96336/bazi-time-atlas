@@ -2147,3 +2147,21 @@
     font-size:var(--research-type-compact);
   }
 }
+
+
+/* Research 01 density: the 660px phase fan is verification evidence, not part
+   of the mandatory 01 → 02 reading spine. Keep Δ controls visible below it. */
+.research-phase-fan-drilldown {
+  margin-top:var(--research-space-4);
+}
+.research-phase-fan-drilldown > .recurrence-instrument {
+  margin-top:0;
+  border-top:0;
+  border-radius:0;
+}
+.research-phase-fan-drilldown[open] > .recurrence-instrument {
+  margin-top:var(--research-space-2);
+}
+.research-phase-fan-drilldown + .discrete-derivation {
+  margin-top:var(--research-space-3);
+}

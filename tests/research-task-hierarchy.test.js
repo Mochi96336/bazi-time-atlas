@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, astronomyCss, residualCss, recurrenceCss, spineJs] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, discreteJs, astronomyCss, residualCss, recurrenceCss, spineJs] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
   readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
@@ -14,6 +14,7 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8"),
   readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
+  readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
   readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
   readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
@@ -87,12 +88,22 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.ok(discrete.indexOf('id="research-discrete-thesis"') < discrete.indexOf('id="research-year-strip"'));
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('id="recurrence-instrument"'));
+  assert.match(discrete, /id="recurrence-instrument"/);
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
   assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('class="discrete-derivation"'));
   assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
   assert.doesNotMatch(discrete, /class="astronomy-panel"/);
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
+});
+
+test("Research 01 keeps the large phase fan as optional verification while Delta stays primary", () => {
+  assert.match(discreteJs, /id = "discrete-phase-fan-details"/);
+  assert.match(discreteJs, /research-phase-fan-drilldown/);
+  assert.match(discreteJs, /離散相位扇/);
+  assert.match(discreteJs, /revealPhaseFanHash/);
+  assert.match(discreteCss, /\.research-phase-fan-drilldown/);
+  assert.doesNotMatch(html, /<details[^>]*id="discrete-phase-fan-details"/);
 });
 
 test("restored 60-day chart keeps the old wide-chart to narrow-readout proportion without reviving the legacy page", () => {
