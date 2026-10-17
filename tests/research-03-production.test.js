@@ -27,6 +27,10 @@ test("Research 03 production distinguishes supported from unresolved pillars",()
   assert.match(consequenceView,/日／時仍是「未能判定」/);
 });
 
+test("Research 03 production CSS drops the retired three-column conclusion grid",()=>{
+  assert.doesNotMatch(consequenceCss,/research-conclusion-grid|data-conclusion=/);
+});
+
 test("Research 03 production does not redraw Research 02 evidence",()=>{
   assert.doesNotMatch(consequenceView,/svgEl|absolute-boundary-strip|renderStrip/);
   assert.match(consequenceView,/證據已在 02 顯示，不在 03 重畫/);
