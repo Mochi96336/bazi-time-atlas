@@ -197,15 +197,6 @@
   padding-bottom:7px;
 }
 
-.seasonal-drift-linked-layout {
-  display:grid;
-  gap:18px;
-  margin-top:12px;
-}
-.seasonal-drift-evidence[data-mode="total"] .seasonal-drift-linked-layout,
-.seasonal-drift-evidence[data-mode="split"] .seasonal-drift-linked-layout {
-  grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);
-}
 .seasonal-drift-plot,
 .seasonal-drift-orbit-panel {
   min-width:0;
@@ -435,7 +426,6 @@
 .secondary-astronomy-tools > .near-search-panel { margin-bottom:10px; }
 
 @media (max-width:900px) {
-  .seasonal-drift-linked-layout { grid-template-columns:1fr !important; gap:12px; }
   .seasonal-drift-plot { border-right:0; border-bottom:1px solid rgba(238,242,237,.055); padding-bottom:8px; }
   .seasonal-drift-orbit-panel { max-width:560px; width:100%; margin:0 auto; }
 }
