@@ -92,3 +92,16 @@ test("shared Research time state condenses only after the same sticky node is st
   assert.match(css,/@media \(max-width:680px\)[\s\S]*?\.research-time-state\[data-stuck="true"\] \.research-time-pillar > small\s*\{[\s\S]*?display:none/);
   assert.doesNotMatch(view,/cloneNode|appendChild\(root\.clone|createElement\(["']section["']\)/);
 });
+
+test("shared Research time state uses the Research semantic palette", async () => {
+  const css = await readFile(new URL("../research-time-state.css", import.meta.url), "utf8");
+  assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/);
+  assert.match(css, /data-status="research-resolved"[^}]*var\(--research-candidate\)/);
+  assert.match(css, /data-status="sequence-only"[^}]*var\(--research-text-secondary\)/);
+  assert.match(css, /data-status="unresolved"[^}]*var\(--research-diagram-unresolved\)/);
+  for (const token of [
+    "--research-text-primary",
+    "--research-text-secondary",
+    "--research-text-muted"
+  ]) assert.ok(css.includes(token), `missing semantic token ${token}`);
+});
