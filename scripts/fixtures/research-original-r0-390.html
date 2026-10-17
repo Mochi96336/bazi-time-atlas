@@ -61,7 +61,10 @@ iframe.addEventListener("load",async()=>{
   // Restore the long-range Research chapters. Preserve the ORIGINAL small
   // within-chapter disclosure around the optional 60-day wheel; R0 only
   // removes the NEW top-level wrapper that hid ALL Research content.
-  const ids=["research-discrete","research-cycle-comparison","recurrence-instrument",
+  const phaseFanDetails=d.getElementById("discrete-phase-fan-details");
+  check(phaseFanDetails && phaseFanDetails.contains(instrument) && !phaseFanDetails.open,
+    "R1 large phase fan must keep the original instrument behind its default-closed verification disclosure");
+  const ids=["research-discrete","research-cycle-comparison",
     "research-year-strip","research-astronomy",
     "research-evidence","four-pillar-determinacy"];
   for(const id of ids){
@@ -69,6 +72,13 @@ iframe.addEventListener("load",async()=>{
     check(el&&!el.hidden&&el.checkVisibility(),
       "ORIGINAL Research module absent or hidden: "+id);
   }
+  check(instrument && !instrument.hidden,
+    "ORIGINAL Research instrument owner is absent");
+  // R4 still audits the ORIGINAL fan geometry; explicitly open the new
+  // verification disclosure for those measurements without changing its
+  // production default.
+  phaseFanDetails.open=true;
+  await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
   // R4 layout proof: one genuinely full-width year rail, an in-flow date
   // owner, and an unboxed fan, at actual 320/390/768/1440 viewports.
   const datePicker=d.querySelector("#research-target-date-form");

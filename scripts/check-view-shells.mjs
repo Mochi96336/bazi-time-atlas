@@ -89,6 +89,7 @@ requireEqual(attr(probe, "data-recurrence-lede-hidden"), "false", "Research ques
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
+requireEqual(attr(probe, "data-recurrence-phase-fan-details-open"), "false", "Phase-fan verification evidence must stay closed by default", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the primary delta derivation, not between fan and controls", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
@@ -141,11 +142,12 @@ const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
 const outlineHeight = Number(attr(probe, "data-recurrence-outline-height"));
 const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const taskHeadBottom = Number(attr(probe, "data-recurrence-task-head-bottom"));
-const recurrenceTop = Number(attr(probe, "data-recurrence-instrument-top"));
-const recurrenceHeight = Number(attr(probe, "data-recurrence-instrument-height"));
+const phaseFanTop = Number(attr(probe, "data-recurrence-phase-fan-details-top"));
+const phaseFanHeight = Number(attr(probe, "data-recurrence-phase-fan-details-height"));
 const comparisonTop = Number(attr(probe, "data-recurrence-primary-comparison-top"));
 const comparisonBottom = Number(attr(probe, "data-recurrence-primary-comparison-bottom"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
+const astronomyTransitionBottom = Number(attr(probe, "data-recurrence-astronomy-transition-bottom"));
 const astronomyTaskTop = Number(attr(probe, "data-recurrence-astronomy-task-top"));
 const derivationTop = Number(attr(probe, "data-recurrence-derivation-top"));
 const deltaSettingsHeight = Number(attr(probe, "data-recurrence-delta-settings-height"));
@@ -153,22 +155,22 @@ const zeroDeltaStepHeight = Number(attr(probe, "data-recurrence-zero-delta-step-
 const publicDeltaSliderWidth = Number(attr(probe, "data-recurrence-public-delta-slider-width"));
 const shiftToolbarHeight = Number(attr(probe, "data-recurrence-shift-toolbar-height"));
 if (
-  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, comparisonTop, comparisonBottom, recurrenceTop, derivationTop].every(Number.isFinite)
+  ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, comparisonTop, comparisonBottom, phaseFanTop, derivationTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom
     && taskHeadBottom < comparisonTop && comparisonTop < comparisonBottom
-    && comparisonBottom <= recurrenceTop && recurrenceTop < derivationTop)
+    && comparisonBottom <= phaseFanTop && phaseFanTop < derivationTop)
   || outlineHeight > 46
 ) {
   throw new Error(
-    `Recurrence mobile outline must stay compact and precede section 01 ` +
-    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, secondaryFan=${recurrenceTop}, deltaRail=${derivationTop}): ${url}`
+    `Recurrence mobile outline must stay compact and preserve the 01 reading order ` +
+    `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, phaseFanRail=${phaseFanTop}, deltaRail=${derivationTop}): ${url}`
   );
 }
-// The derivation thesis now owns the first mobile reading step; the named
-// Year/Day comparison intentionally follows it. The cropped 390px fan stage is
-// ~269px plus the normal-flow readout: enough to read, without the old dead band.
-if (!Number.isFinite(recurrenceHeight) || recurrenceHeight < 300 || recurrenceHeight > 380) {
-  throw new Error(`Recurrence cropped phase fan escaped its compact readable range (${recurrenceHeight}px): ${url}`);
+// The large fan is now optional verification evidence. The default mobile flow
+// should pay only for one compact disclosure rail; expanded fan geometry is
+// audited by the dedicated Year-Day production check.
+if (!Number.isFinite(phaseFanHeight) || phaseFanHeight < 38 || phaseFanHeight > 48) {
+  throw new Error(`Research phase-fan verification rail escaped its compact range (${phaseFanHeight}px): ${url}`);
 }
 if (
   !Number.isFinite(deltaSettingsHeight)
@@ -191,8 +193,8 @@ if (
 if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
   throw new Error(`60-day supporting evidence must collapse to one compact rail by default (${sexagenaryDetailsHeight}px): ${url}`);
 }
-if (!Number.isFinite(astronomyTaskTop) || astronomyTaskTop <= recurrenceTop + recurrenceHeight) {
-  throw new Error(`Research section 02 must remain after the primary recurrence instrument (${astronomyTaskTop}px): ${url}`);
+if (!Number.isFinite(astronomyTransitionBottom) || !Number.isFinite(astronomyTaskTop) || astronomyTaskTop <= astronomyTransitionBottom) {
+  throw new Error(`Research section 02 must remain after the 01→02 transition (${astronomyTransitionBottom}px → ${astronomyTaskTop}px): ${url}`);
 }
 
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
