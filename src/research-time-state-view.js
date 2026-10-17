@@ -74,6 +74,7 @@ if (root) {
 
   function renderDiscrete(state) {
     root.dataset.owner = "discrete";
+    root.dataset.context = "discrete";
     setText("research-time-kicker","01 · 日期／離散序列");
     setText("research-time-title",`基準 ${formatDate(state.selection.baseDate)} · Δ ${state.comparison.deltaYears.toLocaleString("en-US")} 年`);
     setText("research-time-base-coordinate",`${formatDate(state.selection.baseDate)} · 日內時刻未綁定`);
@@ -88,6 +89,7 @@ if (root) {
 
   function renderSeasonal(state) {
     root.dataset.owner = "seasonal";
+    root.dataset.context = "astronomy";
     const term = state.selection.termName
       ? `${state.selection.termName} · ${state.selection.longitudeDegrees}°`
       : `${state.selection.longitudeDegrees}° · ${state.selection.baziMonthBranch}月區段`;
@@ -139,7 +141,7 @@ if (root) {
   }
 
   document.addEventListener(RESEARCH_TIME_SELECTION_EVENT, event => {
-    renderSelection(event.detail);
+    if (renderSelection(event.detail)) queueViewportSync();
   });
 
   function discreteSelectionFromDom() {
@@ -157,27 +159,54 @@ if (root) {
       : null;
   }
 
-  function ownerAtReadingLine() {
+  function readingContextAtLine() {
     const readingY = Math.min(window.innerHeight * 0.30, 240);
     const contains = section => {
       if (!section) return false;
       const rect = section.getBoundingClientRect();
       return rect.top <= readingY && rect.bottom > readingY;
     };
-    if (contains(astronomySection) || contains(evidenceSection)) return "seasonal";
+    if (contains(evidenceSection)) return "evidence";
+    if (contains(astronomySection)) return "astronomy";
     if (contains(discreteSection)) return "discrete";
+    return null;
+  }
+
+  function ownerForReadingContext(context) {
+    if (context === "astronomy" || context === "evidence") return "seasonal";
+    if (context === "discrete") return "discrete";
     return activeOwner ?? "discrete";
+  }
+
+  function applyReadingContext(context) {
+    if (context === "evidence" && activeOwner === "seasonal") {
+      root.dataset.context = "evidence";
+      setText("research-time-kicker","03 · 四柱判定／同一太陽黃經");
+      return;
+    }
+    if (context === "astronomy" && activeOwner === "seasonal") {
+      root.dataset.context = "astronomy";
+      setText("research-time-kicker","02 · 太陽黃經／八字節界");
+      return;
+    }
+    if (context === "discrete" && activeOwner === "discrete") {
+      root.dataset.context = "discrete";
+      setText("research-time-kicker","01 · 日期／離散序列");
+    }
   }
 
   function syncOwnerFromViewport() {
     viewportSyncQueued = false;
     syncStickyPresentation();
-    const owner = ownerAtReadingLine();
-    if (owner === activeOwner) return;
-    const selection = owner === "seasonal"
-      ? seasonalSelectionFromDom()
-      : discreteSelectionFromDom();
-    if (selection) renderSelection(selection);
+    const context = readingContextAtLine();
+    const owner = ownerForReadingContext(context);
+    if (owner !== activeOwner) {
+      const selection = owner === "seasonal"
+        ? seasonalSelectionFromDom()
+        : discreteSelectionFromDom();
+      if (selection) renderSelection(selection);
+    }
+    applyReadingContext(context);
   }
 
   function syncStickyPresentation() {

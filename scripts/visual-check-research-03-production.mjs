@@ -37,6 +37,8 @@ for(const viewport of viewports){
   const dom=run(browser,[...browserArgs(),"--window-size="+viewport.width+","+viewport.height,"--dump-dom",url],"Research 03 DOM").stdout;
   for(const required of [
     'data-ready="true"',
+    'data-time-context="evidence"',
+    'data-time-kicker="03 · 四柱判定／同一太陽黃經"',
     'data-conclusion-grammar="alignment-fork"',
     'data-pillar-grammar="pillar-verdict"'
   ]) if(!dom.includes(required))throw new Error("Research 03 production harness missing "+required);
