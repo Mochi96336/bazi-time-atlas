@@ -135,6 +135,7 @@
       const recurrenceAlignmentRows = [...recurrenceDoc.querySelectorAll(".research-alignment-row")];
       const recurrenceNext = recurrenceDoc.querySelector(".research-question-next");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
+      const phaseFanDetails = recurrenceDoc.querySelector("#discrete-phase-fan-details");
       const sexagenaryDetails = recurrenceDoc.querySelector("#discrete-sexagenary-details");
       const astronomyTaskHead = recurrenceDoc.querySelector("#research-astronomy > .research-task-head");
       const researchTaskNav = recurrenceDoc.querySelector(".research-task-nav");
@@ -204,6 +205,7 @@
       probe.dataset.recurrenceOutlineTop = String(Math.round(outlineRect?.top ?? -1));
       probe.dataset.recurrenceOutlineBottom = String(Math.round(outlineRect?.bottom ?? -1));
       probe.dataset.recurrenceOutlineHeight = String(Math.round(outlineRect?.height ?? -1));
+      probe.dataset.recurrencePhaseFanDetailsOpen = String(Boolean(phaseFanDetails?.open));
       probe.dataset.recurrenceSexagenaryDetailsOpen = String(Boolean(sexagenaryDetails?.open));
       probe.dataset.recurrenceSexagenaryDetailsHeight = String(Math.round(sexagenaryDetailsRect?.height ?? -1));
       probe.dataset.recurrenceSexagenaryAfterDerivation = String(Boolean(
@@ -284,12 +286,13 @@
       probe.dataset.recurrenceTargetDateInputHeight = String(Math.round(selectedDateInputClosedRect?.height ?? -1));
       probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
       probe.dataset.recurrenceDeltaControlsAfterInstrument = String(Boolean(
-        recurrenceRect && derivationRect && compactControls && originalYearStrip &&
-        derivation?.contains(compactControls) &&
+        phaseFanDetails && recurrenceInstrument && phaseFanDetails.contains(recurrenceInstrument) &&
+        derivation && compactControls && originalYearStrip &&
+        derivation.contains(compactControls) &&
         !originalYearStrip.contains(compactControls) &&
         originalYearStrip.contains(selectedDateInput) &&
         controlsClosedOnEntry &&
-        recurrenceRect.bottom <= derivationRect.top
+        phaseFanDetails.nextElementSibling === derivation
       ));
       probe.dataset.recurrenceDeltaRailOwnsZero = String(Boolean(
         zeroDeltaStep &&
