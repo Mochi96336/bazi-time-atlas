@@ -26,10 +26,10 @@ function dump(path) {
 
 function dumpViewport(path, width, height) {
   const url = new URL(path, baseURL).href;
-  const browserWidth = width === 390 ? 500 : width;
+  const browserWidth = width;
   const result = spawnSync(findBrowser(), [
     "--headless=new", "--no-sandbox", "--disable-gpu", "--force-device-scale-factor=1", "--hide-scrollbars",
-    "--run-all-compositor-stages-before-draw", "--virtual-time-budget=4200",
+    "--run-all-compositor-stages-before-draw", "--virtual-time-budget=1200",
     `--window-size=${browserWidth},${height}`, "--dump-dom", url
   ], { encoding:"utf8", maxBuffer:16 * 1024 * 1024 });
   if (result.status !== 0) {
