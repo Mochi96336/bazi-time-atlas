@@ -378,7 +378,8 @@ for (const target of ["research-astronomy","research-evidence"]) {
     );
     const probeTag = geometry.dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0] ?? "";
     if (!probeTag.includes('data-ready="true"')) {
-      throw new Error(`Research anchor geometry probe did not become ready for ${target} / ${viewport.key}: ${geometry.url}`);
+      const probeError = probeTag.match(/data-error="([^"]*)"/)?.[1] ?? "no probe error";
+      throw new Error(`Research anchor geometry probe did not become ready for ${target} / ${viewport.key}: ${probeError}: ${geometry.url}`);
     }
     if (!probeTag.includes('data-stuck="true"')) {
       throw new Error(`Research time state did not become sticky after outline navigation to ${target} / ${viewport.key}: ${geometry.url}`);
