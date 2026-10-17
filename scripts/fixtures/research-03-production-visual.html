@@ -45,7 +45,14 @@
         doc.getElementById("research-evidence")?.scrollIntoView({block:"start"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
+        const timeState=doc?.getElementById("research-time-state");
+        const timeKicker=doc?.getElementById("research-time-kicker");
+        if(timeState?.dataset.context!=="evidence"||timeKicker?.textContent.trim()!=="03 · 四柱判定／同一太陽黃經"){
+          throw new Error("Research 03 sticky time context did not switch from the shared seasonal owner");
+        }
         probe.dataset.ready="true";
+        probe.dataset.timeContext=timeState.dataset.context||"";
+        probe.dataset.timeKicker=timeKicker.textContent.trim();
         probe.dataset.conclusionGrammar=conclusion.dataset.diagramGrammar||"";
         probe.dataset.pillarGrammar=determinacy.dataset.diagramGrammar||"";
         probe.dataset.yearStatus=determinacy.dataset.yearStatus||"";
