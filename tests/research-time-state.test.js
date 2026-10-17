@@ -82,6 +82,10 @@ test("shared Research time state condenses only after the same sticky node is st
 
   assert.equal((html.match(/id="research-time-state"/g) ?? []).length,1);
   assert.match(view,/function syncStickyPresentation\(\)/);
+  assert.match(view,/function readingContextAtLine\(\)/);
+  assert.match(view,/function ownerForReadingContext\(context\)/);
+  assert.match(view,/03 · 四柱判定／同一太陽黃經/);
+  assert.doesNotMatch(view,/contains\(astronomySection\) \|\| contains\(evidenceSection\)/);
   assert.match(view,/root\.dataset\.stuck = String\(window\.scrollY > 0 && rect\.top <= top \+ 1\)/);
   assert.match(view,/syncStickyPresentation\(\);/);
   assert.match(view,/root\.dataset\.stuck = "false"/);
