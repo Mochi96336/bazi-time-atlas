@@ -21,7 +21,7 @@ const LABELS = Object.freeze({
 });
 
 const STATUS_LABELS = Object.freeze({
-  "research-resolved":"研究可判",
+  "research-resolved":"可回到同柱",
   "resolved":"已解析",
   "unresolved":"未定",
   "identical-by-definition":"同一狀態",
@@ -29,7 +29,7 @@ const STATUS_LABELS = Object.freeze({
   "mixed-with-year-sequence":"混入年序偏移",
   "branch-resolved-stem-mixed":"月支可判 · 月干混合",
   "astronomy-unavailable":"天文模型外",
-  "not-resolved-by-shape-model":"此模型不可判"
+  "not-resolved-by-shape-model":"未能判定"
 });
 
 let currentSeasonalState=null;
@@ -103,14 +103,14 @@ function renderSharedSeasonal(state){
   const resolvedCount=Object.values(states).filter(item=>item.resolved).length;
   const label=panel.querySelector(".determinacy-label");
   const scopeLabel=panel.querySelector(".determinacy-scope span");
-  if(label)label.textContent="目前選定太陽位置";
+  if(label)label.textContent="四柱可判範圍";
   if(scopeLabel)scopeLabel.textContent="固定 +24,000 · 同一太陽黃經";
 
   const selectionLabel=selected.termName
     ? `${selected.termName} · ${selected.longitudeDegrees}°`
     : `${selected.longitudeDegrees}° · ${selected.baziMonthBranch}月`;
 
-  setText("determinacy-scope-value","年／月可判 · 日／時未定");
+  setText("determinacy-scope-value","年／月可回同柱 · 日／時未能判定");
   setText(
     "determinacy-footnote",
     `${selectionLabel}：這裡比較的是同一太陽黃經位置，所以年／月可由 60 年序與節界規則推出；但 02 已證明這個太陽位置的到達時刻，相對固定推進 24,000 個公曆年提前 ${Math.abs(state.comparison.driftDays).toFixed(3)} 天。日／時仍不能由帶不確定性的深時間 UT1／地方鐘面唯一決定。`

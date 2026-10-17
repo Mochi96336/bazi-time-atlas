@@ -88,7 +88,9 @@ for (const expected of [
   "TT 提前 10–14 d",
   "24,000 ≠ 完整週期",
   "主線案例 · 固定 2026 → 26026",
-  "12 / 12 節界未重現"
+  "12 / 12",
+  "全部提前",
+  "0 天 = 完全重合"
 ]) {
   if (!identityProbe.dom.includes(expected)) {
     throw new Error(`Research fixed main story missing at default delta=0 "${expected}": ${identityProbe.url}`);
@@ -229,10 +231,10 @@ for (const expected of [
   "60 年序",
   "60 日序",
   "季節形狀 RMS",
-  "12 / 12 節界未重現",
-  "目前選定太陽位置",
+  "0 天 = 完全重合",
+  "四柱可判範圍",
   "固定 +24,000 · 同一太陽黃經",
-  "年／月可判 · 日／時未定",
+  "年／月可回同柱 · 日／時未能判定",
   "四柱結論",
   "研究時間",
   "年序／日序",

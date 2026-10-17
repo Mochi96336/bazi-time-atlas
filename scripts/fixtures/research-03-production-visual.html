@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Research 03 production visual harness</title>
+  <style>
+    html,body{margin:0;overflow:hidden;background:#0a0e12}
+    #stage{display:block;border:0;background:#0a0e12}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Research 03 production viewport"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const params=new URLSearchParams(location.search);
+    const width=Math.max(320,Math.min(2047,Number(params.get("width"))||1440));
+    const height=Math.max(480,Math.min(2400,Number(params.get("height"))||900));
+    const frame=document.querySelector("#stage");
+    const probe=document.querySelector("#probe");
+    document.documentElement.style.width=(width<=390?500:width)+"px";
+    document.body.style.width=(width<=390?500:width)+"px";
+    document.documentElement.style.height=height+"px";
+    document.body.style.height=height+"px";
+    frame.style.width=width+"px";
+    frame.style.height=height+"px";
+    frame.src=new URL("../../recurrence.html?date=2026-09-13&delta=24000",location.href).href;
+    const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    frame.addEventListener("load",async()=>{
+      try{
+        const doc=frame.contentDocument;
+        const win=frame.contentWindow;
+        for(let i=0;i<220;i++){
+          const conclusion=doc?.getElementById("absolute-boundary-consequence");
+          const determinacy=doc?.getElementById("four-pillar-determinacy");
+          if(conclusion?.dataset.ready==="true"&&determinacy?.dataset.ready==="true")break;
+          await wait(40);
+        }
+        const conclusion=doc?.getElementById("absolute-boundary-consequence");
+        const determinacy=doc?.getElementById("four-pillar-determinacy");
+        if(!conclusion||conclusion.dataset.ready!=="true"||determinacy?.dataset.ready!=="true"){
+          throw new Error("Research 03 did not become ready");
+        }
+        doc.getElementById("research-evidence")?.scrollIntoView({block:"start"});
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+        await wait(120);
+        probe.dataset.ready="true";
+        probe.dataset.conclusionGrammar=conclusion.dataset.diagramGrammar||"";
+        probe.dataset.pillarGrammar=determinacy.dataset.diagramGrammar||"";
+        probe.dataset.yearStatus=determinacy.dataset.yearStatus||"";
+        probe.dataset.monthStatus=determinacy.dataset.monthStatus||"";
+        probe.dataset.dayStatus=determinacy.dataset.dayStatus||"";
+        probe.dataset.hourStatus=determinacy.dataset.hourStatus||"";
+        probe.dataset.innerWidth=String(win.innerWidth);
+      }catch(error){
+        probe.dataset.ready="error";
+        probe.dataset.error=String(error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -100,3 +100,98 @@
   .research-conclusion-grid small,
   .absolute-boundary-note { font-size:8.5px; }
 }
+
+/* Research 03 selected grammar — compact reference-frame fork before the pillar verdict band */
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] {
+  margin-top:var(--research-space-2);
+  padding:var(--research-space-4) 0 var(--research-space-5);
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-strong);
+}
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head {
+  max-width:var(--research-width-narrative);
+}
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head h3 {
+  color:var(--research-text-primary);
+  font-size:var(--research-type-section);
+  line-height:var(--research-leading-section);
+}
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head p {
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-compact);
+  line-height:var(--research-leading-compact);
+}
+.research-fork-source {
+  width:max-content;
+  max-width:100%;
+  margin:var(--research-space-5) auto 0;
+  padding:var(--research-space-2) var(--research-space-6);
+  border-top:var(--research-diagram-line-active) solid var(--research-candidate);
+  border-bottom:1px solid var(--research-line-subtle);
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+  font-weight:var(--research-weight-emphasis);
+  text-align:center;
+}
+.research-alignment-fork {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:var(--research-space-4);
+  max-width:980px;
+  margin:var(--research-space-3) auto 0;
+}
+.research-alignment-fork article {
+  min-width:0;
+  padding:var(--research-space-4);
+  border-top:1px solid var(--research-line-strong);
+  border-bottom:1px solid var(--research-line-subtle);
+  background:var(--research-diagram-surface);
+}
+.research-alignment-fork span {
+  display:block;
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  letter-spacing:.04em;
+}
+.research-alignment-fork strong {
+  display:block;
+  margin-top:var(--research-space-1);
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-subsection);
+  line-height:var(--research-leading-subsection);
+}
+.research-alignment-fork [data-alignment-claim="solar"] strong { color:var(--research-candidate); }
+.research-alignment-fork small {
+  display:block;
+  margin-top:var(--research-space-2);
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note {
+  max-width:980px;
+  margin:var(--research-space-3) auto 0;
+  padding-top:var(--research-space-3);
+  border-top:1px solid var(--research-line-subtle);
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+@media(max-width:480px){
+  .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] { padding-top:var(--research-space-3); }
+  .research-fork-source { margin-top:var(--research-space-4); padding-inline:var(--research-space-4); }
+  .research-alignment-fork { gap:var(--research-space-2); }
+  .research-alignment-fork article { padding:var(--research-space-3); }
+  .research-alignment-fork strong { font-size:var(--research-type-compact); line-height:var(--research-leading-compact); }
+  .research-alignment-fork small { font-size:8.5px; }
+}
+
+
+/* The alignment fork is explanatory follow-up; the pillar band above owns the first verdict. */
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] {
+  margin-top:var(--research-space-5);
+}
+.absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head h3 {
+  font-size:var(--research-type-subsection);
+  line-height:var(--research-leading-subsection);
+}

@@ -64,12 +64,15 @@ for(const delta of [0,400,1980,24000]){
     'id="seasonal-drift-selected-total-human">提前 10.883 天',
     'id="absolute-boundary-consequence"',
     'research-recurrence-conclusion',
-    '24,000 年不是完整「時間 → 八字」映射的精確週期',
-    '12 / 12 節界未重現',
+    '≠ 完整「時間 → 八字」精確週期',
+    'data-diagram-grammar="pillar-verdict"',
+    'data-diagram-grammar="alignment-fork"',
+    '固定推進 24,000 公曆年',
+    '節界時間沒有重現',
     'id="four-pillar-determinacy"',
     'data-mode="shared-seasonal"',
     'data-selected-longitude="315"',
-    '年／月可判 · 日／時未定',
+    '年／月可回同柱 · 日／時未能判定',
     '探索工具 · 目前 Δ = '+delta.toLocaleString("en-US")+' 年 · 不影響上方固定 24,000 年主線'
   ],"always-visible main story @ delta="+delta);
 

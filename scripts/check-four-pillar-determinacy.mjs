@@ -77,9 +77,9 @@ for (const delta of [0,400,1980,24000]) {
     throw new Error(`03 did not initialize from the default Li Chun crossing at Δ=${delta}: ${fixed.url}`);
   }
   for (const expected of [
-    "年／月可判 · 日／時未定",
+    "年／月可回同柱 · 日／時未能判定",
     "立春 · 315°",
-    "24,000 年不是完整「時間 → 八字」映射的精確週期"
+    "≠ 完整「時間 → 八字」精確週期"
   ]) {
     if (!fixed.dom.includes(expected)) {
       throw new Error(`fixed +24k selected-crossing conclusion missing "${expected}" at Δ=${delta}: ${fixed.url}`);
@@ -101,8 +101,9 @@ const global = expectState(24000, {
 }, "24000-year exact discrete closure");
 
 for (const expected of [
-  "同一太陽位置的年／月柱可重現",
-  "相隔固定 24,000 年的所有時間都回到同一八字",
+  "對齊同一太陽黃經",
+  "固定推進 24,000 公曆年",
+  "不能直接偷換成「每個相隔 24,000 年的四柱一定不同」",
   "日／時仍不能由帶不確定性的深時間 UT1／地方鐘面唯一決定"
 ]) {
   if (!global.dom.includes(expected)) {
