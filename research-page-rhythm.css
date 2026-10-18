@@ -57,3 +57,190 @@
 #research-evidence .research-alignment-fork{gap:var(--research-space-4)}
 #research-evidence .research-alignment-fork article{padding:var(--research-space-4) var(--research-space-3)}
 }
+
+
+/* Editorial pass: diagrams are the content, not modules inside ruled cards.
+   Color remains semantic: current cyan, candidate amber, unresolved neutral.
+   Keep structural axes and plotted marks; remove framing rules around scenes. */
+#research-astronomy .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"]{
+  padding-top:0;
+  padding-bottom:0;
+  border:0;
+}
+#research-astronomy .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-summary{
+  margin-top:var(--research-space-8);
+  border:0;
+}
+#research-astronomy .seasonal-boundary-proof{
+  padding:0;
+  border:0;
+}
+#research-astronomy .seasonal-boundary-proof-head{
+  padding-inline:0;
+}
+#research-astronomy .seasonal-boundary-proof-head strong{
+  font-size:var(--research-type-subsection);
+  letter-spacing:-.02em;
+}
+#research-astronomy .seasonal-drift-orbit-explainer{
+  width:min(860px,100%);
+  padding:0;
+  border:0;
+}
+#research-astronomy .seasonal-orbit-explainer-note{
+  margin-top:var(--research-space-8);
+  padding-top:0;
+  border:0;
+  color:var(--research-text-secondary);
+}
+#research-astronomy .seasonal-drift-residual-strip{
+  padding:0;
+  border:0;
+}
+#research-astronomy .seasonal-drift-residual-strip>svg{
+  max-width:var(--research-width-visual);
+  margin-inline:auto;
+}
+#research-astronomy .seasonal-drift-evidence-note{
+  max-width:var(--research-width-narrative);
+  padding-top:0;
+  border:0;
+}
+
+/* The four pillars remain a single horizontal register rather than four
+   inset tiles. Resolution is conveyed by the actual pillar and its accent. */
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"]{
+  border:0;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict{
+  padding:var(--research-space-4) 0 var(--research-space-4) var(--research-space-6);
+  border:0;
+  border-left:var(--research-diagram-line-active) solid var(--research-candidate);
+  background:linear-gradient(90deg,var(--research-candidate-soft),transparent 70%);
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid{
+  gap:var(--research-space-2);
+  border:0;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{
+  padding:var(--research-space-6) var(--research-space-4);
+  border:0;
+  border-top:var(--research-diagram-line-active) solid var(--research-diagram-structure);
+  background:none;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"]{
+  border-top-color:var(--research-candidate);
+  background:none;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="false"]{
+  background:none;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-foot{
+  border:0;
+}
+
+/* Two reference frames unfold as typography connected to one shared source.
+   No colored panel shells: just one short semantic rule per claim. */
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"]{
+  padding-top:0;
+  padding-bottom:0;
+  border:0;
+}
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head{
+  max-width:var(--research-width-narrative);
+}
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head h3{
+  font-size:var(--research-type-section);
+  line-height:var(--research-leading-section);
+}
+#research-evidence .research-fork-source{
+  position:relative;
+  width:max-content;
+  margin-top:var(--research-space-12);
+  padding:0;
+  border:0;
+  color:var(--research-text-secondary);
+}
+#research-evidence .research-fork-source::after{
+  content:"";
+  position:absolute;
+  top:calc(100% + var(--research-space-2));
+  left:50%;
+  width:var(--research-diagram-line-hairline);
+  height:var(--research-space-6);
+  background:var(--research-candidate-line);
+}
+#research-evidence .research-alignment-fork{
+  max-width:var(--research-width-narrative);
+  gap:var(--research-space-20);
+  margin-top:var(--research-space-12);
+}
+#research-evidence .research-alignment-fork article,
+#research-evidence .research-alignment-fork article[data-alignment-claim="solar"],
+#research-evidence .research-alignment-fork article[data-alignment-claim="calendar"]{
+  position:relative;
+  min-height:0;
+  padding:var(--research-space-6) 0 var(--research-space-4);
+  border:0;
+  background:none;
+}
+#research-evidence .research-alignment-fork article::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:var(--research-space-20);
+  height:var(--research-diagram-line-active);
+  background:var(--research-diagram-structure);
+}
+#research-evidence .research-alignment-fork article[data-alignment-claim="solar"]::before{
+  background:var(--research-candidate);
+}
+#research-evidence .research-alignment-fork article strong{
+  margin-top:var(--research-space-3);
+  font-size:var(--research-type-subsection);
+}
+#research-evidence .research-alignment-fork article small{
+  margin-top:var(--research-space-4);
+  color:var(--research-text-secondary);
+}
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note{
+  margin-top:var(--research-space-12);
+  padding-top:0;
+  border:0;
+  max-width:var(--research-width-narrative);
+}
+
+@media(max-width:680px){
+  #research-astronomy .seasonal-boundary-proof-head strong{
+    font-size:var(--research-type-subsection);
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict{
+    padding-left:var(--research-space-4);
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid{
+    gap:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{
+    padding:var(--research-space-4) var(--research-space-3);
+  }
+  #research-evidence .research-fork-source{
+    margin-top:var(--research-space-8);
+  }
+  #research-evidence .research-alignment-fork{
+    grid-template-columns:minmax(0,1fr);
+    gap:var(--research-space-8);
+    margin-top:var(--research-space-12);
+  }
+  #research-evidence .research-alignment-fork article,
+  #research-evidence .research-alignment-fork article[data-alignment-claim="solar"],
+  #research-evidence .research-alignment-fork article[data-alignment-claim="calendar"]{
+    padding:var(--research-space-4) 0 var(--research-space-3);
+  }
+  #research-evidence .research-alignment-fork article strong{
+    font-size:var(--research-type-subsection);
+  }
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note{
+    margin-top:var(--research-space-8);
+  }
+}
