@@ -562,3 +562,84 @@
     font-size:var(--research-type-meta);
   }
 }
+
+
+/* Research 03 visual grammar: the actual stem/branch and verdict outrank
+   the generic card heading. Do not present "年柱" as a giant placeholder. */
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{
+  min-height:205px;
+  justify-content:initial;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong{
+  margin-top:var(--research-space-2);
+  font-size:var(--research-type-subsection);
+  line-height:var(--research-leading-subsection);
+  font-weight:var(--research-weight-subsection);
+  color:var(--research-text-secondary);
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-end;
+  gap:var(--research-space-3);
+  margin-top:var(--research-space-8);
+  padding-top:0;
+  min-height:72px;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-pillar-value{
+  display:block;
+  font-size:clamp(1.75rem,2.6vw,2.35rem);
+  line-height:1.08;
+  letter-spacing:.09em;
+  font-weight:var(--research-weight-display);
+  color:var(--research-focus);
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-state-label{
+  display:block;
+  font-size:var(--research-type-compact);
+  line-height:var(--research-leading-subsection);
+  font-weight:var(--research-weight-emphasis);
+  color:var(--research-text-secondary);
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"] .determinacy-pillar-value,
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"] .determinacy-state-label{
+  color:var(--research-candidate);
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="false"] .determinacy-state-label{
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-subsection);
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p{
+  margin-top:var(--research-space-5);
+  max-width:270px;
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+@media(max-width:680px){
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{
+    min-height:175px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong{
+    font-size:var(--research-type-meta);
+    margin-top:var(--research-space-1);
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status{
+    gap:var(--research-space-2);
+    margin-top:var(--research-space-4);
+    min-height:61px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-pillar-value{
+    font-size:1.625rem;
+    letter-spacing:.04em;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-state-label,
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="false"] .determinacy-state-label{
+    font-size:var(--research-type-compact);
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p{
+    margin-top:var(--research-space-3);
+    font-size:var(--research-type-meta);
+  }
+}
