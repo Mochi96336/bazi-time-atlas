@@ -37,13 +37,21 @@
         return;
       }
       const y=win.scrollY+anchor.getBoundingClientRect().top;
-      win.scrollTo(0,Math.max(0,Math.round(y-205)));
+      const targetY=Math.max(0,Math.round(y-205));
+      // Simulate a real two-step scroll, not one instantaneous deep jump during
+      // iframe initialization (which headless Chromium can coalesce with load).
+      win.scrollTo(0,Math.max(0,targetY-96));
+      setTimeout(()=>win.scrollTo(0,targetY),160);
       setTimeout(()=>{
         const rect=rail.getBoundingClientRect();
         const fontTarget=scene==="astronomy"
           ? doc.querySelector(".seasonal-orbit-explainer-note")
           : doc.querySelector(".research-alignment-fork small");
         probe.dataset.scene=scene;
+        probe.dataset.anchorInsideEvidence=String(!!doc.getElementById("research-evidence")?.contains(anchor));
+        const evidenceRect=doc.getElementById("research-evidence")?.getBoundingClientRect();
+        probe.dataset.evidenceTop=evidenceRect?evidenceRect.top.toFixed(1):"missing";
+        probe.dataset.evidenceBottom=evidenceRect?evidenceRect.bottom.toFixed(1):"missing";
         probe.dataset.scrollY=String(Math.round(win.scrollY));
         probe.dataset.viewportHeight=String(win.innerHeight);
         probe.dataset.stuck=rail.dataset.stuck??"missing";
@@ -54,7 +62,7 @@
         probe.dataset.ready=win.scrollY>400&&rail.dataset.stuck==="true"
           &&rail.dataset.context===expectedContext?"true":"error";
         if(probe.dataset.ready==="error")probe.dataset.reason="invalid real-viewport sticky/context state";
-      },240);
+      },520);
     }
     if(!selectors[scene]){probe.dataset.ready="error";probe.dataset.reason="unknown scene";}
     else frame.addEventListener("load",()=>setTimeout(inspect,100),{once:true});
