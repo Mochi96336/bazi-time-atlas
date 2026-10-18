@@ -49,7 +49,8 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "visual-check-research-02-diagram-lab.mjs",
     "visual-check-research-02-production.mjs",
     "visual-check-research-03-diagram-lab.mjs",
-    "visual-check-research-03-production.mjs"
+    "visual-check-research-03-production.mjs",
+    "visual-check-research-full-page-rhythm.mjs"
   ],
   "capture-interactions": [
     "check-wide-desktop-composition.mjs",
