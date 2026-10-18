@@ -19,7 +19,7 @@ test("parallel visual CI retains every existing screenshot command and determina
   assert.equal(new Set(screenshotChecks).size, screenshotChecks.length, "duplicate screenshot checks");
   assert.deepEqual(
     [...screenshotChecks].sort(),
-    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs"].sort(),
+    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs", "visual-check-research-full-page-rhythm.mjs"].sort(),
     "parallel PNG CI must preserve the complete existing visual:check inventory"
   );
   assert.ok(VISUAL_CI_SUITES["capture-material"].indexOf("visual-check-material-prototype.mjs")
@@ -33,7 +33,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 53, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, and Research production evidence");
+  assert.equal(scripts.length, 54, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, production evidence, and the page-rhythm prototype");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
@@ -41,26 +41,16 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
   assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
-  assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-01-diagram-lab.mjs"),
-    "Research 01 diagram lab must keep deterministic desktop/mobile PNG evidence"
-  );
-  assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-02-diagram-lab.mjs"),
-    "Research 02 diagram lab must keep deterministic desktop/mobile PNG evidence"
-  );
-  assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-02-production.mjs"),
-    "Research 02 production must keep deterministic desktop/mobile PNG evidence"
-  );
-  assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-03-diagram-lab.mjs"),
-    "Research 03 diagram lab must keep deterministic desktop/mobile PNG evidence"
-  );
-  assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-03-production.mjs"),
-    "Research 03 production must keep deterministic desktop/mobile PNG evidence"
-  );
+  for(const script of [
+    "visual-check-research-01-diagram-lab.mjs",
+    "visual-check-research-02-diagram-lab.mjs",
+    "visual-check-research-02-production.mjs",
+    "visual-check-research-03-diagram-lab.mjs",
+    "visual-check-research-03-production.mjs",
+    "visual-check-research-full-page-rhythm.mjs"
+  ]){
+    assert.ok(VISUAL_CI_SUITES["capture-pages"].includes(script), script+" must keep deterministic PNG evidence");
+  }
 });
 
 test("parallel visual gate preserves prior CI protection and combined PNG artifact", () => {

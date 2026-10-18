@@ -1,0 +1,10 @@
+const params=new URLSearchParams(location.search);
+const requested=params.get("mode");
+const mode=["editorial","gallery","balanced"].includes(requested)?requested:"balanced";
+document.documentElement.dataset.mode=mode;
+for(const link of document.querySelectorAll("[data-mode-link]")){
+  const active=link.dataset.modeLink===mode;
+  link.classList.toggle("is-active",active);
+  if(active)link.setAttribute("aria-current","page"); else link.removeAttribute("aria-current");
+}
+document.documentElement.dataset.rhythmLabReady="true";
