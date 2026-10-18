@@ -47,4 +47,28 @@ for(const viewport of viewports){
   if(info.size<(viewport.width>1000?100000:60000))throw new Error(fileName+" unexpectedly small");
   captures.push({viewport:viewport.key,file:fileName,bytes:info.size,url});
 }
+
+// Full-page-height captures establish overall rhythm, not actual mobile scroll
+// behavior. Use a same-origin 390x844 iframe to exercise the production sticky
+// rail, contextual ownership, and readable labels after a real scroll.
+for(const scene of ["astronomy","fork"]){
+  const key="390x844-scrolled-"+scene;
+  const url=new URL("scripts/fixtures/research-production-scroll-viewport.html?scene="+scene,baseURL).href;
+  const cli=[...args(),"--window-size=390,844"];
+  const dom=run(browser,[...cli,"--dump-dom",url],key+" DOM").stdout;
+  const probe=dom.match(/<output\b[^>]*id="probe"[^>]*>/)?.[0]??"";
+  if(!probe.includes('data-ready="true"')||!probe.includes('data-stuck="true"')||
+    !probe.includes('data-context="'+(scene==="astronomy"?"astronomy":"evidence")+'"'))
+    throw new Error(key+" failed actual-scroll context probe: "+probe);
+  const fontSize=Number(probe.match(/data-font-size="([0-9.]+)px"/)?.[1]);
+  if(!Number.isFinite(fontSize)||fontSize<11)
+    throw new Error(key+" core explanation font fell below 11px: "+probe);
+  const fileName="research-production-rhythm-"+key+".png";
+  const filePath=path.join(outputDir,fileName);
+  run(browser,[...cli,"--screenshot="+filePath,url],key+" screenshot");
+  const info=await stat(filePath);
+  if(info.size<18000)throw new Error(fileName+" unexpectedly small");
+  captures.push({viewport:key,file:fileName,bytes:info.size,url,realViewport:true});
+}
+
 await writeFile(path.join(outputDir,"research-production-rhythm-evidence.json"),JSON.stringify({browser,baseURL,captures},null,2)+"\n","utf8");
