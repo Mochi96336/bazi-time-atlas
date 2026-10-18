@@ -256,6 +256,10 @@
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"] {
   border-top-color:var(--research-candidate);
+  background:linear-gradient(180deg,var(--research-candidate-soft),transparent 76%);
+}
+.determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="false"] {
+  background:linear-gradient(180deg,var(--research-unresolved-soft),transparent 76%);
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header { display:block; }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span {
@@ -315,6 +319,7 @@
   padding:var(--research-space-3) 0;
   border-top:var(--research-diagram-line-active) solid var(--research-candidate);
   border-bottom:1px solid var(--research-line-subtle);
+  background:linear-gradient(90deg,var(--research-candidate-soft),transparent 72%);
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict span,
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict small {
