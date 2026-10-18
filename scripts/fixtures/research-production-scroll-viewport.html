@@ -41,9 +41,15 @@
       // Simulate a real two-step scroll, not one instantaneous deep jump during
       // iframe initialization (which headless Chromium can coalesce with load).
       win.scrollTo(0,Math.max(0,targetY-96));
-      setTimeout(()=>win.scrollTo(0,targetY),160);
+      // The sticky rail changes from full to compact height during the first
+      // scroll, so remeasure the target after that layout change.
+      setTimeout(()=>{
+        const adjustedY=win.scrollY+anchor.getBoundingClientRect().top-205;
+        win.scrollTo(0,Math.max(0,Math.round(adjustedY)));
+      },160);
       setTimeout(()=>{
         const rect=rail.getBoundingClientRect();
+        const anchorRect=anchor.getBoundingClientRect();
         const fontTarget=scene==="astronomy"
           ? doc.querySelector(".seasonal-orbit-explainer-note")
           : doc.querySelector(".research-alignment-fork small");
@@ -57,10 +63,14 @@
         probe.dataset.stuck=rail.dataset.stuck??"missing";
         probe.dataset.context=rail.dataset.context??"missing";
         probe.dataset.railTop=rect.top.toFixed(1);
+        probe.dataset.railBottom=rect.bottom.toFixed(1);
+        probe.dataset.anchorTop=anchorRect.top.toFixed(1);
+        probe.dataset.anchorBottom=anchorRect.bottom.toFixed(1);
         probe.dataset.fontSize=fontTarget?win.getComputedStyle(fontTarget).fontSize:"missing";
         probe.dataset.horizontalOverflow=String(doc.documentElement.scrollWidth>win.innerWidth+1);
         probe.dataset.ready=win.scrollY>400&&rail.dataset.stuck==="true"
-          &&rail.dataset.context===expectedContext?"true":"error";
+          &&rail.dataset.context===expectedContext
+          &&anchorRect.top>rect.bottom+8&&anchorRect.top<win.innerHeight-80?"true":"error";
         if(probe.dataset.ready==="error")probe.dataset.reason="invalid real-viewport sticky/context state";
       },520);
     }
