@@ -1838,7 +1838,7 @@
   min-height:174px;
   padding:var(--research-space-6);
   border-top:var(--research-diagram-line-active) solid var(--research-current);
-  background:var(--research-diagram-surface);
+  background:linear-gradient(180deg,var(--research-current-soft),transparent 78%);
 }
 
 .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
@@ -1847,7 +1847,7 @@
   min-height:174px;
   padding:var(--research-space-6);
   border-top:var(--research-diagram-line-active) solid var(--research-candidate);
-  background:var(--research-diagram-surface);
+  background:linear-gradient(180deg,var(--research-candidate-soft),transparent 78%);
 }
 
 .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
