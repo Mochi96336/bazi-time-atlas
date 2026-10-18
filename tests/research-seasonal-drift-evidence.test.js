@@ -192,3 +192,15 @@ test("Research 02 hierarchy leads with zero-line proof, then orbit, then deep cu
     /data-seasonal-drift-mode/
   );
 });
+test("the orbit distinguishes the spatial paths from the selected time-phase advance", () => {
+  assert.match(html,/class="seasonal-orbit-coordinate-legend"/);
+  assert.match(html,/01 · 空間 \/ 內圈/);
+  assert.match(html,/02 · 時間 \/ 外圈/);
+  assert.match(html,/id="seasonal-orbit-active-term"/);
+  assert.match(html,/id="seasonal-orbit-active-days"/);
+  assert.match(view,/set\("seasonal-orbit-active-days",\(-drift\)\.toFixed\(2\)\)/);
+  assert.match(view,/showLabel = boundary\.yearBoundary \|\| selected \|\| index%3===0/);
+  assert.match(view,/class:"seasonal-orbit-time-selection-arc"/);
+  assert.match(view,/arrivalTimeArcPath\(boundary\.longitudeDegrees,arrivalLongitude,ORBIT\.timeRadius\)/);
+  assert.match(view,/"marker-end":"url\(#seasonal-orbit-time-arrow\)"/);
+});
