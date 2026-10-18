@@ -551,8 +551,9 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
       class:"seasonal-orbit-bazi-month-arc"
     }, orbitSvg);
 
-    for (const boundary of BAZI_JIE_BOUNDARIES) {
+    for (const [index,boundary] of BAZI_JIE_BOUNDARIES.entries()) {
       const selected = boundary.longitudeDegrees === longitude;
+      const showLabel = boundary.yearBoundary || selected || index%3===0;
       const rayEnd = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.baseRadius+30);
       const labelPoint = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.labelRadius);
       svgEl("line", {
@@ -562,13 +563,15 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
         y2:rayEnd.y,
         class:`seasonal-orbit-bazi-boundary${selected ? " is-selected" : ""}`
       }, orbitSvg);
-      const label = svgEl("text", {
-        x:labelPoint.x,
-        y:labelPoint.y+3,
-        class:`seasonal-orbit-bazi-label${selected ? " is-selected" : ""}`,
-        "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12 ? "middle" : labelPoint.x<ORBIT.cx ? "end" : "start"
-      }, orbitSvg);
-      label.textContent = `${boundary.termName} · ${boundary.branch}`;
+      if (showLabel) {
+        const label = svgEl("text", {
+          x:labelPoint.x,
+          y:labelPoint.y+3,
+          class:`seasonal-orbit-bazi-label${selected ? " is-selected" : ""}`,
+          "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12 ? "middle" : labelPoint.x<ORBIT.cx ? "end" : "start"
+        }, orbitSvg);
+        label.textContent = `${boundary.termName} · ${boundary.branch}`;
+      }
     }
   }
 
@@ -585,6 +588,13 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
   }
 
   function drawArrivalTimeRing(longitude) {
+    const defs=svgEl("defs",{},orbitSvg);
+    const arrow=svgEl("marker",{
+      id:"seasonal-orbit-time-arrow",
+      markerWidth:8,markerHeight:8,refX:6,refY:4,
+      orient:"auto",markerUnits:"userSpaceOnUse"
+    },defs);
+    svgEl("path",{d:"M 0 0 L 7 4 L 0 8 Z",class:"seasonal-orbit-time-arrowhead"},arrow);
     svgEl("circle",{
       cx:ORBIT.cx,cy:ORBIT.cy,r:ORBIT.timeRadius,class:"seasonal-orbit-time-ring"
     },orbitSvg);
@@ -616,14 +626,14 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
         cx:target.x,cy:target.y,r:boundary.yearBoundary?5.5:3.5,class:"seasonal-orbit-time-target"
       },group);
 
-      if (boundary.yearBoundary || selected) {
-        const labelPoint=orbitDirectionXY(boundary.longitudeDegrees,ORBIT.timeRadius+20);
-        const label=svgEl("text",{
-          x:labelPoint.x,y:labelPoint.y+3,
-          "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12?"middle":labelPoint.x<ORBIT.cx?"end":"start",
-          class:"seasonal-orbit-time-label"
+      // Only the selected advance receives a strong direction arrow.
+      // Every other Jie remains a subdued position reference around the dial.
+      if (selected) {
+        svgEl("path",{
+          d:arrivalTimeArcPath(boundary.longitudeDegrees,arrivalLongitude,ORBIT.timeRadius),
+          class:"seasonal-orbit-time-selection-arc",
+          "marker-end":"url(#seasonal-orbit-time-arrow)"
         },group);
-        label.textContent=boundary.termName+" · 提前 "+advanceDays.toFixed(2)+" d";
       }
     }
   }
@@ -773,6 +783,8 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
     set("seasonal-residual-mean",humanDrift(DATA.meanDriftDays,3));
     set("seasonal-residual-span",`${(JIE_SUMMARY.maxAdvanceDays-JIE_SUMMARY.minAdvanceDays).toFixed(3)} d`);
+    set("seasonal-orbit-active-term",namedTerm ?? `λ ${longitude}°`);
+    set("seasonal-orbit-active-days",(-drift).toFixed(2));
     set("seasonal-drift-orbit-base-e",DATA.baseEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-orbit-target-e",DATA.targetEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-scale-label",state.exaggerate ? "形變 ×10" : "真實比例");
