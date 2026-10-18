@@ -44,7 +44,8 @@ test("balanced production rhythm uses whitespace rather than a second palette",(
   assert.match(css,/\.discrete-to-astronomy,[\s\S]*?\.astronomy-to-evidence[\s\S]*?padding:var\(--research-space-20\) 0/);
   assert.match(css,/\.astronomy-to-evidence\{[^}]*margin-top:var\(--research-space-16\);[^}]*padding-block:var\(--research-space-12\)/);
   assert.match(css,/@media\(max-width:680px\)[\s\S]*?\.astronomy-to-evidence\{[^}]*margin-top:var\(--research-space-12\);[^}]*padding-block:var\(--research-space-12\)/);
-  assert.match(css,/#research-evidence \.research-alignment-fork article\{[^}]*background:transparent/);
+  assert.doesNotMatch(css,/#research-evidence \.research-alignment-fork article\{[^}]*background:transparent/);
+  assert.doesNotMatch(css,/#research-evidence \.determinacy-panel\[data-diagram-grammar="pillar-verdict"\] \.determinacy-card\{[^}]*background:transparent/);
 });
 test("02 to 03 keeps an explicit chapter transition",()=>{
   const transition=html.indexOf('class="astronomy-to-evidence"');
