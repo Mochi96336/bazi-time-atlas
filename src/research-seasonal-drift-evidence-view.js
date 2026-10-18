@@ -24,6 +24,7 @@ const decomposition = document.querySelector("#seasonal-drift-decomposition");
 const JIE_SUMMARY = baziJieDriftSummary(DATA.driftDays,indexForLongitude);
 const JIE_BY_LONGITUDE = new Map(JIE_SUMMARY.rows.map(row => [row.longitudeDegrees,row]));
 const compactProofMedia = window.matchMedia("(max-width:680px)");
+const pairedProofMedia = window.matchMedia("(min-width:1020px)");
 
 if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSvg) {
   const initialParams = new URLSearchParams(location.search);
@@ -167,6 +168,55 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
     });
   }
 
+  // In the desktop paired plate, keep all twelve Jie readable in the
+  // narrower left column. Evidence and click semantics stay unchanged.
+  function drawBoundaryProofPaired() {
+    const W=560,H=474,left=59,right=55,top=43,bottom=17,max=15;
+    boundaryProofSvg.setAttribute("viewBox","0 0 "+W+" "+H);
+    const width=W-left-right;
+    const rowHeight=(H-top-bottom)/JIE_SUMMARY.rows.length;
+    const xFor=value=>left+(value/max)*width;
+
+    for(const tick of [0,5,10,15]){
+      const x=xFor(tick);
+      svgEl("line",{
+        x1:x,x2:x,y1:top-12,y2:H-bottom,
+        class:tick===0?"seasonal-proof-zero":"seasonal-proof-grid"
+      },boundaryProofSvg);
+      const label=svgEl("text",{
+        x,y:20,"text-anchor":"middle",class:"seasonal-proof-axis"
+      },boundaryProofSvg);
+      label.textContent=tick===0?"0":tick+" d";
+    }
+
+    JIE_SUMMARY.rows.forEach((row,index)=>{
+      const advance=-row.driftDays;
+      const y=top+(index+.5)*rowHeight;
+      const end=xFor(advance);
+      const selected=indexForLongitude(row.longitudeDegrees)===state.index;
+      const group=svgEl("g",{
+        class:"seasonal-proof-group"+(selected?" is-selected":"")+(row.yearBoundary?" is-year":""),
+        "data-longitude":row.longitudeDegrees
+      },boundaryProofSvg);
+      const term=svgEl("text",{
+        x:left-12,y:y+4,"text-anchor":"end",class:"seasonal-proof-label"
+      },group);
+      term.textContent=row.termName;
+      svgEl("line",{x1:left,x2:end,y1:y,y2:y,class:"seasonal-proof-stem"},group);
+      svgEl("circle",{
+        cx:end,cy:y,r:row.yearBoundary?6:4.5,class:"seasonal-proof-dot"
+      },group);
+      const value=svgEl("text",{
+        x:end+10,y:y+4,"text-anchor":"start",class:"seasonal-proof-value"
+      },group);
+      value.textContent=advance.toFixed(1);
+      const hit=svgEl("rect",{
+        x:0,y:y-rowHeight/2,width:W,height:rowHeight,class:"seasonal-proof-hit"
+      },group);
+      hit.addEventListener("pointerdown",()=>activateBoundary(row.longitudeDegrees));
+    });
+  }
+
   function drawBoundaryProofMobile() {
     boundaryProofSvg.setAttribute("viewBox","0 0 390 430");
     const left=58,right=34,top=42,bottom=18,max=15;
@@ -210,6 +260,7 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
   function drawBoundaryProof() {
     clear(boundaryProofSvg);
     if (compactProofMedia.matches) drawBoundaryProofMobile();
+    else if (pairedProofMedia.matches) drawBoundaryProofPaired();
     else drawBoundaryProofDesktop();
     boundaryProofSvg.dataset.ready="true";
   }
@@ -791,6 +842,7 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
   });
 
   compactProofMedia.addEventListener?.("change",render);
+  pairedProofMedia.addEventListener?.("change",render);
 
   if (instrument) {
     new MutationObserver(syncSecondaryDeltaLabel).observe(instrument, {
