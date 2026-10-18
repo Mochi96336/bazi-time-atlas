@@ -205,7 +205,7 @@ test("mobile Research outcomes keep a readable interaction floor without inflati
   );
   assert.match(
     evidenceCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*8\.5px;/
+    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*var\(--research-type-plot\);/
   );
   assert.match(
     determinacyCss,
