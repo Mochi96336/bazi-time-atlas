@@ -565,7 +565,7 @@
 .seasonal-boundary-proof-head strong {
   display:block;
   margin-top:var(--research-space-1);
-  color:var(--research-focus);
+  color:var(--research-candidate);
   font-size:var(--research-type-subsection);
   line-height:var(--research-leading-subsection);
 }
@@ -612,7 +612,7 @@
   margin:0 auto;
 }
 .seasonal-orbit-time-ring { fill:none; stroke:var(--research-line-strong); stroke-width:1; }
-.seasonal-orbit-time-base { stroke:var(--research-diagram-context); stroke-width:2; }
+.seasonal-orbit-time-base { stroke:var(--research-current); stroke-width:2; }
 .seasonal-orbit-time-target {
   fill:var(--research-bg-page);
   stroke:var(--research-diagram-active-candidate);
