@@ -625,7 +625,7 @@
 }
 .seasonal-orbit-time-label {
   fill:var(--research-text-muted);
-  font-size:9px;
+  font-size:var(--research-type-plot);
   font-weight:var(--research-weight-emphasis);
 }
 .seasonal-orbit-time-group.is-selected .seasonal-orbit-time-target,
@@ -670,7 +670,7 @@
   .seasonal-drift-orbit-explainer { margin-top:var(--research-space-6); padding-top:var(--research-space-3); }
   .seasonal-drift-orbit-explainer .seasonal-drift-orbit-head { min-height:0; }
   .seasonal-drift-orbit-explainer #seasonal-drift-orbit { width:100%; min-height:300px; }
-  .seasonal-orbit-explainer-note { font-size:8.5px; }
+  .seasonal-orbit-explainer-note { font-size:var(--research-type-meta); line-height:var(--research-leading-meta); }
 }
 @media (max-width:480px) {
   .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] { padding-top:var(--research-space-3); }
