@@ -116,7 +116,8 @@ test("selected zero-line proof owns the primary twelve-Jie closure verdict", () 
 });
 
 test("visible orbit explains arrival-time phase without pretending it is a physical second Earth", () => {
-  assert.match(html,/外圈：同一「節」的到達時間相位/);
+  assert.match(html,/02 · 時間 \/ 外圈/);
+  assert.match(html,/2026 到達相位/);
   assert.match(html,/外圈不是第二顆地球/);
   assert.match(view,/function drawArrivalTimeRing\(longitude\)/);
   assert.match(view,/advanceDays\*\(360\/365\.2425\)/);
