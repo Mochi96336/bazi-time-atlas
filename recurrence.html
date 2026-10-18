@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="./research-seasonal-drift-evidence.css">
   <link rel="stylesheet" href="./research-absolute-boundary-consequence.css">
   <link rel="stylesheet" href="./research-time-state.css">
+  <link rel="stylesheet" href="./research-page-rhythm.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -426,6 +427,22 @@
           <p class="seasonal-orbit-explainer-note"><strong>外圈不是第二顆地球。</strong>射線固定同一太陽黃經；外圈只把同一「節」在一年時間相位中的提前量換成角度，幫助理解「太陽位置相同」與「固定 24,000 年後到達時間相同」是兩件事。拖俯視圖仍可選黃經，上方干支同步更新。</p>
         </div>
 
+        <section class="seasonal-drift-residual-strip" data-diagram-grammar="residual-strip" aria-labelledby="seasonal-drift-residual-title">
+          <header class="seasonal-drift-residual-head">
+            <div>
+              <span>共同提前之後</span>
+              <strong id="seasonal-drift-residual-title">十二節仍有小幅年內起伏</strong>
+            </div>
+            <div class="seasonal-drift-residual-metrics">
+              <span>全年共同提前 <strong id="seasonal-residual-mean">—</strong></span>
+              <span>十二節跨度 <strong id="seasonal-residual-span">—</strong></span>
+            </div>
+          </header>
+          <svg id="seasonal-drift-residual-strip-svg" class="seasonal-drift-svg" role="img"
+            aria-label="十二個八字節界扣除共同提前量後的年內殘差"></svg>
+          <p>這張只回答「為什麼不是每個節都剛好提前同一天數」；是否回到原時刻仍以上方 0 天基準判定。</p>
+        </section>
+
         <details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">
           <summary>
             <span>深入：為什麼不是固定提前 12 天？</span>
@@ -463,7 +480,7 @@
           </div>
         </details>
 
-        <p class="seasonal-drift-evidence-note"><strong>主線怎麼讀：</strong>先看 0 天基準：十二「節」沒有一條重合，因此 24,000 只到離散候選。再用俯視圖理解「同一太陽黃經、不同到達時間相位」。只有想追原因時，才展開全年 360 點與共同位移／年內起伏。</p>
+        <p class="seasonal-drift-evidence-note"><strong>主線怎麼讀：</strong>先看 0 天基準：十二「節」沒有一條重合，因此 24,000 只到離散候選。再用俯視圖理解「同一太陽黃經、不同到達時間相位」，最後用常駐 residual strip 看十二節之間的小幅起伏；360 點全年曲線只留給深入追原因。</p>
       </section>
 
       <details id="secondary-astronomy-tools" class="secondary-astronomy-tools">
@@ -492,6 +509,8 @@
         </div>
       </section>
       </details>
+
+      <p class="astronomy-to-evidence"><span>十二節已證明沒有回到原時刻</span><strong>那麼對八字，可以說到哪裡？</strong></p>
     </section>
 
     <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">

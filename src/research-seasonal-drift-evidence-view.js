@@ -15,6 +15,7 @@ const root = document.querySelector("#seasonal-drift-evidence");
 const curveSvg = document.querySelector("#seasonal-drift-curve");
 const boundaryProofSvg = document.querySelector("#seasonal-boundary-proof-svg");
 const orbitSvg = document.querySelector("#seasonal-drift-orbit");
+const residualStripSvg = document.querySelector("#seasonal-drift-residual-strip-svg");
 const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
 const secondaryTools = document.querySelector("#secondary-astronomy-tools");
@@ -24,7 +25,7 @@ const JIE_SUMMARY = baziJieDriftSummary(DATA.driftDays,indexForLongitude);
 const JIE_BY_LONGITUDE = new Map(JIE_SUMMARY.rows.map(row => [row.longitudeDegrees,row]));
 const compactProofMedia = window.matchMedia("(max-width:680px)");
 
-if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
+if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSvg) {
   const initialParams = new URLSearchParams(location.search);
   const state = {
     index:indexForLongitude(315),
@@ -211,6 +212,47 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     if (compactProofMedia.matches) drawBoundaryProofMobile();
     else drawBoundaryProofDesktop();
     boundaryProofSvg.dataset.ready="true";
+  }
+
+  function drawResidualStrip() {
+    clear(residualStripSvg);
+    const mobile=compactProofMedia.matches;
+    const W=mobile?390:1080,H=mobile?250:230;
+    const left=mobile?24:54,right=mobile?24:38,top=34,bottom=mobile?48:52;
+    const plotW=W-left-right,plotH=H-top-bottom;
+    const meanAdvance=-DATA.meanDriftDays;
+    const rows=JIE_SUMMARY.rows.map(row=>({
+      ...row,
+      residual:(-row.driftDays)-meanAdvance
+    }));
+    const maxAbs=Math.max(2.2,...rows.map(row=>Math.abs(row.residual)));
+    const xFor=index=>left+(index/(rows.length-1))*plotW;
+    const yFor=value=>top+((maxAbs-value)/(maxAbs*2))*plotH;
+
+    residualStripSvg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+    svgEl("line",{x1:left,x2:W-right,y1:yFor(0),y2:yFor(0),class:"seasonal-residual-zero"},residualStripSvg);
+    const path=rows.map((row,index)=>
+      `${index===0?"M":"L"} ${xFor(index).toFixed(2)} ${yFor(row.residual).toFixed(2)}`
+    ).join(" ");
+    svgEl("path",{d:path,class:"seasonal-residual-path"},residualStripSvg);
+
+    rows.forEach((row,index)=>{
+      const x=xFor(index),y=yFor(row.residual);
+      const selected=indexForLongitude(row.longitudeDegrees)===state.index;
+      const group=svgEl("g",{
+        class:"seasonal-residual-point"+(selected?" is-selected":""),
+        "data-longitude":row.longitudeDegrees
+      },residualStripSvg);
+      svgEl("line",{x1:x,x2:x,y1:yFor(0),y2:y,class:"seasonal-residual-stem"},group);
+      svgEl("circle",{cx:x,cy:y,r:selected?6:4,class:"seasonal-residual-dot"},group);
+      if(index%3===0){
+        const label=svgEl("text",{x,y:H-20,"text-anchor":"middle",class:"seasonal-residual-label"},group);
+        label.textContent=row.termName;
+      }
+      const hit=svgEl("circle",{cx:x,cy:y,r:mobile?14:12,class:"seasonal-residual-hit"},group);
+      hit.addEventListener("pointerdown",()=>activateBoundary(row.longitudeDegrees,"residual-strip"));
+    });
+    residualStripSvg.dataset.ready="true";
   }
 
   function curveX(index) {
@@ -676,6 +718,8 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     set("seasonal-drift-selected-shape",signedDays(shape,3));
     set("seasonal-drift-phase-value",signedDays(DATA.meanDriftDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
+    set("seasonal-residual-mean",humanDrift(DATA.meanDriftDays,3));
+    set("seasonal-residual-span",`${(JIE_SUMMARY.maxAdvanceDays-JIE_SUMMARY.minAdvanceDays).toFixed(3)} d`);
     set("seasonal-drift-orbit-base-e",DATA.baseEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-orbit-target-e",DATA.targetEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-scale-label",state.exaggerate ? "形變 ×10" : "真實比例");
@@ -693,6 +737,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   function render() {
     updateReadout();
     drawBoundaryProof();
+    drawResidualStrip();
     drawCurve();
     drawOrbit();
   }

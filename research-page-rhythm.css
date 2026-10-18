@@ -1,0 +1,58 @@
+/* Research production page rhythm
+   Selected C rhythm: core figures stay unfolded; whitespace separates scenes
+   and chapters; supporting evidence stays behind details. */
+#research-discrete,#research-astronomy,#research-evidence{scroll-margin-top:var(--research-space-20)}
+#research-discrete>.research-task-head,#research-astronomy>.research-task-head,#research-evidence>.research-task-head{margin-bottom:var(--research-space-12)}
+#research-discrete>.research-discrete-scope{max-width:var(--research-width-narrative);margin-bottom:var(--research-space-12)}
+#research-discrete-thesis{margin-top:0}
+#research-year-strip{margin-top:var(--research-space-20)}
+#recurrence-instrument[data-research-mainline="phase-fan"]{margin-top:var(--research-space-20)!important;padding-top:var(--research-space-6);border-top:1px solid var(--research-line-subtle)!important;border-bottom:1px solid var(--research-line-subtle)!important}
+#research-discrete .discrete-derivation{margin-top:var(--research-space-20);padding-top:var(--research-space-6)}
+#research-discrete .research-sexagenary-drilldown,#secondary-astronomy-tools,#research-evidence .research-evidence-support,#research-evidence .research-evidence-appendix{margin-top:var(--research-space-16)}
+.discrete-to-astronomy,.astronomy-to-evidence{display:grid;grid-template-columns:minmax(180px,.55fr) minmax(0,1.45fr);gap:var(--research-space-8);align-items:baseline;margin:0;padding:var(--research-space-20) 0;border-top:1px solid var(--research-line-subtle)}
+.discrete-to-astronomy{margin-top:var(--research-space-20);color:var(--research-text-secondary);font-size:var(--research-type-section);line-height:var(--research-leading-section);font-weight:var(--research-weight-section)}
+.discrete-to-astronomy::before{content:"離散候選已建立";color:var(--research-text-muted);font-size:var(--research-type-meta);font-weight:var(--research-weight-body)}
+.astronomy-to-evidence{margin-top:var(--research-space-20);color:var(--research-text-muted)}
+.astronomy-to-evidence span{font-size:var(--research-type-meta)}
+.astronomy-to-evidence strong{max-width:760px;color:var(--research-text-secondary);font-size:var(--research-type-section);line-height:var(--research-leading-section);font-weight:var(--research-weight-section)}
+#research-astronomy .seasonal-drift-evidence{margin-top:0}
+#research-astronomy .seasonal-boundary-proof,#research-astronomy .seasonal-drift-orbit-explainer,#research-astronomy .seasonal-drift-residual-strip{margin-top:var(--research-space-20)}
+.seasonal-drift-residual-strip{padding:var(--research-space-6) 0;border-top:1px solid var(--research-line-subtle);border-bottom:1px solid var(--research-line-subtle)}
+.seasonal-drift-residual-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--research-space-6);align-items:end;max-width:var(--research-width-narrative)}
+.seasonal-drift-residual-head>div:first-child>span{display:block;color:var(--research-text-muted);font-size:var(--research-type-meta)}
+.seasonal-drift-residual-head>div:first-child>strong{display:block;margin-top:var(--research-space-1);color:var(--research-text-primary);font-size:var(--research-type-subsection);line-height:var(--research-leading-subsection)}
+.seasonal-drift-residual-metrics{display:flex;gap:var(--research-space-4);color:var(--research-text-muted);font-size:var(--research-type-meta);font-variant-numeric:tabular-nums}
+.seasonal-drift-residual-metrics strong{color:var(--research-text-secondary)}
+.seasonal-drift-residual-strip>svg{display:block;width:100%;height:auto;margin-top:var(--research-space-6)}
+.seasonal-drift-residual-strip>p{max-width:var(--research-width-narrative);margin:var(--research-space-3) 0 0;color:var(--research-text-muted);font-size:var(--research-type-meta);line-height:var(--research-leading-meta)}
+.seasonal-residual-zero{stroke:var(--research-focus);stroke-width:var(--research-diagram-line-hairline);opacity:.62}
+.seasonal-residual-path{fill:none;stroke:var(--research-current);stroke-width:var(--research-diagram-line-active)}
+.seasonal-residual-stem{stroke:var(--research-diagram-structure);stroke-width:var(--research-diagram-line-hairline)}
+.seasonal-residual-dot{fill:var(--research-current)}
+.seasonal-residual-point.is-selected .seasonal-residual-dot{fill:var(--research-focus);stroke:var(--research-candidate);stroke-width:var(--research-diagram-line-active)}
+.seasonal-residual-label{fill:var(--research-text-muted);font-size:var(--research-type-plot)}
+.seasonal-residual-hit{fill:transparent;cursor:pointer}
+#seasonal-drift-decomposition{margin-top:var(--research-space-12)}
+#secondary-astronomy-tools{margin-top:var(--research-space-16)}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"]{margin-top:0;padding-top:var(--research-space-6);padding-bottom:var(--research-space-8)}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{background:transparent}
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"]{margin-top:var(--research-space-20);padding-top:var(--research-space-6);padding-bottom:var(--research-space-8)}
+#research-evidence .research-alignment-fork{gap:var(--research-space-12)}
+#research-evidence .research-alignment-fork article{padding:var(--research-space-6) 0;background:transparent}
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note{margin-top:var(--research-space-8);padding-top:var(--research-space-4)}
+@media(max-width:680px){
+#research-discrete>.research-task-head,#research-astronomy>.research-task-head,#research-evidence>.research-task-head{margin-bottom:var(--research-space-8)}
+#research-discrete>.research-discrete-scope{margin-bottom:var(--research-space-8)}
+#research-year-strip,#recurrence-instrument[data-research-mainline="phase-fan"],#research-discrete .discrete-derivation{margin-top:var(--research-space-16)!important}
+.discrete-to-astronomy,.astronomy-to-evidence{grid-template-columns:minmax(0,1fr);gap:var(--research-space-3);padding:var(--research-space-16) 0}
+.discrete-to-astronomy{margin-top:var(--research-space-16);font-size:var(--research-type-subsection)}
+.astronomy-to-evidence{margin-top:var(--research-space-16)}
+.astronomy-to-evidence strong{font-size:var(--research-type-subsection)}
+#research-astronomy .seasonal-boundary-proof,#research-astronomy .seasonal-drift-orbit-explainer,#research-astronomy .seasonal-drift-residual-strip{margin-top:var(--research-space-16)}
+.seasonal-drift-residual-head{grid-template-columns:minmax(0,1fr);gap:var(--research-space-3)}
+.seasonal-drift-residual-metrics{flex-wrap:wrap;gap:var(--research-space-2) var(--research-space-4)}
+#seasonal-drift-decomposition,#secondary-astronomy-tools,#research-discrete .research-sexagenary-drilldown,#research-evidence .research-evidence-support,#research-evidence .research-evidence-appendix{margin-top:var(--research-space-12)}
+#research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"]{margin-top:var(--research-space-16)}
+#research-evidence .research-alignment-fork{gap:var(--research-space-4)}
+#research-evidence .research-alignment-fork article{padding:var(--research-space-4) 0}
+}

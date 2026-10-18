@@ -26,42 +26,11 @@ function consolidateGlobalPeriod() {
   dock.classList.add("research-delta-consolidated");
 }
 
-function hashTargetsPhaseFan(details, instrument) {
-  const id = decodeURIComponent(location.hash.slice(1));
-  if (!id) return false;
-  const target = document.getElementById(id);
-  return Boolean(target && (target === details || target === instrument || instrument.contains(target)));
-}
-
-function revealPhaseFanHash(details, instrument) {
-  if (!details || !instrument || !hashTargetsPhaseFan(details, instrument)) return;
-  details.open = true;
-  requestAnimationFrame(() => {
-    const id = decodeURIComponent(location.hash.slice(1));
-    document.getElementById(id)?.scrollIntoView({ block:"start" });
-  });
-}
-
-function ensurePhaseFanDrilldown() {
+function markPhaseFanMainline() {
   const instrument = researchDiscrete?.querySelector("#recurrence-instrument");
   if (!instrument) return null;
-
-  let details = instrument.closest("#discrete-phase-fan-details");
-  if (!details) {
-    details = document.createElement("details");
-    details.id = "discrete-phase-fan-details";
-    details.className = "research-discrete-drilldown research-phase-fan-drilldown";
-    details.dataset.researchDrilldown = "discrete-phase-fan";
-
-    const summary = document.createElement("summary");
-    summary.innerHTML = "<span>離散相位扇</span><strong>公曆結構 · 60 年序 · 60 日序的距 0 位置</strong>";
-
-    instrument.insertAdjacentElement("beforebegin", details);
-    details.append(summary, instrument);
-  }
-
-  revealPhaseFanHash(details, instrument);
-  return details;
+  instrument.dataset.researchMainline = "phase-fan";
+  return instrument;
 }
 
 function hashTargetsCycle(details, cycle) {
@@ -113,7 +82,7 @@ function ensureSexagenaryDrilldown() {
 
   // Keep the large 60-pair diagram as supporting evidence after the
   // explorer. The reading spine is now:
-  // derivation thesis → date/year verification → optional phase fan → Δ explorer
+  // derivation thesis → date/year verification → visible phase fan → Δ explorer
   // → optional 60-pair source.
   const derivation = researchDiscrete?.querySelector(".discrete-derivation");
   const transition = researchDiscrete?.querySelector(".discrete-to-astronomy");
@@ -132,7 +101,7 @@ function syncDiscretePresentation() {
   if (!researchDiscrete) return;
   removeDuplicateScopeNote();
   consolidateGlobalPeriod();
-  ensurePhaseFanDrilldown();
+  markPhaseFanMainline();
   ensureSexagenaryDrilldown();
 }
 
@@ -141,9 +110,6 @@ if (researchDiscrete) {
   const candidates = researchDiscrete.querySelector("#candidate-buttons");
   if (candidates) new MutationObserver(syncDiscretePresentation).observe(candidates, { childList:true });
   window.addEventListener("hashchange", () => {
-    const instrument = researchDiscrete.querySelector("#recurrence-instrument");
-    const phaseDetails = instrument?.closest("#discrete-phase-fan-details");
-    revealPhaseFanHash(phaseDetails, instrument);
     const cycle = researchDiscrete.querySelector("#research-sexagenary-cycle");
     const details = cycle?.closest("#discrete-sexagenary-details");
     revealCycleHash(details, cycle);
