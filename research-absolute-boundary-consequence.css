@@ -108,7 +108,15 @@
   font-size:var(--research-type-subsection);
   line-height:var(--research-leading-subsection);
 }
+.research-alignment-fork [data-alignment-claim="solar"] {
+  border-top-color:var(--research-candidate-line);
+  background:linear-gradient(180deg,var(--research-candidate-soft),transparent 80%);
+}
 .research-alignment-fork [data-alignment-claim="solar"] strong { color:var(--research-candidate); }
+.research-alignment-fork [data-alignment-claim="calendar"] {
+  background:linear-gradient(180deg,var(--research-unresolved-soft),transparent 80%);
+}
+.research-alignment-fork [data-alignment-claim="calendar"] strong { color:var(--research-focus); }
 .research-alignment-fork small {
   display:block;
   margin-top:var(--research-space-2);
