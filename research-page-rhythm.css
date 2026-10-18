@@ -643,3 +643,34 @@
     font-size:var(--research-type-meta);
   }
 }
+
+
+/* Put research provenance after the immediate spatial/time comparison rather
+   than ahead of the diagram; it remains visible without becoming the headline. */
+#research-astronomy .seasonal-orbit-technical-note{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:var(--research-space-2) var(--research-space-6);
+  max-width:610px;
+  margin:var(--research-space-3) auto 0;
+}
+#research-astronomy .seasonal-orbit-technical-note small{
+  color:var(--research-text-muted);
+  font-size:var(--research-type-plot);
+  line-height:var(--research-leading-meta);
+}
+#research-astronomy .seasonal-orbit-technical-note b{
+  font-weight:var(--research-weight-subsection);
+  color:var(--research-text-secondary);
+}
+@media(max-width:680px){
+  #research-astronomy .seasonal-orbit-technical-note{
+    display:block;
+  }
+  #research-astronomy .seasonal-orbit-technical-note small{
+    display:block;
+    margin-top:var(--research-space-2);
+    font-size:var(--research-type-meta);
+  }
+}
