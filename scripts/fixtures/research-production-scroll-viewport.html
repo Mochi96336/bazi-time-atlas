@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Research real-viewport scroll audit</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#080c11}
+    iframe{display:block;width:100%;height:100%;border:0}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="research-page" title="Research production scroll viewport" src="../../recurrence.html?delta=24000"></iframe>
+  <output id="probe" data-ready="waiting"></output>
+  <script>
+    const params=new URLSearchParams(location.search);
+    const scene=params.get("scene")||"astronomy";
+    const selectors={
+      astronomy:".seasonal-drift-residual-strip",
+      evidence:"#research-evidence",
+      fork:"#absolute-boundary-consequence"
+    };
+    const expectedContext=scene==="astronomy"?"astronomy":"evidence";
+    const frame=document.getElementById("research-page");
+    const probe=document.getElementById("probe");
+    let attempts=0;
+    function inspect(){
+      const win=frame.contentWindow;
+      const doc=frame.contentDocument;
+      const anchor=doc?.querySelector(selectors[scene]);
+      const rail=doc?.getElementById("research-time-state");
+      const residual=doc?.getElementById("seasonal-drift-residual-strip-svg");
+      if(!anchor||!rail||rail.dataset.ready!=="true"||residual?.dataset.ready!=="true"){
+        if(++attempts<70)setTimeout(inspect,100);
+        else{probe.dataset.ready="error";probe.dataset.reason="production hydration timeout";}
+        return;
+      }
+      const y=win.scrollY+anchor.getBoundingClientRect().top;
+      win.scrollTo(0,Math.max(0,Math.round(y-205)));
+      setTimeout(()=>{
+        const rect=rail.getBoundingClientRect();
+        const fontTarget=scene==="astronomy"
+          ? doc.querySelector(".seasonal-orbit-explainer-note")
+          : doc.querySelector(".research-alignment-fork small");
+        probe.dataset.scene=scene;
+        probe.dataset.scrollY=String(Math.round(win.scrollY));
+        probe.dataset.viewportHeight=String(win.innerHeight);
+        probe.dataset.stuck=rail.dataset.stuck??"missing";
+        probe.dataset.context=rail.dataset.context??"missing";
+        probe.dataset.railTop=rect.top.toFixed(1);
+        probe.dataset.fontSize=fontTarget?win.getComputedStyle(fontTarget).fontSize:"missing";
+        probe.dataset.horizontalOverflow=String(doc.documentElement.scrollWidth>win.innerWidth+1);
+        probe.dataset.ready=win.scrollY>400&&rail.dataset.stuck==="true"
+          &&rail.dataset.context===expectedContext?"true":"error";
+        if(probe.dataset.ready==="error")probe.dataset.reason="invalid real-viewport sticky/context state";
+      },240);
+    }
+    if(!selectors[scene]){probe.dataset.ready="error";probe.dataset.reason="unknown scene";}
+    else frame.addEventListener("load",()=>setTimeout(inspect,100),{once:true});
+  </script>
+</body>
+</html>
