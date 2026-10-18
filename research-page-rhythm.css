@@ -244,3 +244,42 @@
     margin-top:var(--research-space-8);
   }
 }
+
+
+/* The chapter break is already signalled by a full reading pause. */
+#research-astronomy,#research-evidence{
+  border-top:0;
+}
+.discrete-to-astronomy,.astronomy-to-evidence{
+  border-top:0;
+}
+
+/* One shared hypothesis, visibly forking into two coordinate frames. */
+@media(min-width:681px){
+  #research-evidence .research-fork-source{
+    display:table;
+    margin:var(--research-space-12) auto 0;
+    text-align:center;
+  }
+  #research-evidence .research-alignment-fork{
+    position:relative;
+  }
+  #research-evidence .research-alignment-fork::before{
+    content:"";
+    position:absolute;
+    top:calc(-1 * var(--research-space-6));
+    left:25%;
+    right:25%;
+    height:var(--research-diagram-line-hairline);
+    background:var(--research-line-strong);
+  }
+  #research-evidence .research-alignment-fork article::after{
+    content:"";
+    position:absolute;
+    bottom:100%;
+    left:50%;
+    height:var(--research-space-6);
+    width:var(--research-diagram-line-hairline);
+    background:var(--research-line-strong);
+  }
+}
