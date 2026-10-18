@@ -6,7 +6,7 @@
 #research-discrete>.research-discrete-scope{max-width:var(--research-width-narrative);margin-bottom:var(--research-space-12)}
 #research-discrete-thesis{margin-top:0}
 #research-year-strip{margin-top:var(--research-space-20)}
-#recurrence-instrument[data-research-mainline="phase-fan"]{margin-top:var(--research-space-20)!important;padding-top:var(--research-space-6);border-top:1px solid var(--research-line-subtle)!important;border-bottom:1px solid var(--research-line-subtle)!important}
+#recurrence-instrument[data-research-mainline="phase-fan"]{margin-top:var(--research-space-20)!important;padding-top:var(--research-space-6)}
 #research-discrete .discrete-derivation{margin-top:var(--research-space-20);padding-top:var(--research-space-6)}
 #research-discrete .research-sexagenary-drilldown,#secondary-astronomy-tools,#research-evidence .research-evidence-support,#research-evidence .research-evidence-appendix{margin-top:var(--research-space-16)}
 .discrete-to-astronomy,.astronomy-to-evidence{display:grid;grid-template-columns:minmax(180px,.55fr) minmax(0,1.45fr);gap:var(--research-space-8);align-items:baseline;margin:0;padding:var(--research-space-20) 0;border-top:1px solid var(--research-line-subtle)}
