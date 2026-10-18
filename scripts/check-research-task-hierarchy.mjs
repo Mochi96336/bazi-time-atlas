@@ -216,17 +216,15 @@ if (/^<details[^>]*\sopen(?:\s|=|>)/.test(epochSupport)) {
 
 const defaultEvidenceProbe = dump("recurrence.html?delta=24000");
 const defaultEvidence = sectionById(defaultEvidenceProbe.dom, "research-evidence");
-const phaseFanDetail = detailsById(defaultEvidenceProbe.dom, "discrete-phase-fan-details");
-if (!phaseFanDetail || !phaseFanDetail.includes('id="recurrence-instrument"')) {
-  throw new Error(`Research 01 phase fan did not move behind its verification disclosure: ${defaultEvidenceProbe.url}`);
-}
-if (/^<details[^>]*\sopen(?:\s|=|>)/.test(phaseFanDetail)) {
-  throw new Error(`Research 01 phase fan must stay closed by default: ${defaultEvidenceProbe.url}`);
+if (!defaultEvidenceProbe.dom.includes('id="recurrence-instrument"') ||
+    !defaultEvidenceProbe.dom.includes('data-research-mainline="phase-fan"') ||
+    defaultEvidenceProbe.dom.includes('id="discrete-phase-fan-details"')) {
+  throw new Error(`Research 01 phase fan must stay unfolded in the main reading spine: ${defaultEvidenceProbe.url}`);
 }
 const phaseFanDeepLink = dump("recurrence.html?delta=24000#recurrence-instrument");
-const phaseFanDeepLinkDetail = detailsById(phaseFanDeepLink.dom, "discrete-phase-fan-details");
-if (!phaseFanDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(phaseFanDeepLinkDetail) || !phaseFanDeepLinkDetail.includes('id="recurrence-instrument"')) {
-  throw new Error(`direct phase-fan hash did not auto-open verification evidence: ${phaseFanDeepLink.url}`);
+if (!phaseFanDeepLink.dom.includes('id="recurrence-instrument"') ||
+    !phaseFanDeepLink.dom.includes('data-research-mainline="phase-fan"')) {
+  throw new Error(`direct phase-fan hash lost the mainline instrument: ${phaseFanDeepLink.url}`);
 }
 
 const defaultProofSupport = detailsById(defaultEvidenceProbe.dom, "proof-chain-support-details");
