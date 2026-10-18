@@ -36,10 +36,10 @@
 #seasonal-drift-decomposition{margin-top:var(--research-space-12)}
 #secondary-astronomy-tools{margin-top:var(--research-space-16)}
 #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"]{margin-top:0;padding-top:var(--research-space-6);padding-bottom:var(--research-space-8)}
-#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{background:transparent}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card{border-radius:0}
 #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"]{margin-top:var(--research-space-20);padding-top:var(--research-space-6);padding-bottom:var(--research-space-8)}
 #research-evidence .research-alignment-fork{gap:var(--research-space-12)}
-#research-evidence .research-alignment-fork article{padding:var(--research-space-6) 0;background:transparent}
+#research-evidence .research-alignment-fork article{padding:var(--research-space-6) var(--research-space-4)}
 #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note{margin-top:var(--research-space-8);padding-top:var(--research-space-4)}
 @media(max-width:680px){
 #research-discrete>.research-task-head,#research-astronomy>.research-task-head,#research-evidence>.research-task-head{margin-bottom:var(--research-space-8)}
@@ -55,5 +55,5 @@
 #seasonal-drift-decomposition,#secondary-astronomy-tools,#research-discrete .research-sexagenary-drilldown,#research-evidence .research-evidence-support,#research-evidence .research-evidence-appendix{margin-top:var(--research-space-12)}
 #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"]{margin-top:var(--research-space-16)}
 #research-evidence .research-alignment-fork{gap:var(--research-space-4)}
-#research-evidence .research-alignment-fork article{padding:var(--research-space-4) 0}
+#research-evidence .research-alignment-fork article{padding:var(--research-space-4) var(--research-space-3)}
 }
