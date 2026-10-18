@@ -360,3 +360,35 @@
 #research-astronomy .seasonal-drift-residual-strip>svg{
   width:min(940px,100%);
 }
+
+
+/* Mobile orbit: give the explanatory drawing a full-width title before tools,
+   instead of squeezing its meaning into a narrow left half-column. */
+@media(max-width:680px){
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:var(--research-space-3);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-head>div:first-child{
+    min-width:0;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-head strong{
+    display:block;
+    max-width:100%;
+    font-size:var(--research-type-compact);
+    line-height:var(--research-leading-subsection);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-tools{
+    align-items:center;
+    justify-content:flex-start;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-tools>small{
+    text-align:left;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate #seasonal-drift-orbit-scale{
+    min-height:36px;
+    padding-inline:var(--research-space-3);
+    font-size:var(--research-type-plot);
+  }
+}
