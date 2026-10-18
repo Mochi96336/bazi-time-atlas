@@ -392,3 +392,173 @@
     font-size:var(--research-type-plot);
   }
 }
+
+
+/* Research 02 visual grammar: one spatial orbit and one arrival-time dial.
+   These are distinct coordinate systems, not two physical Earth paths. */
+#research-astronomy .seasonal-orbit-coordinate-legend{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(14px,2.3vw,34px);
+  margin:var(--research-space-6) 0 var(--research-space-2);
+  padding:0;
+}
+#research-astronomy .seasonal-orbit-coordinate-legend>div{
+  min-width:0;
+  padding-top:var(--research-space-3);
+  border-top:1px solid var(--research-line-subtle);
+}
+#research-astronomy .seasonal-orbit-coordinate-legend>div:first-child{
+  border-top-color:var(--research-current-line);
+}
+#research-astronomy .seasonal-orbit-coordinate-legend>div:last-child{
+  border-top-color:var(--research-candidate-line);
+}
+#research-astronomy .seasonal-orbit-coordinate-legend span{
+  display:block;
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+}
+#research-astronomy .seasonal-orbit-coordinate-legend strong{
+  display:block;
+  margin-top:var(--research-space-2);
+  color:var(--research-text-primary);
+  font-size:var(--research-type-compact);
+  font-weight:var(--research-weight-subsection);
+  line-height:var(--research-leading-subsection);
+}
+#research-astronomy .seasonal-orbit-time-key strong b{
+  color:var(--research-candidate);
+  font-weight:inherit;
+}
+#research-astronomy .seasonal-orbit-coordinate-legend small{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  column-gap:var(--research-space-2);
+  row-gap:var(--research-space-1);
+  margin-top:var(--research-space-3);
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-plot);
+  line-height:var(--research-leading-plot);
+}
+#research-astronomy .seasonal-orbit-coordinate-legend i{
+  display:inline-block;
+  flex:none;
+  vertical-align:middle;
+  font-style:normal;
+}
+#research-astronomy .orbit-key-line{
+  width:24px;
+  height:0;
+  border-top:2px solid;
+}
+#research-astronomy .orbit-key-base{
+  border-color:var(--research-current);
+  border-top-style:dashed;
+}
+#research-astronomy .orbit-key-target{
+  border-color:var(--research-candidate);
+}
+#research-astronomy .orbit-key-tick{
+  width:2px;
+  height:14px;
+  background:var(--research-current);
+  transform:rotate(20deg);
+}
+#research-astronomy .orbit-key-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  border:2px solid var(--research-candidate);
+  background:var(--research-bg-page);
+}
+#research-astronomy .seasonal-orbit-base{
+  stroke:var(--research-current);
+  stroke-width:2.2;
+  opacity:.72;
+  stroke-dasharray:5 6;
+}
+#research-astronomy .seasonal-orbit-target{
+  stroke:var(--research-candidate);
+  stroke-width:2.6;
+  opacity:.95;
+}
+#research-astronomy .seasonal-orbit-point-base{
+  stroke:var(--research-current);
+}
+#research-astronomy .seasonal-orbit-point-target{
+  stroke:var(--research-candidate);
+}
+#research-astronomy .seasonal-orbit-bazi-boundary{
+  stroke:var(--research-diagram-structure);
+  opacity:.45;
+}
+#research-astronomy .seasonal-orbit-bazi-boundary.is-selected{
+  stroke:var(--research-current);
+  opacity:.8;
+}
+#research-astronomy .seasonal-orbit-bazi-label{
+  fill:var(--research-text-secondary);
+  font-size:11px;
+}
+#research-astronomy .seasonal-orbit-bazi-label.is-selected{
+  fill:var(--research-current);
+  font-size:12px;
+}
+#research-astronomy .seasonal-orbit-time-ring{
+  stroke:var(--research-diagram-structure);
+  opacity:.9;
+}
+#research-astronomy .seasonal-orbit-time-base{
+  stroke:var(--research-current);
+  opacity:.45;
+}
+#research-astronomy .seasonal-orbit-time-target{
+  stroke:var(--research-candidate);
+  opacity:.45;
+}
+#research-astronomy .seasonal-orbit-time-arc{
+  stroke:var(--research-candidate);
+  opacity:.16;
+  stroke-width:1.6;
+}
+#research-astronomy .seasonal-orbit-time-group.is-selected .seasonal-orbit-time-base{
+  opacity:1;
+  stroke-width:3;
+}
+#research-astronomy .seasonal-orbit-time-group.is-selected .seasonal-orbit-time-target{
+  opacity:1;
+  stroke-width:2.8;
+}
+#research-astronomy .seasonal-orbit-time-group.is-selected .seasonal-orbit-time-arc{
+  opacity:0;
+}
+#research-astronomy .seasonal-orbit-time-selection-arc{
+  fill:none;
+  stroke:var(--research-candidate);
+  stroke-width:3.3;
+  stroke-linecap:round;
+  opacity:1;
+}
+#research-astronomy .seasonal-orbit-time-arrowhead{
+  fill:var(--research-candidate);
+}
+#research-astronomy .seasonal-orbit-explainer-note{
+  max-width:610px;
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+@media(max-width:680px){
+  #research-astronomy .seasonal-orbit-coordinate-legend{
+    grid-template-columns:minmax(0,1fr);
+    margin-top:var(--research-space-4);
+    gap:var(--research-space-4);
+  }
+  #research-astronomy .seasonal-orbit-coordinate-legend strong{
+    font-size:var(--research-type-compact);
+  }
+  #research-astronomy .seasonal-orbit-coordinate-legend small{
+    font-size:var(--research-type-meta);
+  }
+}
