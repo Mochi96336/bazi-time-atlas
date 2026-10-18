@@ -12,7 +12,7 @@ const [html,css,js,production]=await Promise.all([
 test("full-page rhythm lab stays prototype-only",()=>{
   assert.doesNotMatch(production,/research-full-page-rhythm-lab/);
   assert.match(html,/noindex,nofollow/);
-  assert.match(html,/../research-foundations.css/);
+  assert.ok(html.includes("../research-foundations.css"));
 });
 
 test("core research figures stay unfolded in the main reading spine",()=>{
