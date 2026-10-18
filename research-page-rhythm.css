@@ -283,3 +283,80 @@
     background:var(--research-line-strong);
   }
 }
+
+
+/* Research 02 comparison plate — simultaneous evidence and explanation.
+   Desktop proof uses 12 compact horizontal Jie rows; orbit is an equal
+   visual partner rather than a small afterthought below a full-width chart. */
+@media(min-width:1020px){
+  #research-astronomy .seasonal-drift-evidence-plate{
+    display:grid;
+    grid-template-columns:minmax(0,.90fr) minmax(0,1.10fr);
+    gap:clamp(32px,4.5vw,72px);
+    align-items:start;
+    margin-top:var(--research-space-16);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-boundary-proof,
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-explainer{
+    min-width:0;
+    width:100%;
+    max-width:none;
+    margin:0;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-boundary-proof-head{
+    display:block;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-boundary-proof-head p{
+    max-width:460px;
+    margin-top:var(--research-space-3);
+    text-align:left;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate #seasonal-boundary-proof-svg{
+    width:100%;
+    height:auto;
+    min-height:0;
+    margin-top:var(--research-space-6);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate #seasonal-drift-orbit{
+    width:100%;
+    max-width:none;
+    height:auto;
+    min-height:0;
+    margin:var(--research-space-3) auto 0;
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-head{
+    gap:var(--research-space-4);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-orbit-explainer-note{
+    max-width:620px;
+    margin:var(--research-space-6) auto 0;
+  }
+}
+/* Avoid two miniature columns on laptops and tablets. */
+@media(max-width:1019px){
+  #research-astronomy .seasonal-drift-evidence-plate{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-explainer{
+    margin-top:var(--research-space-16);
+  }
+}
+@media(min-width:681px) and (max-width:1019px){
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-explainer{
+    width:min(720px,100%);
+  }
+  #research-astronomy .seasonal-drift-evidence-plate #seasonal-drift-orbit{
+    width:100%;
+    max-width:680px;
+  }
+}
+@media(max-width:680px){
+  #research-astronomy .seasonal-drift-evidence-plate .seasonal-drift-orbit-explainer{
+    margin-top:var(--research-space-16);
+  }
+}
+/* The residual is a quiet third reading moment, not another dominant panel. */
+#research-astronomy .seasonal-drift-residual-strip>svg{
+  width:min(940px,100%);
+}
