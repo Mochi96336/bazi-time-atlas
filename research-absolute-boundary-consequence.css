@@ -139,6 +139,6 @@
   .research-alignment-fork { gap:var(--research-space-2); }
   .research-alignment-fork article { padding:var(--research-space-3); }
   .research-alignment-fork strong { font-size:var(--research-type-compact); line-height:var(--research-leading-compact); }
-  .research-alignment-fork small { font-size:8.5px; }
+  .research-alignment-fork small { font-size:var(--research-type-meta); line-height:var(--research-leading-meta); }
 }
 
