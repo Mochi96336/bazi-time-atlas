@@ -231,6 +231,8 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
 
     residualStripSvg.setAttribute("viewBox",`0 0 ${W} ${H}`);
     svgEl("line",{x1:left,x2:W-right,y1:yFor(0),y2:yFor(0),class:"seasonal-residual-zero"},residualStripSvg);
+    const zeroLabel=svgEl("text",{x:left,y:yFor(0)-8,class:"seasonal-residual-zero-label"},residualStripSvg);
+    zeroLabel.textContent="0 = 全年平均";
     const path=rows.map((row,index)=>
       `${index===0?"M":"L"} ${xFor(index).toFixed(2)} ${yFor(row.residual).toFixed(2)}`
     ).join(" ");

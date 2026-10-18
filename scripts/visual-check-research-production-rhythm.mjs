@@ -31,6 +31,15 @@ for(const viewport of viewports){
   for(const required of ['data-research-mainline="phase-fan"','id="seasonal-drift-residual-strip-svg"','data-ready="true"','class="astronomy-to-evidence"','data-diagram-grammar="pillar-verdict"','data-diagram-grammar="alignment-fork"'])
     if(!dom.includes(required))throw new Error("Research production rhythm missing "+required);
   if(dom.includes('id="discrete-phase-fan-details"'))throw new Error("phase fan disclosure returned");
+  const order=[
+    dom.indexOf('id="four-pillar-determinacy"'),
+    dom.indexOf('id="absolute-boundary-consequence"'),
+    dom.indexOf('id="proof-chain-support-details"'),
+    dom.indexOf('id="epoch-audit-support-details"')
+  ];
+  if(order.some(index=>index<0)||!order.every((value,index)=>index===0||order[index-1]<value))
+    throw new Error("Research 03 core/support order regressed: "+order.join(" → "));
+  if(!dom.includes("0 = 全年平均"))throw new Error("residual baseline lost its relative-zero label");
   const fileName="research-production-rhythm-"+viewport.key+".png";
   const filePath=path.join(outputDir,fileName);
   run(browser,[...args(),"--window-size="+viewport.width+","+viewport.height,"--screenshot="+filePath,url],fileName);
