@@ -28,9 +28,13 @@ test("core research figures stay unfolded in the main reading spine",()=>{
   assert.equal((html.match(/data-support/g)??[]).length,2);
 });
 
-test("lab compares editorial and gallery spacing without changing research semantics",()=>{
+test("lab compares editorial, gallery and balanced spacing without changing research semantics",()=>{
   assert.match(html,/data-mode-link="editorial"/);
   assert.match(html,/data-mode-link="gallery"/);
+  assert.match(html,/data-mode-link="balanced"/);
+  assert.match(html,/平衡版 · 推薦/);
+  assert.match(js,/\["editorial","gallery","balanced"\]/);
+  assert.match(js,/\?requested:"balanced"/);
   assert.match(js,/dataset\.mode=mode/);
   assert.match(html,/12 \/ 12/);
   assert.match(html,/固定 \+24,000 公曆年 ≠ 完整「時間 → 八字」精確週期/);
@@ -42,7 +46,9 @@ test("rhythm lab uses semantic foundation tokens and explicit whitespace scales"
   assert.doesNotMatch(css,/rgba?\(/);
   assert.match(css,/--scene-gap:112px/);
   assert.match(css,/--scene-gap:152px/);
-  assert.match(css,/--transition-space:144px/);
+  assert.match(css,/data-mode="balanced"\]\{--chapter-head-space:104px;--scene-gap:112px/);
+  assert.match(css,/--chapter-end-space:160px;--transition-space:144px;--support-gap:96px/);
+  assert.match(css,/top:calc\(36px \+ var\(--y\)\)/);
   assert.match(css,/var\(--research-candidate\)/);
   assert.match(css,/var\(--research-current\)/);
   assert.match(css,/var\(--research-diagram-structure\)/);

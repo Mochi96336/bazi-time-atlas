@@ -1,5 +1,6 @@
 const params=new URLSearchParams(location.search);
-const mode=params.get("mode")==="gallery"?"gallery":"editorial";
+const requested=params.get("mode");
+const mode=["editorial","gallery","balanced"].includes(requested)?requested:"balanced";
 document.documentElement.dataset.mode=mode;
 for(const link of document.querySelectorAll("[data-mode-link]")){
   const active=link.dataset.modeLink===mode;

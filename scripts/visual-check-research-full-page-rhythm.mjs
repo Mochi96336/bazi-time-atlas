@@ -8,7 +8,9 @@ const captures=[
   {mode:"editorial",key:"1440x5600",width:1440,height:5600},
   {mode:"gallery",key:"1440x6500",width:1440,height:6500},
   {mode:"editorial",key:"390x7600",width:390,height:7600},
-  {mode:"gallery",key:"390x8600",width:390,height:8600}
+  {mode:"gallery",key:"390x8600",width:390,height:8600},
+  {mode:"balanced",key:"1440x8600",width:1440,height:8600},
+  {mode:"balanced",key:"390x10000",width:390,height:10000}
 ];
 function browser(){
   if(process.env.CHROMIUM_BIN)return process.env.CHROMIUM_BIN;
