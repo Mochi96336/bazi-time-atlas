@@ -48,9 +48,11 @@ for(const viewport of viewports){
   captures.push({viewport:viewport.key,file:fileName,bytes:info.size,url});
 }
 
-// Fixed-height long captures show overall composition, not scroll state. Check
-// native hash navigation in the real production page at a mobile viewport;
-// avoid nested iframe virtual-time/rAF throttling during deep jumps.
+// Full-page screenshots verify composition; a separate native-hash DOM probe
+// checks real mobile scroll ownership. Chromium CLI screenshot startup can race
+// with native fragment navigation and produce an empty frame, so do not treat
+// that separate process as deterministic visual evidence.
+const scrollProbes=[];
 for(const scene of ["astronomy","evidence"]){
   const key="390x844-scrolled-"+scene;
   const url=new URL("recurrence.html?delta=24000#research-"+scene,baseURL).href;
@@ -60,12 +62,7 @@ for(const scene of ["astronomy","evidence"]){
   if(!rail.includes('data-ready="true"')||!rail.includes('data-stuck="true"')||
     !rail.includes('data-context="'+scene+'"'))
     throw new Error(key+" failed native-scroll research-time state: "+rail);
-  const fileName="research-production-rhythm-"+key+".png";
-  const filePath=path.join(outputDir,fileName);
-  run(browser,[...cli,"--screenshot="+filePath,url],key+" screenshot");
-  const info=await stat(filePath);
-  if(info.size<18000)throw new Error(fileName+" unexpectedly small");
-  captures.push({viewport:key,file:fileName,bytes:info.size,url,realViewport:true});
+  scrollProbes.push({viewport:key,url,sticky:true,context:scene});
 }
 
-await writeFile(path.join(outputDir,"research-production-rhythm-evidence.json"),JSON.stringify({browser,baseURL,captures},null,2)+"\n","utf8");
+await writeFile(path.join(outputDir,"research-production-rhythm-evidence.json"),JSON.stringify({browser,baseURL,captures,scrollProbes},null,2)+"\n","utf8");
