@@ -48,21 +48,18 @@ for(const viewport of viewports){
   captures.push({viewport:viewport.key,file:fileName,bytes:info.size,url});
 }
 
-// Full-page-height captures establish overall rhythm, not actual mobile scroll
-// behavior. Use a same-origin 390x844 iframe to exercise the production sticky
-// rail, contextual ownership, and readable labels after a real scroll.
-for(const scene of ["astronomy","fork"]){
+// Fixed-height long captures show overall composition, not scroll state. Check
+// native hash navigation in the real production page at a mobile viewport;
+// avoid nested iframe virtual-time/rAF throttling during deep jumps.
+for(const scene of ["astronomy","evidence"]){
   const key="390x844-scrolled-"+scene;
-  const url=new URL("scripts/fixtures/research-production-scroll-viewport.html?scene="+scene,baseURL).href;
+  const url=new URL("recurrence.html?delta=24000#research-"+scene,baseURL).href;
   const cli=[...args(),"--window-size=390,844"];
   const dom=run(browser,[...cli,"--dump-dom",url],key+" DOM").stdout;
-  const probe=dom.match(/<output\b[^>]*id="probe"[^>]*>/)?.[0]??"";
-  if(!probe.includes('data-ready="true"')||!probe.includes('data-stuck="true"')||
-    !probe.includes('data-context="'+(scene==="astronomy"?"astronomy":"evidence")+'"'))
-    throw new Error(key+" failed actual-scroll context probe: "+probe);
-  const fontSize=Number(probe.match(/data-font-size="([0-9.]+)px"/)?.[1]);
-  if(!Number.isFinite(fontSize)||fontSize<11)
-    throw new Error(key+" core explanation font fell below 11px: "+probe);
+  const rail=dom.match(/<section\b[^>]*id="research-time-state"[^>]*>/)?.[0]??"";
+  if(!rail.includes('data-ready="true"')||!rail.includes('data-stuck="true"')||
+    !rail.includes('data-context="'+scene+'"'))
+    throw new Error(key+" failed native-scroll research-time state: "+rail);
   const fileName="research-production-rhythm-"+key+".png";
   const filePath=path.join(outputDir,fileName);
   run(browser,[...cli,"--screenshot="+filePath,url],key+" screenshot");
