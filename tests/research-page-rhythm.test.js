@@ -40,7 +40,7 @@ test("production residual strip uses the 12-Jie evidence and stays interactive",
 test("balanced production rhythm uses whitespace rather than a second palette",()=>{
   assert.doesNotMatch(css,/#[0-9a-fA-F]{3,8}\b/);
   assert.doesNotMatch(css,/rgba?\(/);
-  for(const token of ["--research-space-20","--research-line-subtle","--research-text-secondary","--research-current","--research-candidate"])assert.ok(css.includes(token));
+  for(const token of ["--research-space-20","--research-line-subtle","--research-text-secondary","--research-diagram-context","--research-current","--research-focus"])assert.ok(css.includes(token));
   assert.match(css,/\.discrete-to-astronomy,[\s\S]*?\.astronomy-to-evidence[\s\S]*?padding:var\(--research-space-20\) 0/);
   assert.match(css,/\.astronomy-to-evidence\{[^}]*margin-top:var\(--research-space-16\);[^}]*padding-block:var\(--research-space-12\)/);
   assert.match(css,/@media\(max-width:680px\)[\s\S]*?\.astronomy-to-evidence\{[^}]*margin-top:var\(--research-space-12\);[^}]*padding-block:var\(--research-space-12\)/);
