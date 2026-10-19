@@ -627,10 +627,10 @@ function renderState() {
   if(!phaseKnown) {
     setText("research-fan-verdict","離散條件未定");
     setText("research-fan-explanation","目前的目標日期不足以完整判定三個相位。");
-  } else if(state.closed.gregorian && state.closed.year && state.closed.day) {
+  } else if(state.closed.gregorian && state.closed.yearSequence && state.closed.day) {
     setText("research-fan-verdict","三項都回到 0");
     setText("research-fan-explanation","公曆結構、60 年序與 60 日序同時重合；這仍是離散候選，不代表節界已驗真。");
-  } else if(state.closed.year && state.closed.day) {
+  } else if(state.closed.yearSequence && state.closed.day) {
     setText("research-fan-verdict","還差公曆 "+formatSigned(gregorianSigned));
     setText("research-fan-explanation","年序、日序已回到 0；公曆結構仍偏離共同基準。");
   } else {
