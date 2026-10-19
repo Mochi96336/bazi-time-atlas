@@ -152,24 +152,23 @@ iframe.addEventListener("load",async()=>{
     const wheel=d.getElementById("recurrence-wheel");
     const legend=d.querySelector(".recurrence-legend");
     const transform=wheel.getScreenCTM();
-    check(wheel.getAttribute("viewBox")==="0 90 1200 630" &&
+    check(wheel.getAttribute("viewBox")==="0 213 1200 603" &&
       wheel.dataset.mobileCrop==="true",
-      "R12 mobile fan did not activate the cropped SVG viewport: "+
+      "R13 phone fan must crop only empty space, preserving all radial cells: "+
       JSON.stringify({viewBox:wheel.getAttribute("viewBox"),crop:wheel.dataset.mobileCrop}));
-    // Canonical geometry remains unchanged: Gregorian apex y=260;
-    // the outer astronomy label/reference reaches y=130.
+    // The discarded outer astronomy y=130 label is not Research 01 evidence.
+    // The visible shared datum y=225 and Gregorian apex y=260 now follow the
+    // textual verdict, without a separate dead letterbox above the diagram.
     const apexY=transform.d*260+transform.f;
-    const astronomyApexY=transform.d*195+transform.f;
-    const outerReferenceY=transform.d*130+transform.f;
+    const datumY=transform.d*225+transform.f;
     const legendBottom=legend.getBoundingClientRect().bottom;
-    check(Number.isFinite(apexY) && Number.isFinite(astronomyApexY) &&
-      apexY>=legendBottom+22 && astronomyApexY>=legendBottom+10,
-      "R12 fan or astronomy baseline overlaps the mobile legend: "+
-      JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
-    check(Number.isFinite(outerReferenceY) &&
-      outerReferenceY>=legendBottom+2 && outerReferenceY<=legendBottom+42,
-      "R12 mobile fan still leaves a dead band between legend and first visible geometry: "+
-      JSON.stringify({outerReference:outerReferenceY,legendBottom,gap:outerReferenceY-legendBottom}));
+    const graphicTop=fanGraphic.top;
+    check(Number.isFinite(apexY) && Number.isFinite(datumY) &&
+      datumY>=legendBottom+5 && apexY>datumY &&
+      datumY<=graphicTop+30 && apexY<=graphicTop+65,
+      "R13 mobile fan must follow the verdict/legend with a visible zero datum: "+
+      JSON.stringify({phaseApex:apexY,zeroDatum:datumY,
+        legendBottom,graphicTop}));
   }
   const localStep=derivationSteps?.querySelector('[data-milestone="local-year-day"]');
   const globalStep=derivationSteps?.querySelector('[data-milestone="global-discrete"]');
