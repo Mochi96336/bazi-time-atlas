@@ -162,7 +162,7 @@ test("Research 02 stays framed as a BaZi boundary question", () => {
 
 test("curve and orbit expose the same canonical Jie structure", () => {
   assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary=>/);
-  assert.match(view, /seasonal-drift-jie-guide/);
+  assert.match(view, /const i=indexForLongitude\(boundary.longitudeDegrees\)/);
   assert.match(view, /seasonal-drift-jie-dot/);
   assert.match(view, /root\.dataset\.baziMonthBranch = month\.branch/);
   assert.match(css, /\.seasonal-drift-jie-guide/);
