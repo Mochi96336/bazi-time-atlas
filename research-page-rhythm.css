@@ -731,11 +731,15 @@
   font-weight:var(--research-weight-subsection);
 }
 #research-astronomy .seasonal-drift-wave-readout small{
+  display:block;
   color:var(--research-text-secondary);
   font-size:var(--research-type-meta);
   line-height:var(--research-leading-meta);
 }
-#research-astronomy .seasonal-drift-wave-readout small::before{
+#research-astronomy .seasonal-drift-wave-readout #seasonal-drift-wave-active-residual{
+  color:var(--research-current);
+}
+#research-astronomy .seasonal-drift-wave-readout .seasonal-drift-wave-mean-readout::before{
   content:"";
   display:inline-block;
   width:19px;
