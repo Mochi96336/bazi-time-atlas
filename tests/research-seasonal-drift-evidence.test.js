@@ -219,6 +219,7 @@ test("02 plots exactly one wave and mean as horizontal line, retaining one scrub
   assert.match(view, /const meanAdvance=-DATA\.meanDriftDays/);
   assert.match(view, /const meanY=totalY\(meanAdvance\)/);
   assert.doesNotMatch(view, /function shapeY\(/);
-  assert.match(view, /y1:meanY,y2:selectedY/);
+  assert.match(view, /d:"M "\+cursorX\+" "\+meanY\+" H "\+bracketX\+" V "\+selectedY\+" H "\+cursorX/);
+  assert.doesNotMatch(view, /const meanCaption=|seasonal-residual-path/);
   assert.match(view, /gapLabel\.textContent=humanDrift\(selectedDrift\(\),2\)/);
 });
