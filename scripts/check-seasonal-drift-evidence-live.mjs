@@ -58,9 +58,10 @@ for(const delta of [0,400,1980,24000]){
     'data-ready="true"',
     'data-mode="total"',
     'class="seasonal-drift-curve-path"',
-    'data-grammar="absolute-plus-residual"',
-    'class="seasonal-residual-path"',
-    '0 = 全年平均',
+    'data-grammar="single-advance-mean"',
+    'class="seasonal-drift-mean-line"',
+    'class="seasonal-drift-deviation-stick"',
+    '全年平均提前 ',
     '0 = 完全重合',
     '先看結論 · 八字節界',
     'id="seasonal-drift-selected-total-human">提前 10.883 天',
@@ -107,8 +108,8 @@ const splitDecomposition=detailsTag(split.dom,"seasonal-drift-decomposition");
 if(!splitDecomposition||!/\sopen(?:\s|=|>)/.test(splitDecomposition)){
   throw Error("split query must open the drift decomposition detail: "+split.url);
 }
-if(!split.dom.includes('class="seasonal-residual-path"')||!split.dom.includes('class="seasonal-drift-curve-path"')){
-  throw Error("split mode lost one of the always-visible coupled curves: "+split.url);
+if(!split.dom.includes('class="seasonal-drift-mean-line"')||!split.dom.includes('class="seasonal-drift-curve-path"')||split.dom.includes('class="seasonal-residual-path"')){
+  throw Error("split mode must preserve one absolute curve with its mean line: "+split.url);
 }
 
 const deep=dump("total",0,"near-recurrence-detail");
