@@ -104,6 +104,7 @@ test("single curve visualizes absolute advance with the same-scale mean referenc
   assert.match(html, /12 \/ 12/);
   assert.match(html, /提前 10\.235–14\.177 天/);
   assert.match(css, /\.seasonal-drift-zero-caption/);
+  assert.match(html, /id="seasonal-drift-wave-mean"/);
   assert.match(html, /id="seasonal-drift-wave-active-residual"/);
 });
 
