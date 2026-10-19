@@ -50,13 +50,13 @@ test("direct hashes can still reopen the folded delta sandbox", () => {
   assert.match(view, /addEventListener\("load"/);
 });
 
-test("seasonal evidence derives the visible residual from the same 360-point absolute drift", () => {
+test("seasonal evidence compares absolute advance with a shared-axis mean reference", () => {
   assert.match(data, /meanDriftDays:SUMMARY\.meanDriftDays/);
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
   assert.match(view, /selectedShape\(\) \{\s*return DATA\.meanDriftDays - selectedDrift\(\)/);
   assert.match(html, /研究方法：共同提前與年內起伏怎麼分開？/);
   assert.match(html, /上方合併圖已常駐顯示全部 360 個黃經位置/);
-  assert.match(html, /data-diagram-grammar="absolute-plus-residual"/);
+  assert.match(html, /data-diagram-grammar="advance-with-mean"/);
   assert.doesNotMatch(html, /timing 反演的等效 shape/);
   assert.doesNotMatch(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
   assert.match(css, /\.seasonal-orbit-bazi-boundary/);
@@ -92,11 +92,13 @@ test("curve and orbit share one longitude cursor without calling it a physical E
   assert.doesNotMatch(html, /拖地球也能選位置/);
 });
 
-test("combined chart visualizes absolute advance and a separate mean-centered residual without duplicate wave panels", () => {
+test("single curve visualizes absolute advance with the same-scale mean reference and selected deviation", () => {
   assert.match(view, /const advances=DATA\.driftDays\.map\(value=>-value\)/);
   assert.match(view, /function totalY\(advanceDays\)/);
   assert.match(view, /zeroCaption\.textContent="0 = 完全重合"/);
-  assert.match(view, /class:"seasonal-residual-path"/);
+  assert.match(view, /class:"seasonal-drift-mean-line"/);
+  assert.match(view, /class:"seasonal-drift-deviation-stick"/);
+  assert.doesNotMatch(view, /seasonal-residual-path|function shapeY\(/);
   assert.match(view, /gapLabel\.textContent=humanDrift\(selectedDrift\(\),2\)/);
   assert.match(html, /先看結論 · 八字節界/);
   assert.match(html, /12 \/ 12/);
@@ -184,7 +186,7 @@ test("Research 02 hierarchy keeps zero-line proof and orbit before the combined 
   assert.match(html, /0 天 = 完全重合/);
   assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
   assert.match(html, /強調完整提前量/);
-  assert.match(html, /強調去平均起伏/);
+  assert.match(html, /強調選定點的平均差/);
   assert.doesNotMatch(
     html.slice(
       html.indexOf('class="seasonal-drift-evidence-head"'),
@@ -206,15 +208,17 @@ test("the orbit distinguishes the spatial paths from the selected time-phase adv
   assert.match(view,/"marker-end":"url\(#seasonal-orbit-time-arrow\)"/);
 });
 
-test("02 uses one visible SVG for both waves and preserves one scrub slider", () => {
+test("02 plots exactly one wave and mean as horizontal line, retaining one scrub", () => {
   assert.match(html, /id="seasonal-drift-curve"/);
   assert.match(html, /id="seasonal-drift-wave-active-total"/);
-  assert.match(html, /<b>0<\/b> 代表節界完全重合/);
-  assert.match(html, /<b>0<\/b> 只是全年平均/);
+  assert.match(html, /<b>0 天<\/b>表示完全重合/);
+  assert.match(html, /<b>全年平均<\/b>是同一縱軸上的水平參考線/);
   assert.doesNotMatch(html, /id="seasonal-drift-residual-strip-svg"/);
   assert.equal((html.match(/id="seasonal-drift-curve"/g) ?? []).length,1);
   assert.equal((html.match(/id="seasonal-drift-scrub"/g) ?? []).length,1);
-  assert.match(view, /const residuals=advances\.map\(value=>value-meanAdvance\)/);
-  assert.match(view, /function shapeY\(advanceResidualDays\)/);
-  assert.match(view, /y1:CURVE\.top,y2:CURVE\.endY/);
+  assert.match(view, /const meanAdvance=-DATA\.meanDriftDays/);
+  assert.match(view, /const meanY=totalY\(meanAdvance\)/);
+  assert.doesNotMatch(view, /function shapeY\(/);
+  assert.match(view, /y1:meanY,y2:selectedY/);
+  assert.match(view, /gapLabel\.textContent=humanDrift\(selectedDrift\(\),2\)/);
 });
