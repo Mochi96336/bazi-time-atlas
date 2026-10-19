@@ -60,7 +60,7 @@ for(const delta of [0,400,1980,24000]){
     'class="seasonal-drift-curve-path"',
     'data-grammar="absolute-plus-residual"',
     'class="seasonal-residual-path"',
-    '0 = 全年平均'
+    '0 = 全年平均',
     '0 = 完全重合',
     '先看結論 · 八字節界',
     'id="seasonal-drift-selected-total-human">提前 10.883 天',
