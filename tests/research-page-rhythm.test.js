@@ -14,28 +14,28 @@ test("production Research loads the rhythm layer after component styles",()=>{
   for(const dependency of ["research-seasonal-drift-evidence.css","research-absolute-boundary-consequence.css","research-time-state.css"])
     assert.ok(html.indexOf(dependency)<rhythm,dependency+" must load before rhythm");
 });
-test("core phase and residual figures stay unfolded while support remains disclosed",()=>{
+test("phase fan and unified 360-point wave stay unfolded while methods remain disclosed",()=>{
   assert.match(discreteView,/function markPhaseFanMainline\(\)/);
   assert.match(discreteView,/dataset\.researchMainline = "phase-fan"/);
   assert.doesNotMatch(discreteView,/discrete-phase-fan-details|ensurePhaseFanDrilldown/);
-  const residual=html.indexOf('class="seasonal-drift-residual-strip"');
-  const decomposition=html.indexOf('id="seasonal-drift-decomposition"');
-  assert.ok(residual>0&&residual<decomposition);
-  assert.ok(html.lastIndexOf("<details",residual)<html.lastIndexOf("</details>",residual));
+  const plate=html.indexOf('class="seasonal-drift-wave-composition"');
+  const detail=html.indexOf('id="seasonal-drift-decomposition"');
+  assert.ok(plate>0&&plate<detail);
+  assert.ok(html.lastIndexOf("<details",plate)<html.lastIndexOf("</details>",plate));
   assert.match(html,/<details id="seasonal-drift-decomposition"/);
   assert.match(html,/<details id="secondary-astronomy-tools"/);
   assert.match(html,/class="model-boundary research-evidence-appendix"/);
 });
-test("production residual strip uses the 12-Jie evidence and stays interactive",()=>{
-  assert.match(seasonalView,/function drawResidualStrip\(\)/);
-  assert.match(seasonalView,/JIE_SUMMARY\.rows\.map/);
-  assert.match(seasonalView,/meanAdvance=-DATA\.meanDriftDays/);
-  assert.match(seasonalView,/residual:\(-row\.driftDays\)-meanAdvance/);
-  assert.match(seasonalView,/activateBoundary\(row\.longitudeDegrees,"residual-strip"\)/);
-  assert.match(seasonalView,/zeroLabel\.textContent="0 = 全年平均"/);
-  assert.match(seasonalView,/residualStripSvg\.dataset\.ready="true"/);
-  assert.match(html,/扣掉全年共同位移後/);
-  assert.match(html,/常駐殘差帶看十二節相對全年平均/);
+test("the unified wave derives both rulers from one 360-point series and remains interactive",()=>{
+  assert.match(seasonalView,/function drawCurve\(\)/);
+  assert.match(seasonalView,/const advances=DATA\.driftDays\.map\(value=>-value\)/);
+  assert.match(seasonalView,/const residuals=advances\.map\(value=>value-meanAdvance\)/);
+  assert.match(seasonalView,/zeroCaption\.textContent="0 = 完全重合"/);
+  assert.match(seasonalView,/avg\.textContent="去平均起伏 · 0 = 全年平均"/);
+  assert.match(seasonalView,/updateFromCurvePointer\(event\)/);
+  assert.match(seasonalView,/curveSvg\.dataset\.ready="true"/);
+  assert.match(html,/常駐顯示全部 360 個黃經位置/);
+  assert.doesNotMatch(html,/id="seasonal-drift-residual-strip-svg"/);
 });
 test("balanced production rhythm uses whitespace rather than a second palette",()=>{
   assert.doesNotMatch(css,/#[0-9a-fA-F]{3,8}\b/);
