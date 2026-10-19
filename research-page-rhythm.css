@@ -674,3 +674,185 @@
     font-size:var(--research-type-meta);
   }
 }
+
+
+/* Research 02 — one composition, one 360-point longitude ruler.
+   Two visibly distinct zeroes: full coincidence vs centered mean residual. */
+#research-astronomy .seasonal-drift-wave-composition{
+  width:min(980px,100%);
+  max-width:100%;
+  margin:var(--research-space-20) auto 0;
+  padding:0;
+  border:0;
+}
+#research-astronomy .seasonal-drift-wave-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(165px,.32fr);
+  align-items:end;
+  gap:var(--research-space-12);
+  margin-bottom:var(--research-space-5);
+}
+#research-astronomy .seasonal-drift-wave-head>div:first-child>span{
+  display:block;
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+}
+#research-astronomy .seasonal-drift-wave-head>div:first-child>strong{
+  display:block;
+  margin-top:var(--research-space-2);
+  color:var(--research-text-primary);
+  font-size:var(--research-type-subsection);
+  line-height:var(--research-leading-subsection);
+}
+#research-astronomy .seasonal-drift-wave-head p{
+  max-width:650px;
+  margin:var(--research-space-3) 0 0;
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+#research-astronomy .seasonal-drift-wave-readout{
+  display:flex;
+  flex-direction:column;
+  gap:var(--research-space-1);
+  align-items:flex-start;
+  color:var(--research-text-secondary);
+  font-variant-numeric:tabular-nums;
+  font-size:var(--research-type-meta);
+}
+#research-astronomy .seasonal-drift-wave-readout strong{
+  color:var(--research-current);
+  font-size:var(--research-type-compact);
+}
+#research-astronomy .seasonal-drift-wave-readout>span{
+  color:var(--research-candidate);
+  font-size:var(--research-type-subsection);
+  font-weight:var(--research-weight-subsection);
+}
+#research-astronomy .seasonal-drift-wave-readout small{
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+}
+#research-astronomy .seasonal-drift-wave-composition #seasonal-drift-curve{
+  width:100%;
+  max-width:980px;
+  height:auto;
+  min-height:0;
+  margin:0 auto;
+  overflow:visible;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero{
+  stroke:var(--research-text-secondary);
+  stroke-width:1.6;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-grid{
+  stroke:var(--research-diagram-structure);
+  stroke-width:1;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-curve-path{
+  stroke:var(--research-candidate);
+  stroke-width:2.7;
+  opacity:.84;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-axis-label,
+#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-zero-label{
+  fill:var(--research-text-secondary);
+  font-size:13px;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero-caption{
+  fill:var(--research-text-primary);
+  font-size:13px;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-wave-band-divider{
+  stroke:var(--research-diagram-structure);
+  stroke-width:1;
+  opacity:.36;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-zero{
+  stroke:var(--research-text-muted);
+  opacity:.7;
+  stroke-width:1;
+  stroke-dasharray:4 7;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-path{
+  fill:none;
+  stroke:var(--research-diagram-context);
+  stroke-width:1.6;
+  opacity:.8;
+}
+#research-astronomy .seasonal-drift-wave-composition[data-mode="split"] .seasonal-residual-path,
+#research-astronomy .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-wave-composition .seasonal-residual-path{
+  stroke:var(--research-current);
+  stroke-width:2.1;
+  opacity:1;
+}
+#research-astronomy .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-wave-composition .seasonal-drift-curve-path{
+  opacity:.38;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-jie-dot{
+  fill:var(--research-bg-page);
+  stroke:var(--research-candidate);
+  stroke-width:1.5;
+  opacity:.42;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-jie-dot.is-selected{
+  stroke:var(--research-current);
+  opacity:1;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-cursor-line{
+  stroke:var(--research-current);
+  stroke-dasharray:3 6;
+  opacity:.66;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-cursor-dot,
+#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-dot.is-selected{
+  fill:var(--research-bg-page);
+  stroke:var(--research-current);
+  stroke-width:2.4;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-gap-label{
+  fill:var(--research-current);
+  font-size:13px;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-scrub-row{
+  width:100%;
+  max-width:980px;
+  margin:var(--research-space-1) auto 0;
+}
+#research-astronomy .seasonal-drift-wave-caption{
+  margin:var(--research-space-5) 0 0;
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+#research-astronomy .seasonal-drift-wave-caption b{
+  color:var(--research-text-primary);
+  font-weight:var(--research-weight-emphasis);
+}
+@media(max-width:680px){
+  #research-astronomy .seasonal-drift-wave-composition{
+    margin-top:var(--research-space-16);
+  }
+  #research-astronomy .seasonal-drift-wave-head{
+    grid-template-columns:minmax(0,1fr);
+    gap:var(--research-space-5);
+  }
+  #research-astronomy .seasonal-drift-wave-readout{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:baseline;
+  }
+  #research-astronomy .seasonal-drift-wave-readout small{
+    grid-column:1 / -1;
+  }
+  #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-axis-label,
+  #research-astronomy .seasonal-drift-wave-composition .seasonal-residual-zero-label{
+    font-size:15px;
+  }
+  #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero-caption{
+    font-size:15px;
+  }
+  #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-gap-label{
+    font-size:16px;
+  }
+}
