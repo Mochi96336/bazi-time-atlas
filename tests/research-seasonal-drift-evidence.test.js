@@ -209,8 +209,8 @@ test("the orbit distinguishes the spatial paths from the selected time-phase adv
 test("02 uses one visible SVG for both waves and preserves one scrub slider", () => {
   assert.match(html, /id="seasonal-drift-curve"/);
   assert.match(html, /id="seasonal-drift-wave-active-total"/);
-  assert.match(html, /0[^<]*代表節界完全重合/);
-  assert.match(html, /0[^<]*只是全年平均/);
+  assert.match(html, /<b>0<\/b> 代表節界完全重合/);
+  assert.match(html, /<b>0<\/b> 只是全年平均/);
   assert.doesNotMatch(html, /id="seasonal-drift-residual-strip-svg"/);
   assert.equal((html.match(/id="seasonal-drift-curve"/g) ?? []).length,1);
   assert.equal((html.match(/id="seasonal-drift-scrub"/g) ?? []).length,1);
