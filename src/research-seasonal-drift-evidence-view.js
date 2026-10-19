@@ -333,9 +333,14 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     svgEl("circle",{cx:cursorX,cy:meanY,r:3.8,
       class:"seasonal-drift-mean-cursor"},curveSvg);
 
+    // Keep the selected value away from the horizontal mean line at every
+    // longitude, not only at the default Li Chun selection.
+    const valueLabelY=selectedY<meanY
+      ? Math.max(CURVE.top+18,selectedY-16)
+      : Math.min(CURVE.bottom-8,selectedY+23);
     const gapLabel=svgEl("text",{
       x:cursorX>CURVE.width-155?cursorX-10:cursorX+10,
-      y:Math.max(CURVE.top+18,selectedY-16),
+      y:valueLabelY,
       "text-anchor":cursorX>CURVE.width-155?"end":"start",
       class:"seasonal-drift-gap-label"},curveSvg);
     gapLabel.textContent=humanDrift(selectedDrift(),2);
