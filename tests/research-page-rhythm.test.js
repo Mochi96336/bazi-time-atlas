@@ -31,7 +31,8 @@ test("single advance curve includes a same-scale mean reference and remains inte
   assert.match(seasonalView,/const advances=DATA\.driftDays\.map\(value=>-value\)/);
   assert.match(seasonalView,/const meanY=totalY\(meanAdvance\)/);
   assert.match(seasonalView,/zeroCaption\.textContent="0 = 完全重合"/);
-  assert.match(seasonalView,/set\("seasonal-drift-wave-active-residual","全年平均提前 "/);
+  assert.match(seasonalView,/set\("seasonal-drift-wave-mean","全年平均提前 "/);
+  assert.match(seasonalView,/set\("seasonal-drift-wave-active-residual","偏離全年平均 "/);
   assert.doesNotMatch(seasonalView,/const meanCaption=/);
   assert.match(seasonalView,/updateFromCurvePointer\(event\)/);
   assert.match(seasonalView,/class:"seasonal-drift-deviation-stick"/);
