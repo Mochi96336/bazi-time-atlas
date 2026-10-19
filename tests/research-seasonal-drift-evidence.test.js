@@ -95,7 +95,7 @@ test("curve and orbit share one longitude cursor without calling it a physical E
 test("combined chart visualizes absolute advance and a separate mean-centered residual without duplicate wave panels", () => {
   assert.match(view, /const advances=DATA\.driftDays\.map\(value=>-value\)/);
   assert.match(view, /function totalY\(advanceDays\)/);
-  assert.match(view, /zeroCaption\.textContent = "0 = 完全重合"/);
+  assert.match(view, /zeroCaption\.textContent="0 = 完全重合"/);
   assert.match(view, /class:"seasonal-residual-path"/);
   assert.match(view, /gapLabel\.textContent=humanDrift\(selectedDrift\(\),2\)/);
   assert.match(html, /先看結論 · 八字節界/);
@@ -161,7 +161,7 @@ test("Research 02 stays framed as a BaZi boundary question", () => {
 });
 
 test("curve and orbit expose the same canonical Jie structure", () => {
-  assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary =>/);
+  assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary=>/);
   assert.match(view, /seasonal-drift-jie-guide/);
   assert.match(view, /seasonal-drift-jie-dot/);
   assert.match(view, /root\.dataset\.baziMonthBranch = month\.branch/);
@@ -183,8 +183,8 @@ test("Research 02 hierarchy keeps zero-line proof and orbit before the combined 
   assert.ok(proof > cursor && orbit > proof && curve > orbit && detail > curve && controls > detail);
   assert.match(html, /0 天 = 完全重合/);
   assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
-  assert.match(html, /看完整節界偏移/);
-  assert.match(html, /扣除平均，看年內起伏/);
+  assert.match(html, /強調完整提前量/);
+  assert.match(html, /強調去平均起伏/);
   assert.doesNotMatch(
     html.slice(
       html.indexOf('class="seasonal-drift-evidence-head"'),
