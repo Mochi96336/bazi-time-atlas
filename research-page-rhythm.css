@@ -1008,7 +1008,7 @@
 }
 @media(max-width:480px){
   .research-task-primary .research-fan-graphic{
-    height:clamp(285px,77vw,315px);
+    height:clamp(235px,calc(52.5vw + 64px),270px);
   }
   .research-task-primary .phase-gauge-caption{
     top:0;
