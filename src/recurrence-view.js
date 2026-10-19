@@ -156,7 +156,7 @@ function renderRing(key) {
       const label = svgEl("text", {
         x:p.x,
         y:p.y,
-        class:"phase-label",
+        class:`phase-label${cell.signedStart===0 ? " is-zero" : ""}`,
         transform:`rotate(${angle + 90} ${p.x} ${p.y})`
       }, spec.group);
       label.textContent = formatSigned(cell.signedStart);
@@ -202,6 +202,33 @@ function renderReturnMarkers(state) {
       fanEnd:FAN_END,
       referenceAngle:CURSOR_ANGLE
     });
+    // Keep all 160 sector cells as true scale evidence, but spotlight only
+    // the current cell. A baseline-to-marker arc encodes signed shortest
+    // displacement rather than adding another grid of equally strong sectors.
+    spec.group.querySelectorAll(".phase-sector.is-current").forEach(node=>{
+      node.classList.remove("is-current","is-closed");
+    });
+    const activeIndex=Math.max(0,Math.min(
+      spec.sectors-1,
+      Math.floor((signed+spec.modulus/2)/spec.phasePerSector)
+    ));
+    const activeCell=spec.group.querySelector('[data-phase-cell="'+activeIndex+'"]');
+    activeCell?.classList.add("is-current");
+    if(phase===0) activeCell?.classList.add("is-closed");
+
+    if(phase!==0) {
+      const arcRadius=(spec.inner+spec.outer)/2;
+      const first=polar(arcRadius,CURSOR_ANGLE);
+      const last=polar(arcRadius,angle);
+      svgEl("path",{
+        d:"M "+first.x.toFixed(3)+" "+first.y.toFixed(3)+
+          " A "+arcRadius+" "+arcRadius+" 0 0 "+(angle>CURSOR_ANGLE?"1":"0")+
+          " "+last.x.toFixed(3)+" "+last.y.toFixed(3),
+        class:"phase-offset-arc phase-offset-arc-"+key,
+        "data-return-marker":key+"-offset",
+        "data-signed-offset":signed
+      },cursorGroup);
+    }
     const p1 = polar(spec.inner + 5, angle);
     const p2 = polar(spec.outer - 5, angle);
     svgEl("line", {
