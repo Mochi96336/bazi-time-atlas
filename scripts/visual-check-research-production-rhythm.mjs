@@ -28,7 +28,7 @@ const browser=findBrowser(),captures=[];
 for(const viewport of viewports){
   const url=new URL("recurrence.html?delta=24000",baseURL).href;
   const dom=run(browser,[...args(),"--window-size="+viewport.width+","+viewport.height,"--dump-dom",url],"Research production rhythm DOM").stdout;
-  for(const required of ['data-research-mainline="phase-fan"','id="seasonal-drift-curve"','data-grammar="absolute-plus-residual"','data-ready="true"','class="astronomy-to-evidence"','data-diagram-grammar="pillar-verdict"','data-diagram-grammar="alignment-fork"'])
+  for(const required of ['data-research-mainline="phase-fan"','id="seasonal-drift-curve"','data-grammar="single-advance-mean"','data-ready="true"','class="astronomy-to-evidence"','data-diagram-grammar="pillar-verdict"','data-diagram-grammar="alignment-fork"'])
     if(!dom.includes(required))throw new Error("Research production rhythm missing "+required);
   if(dom.includes('id="discrete-phase-fan-details"'))throw new Error("phase fan disclosure returned");
   const order=[
@@ -39,7 +39,7 @@ for(const viewport of viewports){
   ];
   if(order.some(index=>index<0)||!order.every((value,index)=>index===0||order[index-1]<value))
     throw new Error("Research 03 core/support order regressed: "+order.join(" → "));
-  if(!dom.includes("0 = 全年平均")||!dom.includes("0 = 完全重合")||!dom.includes("class=\"seasonal-residual-path\""))throw new Error("unified chart lost its separate zeroes or residual trace");
+  if(!dom.includes("全年平均提前 ")||!dom.includes("0 = 完全重合")||!dom.includes("class=\"seasonal-drift-mean-line\"")||dom.includes("class=\"seasonal-residual-path\""))throw new Error("single curve lost its mean line or reintroduced a second wave");
   const fileName="research-production-rhythm-"+viewport.key+".png";
   const filePath=path.join(outputDir,fileName);
   run(browser,[...args(),"--window-size="+viewport.width+","+viewport.height,"--screenshot="+filePath,url],fileName);
