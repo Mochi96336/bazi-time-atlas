@@ -380,3 +380,17 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
+
+test("01 fan spotlights the current cell and a signed-zero-to-phase arc without changing 160-sector geometry",async()=>{
+  const rhythm=await readFile(new URL("../research-page-rhythm.css",import.meta.url),"utf8");
+  assert.match(recurrenceView,/const activeIndex=Math\.max\(0,Math\.min\(/);
+  assert.match(recurrenceView,/Math\.floor\(\(signed\+spec\.modulus\/2\)\/spec\.phasePerSector\)/);
+  assert.match(recurrenceView,/activeCell\?\.classList\.add\("is-current"\)/);
+  assert.match(recurrenceView,/if\(phase===0\) activeCell\?\.classList\.add\("is-closed"\)/);
+  assert.match(recurrenceView,/class:"phase-offset-arc phase-offset-arc-"\+key/);
+  assert.match(recurrenceView,/"data-signed-offset":signed/);
+  assert.match(rhythm,/\.research-fan-graphic \.phase-sector\.is-current/);
+  assert.match(rhythm,/\.research-fan-graphic \.phase-offset-arc/);
+  assert.match(rhythm,/\.research-fan-graphic \.phase-label\.is-zero/);
+  assert.doesNotMatch(recurrenceView,/spec\.sectors\s*:\s*0/);
+});
