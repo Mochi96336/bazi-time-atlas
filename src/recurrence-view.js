@@ -27,8 +27,8 @@ const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
-const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
-const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
+const DEFAULT_FAN_VIEWBOX = "0 213 1200 603";
+const MOBILE_FAN_VIEWBOX = "0 213 1200 603";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -618,6 +618,25 @@ function renderState() {
   }
 
   renderReturnMarkers(state);
+
+  // Lead with the consequence, not 160 equally prominent ruler cells.
+  // Both labels are derived from the same recurrenceState used by the fan.
+  const phaseKnown = Object.values(state.phases).every(value=>value!==null);
+  const gregorianSigned = state.phases.gregorian===null
+    ? null : signedShortestPhase(state.phases.gregorian,400);
+  if(!phaseKnown) {
+    setText("research-fan-verdict","離散條件未定");
+    setText("research-fan-explanation","目前的目標日期不足以完整判定三個相位。");
+  } else if(state.closed.gregorian && state.closed.year && state.closed.day) {
+    setText("research-fan-verdict","三項都回到 0");
+    setText("research-fan-explanation","公曆結構、60 年序與 60 日序同時重合；這仍是離散候選，不代表節界已驗真。");
+  } else if(state.closed.year && state.closed.day) {
+    setText("research-fan-verdict","還差公曆 "+formatSigned(gregorianSigned));
+    setText("research-fan-explanation","年序、日序已回到 0；公曆結構仍偏離共同基準。");
+  } else {
+    setText("research-fan-verdict","尚未三項歸零");
+    setText("research-fan-explanation","0 = 與基準同相位 · 左右為距 0 的最短循環位移");
+  }
 
   setText("gregorian-phase-readout", phaseReadout(state.phases.gregorian, 400));
   setText("year-phase-readout", phaseReadout(state.phases.yearSequence, 60));
