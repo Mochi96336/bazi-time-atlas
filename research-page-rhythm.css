@@ -927,7 +927,7 @@
   stroke-width:2.5;
 }
 .research-task-primary .research-fan-graphic .return-marker.is-closed{
-  stroke:var(--research-fan-datum,#f1e7c9);
+  stroke:var(--research-fan-datum);
   stroke-width:3;
 }
 .research-task-primary .research-fan-graphic .return-marker-label{
