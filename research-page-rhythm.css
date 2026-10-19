@@ -1173,7 +1173,7 @@
 .research-task-primary .research-fan-composition{
   display:grid;
   grid-template-columns:minmax(0,1fr);
-  grid-template-areas:"head" "readout" "graphic";
+  grid-template-areas:"head" "graphic" "readout";
   gap:var(--research-space-4);
   align-items:start;
 }
@@ -1300,12 +1300,12 @@
 @media(min-width:960px){
   .research-task-primary .research-fan-composition{
     grid-template-columns:minmax(0,.41fr) minmax(0,.59fr);
-    grid-template-areas:"head graphic" "readout graphic";
+    grid-template-areas:"head graphic" "readout readout";
     gap:var(--research-space-5) clamp(32px,4vw,64px);
     align-items:center;
   }
   .research-task-primary .research-fan-composition .research-fan-head{
-    align-self:end;
+    align-self:center;
   }
   .research-task-primary .research-fan-composition .recurrence-readout.research-current-state{
     align-self:start;
