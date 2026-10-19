@@ -15,7 +15,6 @@ const root = document.querySelector("#seasonal-drift-evidence");
 const curveSvg = document.querySelector("#seasonal-drift-curve");
 const boundaryProofSvg = document.querySelector("#seasonal-boundary-proof-svg");
 const orbitSvg = document.querySelector("#seasonal-drift-orbit");
-const residualStripSvg = document.querySelector("#seasonal-drift-residual-strip-svg");
 const scrub = document.querySelector("#seasonal-drift-scrub");
 const instrument = document.querySelector("#recurrence-instrument");
 const secondaryTools = document.querySelector("#secondary-astronomy-tools");
@@ -26,7 +25,7 @@ const JIE_BY_LONGITUDE = new Map(JIE_SUMMARY.rows.map(row => [row.longitudeDegre
 const compactProofMedia = window.matchMedia("(max-width:680px)");
 const pairedProofMedia = window.matchMedia("(min-width:1020px)");
 
-if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSvg) {
+if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   const initialParams = new URLSearchParams(location.search);
   const state = {
     index:indexForLongitude(315),
@@ -34,16 +33,9 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
     exaggerate:initialParams.get("seasonalOrbitScale") !== "true"
   };
 
-  const CURVE = {
-    width:760,
-    height:330,
-    left:62,
-    right:24,
-    top:24,
-    bottom:52
-  };
-  CURVE.plotWidth = CURVE.width - CURVE.left - CURVE.right;
-  CURVE.plotHeight = CURVE.height - CURVE.top - CURVE.bottom;
+  // One shared longitude coordinate for the advance trace and its residual.
+  const CURVE = { width:960, height:430, left:72, right:32, top:60, plotWidth:856,
+    mainHeight:220, residualCenter:356, residualHalf:32, endY:390 };
 
   const ORBIT = Object.freeze({
     width:470,
@@ -83,7 +75,7 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
   }
 
   function selectedShape() {
-    return selectedDrift() - DATA.meanDriftDays;
+    return DATA.meanDriftDays - selectedDrift();
   }
 
   function humanDrift(value, digits = 3) {
@@ -265,229 +257,114 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
     boundaryProofSvg.dataset.ready="true";
   }
 
-  function drawResidualStrip() {
-    clear(residualStripSvg);
-    const mobile=compactProofMedia.matches;
-    const W=mobile?390:1080,H=mobile?250:230;
-    const left=mobile?24:54,right=mobile?24:38,top=34,bottom=mobile?48:52;
-    const plotW=W-left-right,plotH=H-top-bottom;
-    const meanAdvance=-DATA.meanDriftDays;
-    const rows=JIE_SUMMARY.rows.map(row=>({
-      ...row,
-      residual:(-row.driftDays)-meanAdvance
-    }));
-    const maxAbs=Math.max(2.2,...rows.map(row=>Math.abs(row.residual)));
-    const xFor=index=>left+(index/(rows.length-1))*plotW;
-    const yFor=value=>top+((maxAbs-value)/(maxAbs*2))*plotH;
-
-    residualStripSvg.setAttribute("viewBox",`0 0 ${W} ${H}`);
-    svgEl("line",{x1:left,x2:W-right,y1:yFor(0),y2:yFor(0),class:"seasonal-residual-zero"},residualStripSvg);
-    const zeroLabel=svgEl("text",{x:left,y:yFor(0)-8,class:"seasonal-residual-zero-label"},residualStripSvg);
-    zeroLabel.textContent="0 = 全年平均";
-    const path=rows.map((row,index)=>
-      `${index===0?"M":"L"} ${xFor(index).toFixed(2)} ${yFor(row.residual).toFixed(2)}`
-    ).join(" ");
-    svgEl("path",{d:path,class:"seasonal-residual-path"},residualStripSvg);
-
-    rows.forEach((row,index)=>{
-      const x=xFor(index),y=yFor(row.residual);
-      const selected=indexForLongitude(row.longitudeDegrees)===state.index;
-      const group=svgEl("g",{
-        class:"seasonal-residual-point"+(selected?" is-selected":""),
-        "data-longitude":row.longitudeDegrees
-      },residualStripSvg);
-      svgEl("line",{x1:x,x2:x,y1:yFor(0),y2:y,class:"seasonal-residual-stem"},group);
-      svgEl("circle",{cx:x,cy:y,r:selected?6:4,class:"seasonal-residual-dot"},group);
-      if(index%3===0){
-        const label=svgEl("text",{x,y:H-20,"text-anchor":"middle",class:"seasonal-residual-label"},group);
-        label.textContent=row.termName;
-      }
-      const hit=svgEl("circle",{cx:x,cy:y,r:mobile?14:12,class:"seasonal-residual-hit"},group);
-      hit.addEventListener("pointerdown",()=>activateBoundary(row.longitudeDegrees,"residual-strip"));
-    });
-    residualStripSvg.dataset.ready="true";
-  }
-
   function curveX(index) {
     return CURVE.left + (index / 359) * CURVE.plotWidth;
   }
 
-  function totalY(value) {
-    const min = 0;
-    const max = 15;
-    return CURVE.top + ((max - value) / (max - min)) * CURVE.plotHeight;
+  function totalY(advanceDays) {
+    // Here 0 means actual coincidence; advance grows downwards.
+    return CURVE.top + (advanceDays / 15) * CURVE.mainHeight;
   }
 
-  function shapeY(value) {
-    const min = -2.35;
-    const max = 2.35;
-    return CURVE.top + ((max - value) / (max - min)) * CURVE.plotHeight;
-  }
-
-  function curveY(value) {
-    return state.mode === "total" ? totalY(value) : shapeY(value);
+  function shapeY(advanceResidualDays) {
+    // Independent vertical ruler: this 0 means the 360-point yearly mean.
+    return CURVE.residualCenter - (advanceResidualDays / 2.5) * CURVE.residualHalf;
   }
 
   function drawCurve() {
     clear(curveSvg);
-    curveSvg.setAttribute("viewBox", `0 0 ${CURVE.width} ${CURVE.height}`);
-    curveSvg.dataset.mode = state.mode;
+    const mobile=compactProofMedia.matches;
+    Object.assign(CURVE,mobile
+      ? {width:390,height:434,left:45,right:17,top:69,mainHeight:216,residualCenter:349,residualHalf:30,endY:390}
+      : {width:960,height:430,left:72,right:32,top:60,mainHeight:220,residualCenter:354,residualHalf:31,endY:393});
+    CURVE.plotWidth=CURVE.width-CURVE.left-CURVE.right;
+    curveSvg.setAttribute("viewBox","0 0 "+CURVE.width+" "+CURVE.height);
+    curveSvg.dataset.mode=state.mode;
+    curveSvg.dataset.ready="true";
+    curveSvg.dataset.grammar="absolute-plus-residual";
 
-    const values = state.mode === "total"
-      ? DATA.driftDays.map(value => -value)
-      : DATA.driftDays.map(value => value - DATA.meanDriftDays);
-
-    const ticks = state.mode === "total"
-      ? [15,12,9,6,3,0]
-      : [2,1,0,-1,-2];
-
-    for (const tick of ticks) {
-      const y = curveY(tick);
-      svgEl("line", {
-        x1:CURVE.left,
-        x2:CURVE.width-CURVE.right,
-        y1:y,
-        y2:y,
-        class:tick === 0 ? "seasonal-drift-zero" : "seasonal-drift-grid"
-      }, curveSvg);
-      const label = svgEl("text", {
-        x:CURVE.left-12,
-        y:y+4,
-        class:"seasonal-drift-axis-label",
-        "text-anchor":"end"
-      }, curveSvg);
-      label.textContent = tick === 0 && state.mode === "total"
-        ? "0 d"
-        : `${tick} d`;
-    }
-
-    if (state.mode === "total") {
-      const zeroCaption = svgEl("text", {
-        x:CURVE.width-CURVE.right,
-        y:totalY(0)-8,
-        class:"seasonal-drift-zero-caption",
-        "text-anchor":"end"
-      }, curveSvg);
-      zeroCaption.textContent = "0 = 完全重合";
-    }
-
-    const path = values.map((value,index) =>
-      `${index === 0 ? "M" : "L"} ${curveX(index).toFixed(2)} ${curveY(value).toFixed(2)}`
+    // Both lines originate from exactly the same 360 points and share x.
+    const advances=DATA.driftDays.map(value=>-value);
+    const meanAdvance=-DATA.meanDriftDays;
+    const residuals=advances.map(value=>value-meanAdvance);
+    const pathFor=(values,yFor)=>values.map((v,index)=>
+      (index===0?"M ":"L ")+curveX(index).toFixed(2)+" "+yFor(v).toFixed(2)
     ).join(" ");
-    svgEl("path", { d:path, class:"seasonal-drift-curve-path" }, curveSvg);
 
-    BAZI_JIE_BOUNDARIES.forEach(boundary => {
-      const boundaryIndex = indexForLongitude(boundary.longitudeDegrees);
-      const x = curveX(boundaryIndex);
-      const y = curveY(values[boundaryIndex]);
-      const selected = boundaryIndex === state.index;
-      svgEl("line", {
-        x1:x,
-        x2:x,
-        y1:y,
-        y2:CURVE.height-CURVE.bottom,
-        class:`seasonal-drift-jie-guide${selected ? " is-selected" : ""}`
-      }, curveSvg);
-      svgEl("circle", {
-        cx:x,
-        cy:y,
-        r:selected ? 4 : 2.6,
-        class:`seasonal-drift-jie-dot${selected ? " is-selected" : ""}`
-      }, curveSvg);
+    for(const tick of [0,5,10,15]){
+      const y=totalY(tick);
+      svgEl("line",{x1:CURVE.left,x2:CURVE.width-CURVE.right,y1:y,y2:y,
+        class:tick===0?"seasonal-drift-zero":"seasonal-drift-grid"},curveSvg);
+      const axis=svgEl("text",{
+        x:CURVE.left-10,y:y+4,"text-anchor":"end",class:"seasonal-drift-axis-label"
+      },curveSvg);
+      axis.textContent=tick+" d";
+    }
+    const zeroCaption=svgEl("text",{
+      x:CURVE.left,y:CURVE.top-25,class:"seasonal-drift-zero-caption"
+    },curveSvg);
+    zeroCaption.textContent="0 = 完全重合";
+    svgEl("path",{d:pathFor(advances,totalY),class:"seasonal-drift-curve-path"},curveSvg);
+
+    // A secondary strip integrated into the same SVG, not a second chart.
+    const bandTop=CURVE.residualCenter-CURVE.residualHalf-10;
+    svgEl("line",{x1:CURVE.left,x2:CURVE.width-CURVE.right,
+      y1:bandTop,y2:bandTop,class:"seasonal-wave-band-divider"},curveSvg);
+    svgEl("line",{x1:CURVE.left,x2:CURVE.width-CURVE.right,
+      y1:CURVE.residualCenter,y2:CURVE.residualCenter,class:"seasonal-residual-zero"},curveSvg);
+    const avg=svgEl("text",{
+      x:CURVE.left,y:bandTop-7,class:"seasonal-residual-zero-label"
+    },curveSvg);
+    avg.textContent="去平均起伏 · 0 = 全年平均";
+    svgEl("path",{d:pathFor(residuals,shapeY),class:"seasonal-residual-path"},curveSvg);
+
+    // Low-key 12 Jie anchors and a single linked cursor for both rulers.
+    BAZI_JIE_BOUNDARIES.forEach(boundary=>{
+      const i=indexForLongitude(boundary.longitudeDegrees);
+      const x=curveX(i);
+      const selected=i===state.index;
+      svgEl("circle",{cx:x,cy:totalY(advances[i]),r:selected?5:2.8,
+        class:"seasonal-drift-jie-dot"+(selected?" is-selected":"")},curveSvg);
     });
 
-    const major = [
-      {longitude:270,label:"冬至"},
-      {longitude:0,label:"春分"},
-      {longitude:90,label:"夏至"},
-      {longitude:180,label:"秋分"}
-    ];
-    major.forEach(({longitude,label}) => {
-      const index = indexForLongitude(longitude);
-      const x = curveX(index);
-      svgEl("line", {
-        x1:x,
-        x2:x,
-        y1:CURVE.height-CURVE.bottom,
-        y2:CURVE.height-CURVE.bottom+8,
-        class:"seasonal-drift-axis-tick"
-      }, curveSvg);
-      const text = svgEl("text", {
-        x,
-        y:CURVE.height-20,
-        class:"seasonal-drift-axis-label seasonal-drift-term-axis",
-        "text-anchor":"middle"
-      }, curveSvg);
-      text.textContent = label;
-    });
+    const x=curveX(state.index);
+    const yMain=totalY(advances[state.index]);
+    const yResidual=shapeY(residuals[state.index]);
+    svgEl("line",{x1:x,x2:x,y1:CURVE.top,y2:CURVE.endY,
+      class:"seasonal-drift-cursor-line"},curveSvg);
+    const gapLabel=svgEl("text",{
+      x:x>CURVE.width-155?x-12:x+12,y:Math.max(CURVE.top+29,yMain-14),
+      "text-anchor":x>CURVE.width-155?"end":"start",
+      class:"seasonal-drift-gap-label"},curveSvg);
+    gapLabel.textContent=humanDrift(selectedDrift(),2);
+    svgEl("circle",{cx:x,cy:yMain,r:6,class:"seasonal-drift-cursor-dot"},curveSvg);
+    svgEl("circle",{cx:x,cy:yResidual,r:5,class:"seasonal-residual-dot is-selected"},curveSvg);
 
-    const cursorX = curveX(state.index);
-    const cursorY = curveY(values[state.index]);
-
-    if (state.mode === "total") {
-      const zeroY = totalY(0);
-      svgEl("line", {
-        x1:cursorX,
-        x2:cursorX,
-        y1:zeroY,
-        y2:cursorY,
-        class:"seasonal-drift-gap-line"
-      }, curveSvg);
-      const gapLabel = svgEl("text", {
-        x:cursorX > CURVE.width - 150 ? cursorX - 10 : cursorX + 10,
-        y:(zeroY + cursorY) / 2,
-        class:"seasonal-drift-gap-label",
-        "text-anchor":cursorX > CURVE.width - 150 ? "end" : "start"
-      }, curveSvg);
-      gapLabel.textContent = humanDrift(selectedDrift(),2);
+    for(const point of [
+      {longitude:270,label:"冬至"},{longitude:0,label:"春分"},
+      {longitude:90,label:"夏至"},{longitude:180,label:"秋分"}
+    ]){
+      const xx=curveX(indexForLongitude(point.longitude));
+      const axis=svgEl("text",{x:xx,y:CURVE.height-15,
+        "text-anchor":"middle",class:"seasonal-drift-axis-label seasonal-drift-term-axis"},curveSvg);
+      axis.textContent=point.label;
     }
 
-    svgEl("line", {
-      x1:cursorX,
-      x2:cursorX,
-      y1:CURVE.top,
-      y2:CURVE.height-CURVE.bottom,
-      class:"seasonal-drift-cursor-line"
-    }, curveSvg);
-    svgEl("circle", {
-      cx:cursorX,
-      cy:cursorY,
-      r:6,
-      class:"seasonal-drift-cursor-dot"
-    }, curveSvg);
-
-    const longitude = longitudeForIndex(state.index);
-    const name = DATA.termNames[String(longitude)];
-    if (name) {
-      const marker = svgEl("text", {
-        x:cursorX,
-        y:Math.max(CURVE.top+16,cursorY-13),
-        class:"seasonal-drift-cursor-label",
-        "text-anchor":"middle"
-      }, curveSvg);
-      marker.textContent = name;
-    }
-
-    const hit = svgEl("rect", {
-      x:CURVE.left,
-      y:CURVE.top,
-      width:CURVE.plotWidth,
-      height:CURVE.plotHeight,
-      class:"seasonal-drift-hit"
-    }, curveSvg);
-    hit.addEventListener("pointerdown", event => {
+    const hit=svgEl("rect",{x:CURVE.left,y:CURVE.top-6,width:CURVE.plotWidth,
+      height:CURVE.endY-CURVE.top+12,class:"seasonal-drift-hit"},curveSvg);
+    hit.addEventListener("pointerdown",event=>{
       hit.setPointerCapture?.(event.pointerId);
       updateFromCurvePointer(event);
     });
-    hit.addEventListener("pointermove", event => {
-      if (event.buttons === 1 || event.pointerType === "touch") updateFromCurvePointer(event);
+    hit.addEventListener("pointermove",event=>{
+      if(event.buttons===1||event.pointerType==="touch")updateFromCurvePointer(event);
     });
   }
 
   function updateFromCurvePointer(event) {
-    const rect = curveSvg.getBoundingClientRect();
-    const localX = (event.clientX - rect.left) / rect.width * CURVE.width;
-    const fraction = Math.max(0,Math.min(1,(localX-CURVE.left)/CURVE.plotWidth));
+    const rect=curveSvg.getBoundingClientRect();
+    const localX=(event.clientX-rect.left)/rect.width*CURVE.width;
+    const fraction=Math.max(0,Math.min(1,(localX-CURVE.left)/CURVE.plotWidth));
     setIndex(Math.round(fraction*359),"curve");
   }
 
@@ -779,6 +656,9 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
     set("seasonal-drift-selected-total",signedDays(drift,3));
     set("seasonal-drift-selected-total-human",humanDrift(drift,3));
     set("seasonal-drift-selected-shape",signedDays(shape,3));
+    set("seasonal-drift-wave-active-name",namedTerm ?? "λ "+longitude+"°");
+    set("seasonal-drift-wave-active-total",humanDrift(drift,2));
+    set("seasonal-drift-wave-active-residual","相對全年平均 "+signedDays(shape,2));
     set("seasonal-drift-phase-value",signedDays(DATA.meanDriftDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
     set("seasonal-residual-mean",humanDrift(DATA.meanDriftDays,3));
@@ -802,7 +682,6 @@ if (root && curveSvg && orbitSvg && residualStripSvg && scrub && boundaryProofSv
   function render() {
     updateReadout();
     drawBoundaryProof();
-    drawResidualStrip();
     drawCurve();
     drawOrbit();
   }
