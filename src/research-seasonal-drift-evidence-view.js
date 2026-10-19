@@ -317,7 +317,6 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
 
     const cursorX=curveX(state.index);
     const selectedY=totalY(advances[state.index]);
-    const deviation=advances[state.index]-meanAdvance;
     // Deviation is the vertical distance between the selected value and its
     // mean reference; it must never create another y ruler or plotted wave.
     svgEl("line",{x1:cursorX,x2:cursorX,y1:CURVE.top,y2:CURVE.bottom,
