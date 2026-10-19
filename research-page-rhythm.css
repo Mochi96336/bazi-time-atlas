@@ -676,8 +676,9 @@
 }
 
 
-/* Research 02 — one composition, one 360-point longitude ruler.
-   Two visibly distinct zeroes: full coincidence vs centered mean residual. */
+/* Research 02 — one curve, one scale, one mean.
+   Absolute advance is the only waveform. The seasonal deviation is the
+   vertical distance from the selected point to the mean reference. */
 #research-astronomy .seasonal-drift-wave-composition{
   width:min(980px,100%);
   max-width:100%;
@@ -687,7 +688,7 @@
 }
 #research-astronomy .seasonal-drift-wave-head{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(165px,.32fr);
+  grid-template-columns:minmax(0,1fr) minmax(175px,.32fr);
   align-items:end;
   gap:var(--research-space-12);
   margin-bottom:var(--research-space-5);
@@ -735,89 +736,87 @@
 }
 #research-astronomy .seasonal-drift-wave-composition #seasonal-drift-curve{
   width:100%;
-  max-width:980px;
   height:auto;
   min-height:0;
+  max-width:980px;
   margin:0 auto;
-  overflow:visible;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero{
   stroke:var(--research-text-secondary);
-  stroke-width:1.6;
+  stroke-width:1.5;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-grid{
   stroke:var(--research-diagram-structure);
   stroke-width:1;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-curve-path{
+  fill:none;
   stroke:var(--research-candidate);
-  stroke-width:2.7;
-  opacity:.84;
+  stroke-width:2.8;
+  opacity:.92;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-mean-line{
+  stroke:var(--research-text-secondary);
+  stroke-width:1.35;
+  stroke-dasharray:6 7;
+  opacity:.7;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-mean-label{
+  fill:var(--research-text-secondary);
+  font-size:12px;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-axis-label,
-#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-zero-label{
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero-caption{
   fill:var(--research-text-secondary);
   font-size:13px;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero-caption{
   fill:var(--research-text-primary);
-  font-size:13px;
 }
-#research-astronomy .seasonal-drift-wave-composition .seasonal-wave-band-divider{
-  stroke:var(--research-diagram-structure);
-  stroke-width:1;
-  opacity:.36;
-}
-#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-zero{
-  stroke:var(--research-text-muted);
-  opacity:.7;
-  stroke-width:1;
-  stroke-dasharray:4 7;
-}
-#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-path{
-  fill:none;
-  stroke:var(--research-diagram-context);
-  stroke-width:1.6;
-  opacity:.8;
-}
-#research-astronomy .seasonal-drift-wave-composition[data-mode="split"] .seasonal-residual-path,
-#research-astronomy .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-wave-composition .seasonal-residual-path{
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-deviation-stick{
   stroke:var(--research-current);
-  stroke-width:2.1;
-  opacity:1;
+  stroke-width:3.1;
+  stroke-linecap:round;
 }
-#research-astronomy .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-wave-composition .seasonal-drift-curve-path{
-  opacity:.38;
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-cursor-line{
+  stroke:var(--research-current);
+  stroke-width:1;
+  stroke-dasharray:3 6;
+  opacity:.55;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-cursor-dot,
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-mean-cursor{
+  fill:var(--research-bg-page);
+  stroke:var(--research-current);
+  stroke-width:2.4;
+}
+#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-mean-cursor{
+  stroke-width:1.8;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-jie-dot{
   fill:var(--research-bg-page);
   stroke:var(--research-candidate);
+  opacity:.52;
   stroke-width:1.5;
-  opacity:.42;
 }
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-jie-dot.is-selected{
   stroke:var(--research-current);
   opacity:1;
 }
-#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-cursor-line{
-  stroke:var(--research-current);
-  stroke-dasharray:3 6;
-  opacity:.66;
-}
-#research-astronomy .seasonal-drift-wave-composition .seasonal-drift-cursor-dot,
-#research-astronomy .seasonal-drift-wave-composition .seasonal-residual-dot.is-selected{
-  fill:var(--research-bg-page);
-  stroke:var(--research-current);
-  stroke-width:2.4;
-}
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-gap-label{
   fill:var(--research-current);
   font-size:13px;
 }
+#research-astronomy .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-mean-line{
+  stroke:var(--research-current);
+  opacity:1;
+}
+#research-astronomy .seasonal-drift-evidence[data-mode="split"] .seasonal-drift-deviation-stick{
+  stroke-width:4.5;
+}
 #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-scrub-row{
   width:100%;
-  max-width:980px;
-  margin:var(--research-space-1) auto 0;
+  margin:0 auto;
 }
 #research-astronomy .seasonal-drift-wave-caption{
   margin:var(--research-space-5) 0 0;
@@ -846,13 +845,11 @@
     grid-column:1 / -1;
   }
   #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-axis-label,
-  #research-astronomy .seasonal-drift-wave-composition .seasonal-residual-zero-label{
-    font-size:15px;
-  }
-  #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero-caption{
-    font-size:15px;
+  #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-zero-caption,
+  #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-mean-label{
+    font-size:14px;
   }
   #research-astronomy .seasonal-drift-wave-composition .seasonal-drift-gap-label{
-    font-size:16px;
+    font-size:15px;
   }
 }
