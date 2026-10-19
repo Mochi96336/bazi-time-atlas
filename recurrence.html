@@ -444,37 +444,45 @@
 
         </div>
 
-        <section class="seasonal-drift-residual-strip" data-diagram-grammar="residual-strip" aria-labelledby="seasonal-drift-residual-title">
-          <header class="seasonal-drift-residual-head">
+        <section class="seasonal-drift-wave-composition" data-diagram-grammar="absolute-plus-residual" aria-labelledby="seasonal-drift-wave-title">
+          <header class="seasonal-drift-wave-head">
             <div>
-              <span>扣掉全年共同位移後</span>
-              <strong id="seasonal-drift-residual-title">十二節仍有小幅年內起伏</strong>
+              <span>全年 360 個黃經位置 · 共用時間軸</span>
+              <strong id="seasonal-drift-wave-title">全年都提前，但不是每一節都提前同樣多</strong>
+              <p>上方看完整提前量；下方薄帶扣除全年平均，顯示季節性的相對起伏。</p>
             </div>
-            <div class="seasonal-drift-residual-metrics">
-              <span>全年共同提前 <strong id="seasonal-residual-mean">—</strong></span>
-              <span>十二節跨度 <strong id="seasonal-residual-span">—</strong></span>
+            <div class="seasonal-drift-wave-readout" aria-live="polite">
+              <strong id="seasonal-drift-wave-active-name">立春</strong>
+              <span id="seasonal-drift-wave-active-total">—</span>
+              <small id="seasonal-drift-wave-active-residual">—</small>
             </div>
           </header>
-          <svg id="seasonal-drift-residual-strip-svg" class="seasonal-drift-svg" role="img"
-            aria-label="十二個八字節界扣除共同提前量後的年內殘差"></svg>
-          <p>這張只回答「為什麼不是每個節都剛好提前同一天數」；是否回到原時刻仍以上方 0 天基準判定。</p>
+          <svg id="seasonal-drift-curve" class="seasonal-drift-svg" role="img"
+            aria-label="同一張全年 360 點圖版：上方以 0 天完全重合為基準畫完整提前量，下方以全年平均為零畫相對殘差；兩帶共用黃經與游標，可拖曳選擇"></svg>
+          <div class="seasonal-drift-scrub-row">
+            <span>冬至</span>
+            <input id="seasonal-drift-scrub" type="range" min="0" max="359" step="1" value="45"
+              aria-label="沿全年太陽黃經選擇位置，同步主曲線、殘差與俯視圖">
+            <span>→ 冬至</span>
+          </div>
+          <p class="seasonal-drift-wave-caption">上方的 <b>0</b> 代表節界完全重合；下方的 <b>0</b> 只是全年平均，不代表重合。</p>
         </section>
 
         <details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">
           <summary>
-            <span>深入：為什麼不是固定提前 12 天？</span>
-            <strong>全年曲線 · 共同位移 ＋ 年內起伏</strong>
+            <span>研究方法：共同提前與年內起伏怎麼分開？</span>
+            <strong>來源、公式與視覺強調</strong>
           </summary>
           <div class="seasonal-drift-decomposition-body">
-            <p>主圖已經用十二個節界判定「沒有回到 0」。這裡才展開 360 個黃經位置：先看整條季節時間線共同提前，再扣掉平均，只留下不同黃經之間約 4 天的年內形狀差異。</p>
-            <small class="seasonal-drift-decomposition-note">完整偏移仍以 26026 相對固定推進 24,000 個公曆年計算；去平均視圖只解釋各節為何不會剛好提前同一個天數，不能拿來判斷節界是否重合。</small>
-            <div class="seasonal-drift-controls" role="group" aria-label="節氣漂移深入閱讀模式">
-              <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">看完整節界偏移</button>
-              <button type="button" data-seasonal-drift-mode="split" aria-pressed="false">扣除平均，看年內起伏</button>
+            <p>上方合併圖已常駐顯示全部 360 個黃經位置。完整提前量以固定推進 24,000 個公曆年後的節界時間差計算；殘差則是每個位置的提前量減去全年 360 點平均。</p>
+            <small class="seasonal-drift-decomposition-note">「0 = 全年平均」只用於比較一年內的形狀差異，不能替代「0 = 完全重合」的節界判定。兩條線共用黃經軸，但縱軸的零點與單位尺度不同。</small>
+            <div class="seasonal-drift-controls" role="group" aria-label="選擇合併圖要強調的讀法">
+              <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">強調完整提前量</button>
+              <button type="button" data-seasonal-drift-mode="split" aria-pressed="false">強調去平均起伏</button>
             </div>
             <div class="seasonal-drift-decomposition-metrics">
               <div class="seasonal-drift-stat phase">
-                <span>全年共同位移</span>
+                <span>全年共同提前</span>
                 <strong id="seasonal-drift-phase-value">—</strong>
                 <small>360 個黃經位置的平均</small>
               </div>
@@ -484,20 +492,10 @@
                 <small>全年最大－最小</small>
               </div>
             </div>
-            <div class="seasonal-drift-plot seasonal-drift-plot-detail">
-              <svg id="seasonal-drift-curve" class="seasonal-drift-svg" role="img"
-                aria-label="2026 到 26026 全年 360 個太陽黃經的 Gregorian 相位漂移；可拖曳選擇黃經"></svg>
-              <div class="seasonal-drift-scrub-row">
-                <span>冬至</span>
-                <input id="seasonal-drift-scrub" type="range" min="0" max="359" step="1" value="45"
-                  aria-label="沿全年太陽黃經選擇位置">
-                <span>→ 冬至</span>
-              </div>
-            </div>
           </div>
         </details>
 
-        <p class="seasonal-drift-evidence-note"><strong>主線怎麼讀：</strong>先看 0 天基準：十二「節」沒有一條重合，因此 24,000 只到離散候選。再用俯視圖理解「同一太陽黃經、不同到達時間相位」，最後用常駐殘差帶看十二節相對全年平均的小幅起伏；360 點全年曲線只留給深入追原因。</p>
+        <p class="seasonal-drift-evidence-note"><strong>主線怎麼讀：</strong>先看 0 天基準：十二「節」沒有一條重合，因此 24,000 只到離散候選。再用俯視圖理解「同一太陽黃經、不同到達時間相位」，最後在同一張常駐 360 點圖版裡，對照完整提前量與扣除全年平均的起伏；細部方法留給深入工具。</p>
       </section>
 
       <details id="secondary-astronomy-tools" class="secondary-astronomy-tools">
