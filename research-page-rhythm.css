@@ -1152,3 +1152,17 @@
     font-size:var(--research-type-plot);
   }
 }
+
+
+/* Compact reading: the header already names the three scales. Avoid
+   microscopic radial captions on mobile, but retain the shared zero and
+   all three live return markers. SVG data stays complete for review. */
+@media(max-width:480px){
+  .research-task-primary .research-fan-graphic .phase-label:not(.is-zero),
+  .research-task-primary .research-fan-graphic .phase-ring-name{
+    display:none;
+  }
+  .research-task-primary .research-fan-graphic .phase-tick:not(.major){
+    opacity:.28;
+  }
+}
