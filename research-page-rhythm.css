@@ -1166,3 +1166,171 @@
     opacity:.28;
   }
 }
+
+
+/* R13 Research 01 visual essay: verdict and evidence share one scene.
+   SVG viewBox crops only empty coordinate space; cells, zeroes, ticks remain. */
+.research-task-primary .research-fan-composition{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"head" "readout" "graphic";
+  gap:var(--research-space-4);
+  align-items:start;
+}
+.research-task-primary .research-fan-composition .research-fan-head{
+  grid-area:head;
+  display:flex;
+  flex-direction:column;
+  gap:var(--research-space-6);
+  min-width:0;
+  margin:0;
+}
+.research-task-primary .research-fan-composition .research-fan-graphic{
+  grid-area:graphic;
+  position:relative;
+  width:100%;
+  height:auto;
+  aspect-ratio:1200/603;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+.research-task-primary .research-fan-composition #recurrence-wheel{
+  position:absolute;
+  inset:0;
+  top:0;
+  width:100%;
+  height:100%;
+}
+.research-task-primary .research-fan-composition .recurrence-readout.research-current-state{
+  grid-area:readout;
+  min-width:0;
+  max-width:none;
+  margin:0;
+  padding:var(--research-space-4) 0 0;
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:0;
+  background:none;
+}
+.research-task-primary .research-fan-head .phase-gauge-caption{
+  width:auto;
+  max-width:none;
+  gap:var(--research-space-3);
+  padding:0;
+  pointer-events:none;
+}
+.research-task-primary .research-fan-head .research-fan-kicker{
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+  letter-spacing:.09em;
+}
+.research-task-primary .research-fan-head .phase-gauge-caption #research-fan-verdict{
+  display:block;
+  color:var(--research-text-primary);
+  font-weight:var(--research-weight-display);
+  letter-spacing:-.04em;
+  line-height:1.08;
+  font-size:clamp(24px,3.1vw,42px);
+  margin:0;
+}
+.research-task-primary #recurrence-instrument[data-gregorian-closed="false"][data-year-sequence-closed="true"][data-day-closed="true"] #research-fan-verdict{
+  color:var(--research-candidate);
+}
+.research-task-primary #recurrence-instrument[data-global-closed="true"] #research-fan-verdict{
+  color:var(--research-fan-datum);
+}
+.research-task-primary .research-fan-head .research-fan-explanation{
+  max-width:35ch;
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+  color:var(--research-text-secondary);
+}
+.research-task-primary .research-fan-head .research-fan-datum-note{
+  display:block;
+  font-size:var(--research-type-plot);
+  line-height:var(--research-leading-meta);
+  color:var(--research-text-muted);
+}
+.research-task-primary .research-fan-head .recurrence-legend{
+  display:grid;
+  width:100%;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:var(--research-space-3);
+  border-top:1px solid var(--research-line-subtle);
+  padding-top:var(--research-space-4);
+}
+.research-task-primary .research-fan-head .recurrence-legend div{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:var(--research-space-2);
+  min-width:0;
+}
+.research-task-primary .research-fan-head .recurrence-legend i{
+  display:none;
+}
+.research-task-primary .research-fan-head .recurrence-legend span{
+  color:var(--research-text-muted);
+  font-size:var(--research-type-meta);
+}
+.research-task-primary .research-fan-head .recurrence-legend strong{
+  display:block;
+  width:100%;
+  grid-column:auto;
+  font-variant-numeric:tabular-nums;
+  font-size:var(--research-type-compact);
+  line-height:var(--research-leading-subsection);
+  color:var(--research-text-primary);
+  overflow-wrap:normal;
+}
+.research-task-primary .research-fan-composition .research-current-state-head{
+  font-size:var(--research-type-meta);
+}
+.research-task-primary .research-fan-composition .research-current-state-head #delta-readout{
+  color:var(--research-text-primary);
+}
+.research-task-primary .research-fan-composition .research-current-state-phases{
+  opacity:.73;
+}
+.research-task-primary .research-fan-composition #closure-summary{
+  color:var(--research-text-secondary);
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+@media(min-width:960px){
+  .research-task-primary .research-fan-composition{
+    grid-template-columns:minmax(0,.41fr) minmax(0,.59fr);
+    grid-template-areas:"head graphic" "readout graphic";
+    gap:var(--research-space-5) clamp(32px,4vw,64px);
+    align-items:center;
+  }
+  .research-task-primary .research-fan-composition .research-fan-head{
+    align-self:end;
+  }
+  .research-task-primary .research-fan-composition .recurrence-readout.research-current-state{
+    align-self:start;
+  }
+}
+@media(min-width:681px) and (max-width:959px){
+  .research-task-primary .research-fan-composition .research-fan-graphic{
+    width:min(780px,100%);
+    justify-self:center;
+  }
+}
+@media(max-width:680px){
+  .research-task-primary .research-fan-composition{
+    gap:var(--research-space-4);
+  }
+  .research-task-primary .research-fan-head .phase-gauge-caption #research-fan-verdict{
+    font-size:clamp(25px,7.4vw,36px);
+  }
+  .research-task-primary .research-fan-composition .recurrence-readout.research-current-state{
+    padding:var(--research-space-3) 0;
+  }
+  .research-task-primary .research-fan-composition .research-fan-graphic{
+    aspect-ratio:1200/603;
+  }
+  .research-task-primary .research-fan-head .recurrence-legend strong{
+    font-size:var(--research-type-meta);
+  }
+}
