@@ -666,7 +666,8 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     set("seasonal-drift-selected-shape",signedDays(shape,3));
     set("seasonal-drift-wave-active-name",namedTerm ?? "λ "+longitude+"°");
     set("seasonal-drift-wave-active-total",humanDrift(drift,2));
-    set("seasonal-drift-wave-active-residual","全年平均提前 "+(-DATA.meanDriftDays).toFixed(2)+" 天 · 相對平均 "+signedDays(shape,2));
+    set("seasonal-drift-wave-mean","全年平均提前 "+(-DATA.meanDriftDays).toFixed(2)+" 天");
+    set("seasonal-drift-wave-active-residual","偏離全年平均 "+signedDays(shape,2));
     set("seasonal-drift-phase-value",signedDays(DATA.meanDriftDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
     set("seasonal-residual-mean",humanDrift(DATA.meanDriftDays,3));
