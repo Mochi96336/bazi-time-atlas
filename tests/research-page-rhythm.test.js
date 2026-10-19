@@ -26,13 +26,15 @@ test("phase fan and unified 360-point wave stay unfolded while methods remain di
   assert.match(html,/<details id="secondary-astronomy-tools"/);
   assert.match(html,/class="model-boundary research-evidence-appendix"/);
 });
-test("the unified wave derives both rulers from one 360-point series and remains interactive",()=>{
+test("single advance curve includes a same-scale mean reference and remains interactive",()=>{
   assert.match(seasonalView,/function drawCurve\(\)/);
   assert.match(seasonalView,/const advances=DATA\.driftDays\.map\(value=>-value\)/);
-  assert.match(seasonalView,/const residuals=advances\.map\(value=>value-meanAdvance\)/);
+  assert.match(seasonalView,/const meanY=totalY\(meanAdvance\)/);
   assert.match(seasonalView,/zeroCaption\.textContent="0 = 完全重合"/);
-  assert.match(seasonalView,/avg\.textContent="去平均起伏 · 0 = 全年平均"/);
+  assert.match(seasonalView,/meanCaption\.textContent="全年平均提前 "\+meanAdvance\.toFixed\(2\)\+" d"/);
   assert.match(seasonalView,/updateFromCurvePointer\(event\)/);
+  assert.match(seasonalView,/class:"seasonal-drift-deviation-stick"/);
+  assert.doesNotMatch(seasonalView,/seasonal-residual-path/);
   assert.match(seasonalView,/curveSvg\.dataset\.ready="true"/);
   assert.match(html,/常駐顯示全部 360 個黃經位置/);
   assert.doesNotMatch(html,/id="seasonal-drift-residual-strip-svg"/);
