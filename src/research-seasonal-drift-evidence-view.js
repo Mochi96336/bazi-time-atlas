@@ -34,7 +34,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   };
 
   // One longitude axis and one day-scale ruler. The mean is a reference, not a second wave.
-  const CURVE = { width:960,height:318,left:65,right:30,top:48,bottom:278,plotWidth:865,plotHeight:206 };
+  const CURVE = { width:960,height:296,left:65,right:30,top:45,bottom:254,plotWidth:865,plotHeight:183 };
 
   const ORBIT = Object.freeze({
     width:470,
@@ -270,8 +270,8 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     clear(curveSvg);
     const mobile=compactProofMedia.matches;
     Object.assign(CURVE,mobile
-      ? {width:390,height:295,left:43,right:18,top:45,bottom:255,plotHeight:190}
-      : {width:960,height:318,left:65,right:30,top:48,bottom:278,plotHeight:206});
+      ? {width:390,height:275,left:43,right:18,top:43,bottom:235,plotHeight:171}
+      : {width:960,height:296,left:65,right:30,top:45,bottom:254,plotHeight:183});
     CURVE.plotWidth=CURVE.width-CURVE.left-CURVE.right;
     curveSvg.setAttribute("viewBox","0 0 "+CURVE.width+" "+CURVE.height);
     curveSvg.dataset.mode=state.mode;
@@ -304,11 +304,6 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     // A horizontal mean reference, on the very same day scale.
     svgEl("line",{x1:CURVE.left,x2:CURVE.width-CURVE.right,
       y1:meanY,y2:meanY,class:"seasonal-drift-mean-line"},curveSvg);
-    const meanCaption=svgEl("text",{
-      x:CURVE.width-CURVE.right,y:meanY-12,
-      "text-anchor":"end",class:"seasonal-drift-mean-label"
-    },curveSvg);
-    meanCaption.textContent="全年平均提前 "+meanAdvance.toFixed(2)+" d";
 
     svgEl("path",{d:curvePath,class:"seasonal-drift-curve-path"},curveSvg);
     BAZI_JIE_BOUNDARIES.forEach(boundary=>{
@@ -327,8 +322,13 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     // mean reference; it must never create another y ruler or plotted wave.
     svgEl("line",{x1:cursorX,x2:cursorX,y1:CURVE.top,y2:CURVE.bottom,
       class:"seasonal-drift-cursor-line"},curveSvg);
-    svgEl("line",{x1:cursorX,x2:cursorX,y1:meanY,y2:selectedY,
-      class:"seasonal-drift-deviation-stick"},curveSvg);
+    const bracketX=cursorX+(cursorX>CURVE.width-CURVE.right-25?-12:12);
+    // A short bracket links the mean and selected point without obscuring the
+    // dotted 0-to-15-day cursor. The two ends remain on the same day scale.
+    svgEl("path",{
+      d:"M "+cursorX+" "+meanY+" H "+bracketX+" V "+selectedY+" H "+cursorX,
+      class:"seasonal-drift-deviation-stick"
+    },curveSvg);
     svgEl("circle",{cx:cursorX,cy:selectedY,r:5.8,
       class:"seasonal-drift-cursor-dot"},curveSvg);
     svgEl("circle",{cx:cursorX,cy:meanY,r:3.8,
@@ -662,7 +662,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     set("seasonal-drift-selected-shape",signedDays(shape,3));
     set("seasonal-drift-wave-active-name",namedTerm ?? "λ "+longitude+"°");
     set("seasonal-drift-wave-active-total",humanDrift(drift,2));
-    set("seasonal-drift-wave-active-residual","相對全年平均 "+signedDays(shape,2));
+    set("seasonal-drift-wave-active-residual","全年平均提前 "+(-DATA.meanDriftDays).toFixed(2)+" 天 · 相對平均 "+signedDays(shape,2));
     set("seasonal-drift-phase-value",signedDays(DATA.meanDriftDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
     set("seasonal-residual-mean",humanDrift(DATA.meanDriftDays,3));
