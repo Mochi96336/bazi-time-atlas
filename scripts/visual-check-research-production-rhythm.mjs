@@ -48,6 +48,27 @@ for(const viewport of viewports){
   captures.push({viewport:viewport.key,file:fileName,bytes:info.size,url});
 }
 
+// Compare the two crucial story states using the *same* figure grammar:
+// +1,980 year/day closed, Gregorian -20; +24,000 all three closed.
+for(const viewport of [{key:"1440x3200",width:1440,height:3200},{key:"390x4000",width:390,height:4000}]){
+  const key="research-phase-fan-local-"+viewport.key;
+  const url=new URL("recurrence.html?date=2026-09-13&delta=1980",baseURL).href;
+  const cli=[...args(),"--window-size="+viewport.width+","+viewport.height];
+  const dom=run(browser,[...cli,"--dump-dom",url],key+" DOM").stdout;
+  const offset=dom.match(/data-return-marker="gregorian-offset"/g)??[];
+  const closed=dom.match(/class="phase-sector [^"]*is-current is-closed"/g)??[];
+  if(offset.length!==1||closed.length!==2||
+    !dom.includes('data-signed-offset="-20"'))
+    throw new Error(key+" lost the local→global offset comparison");
+  const fileName=key+".png";
+  const filePath=path.join(outputDir,fileName);
+  run(browser,[...cli,"--screenshot="+filePath,url],key+" screenshot");
+  const info=await stat(filePath);
+  if(info.size<(viewport.width>1000?85000:45000))
+    throw new Error(fileName+" unexpectedly small");
+  captures.push({viewport:key,file:fileName,bytes:info.size,url,delta:1980});
+}
+
 // Full-page screenshots verify composition; a separate native-hash DOM probe
 // checks real mobile scroll ownership. Chromium CLI screenshot startup can race
 // with native fragment navigation and produce an empty frame, so do not treat
