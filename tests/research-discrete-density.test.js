@@ -144,11 +144,14 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(compare,/panel\.dataset\.readoutMode = singleDate \? "single" : "comparison"/);
   assert.ok(layout.includes('data-readout-mode="single"') &&
     layout.includes('research-cycle-inline-row[data-side="base"] {display:none}'));
-  assert.match(recurrenceView,/MOBILE_FAN_VIEWBOX = "0 90 1200 630"/);
+  assert.match(recurrenceView,/DEFAULT_FAN_VIEWBOX = "0 213 1200 603"/);
+  assert.match(recurrenceView,/MOBILE_FAN_VIEWBOX = "0 213 1200 603"/);
   assert.match(recurrenceView,/function syncFanViewport\(\)/);
   assert.match(recurrenceView,/svg\.setAttribute\("viewBox", mobile \? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX\)/);
   assert.match(layout,/height:clamp\(235px,calc\(52\.5vw \+ 64px\),270px\)/);
   assert.match(layout,/top:80px;[\s\S]*?height:calc\(100% - 80px\)/);
+  assert.match(recurrenceHtml,/class="research-fan-composition"/);
+  assert.match(recurrenceHtml,/id="research-fan-verdict"/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
 });
 
