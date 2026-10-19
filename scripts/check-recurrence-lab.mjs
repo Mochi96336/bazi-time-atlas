@@ -251,6 +251,13 @@ function expectPhaseFocus(dom,expectedOffsetCount,expectedClosureCount,label,url
   }
 }
 expectPhaseFocus(local.dom,1,2,"1980-year highlighted local recurrence",local.url);
+if(!local.dom.includes('id="research-fan-verdict" class="research-fan-verdict">還差公曆 −20</strong>')||
+   !local.dom.includes('id="research-fan-explanation" class="research-fan-explanation">年序、日序已回到 0')){
+  throw Error("1980 local recurrence must lead with remaining Gregorian -20 verdict: "+local.url);
+}
+if(!local.dom.includes('viewBox="0 213 1200 603"')){
+  throw Error("Research fan should crop the empty SVG coordinate space: "+local.url);
+}
 if(!local.dom.includes('data-return-marker="gregorian-offset"')||
    !local.dom.includes('data-signed-offset="-20"')){
   throw Error("1980-year Gregorian -20 offset must be visible as a directed arc: "+local.url);
@@ -278,6 +285,9 @@ const global = expectCase(
 );
 expectFixedGauge(global.dom, global.url);
 expectPhaseFocus(global.dom,0,3,"24000-year full three-ring closure",global.url);
+if(!global.dom.includes('id="research-fan-verdict" class="research-fan-verdict">三項都回到 0</strong>')){
+  throw Error("24000 global closure must lead with three-ring zero verdict: "+global.url);
+}
 expectDiscreteComprehension(global.dom, global.url);
 expectConsolidatedGlobalPeriod(global.dom, global.url);
 if (!/三個離散相位同時歸零/.test(global.dom) || !/26026-09-13/.test(global.dom)) {
