@@ -55,7 +55,7 @@ test("seasonal evidence compares absolute advance with a shared-axis mean refere
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
   assert.match(view, /selectedShape\(\) \{\s*return DATA\.meanDriftDays - selectedDrift\(\)/);
   assert.match(html, /研究方法：共同提前與年內起伏怎麼分開？/);
-  assert.match(html, /上方合併圖已常駐顯示全部 360 個黃經位置/);
+  assert.match(html, /上方單曲線已常駐顯示全部 360 個黃經位置/);
   assert.match(html, /data-diagram-grammar="advance-with-mean"/);
   assert.doesNotMatch(html, /timing 反演的等效 shape/);
   assert.doesNotMatch(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
