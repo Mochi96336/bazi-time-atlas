@@ -872,34 +872,34 @@
   stroke:none;
 }
 .research-task-primary .research-fan-graphic .gregorian-sector{
-  fill:rgba(72,101,120,.19);
+  fill:color-mix(in srgb,var(--research-fan-outer) 19%,transparent);
 }
 .research-task-primary .research-fan-graphic .year-sector{
-  fill:rgba(86,122,143,.20);
+  fill:color-mix(in srgb,var(--research-fan-middle) 20%,transparent);
 }
 .research-task-primary .research-fan-graphic .day-sector{
-  fill:rgba(102,141,161,.21);
+  fill:color-mix(in srgb,var(--research-fan-inner) 21%,transparent);
 }
 .research-task-primary .research-fan-graphic .phase-sector.is-current{
-  fill:rgba(116,174,198,.66);
+  fill:color-mix(in srgb,var(--research-current) 66%,transparent);
 }
 .research-task-primary .research-fan-graphic .phase-sector.is-current.is-closed{
-  fill:rgba(229,220,186,.83);
+  fill:color-mix(in srgb,var(--research-fan-datum) 83%,transparent);
 }
 .research-task-primary .research-fan-graphic .recurrence-guide{
-  stroke:rgba(163,183,197,.21);
+  stroke:color-mix(in srgb,var(--research-diagram-context) 21%,transparent);
   stroke-width:1.2;
 }
 .research-task-primary .research-fan-graphic .phase-tick{
-  stroke:rgba(187,207,220,.10);
+  stroke:color-mix(in srgb,var(--research-text-secondary) 10%,transparent);
   stroke-width:.85;
 }
 .research-task-primary .research-fan-graphic .phase-tick.major{
-  stroke:rgba(204,225,235,.50);
+  stroke:color-mix(in srgb,var(--research-text-secondary) 50%,transparent);
   stroke-width:1.65;
 }
 .research-task-primary .research-fan-graphic .phase-label{
-  fill:rgba(193,213,224,.43);
+  fill:color-mix(in srgb,var(--research-text-secondary) 43%,transparent);
   font-size:12px;
   font-weight:650;
 }
