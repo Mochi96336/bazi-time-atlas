@@ -904,26 +904,26 @@
   font-weight:650;
 }
 .research-task-primary .research-fan-graphic .phase-label.is-zero{
-  fill:var(--research-fan-datum,#f1e7c9);
+  fill:var(--research-fan-datum);
   font-size:15px;
   font-weight:850;
 }
 .research-task-primary .research-fan-graphic .phase-ring-name{
-  fill:#b6c7d1;
+  fill:var(--research-text-secondary);
   font-size:13px;
   font-weight:750;
-  stroke:var(--research-fan-field,#05080d);
+  stroke:var(--research-fan-field);
   stroke-width:3.4px;
 }
 .research-task-primary .research-fan-graphic .phase-offset-arc{
   fill:none;
-  stroke:#82c2d4;
+  stroke:var(--research-current);
   stroke-width:5;
   stroke-linecap:round;
   opacity:.95;
 }
 .research-task-primary .research-fan-graphic .return-marker:not(.is-closed){
-  stroke:#c1dce6;
+  stroke:var(--research-text-primary);
   stroke-width:2.5;
 }
 .research-task-primary .research-fan-graphic .return-marker.is-closed{
@@ -931,7 +931,7 @@
   stroke-width:3;
 }
 .research-task-primary .research-fan-graphic .return-marker-label{
-  fill:#cde4eb;
+  fill:var(--research-text-primary);
   font-size:14px;
   font-weight:850;
 }
