@@ -4,6 +4,13 @@
 <style>
 :root{color-scheme:dark;--bg:#10191b;--fg:#e5ece8;--muted:#9aaba9;--fine:#4a6464;--cyan:#94d4d6;--amber:#efc58b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,"Noto Sans TC",sans-serif}main{max-width:1460px;margin:auto;padding:clamp(24px,6vw,96px)}header{margin:0 0 85px}p{max-width:64ch;color:var(--muted)}h1{font:400 clamp(32px,4vw,62px)/1.2 Georgia,"Noto Serif TC",serif;letter-spacing:.03em;margin:15px 0 25px}.eyebrow,.kicker{font:12px/1.4 system-ui;letter-spacing:.18em;color:var(--muted)}section{border-top:1px solid #395052;padding:34px 0 65px}.intro{display:flex;justify-content:space-between;gap:32px;align-items:start}.intro h2{font:400 clamp(23px,2.5vw,32px)/1.4 Georgia,"Noto Serif TC",serif;margin:9px 0}.intro p{margin:0;max-width:37ch}.figure-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin:46px 0}.figure{min-width:0}.figure h3{font-size:13px;font-weight:500;letter-spacing:.1em}.figure svg{display:block;width:100%;overflow:visible}.caption{font-size:13px;color:var(--muted);max-width:48ch;margin:18px 0}.controls{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:30px}button{border:1px solid var(--fine);background:transparent;color:var(--fg);padding:7px 15px;cursor:pointer;font:inherit}button:hover,button:focus-visible{border-color:var(--amber)}output{font-variant-numeric:tabular-nums;color:var(--amber)}.readout{color:var(--muted);font-size:14px}.decision{max-width:790px;font-size:15px}.decision strong{color:var(--fg)}.note{padding-top:12px} @media(max-width:850px){main{padding:28px 22px}.figure-grid{grid-template-columns:1fr;gap:32px}.intro{display:block}header{margin-bottom:55px}section{padding-bottom:38px}}
+
+/* The diagrams use native mobile viewBoxes rather than shrinking 12px text to 8px. */
+.figure svg { width:100%; max-width:560px; }
+.figure h3 { margin-bottom:26px; color:var(--muted); }
+.readout { margin-top:22px; padding:22px 0 8px; border-top:1px solid #395052; max-width:75ch; line-height:1.9; }
+button:focus-visible, input:focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
+@media(max-width:560px){ main{padding:28px 20px} .figure-grid{margin-top:38px} .figure h3{margin-bottom:13px} .controls{gap:10px;align-items:stretch} button{font-size:13px;padding:8px 10px} .figure svg{max-width:100%} .caption{line-height:1.8} }
 </style></head>
 <body><main>
 <header><div class="eyebrow">RESEARCH 01 / R17 · COMPOSITION LAB</div><h1>三個週期，如何接近同一個零點？</h1><p>比較現有半橢圓同心構圖與展開式三相位圖。這裡只替換圖形投影，不替換公曆、年序與日序的計算。零點一致，但週期長度與單位不相同。</p></header>
@@ -11,17 +18,138 @@
 <div class="controls"><button data-delta="0">基準 · 0</button><button data-delta="1980">局部重遇 · +1,980</button><button data-delta="24000">粗估閉合 · +24,000</button><label>Δ 年 <input id="delta" type="number" value="1980" step="1" style="width:106px;background:transparent;border:1px solid var(--fine);color:var(--fg);font:inherit;padding:5px"></label><output id="delta-label">+1,980 年</output></div>
 <div class="figure-grid">
 <div class="figure"><h3>01　CONCENTRIC / R16 LANGUAGE</h3><svg id="radial" viewBox="0 0 560 350" role="img" aria-label="同心弧式相位顯示"></svg><p class="caption">弧線高度已壓低，但三條完整對稱軌道仍可能像速度表。此圖僅是可供同場比較的概念重繪。</p></div>
-<div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption">零點共用同一條垂直基線；三條軌跡只顯示各自的負半週期到正半週期。位移段短於刻度間距時仍按真實比例描繪。</p></div>
+<div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption">零點共用同一垂直基線；各列採自身週期比例。用極細輔助線交代範圍，讓真正的位移段與端點負責敘事。</p></div>
 </div><div id="interpretation" class="readout" aria-live="polite"></div></section>
-<section><div class="kicker">DECISION CRITERIA</div><h2 style="font-weight:400">是否應替換 production？</h2><p class="decision"><strong>尚未決定。</strong> 展開式若讓零點、偏移方向、−20 的真實比例更好讀，同時不讓 60 日和 60 年被誤認為同一時間刻度，才值得進主頁。必須另核對桌面與 390px 真實截圖、中文字級、閱讀上下文以及 0 與非 0 的邊界案例。</p><p class="note">基準日期：2026-09-13。日序由公曆序日差取模 60（與正式 recurrenceState 一致）。原始 production reference: PR #605 / a5e8455f。此原型是研究用平行分支，不應被 production 視覺測試當成正式頁面。</p></section>
-</main><script>
-const NS="http://www.w3.org/2000/svg";const specs=[{name:"公曆結構",unit:"年",mod:400,color:"#efc58b"},{name:"年序",unit:"年",mod:60,color:"#94d4d6"},{name:"日序",unit:"日",mod:60,color:"#b5c4c1"}];\nconst base={year:2026,month:9,day:13};function ordinal(y,m,d){const p=y-1;const starts=[0,31,59,90,120,151,181,212,243,273,304,334];return 365*p+Math.floor(p/4)-Math.floor(p/100)+Math.floor(p/400)+starts[m-1]+d-1+(m>2&&(y%4===0&&(y%100!==0||y%400===0))?1:0)}function phases(delta){const dayDiff=ordinal(base.year+delta,base.month,base.day)-ordinal(base.year,base.month,base.day);return [signed(delta,400),signed(delta,60),signed(dayDiff,60)]}
-function node(svg,tag,attrs={},text){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;svg.append(e);return e}
-function signed(v,n){const r=((v%n)+n)%n;return r>n/2?r-n:r}
-function fmt(v){return v===0?"0":(v>0?"+":"−")+Math.abs(v)}
-function track(svg,x1,x2,y,s,labelValue){node(svg,"path",{d:`M ${x1} ${y} H ${x2}`,stroke:"#526869","stroke-width":1,fill:"none"});node(svg,"line",{x1:(x1+x2)/2,y1:y-12,x2:(x1+x2)/2,y2:y+12,stroke:"#e0ece7","stroke-width":1.2});const half=(x2-x1)/2;const x=(x1+x2)/2+half*s/(labelValue/2);node(svg,"line",{x1:(x1+x2)/2,y1:y,x2:x,y2:y,stroke:"#efc58b","stroke-width":5,"stroke-linecap":"round"});node(svg,"circle",{cx:x,cy:y,r:5,fill:"#efc58b"});return x}
-function drawUnfolded(d){const svg=document.querySelector("#unfolded");svg.replaceChildren();node(svg,"text",{x:280,y:27,"text-anchor":"middle",fill:"#9aaba9","font-size":12},"共用零點 / 三種獨立週期");node(svg,"line",{x1:310,y1:65,x2:310,y2:315,stroke:"#b9ceca","stroke-width":1,"stroke-dasharray":"3 7",opacity:.6});specs.forEach((s,i)=>{const y=105+i*92;const value=phases(d)[i];node(svg,"text",{x:16,y:y-24,fill:"#e5ece8","font-size":15},s.name+" · "+s.mod+s.unit);node(svg,"text",{x:16,y:y+7,fill:"#9aaba9","font-size":12},`−${s.mod/2} → 0 → +${s.mod/2} ${s.unit}`);const x=track(svg,120,500,y+18,value,s.mod);node(svg,"text",{x:Math.max(125,Math.min(500,x)),y:y+2,"text-anchor":"middle",fill:value===0?"#94d4d6":"#efc58b","font-size":14,"font-weight":600},fmt(value));node(svg,"text",{x:500,y:y+44,"text-anchor":"end",fill:"#748b89","font-size":11},"1 cycle = "+s.mod+s.unit)})}
-function drawRadial(d){const svg=document.querySelector("#radial");svg.replaceChildren();specs.forEach((s,i)=>{const rx=235-i*44,ry=118-i*25,cy=286;const path=`M ${280-rx} ${cy} A ${rx} ${ry} 0 0 1 ${280+rx} ${cy}`;node(svg,"path",{d:path,fill:"none",stroke:"#587070","stroke-width":i===0?3:2.4,"stroke-linecap":"round"});const t=.5+phases(d)[i]/s.mod;const theta=Math.PI*(1-t);const x=280+rx*Math.cos(theta),y=cy-ry*Math.sin(theta);node(svg,"circle",{cx:x,cy:y,r:5,fill:s.color});node(svg,"text",{x:280,y:cy-ry-17,"text-anchor":"middle",fill:s.color,"font-size":12},s.name+" "+fmt(phases(d)[i]));});node(svg,"line",{x1:280,y1:52,x2:280,y2:311,stroke:"#a7beb9",opacity:.45,"stroke-dasharray":"3 7"});}
-function update(){const input=document.querySelector("#delta");const n=Number(input.value);if(!Number.isSafeInteger(n)||n<0||n>9997974)return;document.querySelector("#delta-label").textContent=(n>=0?"+":"−")+Math.abs(n).toLocaleString("en-US")+" 年";drawRadial(n);drawUnfolded(n);const vals=phases(n).map(fmt);document.querySelector("#interpretation").textContent=`Δ +${n.toLocaleString("en-US")} 年：公曆 ${vals[0]} 年；年序 ${vals[1]} 年；日序 ${vals[2]} 日。圖上三條相位各以自己的半週期正規化，橫向距離不可互換成時間。`;}
-document.querySelectorAll("[data-delta]").forEach(b=>b.addEventListener("click",()=>{document.querySelector("#delta").value=b.dataset.delta;update()}));document.querySelector("#delta").addEventListener("input",update);update();
+<section><div class="kicker">DECISION CRITERIA</div><h2 style="font-weight:400">是否應替換 production？</h2><p class="decision"><strong>尚未決定。</strong> 展開式若讓零點、偏移方向、−20 的真實比例更好讀，同時不讓 60 日和 60 年被誤認為同一時間刻度，才值得進主頁。必須另核對桌面與 390px 真實截圖、中文字級、閱讀上下文以及 0 與非 0 的邊界案例。</p><p class="note">基準日期：2026-09-13。資料直接取自正式 recurrenceState；展示端只做投影，不另行計算日序。原始 production reference: PR #605 / a5e8455f。此原型是研究用平行分支，不應被 production 視覺測試當成正式頁面。</p></section>
+</main><script type="module">
+import { recurrenceState } from "../src/recurrence/gregorian-cycle.js";
+import { projectUnfoldedPhases } from "../src/recurrence/r17-unfolded-phase-projection.js";
+
+const NS = "http://www.w3.org/2000/svg";
+const base = Object.freeze({ year: 2026, month: 9, day: 13 });
+const palette = ["#efc58b", "#94d4d6", "#b5c4c1"];
+const query = selector => document.querySelector(selector);
+const mobileMedia = matchMedia("(max-width: 560px)");
+
+function create(svg, tag, attrs = {}, content) {
+  const el = document.createElementNS(NS, tag);
+  for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, String(value));
+  if (content !== undefined) el.textContent = content;
+  svg.append(el);
+  return el;
+}
+function signedLabel(value) {
+  if (value === null) return "—";
+  return value === 0 ? "0" : (value > 0 ? "+" : "−") + Math.abs(value);
+}
+function setup(svg) {
+  const width = mobileMedia.matches ? 380 : 560;
+  svg.setAttribute("viewBox", `0 0 ${width} 350`);
+  svg.replaceChildren();
+  return { width, zero: width / 2 };
+}
+
+function drawConcentric(rows) {
+  const svg = query("#radial");
+  const { width, zero } = setup(svg);
+  const mobile = width === 380;
+  rows.forEach((row, index) => {
+    const rx = (mobile ? 168 : 235) - index * (mobile ? 33 : 44);
+    const ry = 118 - index * 25;
+    const cy = 287;
+    create(svg, "path", {
+      d: `M ${zero-rx} ${cy} A ${rx} ${ry} 0 0 1 ${zero+rx} ${cy}`,
+      fill: "none", stroke: "#526869", "stroke-width": index === 0 ? 2.6 : 2,
+      "stroke-linecap": "round"
+    });
+    if (!row.available) return;
+    const t = .5 + row.signed / row.modulus;
+    const angle = Math.PI * (1 - t);
+    const x = zero + rx * Math.cos(angle);
+    const y = cy - ry * Math.sin(angle);
+    create(svg, "circle", { cx:x, cy:y, r:4.5, fill:palette[index] });
+    create(svg, "text", {
+      x:zero, y:cy-ry-18, "text-anchor":"middle",
+      fill:palette[index], "font-size":mobile?14:13
+    }, `${row.label}  ${signedLabel(row.signed)}`);
+  });
+  create(svg, "line", {
+    x1:zero, y1:57, x2:zero, y2:313, stroke:"#b5c4c1",
+    "stroke-dasharray":"2 7", "stroke-width":1, opacity:.45
+  });
+}
+
+function drawUnfolded(rows) {
+  const svg = query("#unfolded");
+  const { width, zero } = setup(svg);
+  const end = width - 28;
+  const start = 28;
+  const half = (end-start)/2;
+  create(svg, "text", {
+    x:zero, y:23, "text-anchor":"middle",
+    fill:"#b5c4c1", "font-size":13
+  }, "三個週期的共同 0");
+  create(svg, "line", {
+    x1:zero,y1:53,x2:zero,y2:333,
+    stroke:"#9cb6b1","stroke-width":1,"stroke-dasharray":"2 7",opacity:.65
+  });
+  rows.forEach((row,index)=>{
+    const y = 104 + 92*index;
+    const x = row.available ? zero+half*row.fraction : null;
+    create(svg, "text", {x:20,y:y-38,fill:"#e5ece8","font-size":16}, row.label);
+    create(svg, "text", {x:20,y:y-18,fill:"#a4b6b1","font-size":12},
+      `每 ${row.modulus} ${row.unit}重複 · 單位：${row.unit}`);
+    // A quiet guide, not a dense ruler: the displacement carries the reading.
+    create(svg, "path", {
+      d:`M ${start} ${y+13} H ${end}`,
+      fill:"none",stroke:"#58706d","stroke-width":1,opacity:.53
+    });
+    for (const p of [start,end]) create(svg,"line",{
+      x1:p,y1:y+9,x2:p,y2:y+17,stroke:"#718783",opacity:.55
+    });
+    if (!row.available) {
+      create(svg,"text",{x:zero,y:y-2,"text-anchor":"middle",
+        fill:"#9aaba9","font-size":14},"待判定");
+      return;
+    }
+    const fill = palette[index];
+    if (!row.closed) create(svg,"line",{
+      x1:zero,y1:y+13,x2:x,y2:y+13,stroke:fill,
+      "stroke-width":5,"stroke-linecap":"round"
+    });
+    create(svg,"circle",{cx:x,cy:y+13,r:row.closed?5.5:5,fill});
+    create(svg,"text",{
+      x:Math.max(start+16,Math.min(end-16,x)),y:y,
+      "text-anchor":"middle",fill,"font-size":14,"font-weight":600
+    },signedLabel(row.signed));
+    create(svg,"text",{
+      x:end,y:y+38,"text-anchor":"end",fill:"#9aaba9","font-size":12
+    },`−${row.modulus/2} / 0 / +${row.modulus/2}`);
+  });
+}
+
+function update() {
+  const input=query("#delta");
+  const n=Number(input.value);
+  const feedback=query("#interpretation");
+  if (!input.value.trim() || !Number.isSafeInteger(n) || n<0 || n>9997974) {
+    feedback.textContent="請輸入有效的非負整數年差，並保持目標年份不超過 10,000,000。";
+    query("#delta-label").textContent="—";
+    return;
+  }
+  const state=recurrenceState(base,n);
+  const rows=projectUnfoldedPhases(state);
+  query("#delta-label").textContent=`+${n.toLocaleString("en-US")} 年`;
+  drawConcentric(rows);
+  drawUnfolded(rows);
+  feedback.textContent=`+${n.toLocaleString("en-US")} 年：${rows.map(row=>`${row.label} ${signedLabel(row.signed)} ${row.unit}`).join("；")}。這是三個各自週期中的位移比例，不是同一條時間軸。離散回零仍不代表節氣天文驗證通過。`;
+}
+
+document.querySelectorAll("[data-delta]").forEach(button => button.addEventListener("click",()=>{
+  query("#delta").value=button.dataset.delta;
+  update();
+}));
+query("#delta").addEventListener("input",update);
+mobileMedia.addEventListener("change",update);
+update();
 </script></body></html>
