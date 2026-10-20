@@ -27,8 +27,8 @@ const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
-const DEFAULT_FAN_VIEWBOX = "0 213 1200 603";
-const MOBILE_FAN_VIEWBOX = "0 213 1200 603";
+const DEFAULT_FAN_VIEWBOX = "0 325 1200 470";
+const MOBILE_FAN_VIEWBOX = "0 325 1200 470";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
