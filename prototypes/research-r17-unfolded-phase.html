@@ -171,6 +171,6 @@ document.querySelectorAll("[data-delta]").forEach(button => button.addEventListe
 query("#delta").addEventListener("input",update);
 mobileMedia.addEventListener("change",update);
 const requestedDelta=new URLSearchParams(location.search).get("delta");
-if (requestedDelta !== null && /^\\d+$/.test(requestedDelta)) query("#delta").value=requestedDelta;
+if (requestedDelta !== null && /^\d+$/.test(requestedDelta)) query("#delta").value=requestedDelta;
 update();
 </script></body></html>
