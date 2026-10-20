@@ -43,6 +43,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "check-seasonal-drift-evidence-live.mjs"
   ],
   "capture-pages": [
+    "visual-check-r17-unfolded-phase.mjs",
     "check-tools-human-ux.mjs",
     "visual-check.mjs",
     "visual-check-research-01-diagram-lab.mjs",
@@ -50,8 +51,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "visual-check-research-02-production.mjs",
     "visual-check-research-03-diagram-lab.mjs",
     "visual-check-research-03-production.mjs",
-    "visual-check-research-production-rhythm.mjs",
-    "visual-check-r17-unfolded-phase.mjs"
+    "visual-check-research-production-rhythm.mjs"
   ],
   "capture-interactions": [
     "check-wide-desktop-composition.mjs",
