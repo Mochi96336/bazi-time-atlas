@@ -397,3 +397,15 @@ test("01 fan spotlights the current cell and a signed-zero-to-phase arc without 
   assert.match(rhythm,/\.research-fan-graphic \.phase-label\.is-zero/);
   assert.doesNotMatch(recurrenceView,/spec\.sectors\s*:\s*0/);
 });
+
+test("fan clears selected cells before unavailable phases and scales markers for phones",async()=>{
+  const rhythm=await readFile(new URL("../research-page-rhythm.css",import.meta.url),"utf8");
+  const render=recurrenceView.slice(recurrenceView.indexOf("function renderReturnMarkers(state)"),
+    recurrenceView.indexOf("function readBaseDate()"));
+  const clear=render.indexOf('node.classList.remove("is-current","is-closed")');
+  const unavailable=render.indexOf('if (phase === null) continue');
+  assert.ok(clear>=0&&unavailable>clear,"stale selected cells must be removed even if phase is null");
+  assert.match(render,/spec\.group\.dataset\.phaseAvailable = String\(phase !== null\)/);
+  assert.match(rhythm,/@media\(max-width:680px\)[\s\S]*?\.research-fan-composition \.return-marker-label\s*\{[\s\S]*?font-size:38px/);
+  assert.match(rhythm,/@media\(max-width:680px\)[\s\S]*?\.research-fan-composition \.phase-label,[\s\S]*?display:none/);
+});
