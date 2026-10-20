@@ -142,6 +142,12 @@ function update() {
   query("#delta-label").textContent=`+${n.toLocaleString("en-US")} 年`;
   drawConcentric(rows);
   drawUnfolded(rows);
+  const figure=query("#unfolded");
+  figure.dataset.gregorianSigned=String(rows[0].signed);
+  figure.dataset.yearSigned=String(rows[1].signed);
+  figure.dataset.daySigned=String(rows[2].signed);
+  figure.dataset.layout=mobileMedia.matches?"mobile-native":"desktop-native";
+  figure.dataset.phaseSource="recurrenceState";
   feedback.textContent=`+${n.toLocaleString("en-US")} 年：${rows.map(row=>`${row.label} ${signedLabel(row.signed)} ${row.unit}`).join("；")}。這是三個各自週期中的位移比例，不是同一條時間軸。離散回零仍不代表節氣天文驗證通過。`;
 }
 
@@ -151,5 +157,7 @@ document.querySelectorAll("[data-delta]").forEach(button => button.addEventListe
 }));
 query("#delta").addEventListener("input",update);
 mobileMedia.addEventListener("change",update);
+const requestedDelta=new URLSearchParams(location.search).get("delta");
+if (requestedDelta !== null && /^\\d+$/.test(requestedDelta)) query("#delta").value=requestedDelta;
 update();
 </script></body></html>
