@@ -27,7 +27,7 @@ async function inspect(){
     }));
     await later(130);
     check(instrument.dataset.deltaYears==="1"&&
-      instrument.dataset.targetValid==="false"&&
+      instrument.dataset.targetDate==="invalid"&&
       day.dataset.phaseAvailable==="false",
       "Feb 29 +1 year must make day phase unavailable");
     check(count(day)===0&&closed(day)===0&&
