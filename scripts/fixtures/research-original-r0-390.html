@@ -151,10 +151,13 @@ iframe.addEventListener("load",async()=>{
       fanGraphic.height);
     const wheel=d.getElementById("recurrence-wheel");
     const legend=d.querySelector(".recurrence-legend");
-    const transform=wheel.getScreenCTM();
-    check(wheel.getAttribute("viewBox")==="0 213 1200 603" &&
+    const projection=d.getElementById("research-phase-projection");
+    const transform=projection?.getScreenCTM();
+    check(projection?.getAttribute("transform")==="translate(0 165) scale(1 .78)",
+      "R16 phase projection must preserve all ring coordinates under one affine transform");
+    check(wheel.getAttribute("viewBox")==="0 325 1200 470" &&
       wheel.dataset.mobileCrop==="true",
-      "R13 phone fan must crop only empty space, preserving all radial cells: "+
+      "R16 phone fan must crop projected empty space without clipping phase loci: "+
       JSON.stringify({viewBox:wheel.getAttribute("viewBox"),crop:wheel.dataset.mobileCrop}));
     // The discarded outer astronomy y=130 label is not Research 01 evidence.
     // The visible shared datum y=225 and Gregorian apex y=260 now follow the
@@ -166,7 +169,7 @@ iframe.addEventListener("load",async()=>{
     check(Number.isFinite(apexY) && Number.isFinite(datumY) &&
       datumY>=legendBottom+5 && apexY>datumY &&
       datumY<=graphicTop+30 && apexY<=graphicTop+65,
-      "R13 mobile fan must follow the verdict/legend with a visible zero datum: "+
+      "R16 shallow fan must follow the verdict with a projected zero datum: "+
       JSON.stringify({phaseApex:apexY,zeroDatum:datumY,
         legendBottom,graphicTop}));
   }
