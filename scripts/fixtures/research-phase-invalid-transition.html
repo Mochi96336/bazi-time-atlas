@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8">
+<title>Research phase unavailable transition probe</title>
+<iframe id="production" title="Research recurrence phase probe"
+  src="../../recurrence.html?date=2024-02-29&delta=0"
+  style="display:none"></iframe>
+<output id="probe" data-ready="waiting"></output>
+<script>
+const frame=document.getElementById("production");
+const output=document.getElementById("probe");
+const later=ms=>new Promise(done=>setTimeout(done,ms));
+const check=(pass,message)=>{if(!pass)throw Error(message);};
+async function inspect(){
+  try{
+    const doc=frame.contentDocument, win=frame.contentWindow;
+    const instrument=doc.querySelector("#recurrence-instrument");
+    for(let i=0;i<75&&instrument?.dataset.deltaYears!=="0";i++) await later(40);
+    const day=doc.querySelector("#day-ring");
+    const year=doc.querySelector("#year-ring");
+    const gregorian=doc.querySelector("#gregorian-ring");
+    const count=el=>el.querySelectorAll(".phase-sector.is-current").length;
+    const closed=el=>el.querySelectorAll(".phase-sector.is-closed").length;
+    check(count(day)===1&&closed(day)===1&&day.dataset.phaseAvailable==="true",
+      "baseline Feb 29 must start as selected zero day phase");
+    win.dispatchEvent(new CustomEvent("recurrence:select-delta",{
+      detail:{deltaYears:1,source:"phase-transition-audit"}
+    }));
+    await later(130);
+    check(instrument.dataset.deltaYears==="1"&&
+      instrument.dataset.targetValid==="false"&&
+      day.dataset.phaseAvailable==="false",
+      "Feb 29 +1 year must make day phase unavailable");
+    check(count(day)===0&&closed(day)===0&&
+      !doc.querySelector('[data-return-marker="day"]')&&
+      !doc.querySelector('[data-return-marker="day-label"]')&&
+      count(year)===1&&count(gregorian)===1,
+      "invalid day phase kept an obsolete highlighted sector or marker");
+    output.dataset.nullCleared="true";
+    win.dispatchEvent(new CustomEvent("recurrence:select-delta",{
+      detail:{deltaYears:0,source:"phase-transition-audit"}
+    }));
+    await later(130);
+    check(instrument.dataset.deltaYears==="0"&&day.dataset.phaseAvailable==="true"&&
+      count(day)===1&&closed(day)===1&&
+      !!doc.querySelector('[data-return-marker="day"]'),
+      "return to valid date did not restore the live day-phase zero");
+    output.dataset.restored="true";
+    output.dataset.ready="true";
+  }catch(error){output.dataset.ready="error";output.dataset.error=String(error);}
+}
+frame.addEventListener("load",()=>{inspect();},{once:true});
+</script></html>
