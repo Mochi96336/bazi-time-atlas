@@ -249,13 +249,18 @@
           <strong id="deep-time-badge-value">—</strong>
         </div>
 
-        <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆 400 年、60 年序與 60 日序相對基準零點的最短相位">
-          <g id="recurrence-guides"></g>
-          <g id="gregorian-ring"></g>
-          <g id="year-ring"></g>
-          <g id="day-ring"></g>
-          <g id="astronomy-residual-ring" aria-hidden="true"></g>
-          <g id="recurrence-cursor"></g>
+        <svg id="recurrence-wheel" viewBox="0 325 1200 470" role="img" aria-label="公曆 400 年、60 年序與 60 日序相對基準零點的最短相位；橢圓形為平面投影，不改變相位角度">
+          <!-- The same polar phase geometry, compressed uniformly on the
+               vertical drawing axis. Every rail, zero datum, marker and
+               offset arc shares this projection, with no phase remapping. -->
+          <g id="research-phase-projection" transform="translate(0 165) scale(1 .78)">
+            <g id="recurrence-guides"></g>
+            <g id="gregorian-ring"></g>
+            <g id="year-ring"></g>
+            <g id="day-ring"></g>
+            <g id="astronomy-residual-ring" aria-hidden="true"></g>
+            <g id="recurrence-cursor"></g>
+          </g>
         </svg>
         </div>
 
