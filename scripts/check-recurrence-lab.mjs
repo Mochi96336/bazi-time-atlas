@@ -269,7 +269,7 @@ if(!local.dom.includes('id="research-fan-verdict" class="research-fan-verdict">�
    !local.dom.includes('id="research-fan-explanation" class="research-fan-explanation">年序、日序已回到 0')){
   throw Error("1980 local recurrence must lead with remaining Gregorian -20 verdict: "+local.url);
 }
-if(!local.dom.includes('viewBox="0 213 1200 603"')){
+if(!local.dom.includes('viewBox="0 325 1200 470"')){
   throw Error("Research fan should crop the empty SVG coordinate space: "+local.url);
 }
 if(!local.dom.includes('data-return-marker="gregorian-offset"')||
