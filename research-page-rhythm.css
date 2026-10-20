@@ -1475,23 +1475,12 @@
 }
 .research-task-primary .research-fan-composition .return-marker,
 .research-task-primary .research-fan-composition .return-marker.is-closed{
-  stroke:var(--research-text-primary);
-  stroke-width:2.7;
-  opacity:.8;
+  stroke:none;
+  opacity:0;
   filter:none;
 }
 .research-task-primary .research-fan-composition .return-marker-label{
   display:none;
-}
-.research-task-primary .research-fan-composition .phase-position-arc{
-  fill:none;
-  stroke:var(--research-current);
-  stroke-width:18;
-  stroke-linecap:round;
-}
-.research-task-primary .research-fan-composition .phase-position-arc.is-closed{
-  stroke:var(--research-fan-datum);
-  stroke-width:16;
 }
 .research-task-primary .research-fan-composition .phase-position-dot{
   fill:var(--research-fan-field);
@@ -1499,7 +1488,7 @@
   stroke-width:5;
 }
 .research-task-primary .research-fan-composition .return-marker-zero-node{
-  r:7px;
+  r:9px;
   fill:var(--research-fan-field);
   stroke:var(--research-fan-datum);
   stroke-width:4;
@@ -1521,10 +1510,6 @@
   .research-task-primary .research-fan-composition .phase-tick.major{
     stroke-width:4;
   }
-  .research-task-primary .research-fan-composition .phase-position-arc,
-  .research-task-primary .research-fan-composition .phase-position-arc.is-closed{
-    stroke-width:24;
-  }
   .research-task-primary .research-fan-composition .phase-position-dot{
     r:10px;
     stroke-width:7;
@@ -1532,10 +1517,6 @@
   .research-task-primary .research-fan-composition .return-marker-zero-node{
     r:10px;
     stroke-width:7;
-  }
-  .research-task-primary .research-fan-composition .return-marker,
-  .research-task-primary .research-fan-composition .return-marker.is-closed{
-    stroke-width:4;
   }
   .research-task-primary .research-fan-composition .phase-offset-arc{
     stroke-width:11;
