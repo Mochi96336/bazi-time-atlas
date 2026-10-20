@@ -3,7 +3,7 @@
 <title>R17 · Phase geometry comparison</title>
 <style>
 :root{color-scheme:dark;--bg:#0a0e12;--fg:#eef2f2;--muted:#b2bdc1;--fine:rgba(224,234,238,.18);--cyan:#75cddd;--amber:#dfb86d}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,"Noto Sans TC",sans-serif}main{max-width:1460px;margin:auto;padding:clamp(24px,6vw,96px)}header{margin:0 0 85px}p{max-width:64ch;color:var(--muted)}h1{font:400 clamp(32px,4vw,62px)/1.2 Georgia,"Noto Serif TC",serif;letter-spacing:.03em;margin:15px 0 25px}.eyebrow,.kicker{font:12px/1.4 system-ui;letter-spacing:.18em;color:var(--muted)}section{border-top:1px solid #395052;padding:34px 0 65px}.intro{display:flex;justify-content:space-between;gap:32px;align-items:start}.intro h2{font:400 clamp(23px,2.5vw,32px)/1.4 Georgia,"Noto Serif TC",serif;margin:9px 0}.intro p{margin:0;max-width:37ch}.figure-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin:46px 0}.figure{min-width:0}.figure h3{font-size:13px;font-weight:500;letter-spacing:.1em}.figure svg{display:block;width:100%;overflow:visible}.caption{font-size:13px;color:var(--muted);max-width:48ch;margin:18px 0}.controls{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:30px}button{border:1px solid var(--fine);background:transparent;color:var(--fg);padding:7px 15px;cursor:pointer;font:inherit}button:hover,button:focus-visible{border-color:var(--amber)}output{font-variant-numeric:tabular-nums;color:var(--amber)}.readout{color:var(--muted);font-size:14px}.decision{max-width:790px;font-size:15px}.decision strong{color:var(--fg)}.note{padding-top:12px} @media(max-width:850px){main{padding:28px 22px}.figure-grid{grid-template-columns:1fr;gap:32px}.intro{display:block}header{margin-bottom:55px}section{padding-bottom:38px}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,"Noto Sans TC",sans-serif}main{max-width:1460px;margin:auto;padding:clamp(24px,6vw,96px)}header{margin:0 0 54px}p{max-width:64ch;color:var(--muted)}h1{font:400 clamp(32px,4vw,62px)/1.2 Georgia,"Noto Serif TC",serif;letter-spacing:.03em;margin:15px 0 25px}.eyebrow,.kicker{font:12px/1.4 system-ui;letter-spacing:.18em;color:var(--muted)}section{border-top:1px solid #395052;padding:34px 0 65px}.intro{display:flex;justify-content:space-between;gap:32px;align-items:start}.intro h2{font:400 clamp(23px,2.5vw,32px)/1.4 Georgia,"Noto Serif TC",serif;margin:9px 0}.intro p{margin:0;max-width:37ch}.figure-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:42px;margin:30px 0}.figure{min-width:0}.figure h3{font-size:13px;font-weight:500;letter-spacing:.1em}.figure svg{display:block;width:100%;overflow:visible}.caption{font-size:13px;color:var(--muted);max-width:48ch;margin:18px 0}.controls{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:30px}button{border:1px solid var(--fine);background:transparent;color:var(--fg);padding:7px 15px;cursor:pointer;font:inherit}button:hover,button:focus-visible{border-color:var(--amber)}output{font-variant-numeric:tabular-nums;color:var(--amber)}.readout{color:var(--muted);font-size:14px}.decision{max-width:790px;font-size:15px}.decision strong{color:var(--fg)}.note{padding-top:12px} @media(max-width:850px){main{padding:28px 22px}.figure-grid{grid-template-columns:1fr;gap:20px}.intro{display:block}header{margin-bottom:40px}section{padding-bottom:38px}}
 
 /* The diagrams use native mobile viewBoxes rather than shrinking 12px text to 8px. */
 .figure svg { width:100%; max-width:560px; }
@@ -12,18 +12,18 @@
 button:focus-visible, input:focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
 @media(max-width:560px){ main{padding:28px 20px} .figure-grid{margin-top:38px} .figure h3{margin-bottom:13px} .controls{gap:10px;align-items:stretch} button{font-size:13px;padding:8px 10px} .figure svg{max-width:100%} .caption{line-height:1.8} }
 
-.verdict { margin:44px 0 12px; color:var(--fg); max-width:34ch; font:400 clamp(24px,3vw,40px)/1.35 Georgia,"Noto Serif TC",serif; letter-spacing:.015em; }
-.verdict + .figure-grid { margin-top:30px; }
-@media(max-width:560px){.verdict{margin:35px 0 12px;font-size:27px}}
+.verdict { margin:26px 0 12px; color:var(--fg); max-width:34ch; font:400 clamp(24px,3vw,40px)/1.35 Georgia,"Noto Serif TC",serif; letter-spacing:.015em; }
+.verdict + .figure-grid { margin-top:20px; }
+@media(max-width:560px){.verdict{margin:25px 0 12px;font-size:27px}}
 </style></head>
 <body><main>
-<header><div class="eyebrow">RESEARCH 01 / R17 · COMPOSITION LAB</div><h1>三個週期，如何接近同一個零點？</h1><p>比較現有半橢圓同心構圖與展開式三相位圖。這裡只替換圖形投影，不替換公曆、年序與日序的計算。零點一致，但週期長度與單位不相同。</p></header>
-<section><div class="intro"><div><div class="kicker">GEOMETRY COMPARISON</div><h2>把判讀從「儀表」還給「時間」</h2></div><p>左：R16 圖形語法的示意重建，非 production 截圖。右：R17 共同零點展開提案。橫向位置是各週期內的相對相位，不是統一的年數軸。</p></div>
+<header><div class="eyebrow">RESEARCH 01 / R17 · COMPOSITION LAB</div><h1>三個週期，如何接近同一個零點？</h1><p>+1,980 年後，年序與日序都已重遇，公曆仍差 −20 年。我們需要的不是另一個速度表，而是一張能看清這個關係的研究圖。</p></header>
+<section><div class="intro"><div><div class="kicker">GEOMETRY COMPARISON</div><h2>把判讀從「儀表」還給「時間」</h2></div><p>左：R16 同心構圖的示意重建。右：R17 沿共同零點展開。兩圖都是概念比較，左圖不是 production 截圖。</p></div>
 <div class="controls"><button data-delta="0">基準 · 0</button><button data-delta="1980">局部重遇 · +1,980</button><button data-delta="24000">粗估閉合 · +24,000</button><label>Δ 年 <input id="delta" type="number" value="1980" step="1" style="width:106px;background:transparent;border:1px solid var(--fine);color:var(--fg);font:inherit;padding:5px"></label><output id="delta-label">+1,980 年</output></div>
 <p id="verdict" class="verdict" aria-live="polite">年序與日序重遇，公曆仍偏離零點。</p>
 <div class="figure-grid">
 <div class="figure"><h3>01　CONCENTRIC / R16 LANGUAGE</h3><svg id="radial" viewBox="0 0 560 350" role="img" aria-label="同心弧式相位顯示"></svg><p class="caption">弧線高度已壓低，但三條完整對稱軌道仍可能像速度表。此圖僅是可供同場比較的概念重繪。</p></div>
-<div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption">零點共用同一垂直基線；各列採自身週期比例。用極細輔助線交代範圍，讓真正的位移段與端點負責敘事。</p></div>
+<div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption">三條軌跡沿同一零點收束，長短刻意不同以解除儀表感；每條軌跡仍依自身半週期成比例，不能跨列比絕對長度。</p></div>
 </div><div id="interpretation" class="readout" aria-live="polite"></div></section>
 <section><div class="kicker">DECISION CRITERIA</div><h2 style="font-weight:400">是否應替換 production？</h2><p class="decision"><strong>尚未決定。</strong> 展開式若讓零點、偏移方向、−20 的真實比例更好讀，同時不讓 60 日和 60 年被誤認為同一時間刻度，才值得進主頁。必須另核對桌面與 390px 真實截圖、中文字級、閱讀上下文以及 0 與非 0 的邊界案例。</p><p class="note">基準日期：2026-09-13。資料直接取自正式 recurrenceState；展示端只做投影，不另行計算日序。原始 production reference: PR #605 / a5e8455f。此原型是研究用平行分支，不應被 production 視覺測試當成正式頁面。</p></section>
 </main><script type="module">
@@ -58,81 +58,90 @@ function drawConcentric(rows) {
   const svg = query("#radial");
   const { width, zero } = setup(svg);
   const mobile = width === 380;
+  // R16-style comparison only: retain the arcs, move labels to a single clear legend.
   rows.forEach((row, index) => {
-    const rx = (mobile ? 168 : 235) - index * (mobile ? 33 : 44);
-    const ry = 118 - index * 25;
-    const cy = 287;
+    const rx = (mobile ? 164 : 218) - index * (mobile ? 33 : 43);
+    const ry = 115 - index * 25;
+    const cy = 264;
+    const color = !row.available ? "#7c878d" : row.closed ? "#75cddd" : "#dfb86d";
     create(svg, "path", {
-      d: `M ${zero-rx} ${cy} A ${rx} ${ry} 0 0 1 ${zero+rx} ${cy}`,
-      fill: "none", stroke: "#526869", "stroke-width": index === 0 ? 2.6 : 2,
-      "stroke-linecap": "round"
+      d: \`M \${zero-rx} \${cy} A \${rx} \${ry} 0 0 1 \${zero+rx} \${cy}\`,
+      fill:"none",stroke:"#526869","stroke-width":index===0?2.6:2,
+      "stroke-linecap":"round"
     });
+    create(svg,"circle",{cx:24,cy:46+index*24,r:3.5,fill:color});
+    create(svg,"text",{x:36,y:50+index*24,"font-size":13,fill:"#b2bdc1"},
+      \`\${row.label}  \${signedLabel(row.signed)} \${row.unit}\`);
     if (!row.available) return;
-    const t = .5 + row.signed / row.modulus;
-    const angle = Math.PI * (1 - t);
-    const x = zero + rx * Math.cos(angle);
-    const y = cy - ry * Math.sin(angle);
-    create(svg, "circle", { cx:x, cy:y, r:4.5, fill:palette[index] });
-    create(svg, "text", {
-      x:zero, y:cy-ry-18, "text-anchor":"middle",
-      fill:palette[index], "font-size":mobile?14:13
-    }, `${row.label}  ${signedLabel(row.signed)}`);
+    const angle = Math.PI * (.5-row.fraction/2);
+    const x = zero + rx*Math.cos(angle);
+    const y = cy - ry*Math.sin(angle);
+    create(svg,"circle",{cx:x,cy:y,r:5,fill:color});
   });
-  create(svg, "line", {
-    x1:zero, y1:57, x2:zero, y2:313, stroke:"#b5c4c1",
-    "stroke-dasharray":"2 7", "stroke-width":1, opacity:.45
+  create(svg,"line",{
+    x1:zero,y1:133,x2:zero,y2:296,stroke:"#b5c4c1",
+    "stroke-dasharray":"2 7","stroke-width":1,opacity:.38
   });
 }
 
 function drawUnfolded(rows) {
   const svg = query("#unfolded");
   const { width, zero } = setup(svg);
-  const end = width - 28;
-  const start = 28;
-  const half = (end-start)/2;
-  create(svg, "text", {
-    x:zero, y:23, "text-anchor":"middle",
-    fill:"#b5c4c1", "font-size":13
-  }, "三個週期的共同 0");
-  create(svg, "line", {
-    x1:zero,y1:53,x2:zero,y2:333,
-    stroke:"#9cb6b1","stroke-width":1,"stroke-dasharray":"2 7",opacity:.65
+  svg.dataset.figureGrammar="graduated-zero-spine";
+  const mobile=width===380;
+  const maxSpan=width-(mobile?55:85);
+  const spanMultipliers=[1,.77,.57];
+  create(svg,"text",{
+    x:zero,y:21,"text-anchor":"middle",
+    fill:"#b2bdc1","font-size":13
+  },"共同零點");
+  create(svg,"path",{
+    d:\`M \${zero} 47 V 310\`,
+    fill:"none",stroke:"#819b9d","stroke-width":1,
+    "stroke-dasharray":"2 6",opacity:.6
   });
+  // A slightly more visible segment connects the two independently closed phases.
+  if(rows[1].closed && rows[2].closed) {
+    create(svg,"path",{
+      d:\`M \${zero} 183 V 266\`,
+      fill:"none",stroke:"#75cddd","stroke-width":1.5,opacity:.55
+    });
+  }
   rows.forEach((row,index)=>{
-    const y = 104 + 92*index;
-    const x = row.available ? zero+half*row.fraction : null;
-    create(svg, "text", {x:20,y:y-38,fill:"#e5ece8","font-size":16}, row.label);
-    create(svg, "text", {x:20,y:y-18,fill:"#a4b6b1","font-size":12},
-      `每 ${row.modulus} ${row.unit}重複 · 單位：${row.unit}`);
-    // A quiet guide, not a dense ruler: the displacement carries the reading.
-    create(svg, "path", {
-      d:`M ${start} ${y+13} H ${end}`,
-      fill:"none",stroke:"#58706d","stroke-width":1,opacity:.53
+    const y=110+75*index;
+    const span=maxSpan*spanMultipliers[index];
+    const start=zero-span/2;
+    const end=zero+span/2;
+    const x=row.available?zero+row.fraction*span/2:null;
+    const color=!row.available?"#7c878d":row.closed?"#75cddd":"#dfb86d";
+    create(svg,"text",{x:start,y:y-24,fill:"#eef2f2","font-size":16},row.label);
+    create(svg,"text",{
+      x:end,y:y-24,"text-anchor":"end",fill:"#b2bdc1","font-size":12
+    },\`週期 \${row.modulus} \${row.unit}\`);
+    // Hairline is secondary evidence, not another full-strength instrument ruler.
+    create(svg,"path",{
+      d:\`M \${start} \${y+12} H \${end}\`,
+      fill:"none",stroke:"#9eb2b5","stroke-width":1,opacity:.22
     });
-    for (const p of [start,end]) create(svg,"line",{
-      x1:p,y1:y+9,x2:p,y2:y+17,stroke:"#718783",opacity:.55
-    });
-    if (!row.available) {
-      create(svg,"text",{x:zero,y:y-2,"text-anchor":"middle",
-        fill:"#9aaba9","font-size":14},"待判定");
+    for(const p of [start,end]) {
+      create(svg,"circle",{cx:p,cy:y+12,r:1.7,fill:"#96adb0",opacity:.5});
+    }
+    if(!row.available) {
+      create(svg,"text",{x:zero,y:y-5,"text-anchor":"middle",
+        fill:"#7c878d","font-size":14},"待判定");
       return;
     }
-    const fill = palette[index];
-    if (!row.closed) create(svg,"line",{
-      x1:zero,y1:y+13,x2:x,y2:y+13,stroke:fill,
-      "stroke-width":5,"stroke-linecap":"round"
+    if(!row.closed)create(svg,"line",{
+      x1:zero,y1:y+12,x2:x,y2:y+12,stroke:color,
+      "stroke-width":4,"stroke-linecap":"round"
     });
-    create(svg,"circle",{cx:x,cy:y+13,r:row.closed?5.5:5,fill});
+    create(svg,"circle",{cx:x,cy:y+12,r:row.closed?5:4.5,fill:color});
     create(svg,"text",{
-      x:Math.max(start+16,Math.min(end-16,x)),y:y,
-      "text-anchor":"middle",fill,"font-size":14,"font-weight":600
-    },signedLabel(row.signed));
-    create(svg,"text",{
-      x:end,y:y+38,"text-anchor":"end",fill:"#9aaba9","font-size":12
-    },`−${row.modulus/2} / 0 / +${row.modulus/2}`);
+      x:Math.max(start+28,Math.min(end-28,x)),y:y-2,
+      "text-anchor":"middle",fill:color,"font-size":14,"font-weight":600
+    },\`\${signedLabel(row.signed)} \${row.unit}\`);
   });
 }
-
 function update() {
   const input=query("#delta");
   const n=Number(input.value);
