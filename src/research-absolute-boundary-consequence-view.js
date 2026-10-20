@@ -27,7 +27,7 @@ function ensurePanel(){
     '</header>',
     '<div class="research-fork-source"><span>同一 +24,000 年離散候選</span></div>',
     '<div class="research-alignment-fork">',
-      '<article data-alignment-claim="solar"><span>對齊同一太陽黃經</span><strong>年／月可回到同柱</strong><small>同一節界方向 + 60 年序閉合；實際干支與目前選定黃經看下方四柱判定帶。</small></article>',
+      '<article data-alignment-claim="solar"><span>對齊同一太陽黃經</span><strong>年／月可回到同柱</strong><small>同一節界方向 + 60 年序閉合；實際干支與目前選定黃經看上方四柱判定帶。</small></article>',
       '<article data-alignment-claim="calendar"><span>固定推進 24,000 公曆年</span><strong>節界時間沒有重現</strong><small>12 / 12 節界提前 '+CONSEQUENCE.minBoundaryDays.toFixed(3)+'–'+CONSEQUENCE.maxBoundaryDays.toFixed(3)+' 天；證據已在 02 顯示，不在 03 重畫。</small></article>',
     '</div>',
     '<p class="absolute-boundary-note"><strong>日／時仍是「未能判定」：</strong>節界未重現可以否定整套固定精確週期，但不能直接偷換成「每個相隔 24,000 年的四柱一定不同」。深時間民用日、日界與地方時證據仍不足。</p>'

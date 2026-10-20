@@ -18,11 +18,20 @@
   --research-line-strong: rgba(224, 234, 238, .18);
 
   /* Semantic accents */
-  --research-current: #7ec8d8;
-  --research-candidate: #d6b26f;
+  --research-current: #75cddd;
+  --research-candidate: #dfb86d;
   --research-unresolved: #7c878d;
-  --research-danger: #cf8276;
+  --research-danger: #d58a7c;
   --research-focus: #edf4f5;
+
+  /* Semantic washes and rules: enough area to carry meaning without becoming cards. */
+  --research-current-soft: rgba(117, 205, 221, .10);
+  --research-current-line: rgba(117, 205, 221, .42);
+  --research-candidate-soft: rgba(223, 184, 109, .10);
+  --research-candidate-line: rgba(223, 184, 109, .42);
+  --research-unresolved-soft: rgba(124, 135, 141, .07);
+  --research-danger-soft: rgba(213, 138, 124, .09);
+  --research-danger-line: rgba(213, 138, 124, .42);
 
   /* Diagram mark roles */
   --research-diagram-surface: rgba(224, 234, 238, .045);

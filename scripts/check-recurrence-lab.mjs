@@ -11,14 +11,14 @@ function findBrowser() {
   throw new Error("No system Chromium/Chrome executable found");
 }
 
-function dumpDom(path) {
+function dumpDom(path, virtualTimeBudget = 1400) {
   const browser = findBrowser();
   const url = new URL(path, baseURL).href;
   const result = spawnSync(browser, [
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
-    "--virtual-time-budget=1400",
+    `--virtual-time-budget=${virtualTimeBudget}`,
     "--dump-dom",
     url
   ], { encoding:"utf8", maxBuffer:8 * 1024 * 1024 });
@@ -28,6 +28,20 @@ function dumpDom(path) {
   }
   return { url, dom:result.stdout };
 }
+
+// A valid leap day can become an invalid target date when Δ changes.
+// Exercise the *same page* in both directions to catch retained SVG focus.
+const leapTransition=dumpDom(
+  "scripts/fixtures/research-phase-invalid-transition.html",4800
+);
+const leapProbe=tagById(leapTransition.dom,"probe");
+if(!leapProbe.includes('data-ready="true"')||
+   !leapProbe.includes('data-null-cleared="true"')||
+   !leapProbe.includes('data-restored="true"')){
+  throw Error("Leap-day phase focus transition failed: "+leapProbe+
+    " at "+leapTransition.url);
+}
+console.log("[recurrence] PASS live leap-day phase unavailable → restored transition");
 
 function tagById(dom, id) {
   return dom.match(new RegExp(`<[^>]+id="${id}"[^>]*>`))?.[0] ?? "";
@@ -240,6 +254,28 @@ if (!/此起點 60 年序＋60 日序首次重遇/.test(local.dom) || !/1,980 �
 expectMarker(local.dom, "gregorian", "-98.000", "-20", "1980-year local recurrence", local.url);
 expectMarker(local.dom, "year", "-90.000", "0", "1980-year local recurrence", local.url);
 expectMarker(local.dom, "day", "-90.000", "0", "1980-year local recurrence", local.url);
+function expectPhaseFocus(dom,expectedOffsetCount,expectedClosureCount,label,url){
+  const active=[...dom.matchAll(/class="phase-sector [^"]*\bis-current\b[^"]*"/g)].length;
+  const closed=[...dom.matchAll(/class="phase-sector [^"]*\bis-closed\b[^"]*"/g)].length;
+  const arcs=[...dom.matchAll(/data-return-marker="(?:gregorian|year|day)-offset"/g)].length;
+  if(active!==3||closed!==expectedClosureCount||arcs!==expectedOffsetCount){
+    throw Error(label+": expected three current cells, "+expectedClosureCount+
+      " closed cells and "+expectedOffsetCount+" offset arcs; got "+
+      active+"/"+closed+"/"+arcs+": "+url);
+  }
+}
+expectPhaseFocus(local.dom,1,2,"1980-year highlighted local recurrence",local.url);
+if(!local.dom.includes('id="research-fan-verdict" class="research-fan-verdict">還差公曆 −20</strong>')||
+   !local.dom.includes('id="research-fan-explanation" class="research-fan-explanation">年序、日序已回到 0')){
+  throw Error("1980 local recurrence must lead with remaining Gregorian -20 verdict: "+local.url);
+}
+if(!local.dom.includes('viewBox="0 325 1200 470"')){
+  throw Error("Research fan should crop the empty SVG coordinate space: "+local.url);
+}
+if(!local.dom.includes('data-return-marker="gregorian-offset"')||
+   !local.dom.includes('data-signed-offset="-20"')){
+  throw Error("1980-year Gregorian -20 offset must be visible as a directed arc: "+local.url);
+}
 console.log(`[recurrence] PASS local Year+Day recurrence + fixed signed phase gauges: ${local.url}`);
 
 const global = expectCase(
@@ -262,6 +298,10 @@ const global = expectCase(
   "24000-year global recurrence"
 );
 expectFixedGauge(global.dom, global.url);
+expectPhaseFocus(global.dom,0,3,"24000-year full three-ring closure",global.url);
+if(!global.dom.includes('id="research-fan-verdict" class="research-fan-verdict">三項都回到 0</strong>')){
+  throw Error("24000 global closure must lead with three-ring zero verdict: "+global.url);
+}
 expectDiscreteComprehension(global.dom, global.url);
 expectConsolidatedGlobalPeriod(global.dom, global.url);
 if (!/三個離散相位同時歸零/.test(global.dom) || !/26026-09-13/.test(global.dom)) {

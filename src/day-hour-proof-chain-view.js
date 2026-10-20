@@ -348,7 +348,8 @@ function ensurePanel() {
       <div><span>時柱證明</span><strong id="proof-chain-hour-status">—</strong><small id="proof-chain-hour-blockers">—</small></div>
     </div>
   `;
-  determinacyPanel.insertAdjacentElement("afterend", panel);
+  const conclusionPanel = document.querySelector("#absolute-boundary-consequence");
+  (conclusionPanel ?? determinacyPanel).insertAdjacentElement("afterend", panel);
   proofPanel = panel;
   ensureTargetClockControls(panel);
   return panel;

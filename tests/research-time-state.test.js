@@ -100,12 +100,20 @@ test("shared Research time state condenses only after the same sticky node is st
 test("shared Research time state uses the Research semantic palette", async () => {
   const css = await readFile(new URL("../research-time-state.css", import.meta.url), "utf8");
   assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/);
-  assert.match(css, /data-status="research-resolved"[^}]*var\(--research-candidate\)/);
-  assert.match(css, /data-status="sequence-only"[^}]*var\(--research-text-secondary\)/);
+  assert.match(css, /data-research-time-side="base"[^}]*var\(--research-current-soft\)/);
+  assert.match(css, /data-research-time-side="target"[^}]*var\(--research-candidate-soft\)/);
+  assert.match(css, /data-research-time-side="base"[\s\S]*?\.research-time-pillar:not\(\[data-status="unresolved"\]\) > strong[\s\S]*?var\(--research-current\)/);
+  assert.match(css, /data-research-time-side="target"[\s\S]*?\.research-time-pillar:not\(\[data-status="unresolved"\]\) > strong[\s\S]*?var\(--research-candidate\)/);
   assert.match(css, /data-status="unresolved"[^}]*var\(--research-diagram-unresolved\)/);
   for (const token of [
     "--research-text-primary",
     "--research-text-secondary",
-    "--research-text-muted"
+    "--research-text-muted",
+    "--research-current",
+    "--research-candidate"
   ]) assert.ok(css.includes(token), `missing semantic token ${token}`);
+
+  const literalPxSizes=[...css.matchAll(/font-size:\s*([0-9.]+)px/g)].map(match=>Number(match[1]));
+  assert.ok(literalPxSizes.length>0);
+  assert.ok(Math.min(...literalPxSizes)>=10, "sticky Research time state must not use sub-10px labels");
 });

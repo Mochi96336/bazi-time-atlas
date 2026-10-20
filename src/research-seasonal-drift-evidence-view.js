@@ -23,6 +23,7 @@ const decomposition = document.querySelector("#seasonal-drift-decomposition");
 const JIE_SUMMARY = baziJieDriftSummary(DATA.driftDays,indexForLongitude);
 const JIE_BY_LONGITUDE = new Map(JIE_SUMMARY.rows.map(row => [row.longitudeDegrees,row]));
 const compactProofMedia = window.matchMedia("(max-width:680px)");
+const pairedProofMedia = window.matchMedia("(min-width:1020px)");
 
 if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   const initialParams = new URLSearchParams(location.search);
@@ -32,16 +33,8 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     exaggerate:initialParams.get("seasonalOrbitScale") !== "true"
   };
 
-  const CURVE = {
-    width:760,
-    height:330,
-    left:62,
-    right:24,
-    top:24,
-    bottom:52
-  };
-  CURVE.plotWidth = CURVE.width - CURVE.left - CURVE.right;
-  CURVE.plotHeight = CURVE.height - CURVE.top - CURVE.bottom;
+  // One longitude axis and one day-scale ruler. The mean is a reference, not a second wave.
+  const CURVE = { width:960,height:296,left:65,right:30,top:45,bottom:254,plotWidth:865,plotHeight:183 };
 
   const ORBIT = Object.freeze({
     width:470,
@@ -81,7 +74,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   }
 
   function selectedShape() {
-    return selectedDrift() - DATA.meanDriftDays;
+    return DATA.meanDriftDays - selectedDrift();
   }
 
   function humanDrift(value, digits = 3) {
@@ -166,6 +159,55 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     });
   }
 
+  // In the desktop paired plate, keep all twelve Jie readable in the
+  // narrower left column. Evidence and click semantics stay unchanged.
+  function drawBoundaryProofPaired() {
+    const W=560,H=474,left=59,right=55,top=43,bottom=17,max=15;
+    boundaryProofSvg.setAttribute("viewBox","0 0 "+W+" "+H);
+    const width=W-left-right;
+    const rowHeight=(H-top-bottom)/JIE_SUMMARY.rows.length;
+    const xFor=value=>left+(value/max)*width;
+
+    for(const tick of [0,5,10,15]){
+      const x=xFor(tick);
+      svgEl("line",{
+        x1:x,x2:x,y1:top-12,y2:H-bottom,
+        class:tick===0?"seasonal-proof-zero":"seasonal-proof-grid"
+      },boundaryProofSvg);
+      const label=svgEl("text",{
+        x,y:20,"text-anchor":"middle",class:"seasonal-proof-axis"
+      },boundaryProofSvg);
+      label.textContent=tick===0?"0":tick+" d";
+    }
+
+    JIE_SUMMARY.rows.forEach((row,index)=>{
+      const advance=-row.driftDays;
+      const y=top+(index+.5)*rowHeight;
+      const end=xFor(advance);
+      const selected=indexForLongitude(row.longitudeDegrees)===state.index;
+      const group=svgEl("g",{
+        class:"seasonal-proof-group"+(selected?" is-selected":"")+(row.yearBoundary?" is-year":""),
+        "data-longitude":row.longitudeDegrees
+      },boundaryProofSvg);
+      const term=svgEl("text",{
+        x:left-12,y:y+4,"text-anchor":"end",class:"seasonal-proof-label"
+      },group);
+      term.textContent=row.termName;
+      svgEl("line",{x1:left,x2:end,y1:y,y2:y,class:"seasonal-proof-stem"},group);
+      svgEl("circle",{
+        cx:end,cy:y,r:row.yearBoundary?6:4.5,class:"seasonal-proof-dot"
+      },group);
+      const value=svgEl("text",{
+        x:end+10,y:y+4,"text-anchor":"start",class:"seasonal-proof-value"
+      },group);
+      value.textContent=advance.toFixed(1);
+      const hit=svgEl("rect",{
+        x:0,y:y-rowHeight/2,width:W,height:rowHeight,class:"seasonal-proof-hit"
+      },group);
+      hit.addEventListener("pointerdown",()=>activateBoundary(row.longitudeDegrees));
+    });
+  }
+
   function drawBoundaryProofMobile() {
     boundaryProofSvg.setAttribute("viewBox","0 0 390 430");
     const left=58,right=34,top=42,bottom=18,max=15;
@@ -209,190 +251,128 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   function drawBoundaryProof() {
     clear(boundaryProofSvg);
     if (compactProofMedia.matches) drawBoundaryProofMobile();
+    else if (pairedProofMedia.matches) drawBoundaryProofPaired();
     else drawBoundaryProofDesktop();
     boundaryProofSvg.dataset.ready="true";
   }
 
+
   function curveX(index) {
-    return CURVE.left + (index / 359) * CURVE.plotWidth;
+    return CURVE.left+(index/359)*CURVE.plotWidth;
   }
 
-  function totalY(value) {
-    const min = 0;
-    const max = 15;
-    return CURVE.top + ((max - value) / (max - min)) * CURVE.plotHeight;
-  }
-
-  function shapeY(value) {
-    const min = -2.35;
-    const max = 2.35;
-    return CURVE.top + ((max - value) / (max - min)) * CURVE.plotHeight;
-  }
-
-  function curveY(value) {
-    return state.mode === "total" ? totalY(value) : shapeY(value);
+  function totalY(advanceDays) {
+    // Single ruler: 0 is exact coincidence, all advance values use days.
+    return CURVE.top+(advanceDays/15)*CURVE.plotHeight;
   }
 
   function drawCurve() {
     clear(curveSvg);
-    curveSvg.setAttribute("viewBox", `0 0 ${CURVE.width} ${CURVE.height}`);
-    curveSvg.dataset.mode = state.mode;
+    const mobile=compactProofMedia.matches;
+    Object.assign(CURVE,mobile
+      ? {width:390,height:275,left:43,right:18,top:43,bottom:235,plotHeight:171}
+      : {width:960,height:296,left:65,right:30,top:45,bottom:254,plotHeight:183});
+    CURVE.plotWidth=CURVE.width-CURVE.left-CURVE.right;
+    curveSvg.setAttribute("viewBox","0 0 "+CURVE.width+" "+CURVE.height);
+    curveSvg.dataset.mode=state.mode;
+    curveSvg.dataset.ready="true";
+    curveSvg.dataset.grammar="single-advance-mean";
 
-    const values = state.mode === "total"
-      ? DATA.driftDays.map(value => -value)
-      : DATA.driftDays.map(value => value - DATA.meanDriftDays);
-
-    const ticks = state.mode === "total"
-      ? [15,12,9,6,3,0]
-      : [2,1,0,-1,-2];
-
-    for (const tick of ticks) {
-      const y = curveY(tick);
-      svgEl("line", {
-        x1:CURVE.left,
-        x2:CURVE.width-CURVE.right,
-        y1:y,
-        y2:y,
-        class:tick === 0 ? "seasonal-drift-zero" : "seasonal-drift-grid"
-      }, curveSvg);
-      const label = svgEl("text", {
-        x:CURVE.left-12,
-        y:y+4,
-        class:"seasonal-drift-axis-label",
-        "text-anchor":"end"
-      }, curveSvg);
-      label.textContent = tick === 0 && state.mode === "total"
-        ? "0 d"
-        : `${tick} d`;
-    }
-
-    if (state.mode === "total") {
-      const zeroCaption = svgEl("text", {
-        x:CURVE.width-CURVE.right,
-        y:totalY(0)-8,
-        class:"seasonal-drift-zero-caption",
-        "text-anchor":"end"
-      }, curveSvg);
-      zeroCaption.textContent = "0 = 完全重合";
-    }
-
-    const path = values.map((value,index) =>
-      `${index === 0 ? "M" : "L"} ${curveX(index).toFixed(2)} ${curveY(value).toFixed(2)}`
+    // The sole plotted curve is the 360-point absolute advance. Its mean is
+    // a constant level on exactly the same y axis, not a normalized waveform.
+    const advances=DATA.driftDays.map(value=>-value);
+    const meanAdvance=-DATA.meanDriftDays;
+    const meanY=totalY(meanAdvance);
+    const curvePath=advances.map((value,index)=>
+      (index===0?"M ":"L ")+curveX(index).toFixed(2)+" "+totalY(value).toFixed(2)
     ).join(" ");
-    svgEl("path", { d:path, class:"seasonal-drift-curve-path" }, curveSvg);
 
-    BAZI_JIE_BOUNDARIES.forEach(boundary => {
-      const boundaryIndex = indexForLongitude(boundary.longitudeDegrees);
-      const x = curveX(boundaryIndex);
-      const y = curveY(values[boundaryIndex]);
-      const selected = boundaryIndex === state.index;
-      svgEl("line", {
-        x1:x,
-        x2:x,
-        y1:y,
-        y2:CURVE.height-CURVE.bottom,
-        class:`seasonal-drift-jie-guide${selected ? " is-selected" : ""}`
-      }, curveSvg);
-      svgEl("circle", {
-        cx:x,
-        cy:y,
-        r:selected ? 4 : 2.6,
-        class:`seasonal-drift-jie-dot${selected ? " is-selected" : ""}`
-      }, curveSvg);
+    for(const tick of [0,5,10,15]){
+      const y=totalY(tick);
+      svgEl("line",{x1:CURVE.left,x2:CURVE.width-CURVE.right,y1:y,y2:y,
+        class:tick===0?"seasonal-drift-zero":"seasonal-drift-grid"},curveSvg);
+      const axis=svgEl("text",{
+        x:CURVE.left-10,y:y+4,"text-anchor":"end",class:"seasonal-drift-axis-label"
+      },curveSvg);
+      axis.textContent=tick+" d";
+    }
+    const zeroCaption=svgEl("text",{
+      x:CURVE.left,y:CURVE.top-21,class:"seasonal-drift-zero-caption"
+    },curveSvg);
+    zeroCaption.textContent="0 = 完全重合";
+
+    // A horizontal mean reference, on the very same day scale.
+    svgEl("line",{x1:CURVE.left,x2:CURVE.width-CURVE.right,
+      y1:meanY,y2:meanY,class:"seasonal-drift-mean-line"},curveSvg);
+
+    svgEl("path",{d:curvePath,class:"seasonal-drift-curve-path"},curveSvg);
+    BAZI_JIE_BOUNDARIES.forEach(boundary=>{
+      const i=indexForLongitude(boundary.longitudeDegrees);
+      const selected=i===state.index;
+      svgEl("circle",{
+        cx:curveX(i),cy:totalY(advances[i]),r:selected?4.7:2.5,
+        class:"seasonal-drift-jie-dot"+(selected?" is-selected":"")
+      },curveSvg);
     });
 
-    const major = [
-      {longitude:270,label:"冬至"},
-      {longitude:0,label:"春分"},
-      {longitude:90,label:"夏至"},
-      {longitude:180,label:"秋分"}
+    const cursorX=curveX(state.index);
+    const selectedY=totalY(advances[state.index]);
+    // Deviation is the vertical distance between the selected value and its
+    // mean reference; it must never create another y ruler or plotted wave.
+    svgEl("line",{x1:cursorX,x2:cursorX,y1:CURVE.top,y2:CURVE.bottom,
+      class:"seasonal-drift-cursor-line"},curveSvg);
+    const bracketX=cursorX+(cursorX>CURVE.width-CURVE.right-25?-12:12);
+    // A short bracket links the mean and selected point without obscuring the
+    // dotted 0-to-15-day cursor. The two ends remain on the same day scale.
+    svgEl("path",{
+      d:"M "+cursorX+" "+meanY+" H "+bracketX+" V "+selectedY+" H "+cursorX,
+      class:"seasonal-drift-deviation-stick"
+    },curveSvg);
+    svgEl("circle",{cx:cursorX,cy:selectedY,r:5.8,
+      class:"seasonal-drift-cursor-dot"},curveSvg);
+    svgEl("circle",{cx:cursorX,cy:meanY,r:3.8,
+      class:"seasonal-drift-mean-cursor"},curveSvg);
+
+    // Keep the selected value away from the horizontal mean line at every
+    // longitude, not only at the default Li Chun selection.
+    const valueLabelY=selectedY<meanY
+      ? Math.max(CURVE.top+18,selectedY-16)
+      : Math.min(CURVE.bottom-8,selectedY+23);
+    const gapLabel=svgEl("text",{
+      x:cursorX>CURVE.width-155?cursorX-10:cursorX+10,
+      y:valueLabelY,
+      "text-anchor":cursorX>CURVE.width-155?"end":"start",
+      class:"seasonal-drift-gap-label"},curveSvg);
+    gapLabel.textContent=humanDrift(selectedDrift(),2);
+
+    const ticks=[
+      {longitude:270,label:"冬至"},{longitude:0,label:"春分"},
+      {longitude:90,label:"夏至"},{longitude:180,label:"秋分"}
     ];
-    major.forEach(({longitude,label}) => {
-      const index = indexForLongitude(longitude);
-      const x = curveX(index);
-      svgEl("line", {
-        x1:x,
-        x2:x,
-        y1:CURVE.height-CURVE.bottom,
-        y2:CURVE.height-CURVE.bottom+8,
-        class:"seasonal-drift-axis-tick"
-      }, curveSvg);
-      const text = svgEl("text", {
-        x,
-        y:CURVE.height-20,
-        class:"seasonal-drift-axis-label seasonal-drift-term-axis",
-        "text-anchor":"middle"
-      }, curveSvg);
-      text.textContent = label;
-    });
-
-    const cursorX = curveX(state.index);
-    const cursorY = curveY(values[state.index]);
-
-    if (state.mode === "total") {
-      const zeroY = totalY(0);
-      svgEl("line", {
-        x1:cursorX,
-        x2:cursorX,
-        y1:zeroY,
-        y2:cursorY,
-        class:"seasonal-drift-gap-line"
-      }, curveSvg);
-      const gapLabel = svgEl("text", {
-        x:cursorX > CURVE.width - 150 ? cursorX - 10 : cursorX + 10,
-        y:(zeroY + cursorY) / 2,
-        class:"seasonal-drift-gap-label",
-        "text-anchor":cursorX > CURVE.width - 150 ? "end" : "start"
-      }, curveSvg);
-      gapLabel.textContent = humanDrift(selectedDrift(),2);
+    for(const {longitude,label} of ticks){
+      const xx=curveX(indexForLongitude(longitude));
+      const axis=svgEl("text",{x:xx,y:CURVE.height-14,
+        "text-anchor":"middle",class:"seasonal-drift-axis-label seasonal-drift-term-axis"},curveSvg);
+      axis.textContent=label;
     }
 
-    svgEl("line", {
-      x1:cursorX,
-      x2:cursorX,
-      y1:CURVE.top,
-      y2:CURVE.height-CURVE.bottom,
-      class:"seasonal-drift-cursor-line"
-    }, curveSvg);
-    svgEl("circle", {
-      cx:cursorX,
-      cy:cursorY,
-      r:6,
-      class:"seasonal-drift-cursor-dot"
-    }, curveSvg);
-
-    const longitude = longitudeForIndex(state.index);
-    const name = DATA.termNames[String(longitude)];
-    if (name) {
-      const marker = svgEl("text", {
-        x:cursorX,
-        y:Math.max(CURVE.top+16,cursorY-13),
-        class:"seasonal-drift-cursor-label",
-        "text-anchor":"middle"
-      }, curveSvg);
-      marker.textContent = name;
-    }
-
-    const hit = svgEl("rect", {
-      x:CURVE.left,
-      y:CURVE.top,
-      width:CURVE.plotWidth,
-      height:CURVE.plotHeight,
-      class:"seasonal-drift-hit"
-    }, curveSvg);
-    hit.addEventListener("pointerdown", event => {
+    const hit=svgEl("rect",{
+      x:CURVE.left,y:CURVE.top-6,width:CURVE.plotWidth,
+      height:CURVE.bottom-CURVE.top+12,class:"seasonal-drift-hit"
+    },curveSvg);
+    hit.addEventListener("pointerdown",event=>{
       hit.setPointerCapture?.(event.pointerId);
       updateFromCurvePointer(event);
     });
-    hit.addEventListener("pointermove", event => {
-      if (event.buttons === 1 || event.pointerType === "touch") updateFromCurvePointer(event);
+    hit.addEventListener("pointermove",event=>{
+      if(event.buttons===1||event.pointerType==="touch")updateFromCurvePointer(event);
     });
   }
 
   function updateFromCurvePointer(event) {
-    const rect = curveSvg.getBoundingClientRect();
-    const localX = (event.clientX - rect.left) / rect.width * CURVE.width;
-    const fraction = Math.max(0,Math.min(1,(localX-CURVE.left)/CURVE.plotWidth));
+    const rect=curveSvg.getBoundingClientRect();
+    const localX=(event.clientX-rect.left)/rect.width*CURVE.width;
+    const fraction=Math.max(0,Math.min(1,(localX-CURVE.left)/CURVE.plotWidth));
     setIndex(Math.round(fraction*359),"curve");
   }
 
@@ -456,8 +436,9 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
       class:"seasonal-orbit-bazi-month-arc"
     }, orbitSvg);
 
-    for (const boundary of BAZI_JIE_BOUNDARIES) {
+    for (const [index,boundary] of BAZI_JIE_BOUNDARIES.entries()) {
       const selected = boundary.longitudeDegrees === longitude;
+      const showLabel = boundary.yearBoundary || selected || index%3===0;
       const rayEnd = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.baseRadius+30);
       const labelPoint = orbitDirectionXY(boundary.longitudeDegrees,ORBIT.labelRadius);
       svgEl("line", {
@@ -467,13 +448,15 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
         y2:rayEnd.y,
         class:`seasonal-orbit-bazi-boundary${selected ? " is-selected" : ""}`
       }, orbitSvg);
-      const label = svgEl("text", {
-        x:labelPoint.x,
-        y:labelPoint.y+3,
-        class:`seasonal-orbit-bazi-label${selected ? " is-selected" : ""}`,
-        "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12 ? "middle" : labelPoint.x<ORBIT.cx ? "end" : "start"
-      }, orbitSvg);
-      label.textContent = `${boundary.termName} · ${boundary.branch}`;
+      if (showLabel) {
+        const label = svgEl("text", {
+          x:labelPoint.x,
+          y:labelPoint.y+3,
+          class:`seasonal-orbit-bazi-label${selected ? " is-selected" : ""}`,
+          "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12 ? "middle" : labelPoint.x<ORBIT.cx ? "end" : "start"
+        }, orbitSvg);
+        label.textContent = `${boundary.termName} · ${boundary.branch}`;
+      }
     }
   }
 
@@ -490,6 +473,13 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   }
 
   function drawArrivalTimeRing(longitude) {
+    const defs=svgEl("defs",{},orbitSvg);
+    const arrow=svgEl("marker",{
+      id:"seasonal-orbit-time-arrow",
+      markerWidth:8,markerHeight:8,refX:6,refY:4,
+      orient:"auto",markerUnits:"userSpaceOnUse"
+    },defs);
+    svgEl("path",{d:"M 0 0 L 7 4 L 0 8 Z",class:"seasonal-orbit-time-arrowhead"},arrow);
     svgEl("circle",{
       cx:ORBIT.cx,cy:ORBIT.cy,r:ORBIT.timeRadius,class:"seasonal-orbit-time-ring"
     },orbitSvg);
@@ -521,14 +511,14 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
         cx:target.x,cy:target.y,r:boundary.yearBoundary?5.5:3.5,class:"seasonal-orbit-time-target"
       },group);
 
-      if (boundary.yearBoundary || selected) {
-        const labelPoint=orbitDirectionXY(boundary.longitudeDegrees,ORBIT.timeRadius+20);
-        const label=svgEl("text",{
-          x:labelPoint.x,y:labelPoint.y+3,
-          "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12?"middle":labelPoint.x<ORBIT.cx?"end":"start",
-          class:"seasonal-orbit-time-label"
+      // Only the selected advance receives a strong direction arrow.
+      // Every other Jie remains a subdued position reference around the dial.
+      if (selected) {
+        svgEl("path",{
+          d:arrivalTimeArcPath(boundary.longitudeDegrees,arrivalLongitude,ORBIT.timeRadius),
+          class:"seasonal-orbit-time-selection-arc",
+          "marker-end":"url(#seasonal-orbit-time-arrow)"
         },group);
-        label.textContent=boundary.termName+" · 提前 "+advanceDays.toFixed(2)+" d";
       }
     }
   }
@@ -674,8 +664,16 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     set("seasonal-drift-selected-total",signedDays(drift,3));
     set("seasonal-drift-selected-total-human",humanDrift(drift,3));
     set("seasonal-drift-selected-shape",signedDays(shape,3));
+    set("seasonal-drift-wave-active-name",namedTerm ?? "λ "+longitude+"°");
+    set("seasonal-drift-wave-active-total",humanDrift(drift,2));
+    set("seasonal-drift-wave-mean","全年平均提前 "+(-DATA.meanDriftDays).toFixed(2)+" 天");
+    set("seasonal-drift-wave-active-residual","偏離全年平均 "+signedDays(shape,2));
     set("seasonal-drift-phase-value",signedDays(DATA.meanDriftDays,3));
     set("seasonal-drift-shape-span",`${DATA.peakToPeakDays.toFixed(3)} d`);
+    set("seasonal-residual-mean",humanDrift(DATA.meanDriftDays,3));
+    set("seasonal-residual-span",`${(JIE_SUMMARY.maxAdvanceDays-JIE_SUMMARY.minAdvanceDays).toFixed(3)} d`);
+    set("seasonal-orbit-active-term",namedTerm ?? `λ ${longitude}°`);
+    set("seasonal-orbit-active-days",(-drift).toFixed(2));
     set("seasonal-drift-orbit-base-e",DATA.baseEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-orbit-target-e",DATA.targetEllipse.eccentricity.toFixed(5));
     set("seasonal-drift-scale-label",state.exaggerate ? "形變 ×10" : "真實比例");
@@ -744,6 +742,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   });
 
   compactProofMedia.addEventListener?.("change",render);
+  pairedProofMedia.addEventListener?.("change",render);
 
   if (instrument) {
     new MutationObserver(syncSecondaryDeltaLabel).observe(instrument, {

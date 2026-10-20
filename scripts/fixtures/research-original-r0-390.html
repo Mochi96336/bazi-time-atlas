@@ -58,12 +58,11 @@ iframe.addEventListener("load",async()=>{
   check(!d.getElementById("research-free-explorer") &&
     !d.getElementById("research-advanced-details"),
     "R3 public route must contain no replacement Year story or top-level wrapper");
-  // Restore the long-range Research chapters. Preserve the ORIGINAL small
-  // within-chapter disclosure around the optional 60-day wheel; R0 only
-  // removes the NEW top-level wrapper that hid ALL Research content.
-  const phaseFanDetails=d.getElementById("discrete-phase-fan-details");
-  check(phaseFanDetails && phaseFanDetails.contains(instrument) && !phaseFanDetails.open,
-    "R1 large phase fan must keep the original instrument behind its default-closed verification disclosure");
+  // Restore the long-range Research chapters. The phase fan is a first-class
+  // mainline figure; the optional 60-day source remains the within-chapter disclosure.
+  check(instrument?.dataset.researchMainline==="phase-fan" &&
+    !d.getElementById("discrete-phase-fan-details"),
+    "R1 phase fan must remain unfolded in the production reading spine");
   const ids=["research-discrete","research-cycle-comparison",
     "research-year-strip","research-astronomy",
     "research-evidence","four-pillar-determinacy"];
@@ -74,10 +73,7 @@ iframe.addEventListener("load",async()=>{
   }
   check(instrument && !instrument.hidden,
     "ORIGINAL Research instrument owner is absent");
-  // R4 still audits the ORIGINAL fan geometry; explicitly open the new
-  // verification disclosure for those measurements without changing its
-  // production default.
-  phaseFanDetails.open=true;
+  // R4 audits the already-visible fan geometry in the production reading spine.
   await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
   // R4 layout proof: one genuinely full-width year rail, an in-flow date
   // owner, and an unboxed fan, at actual 320/390/768/1440 viewports.
@@ -155,25 +151,27 @@ iframe.addEventListener("load",async()=>{
       fanGraphic.height);
     const wheel=d.getElementById("recurrence-wheel");
     const legend=d.querySelector(".recurrence-legend");
-    const transform=wheel.getScreenCTM();
-    check(wheel.getAttribute("viewBox")==="0 90 1200 630" &&
+    const projection=d.getElementById("research-phase-projection");
+    const transform=projection?.getScreenCTM();
+    check(projection?.getAttribute("transform")==="translate(0 165) scale(1 .78)",
+      "R16 phase projection must preserve all ring coordinates under one affine transform");
+    check(wheel.getAttribute("viewBox")==="0 325 1200 470" &&
       wheel.dataset.mobileCrop==="true",
-      "R12 mobile fan did not activate the cropped SVG viewport: "+
+      "R16 phone fan must crop projected empty space without clipping phase loci: "+
       JSON.stringify({viewBox:wheel.getAttribute("viewBox"),crop:wheel.dataset.mobileCrop}));
-    // Canonical geometry remains unchanged: Gregorian apex y=260;
-    // the outer astronomy label/reference reaches y=130.
+    // The discarded outer astronomy y=130 label is not Research 01 evidence.
+    // The visible shared datum y=225 and Gregorian apex y=260 now follow the
+    // textual verdict, without a separate dead letterbox above the diagram.
     const apexY=transform.d*260+transform.f;
-    const astronomyApexY=transform.d*195+transform.f;
-    const outerReferenceY=transform.d*130+transform.f;
+    const datumY=transform.d*225+transform.f;
     const legendBottom=legend.getBoundingClientRect().bottom;
-    check(Number.isFinite(apexY) && Number.isFinite(astronomyApexY) &&
-      apexY>=legendBottom+22 && astronomyApexY>=legendBottom+10,
-      "R12 fan or astronomy baseline overlaps the mobile legend: "+
-      JSON.stringify({phaseApex:apexY,astronomyApex:astronomyApexY,legendBottom}));
-    check(Number.isFinite(outerReferenceY) &&
-      outerReferenceY>=legendBottom+2 && outerReferenceY<=legendBottom+42,
-      "R12 mobile fan still leaves a dead band between legend and first visible geometry: "+
-      JSON.stringify({outerReference:outerReferenceY,legendBottom,gap:outerReferenceY-legendBottom}));
+    const graphicTop=fanGraphic.top;
+    check(Number.isFinite(apexY) && Number.isFinite(datumY) &&
+      datumY>=legendBottom+5 && apexY>datumY &&
+      datumY<=graphicTop+30 && apexY<=graphicTop+65,
+      "R16 shallow fan must follow the verdict with a projected zero datum: "+
+      JSON.stringify({phaseApex:apexY,zeroDatum:datumY,
+        legendBottom,graphicTop}));
   }
   const localStep=derivationSteps?.querySelector('[data-milestone="local-year-day"]');
   const globalStep=derivationSteps?.querySelector('[data-milestone="global-discrete"]');

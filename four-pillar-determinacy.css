@@ -256,6 +256,10 @@
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"] {
   border-top-color:var(--research-candidate);
+  background:linear-gradient(180deg,var(--research-candidate-soft),transparent 76%);
+}
+.determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="false"] {
+  background:linear-gradient(180deg,var(--research-unresolved-soft),transparent 76%);
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header { display:block; }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span {
@@ -299,10 +303,10 @@
 @media(max-width:480px){
   .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card { min-height:178px; padding:var(--research-space-3); }
-  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span { display:block; font-size:8px; }
+  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span { display:block; font-size:var(--research-type-meta); }
   .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong { margin-top:var(--research-space-2); font-size:2rem; }
   .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status { padding-top:var(--research-space-3); font-size:11px; }
-  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p { font-size:8.5px; }
+  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p { font-size:var(--research-type-meta); line-height:var(--research-leading-meta); }
 }
 
 
@@ -315,6 +319,7 @@
   padding:var(--research-space-3) 0;
   border-top:var(--research-diagram-line-active) solid var(--research-candidate);
   border-bottom:1px solid var(--research-line-subtle);
+  background:linear-gradient(90deg,var(--research-candidate-soft),transparent 72%);
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict span,
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict small {

@@ -144,12 +144,18 @@ test("default single-date readout and responsive fan preserve paired comparisons
   assert.match(compare,/panel\.dataset\.readoutMode = singleDate \? "single" : "comparison"/);
   assert.ok(layout.includes('data-readout-mode="single"') &&
     layout.includes('research-cycle-inline-row[data-side="base"] {display:none}'));
-  assert.match(recurrenceView,/MOBILE_FAN_VIEWBOX = "0 90 1200 630"/);
+  assert.match(recurrenceView,/DEFAULT_FAN_VIEWBOX = "0 325 1200 470"/);
+  assert.match(recurrenceView,/MOBILE_FAN_VIEWBOX = "0 325 1200 470"/);
   assert.match(recurrenceView,/function syncFanViewport\(\)/);
   assert.match(recurrenceView,/svg\.setAttribute\("viewBox", mobile \? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX\)/);
   assert.match(layout,/height:clamp\(235px,calc\(52\.5vw \+ 64px\),270px\)/);
   assert.match(layout,/top:80px;[\s\S]*?height:calc\(100% - 80px\)/);
+  assert.match(recurrenceHtml,/class="research-fan-composition"/);
+  assert.match(recurrenceHtml,/id="research-fan-verdict"/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);
+  assert.match(recurrenceHtml,/id="research-phase-projection" transform="translate\(0 165\) scale\(1 \.78\)"/);
+  assert.match(recurrenceHtml,/id="recurrence-guides"/);
+  assert.match(recurrenceHtml,/id="recurrence-cursor"/);
 });
 
 test("year-day local recurrence is promoted into the visible derivation rail",()=>{
@@ -379,4 +385,47 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.match(recurrenceView,/signedShortestPhase\(localState\.phases\.gregorian,400\)/);
   assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
+});
+
+test("01 fan spotlights the current cell and a signed-zero-to-phase arc without changing 160-sector geometry",async()=>{
+  const rhythm=await readFile(new URL("../research-page-rhythm.css",import.meta.url),"utf8");
+  assert.match(recurrenceView,/const activeIndex=Math\.max\(0,Math\.min\(/);
+  assert.match(recurrenceView,/Math\.floor\(\(signed\+spec\.modulus\/2\)\/spec\.phasePerSector\)/);
+  assert.match(recurrenceView,/activeCell\?\.classList\.add\("is-current"\)/);
+  assert.match(recurrenceView,/if\(phase===0\) activeCell\?\.classList\.add\("is-closed"\)/);
+  assert.match(recurrenceView,/class:"phase-offset-arc phase-offset-arc-"\+key/);
+  assert.match(recurrenceView,/"data-signed-offset":signed/);
+  assert.match(rhythm,/\.research-fan-graphic \.phase-sector\.is-current/);
+  assert.match(rhythm,/\.research-fan-graphic \.phase-offset-arc/);
+  assert.match(rhythm,/\.research-fan-graphic \.phase-label\.is-zero/);
+  assert.doesNotMatch(recurrenceView,/spec\.sectors\s*:\s*0/);
+});
+
+test("fan clears selected cells before unavailable phases and scales markers for phones",async()=>{
+  const rhythm=await readFile(new URL("../research-page-rhythm.css",import.meta.url),"utf8");
+  const render=recurrenceView.slice(recurrenceView.indexOf("function renderReturnMarkers(state)"),
+    recurrenceView.indexOf("function readBaseDate()"));
+  const clear=render.indexOf('node.classList.remove("is-current","is-closed")');
+  const unavailable=render.indexOf('if (phase === null) continue');
+  assert.ok(clear>=0&&unavailable>clear,"stale selected cells must be removed even if phase is null");
+  assert.match(render,/spec\.group\.dataset\.phaseAvailable = String\(phase !== null\)/);
+  assert.match(rhythm,/@media\(max-width:680px\)[\s\S]*?\.research-fan-composition \.return-marker-label\s*\{[\s\S]*?font-size:38px/);
+  assert.match(rhythm,/@media\(max-width:680px\)[\s\S]*?\.research-fan-composition \.phase-label,[\s\S]*?display:none/);
+});
+
+test("fan uses three open rounded rails rather than filled annular sectors",async()=>{
+  const rhythm=await readFile(new URL("../research-page-rhythm.css",import.meta.url),"utf8");
+  assert.match(recurrenceView,/class:"phase-orbit-rail phase-orbit-rail-"\+key/);
+  assert.match(recurrenceView,/d:arcPath\(radius,FAN_START,FAN_END\)/);
+  assert.match(recurrenceView,/const currentPoint=polar\(mid,angle\)/);
+  assert.match(recurrenceView,/class:"phase-position-dot"/);
+  assert.doesNotMatch(recurrenceView,/class:"phase-position-arc/);
+  assert.match(rhythm,/\.research-fan-composition \.phase-sector\.is-current\.is-closed\s*\{[\s\S]*?fill:transparent/);
+  assert.match(rhythm,/\.research-fan-composition \.phase-orbit-rail\s*\{[\s\S]*?stroke-linecap:round/);
+  assert.match(rhythm,/\.research-fan-composition \.return-marker-zero-node/);
+  assert.match(rhythm,/\.research-fan-composition \.phase-offset-arc/);
+  // An absence of visible cell fill must never mean the data cells disappear.
+  assert.match(recurrenceView,/sectors:60/);
+  assert.match(recurrenceView,/sectors:40/);
+  assert.match(recurrenceView,/data-phase-cell/);
 });

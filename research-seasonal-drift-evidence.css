@@ -540,6 +540,11 @@
   margin-top:var(--research-space-4);
   border-color:var(--research-line-subtle);
 }
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-stat > span,
+.seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-stat small {
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
 .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] .seasonal-drift-stat.verdict strong {
   color:var(--research-candidate);
 }
@@ -565,7 +570,7 @@
 .seasonal-boundary-proof-head strong {
   display:block;
   margin-top:var(--research-space-1);
-  color:var(--research-focus);
+  color:var(--research-candidate);
   font-size:var(--research-type-subsection);
   line-height:var(--research-leading-subsection);
 }
@@ -606,13 +611,25 @@
   border-bottom:1px solid var(--research-line-subtle);
 }
 .seasonal-drift-orbit-explainer .seasonal-drift-orbit-head { min-height:0; margin-bottom:var(--research-space-2); }
+.seasonal-drift-orbit-explainer .seasonal-drift-orbit-head span,
+.seasonal-drift-orbit-explainer .seasonal-drift-orbit-head small {
+  font-size:var(--research-type-meta);
+  line-height:var(--research-leading-meta);
+}
+.seasonal-drift-orbit-explainer .seasonal-drift-orbit-head strong {
+  font-size:var(--research-type-compact);
+}
+.seasonal-drift-orbit-explainer #seasonal-drift-orbit-scale {
+  min-height:32px;
+  font-size:var(--research-type-plot);
+}
 .seasonal-drift-orbit-explainer #seasonal-drift-orbit {
   width:min(620px,100%);
   min-height:0;
   margin:0 auto;
 }
 .seasonal-orbit-time-ring { fill:none; stroke:var(--research-line-strong); stroke-width:1; }
-.seasonal-orbit-time-base { stroke:var(--research-diagram-context); stroke-width:2; }
+.seasonal-orbit-time-base { stroke:var(--research-current); stroke-width:2; }
 .seasonal-orbit-time-target {
   fill:var(--research-bg-page);
   stroke:var(--research-diagram-active-candidate);
@@ -625,7 +642,7 @@
 }
 .seasonal-orbit-time-label {
   fill:var(--research-text-muted);
-  font-size:9px;
+  font-size:var(--research-type-plot);
   font-weight:var(--research-weight-emphasis);
 }
 .seasonal-orbit-time-group.is-selected .seasonal-orbit-time-target,
@@ -670,7 +687,7 @@
   .seasonal-drift-orbit-explainer { margin-top:var(--research-space-6); padding-top:var(--research-space-3); }
   .seasonal-drift-orbit-explainer .seasonal-drift-orbit-head { min-height:0; }
   .seasonal-drift-orbit-explainer #seasonal-drift-orbit { width:100%; min-height:300px; }
-  .seasonal-orbit-explainer-note { font-size:8.5px; }
+  .seasonal-orbit-explainer-note { font-size:var(--research-type-meta); line-height:var(--research-leading-meta); }
 }
 @media (max-width:480px) {
   .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] { padding-top:var(--research-space-3); }

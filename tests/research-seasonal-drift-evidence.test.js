@@ -50,13 +50,13 @@ test("direct hashes can still reopen the folded delta sandbox", () => {
   assert.match(view, /addEventListener\("load"/);
 });
 
-test("seasonal evidence keeps mean drift inside the explicit decomposition layer", () => {
+test("seasonal evidence compares absolute advance with a shared-axis mean reference", () => {
   assert.match(data, /meanDriftDays:SUMMARY\.meanDriftDays/);
   assert.match(data, /peakToPeakDays:SUMMARY\.peakToPeakDays/);
-  assert.match(view, /selectedShape\(\) \{\s*return selectedDrift\(\) - DATA\.meanDriftDays/);
-  assert.match(html, /深入：為什麼不是固定提前 12 天？/);
-  assert.match(html, /主圖已經用十二個節界判定「沒有回到 0」/);
-  assert.match(html, /全年曲線 · 共同位移 ＋ 年內起伏/);
+  assert.match(view, /selectedShape\(\) \{\s*return DATA\.meanDriftDays - selectedDrift\(\)/);
+  assert.match(html, /研究方法：共同提前與年內起伏怎麼分開？/);
+  assert.match(html, /上方單曲線已常駐顯示全部 360 個黃經位置/);
+  assert.match(html, /data-diagram-grammar="advance-with-mean"/);
   assert.doesNotMatch(html, /timing 反演的等效 shape/);
   assert.doesNotMatch(css, /data-mode="total"[\s\S]*\.seasonal-drift-orbit-panel\s*\{\s*display:none/);
   assert.match(css, /\.seasonal-orbit-bazi-boundary/);
@@ -73,7 +73,7 @@ test("equivalent orbit converts apparent solar longitude to heliocentric Earth d
 test("decomposition is folded by default and closing it restores the total view", () => {
   assert.match(html, /<details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">/);
   assert.doesNotMatch(html, /<details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition" open>/);
-  assert.match(html, /全年共同位移/);
+  assert.match(html, /全年共同提前/);
   assert.match(html, /去平均後的年內起伏/);
   assert.match(view, /if \(state\.mode === "split" && decomposition\) decomposition\.open = true/);
   assert.match(view, /decomposition\?\.addEventListener\("toggle"/);
@@ -92,17 +92,20 @@ test("curve and orbit share one longitude cursor without calling it a physical E
   assert.doesNotMatch(html, /拖地球也能選位置/);
 });
 
-test("total view visualizes advance from zero before shape decomposition", () => {
-  assert.match(view, /DATA\.driftDays\.map\(value => -value\)/);
-  assert.match(view, /const min = 0;\s*const max = 15/);
-  assert.match(view, /zeroCaption\.textContent = "0 = 完全重合"/);
-  assert.match(view, /class:"seasonal-drift-gap-line"/);
-  assert.match(view, /gapLabel\.textContent = humanDrift\(selectedDrift\(\),2\)/);
+test("single curve visualizes absolute advance with the same-scale mean reference and selected deviation", () => {
+  assert.match(view, /const advances=DATA\.driftDays\.map\(value=>-value\)/);
+  assert.match(view, /function totalY\(advanceDays\)/);
+  assert.match(view, /zeroCaption\.textContent="0 = 完全重合"/);
+  assert.match(view, /class:"seasonal-drift-mean-line"/);
+  assert.match(view, /class:"seasonal-drift-deviation-stick"/);
+  assert.doesNotMatch(view, /seasonal-residual-path|function shapeY\(/);
+  assert.match(view, /gapLabel\.textContent=humanDrift\(selectedDrift\(\),2\)/);
   assert.match(html, /先看結論 · 八字節界/);
   assert.match(html, /12 \/ 12/);
   assert.match(html, /提前 10\.235–14\.177 天/);
   assert.match(css, /\.seasonal-drift-zero-caption/);
-  assert.match(css, /\.seasonal-drift-gap-line/);
+  assert.match(html, /id="seasonal-drift-wave-mean"/);
+  assert.match(html, /id="seasonal-drift-wave-active-residual"/);
 });
 
 test("selected zero-line proof owns the primary twelve-Jie closure verdict", () => {
@@ -116,7 +119,8 @@ test("selected zero-line proof owns the primary twelve-Jie closure verdict", () 
 });
 
 test("visible orbit explains arrival-time phase without pretending it is a physical second Earth", () => {
-  assert.match(html,/外圈：同一「節」的到達時間相位/);
+  assert.match(html,/02 · 時間 \/ 外圈/);
+  assert.match(html,/26026 到達相位/);
   assert.match(html,/外圈不是第二顆地球/);
   assert.match(view,/function drawArrivalTimeRing\(longitude\)/);
   assert.match(view,/advanceDays\*\(360\/365\.2425\)/);
@@ -160,15 +164,15 @@ test("Research 02 stays framed as a BaZi boundary question", () => {
 });
 
 test("curve and orbit expose the same canonical Jie structure", () => {
-  assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary =>/);
-  assert.match(view, /seasonal-drift-jie-guide/);
+  assert.match(view, /BAZI_JIE_BOUNDARIES\.forEach\(boundary=>/);
+  assert.match(view, /const i=indexForLongitude\(boundary.longitudeDegrees\)/);
   assert.match(view, /seasonal-drift-jie-dot/);
   assert.match(view, /root\.dataset\.baziMonthBranch = month\.branch/);
   assert.match(css, /\.seasonal-drift-jie-guide/);
   assert.match(css, /\.seasonal-drift-jie-dot/);
 });
 
-test("Research 02 hierarchy leads with zero-line proof, then orbit, then deep curve decomposition", () => {
+test("Research 02 hierarchy keeps zero-line proof and orbit before the combined visible 360-point wave", () => {
   const summary = html.indexOf('class="seasonal-drift-summary"');
   const verdict = html.indexOf('class="seasonal-drift-stat verdict"');
   const cursor = html.indexOf('class="seasonal-drift-stat cursor"');
@@ -176,14 +180,14 @@ test("Research 02 hierarchy leads with zero-line proof, then orbit, then deep cu
   const orbit = html.indexOf('class="seasonal-drift-orbit-panel seasonal-drift-orbit-explainer"');
   const detail = html.indexOf('id="seasonal-drift-decomposition"');
   const controls = html.indexOf('class="seasonal-drift-controls"', detail);
-  const curve = html.indexOf('id="seasonal-drift-curve"', detail);
+  const curve = html.indexOf('id="seasonal-drift-curve"');
 
   assert.ok(summary >= 0 && verdict > summary && cursor > verdict);
-  assert.ok(proof > cursor && orbit > proof && detail > orbit && controls > detail && curve > controls);
+  assert.ok(proof > cursor && orbit > proof && curve > orbit && detail > curve && controls > detail);
   assert.match(html, /0 天 = 完全重合/);
   assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
-  assert.match(html, /看完整節界偏移/);
-  assert.match(html, /扣除平均，看年內起伏/);
+  assert.match(html, /強調完整提前量/);
+  assert.match(html, /強調選定點的平均差/);
   assert.doesNotMatch(
     html.slice(
       html.indexOf('class="seasonal-drift-evidence-head"'),
@@ -191,4 +195,32 @@ test("Research 02 hierarchy leads with zero-line proof, then orbit, then deep cu
     ),
     /data-seasonal-drift-mode/
   );
+});
+test("the orbit distinguishes the spatial paths from the selected time-phase advance", () => {
+  assert.match(html,/class="seasonal-orbit-coordinate-legend"/);
+  assert.match(html,/01 · 空間 \/ 內圈/);
+  assert.match(html,/02 · 時間 \/ 外圈/);
+  assert.match(html,/id="seasonal-orbit-active-term"/);
+  assert.match(html,/id="seasonal-orbit-active-days"/);
+  assert.match(view,/set\("seasonal-orbit-active-days",\(-drift\)\.toFixed\(2\)\)/);
+  assert.match(view,/showLabel = boundary\.yearBoundary \|\| selected \|\| index%3===0/);
+  assert.match(view,/class:"seasonal-orbit-time-selection-arc"/);
+  assert.match(view,/arrivalTimeArcPath\(boundary\.longitudeDegrees,arrivalLongitude,ORBIT\.timeRadius\)/);
+  assert.match(view,/"marker-end":"url\(#seasonal-orbit-time-arrow\)"/);
+});
+
+test("02 plots exactly one wave and mean as horizontal line, retaining one scrub", () => {
+  assert.match(html, /id="seasonal-drift-curve"/);
+  assert.match(html, /id="seasonal-drift-wave-active-total"/);
+  assert.match(html, /<b>0 天<\/b>表示完全重合/);
+  assert.match(html, /<b>全年平均<\/b>是同一縱軸上的水平參考線/);
+  assert.doesNotMatch(html, /id="seasonal-drift-residual-strip-svg"/);
+  assert.equal((html.match(/id="seasonal-drift-curve"/g) ?? []).length,1);
+  assert.equal((html.match(/id="seasonal-drift-scrub"/g) ?? []).length,1);
+  assert.match(view, /const meanAdvance=-DATA\.meanDriftDays/);
+  assert.match(view, /const meanY=totalY\(meanAdvance\)/);
+  assert.doesNotMatch(view, /function shapeY\(/);
+  assert.match(view, /d:"M "\+cursorX\+" "\+meanY\+" H "\+bracketX\+" V "\+selectedY\+" H "\+cursorX/);
+  assert.doesNotMatch(view, /const meanCaption=|seasonal-residual-path/);
+  assert.match(view, /gapLabel\.textContent=humanDrift\(selectedDrift\(\),2\)/);
 });

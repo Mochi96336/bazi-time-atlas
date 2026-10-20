@@ -27,8 +27,8 @@ const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
-const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
-const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
+const DEFAULT_FAN_VIEWBOX = "0 325 1200 470";
+const MOBILE_FAN_VIEWBOX = "0 325 1200 470";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -62,9 +62,9 @@ const DERIVATION_STRUCTURAL_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000])
 // recurrence cycles live inside, longer cycles live outside. Astronomy remains
 // the outer comparison layer rather than another discrete gear.
 const ringSpecs = Object.freeze({
-  day: { group: document.querySelector("#day-ring"), inner:270, outer:360, sectors:60, phasePerSector:1, modulus:60, className:"day-sector", displayLabel:"日序 · 60 日" },
-  year: { group: document.querySelector("#year-ring"), inner:360, outer:450, sectors:60, phasePerSector:1, modulus:60, className:"year-sector", displayLabel:"年序 · 60 年" },
-  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆結構 · 400 年" }
+  day: { group: document.querySelector("#day-ring"), inner:296, outer:334, sectors:60, phasePerSector:1, modulus:60, className:"day-sector", displayLabel:"日序 · 60 日" },
+  year: { group: document.querySelector("#year-ring"), inner:382, outer:424, sectors:60, phasePerSector:1, modulus:60, className:"year-sector", displayLabel:"年序 · 60 年" },
+  gregorian: { group: document.querySelector("#gregorian-ring"), inner:481, outer:527, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆結構 · 400 年" }
 });
 
 let currentBase = { year:2026, month:9, day:13 };
@@ -113,15 +113,16 @@ function formatSigned(value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
+  // Preserve the 160 selectable geometry cells, but replace the three solid
+  // wedge bands with independent, thin, rounded orbital traces.
   for (const [key, spec] of Object.entries(ringSpecs)) {
+    const radius=(spec.inner+spec.outer)/2;
     svgEl("path", {
-      d:annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
-      class:`phase-band phase-band-${key}`
-    }, group);
+      d:arcPath(radius,FAN_START,FAN_END),
+      class:"phase-orbit-rail phase-orbit-rail-"+key,
+      "data-phase-rail":key
+    },group);
   }
-  [270, 360, 450, 560].forEach(radius => {
-    svgEl("path", { d:arcPath(radius, FAN_START, FAN_END), class:"recurrence-guide" }, group);
-  });
 }
 
 function renderRing(key) {
@@ -142,8 +143,8 @@ function renderRing(key) {
 
     const tickAngle = cell.startAngle;
     const major = cell.index % 10 === 0 || cell.index === spec.sectors / 2;
-    const p1 = polar(spec.outer - (major ? 10 : 5), tickAngle);
-    const p2 = polar(spec.outer, tickAngle);
+    const p1 = polar(spec.outer + (major ? 0 : 7), tickAngle);
+    const p2 = polar(spec.outer + (major ? 11 : 10), tickAngle);
     svgEl("line", {
       x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y,
       class:`phase-tick${major ? " major" : ""}`
@@ -156,7 +157,7 @@ function renderRing(key) {
       const label = svgEl("text", {
         x:p.x,
         y:p.y,
-        class:"phase-label",
+        class:`phase-label${cell.signedStart===0 ? " is-zero" : ""}`,
         transform:`rotate(${angle + 90} ${p.x} ${p.y})`
       }, spec.group);
       label.textContent = formatSigned(cell.signedStart);
@@ -192,7 +193,14 @@ function renderReturnMarkers(state) {
   };
 
   for (const [key, spec] of Object.entries(ringSpecs)) {
+    // The target date can become invalid (e.g. leap day +1 year).
+    // Clear presentation from the previous frame before deciding whether
+    // this ring has a phase; otherwise its old selected cell stays lit.
+    spec.group.querySelectorAll(".phase-sector.is-current").forEach(node=>{
+      node.classList.remove("is-current","is-closed");
+    });
     const phase = phases[key];
+    spec.group.dataset.phaseAvailable = String(phase !== null);
     if (phase === null) continue;
     const signed = signedShortestPhase(phase, spec.modulus);
     const angle = phaseAngleOnFan({
@@ -202,8 +210,33 @@ function renderReturnMarkers(state) {
       fanEnd:FAN_END,
       referenceAngle:CURSOR_ANGLE
     });
-    const p1 = polar(spec.inner + 5, angle);
-    const p2 = polar(spec.outer - 5, angle);
+    // Keep all 160 sector cells as true scale evidence, but spotlight only
+    // the current cell. A baseline-to-marker arc encodes signed shortest
+    // displacement rather than adding another grid of equally strong sectors.
+    const activeIndex=Math.max(0,Math.min(
+      spec.sectors-1,
+      Math.floor((signed+spec.modulus/2)/spec.phasePerSector)
+    ));
+    const activeCell=spec.group.querySelector('[data-phase-cell="'+activeIndex+'"]');
+    activeCell?.classList.add("is-current");
+    if(phase===0) activeCell?.classList.add("is-closed");
+
+    if(phase!==0) {
+      const arcRadius=(spec.inner+spec.outer)/2;
+      const first=polar(arcRadius,CURSOR_ANGLE);
+      const last=polar(arcRadius,angle);
+      svgEl("path",{
+        d:"M "+first.x.toFixed(3)+" "+first.y.toFixed(3)+
+          " A "+arcRadius+" "+arcRadius+" 0 0 "+(angle>CURSOR_ANGLE?"1":"0")+
+          " "+last.x.toFixed(3)+" "+last.y.toFixed(3),
+        class:"phase-offset-arc phase-offset-arc-"+key,
+        "data-return-marker":key+"-offset",
+        "data-signed-offset":signed
+      },cursorGroup);
+    }
+    const mid=(spec.inner+spec.outer)/2;
+    const p1 = polar(mid-9,angle);
+    const p2 = polar(mid+9,angle);
     svgEl("line", {
       x1:p1.x,
       y1:p1.y,
@@ -216,21 +249,32 @@ function renderReturnMarkers(state) {
       "data-phase-signed":signed,
       "data-phase-modulus":spec.modulus
     }, cursorGroup);
+    const currentPoint=polar(mid,angle);
     if (phase === 0) {
-      const zeroPoint = polar((spec.inner + spec.outer) / 2, angle);
       svgEl("circle", {
-        cx:zeroPoint.x,
-        cy:zeroPoint.y,
-        r:4.1,
+        cx:currentPoint.x,
+        cy:currentPoint.y,
+        r:7,
         class:`return-marker-zero-node return-marker-zero-node-${key}`,
         "data-return-marker":`${key}-zero-node`,
         "data-phase-zero-owner":key
       }, cursorGroup);
+    } else {
+      svgEl("circle",{
+        cx:currentPoint.x,cy:currentPoint.y,r:7,
+        class:"phase-position-dot",
+        "data-return-marker":key+"-position-dot"
+      },cursorGroup);
     }
-    const labelPoint = polar(spec.outer + 9, angle);
+    // Put the value beside its marker in the middle of its own ring.
+    // At a 390px viewport the 1200-unit SVG scales down ~3x; labels
+    // touching the outer edge made three 0s look like one crowded stack.
+    const labelPoint = polar((spec.inner + spec.outer) / 2, angle);
+    const labelLeft = signed < 0;
     const label = svgEl("text", {
-      x:labelPoint.x,
-      y:labelPoint.y,
+      x:labelPoint.x + (labelLeft ? -22 : 22),
+      y:labelPoint.y + 8,
+      "text-anchor":labelLeft ? "end" : "start",
       class:`return-marker-label return-marker-label-${key}`,
       "data-return-marker":`${key}-label`
     }, cursorGroup);
@@ -591,6 +635,25 @@ function renderState() {
   }
 
   renderReturnMarkers(state);
+
+  // Lead with the consequence, not 160 equally prominent ruler cells.
+  // Both labels are derived from the same recurrenceState used by the fan.
+  const phaseKnown = Object.values(state.phases).every(value=>value!==null);
+  const gregorianSigned = state.phases.gregorian===null
+    ? null : signedShortestPhase(state.phases.gregorian,400);
+  if(!phaseKnown) {
+    setText("research-fan-verdict","離散條件未定");
+    setText("research-fan-explanation","目前的目標日期不足以完整判定三個相位。");
+  } else if(state.closed.gregorian && state.closed.yearSequence && state.closed.day) {
+    setText("research-fan-verdict","三項都回到 0");
+    setText("research-fan-explanation","公曆結構、60 年序與 60 日序同時重合；這仍是離散候選，不代表節界已驗真。");
+  } else if(state.closed.yearSequence && state.closed.day) {
+    setText("research-fan-verdict","還差公曆 "+formatSigned(gregorianSigned));
+    setText("research-fan-explanation","年序、日序已回到 0；公曆結構仍偏離共同基準。");
+  } else {
+    setText("research-fan-verdict","尚未三項歸零");
+    setText("research-fan-explanation","0 = 與基準同相位 · 左右為距 0 的最短循環位移");
+  }
 
   setText("gregorian-phase-readout", phaseReadout(state.phases.gregorian, 400));
   setText("year-phase-readout", phaseReadout(state.phases.yearSequence, 60));

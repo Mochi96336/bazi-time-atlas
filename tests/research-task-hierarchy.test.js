@@ -97,13 +97,14 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
 
-test("Research 01 keeps the large phase fan as optional verification while Delta stays primary", () => {
-  assert.match(discreteJs, /id = "discrete-phase-fan-details"/);
-  assert.match(discreteJs, /research-phase-fan-drilldown/);
-  assert.match(discreteJs, /離散相位扇/);
-  assert.match(discreteJs, /revealPhaseFanHash/);
-  assert.match(discreteCss, /\.research-phase-fan-drilldown/);
+test("Research 01 keeps the phase fan unfolded in the main reading spine while Delta stays below it", () => {
+  assert.match(discreteJs, /function markPhaseFanMainline\(\)/);
+  assert.match(discreteJs, /dataset\.researchMainline = "phase-fan"/);
+  assert.doesNotMatch(discreteJs, /discrete-phase-fan-details|research-phase-fan-drilldown|revealPhaseFanHash/);
+  assert.doesNotMatch(discreteCss, /\.research-phase-fan-drilldown/);
   assert.doesNotMatch(html, /<details[^>]*id="discrete-phase-fan-details"/);
+  assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="recurrence-instrument"'));
+  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('class="discrete-derivation"'));
 });
 
 test("restored 60-day chart keeps the old wide-chart to narrow-readout proportion without reviving the legacy page", () => {
@@ -204,7 +205,7 @@ test("mobile Research outcomes keep a readable interaction floor without inflati
   );
   assert.match(
     evidenceCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*8\.5px;/
+    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*var\(--research-type-plot\);/
   );
   assert.match(
     determinacyCss,

@@ -69,7 +69,19 @@ function renderCard(name,{ pillarName=null, status, reason, resolved=false }) {
   const statusNode=card.querySelector(".determinacy-status");
   const summary=card.querySelector("p");
   const label=STATUS_LABELS[status] ?? status;
-  if(statusNode) statusNode.textContent=pillarName ? `${pillarName} · ${label}` : label;
+  if(statusNode){
+    statusNode.replaceChildren();
+    if(pillarName){
+      const value=document.createElement("span");
+      value.className="determinacy-pillar-value";
+      value.textContent=pillarName;
+      statusNode.append(value);
+    }
+    const verdict=document.createElement("span");
+    verdict.className="determinacy-state-label";
+    verdict.textContent=label;
+    statusNode.append(verdict);
+  }
   if(summary) summary.textContent=reason;
 }
 
