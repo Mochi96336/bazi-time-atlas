@@ -258,10 +258,15 @@ function renderReturnMarkers(state) {
         "data-phase-zero-owner":key
       }, cursorGroup);
     }
-    const labelPoint = polar(spec.outer + 9, angle);
+    // Put the value beside its marker in the middle of its own ring.
+    // At a 390px viewport the 1200-unit SVG scales down ~3x; labels
+    // touching the outer edge made three 0s look like one crowded stack.
+    const labelPoint = polar((spec.inner + spec.outer) / 2, angle);
+    const labelLeft = signed < 0;
     const label = svgEl("text", {
-      x:labelPoint.x,
-      y:labelPoint.y,
+      x:labelPoint.x + (labelLeft ? -22 : 22),
+      y:labelPoint.y + 8,
+      "text-anchor":labelLeft ? "end" : "start",
       class:`return-marker-label return-marker-label-${key}`,
       "data-return-marker":`${key}-label`
     }, cursorGroup);
