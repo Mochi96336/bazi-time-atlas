@@ -62,9 +62,9 @@ const DERIVATION_STRUCTURAL_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000])
 // recurrence cycles live inside, longer cycles live outside. Astronomy remains
 // the outer comparison layer rather than another discrete gear.
 const ringSpecs = Object.freeze({
-  day: { group: document.querySelector("#day-ring"), inner:270, outer:360, sectors:60, phasePerSector:1, modulus:60, className:"day-sector", displayLabel:"日序 · 60 日" },
-  year: { group: document.querySelector("#year-ring"), inner:360, outer:450, sectors:60, phasePerSector:1, modulus:60, className:"year-sector", displayLabel:"年序 · 60 年" },
-  gregorian: { group: document.querySelector("#gregorian-ring"), inner:450, outer:560, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆結構 · 400 年" }
+  day: { group: document.querySelector("#day-ring"), inner:296, outer:334, sectors:60, phasePerSector:1, modulus:60, className:"day-sector", displayLabel:"日序 · 60 日" },
+  year: { group: document.querySelector("#year-ring"), inner:382, outer:424, sectors:60, phasePerSector:1, modulus:60, className:"year-sector", displayLabel:"年序 · 60 年" },
+  gregorian: { group: document.querySelector("#gregorian-ring"), inner:481, outer:527, sectors:40, phasePerSector:10, modulus:400, className:"gregorian-sector", displayLabel:"公曆結構 · 400 年" }
 });
 
 let currentBase = { year:2026, month:9, day:13 };
@@ -113,15 +113,16 @@ function formatSigned(value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
+  // Preserve the 160 selectable geometry cells, but replace the three solid
+  // wedge bands with independent, thin, rounded orbital traces.
   for (const [key, spec] of Object.entries(ringSpecs)) {
+    const radius=(spec.inner+spec.outer)/2;
     svgEl("path", {
-      d:annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
-      class:`phase-band phase-band-${key}`
-    }, group);
+      d:arcPath(radius,FAN_START,FAN_END),
+      class:"phase-orbit-rail phase-orbit-rail-"+key,
+      "data-phase-rail":key
+    },group);
   }
-  [270, 360, 450, 560].forEach(radius => {
-    svgEl("path", { d:arcPath(radius, FAN_START, FAN_END), class:"recurrence-guide" }, group);
-  });
 }
 
 function renderRing(key) {
@@ -142,8 +143,8 @@ function renderRing(key) {
 
     const tickAngle = cell.startAngle;
     const major = cell.index % 10 === 0 || cell.index === spec.sectors / 2;
-    const p1 = polar(spec.outer - (major ? 10 : 5), tickAngle);
-    const p2 = polar(spec.outer, tickAngle);
+    const p1 = polar(spec.outer + (major ? 0 : 7), tickAngle);
+    const p2 = polar(spec.outer + (major ? 11 : 10), tickAngle);
     svgEl("line", {
       x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y,
       class:`phase-tick${major ? " major" : ""}`
@@ -233,8 +234,16 @@ function renderReturnMarkers(state) {
         "data-signed-offset":signed
       },cursorGroup);
     }
-    const p1 = polar(spec.inner + 5, angle);
-    const p2 = polar(spec.outer - 5, angle);
+    const mid=(spec.inner+spec.outer)/2;
+    // The selected phase is a short luminous arc centered on its actual
+    // angular position; it should never look like a filled rectangle.
+    svgEl("path", {
+      d:arcPath(mid,angle-2.8,angle+2.8),
+      class:"phase-position-arc"+(phase===0?" is-closed":""),
+      "data-return-marker":key+"-position"
+    },cursorGroup);
+    const p1 = polar(mid-9,angle);
+    const p2 = polar(mid+9,angle);
     svgEl("line", {
       x1:p1.x,
       y1:p1.y,
@@ -247,16 +256,22 @@ function renderReturnMarkers(state) {
       "data-phase-signed":signed,
       "data-phase-modulus":spec.modulus
     }, cursorGroup);
+    const currentPoint=polar(mid,angle);
     if (phase === 0) {
-      const zeroPoint = polar((spec.inner + spec.outer) / 2, angle);
       svgEl("circle", {
-        cx:zeroPoint.x,
-        cy:zeroPoint.y,
-        r:4.1,
+        cx:currentPoint.x,
+        cy:currentPoint.y,
+        r:7,
         class:`return-marker-zero-node return-marker-zero-node-${key}`,
         "data-return-marker":`${key}-zero-node`,
         "data-phase-zero-owner":key
       }, cursorGroup);
+    } else {
+      svgEl("circle",{
+        cx:currentPoint.x,cy:currentPoint.y,r:7,
+        class:"phase-position-dot",
+        "data-return-marker":key+"-position-dot"
+      },cursorGroup);
     }
     // Put the value beside its marker in the middle of its own ring.
     // At a 390px viewport the 1200-unit SVG scales down ~3x; labels
