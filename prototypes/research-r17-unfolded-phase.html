@@ -91,6 +91,7 @@ function drawUnfolded(rows) {
   const mobile=width===380;
   const maxSpan=width-(mobile?55:85);
   const spanMultipliers=[1,.77,.57];
+  const rowY=index=>110+75*index;
   create(svg,"text",{
     x:zero,y:21,"text-anchor":"middle",
     fill:"#b2bdc1","font-size":13
@@ -103,12 +104,12 @@ function drawUnfolded(rows) {
   // A slightly more visible segment connects the two independently closed phases.
   if(rows[1].closed && rows[2].closed) {
     create(svg,"path",{
-      d:`M ${zero} 183 V 266`,
+      d:`M ${zero} ${rowY(1)+12} V ${rowY(2)+12}`,
       fill:"none",stroke:"#75cddd","stroke-width":1.5,opacity:.55
     });
   }
   rows.forEach((row,index)=>{
-    const y=110+75*index;
+    const y=rowY(index);
     const span=maxSpan*spanMultipliers[index];
     const start=zero-span/2;
     const end=zero+span/2;
