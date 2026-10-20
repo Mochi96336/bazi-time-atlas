@@ -409,3 +409,20 @@ test("fan clears selected cells before unavailable phases and scales markers for
   assert.match(rhythm,/@media\(max-width:680px\)[\s\S]*?\.research-fan-composition \.return-marker-label\s*\{[\s\S]*?font-size:38px/);
   assert.match(rhythm,/@media\(max-width:680px\)[\s\S]*?\.research-fan-composition \.phase-label,[\s\S]*?display:none/);
 });
+
+test("fan uses three open rounded rails rather than filled annular sectors",async()=>{
+  const rhythm=await readFile(new URL("../research-page-rhythm.css",import.meta.url),"utf8");
+  assert.match(recurrenceView,/class:"phase-orbit-rail phase-orbit-rail-"\+key/);
+  assert.match(recurrenceView,/d:arcPath\(radius,FAN_START,FAN_END\)/);
+  assert.match(recurrenceView,/const currentPoint=polar\(mid,angle\)/);
+  assert.match(recurrenceView,/class:"phase-position-dot"/);
+  assert.doesNotMatch(recurrenceView,/class:"phase-position-arc/);
+  assert.match(rhythm,/\.research-fan-composition \.phase-sector\.is-current\.is-closed\s*\{[\s\S]*?fill:transparent/);
+  assert.match(rhythm,/\.research-fan-composition \.phase-orbit-rail\s*\{[\s\S]*?stroke-linecap:round/);
+  assert.match(rhythm,/\.research-fan-composition \.return-marker-zero-node/);
+  assert.match(rhythm,/\.research-fan-composition \.phase-offset-arc/);
+  // An absence of visible cell fill must never mean the data cells disappear.
+  assert.match(recurrenceView,/sectors:60/);
+  assert.match(recurrenceView,/sectors:40/);
+  assert.match(recurrenceView,/data-phase-cell/);
+});
