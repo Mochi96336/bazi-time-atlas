@@ -11,14 +11,14 @@ function findBrowser() {
   throw new Error("No system Chromium/Chrome executable found");
 }
 
-function dumpDom(path) {
+function dumpDom(path, virtualTimeBudget = 1400) {
   const browser = findBrowser();
   const url = new URL(path, baseURL).href;
   const result = spawnSync(browser, [
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
-    "--virtual-time-budget=1400",
+    `--virtual-time-budget=${virtualTimeBudget}`,
     "--dump-dom",
     url
   ], { encoding:"utf8", maxBuffer:8 * 1024 * 1024 });
@@ -28,6 +28,20 @@ function dumpDom(path) {
   }
   return { url, dom:result.stdout };
 }
+
+// A valid leap day can become an invalid target date when Δ changes.
+// Exercise the *same page* in both directions to catch retained SVG focus.
+const leapTransition=dumpDom(
+  "scripts/fixtures/research-phase-invalid-transition.html",4800
+);
+const leapProbe=tagById(leapTransition.dom,"probe");
+if(!leapProbe.includes('data-ready="true"')||
+   !leapProbe.includes('data-null-cleared="true"')||
+   !leapProbe.includes('data-restored="true"')){
+  throw Error("Leap-day phase focus transition failed: "+leapProbe+
+    " at "+leapTransition.url);
+}
+console.log("[recurrence] PASS live leap-day phase unavailable → restored transition");
 
 function tagById(dom, id) {
   return dom.match(new RegExp(`<[^>]+id="${id}"[^>]*>`))?.[0] ?? "";
