@@ -2,7 +2,7 @@
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>R17 · Phase geometry comparison</title>
 <style>
-:root{color-scheme:dark;--bg:#10191b;--fg:#e5ece8;--muted:#9aaba9;--fine:#4a6464;--cyan:#94d4d6;--amber:#efc58b}
+:root{color-scheme:dark;--bg:#0a0e12;--fg:#eef2f2;--muted:#b2bdc1;--fine:rgba(224,234,238,.18);--cyan:#75cddd;--amber:#dfb86d}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,"Noto Sans TC",sans-serif}main{max-width:1460px;margin:auto;padding:clamp(24px,6vw,96px)}header{margin:0 0 85px}p{max-width:64ch;color:var(--muted)}h1{font:400 clamp(32px,4vw,62px)/1.2 Georgia,"Noto Serif TC",serif;letter-spacing:.03em;margin:15px 0 25px}.eyebrow,.kicker{font:12px/1.4 system-ui;letter-spacing:.18em;color:var(--muted)}section{border-top:1px solid #395052;padding:34px 0 65px}.intro{display:flex;justify-content:space-between;gap:32px;align-items:start}.intro h2{font:400 clamp(23px,2.5vw,32px)/1.4 Georgia,"Noto Serif TC",serif;margin:9px 0}.intro p{margin:0;max-width:37ch}.figure-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin:46px 0}.figure{min-width:0}.figure h3{font-size:13px;font-weight:500;letter-spacing:.1em}.figure svg{display:block;width:100%;overflow:visible}.caption{font-size:13px;color:var(--muted);max-width:48ch;margin:18px 0}.controls{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:30px}button{border:1px solid var(--fine);background:transparent;color:var(--fg);padding:7px 15px;cursor:pointer;font:inherit}button:hover,button:focus-visible{border-color:var(--amber)}output{font-variant-numeric:tabular-nums;color:var(--amber)}.readout{color:var(--muted);font-size:14px}.decision{max-width:790px;font-size:15px}.decision strong{color:var(--fg)}.note{padding-top:12px} @media(max-width:850px){main{padding:28px 22px}.figure-grid{grid-template-columns:1fr;gap:32px}.intro{display:block}header{margin-bottom:55px}section{padding-bottom:38px}}
 
 /* The diagrams use native mobile viewBoxes rather than shrinking 12px text to 8px. */
@@ -11,11 +11,16 @@
 .readout { margin-top:22px; padding:22px 0 8px; border-top:1px solid #395052; max-width:75ch; line-height:1.9; }
 button:focus-visible, input:focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
 @media(max-width:560px){ main{padding:28px 20px} .figure-grid{margin-top:38px} .figure h3{margin-bottom:13px} .controls{gap:10px;align-items:stretch} button{font-size:13px;padding:8px 10px} .figure svg{max-width:100%} .caption{line-height:1.8} }
+
+.verdict { margin:44px 0 12px; color:var(--fg); max-width:34ch; font:400 clamp(24px,3vw,40px)/1.35 Georgia,"Noto Serif TC",serif; letter-spacing:.015em; }
+.verdict + .figure-grid { margin-top:30px; }
+@media(max-width:560px){.verdict{margin:35px 0 12px;font-size:27px}}
 </style></head>
 <body><main>
 <header><div class="eyebrow">RESEARCH 01 / R17 · COMPOSITION LAB</div><h1>三個週期，如何接近同一個零點？</h1><p>比較現有半橢圓同心構圖與展開式三相位圖。這裡只替換圖形投影，不替換公曆、年序與日序的計算。零點一致，但週期長度與單位不相同。</p></header>
 <section><div class="intro"><div><div class="kicker">GEOMETRY COMPARISON</div><h2>把判讀從「儀表」還給「時間」</h2></div><p>左：R16 圖形語法的示意重建，非 production 截圖。右：R17 共同零點展開提案。橫向位置是各週期內的相對相位，不是統一的年數軸。</p></div>
 <div class="controls"><button data-delta="0">基準 · 0</button><button data-delta="1980">局部重遇 · +1,980</button><button data-delta="24000">粗估閉合 · +24,000</button><label>Δ 年 <input id="delta" type="number" value="1980" step="1" style="width:106px;background:transparent;border:1px solid var(--fine);color:var(--fg);font:inherit;padding:5px"></label><output id="delta-label">+1,980 年</output></div>
+<p id="verdict" class="verdict" aria-live="polite">年序與日序重遇，公曆仍偏離零點。</p>
 <div class="figure-grid">
 <div class="figure"><h3>01　CONCENTRIC / R16 LANGUAGE</h3><svg id="radial" viewBox="0 0 560 350" role="img" aria-label="同心弧式相位顯示"></svg><p class="caption">弧線高度已壓低，但三條完整對稱軌道仍可能像速度表。此圖僅是可供同場比較的概念重繪。</p></div>
 <div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption">零點共用同一垂直基線；各列採自身週期比例。用極細輔助線交代範圍，讓真正的位移段與端點負責敘事。</p></div>
@@ -27,7 +32,7 @@ import { projectUnfoldedPhases } from "../src/recurrence/r17-unfolded-phase-proj
 
 const NS = "http://www.w3.org/2000/svg";
 const base = Object.freeze({ year: 2026, month: 9, day: 13 });
-const palette = ["#efc58b", "#94d4d6", "#b5c4c1"];
+const palette = ["#dfb86d", "#75cddd", "#7c878d"];
 const query = selector => document.querySelector(selector);
 const mobileMedia = matchMedia("(max-width: 560px)");
 
@@ -140,6 +145,14 @@ function update() {
   const state=recurrenceState(base,n);
   const rows=projectUnfoldedPhases(state);
   query("#delta-label").textContent=`+${n.toLocaleString("en-US")} 年`;
+  const verdict=query("#verdict");
+  if (rows.every(row=>row.closed)) {
+    verdict.textContent="三個離散相位，同時回到零點";
+  } else if (rows[1].closed && rows[2].closed && rows[0].available) {
+    verdict.textContent="年序與日序重遇；公曆還差 "+signedLabel(rows[0].signed)+" 年";
+  } else {
+    verdict.textContent="三個週期，尚未同時回到零點";
+  }
   drawConcentric(rows);
   drawUnfolded(rows);
   const figure=query("#unfolded");
