@@ -235,13 +235,6 @@ function renderReturnMarkers(state) {
       },cursorGroup);
     }
     const mid=(spec.inner+spec.outer)/2;
-    // The selected phase is a short luminous arc centered on its actual
-    // angular position; it should never look like a filled rectangle.
-    svgEl("path", {
-      d:arcPath(mid,angle-2.8,angle+2.8),
-      class:"phase-position-arc"+(phase===0?" is-closed":""),
-      "data-return-marker":key+"-position"
-    },cursorGroup);
     const p1 = polar(mid-9,angle);
     const p2 = polar(mid+9,angle);
     svgEl("line", {
