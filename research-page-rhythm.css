@@ -1334,3 +1334,82 @@
     font-size:var(--research-type-meta);
   }
 }
+
+
+/* R14 fan reading scale: preserve every data cell, but move the precise
+   per-ring value to the three large live markers and HTML phase readouts.
+   SVG user-units shrink with the 1200-unit viewBox; a 14-unit label is only
+   about 4px on a 390px phone, so small radial annotations cannot be primary. */
+.research-task-primary .research-fan-composition .phase-label:not(.is-zero){
+  opacity:.28;
+}
+.research-task-primary .research-fan-composition .phase-ring-name{
+  font-size:24px;
+  font-weight:700;
+}
+.research-task-primary .research-fan-composition .return-marker-label{
+  font-size:28px;
+  font-weight:850;
+  paint-order:stroke;
+  stroke:var(--research-fan-field);
+  stroke-width:7px;
+  stroke-linejoin:round;
+}
+.research-task-primary .research-fan-composition .return-marker{
+  stroke-width:5;
+}
+.research-task-primary .research-fan-composition .return-marker.is-closed{
+  stroke-width:6;
+}
+.research-task-primary .research-fan-composition .return-marker-zero-node{
+  r:8px;
+  stroke-width:4px;
+}
+.research-task-primary .research-fan-composition .phase-offset-arc{
+  stroke-width:8;
+}
+.research-task-primary .research-fan-composition .phase-sector.is-current{
+  fill:color-mix(in srgb,var(--research-current) 80%,transparent);
+}
+.research-task-primary .research-fan-composition .phase-sector.is-current.is-closed{
+  fill:color-mix(in srgb,var(--research-fan-datum) 88%,transparent);
+}
+/* Unavailable is not zero: the old selected sector has already been cleared. */
+.research-task-primary .research-fan-composition [data-phase-available="false"] .phase-sector{
+  opacity:.25;
+}
+@media(max-width:680px){
+  .research-task-primary .research-fan-composition .phase-label,
+  .research-task-primary .research-fan-composition .phase-ring-name,
+  .research-task-primary .research-fan-composition .cursor-label{
+    display:none;
+  }
+  .research-task-primary .research-fan-composition .phase-tick:not(.major){
+    display:none;
+  }
+  .research-task-primary .research-fan-composition .phase-tick.major{
+    stroke-width:3.5;
+    opacity:.65;
+  }
+  .research-task-primary .research-fan-composition .return-marker-label{
+    display:block;
+    font-size:38px;
+    stroke-width:10px;
+  }
+  .research-task-primary .research-fan-composition .return-marker{
+    stroke-width:9;
+  }
+  .research-task-primary .research-fan-composition .return-marker.is-closed{
+    stroke-width:10;
+  }
+  .research-task-primary .research-fan-composition .return-marker-zero-node{
+    r:13px;
+    stroke-width:6px;
+  }
+  .research-task-primary .research-fan-composition .phase-offset-arc{
+    stroke-width:12;
+  }
+  .research-task-primary .research-fan-composition .cursor-line{
+    stroke-width:5;
+  }
+}
