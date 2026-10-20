@@ -192,7 +192,14 @@ function renderReturnMarkers(state) {
   };
 
   for (const [key, spec] of Object.entries(ringSpecs)) {
+    // The target date can become invalid (e.g. leap day +1 year).
+    // Clear presentation from the previous frame before deciding whether
+    // this ring has a phase; otherwise its old selected cell stays lit.
+    spec.group.querySelectorAll(".phase-sector.is-current").forEach(node=>{
+      node.classList.remove("is-current","is-closed");
+    });
     const phase = phases[key];
+    spec.group.dataset.phaseAvailable = String(phase !== null);
     if (phase === null) continue;
     const signed = signedShortestPhase(phase, spec.modulus);
     const angle = phaseAngleOnFan({
@@ -205,9 +212,6 @@ function renderReturnMarkers(state) {
     // Keep all 160 sector cells as true scale evidence, but spotlight only
     // the current cell. A baseline-to-marker arc encodes signed shortest
     // displacement rather than adding another grid of equally strong sectors.
-    spec.group.querySelectorAll(".phase-sector.is-current").forEach(node=>{
-      node.classList.remove("is-current","is-closed");
-    });
     const activeIndex=Math.max(0,Math.min(
       spec.sectors-1,
       Math.floor((signed+spec.modulus/2)/spec.phasePerSector)
