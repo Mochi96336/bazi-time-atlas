@@ -1190,7 +1190,7 @@
   position:relative;
   width:100%;
   height:auto;
-  aspect-ratio:1200/603;
+  aspect-ratio:1200/470;
   margin:0;
   padding:0;
   overflow:hidden;
@@ -1302,10 +1302,11 @@
     grid-template-columns:minmax(0,.41fr) minmax(0,.59fr);
     grid-template-areas:"head graphic" "readout readout";
     gap:var(--research-space-5) clamp(32px,4vw,64px);
-    align-items:center;
+    align-items:start;
   }
   .research-task-primary .research-fan-composition .research-fan-head{
-    align-self:center;
+    align-self:start;
+    padding-top:var(--research-space-6);
   }
   .research-task-primary .research-fan-composition .recurrence-readout.research-current-state{
     align-self:start;
@@ -1328,7 +1329,7 @@
     padding:var(--research-space-3) 0;
   }
   .research-task-primary .research-fan-composition .research-fan-graphic{
-    aspect-ratio:1200/603;
+    aspect-ratio:1200/470;
   }
   .research-task-primary .research-fan-head .recurrence-legend strong{
     font-size:var(--research-type-meta);
@@ -1526,5 +1527,26 @@
   }
   .research-task-primary .research-fan-composition .cursor-label{
     display:none;
+  }
+}
+
+
+/* R16 — keep the mathematically identical polar positions, but show their
+   shared affine projection as a shallower editorial arc rather than a gauge.
+   Editorial text starts at the graphic's top, not halfway down the scene. */
+.research-task-primary .research-fan-composition .research-fan-graphic{
+  aspect-ratio:1200/470;
+}
+.research-task-primary .research-fan-composition .phase-orbit-rail{
+  stroke-width:12;
+}
+.research-task-primary .research-fan-composition .phase-orbit-rail-gregorian,
+.research-task-primary .research-fan-composition .phase-orbit-rail-year,
+.research-task-primary .research-fan-composition .phase-orbit-rail-day{
+  opacity:.57;
+}
+@media(min-width:960px){
+  .research-task-primary .research-fan-composition .research-fan-head{
+    padding-top:var(--research-space-6);
   }
 }
