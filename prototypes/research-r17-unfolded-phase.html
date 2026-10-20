@@ -65,13 +65,13 @@ function drawConcentric(rows) {
     const cy = 264;
     const color = !row.available ? "#7c878d" : row.closed ? "#75cddd" : "#dfb86d";
     create(svg, "path", {
-      d: \`M \${zero-rx} \${cy} A \${rx} \${ry} 0 0 1 \${zero+rx} \${cy}\`,
+      d: `M ${zero-rx} ${cy} A ${rx} ${ry} 0 0 1 ${zero+rx} ${cy}`,
       fill:"none",stroke:"#526869","stroke-width":index===0?2.6:2,
       "stroke-linecap":"round"
     });
     create(svg,"circle",{cx:24,cy:46+index*24,r:3.5,fill:color});
     create(svg,"text",{x:36,y:50+index*24,"font-size":13,fill:"#b2bdc1"},
-      \`\${row.label}  \${signedLabel(row.signed)} \${row.unit}\`);
+      `${row.label}  ${signedLabel(row.signed)} ${row.unit}`);
     if (!row.available) return;
     const angle = Math.PI * (.5-row.fraction/2);
     const x = zero + rx*Math.cos(angle);
@@ -96,14 +96,14 @@ function drawUnfolded(rows) {
     fill:"#b2bdc1","font-size":13
   },"共同零點");
   create(svg,"path",{
-    d:\`M \${zero} 47 V 310\`,
+    d:`M ${zero} 47 V 310`,
     fill:"none",stroke:"#819b9d","stroke-width":1,
     "stroke-dasharray":"2 6",opacity:.6
   });
   // A slightly more visible segment connects the two independently closed phases.
   if(rows[1].closed && rows[2].closed) {
     create(svg,"path",{
-      d:\`M \${zero} 183 V 266\`,
+      d:`M ${zero} 183 V 266`,
       fill:"none",stroke:"#75cddd","stroke-width":1.5,opacity:.55
     });
   }
@@ -117,10 +117,10 @@ function drawUnfolded(rows) {
     create(svg,"text",{x:start,y:y-24,fill:"#eef2f2","font-size":16},row.label);
     create(svg,"text",{
       x:end,y:y-24,"text-anchor":"end",fill:"#b2bdc1","font-size":12
-    },\`週期 \${row.modulus} \${row.unit}\`);
+    },`週期 ${row.modulus} ${row.unit}`);
     // Hairline is secondary evidence, not another full-strength instrument ruler.
     create(svg,"path",{
-      d:\`M \${start} \${y+12} H \${end}\`,
+      d:`M ${start} ${y+12} H ${end}`,
       fill:"none",stroke:"#9eb2b5","stroke-width":1,opacity:.22
     });
     for(const p of [start,end]) {
@@ -139,7 +139,7 @@ function drawUnfolded(rows) {
     create(svg,"text",{
       x:Math.max(start+28,Math.min(end-28,x)),y:y-2,
       "text-anchor":"middle",fill:color,"font-size":14,"font-weight":600
-    },\`\${signedLabel(row.signed)} \${row.unit}\`);
+    },`${signedLabel(row.signed)} ${row.unit}`);
   });
 }
 function update() {
