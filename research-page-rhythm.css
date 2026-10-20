@@ -1413,3 +1413,137 @@
     stroke-width:5;
   }
 }
+
+
+/* R15: three phase loci, not three pie-shaped wedges.
+   The 160 source cells are retained in the SVG for exact phase indexing;
+   the visual foreground is three spacious open tracks and their live loci. */
+.research-task-primary .research-fan-composition .phase-orbit-rail{
+  fill:none;
+  stroke:var(--research-diagram-context);
+  stroke-width:14;
+  stroke-linecap:round;
+  opacity:.27;
+}
+.research-task-primary .research-fan-composition .phase-orbit-rail-gregorian{
+  stroke:var(--research-fan-outer);
+  opacity:.65;
+}
+.research-task-primary .research-fan-composition .phase-orbit-rail-year{
+  stroke:var(--research-fan-middle);
+  opacity:.63;
+}
+.research-task-primary .research-fan-composition .phase-orbit-rail-day{
+  stroke:var(--research-fan-inner);
+  opacity:.66;
+}
+.research-task-primary .research-fan-composition .phase-sector,
+.research-task-primary .research-fan-composition .phase-sector.is-current,
+.research-task-primary .research-fan-composition .phase-sector.is-current.is-closed{
+  fill:transparent;
+  stroke:none;
+}
+.research-task-primary .research-fan-composition .recurrence-guide,
+.research-task-primary .research-fan-composition .phase-band{
+  display:none;
+}
+.research-task-primary .research-fan-composition .phase-label,
+.research-task-primary .research-fan-composition .phase-ring-name{
+  display:none;
+}
+.research-task-primary .research-fan-composition .phase-tick{
+  display:none;
+}
+.research-task-primary .research-fan-composition .phase-tick.major{
+  display:block;
+  stroke:var(--research-text-secondary);
+  stroke-width:2.1;
+  opacity:.25;
+}
+.research-task-primary .research-fan-composition .cursor-halo{
+  display:none;
+}
+.research-task-primary .research-fan-composition .cursor-line{
+  stroke:var(--research-fan-datum);
+  stroke-width:2.2;
+  opacity:.65;
+}
+.research-task-primary .research-fan-composition .cursor-label{
+  fill:var(--research-text-secondary);
+  font-size:17px;
+  opacity:.75;
+}
+.research-task-primary .research-fan-composition .return-marker,
+.research-task-primary .research-fan-composition .return-marker.is-closed{
+  stroke:var(--research-text-primary);
+  stroke-width:2.7;
+  opacity:.8;
+  filter:none;
+}
+.research-task-primary .research-fan-composition .return-marker-label{
+  display:none;
+}
+.research-task-primary .research-fan-composition .phase-position-arc{
+  fill:none;
+  stroke:var(--research-current);
+  stroke-width:18;
+  stroke-linecap:round;
+}
+.research-task-primary .research-fan-composition .phase-position-arc.is-closed{
+  stroke:var(--research-fan-datum);
+  stroke-width:16;
+}
+.research-task-primary .research-fan-composition .phase-position-dot{
+  fill:var(--research-fan-field);
+  stroke:var(--research-current);
+  stroke-width:5;
+}
+.research-task-primary .research-fan-composition .return-marker-zero-node{
+  r:7px;
+  fill:var(--research-fan-field);
+  stroke:var(--research-fan-datum);
+  stroke-width:4;
+}
+.research-task-primary .research-fan-composition .phase-offset-arc{
+  fill:none;
+  stroke:var(--research-current);
+  stroke-width:7;
+  stroke-linecap:round;
+  opacity:.96;
+}
+.research-task-primary .research-fan-composition [data-phase-available="false"] .phase-sector{
+  opacity:0;
+}
+@media(max-width:680px){
+  .research-task-primary .research-fan-composition .phase-orbit-rail{
+    stroke-width:19;
+  }
+  .research-task-primary .research-fan-composition .phase-tick.major{
+    stroke-width:4;
+  }
+  .research-task-primary .research-fan-composition .phase-position-arc,
+  .research-task-primary .research-fan-composition .phase-position-arc.is-closed{
+    stroke-width:24;
+  }
+  .research-task-primary .research-fan-composition .phase-position-dot{
+    r:10px;
+    stroke-width:7;
+  }
+  .research-task-primary .research-fan-composition .return-marker-zero-node{
+    r:10px;
+    stroke-width:7;
+  }
+  .research-task-primary .research-fan-composition .return-marker,
+  .research-task-primary .research-fan-composition .return-marker.is-closed{
+    stroke-width:4;
+  }
+  .research-task-primary .research-fan-composition .phase-offset-arc{
+    stroke-width:11;
+  }
+  .research-task-primary .research-fan-composition .cursor-line{
+    stroke-width:3;
+  }
+  .research-task-primary .research-fan-composition .cursor-label{
+    display:none;
+  }
+}
