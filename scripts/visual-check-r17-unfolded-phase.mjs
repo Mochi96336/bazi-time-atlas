@@ -28,7 +28,7 @@ for(const scene of [
   assert(figure.includes('data-layout="'+scene.layout+'"'),scene.name+" wrong native viewport");
   for(const [attr,value] of [["gregorian-signed",scene.wanted[0]],["year-signed",scene.wanted[1]],["day-signed",scene.wanted[2]]])
     assert(figure.includes('data-'+attr+'="'+value+'"'),scene.name+" wrong "+attr+": "+figure);
-  assert(dom.includes("三個週期的共同 0"),scene.name+" drawing did not complete");
+  assert(figure.includes('data-figure-grammar="graduated-zero-spine"'),scene.name+" expected graduated zero-spine geometry");
   assert(!dom.includes("Uncaught SyntaxError"),scene.name+" syntax error");
   const filename="research-r17-"+scene.name+".png";
   const file=path.join(outputDir,filename);
