@@ -143,6 +143,15 @@ function mount(){
       doc.defaultView.requestAnimationFrame(()=>{
         const top=strip.getBoundingClientRect().top+doc.defaultView.scrollY;
         doc.defaultView.scrollTo(0,Math.max(0,top-(doc.defaultView.innerWidth<=680?174:128)));
+        // The live Ganzhi rail is sticky. Align the real strip heading BELOW
+        // that rail, not to the frame origin (which clips the heading).
+        doc.defaultView.requestAnimationFrame(()=>{
+          const heading=strip.querySelector(".research-year-head");
+          const rail=doc.querySelector("#research-time-state");
+          if(!heading||!rail)return;
+          const deficit=rail.getBoundingClientRect().bottom+18-heading.getBoundingClientRect().top;
+          if(deficit>0)doc.defaultView.scrollBy({top:-Math.ceil(deficit),behavior:"instant"});
+        });
       });
     }else if(++attempts<350)doc.defaultView.requestAnimationFrame(settle);
     else document.body.dataset.r17ContextError="production-not-ready";
