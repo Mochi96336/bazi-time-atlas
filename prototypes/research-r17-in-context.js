@@ -118,6 +118,9 @@ function mount(){
     "body.r17-context-prototype #r17-context-proof{display:block}",
     "body.r17-context-prototype #recurrence-instrument .research-fan-head{padding-top:0}",
     "body.r17-context-prototype #recurrence-instrument .research-current-state-phases{opacity:.5}",
+    "body.r17-context-prototype #recurrence-instrument .research-fan-datum-note{display:none!important}",
+    "body.r17-context-prototype #recurrence-instrument[data-research-mainline=phase-fan]{margin-top:38px!important}",
+    "body.r17-context-prototype #research-discrete .discrete-derivation{margin-top:42px!important}",
     "@media(min-width:960px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{grid-template-columns:minmax(0,.37fr) minmax(0,.63fr)!important;column-gap:clamp(28px,4vw,65px)!important}}",
     "@media(max-width:680px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{gap:20px!important}}"
   ].join("\n");
@@ -139,7 +142,7 @@ function mount(){
       apply();
       doc.defaultView.requestAnimationFrame(()=>{
         const top=strip.getBoundingClientRect().top+doc.defaultView.scrollY;
-        doc.defaultView.scrollTo(0,Math.max(0,top-24));
+        doc.defaultView.scrollTo(0,Math.max(0,top-(doc.defaultView.innerWidth<=680?174:128)));
       });
     }else if(++attempts<350)doc.defaultView.requestAnimationFrame(settle);
     else document.body.dataset.r17ContextError="production-not-ready";
