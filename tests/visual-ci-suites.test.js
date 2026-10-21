@@ -33,7 +33,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 57, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, production evidence, and full-page Research rhythm evidence");
+  assert.equal(scripts.length, 58, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, production evidence, and full-page Research rhythm evidence");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
@@ -41,6 +41,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
   assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
+  assert.ok(VISUAL_CI_SUITES.research.includes("check-r17-live-interactions.mjs"));
   assert.ok(
     VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-01-diagram-lab.mjs"),
     "Research 01 diagram lab must keep deterministic desktop/mobile PNG evidence"
