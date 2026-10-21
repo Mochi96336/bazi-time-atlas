@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R17 · Research 01 in-context integration study</title>
+<style>
+:root{color-scheme:dark;background:#090e12;color:#eef2f2;font:14px/1.5 system-ui,"Noto Sans TC",sans-serif}
+*{box-sizing:border-box}
+body{margin:0}
+header{display:flex;gap:18px;justify-content:space-between;align-items:center;padding:11px 22px;background:#131b20;border-bottom:1px solid #3c4b54}
+header p{margin:0;color:#b2bdc1;max-width:56ch}
+header strong{display:block;font-size:14px;font-weight:650}
+header .intro{min-width:235px}
+.controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+button{font:inherit;background:transparent;color:#b2bdc1;border:1px solid #46545c;padding:6px 11px;cursor:pointer}
+button[aria-pressed="true"]{color:#eef2f2;border-color:#75cddd}
+button:focus-visible{outline:2px solid #75cddd;outline-offset:3px}
+select{font:inherit;background:#182228;color:#eef2f2;border:1px solid #46545c;padding:6px}
+main{margin:0}
+iframe{display:block;width:100%;height:calc(100vh - 73px);min-height:650px;border:0;background:#0a0e12}
+footer{padding:10px 22px;color:#b2bdc1;font-size:12px;border-top:1px solid #26343b}
+@media(max-width:680px){
+header{display:block;padding:12px 14px}
+header p{display:none}
+.controls{margin-top:9px;gap:6px}
+button{padding:6px 8px;font-size:12px}
+iframe{height:calc(100vh - 123px);min-height:550px}
+footer{font-size:11px;padding:8px 14px}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="intro"><strong>RESEARCH 01 / R17 IN CONTEXT</strong><p>真正的年度時間條、干支與 Δ 控制；只在相位圖位置比較視覺語法</p></div>
+<div class="controls" role="group" aria-label="設計對照">
+<button type="button" data-variant="proof" aria-pressed="true">R17 零點證明</button>
+<button type="button" data-variant="original" aria-pressed="false">R16 原始圖形</button>
+<label for="scenario">時間差</label>
+<select id="scenario" aria-label="時間差案例">
+<option value="1980">+1,980</option>
+<option value="400">+400</option>
+<option value="24000">+24,000</option>
+</select>
+</div>
+</header>
+<main><iframe id="production" title="完整 Research 01 正式頁上下文"></iframe></main>
+<footer>獨立研究原型，不修改 recurrence.html 或正式相位計算。來源是同源 iframe 內真正的正式頁，R17 只替換顯示圖形；切換設計不建立第二套日期狀態。</footer>
+<script type="module" src="./research-r17-in-context.js"></script>
+</body>
+</html>
