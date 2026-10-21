@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body>
+<output id="probe" data-ready="false">running</output>
+<iframe id="research" title="Unmodified live Research 01" style="width:100%;height:900px;border:0"></iframe>
+<script>
+const probe=document.querySelector("#probe");
+const iframe=document.querySelector("#research");
+const params=new URLSearchParams(location.search);
+const mode=params.get("mode")==="r16"?"r16":"r17";
+const events=[];
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function fail(message){throw Error(message+"; events="+JSON.stringify(events));}
+function expect(value,message){if(!value)fail(message);}
+function report(phase,doc){
+ const instrument=doc.querySelector("#recurrence-instrument");
+ const svg=doc.querySelector("#r17-production-proof");
+ const entry={
+  phase,delta:instrument?.dataset.deltaYears,base:instrument?.dataset.baseDate,
+  source:instrument?.dataset.deltaSource,visual:doc.documentElement.dataset.researchVisual,
+  playing:instrument?.dataset.deltaPlayback,proof:svg?.dataset.proofReady,
+  evidence:svg?.dataset.evidenceState,
+  phases:[svg?.dataset.gregorianSigned,svg?.dataset.yearSigned,svg?.dataset.daySigned],
+  r16:doc.querySelector("#recurrence-wheel")?.dataset.mobileCrop
+ };
+ events.push(entry);
+ expect(instrument&&doc.querySelector("#delta-slider"),phase+": canonical controls lost");
+ expect(entry.visual===mode,phase+": wrong display mode");
+ expect(doc.querySelector("#research-year-strip"),phase+": real year strip missing");
+ expect(doc.querySelector("#recurrence-wheel"),phase+": R16 geometry missing");
+ if(mode==="r17"){
+  expect(entry.proof==="true",phase+": R17 not rendered");
+  expect(instrument.dataset.r17ProofSource==="recurrenceState",phase+": model fork");
+  expect(svg.querySelectorAll("circle").length>=2,phase+": no proof loci");
+ }else{
+  expect(entry.proof===undefined,phase+": R16 unexpectedly rendered proof");
+ }
+ return entry;
+}
+function assertState(phase,doc,delta,expected,evidence){
+ const p=report(phase,doc);
+ expect(p.delta===String(delta),phase+": wrong delta "+p.delta);
+ if(mode==="r17"){
+  expect(p.phases.join(",")===expected.join(","),phase+": phase mismatch "+p.phases);
+  expect(p.evidence===evidence,phase+": wrong closure "+p.evidence);
+ }
+ return p;
+}
+function setSlider(doc,value){
+ const input=doc.querySelector("#delta-slider");
+ input.value=String(value);
+ input.dispatchEvent(new doc.defaultView.Event("input",{bubbles:true}));
+}
+function setBase(doc,{year,month,day}){
+ for(const [id,value] of [["base-year",year],["base-month",month],["base-day",day]]){
+  const el=doc.querySelector("#"+id);
+  el.value=String(value);
+ }
+ doc.querySelector("#base-day").dispatchEvent(new doc.defaultView.Event("change",{bubbles:true}));
+}
+function loadFrame(src){
+ return new Promise((resolve,reject)=>{
+  iframe.onload=()=>resolve(iframe.contentDocument);
+  iframe.onerror=()=>reject(Error("iframe load failed"));
+  iframe.src=src;
+ });
+}
+async function interact(doc){
+ assertState("initial",doc,1980,["-20","0","0"],"year-day-closed");
+ // The user-facing range input feeds the canonical setDelta and R17 immediately.
+ setSlider(doc,400);
+ assertState("slider-400",doc,400,["0","-20","-3"],"gregorian-closed");
+ setSlider(doc,24000);
+ assertState("slider-24000",doc,24000,["0","0","0"],"all-closed");
+ // Follow a public, real event used by the Year strip without second time owner.
+ doc.defaultView.dispatchEvent(new doc.defaultView.CustomEvent("recurrence:select-delta",{
+  detail:{deltaYears:1980,source:"r17-interaction-fixture"}
+ }));
+ assertState("strip-delta-event",doc,1980,["-20","0","0"],"year-day-closed");
+ // Playback: actual click must advance time and pause at an intermediate state.
+ setSlider(doc,0);
+ const play=doc.querySelector("#research-delta-play");
+ play.click();
+ let state=report("play-start",doc);
+ expect(state.playing==="playing", "play button did not start controller");
+ await sleep(1500);
+ state=report("play-advance",doc);
+ expect(Number(state.delta)>0,"playback did not advance delta "+state.delta);
+ expect(state.playing==="playing","playback ended before manual pause");
+ play.click();
+ state=report("play-pause",doc);
+ expect(state.playing==="stopped","playback did not stop");
+ // Return to a deterministic delta and change actual base editor fields.
+ setSlider(doc,1);
+ setBase(doc,{year:2024,month:2,day:29});
+ state=report("leap-day-invalid",doc);
+ expect(state.base==="2024-02-29","base editor did not commit");
+ expect(state.delta==="1","base edit lost delta");
+ if(mode==="r17"){
+  expect(state.evidence==="unavailable","invalid leap-day target treated as closure");
+  expect(state.phases[2]==="null","unavailable Day phase faked as 0");
+ }
+ setBase(doc,{year:2024,month:2,day:28});
+ state=report("leap-day-recovered",doc);
+ expect(state.base==="2024-02-28","valid day edit not committed");
+ if(mode==="r17")expect(state.evidence!=="unavailable","recovered Day phase still unavailable");
+ // Check the canonical calendar owns the chosen original-strip date.
+ const baseline=doc.querySelector("#recurrence-instrument").dataset.baseDate;
+ doc.defaultView.dispatchEvent(new doc.defaultView.CustomEvent("recurrence:select-strip-date",{
+  detail:{date:{year:2025,month:3,day:1}}
+ }));
+ state=report("original-strip-date",doc);
+ expect(["applied","stale-original-input","unrepresentable-baseline-date"].includes(
+  doc.querySelector("#recurrence-instrument").dataset.stripSelectionOutcome),
+  "original strip selection produced unexpected status");
+ if(doc.querySelector("#recurrence-instrument").dataset.stripSelectionOutcome==="applied")
+  expect(state.base!==baseline,"strip selection declared applied but base did not change");
+}
+async function main(){
+ const suffix=mode==="r17"?"&r17=1":"";
+ let doc=await loadFrame("../../recurrence.html?date=2026-09-13&delta=1980"+suffix);
+ await interact(doc);
+ // Navigate away and return: fresh controller and opt-in mode must initialize.
+ doc=await loadFrame("../../recurrence.html?date=2026-09-13&delta=1980"+suffix+"#research-year-strip");
+ assertState("return-navigation",doc,1980,["-20","0","0"],"year-day-closed");
+ // The default URL must remain R16, even after direct R17 had been used.
+ if(mode==="r17"){
+  const old=await loadFrame("../../recurrence.html?date=2026-09-13&delta=1980");
+  expect(old.documentElement.dataset.researchVisual==="r16","R16 rollback did not restore");
+  expect(old.querySelector("#r17-production-proof").dataset.proofReady===undefined,
+    "R17 bled into default after navigation");
+  events.push({phase:"r16-rollback",visual:"r16"});
+ }
+ probe.dataset.ready="true";
+ probe.dataset.mode=mode;
+ probe.dataset.events=String(events.length);
+ probe.dataset.playbackAdvanced="true";
+ probe.dataset.navigationRestored="true";
+ probe.dataset.last=events.at(-1).phase;
+ probe.textContent=JSON.stringify(events);
+}
+main().catch(error=>{
+ probe.dataset.ready="error";
+ probe.dataset.error=error.message;
+ probe.textContent=error.stack??String(error);
+});
+</script>
+</body>
+</html>
