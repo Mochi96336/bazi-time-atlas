@@ -1550,3 +1550,115 @@
     padding-top:var(--research-space-6);
   }
 }
+
+
+/* R17 production-candidate, opt-in only (?r17=1). R16 DOM + geometry
+   continue updating exactly as before and remain the default presentation. */
+html[data-research-visual="r17"] #recurrence-instrument #recurrence-wheel,
+html[data-research-visual="r17"] #recurrence-instrument .recurrence-legend,
+html[data-research-visual="r17"] #recurrence-instrument #research-fan-verdict,
+html[data-research-visual="r17"] #recurrence-instrument #research-fan-explanation,
+html[data-research-visual="r17"] #recurrence-instrument .research-fan-datum-note{
+  display:none!important;
+}
+html[data-research-visual="r17"] #recurrence-instrument .research-fan-composition .research-fan-graphic{
+  aspect-ratio:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+  position:relative!important;
+}
+html[data-research-visual="r17"] #r17-production-proof{
+  display:block;
+  position:relative;
+  inset:auto;
+  overflow:visible;
+  width:100%;
+  max-width:740px;
+  height:auto;
+}
+html[data-research-visual="r17"] #recurrence-instrument .research-fan-head{
+  padding-top:0;
+}
+html[data-research-visual="r17"] #r17-production-claim{
+  display:block;
+  color:var(--research-text-primary);
+  font-size:clamp(23px,2.25vw,30px);
+  line-height:1.25;
+  letter-spacing:-.025em;
+  font-weight:620;
+  margin-top:13px;
+}
+html[data-research-visual="r17"] #r17-production-reason{
+  display:block;
+  color:var(--research-text-secondary);
+  font-size:14px;
+  line-height:1.65;
+  max-width:31ch;
+  margin-top:15px;
+}
+html[data-research-visual="r17"] #recurrence-instrument .research-current-state-phases{
+  opacity:.5;
+}
+html[data-research-visual="r17"] #recurrence-instrument[data-research-mainline="phase-fan"]{
+  margin-top:28px!important;
+}
+html[data-research-visual="r17"] #research-discrete .discrete-derivation{
+  margin-top:26px!important;
+}
+html[data-research-visual="r17"] #research-discrete .discrete-to-astronomy{
+  display:grid!important;
+  grid-template-columns:minmax(110px,.38fr) minmax(0,1.62fr)!important;
+  align-items:start!important;
+  gap:22px!important;
+  max-width:100%;
+  margin:30px 0 0!important;
+  padding:20px 0 24px!important;
+  border-top:1px solid var(--research-line-subtle)!important;
+  color:var(--research-text-secondary);
+  font-size:clamp(17px,1.6vw,21px)!important;
+  line-height:1.5!important;
+  font-weight:450!important;
+}
+html[data-research-visual="r17"] #research-discrete .discrete-to-astronomy::before{
+  content:"離散 → 節界"!important;
+  color:var(--research-text-muted);
+  font-size:12px!important;
+  line-height:1.6;
+  font-weight:500;
+  letter-spacing:.06em;
+}
+html[data-research-visual="r17"] #research-discrete .research-sexagenary-drilldown{
+  margin-top:10px!important;
+}
+@media(min-width:960px){
+  html[data-research-visual="r17"] #recurrence-instrument .research-fan-composition{
+    grid-template-columns:minmax(0,.37fr) minmax(0,.63fr)!important;
+    column-gap:clamp(28px,4vw,65px)!important;
+  }
+}
+@media(max-width:680px){
+  html[data-research-visual="r17"] #recurrence-instrument .research-fan-composition{
+    gap:18px!important;
+  }
+  html[data-research-visual="r17"] #r17-production-claim{
+    font-size:26px;
+    margin-top:9px;
+  }
+  html[data-research-visual="r17"] #r17-production-reason{
+    margin-top:10px;
+  }
+  html[data-research-visual="r17"] #recurrence-instrument[data-research-mainline="phase-fan"]{
+    margin-top:22px!important;
+  }
+  html[data-research-visual="r17"] #research-discrete .discrete-to-astronomy{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:10px!important;
+    margin-top:22px!important;
+    padding:15px 0 15px!important;
+    font-size:17px!important;
+  }
+  html[data-research-visual="r17"] #research-discrete .discrete-to-astronomy::before{
+    font-size:11px!important;
+  }
+}
