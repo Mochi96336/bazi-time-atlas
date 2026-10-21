@@ -32,6 +32,6 @@ test("R17 renders an independent explanatory claim instead of repeating the prom
  assert.match(js,/r17-context-claim/);
  assert.match(js,/r17-context-reason/);
  assert.match(js,/r17ClaimHasNumericResidual/);
- assert.match(js,/research-fan-verdict\\{display:none!important/);
- assert.match(js,/research-fan-explanation\\{display:none!important/);
+ assert.match(js,/research-fan-verdict\{display:none!important/);
+ assert.match(js,/research-fan-explanation\{display:none!important/);
 });
