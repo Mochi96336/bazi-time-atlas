@@ -19,6 +19,7 @@ for(const scene of [
   {name:"desktop-local",width:1440,height:1250,delta:1980,wanted:["-20","0","0"],layout:"desktop-native"},
   {name:"mobile-local",width:390,height:1900,delta:1980,wanted:["-20","0","0"],layout:"mobile-native"},
   {name:"mobile-global",width:390,height:1900,delta:24000,wanted:["0","0","0"],layout:"mobile-native"},
+  {name:"mobile-nonzero",width:390,height:1900,delta:400,wanted:["0","-20","-3"],layout:"mobile-native"},
   {name:"desktop-tracks",width:1440,height:1250,delta:1980,wanted:["-20","0","0"],layout:"desktop-native",variant:"tracks"}
 ]){
   const url=new URL("prototypes/research-r17-unfolded-phase.html?delta="+scene.delta+(scene.variant?"&variant="+scene.variant:""),baseURL).href;
