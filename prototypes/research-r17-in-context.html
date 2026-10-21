@@ -7,7 +7,7 @@
 <style>
 :root{color-scheme:dark;background:#090e12;color:#eef2f2;font:14px/1.5 system-ui,"Noto Sans TC",sans-serif}
 *{box-sizing:border-box}
-body{margin:0}
+html,body{height:100%;overflow:hidden}body{margin:0}
 header{display:flex;gap:18px;justify-content:space-between;align-items:center;padding:11px 22px;background:#131b20;border-bottom:1px solid #3c4b54}
 header p{margin:0;color:#b2bdc1;max-width:56ch}
 header strong{display:block;font-size:14px;font-weight:650}
@@ -18,14 +18,14 @@ button[aria-pressed="true"]{color:#eef2f2;border-color:#75cddd}
 button:focus-visible{outline:2px solid #75cddd;outline-offset:3px}
 select{font:inherit;background:#182228;color:#eef2f2;border:1px solid #46545c;padding:6px}
 main{margin:0}
-iframe{display:block;width:100%;height:calc(100vh - 73px);min-height:650px;border:0;background:#0a0e12}
+iframe{display:block;width:100%;height:calc(100vh - 97px);min-height:650px;border:0;background:#0a0e12}
 footer{padding:10px 22px;color:#b2bdc1;font-size:12px;border-top:1px solid #26343b}
 @media(max-width:680px){
 header{display:block;padding:12px 14px}
 header p{display:none}
 .controls{margin-top:9px;gap:6px}
 button{padding:6px 8px;font-size:12px}
-iframe{height:calc(100vh - 123px);min-height:550px}
+iframe{height:calc(100vh - 133px);min-height:550px}
 footer{font-size:11px;padding:8px 14px}
 }
 </style>
