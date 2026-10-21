@@ -33,6 +33,8 @@ for(const scene of [
   const expectedGrammar=scene.variant==="tracks"?"graduated-zero-spine":"zero-proof-plate";
   assert(figure.includes('data-figure-grammar="'+expectedGrammar+'"'),scene.name+" wrong diagram grammar");
   assert(figure.includes('data-diagram-variant="'+(scene.variant??"proof")+'"'),scene.name+" wrong variant");
+  const evidenceState=scene.delta===24000?"all-closed":scene.delta===1980?"year-day-closed":"gregorian-closed";
+  assert(figure.includes('data-evidence-state="'+evidenceState+'"'),scene.name+" wrong semantic evidence state");
   if(scene.delta===24000){
     assert(!dom.includes("+1,980 年後"),scene.name+" stale local-date narrative");
     assert(dom.includes("三個離散相位均回到零點"),scene.name+" global closure narrative missing");
