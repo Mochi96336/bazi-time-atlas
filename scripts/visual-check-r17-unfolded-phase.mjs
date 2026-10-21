@@ -18,9 +18,10 @@ const captures=[];
 for(const scene of [
   {name:"desktop-local",width:1440,height:1250,delta:1980,wanted:["-20","0","0"],layout:"desktop-native"},
   {name:"mobile-local",width:390,height:1900,delta:1980,wanted:["-20","0","0"],layout:"mobile-native"},
-  {name:"mobile-global",width:390,height:1900,delta:24000,wanted:["0","0","0"],layout:"mobile-native"}
+  {name:"mobile-global",width:390,height:1900,delta:24000,wanted:["0","0","0"],layout:"mobile-native"},
+  {name:"desktop-tracks",width:1440,height:1250,delta:1980,wanted:["-20","0","0"],layout:"desktop-native",variant:"tracks"}
 ]){
-  const url=new URL("prototypes/research-r17-unfolded-phase.html?delta="+scene.delta,baseURL).href;
+  const url=new URL("prototypes/research-r17-unfolded-phase.html?delta="+scene.delta+(scene.variant?"&variant="+scene.variant:""),baseURL).href;
   const windowFlag="--window-size="+scene.width+","+scene.height;
   const dom=run([windowFlag,"--dump-dom",url],scene.name+" DOM");
   const figure=figureTag(dom);
@@ -28,7 +29,13 @@ for(const scene of [
   assert(figure.includes('data-layout="'+scene.layout+'"'),scene.name+" wrong native viewport");
   for(const [attr,value] of [["gregorian-signed",scene.wanted[0]],["year-signed",scene.wanted[1]],["day-signed",scene.wanted[2]]])
     assert(figure.includes('data-'+attr+'="'+value+'"'),scene.name+" wrong "+attr+": "+figure);
-  assert(figure.includes('data-figure-grammar="graduated-zero-spine"'),scene.name+" expected graduated zero-spine geometry");
+  const expectedGrammar=scene.variant==="tracks"?"graduated-zero-spine":"zero-proof-plate";
+  assert(figure.includes('data-figure-grammar="'+expectedGrammar+'"'),scene.name+" wrong diagram grammar");
+  assert(figure.includes('data-diagram-variant="'+(scene.variant??"proof")+'"'),scene.name+" wrong variant");
+  if(scene.delta===24000){
+    assert(!dom.includes("+1,980 年後"),scene.name+" stale local-date narrative");
+    assert(dom.includes("三個離散相位均回到零點"),scene.name+" global closure narrative missing");
+  }
   assert(!dom.includes("Uncaught SyntaxError"),scene.name+" syntax error");
   const filename="research-r17-"+scene.name+".png";
   const file=path.join(outputDir,filename);
