@@ -29,7 +29,9 @@ for(const row of rows){
   "data-r17-context-ready":"true","data-r17-production-ready":"true",
   "data-r17-year-strip-present":"true","data-r17-delta-controls-present":"true",
   "data-r17-figure-present":"true","data-r17-year-head-clear":"true","data-r17-current-delta":String(row.delta),
-  "data-r17-selected-variant":row.variant,"data-r17-phase-evidence":row.phase
+  "data-r17-selected-variant":row.variant,"data-r17-phase-evidence":row.phase,
+  "data-r17-claim-state":row.delta===24000?"all-closed":row.delta===1980?"year-day-closed":"gregorian-closed",
+  "data-r17-claim-has-numeric-residual":"false"
  }))assert(dom.includes(attr+'="'+want+'"'),row.key+" missing "+attr+"="+want+"; "+dom.slice(-2200));
  assert(!dom.includes("production-structure-missing"),row.key+" failed to load production nodes");
  const fileName="research-r17-context-"+row.key+".png";
