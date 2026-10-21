@@ -96,6 +96,21 @@ function render() {
   if(reason)reason.textContent=detail;
   document.body.dataset.r17ClaimState=evidence;
   document.body.dataset.r17ClaimHasNumericResidual=String(/[−+]?20(?:\D|$)/.test(headline));
+  const bridge=doc.querySelector("#research-discrete .discrete-to-astronomy");
+  if(bridge){
+    if(!bridge.dataset.r17OriginalText)bridge.dataset.r17OriginalText=bridge.textContent.trim();
+    const bridgeMessages={
+      "all-closed":"三項離散相位同時歸零；真正的十二節界是否也回到原位置，接著交給 02 驗真。",
+      "year-day-closed":"年序、日序已重遇；公曆只是季節位置代理。下一步，要看實際節界是否也接近基準。",
+      "gregorian-closed":"公曆結構先歸零，但年序與日序還有位移；即使離散條件都滿足，也仍須檢查節界。",
+      "mixed":"離散條件尚未一起重遇；它們與真正的太陽節界是兩種不同精度的判定。"
+    };
+    bridge.textContent=variant==="proof"?bridgeMessages[evidence]:bridge.dataset.r17OriginalText;
+    document.body.dataset.r17BridgeState=evidence;
+    document.body.dataset.r17BridgeCopyReady="true";
+    const bounds=bridge.getBoundingClientRect();
+    document.body.dataset.r17BridgeHeight=String(Math.round(bounds.height));
+  }
   Object.assign(document.body.dataset,{
     r17ProductionReady:"true",
     r17YearStripPresent:String(!!doc.querySelector("#research-year-strip")),
@@ -110,6 +125,9 @@ function apply(){
   buttonState();
   if(!child)return;
   child.doc.body.classList.toggle("r17-context-prototype",variant==="proof");
+  // Restore the original chapter-transition copy in R16 comparison mode.
+  const link=child.doc.querySelector("#research-discrete .discrete-to-astronomy");
+  if(link?.dataset.r17OriginalText&&variant==="original")link.textContent=link.dataset.r17OriginalText;
   render();
   document.body.dataset.r17ContextReady="true";
 }
@@ -141,6 +159,9 @@ function mount(){
     "body.r17-context-prototype #r17-context-reason{display:block;color:var(--research-text-secondary);font-size:14px;line-height:1.65;max-width:31ch;margin-top:15px}",
     "body.r17-context-prototype #recurrence-instrument[data-research-mainline=phase-fan]{margin-top:28px!important}",
     "body.r17-context-prototype #research-discrete .discrete-derivation{margin-top:26px!important}",
+    "body.r17-context-prototype #research-discrete .discrete-to-astronomy{display:grid!important;grid-template-columns:minmax(110px,.38fr) minmax(0,1.62fr)!important;align-items:start!important;gap:22px!important;max-width:100%;margin:30px 0 0!important;padding:20px 0 24px!important;border-top:1px solid var(--research-line-subtle)!important;color:var(--research-text-secondary);font-size:clamp(17px,1.6vw,21px)!important;line-height:1.5!important;font-weight:450!important}",
+    "body.r17-context-prototype #research-discrete .discrete-to-astronomy::before{content:'02 / 下一個問題'!important;color:var(--research-text-muted);font-size:12px!important;line-height:1.6;font-weight:500;letter-spacing:.06em}",
+    "@media(max-width:680px){body.r17-context-prototype #research-discrete .discrete-to-astronomy{grid-template-columns:minmax(0,1fr)!important;gap:10px!important;margin-top:22px!important;padding:15px 0 24px!important;font-size:17px!important}body.r17-context-prototype #research-discrete .discrete-to-astronomy::before{font-size:11px!important}}",
     "@media(min-width:960px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{grid-template-columns:minmax(0,.37fr) minmax(0,.63fr)!important;column-gap:clamp(28px,4vw,65px)!important}}",
     "@media(max-width:680px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{gap:18px!important}body.r17-context-prototype #r17-context-claim{font-size:26px;margin-top:9px}body.r17-context-prototype #r17-context-reason{margin-top:10px}body.r17-context-prototype #recurrence-instrument[data-research-mainline=phase-fan]{margin-top:22px!important}}"
   ].join("\n");
