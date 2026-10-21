@@ -36,7 +36,7 @@ for(const row of rows){
   "data-r17-claim-has-numeric-residual":"false"
  }))assert(dom.includes(attr+'="'+want+'"'),row.key+" missing "+attr+"="+want+"; "+dom.slice(-2200));
  assert(!dom.includes("production-structure-missing"),row.key+" failed to load production nodes");
- const bridgeHeight=Number(dom.match(/data-r17-bridge-height="(\\d+)"/)?.[1]);
+ const bridgeHeight=Number(dom.match(/data-r17-bridge-height="([0-9]+)"/)?.[1]);
  assert(Number.isFinite(bridgeHeight)&&bridgeHeight>30, row.key+" missing bridge geometry");
  const bridgeMax=row.width<=400?170:145;
  assert(bridgeHeight<=bridgeMax,row.key+" bridge still reserves too much empty height: "+bridgeHeight+" > "+bridgeMax);
