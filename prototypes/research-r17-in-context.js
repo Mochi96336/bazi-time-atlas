@@ -81,6 +81,21 @@ function render() {
   });
   const evidence=g===0&&y===0&&d===0?"all-closed":y===0&&d===0?"year-day-closed":g===0?"gregorian-closed":"mixed";
   svg.dataset.r17EvidenceState=evidence;
+  // Editorial hierarchy: the proof owns the single prominent numeric residual.
+  // The left column states the relationship, not a second copy of -20.
+  const claim=doc.querySelector("#r17-context-claim");
+  const reason=doc.querySelector("#r17-context-reason");
+  const claims={
+    "all-closed":["三個離散條件已歸零","公曆代理、年序、日序均同相位；節氣仍須在 02 驗真。"],
+    "year-day-closed":["年序、日序已重合","公曆結構尚未回到基準，偏移量交給右側圖形說明。"],
+    "gregorian-closed":["公曆結構已歸零","年序與日序仍有位移，因此還不是共同重遇。"],
+    "mixed":["三個條件尚未同時重遇","從共同零點分別讀取未閉合週期的最短偏移。"]
+  };
+  const [headline,detail]=claims[evidence];
+  if(claim)claim.textContent=headline;
+  if(reason)reason.textContent=detail;
+  document.body.dataset.r17ClaimState=evidence;
+  document.body.dataset.r17ClaimHasNumericResidual=String(/[−+]?20(?:\D|$)/.test(headline));
   Object.assign(document.body.dataset,{
     r17ProductionReady:"true",
     r17YearStripPresent:String(!!doc.querySelector("#research-year-strip")),
@@ -119,12 +134,31 @@ function mount(){
     "body.r17-context-prototype #recurrence-instrument .research-fan-head{padding-top:0}",
     "body.r17-context-prototype #recurrence-instrument .research-current-state-phases{opacity:.5}",
     "body.r17-context-prototype #recurrence-instrument .research-fan-datum-note{display:none!important}",
-    "body.r17-context-prototype #recurrence-instrument[data-research-mainline=phase-fan]{margin-top:38px!important}",
-    "body.r17-context-prototype #research-discrete .discrete-derivation{margin-top:42px!important}",
+    "body.r17-context-prototype #recurrence-instrument .research-fan-verdict{display:none!important}",
+    "body.r17-context-prototype #recurrence-instrument .research-fan-explanation{display:none!important}",
+    "#r17-context-claim,#r17-context-reason{display:none}",
+    "body.r17-context-prototype #r17-context-claim{display:block;color:var(--research-text-primary);font-size:clamp(23px,2.25vw,30px);line-height:1.25;letter-spacing:-.025em;font-weight:620;margin-top:13px}",
+    "body.r17-context-prototype #r17-context-reason{display:block;color:var(--research-text-secondary);font-size:14px;line-height:1.65;max-width:31ch;margin-top:15px}",
+    "body.r17-context-prototype #recurrence-instrument[data-research-mainline=phase-fan]{margin-top:28px!important}",
+    "body.r17-context-prototype #research-discrete .discrete-derivation{margin-top:26px!important}",
     "@media(min-width:960px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{grid-template-columns:minmax(0,.37fr) minmax(0,.63fr)!important;column-gap:clamp(28px,4vw,65px)!important}}",
-    "@media(max-width:680px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{gap:20px!important}}"
+    "@media(max-width:680px){body.r17-context-prototype #recurrence-instrument .research-fan-composition{gap:18px!important}body.r17-context-prototype #r17-context-claim{font-size:26px;margin-top:9px}body.r17-context-prototype #r17-context-reason{margin-top:10px}body.r17-context-prototype #recurrence-instrument[data-research-mainline=phase-fan]{margin-top:22px!important}}"
   ].join("\n");
   doc.head.append(style);
+  const caption=doc.querySelector("#recurrence-instrument .phase-gauge-caption");
+  const kicker=caption?.querySelector(".research-fan-kicker");
+  if(!caption||!kicker){
+    document.body.dataset.r17ContextError="fan-narrative-missing";
+    return;
+  }
+  const claim=doc.createElement("strong");
+  claim.id="r17-context-claim";
+  claim.className="r17-context-claim";
+  claim.setAttribute("aria-live","polite");
+  const reason=doc.createElement("span");
+  reason.id="r17-context-reason";
+  reason.className="r17-context-reason";
+  kicker.after(claim,reason);
   const svg=doc.createElementNS("http://www.w3.org/2000/svg","svg");
   svg.id="r17-context-proof";
   svg.setAttribute("role","img");
