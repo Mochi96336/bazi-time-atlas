@@ -165,10 +165,8 @@ function drawProof(rows) {
   make("text",{x:28,y:29,fill:"#b2bdc1","font-size":12},"01 / 公曆結構 · 400 年");
   make("text",{x:28,y:92,fill:glyphColor(gregorian),"font-size":mobile?36:43,
     "font-weight":500,"letter-spacing":".01em"},gregorian.available ? signedLabel(gregorian.signed) : "—");
-  make("text",{x:gregorian.available && Math.abs(gregorian.signed)>=100 ? 130 : 96,
-    y:91,fill:"#b2bdc1","font-size":15},"年");
   make("text",{x:28,y:116,fill:"#b2bdc1","font-size":12},
-    gregorian.closed ? "公曆同相位" : gregorian.available ? "距共同零點的最短偏移" : "公曆相位待判定");
+    gregorian.closed ? "公曆結構同相位 · 年" : gregorian.available ? "年 · 距共同零點的最短偏移" : "公曆相位待判定");
 
   const start=zero-halfSpan,end=zero+halfSpan;
   make("path",{d:`M ${start} ${baselineY} H ${end}`,
@@ -215,10 +213,24 @@ function drawProof(rows) {
 function drawUnfolded(rows) {
   if(diagramVariant==="tracks") drawTracks(rows);
   else drawProof(rows);
+  const figure=query("#unfolded");
+  const allClosed=rows.every(row=>row.closed);
+  const evidenceState=allClosed ? "all-closed"
+    : rows[1].closed && rows[2].closed && rows[0].available ? "year-day-closed"
+    : rows[0].closed ? "gregorian-closed" : "mixed";
+  figure.dataset.evidenceState=evidenceState;
   const explain=query("#figure-explanation");
-  explain.textContent=diagramVariant==="tracks"
-    ? "三條相位軌跡共享零點，各自按半週期取比例。此模式保留完整橫向尺度，供比較使用。"
-    : "公曆殘餘是主要位移；年序與日序回零則只留端點。只有未歸零時才展開相應週期的軌跡。";
+  if(diagramVariant==="tracks"){
+    explain.textContent="三條相位軌跡共享零點，各自按半週期取比例。此模式保留完整橫向尺度，供比較使用。";
+  }else if(evidenceState==="all-closed"){
+    explain.textContent="公曆結構、年序與日序全部落在共同零點。這是離散條件閉合的證據，仍不是節氣天文驗證。";
+  }else if(evidenceState==="year-day-closed"){
+    explain.textContent="公曆尚有最短偏移，年序與日序則在共同零點相遇；兩個已閉合的週期不再重畫刻度尺。";
+  }else if(evidenceState==="gregorian-closed"){
+    explain.textContent="公曆結構先回到零點；年序、日序尚未閉合，因此各自展開相位軌跡。";
+  }else{
+    explain.textContent="各相位尚未同時重合，未閉合的週期各自顯示最短位移與獨立的週期尺度。";
+  }
 }
 function update() {
   const input=query("#delta");
