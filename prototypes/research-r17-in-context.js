@@ -151,11 +151,9 @@ function mount(){
           if(!heading||!rail)return;
           const deficit=rail.getBoundingClientRect().bottom+18-heading.getBoundingClientRect().top;
           if(deficit>0)doc.defaultView.scrollBy({top:-Math.ceil(deficit),behavior:"instant"});
-          doc.defaultView.requestAnimationFrame(()=>{
-            const clearance=heading.getBoundingClientRect().top-rail.getBoundingClientRect().bottom;
-            document.body.dataset.r17YearHeadClear=String(clearance>=10);
-            document.body.dataset.r17YearHeadClearance=String(Math.round(clearance));
-          });
+          const clearance=heading.getBoundingClientRect().top-rail.getBoundingClientRect().bottom;
+          document.body.dataset.r17YearHeadClear=String(clearance>=10);
+          document.body.dataset.r17YearHeadClearance=String(Math.round(clearance));
         });
       });
     }else if(++attempts<350)doc.defaultView.requestAnimationFrame(settle);
