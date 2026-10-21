@@ -14,16 +14,21 @@ button:focus-visible, input:focus-visible { outline:2px solid var(--cyan); outli
 
 .verdict { margin:26px 0 12px; color:var(--fg); max-width:34ch; font:400 clamp(24px,3vw,40px)/1.35 Georgia,"Noto Serif TC",serif; letter-spacing:.015em; }
 .verdict + .figure-grid { margin-top:20px; }
+.variant-switch{display:flex;align-items:center;gap:8px;margin:4px 0 13px}
+.variant-switch button{padding:5px 8px;background:transparent;border:0;border-bottom:1px solid var(--fine);font-size:12px;color:var(--muted)}
+.variant-switch button[aria-pressed="true"]{color:var(--fg);border-bottom-color:var(--amber)}
+.variant-switch button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
 @media(max-width:560px){.verdict{margin:25px 0 12px;font-size:27px}}
 </style></head>
 <body><main>
-<header><div class="eyebrow">RESEARCH 01 / R17 · COMPOSITION LAB</div><h1>三個週期，如何接近同一個零點？</h1><p>+1,980 年後，年序與日序都已重遇，公曆仍差 −20 年。我們需要的不是另一個速度表，而是一張能看清這個關係的研究圖。</p></header>
+<header><div class="eyebrow">RESEARCH 01 / R17 · COMPOSITION LAB</div><h1>三個週期，如何接近同一個零點？</h1><p id="lead-story" aria-live="polite">年序、日序與公曆結構，各自如何接近同一個零點？</p></header>
 <section><div class="intro"><div><div class="kicker">GEOMETRY COMPARISON</div><h2>把判讀從「儀表」還給「時間」</h2></div><p>左：R16 同心構圖的示意重建。右：R17 沿共同零點展開。兩圖都是概念比較，左圖不是 production 截圖。</p></div>
 <div class="controls"><button data-delta="0">基準 · 0</button><button data-delta="1980">局部重遇 · +1,980</button><button data-delta="24000">粗估閉合 · +24,000</button><label>Δ 年 <input id="delta" type="number" value="1980" step="1" style="width:106px;background:transparent;border:1px solid var(--fine);color:var(--fg);font:inherit;padding:5px"></label><output id="delta-label">+1,980 年</output></div>
 <p id="verdict" class="verdict" aria-live="polite">年序與日序重遇，公曆仍偏離零點。</p>
 <div class="figure-grid">
 <div class="figure"><h3>01　CONCENTRIC / R16 LANGUAGE</h3><svg id="radial" viewBox="0 0 560 350" role="img" aria-label="同心弧式相位顯示"></svg><p class="caption">弧線高度已壓低，但三條完整對稱軌道仍可能像速度表。此圖僅是可供同場比較的概念重繪。</p></div>
-<div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption">三條軌跡沿同一零點收束，長短刻意不同以解除儀表感；每條軌跡仍依自身半週期成比例，不能跨列比絕對長度。</p></div>
+<div class="figure"><h3>02　UNFOLDED / R17 PROPOSAL</h3><div class="variant-switch" role="group" aria-label="相位圖比較模式"><button type="button" data-variant="proof" aria-pressed="true">零點證明圖</button><button type="button" data-variant="tracks" aria-pressed="false">三軌對照</button></div><svg id="unfolded" viewBox="0 0 560 350" role="img" aria-label="展開式三相位顯示"></svg><p class="caption"><span id="figure-explanation">把公曆尚未閉合的位移當成主要事件；已歸零的年序與日序只標示端點。尚未歸零時才展開各自的相位軌跡。</span></p></div>
 </div><div id="interpretation" class="readout" aria-live="polite"></div></section>
 <section><div class="kicker">DECISION CRITERIA</div><h2 style="font-weight:400">是否應替換 production？</h2><p class="decision"><strong>尚未決定。</strong> 展開式若讓零點、偏移方向、−20 的真實比例更好讀，同時不讓 60 日和 60 年被誤認為同一時間刻度，才值得進主頁。必須另核對桌面與 390px 真實截圖、中文字級、閱讀上下文以及 0 與非 0 的邊界案例。</p><p class="note">基準日期：2026-09-13。資料直接取自正式 recurrenceState；展示端只做投影，不另行計算日序。原始 production reference: PR #605 / a5e8455f。此原型是研究用平行分支，不應被 production 視覺測試當成正式頁面。</p></section>
 </main><script type="module">
@@ -84,7 +89,7 @@ function drawConcentric(rows) {
   });
 }
 
-function drawUnfolded(rows) {
+function drawTracks(rows) {
   const svg = query("#unfolded");
   const { width, zero } = setup(svg);
   svg.dataset.figureGrammar="graduated-zero-spine";
@@ -143,6 +148,78 @@ function drawUnfolded(rows) {
     },`${signedLabel(row.signed)} ${row.unit}`);
   });
 }
+
+let diagramVariant = "proof";
+function drawProof(rows) {
+  const svg = query("#unfolded");
+  const { width } = setup(svg);
+  svg.dataset.figureGrammar = "zero-proof-plate";
+  const mobile = width === 380;
+  const zero = width * (mobile ? .56 : .575);
+  const halfSpan = Math.min(zero - 32, width - zero - 32);
+  const baselineY = 151;
+  const gregorian = rows[0];
+  const glyphColor = row => !row.available ? "#7c878d" : row.closed ? "#75cddd" : "#dfb86d";
+  const make = (tag,attrs,text) => create(svg,tag,attrs,text);
+
+  make("text",{x:28,y:29,fill:"#b2bdc1","font-size":12},"01 / 公曆結構 · 400 年");
+  make("text",{x:28,y:92,fill:glyphColor(gregorian),"font-size":mobile?36:43,
+    "font-weight":500,"letter-spacing":".01em"},gregorian.available ? signedLabel(gregorian.signed) : "—");
+  make("text",{x:gregorian.available && Math.abs(gregorian.signed)>=100 ? 130 : 96,
+    y:91,fill:"#b2bdc1","font-size":15},"年");
+  make("text",{x:28,y:116,fill:"#b2bdc1","font-size":12},
+    gregorian.closed ? "公曆同相位" : gregorian.available ? "距共同零點的最短偏移" : "公曆相位待判定");
+
+  const start=zero-halfSpan,end=zero+halfSpan;
+  make("path",{d:`M ${start} ${baselineY} H ${end}`,
+    stroke:"#b2bdc1","stroke-width":1,opacity:.33,fill:"none"});
+  make("text",{x:start,y:baselineY+24,fill:"#7b878e","font-size":11}, "−200");
+  make("text",{x:end,y:baselineY+24,fill:"#7b878e","font-size":11,"text-anchor":"end"},"+200");
+  make("path",{d:`M ${zero} 130 V 316`,stroke:"#b2bdc1","stroke-width":1,
+    "stroke-dasharray":"2 7",opacity:.46,fill:"none"});
+  make("text",{x:zero,y:125,"text-anchor":"middle",fill:"#b2bdc1","font-size":12},"0");
+  if(gregorian.available) {
+    const markerX=zero+halfSpan*gregorian.fraction;
+    if(!gregorian.closed)make("line",{
+      x1:markerX,y1:baselineY,x2:zero,y2:baselineY,stroke:"#dfb86d",
+      "stroke-width":4,"stroke-linecap":"round"
+    });
+    make("circle",{cx:markerX,cy:baselineY,r:5.5,fill:glyphColor(gregorian)});
+  }
+
+  // Year and Day are two pieces of proof, not duplicate long-scale rulers.
+  // If either becomes nonzero, a short independent half-cycle scale appears.
+  for(let index=1;index<=2;index++){
+    const row=rows[index], y=222+(index-1)*75;
+    const color=glyphColor(row);
+    make("text",{x:28,y:y-14,fill:"#eef2f2","font-size":16},row.label);
+    make("text",{x:28,y:y+11,fill:"#b2bdc1","font-size":12},
+      row.available && row.closed ? "回到基準" : `週期 ${row.modulus} ${row.unit}`);
+    if(row.available && !row.closed){
+      const railHalf=halfSpan*(index===1?.73:.56);
+      make("path",{d:`M ${zero-railHalf} ${y} H ${zero+railHalf}`,
+        stroke:"#9aabad","stroke-width":1,opacity:.32,fill:"none"});
+      const markerX=zero+railHalf*row.fraction;
+      make("path",{d:`M ${markerX} ${y} H ${zero}`,stroke:color,
+        "stroke-width":3,"stroke-linecap":"round"});
+      make("circle",{cx:markerX,cy:y,r:5,fill:color});
+      make("text",{x:width-27,y:y+4,fill:color,
+        "font-size":14,"text-anchor":"end"},`${signedLabel(row.signed)} ${row.unit}`);
+    } else {
+      make("circle",{cx:zero,cy:y,r:row.available?5.5:4.5,fill:color});
+      make("text",{x:width-27,y:y+4,fill:color,
+        "font-size":14,"text-anchor":"end"},row.available ? `0 ${row.unit}` : "待判定");
+    }
+  }
+}
+function drawUnfolded(rows) {
+  if(diagramVariant==="tracks") drawTracks(rows);
+  else drawProof(rows);
+  const explain=query("#figure-explanation");
+  explain.textContent=diagramVariant==="tracks"
+    ? "三條相位軌跡共享零點，各自按半週期取比例。此模式保留完整橫向尺度，供比較使用。"
+    : "公曆殘餘是主要位移；年序與日序回零則只留端點。只有未歸零時才展開相應週期的軌跡。";
+}
 function update() {
   const input=query("#delta");
   const n=Number(input.value);
@@ -155,6 +232,12 @@ function update() {
   const state=recurrenceState(base,n);
   const rows=projectUnfoldedPhases(state);
   query("#delta-label").textContent=`+${n.toLocaleString("en-US")} 年`;
+  const lead=query("#lead-story");
+  lead.textContent=rows.every(row=>row.closed)
+    ? "三個離散相位均回到零點。這是離散條件閉合，不等於天文節界已驗真。"
+    : rows[1].closed && rows[2].closed && rows[0].available
+      ? `+${n.toLocaleString("en-US")} 年後，年序與日序重遇，公曆仍差 ${signedLabel(rows[0].signed)} 年。`
+      : `比較 +${n.toLocaleString("en-US")} 年後的三個離散相位，找出仍未回到共同基準的週期。`;
   const verdict=query("#verdict");
   if (rows.every(row=>row.closed)) {
     verdict.textContent="三個離散相位，同時回到零點";
@@ -171,6 +254,7 @@ function update() {
   figure.dataset.daySigned=String(rows[2].signed);
   figure.dataset.layout=mobileMedia.matches?"mobile-native":"desktop-native";
   figure.dataset.phaseSource="recurrenceState";
+  figure.dataset.diagramVariant=diagramVariant;
   feedback.textContent=`+${n.toLocaleString("en-US")} 年：${rows.map(row=>`${row.label} ${signedLabel(row.signed)} ${row.unit}`).join("；")}。這是三個各自週期中的位移比例，不是同一條時間軸。離散回零仍不代表節氣天文驗證通過。`;
 }
 
@@ -180,7 +264,17 @@ document.querySelectorAll("[data-delta]").forEach(button => button.addEventListe
 }));
 query("#delta").addEventListener("input",update);
 mobileMedia.addEventListener("change",update);
-const requestedDelta=new URLSearchParams(location.search).get("delta");
+const params=new URLSearchParams(location.search);
+diagramVariant=params.get("variant")==="tracks"?"tracks":"proof";
+document.querySelectorAll("[data-variant]").forEach(button=>button.addEventListener("click",()=>{
+  diagramVariant=button.dataset.variant;
+  document.querySelectorAll("[data-variant]").forEach(candidate=>
+    candidate.setAttribute("aria-pressed",String(candidate===button)));
+  update();
+}));
+for(const button of document.querySelectorAll("[data-variant]"))
+  button.setAttribute("aria-pressed",String(button.dataset.variant===diagramVariant));
+const requestedDelta=params.get("delta");
 if (requestedDelta !== null && /^\d+$/.test(requestedDelta)) query("#delta").value=requestedDelta;
 update();
 </script></body></html>
