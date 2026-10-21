@@ -30,10 +30,16 @@ for(const row of rows){
   "data-r17-year-strip-present":"true","data-r17-delta-controls-present":"true",
   "data-r17-figure-present":"true","data-r17-year-head-clear":"true","data-r17-current-delta":String(row.delta),
   "data-r17-selected-variant":row.variant,"data-r17-phase-evidence":row.phase,
+  "data-r17-bridge-copy-ready":"true",
+  "data-r17-bridge-state":row.delta===24000?"all-closed":row.delta===1980?"year-day-closed":"gregorian-closed",
   "data-r17-claim-state":row.delta===24000?"all-closed":row.delta===1980?"year-day-closed":"gregorian-closed",
   "data-r17-claim-has-numeric-residual":"false"
  }))assert(dom.includes(attr+'="'+want+'"'),row.key+" missing "+attr+"="+want+"; "+dom.slice(-2200));
  assert(!dom.includes("production-structure-missing"),row.key+" failed to load production nodes");
+ const bridgeHeight=Number(dom.match(/data-r17-bridge-height="(\\d+)"/)?.[1]);
+ assert(Number.isFinite(bridgeHeight)&&bridgeHeight>30, row.key+" missing bridge geometry");
+ const bridgeMax=row.width<=400?170:145;
+ assert(bridgeHeight<=bridgeMax,row.key+" bridge still reserves too much empty height: "+bridgeHeight+" > "+bridgeMax);
  const fileName="research-r17-context-"+row.key+".png";
  const file=path.join(output,fileName);
  run([size,"--screenshot="+file,url],row.key+" screenshot");
