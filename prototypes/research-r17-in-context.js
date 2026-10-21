@@ -152,8 +152,8 @@ function mount(){
 buttons.forEach(b=>b.addEventListener("click",()=>{variant=b.dataset.variant;apply()}));
 scenario.addEventListener("change",()=>{
   delta=scenario.value;
-  iframe.src="../recurrence.html?date=2026-09-13&delta="+delta+"#research-year-strip";
+  iframe.src="../recurrence.html?date=2026-09-13&delta="+delta;
 });
 iframe.addEventListener("load",mount);
 buttonState();
-iframe.src="../recurrence.html?date=2026-09-13&delta="+delta+"#research-year-strip";
+iframe.src="../recurrence.html?date=2026-09-13&delta="+delta;
