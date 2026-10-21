@@ -15,6 +15,7 @@ import {
   signedShortestPhase
 } from "./recurrence/phase-fan-geometry.js";
 import { publishResearchTimeSelection } from "./research/research-time-state.js";
+import { renderR17ZeroProof } from "./recurrence/r17-zero-proof-view.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -33,6 +34,12 @@ const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
+const r17OptIn = new URLSearchParams(window.location.search).get("r17") === "1";
+const r17Svg = document.querySelector("#r17-production-proof");
+const r17Claim = document.querySelector("#r17-production-claim");
+const r17Reason = document.querySelector("#r17-production-reason");
+const r17Bridge = document.querySelector("#research-discrete .discrete-to-astronomy");
+const r17MobileMedia = window.matchMedia("(max-width: 680px)");
 const yearInput = document.querySelector("#base-year");
 const monthInput = document.querySelector("#base-month");
 const dayInput = document.querySelector("#base-day");
@@ -687,6 +694,16 @@ function renderState() {
   instrument.dataset.yearSequenceClosed = String(state.closed.yearSequence);
   instrument.dataset.dayClosed = String(state.closed.day);
   instrument.dataset.globalClosed = String(state.closed.gregorian && state.closed.yearSequence && state.closed.day);
+  // R17 is an additive projection of the canonical state. R16 still renders,
+  // and R16 remains the default when the explicit query opt-in is absent.
+  if (r17OptIn) {
+    const verdict = renderR17ZeroProof(r17Svg, state, { mobile:r17MobileMedia.matches });
+    r17Claim.textContent = verdict.title;
+    r17Reason.textContent = verdict.detail;
+    if (r17Bridge) r17Bridge.textContent = verdict.bridge;
+    instrument.dataset.r17ProofSource = "recurrenceState";
+    instrument.dataset.r17EvidenceState = verdict.state;
+  }
   syncShiftToolbar(state);
 
   publishResearchTimeSelection({
@@ -870,9 +887,14 @@ function bindControls() {
     if (document.hidden) deltaPlaybackController?.stop();
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
+  r17MobileMedia.addEventListener?.("change", () => { if (r17OptIn) renderState(); });
 }
 
 function initialize() {
+  document.documentElement.dataset.researchVisual = r17OptIn ? "r17" : "r16";
+  if (r17Svg) r17Svg.hidden = !r17OptIn;
+  if (r17Claim) r17Claim.hidden = !r17OptIn;
+  if (r17Reason) r17Reason.hidden = !r17OptIn;
   deltaPlaybackController = createDeltaPlaybackController({
     playButton:deltaPlayButton,
     playIcon:deltaPlayIcon,

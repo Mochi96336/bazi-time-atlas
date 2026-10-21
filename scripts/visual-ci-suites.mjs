@@ -34,6 +34,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "check-recurrence-lab.mjs",
     "check-research-task-hierarchy.mjs",
     "check-research-date-explorer.mjs",
+    "check-r17-live-interactions.mjs",
     "check-astronomical-residuals.mjs",
     "check-four-pillar-determinacy.mjs",
     "check-day-hour-proof-chain.mjs",
@@ -45,6 +46,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
   "capture-pages": [
     "visual-check-r17-unfolded-phase.mjs",
     "visual-check-r17-in-context.mjs",
+    "visual-check-r17-production-optin.mjs",
     "check-tools-human-ux.mjs",
     "visual-check.mjs",
     "visual-check-research-01-diagram-lab.mjs",
