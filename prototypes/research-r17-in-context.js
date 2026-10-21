@@ -140,22 +140,23 @@ function mount(){
   function settle(){
     if(read(inst)){
       apply();
-      doc.defaultView.requestAnimationFrame(()=>{
-        const top=strip.getBoundingClientRect().top+doc.defaultView.scrollY;
-        doc.defaultView.scrollTo(0,Math.max(0,top-(doc.defaultView.innerWidth<=680?174:128)));
-        // The live Ganzhi rail is sticky. Align the real strip heading BELOW
-        // that rail, not to the frame origin (which clips the heading).
-        doc.defaultView.requestAnimationFrame(()=>{
-          const heading=strip.querySelector(".research-year-head");
-          const rail=doc.querySelector("#research-time-state");
-          if(!heading||!rail)return;
-          const deficit=rail.getBoundingClientRect().bottom+18-heading.getBoundingClientRect().top;
-          if(deficit>0)doc.defaultView.scrollBy({top:-Math.ceil(deficit),behavior:"instant"});
-          const clearance=heading.getBoundingClientRect().top-rail.getBoundingClientRect().bottom;
-          document.body.dataset.r17YearHeadClear=String(clearance>=10);
-          document.body.dataset.r17YearHeadClearance=String(Math.round(clearance));
-        });
-      });
+      // One synchronous layout transaction: headless screenshot capture can
+      // finish before follow-up requestAnimationFrame callbacks fire.
+      const win=doc.defaultView;
+      const top=strip.getBoundingClientRect().top+win.scrollY;
+      win.scrollTo({top:Math.max(0,top-(win.innerWidth<=680?174:128)),behavior:"instant"});
+      const heading=strip.querySelector(".research-year-head");
+      const rail=doc.querySelector("#research-time-state");
+      if(heading&&rail){
+        const deficit=rail.getBoundingClientRect().bottom+18-heading.getBoundingClientRect().top;
+        if(deficit>0)win.scrollBy({top:-Math.ceil(deficit),behavior:"instant"});
+        const clearance=heading.getBoundingClientRect().top-rail.getBoundingClientRect().bottom;
+        document.body.dataset.r17YearHeadClear=String(clearance>=10);
+        document.body.dataset.r17YearHeadClearance=String(Math.round(clearance));
+      }else{
+        document.body.dataset.r17YearHeadClear="false";
+        document.body.dataset.r17ContextError="year-heading-or-sticky-rail-missing";
+      }
     }else if(++attempts<350)doc.defaultView.requestAnimationFrame(settle);
     else document.body.dataset.r17ContextError="production-not-ready";
   }
