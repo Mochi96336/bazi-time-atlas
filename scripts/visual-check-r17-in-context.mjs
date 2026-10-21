@@ -28,7 +28,7 @@ for(const row of rows){
  for(const [attr,want] of Object.entries({
   "data-r17-context-ready":"true","data-r17-production-ready":"true",
   "data-r17-year-strip-present":"true","data-r17-delta-controls-present":"true",
-  "data-r17-figure-present":"true","data-r17-current-delta":String(row.delta),
+  "data-r17-figure-present":"true","data-r17-year-head-clear":"true","data-r17-current-delta":String(row.delta),
   "data-r17-selected-variant":row.variant,"data-r17-phase-evidence":row.phase
  }))assert(dom.includes(attr+'="'+want+'"'),row.key+" missing "+attr+"="+want+"; "+dom.slice(-2200));
  assert(!dom.includes("production-structure-missing"),row.key+" failed to load production nodes");
