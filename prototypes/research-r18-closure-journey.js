@@ -4,7 +4,10 @@ const base={year:2026,month:9,day:13};
 const model=buildClosureJourney(base);
 const svgNS="http://www.w3.org/2000/svg";
 const colors={g:"#6ecac8",year:"#eac78a",day:"#b5a4d8",both:"#f1f5f2",muted:"#a9babd",line:"#52646a"};
-let selected=1980,variant="lanes";
+const query=new URLSearchParams(location.search);
+const requestedDelta=Number(query.get("delta")??1980);
+let selected=[0,400,1200,1980,8000,24000].includes(requestedDelta)?requestedDelta:1980;
+let variant=query.get("variant")==="gates"?"gates":"lanes";
 const mobile=()=>matchMedia("(max-width:680px)").matches;
 const format=d=>d.toLocaleString("en-US");
 function put(svg,tag,attrs,content){
@@ -151,4 +154,12 @@ document.querySelectorAll("[data-variant]").forEach(b=>b.addEventListener("click
 }));
 document.querySelectorAll("[data-delta]").forEach(b=>b.addEventListener("click",()=>{selected=Number(b.dataset.delta);render();}));
 matchMedia("(max-width:680px)").addEventListener?.("change",render);
+if(variant==="gates"){
+ document.querySelector('[data-variant="gates"]').setAttribute("aria-pressed","true");
+ document.querySelector('[data-variant="lanes"]').setAttribute("aria-pressed","false");
+ document.getElementById("figures-a").classList.add("hidden");
+ document.getElementById("figures-b").classList.remove("hidden");
+ document.getElementById("variant-heading").textContent="看各項條件在什麼年份交會";
+ document.getElementById("variant-explain").textContent="三條條件列的長度代表它們首次共同達成所需的真正 Δ 年數；+1,980 的年／日局部重遇不冒充三項閉合。下面的獨立比例小圖呈現局部。";
+}
 render();
