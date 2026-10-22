@@ -904,6 +904,13 @@ function bindControls() {
 function initialize() {
   document.documentElement.dataset.researchVisual = r18OptIn ? "r18" : r17OptIn ? "r17" : "r16";
   if (r18Context) r18Context.hidden = !r18OptIn;
+  // Move—not clone—the canonical Δ tools next to the R18 primary timeline.
+  // R16/R17 preserve both their original DOM position and behavior.
+  if (r18OptIn) {
+    const slot = r18Context?.querySelector("#r18-context-controls-slot");
+    const originalTools = document.querySelector("#research-discrete .discrete-derivation");
+    if (slot && originalTools) slot.append(originalTools);
+  }
   if (r17Svg) r17Svg.hidden = !r17OptIn;
   if (r17Claim) r17Claim.hidden = !r17OptIn;
   if (r17Reason) r17Reason.hidden = !r17OptIn;
