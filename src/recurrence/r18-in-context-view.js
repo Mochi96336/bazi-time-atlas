@@ -99,6 +99,9 @@ export function renderR18Context(root,state){
    return null;
   }
  }
+ // Keep the unavailable status stable across subsequent Δ events on the same
+ // out-of-range baseline; never dereference a null journey.
+ if(!journey)return null;
  const overviewSvg=root.querySelector("#r18-context-overview");
  const localSvg=root.querySelector("#r18-context-local");
  if(repaint){
