@@ -62,6 +62,11 @@ test("R18 prototype keeps distinct labeled delta-year scales and compares two di
  assert.match(script,/point\.kind/);
  assert.match(script,/data-r18-first-closure/);
  assert.match(script,/dash:"2 6"/);
+ assert.ok(h.indexOf('id="r18-gates"') < h.indexOf('id="r18-derivation"'),"main diagram must appear before proof");
+ assert.ok(h.indexOf('id="r18-derivation"') < h.indexOf('id="r18-local-b"'),"proof must bridge global to local inset");
+ assert.match(script,/data-r18-cursor/);
+ assert.match(script,/fill:colors.year,"data-r18-cursor"/);
+ assert.match(script,/color:colors.day,opacity:.62,dash:"3 6"/);
 });
 
 test("R18 variable first-local events use complete 24,000-year evidence instead of the first 2,400 years",()=>{
