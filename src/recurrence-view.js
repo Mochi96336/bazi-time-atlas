@@ -16,6 +16,7 @@ import {
 } from "./recurrence/phase-fan-geometry.js";
 import { publishResearchTimeSelection } from "./research/research-time-state.js";
 import { renderR17ZeroProof } from "./recurrence/r17-zero-proof-view.js";
+import { renderR18Context } from "./recurrence/r18-in-context-view.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -34,7 +35,10 @@ const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
-const r17OptIn = new URLSearchParams(window.location.search).get("r17") === "1";
+const researchMode = new URLSearchParams(window.location.search);
+const r18OptIn = researchMode.get("r18") === "1";
+const r17OptIn = !r18OptIn && researchMode.get("r17") === "1";
+const r18Context = document.querySelector("#r18-context");
 const r17Svg = document.querySelector("#r17-production-proof");
 const r17Claim = document.querySelector("#r17-production-claim");
 const r17Reason = document.querySelector("#r17-production-reason");
@@ -704,6 +708,11 @@ function renderState() {
     instrument.dataset.r17ProofSource = "recurrenceState";
     instrument.dataset.r17EvidenceState = verdict.state;
   }
+  if (r18OptIn) {
+    const verdict = renderR18Context(r18Context, state);
+    instrument.dataset.r18EvidenceState = verdict?.kind ?? "unavailable";
+    instrument.dataset.r18ProofSource = "recurrenceState";
+  }
   syncShiftToolbar(state);
 
   publishResearchTimeSelection({
@@ -887,11 +896,14 @@ function bindControls() {
     if (document.hidden) deltaPlaybackController?.stop();
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
-  r17MobileMedia.addEventListener?.("change", () => { if (r17OptIn) renderState(); });
+  r17MobileMedia.addEventListener?.("change", () => {
+    if (r17OptIn || r18OptIn) renderState();
+  });
 }
 
 function initialize() {
-  document.documentElement.dataset.researchVisual = r17OptIn ? "r17" : "r16";
+  document.documentElement.dataset.researchVisual = r18OptIn ? "r18" : r17OptIn ? "r17" : "r16";
+  if (r18Context) r18Context.hidden = !r18OptIn;
   if (r17Svg) r17Svg.hidden = !r17OptIn;
   if (r17Claim) r17Claim.hidden = !r17OptIn;
   if (r17Reason) r17Reason.hidden = !r17OptIn;
