@@ -87,3 +87,25 @@ html[data-research-visual="r18"] #research-discrete .discrete-to-astronomy{
  .r18-context-proof strong{font-size:15px}
  .r18-context figcaption{font-size:11px}
 }
+
+/* The single existing Δ toolbar moves here only in R18. Reader can test the
+   global closure diagram before scrolling into the algebra and local inset. */
+html[data-research-visual="r18"] #r18-context-controls-slot{
+  padding:15px 0 13px;
+  margin:22px 0 0;
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-subtle);
+}
+html[data-research-visual="r18"] #r18-context-controls-slot .discrete-derivation{
+  margin:0!important;padding:0!important;border:0!important;
+  background:transparent!important;box-shadow:none!important;
+  max-width:100%;
+}
+html[data-research-visual="r18"] #r18-context-controls-slot + .r18-context-bottom{
+  border-top:0!important;margin-top:0!important;
+}
+@media(max-width:680px){
+ html[data-research-visual="r18"] #r18-context-controls-slot{
+  margin-top:15px;padding:11px 0;
+ }
+}
