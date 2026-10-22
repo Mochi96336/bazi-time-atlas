@@ -31,6 +31,11 @@ test("R18 in-context uses existing 24000/1200/8000 proofs and avoids standalone 
  assert.match(part,/LCM\(1,200, 8,000\) = 24,000/);
  assert.doesNotMatch(part,/id="delta-slider"|id="base-year"|id="research-delta-play"/);
  assert.equal((h.match(/id="delta-slider"/g)||[]).length,1);
+ assert.match(h,/id="r18-context-controls-slot"/);
+ const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
+ assert.match(view,/slot\.append\(originalTools\)/);
+ assert.match(view,/if \(r18OptIn\)/);
+
 });
 test("R18 projection cache is scoped to current base, not Δ input",()=>{
  const script=readFileSync(new URL("../src/recurrence/r18-in-context-view.js",import.meta.url),"utf8");
@@ -39,6 +44,8 @@ test("R18 projection cache is scoped to current base, not Δ input",()=>{
  assert.match(script,/cursor\(overviewSvg,state\.deltaYears/);
  assert.match(script,/cursor\(localSvg,state\.deltaYears/);
  assert.match(script,/dataset\.r18EventCache=key/);
+ assert.match(script,/if\(!journey\)return null/);
+
  assert.doesNotMatch(script,/history\.replaceState|setInterval|new URLSearchParams/);
  for(const [base,local] of [
   [{year:2026,month:9,day:13},1980],
