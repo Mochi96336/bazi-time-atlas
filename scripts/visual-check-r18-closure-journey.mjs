@@ -23,27 +23,36 @@ const scenes=[
  {key:"r18-A-mobile-global",variant:"lanes",delta:24000,width:390,height:1830,kind:"all"},
  {key:"r18-B-desktop",variant:"gates",delta:1980,width:1440,height:1560,kind:"local"},
  {key:"r18-B-mobile",variant:"gates",delta:400,width:390,height:1830,kind:"gregorian"},
- {key:"r18-A-identity",variant:"lanes",delta:0,width:390,height:1830,kind:"identity"}
+ {key:"r18-A-identity",variant:"lanes",delta:0,width:390,height:1830,kind:"identity"},
+ {key:"r18-B-1900-local",variant:"gates",date:"1900-03-01",delta:6180,width:390,height:1900,kind:"local",firstLocal:6180,detailStart:4620},
+ {key:"r18-B-2100-local",variant:"gates",date:"2100-03-01",delta:16080,width:390,height:1900,kind:"local",firstLocal:16080,detailStart:14520}
 ];
 const captures=[];
 for(const scene of scenes){
- const url=new URL("prototypes/research-r18-closure-journey.html?variant="+scene.variant+"&delta="+scene.delta,baseURL).href;
+ const url=new URL("prototypes/research-r18-closure-journey.html?variant="+scene.variant+"&delta="+scene.delta+(scene.date?"&date="+scene.date:""),baseURL).href;
  const size="--window-size="+scene.width+","+scene.height;
  const dom=run([size,"--dump-dom",url],scene.key+" DOM");
  for(const tag of [
   'data-r18-ready="true"','data-r18-variant="'+scene.variant+'"',
   'data-r18-selected-delta="'+scene.delta+'"','data-r18-selected-kind="'+scene.kind+'"',
-  'data-r18-first-local="1980"','data-r18-first-global="24000"',
+  'data-r18-first-local="'+(scene.firstLocal??1980)+'"','data-r18-first-global="24000"',
+  'data-r18-detail-start="'+(scene.detailStart??0)+'"',
+  'data-r18-detail-end="'+((scene.detailStart??0)+2400)+'"',
   'data-r18-range="24000"','data-r18-range="2400"',
   'data-r18-evidence="recurrenceState"'
  ])check(dom.includes(tag),scene.key+" missing "+tag);
+ if(scene.date)check(dom.includes('data-r18-base-date="'+scene.date+'"'),scene.key+" base date not applied");
+ if(scene.variant==="gates"){
+  const gate=dom.match(/<section[^>]*id="r18-derivation"[^>]*>/)?.[0]??"";
+  check(gate&&!gate.includes("hidden"),scene.key+" derivation section inaccessible");
+ }
  check(!dom.includes('data-r18-selected-kind="all"')||scene.delta===24000,
    scene.key+" identity mistaken for recurrence");
  const outName=scene.key+".png",out=path.join(folder,outName);
  run([size,"--screenshot="+out,url],scene.key+" PNG");
  const bytes=(await stat(out)).size;
  check(bytes>(scene.width>1000?78000:40000),scene.key+" PNG too small "+bytes);
- captures.push({name:outName,width:scene.width,height:scene.height,variant:scene.variant,delta:scene.delta,bytes});
+ captures.push({name:outName,width:scene.width,height:scene.height,variant:scene.variant,delta:scene.delta,date:scene.date??"2026-09-13",firstLocal:scene.firstLocal??1980,bytes});
 }
 await writeFile(path.join(folder,"r18-capture-manifest.json"),JSON.stringify(captures,null,2)+"\n");
 console.log("[r18-diagram] PASS "+JSON.stringify(captures));
