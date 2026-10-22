@@ -102,8 +102,11 @@ function renderB(){
   const y=95+i*80;
   text(svg,isPhone?8:14,y-11,r.name,{size:isPhone?12:16,color:colors.both,weight:550});
   text(svg,isPhone?8:14,y+9,r.text,{size:isPhone?10:12});
-  line(svg,x0,y,x(r.at),y,{color:r.color,width:isPhone?4:6,opacity:.68});
-  put(svg,"circle",{cx:x(r.at),cy:y,r:6,fill:r.color});
+  // A dotted journey is a route to the first event, never a span of closure.
+  // Only the endpoint itself means the condition is satisfied.
+  line(svg,x0,y,x(r.at),y,{color:colors.muted,width:1.5,opacity:.66,dash:"2 6"});
+  put(svg,"circle",{cx:x(r.at),cy:y,r:9,fill:"none",stroke:r.color,"stroke-width":1.7});
+  put(svg,"circle",{cx:x(r.at),cy:y,r:4,fill:r.color,"data-r18-first-closure":String(r.at)});
   r.events.forEach(d=>{if(d>r.at)put(svg,"circle",{cx:x(d),cy:y,r:2.4,fill:r.color,opacity:.55,"data-r18-event":d});});
  });
  const localX=x(model.firstLocal??1980);
