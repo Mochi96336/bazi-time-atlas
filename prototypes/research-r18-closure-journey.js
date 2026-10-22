@@ -52,8 +52,11 @@ function geom(svg,{range,bottom,startYear=0}){
 }
 function cursor(svg,x,top,bottom,range,startYear=0){
  if(selected<startYear||selected>startYear+range)return;
- line(svg,x(selected),top,x(selected),bottom,{color:colors.both,width:1.5,opacity:.75,dash:"3 6"});
- const cx=x(selected);put(svg,"circle",{cx,cy:top,r:4,fill:colors.both,"data-r18-cursor":selected});
+ // Solid gold readhead = current user-selected year; unlike dashed
+ // lavender first-local landmark, it must not look like a recurrence claim.
+ line(svg,x(selected),top,x(selected),bottom,{color:colors.year,width:2,opacity:.86});
+ const cx=x(selected);
+ put(svg,"rect",{x:cx-4,y:top-4,width:8,height:8,fill:colors.year,"data-r18-cursor":selected});
 }
 function timeline(svgId,{range,lanes,firstLocal=false,bottom=350,startYear=0}){
  const svg=document.getElementById(svgId);
@@ -118,7 +121,7 @@ function renderB(){
  });
  if(model.firstLocal!==null){
   const localX=x(model.firstLocal);
-  line(svg,localX,65,localX,axisY-20,{color:colors.both,opacity:.43,dash:"3 5"});
+  line(svg,localX,65,localX,axisY-20,{color:colors.day,opacity:.62,dash:"3 6"});
   text(svg,Math.max(x0+14,Math.min(localX+10,x1-10)),60,"局部 "+format(model.firstLocal),{
    size:isPhone?10:12,color:colors.both
   });
