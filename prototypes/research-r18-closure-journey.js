@@ -151,6 +151,8 @@ function renderSelection(){
 }
 function render(){
  if(variant==="lanes")renderA();else renderB();
+ document.querySelector("#r18-local").setAttribute("aria-label","局部 "+format(model.detailStart)+" 至 "+format(model.detailEnd)+" 年：年序、日序與第一次共同歸零");
+ document.querySelector("#r18-local-b").setAttribute("aria-label","局部 "+format(model.detailStart)+" 至 "+format(model.detailEnd)+" 年：年序、日序與第一次共同歸零");
  const windowLabel=format(model.detailStart)+"～"+format(model.detailEnd)+" 年";
  document.querySelectorAll("[data-r18-local-range]").forEach(n=>n.textContent=windowLabel);
  renderSelection();
@@ -164,6 +166,7 @@ document.querySelectorAll("[data-variant]").forEach(b=>b.addEventListener("click
  const lanes=variant==="lanes";
  document.getElementById("figures-a").classList.toggle("hidden",!lanes);
  document.getElementById("figures-b").classList.toggle("hidden",lanes);
+ document.getElementById("r18-derivation").classList.toggle("hidden",lanes);
  document.getElementById("variant-heading").textContent=lanes?"先看所有閉合事件，再放大局部":"看各項條件在什麼年份交會";
  document.getElementById("variant-explain").textContent=lanes
  ?"所有軸都代表經過年數 Δ。上圖看 0～24,000 年，下面的局部窗口會移動到此日期的首次年＋日重遇附近，並明確標出不同尺度。"
@@ -185,6 +188,7 @@ if(variant==="gates"){
  document.querySelector('[data-variant="lanes"]').setAttribute("aria-pressed","false");
  document.getElementById("figures-a").classList.add("hidden");
  document.getElementById("figures-b").classList.remove("hidden");
+ document.getElementById("r18-derivation").classList.remove("hidden");
  document.getElementById("variant-heading").textContent="看各項條件在什麼年份交會";
  document.getElementById("variant-explain").textContent="三條條件列的端點代表它們首次共同達成的真正 Δ 年數；年／日局部重遇依基準日期變動，並不冒充三項閉合。下面的獨立比例小圖呈現局部。";
 }
