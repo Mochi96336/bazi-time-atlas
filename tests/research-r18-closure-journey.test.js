@@ -55,4 +55,6 @@ test("R18 prototype keeps distinct labeled delta-year scales and compares two di
  assert.match(script,/buildClosureJourney\(base\)/);
  assert.match(script,/data-r18-event/);
  assert.match(script,/point\.kind/);
+ assert.match(script,/data-r18-first-closure/);
+ assert.match(script,/dash:"2 6"/);
 });
