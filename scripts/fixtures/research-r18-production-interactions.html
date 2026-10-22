@@ -17,6 +17,10 @@ function probe(doc,label){
  check(inst.dataset.r18ProofSource==="recurrenceState",label+" instrument fork");
  check(doc.querySelector("#r18-context-overview").dataset.axisUnit==="elapsed-years",label+" axis wrong");
  check(doc.querySelector("#r18-context-local").dataset.axisUnit==="elapsed-years",label+" detail scale wrong");
+ check(!!doc.querySelector("#r18-context-controls-slot #delta-slider"),
+   label+" original slider not adjacent to chart");
+ check(doc.querySelectorAll("#delta-slider").length===1,label+" duplicate slider");
+
  return record;
 }
 function load(url){return new Promise((resolve,reject)=>{
@@ -54,6 +58,9 @@ async function main(){
  const b=await load("../../recurrence.html?date=2026-09-13&delta=1980");
  check(b.documentElement.dataset.researchVisual==="r16","R16 default lost");
  check(b.querySelector("#r18-context").hidden===true,"R18 visible on default");
+ check(!b.querySelector("#r18-context-controls-slot #delta-slider"),
+   "default R16 toolbar was relocated");
+
  const r17=await load("../../recurrence.html?date=2026-09-13&delta=1980&r17=1");
  check(r17.documentElement.dataset.researchVisual==="r17","R17 fallback lost");
  check(r17.querySelector("#r17-production-proof").dataset.proofReady==="true","R17 proof no longer drawn");
