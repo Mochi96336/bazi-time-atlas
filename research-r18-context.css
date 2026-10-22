@@ -109,3 +109,15 @@ html[data-research-visual="r18"] #r18-context-controls-slot + .r18-context-botto
   margin-top:15px;padding:11px 0;
  }
 }
+
+/* The R18 chronology and proof supersede the older oversized milestone cards.
+   Retain the source relationship and chapter route above the Year strip; avoid
+   repeating the same +1980/+24000 verdict four times before the new figure. */
+html[data-research-visual="r18"] #discrete-derivation-steps,
+html[data-research-visual="r18"] #research-discrete .discrete-derivation-rule,
+html[data-research-visual="r18"] #research-discrete .research-discrete-explorer-intro{
+ display:none!important;
+}
+html[data-research-visual="r18"] #research-discrete #research-year-strip{
+ margin-top:clamp(32px,4vw,54px)!important;
+}
