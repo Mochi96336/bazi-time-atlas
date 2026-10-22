@@ -22,6 +22,8 @@ test("R18 integration retains a single live date owner, native Year strip, Δ an
  assert.match(view,/instrument\.dataset\.r18ProofSource = "recurrenceState"/);
  assert.match(css,/html\[data-research-visual="r18"\]/);
  assert.doesNotMatch(css,/html\[data-research-visual="r16"\]/);
+ assert.match(css,/html\[data-research-visual="r18"\] #discrete-derivation-steps/);
+ assert.match(css,/html\[data-research-visual="r18"\] #research-discrete \.discrete-derivation-rule/);
 });
 test("R18 in-context uses existing 24000/1200/8000 proofs and avoids standalone controls",()=>{
  const h=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
