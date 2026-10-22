@@ -43,6 +43,13 @@ for(const scene of scenes){
  check(dom.includes('data-research-visual="r18"'),scene.key+" wrong visual mode");
  check(dom.includes('id="research-year-strip"')&&dom.includes('id="delta-slider"'),
   scene.key+" original controls lost");
+ const slotIndex=dom.indexOf('id="r18-context-controls-slot"');
+ const sliderIndex=dom.indexOf('id="delta-slider"');
+ const proofIndex=dom.indexOf('class="r18-context-bottom"');
+ check(slotIndex>=0&&sliderIndex>slotIndex&&sliderIndex<proofIndex,
+   scene.key+" original Δ toolbar is not between main proof and local evidence");
+ check((dom.match(/id="delta-slider"/g)||[]).length===1,scene.key+" duplicate native slider");
+
  check(dom.includes('id="recurrence-wheel"')&&dom.includes('id="r17-production-proof"'),
   scene.key+" old rollback graphics missing");
  const filename=scene.key+".png",filepath=path.join(dest,filename);
