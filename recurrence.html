@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="./research-absolute-boundary-consequence.css">
   <link rel="stylesheet" href="./research-time-state.css">
   <link rel="stylesheet" href="./research-page-rhythm.css">
+  <link rel="stylesheet" href="./research-r18-context.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -251,6 +252,30 @@
           <strong id="deep-time-badge-value">—</strong>
         </div>
 
+        <div id="r18-context" class="r18-context" hidden aria-label="真實經過年數的三條條件交會圖">
+          <div class="r18-context-heading">
+            <span class="r18-context-eyebrow">三項條件 · 同一條 Δ 年數時間軸</span>
+            <strong id="r18-context-headline" aria-live="polite">等待時間證據</strong>
+            <p id="r18-context-detail">目前比較日期的離散重遇判讀</p>
+          </div>
+          <figure class="r18-context-overview">
+            <div class="r18-context-figure-title"><span>第一次同時成立的年份</span><span id="r18-context-current">選取 Δ 0 年</span></div>
+            <svg id="r18-context-overview" role="img" aria-label="公曆與年序、公曆與日序、三項共同歸零的真實經過年數，金色讀頭為目前選取年份"></svg>
+            <figcaption>點才代表離散條件閉合；虛線只是到首次交會的經過時間。紫色虛線標記這個基準日期的年＋日局部重遇。</figcaption>
+          </figure>
+          <div class="r18-context-bottom">
+            <div class="r18-context-proof" aria-label="從三項週期推出二萬四千年">
+              <div><small>公曆 × 年序</small><strong>LCM(400, 60) = 1,200</strong></div>
+              <div><small>公曆 × 日序</small><strong>146,097 mod 60 = 57</strong><span>400 年區塊 × 20 = 8,000 年</span></div>
+              <div><small>三項交會</small><strong>LCM(1,200, 8,000) = 24,000</strong><span>只是離散條件，非節界重遇</span></div>
+            </div>
+            <figure class="r18-context-inset">
+              <div class="r18-context-figure-title"><span id="r18-context-local-label">局部年份</span></div>
+              <svg id="r18-context-local" role="img" aria-label="依目前基準日期而變的首次年序與日序重遇區間"></svg>
+              <figcaption id="r18-context-local-note">局部放大窗依基準日期變動。</figcaption>
+            </figure>
+          </div>
+        </div>
         <svg id="r17-production-proof" role="img" aria-label="公曆結構 400 年、60 年序、60 日序相對基準的零點證明；各週期使用自己的比例" hidden></svg>
         <svg id="recurrence-wheel" viewBox="0 325 1200 470" role="img" aria-label="公曆 400 年、60 年序與 60 日序相對基準零點的最短相位；橢圓形為平面投影，不改變相位角度">
           <!-- The same polar phase geometry, compressed uniformly on the
