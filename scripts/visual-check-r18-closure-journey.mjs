@@ -22,10 +22,10 @@ const scenes=[
  {key:"r18-A-mobile",variant:"lanes",delta:1980,width:390,height:1830,kind:"local"},
  {key:"r18-A-mobile-global",variant:"lanes",delta:24000,width:390,height:1830,kind:"all"},
  {key:"r18-B-desktop",variant:"gates",delta:1980,width:1440,height:1560,kind:"local"},
- {key:"r18-B-mobile",variant:"gates",delta:400,width:390,height:1830,kind:"gregorian"},
+ {key:"r18-B-mobile",variant:"gates",delta:400,width:390,height:2400,kind:"gregorian"},
  {key:"r18-A-identity",variant:"lanes",delta:0,width:390,height:1830,kind:"identity"},
- {key:"r18-B-1900-local",variant:"gates",date:"1900-03-01",delta:6180,width:390,height:1900,kind:"local",firstLocal:6180,detailStart:4620},
- {key:"r18-B-2100-local",variant:"gates",date:"2100-03-01",delta:16080,width:390,height:1900,kind:"local",firstLocal:16080,detailStart:14520}
+ {key:"r18-B-1900-local",variant:"gates",date:"1900-03-01",delta:6180,width:390,height:2400,kind:"local",firstLocal:6180,detailStart:4620},
+ {key:"r18-B-2100-local",variant:"gates",date:"2100-03-01",delta:16080,width:390,height:2400,kind:"local",firstLocal:16080,detailStart:14520}
 ];
 const captures=[];
 for(const scene of scenes){
