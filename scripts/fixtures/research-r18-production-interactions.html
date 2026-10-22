@@ -20,6 +20,8 @@ function probe(doc,label){
  check(!!doc.querySelector("#r18-context-controls-slot #delta-slider"),
    label+" original slider not adjacent to chart");
  check(doc.querySelectorAll("#delta-slider").length===1,label+" duplicate slider");
+ check(doc.defaultView.getComputedStyle(doc.querySelector("#discrete-derivation-steps")).display==="none",
+   label+" duplicate candidate cards remain in R18");
 
  return record;
 }
@@ -60,6 +62,8 @@ async function main(){
  check(b.querySelector("#r18-context").hidden===true,"R18 visible on default");
  check(!b.querySelector("#r18-context-controls-slot #delta-slider"),
    "default R16 toolbar was relocated");
+ check(b.defaultView.getComputedStyle(b.querySelector("#discrete-derivation-steps")).display!=="none",
+   "R16 original candidate evidence disappeared");
 
  const r17=await load("../../recurrence.html?date=2026-09-13&delta=1980&r17=1");
  check(r17.documentElement.dataset.researchVisual==="r17","R17 fallback lost");
