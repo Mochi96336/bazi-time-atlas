@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R18 · 週期閉合的時間證據</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1216;--paper:#121a20;--ink:#ecf1ef;--mute:#a9babd;--line:#38484d;--cyan:#6ecac8;--gold:#eac78a;--violet:#b5a4d8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 system-ui,"Noto Sans TC",sans-serif}
+main{width:min(1160px,100%);margin:auto;padding:clamp(22px,5vw,76px)}
+header h1{font:400 clamp(34px,5vw,64px)/1.2 Georgia,"Noto Serif TC",serif;max-width:14ch;letter-spacing:.025em;margin:16px 0 28px}
+.eyebrow{letter-spacing:.2em;text-transform:uppercase;font-size:11px;color:var(--mute)}
+.lead{max-width:62ch;color:var(--mute);font-size:17px;margin-bottom:46px}
+nav{display:flex;gap:24px;border-top:1px solid var(--line);padding:20px 0;flex-wrap:wrap}
+nav button,.cases button{background:none;color:var(--mute);border:0;border-bottom:1px solid transparent;padding:5px 0;font:inherit;cursor:pointer}
+nav button[aria-pressed=true],.cases button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--gold)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16px 0}
+.explain{max-width:66ch;color:var(--mute);margin-bottom:35px}
+.figures{display:grid;gap:58px;margin:42px 0}
+.figure{margin:0;min-width:0}
+.figure figcaption{display:flex;flex-wrap:wrap;gap:10px 30px;align-items:baseline;margin-bottom:10px}
+.figure figcaption strong{font-size:18px;font-weight:550}.figure figcaption span{font-size:13px;color:var(--mute)}
+.figure svg{display:block;width:100%;height:auto;overflow:visible;background:transparent}
+.figure .subnote{font-size:13px;color:var(--mute);margin:8px 0 0}
+.timeline-svg text{font-family:system-ui,"Noto Sans TC",sans-serif}
+.controls{border-top:1px solid var(--line);padding-top:30px;margin-top:45px}
+.cases{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;margin:12px 0 20px}.cases button{font-size:15px;font-variant-numeric:tabular-nums}
+.readout{display:grid;grid-template-columns:minmax(0,.55fr) minmax(0,1.45fr);gap:25px;margin:25px 0 0;padding-top:20px;border-top:1px solid var(--line)}
+.readout strong{font-size:21px;font-weight:500;color:var(--gold)}.readout p{margin:4px 0;color:var(--mute);max-width:58ch}
+.disclaimer{border-top:1px solid var(--line);padding:24px 0 0;font-size:13px;color:var(--mute);max-width:85ch}
+.hidden{display:none!important}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin:18px 0 8px}.legend b{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:middle;border-radius:20px}
+@media(max-width:680px){main{padding:26px 19px}header h1{max-width:none}.lead{font-size:15px;margin-bottom:27px}.figures{gap:35px;margin:28px 0}.figure figcaption{gap:3px;display:grid}.readout{grid-template-columns:1fr;gap:8px}.cases{gap:8px 16px}.controls{margin-top:28px}.disclaimer{padding-top:19px}}
+</style></head>
+<body><main>
+<header><div class="eyebrow">RESEARCH 01 · R18 / Diagram comparison</div>
+<h1>哪些週期先回來，哪些還沒？</h1>
+<p class="lead">不要再把不同單位的相位距離畫成同一把尺。改以真正的 Δ 年數為橫軸，標出每個條件實際重遇的時刻；局部 +1,980 和全域 +24,000 應該在同一段歷程中讀懂。</p>
+</header>
+<nav aria-label="圖形方案比較">
+<button type="button" data-variant="lanes" aria-pressed="true">方案 A · 全貌＋局部放大</button>
+<button type="button" data-variant="gates" aria-pressed="false">方案 B · 條件交會</button>
+</nav>
+<section aria-labelledby="variant-heading">
+<h2 id="variant-heading">先看所有閉合事件，再放大局部</h2>
+<p class="explain" id="variant-explain">所有軸都代表經過年數 Δ。上圖看 0～24,000 年，下面才放大 0～2,400 年；兩張圖採不同時間尺度，並且清楚標出，不把相位刻度冒充經過時間。</p>
+<div class="figures" id="figures-a">
+<figure class="figure">
+<figcaption><strong>長時間軸</strong><span>0–24,000 年 · 實際 Δ</span></figcaption>
+<svg id="r18-overview" class="timeline-svg" role="img" aria-label="公曆、年序、日序各種共同閉合的實際年份分布"></svg>
+<p class="subnote">每條橫列表示一組必須「同時成立」的條件；刻痕是真正閉合的 Δ 年份，不是相位位置。</p>
+</figure>
+<figure class="figure">
+<figcaption><strong>局部放大</strong><span>0–2,400 年 · 實際 Δ，獨立比例</span></figcaption>
+<svg id="r18-local" class="timeline-svg" role="img" aria-label="年序與日序各自重遇的實際年份，以及第一次共同重遇"></svg>
+<p class="subnote">兩列的量都是「哪一年發生歸零」，不是「年序 −20 與日序 −3」的同單位距離。</p>
+</figure>
+</div>
+<div class="figures hidden" id="figures-b">
+<figure class="figure">
+<figcaption><strong>條件交會</strong><span>0–24,000 年 · 單一 Δ 時間軸</span></figcaption>
+<svg id="r18-gates" class="timeline-svg" role="img" aria-label="公曆加年序、公曆加日序和三項同時歸零的時間關係"></svg>
+<p class="subnote">+1,200 與 +8,000 是不同條件首次交會；+24,000 是三項離散條件首次共同閉合。</p>
+</figure>
+<figure class="figure">
+<figcaption><strong>局部事件窗</strong><span>0–2,400 年 · 放大 +1,980 年序／日序重遇</span></figcaption>
+<svg id="r18-local-b" class="timeline-svg" role="img" aria-label="局部 1,980 年年序與日序第一次重遇的位置"></svg>
+</figure>
+</div>
+</section>
+<section class="controls" aria-labelledby="delta-heading">
+<div class="eyebrow">READ THE SELECTED YEAR</div>
+<h2 id="delta-heading">選一個 Δ，對照三項條件</h2>
+<div class="cases" role="group" aria-label="選取經過年數">
+<button data-delta="0" aria-pressed="false">0</button><button data-delta="400" aria-pressed="false">+400</button><button data-delta="1200" aria-pressed="false">+1,200</button><button data-delta="1980" aria-pressed="true">+1,980</button><button data-delta="8000" aria-pressed="false">+8,000</button><button data-delta="24000" aria-pressed="false">+24,000</button>
+</div>
+<div class="readout"><strong id="selected-title" aria-live="polite">年序、日序重遇</strong><div><p id="selected-detail"></p><p id="selected-phases"></p></div></div>
+</section>
+<p class="disclaimer">方法邊界：橫軸只量 Δ（公曆年）。公曆、60 年序與 60 日序的「歸零」皆以正式 recurrenceState 的離散判定為準；日序由實際公曆日數計算。+24,000 是離散候選，不代表節氣、月柱或完整八字精確回到原位，後續仍須天文驗真。</p>
+<script type="module" src="./research-r18-closure-journey.js"></script>
+</main></body></html>
