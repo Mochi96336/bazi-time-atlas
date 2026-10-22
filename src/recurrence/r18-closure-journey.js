@@ -7,46 +7,48 @@ import { recurrenceState, validateGregorianDate } from "./gregorian-cycle.js";
  */
 export function buildClosureJourney(baseDate,{maxYears=24000,detailYears=2400}={}){
   if(!validateGregorianDate(baseDate))throw new RangeError("invalid base date");
-  if(!Number.isInteger(maxYears)||maxYears<24000||maxYears>24000)throw new RangeError("use the established 24,000-year comparison");
-  if(!Number.isInteger(detailYears)||detailYears<1980||detailYears>maxYears)throw new RangeError("detail must include local recurrence");
-  const events={gregorian:[],year:[],day:[],yearDay:[],gregorianYear:[],gregorianDay:[],all:[]};
-  const overview={gregorian:[],gregorianYear:[],gregorianDay:[],all:[]};
+  if(maxYears!==24000)throw new RangeError("use the established 24,000-year comparison");
+  if(!Number.isInteger(detailYears)||detailYears<600||detailYears>maxYears)throw new RangeError("invalid local detail window");
+  if(baseDate.year+maxYears>10000000)throw new RangeError("target year exceeds Gregorian model");
+
+  // Search the FULL horizon first. An earliest local recurrence is a property
+  // of this base date, not a property of a fixed 0–2,400 year inset.
+  const allEvents={gregorian:[],year:[],day:[],yearDay:[],gregorianYear:[],gregorianDay:[],all:[]};
   for(let delta=1;delta<=maxYears;delta++){
-    const {closed,targetValid}=recurrenceState(baseDate,delta);
+    const {closed}=recurrenceState(baseDate,delta);
     const {gregorian:g,yearSequence:y,day:d}=closed;
-    if(g)overview.gregorian.push(delta);
-    if(g&&y)overview.gregorianYear.push(delta);
-    if(g&&d)overview.gregorianDay.push(delta);
-    if(g&&y&&d)overview.all.push(delta);
-    if(delta<=detailYears){
-      if(g)events.gregorian.push(delta);
-      if(y)events.year.push(delta);
-      if(d)events.day.push(delta);
-      if(y&&d)events.yearDay.push(delta);
-      if(g&&y)events.gregorianYear.push(delta);
-      if(g&&d)events.gregorianDay.push(delta);
-      if(g&&y&&d)events.all.push(delta);
-    }
+    if(g)allEvents.gregorian.push(delta);
+    if(y)allEvents.year.push(delta);
+    if(d)allEvents.day.push(delta);
+    if(y&&d)allEvents.yearDay.push(delta);
+    if(g&&y)allEvents.gregorianYear.push(delta);
+    if(g&&d)allEvents.gregorianDay.push(delta);
+    if(g&&y&&d)allEvents.all.push(delta);
   }
-  const firstLocal=events.yearDay[0]??null;
-  const firstGlobal=overview.all[0]??null;
-  const markers=[400,1200,1980,8000,24000].map(delta=>{
-    const state=recurrenceState(baseDate,delta);
-    return Object.freeze({
-      delta,closed:Object.freeze({...state.closed}),
-      dayAvailable:state.targetValid,
-      dayDelta:state.dayDelta
+  const firstLocal=allEvents.yearDay[0]??null;
+  const firstGlobal=allEvents.all[0]??null;
+  const detailStart=firstLocal===null||firstLocal<=detailYears?0
+    :Math.min(maxYears-detailYears,
+      Math.max(0,Math.floor((firstLocal-detailYears*0.65)/60)*60));
+  const detailEnd=detailStart+detailYears;
+  const detail=Object.freeze(Object.fromEntries(Object.entries(allEvents)
+    .map(([key,years])=>[key,Object.freeze(years.filter(d=>d>=detailStart&&d<=detailEnd))])));
+  const overview=Object.freeze(Object.fromEntries(
+    ["gregorian","gregorianYear","gregorianDay","all"].map(key=>[key,Object.freeze(allEvents[key])])
+  ));
+  const markers=[400,1200,firstLocal,8000,24000].filter((d,i,a)=>d!==null&&a.indexOf(d)===i)
+    .sort((a,b)=>a-b).map(delta=>{
+      const state=recurrenceState(baseDate,delta);
+      return Object.freeze({
+        delta,closed:Object.freeze({...state.closed}),
+        dayAvailable:state.targetValid,dayDelta:state.dayDelta
+      });
     });
-  });
   return Object.freeze({
-    baseDate:Object.freeze({...baseDate}),
-    maxYears,detailYears,
-    detail:Object.freeze(Object.fromEntries(Object.entries(events).map(([key,v])=>[key,Object.freeze(v)]))),
-    overview:Object.freeze(Object.fromEntries(Object.entries(overview).map(([key,v])=>[key,Object.freeze(v)]))),
-    firstLocal,firstGlobal,markers:Object.freeze(markers)
+    baseDate:Object.freeze({...baseDate}),maxYears,detailYears,detailStart,detailEnd,
+    detail,overview,firstLocal,firstGlobal,markers:Object.freeze(markers)
   });
 }
-
 export function classifyJourneyPoint(journey,delta){
   if(!Number.isInteger(delta)||delta<0||delta>journey.maxYears)throw new RangeError("outside journey");
   const state=recurrenceState(journey.baseDate,delta);
