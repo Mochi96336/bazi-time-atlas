@@ -1,0 +1,68 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><body>
+<output id="status" data-ready="false">loading</output>
+<iframe id="page" style="width:1200px;height:1250px"></iframe>
+<script>
+const status=document.querySelector("#status"),frame=document.querySelector("#page");
+const events=[];
+function check(ok,reason){if(!ok)throw Error(reason+" / "+JSON.stringify(events))}
+function probe(doc,label){
+ const box=doc.querySelector("#r18-context");
+ const inst=doc.querySelector("#recurrence-instrument");
+ const record={label,base:box.dataset.r18BaseDate,delta:box.dataset.r18SelectedDelta,
+ local:box.dataset.r18FirstLocal,window:box.dataset.r18DetailStart,
+ paints:box.dataset.r18OverviewPaints,mode:doc.documentElement.dataset.researchVisual};
+ events.push(record);
+ check(box.dataset.r18Ready==="true",label+" evidence not ready");
+ check(box.dataset.r18Model==="recurrenceState",label+" model fork");
+ check(inst.dataset.r18ProofSource==="recurrenceState",label+" instrument fork");
+ check(doc.querySelector("#r18-context-overview").dataset.axisUnit==="elapsed-years",label+" axis wrong");
+ check(doc.querySelector("#r18-context-local").dataset.axisUnit==="elapsed-years",label+" detail scale wrong");
+ return record;
+}
+function load(url){return new Promise((resolve,reject)=>{
+ frame.onload=()=>resolve(frame.contentDocument);
+ frame.onerror=()=>reject(Error("load error"));frame.src=url;
+})}
+function slider(doc,delta){
+ const input=doc.querySelector("#delta-slider");input.value=String(delta);
+ input.dispatchEvent(new doc.defaultView.Event("input",{bubbles:true}));
+}
+function baseline(doc,year,month,day){
+ for(const [id,value] of [["base-year",year],["base-month",month],["base-day",day]])
+  doc.querySelector("#"+id).value=String(value);
+ doc.querySelector("#base-day").dispatchEvent(new doc.defaultView.Event("change",{bubbles:true}));
+}
+async function main(){
+ let doc=await load("../../recurrence.html?date=2026-09-13&delta=1980&r18=1");
+ let a=probe(doc,"initial");
+ check(a.local==="1980"&&a.window==="0","initial local false");
+ check(a.paints==="1","unexpected initial scan count");
+ for(const delta of [400,1200,24000,1980]){
+  slider(doc,delta);const x=probe(doc,"slide-"+delta);
+  check(x.delta===String(delta),"slider mismatch");
+  check(x.paints==="1","full 24k scan repeated on slider "+delta);
+ }
+ baseline(doc,1900,3,1);
+ a=probe(doc,"base-1900");
+ check(a.local==="6180"&&a.window==="4620"&&a.paints==="2","1900 cache/window wrong");
+ slider(doc,6180);
+ a=probe(doc,"1900-local-selected");
+ check(a.delta==="6180"&&a.paints==="2","1900 slider re-scan");
+ baseline(doc,2100,3,1);
+ a=probe(doc,"base-2100");
+ check(a.local==="16080"&&a.window==="14520"&&a.paints==="3","2100 cache/window wrong");
+ const b=await load("../../recurrence.html?date=2026-09-13&delta=1980");
+ check(b.documentElement.dataset.researchVisual==="r16","R16 default lost");
+ check(b.querySelector("#r18-context").hidden===true,"R18 visible on default");
+ const r17=await load("../../recurrence.html?date=2026-09-13&delta=1980&r17=1");
+ check(r17.documentElement.dataset.researchVisual==="r17","R17 fallback lost");
+ check(r17.querySelector("#r17-production-proof").dataset.proofReady==="true","R17 proof no longer drawn");
+ status.dataset.ready="true";
+ status.dataset.steps=String(events.length);
+ status.dataset.cached="true";
+ status.dataset.r16Fallback="true";
+ status.dataset.r17Fallback="true";
+ status.textContent=JSON.stringify(events);
+}
+main().catch(error=>{status.dataset.ready="error";status.dataset.error=error.message;status.textContent=error.stack;});
+</script></body></html>
