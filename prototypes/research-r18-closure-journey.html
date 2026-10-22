@@ -25,6 +25,26 @@ h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16p
 .cases{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;margin:12px 0 20px}.cases button{font-size:15px;font-variant-numeric:tabular-nums}
 .readout{display:grid;grid-template-columns:minmax(0,.55fr) minmax(0,1.45fr);gap:25px;margin:25px 0 0;padding-top:20px;border-top:1px solid var(--line)}
 .readout strong{font-size:21px;font-weight:500;color:var(--gold)}.readout p{margin:4px 0;color:var(--mute);max-width:58ch}
+.base-basis{font-size:13px;color:var(--mute);margin:-26px 0 29px}
+.derivation{border:0;border-top:1px solid var(--line);padding:22px 0 8px;margin:12px 0 14px}
+.derivation > header{margin:0 0 18px}
+.derivation h3{font-size:15px;font-weight:550;margin:3px 0}
+.derivation p{margin:0;color:var(--mute);font-size:12px}
+.derivation-track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.derivation-step{min-width:0;border-left:1px solid var(--line);padding:4px 0 6px 17px}
+.derivation-step small{display:block;color:var(--mute);font-size:11px;letter-spacing:.07em}
+.derivation-step strong{display:block;font-size:clamp(17px,2.1vw,24px);font-weight:500;margin:7px 0;color:var(--ink);font-variant-numeric:tabular-nums}
+.derivation-step p{line-height:1.65;max-width:33ch}
+@media(max-width:680px){
+ .base-basis{margin:-8px 0 18px}
+ .derivation-track{grid-template-columns:1fr;gap:12px}
+ .derivation-step{padding:1px 0 4px 12px}
+ .derivation-step strong{margin:3px 0;font-size:18px}
+ .derivation{padding:16px 0 0}
+ .cases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px}
+ .cases button{min-width:0;font-size:12px;line-height:1.25;white-space:normal;text-align:center;padding:9px 3px;border:1px solid var(--line);border-radius:3px}
+ .cases button[aria-pressed=true]{border-color:var(--gold)}
+}
 .disclaimer{border-top:1px solid var(--line);padding:24px 0 0;font-size:13px;color:var(--mute);max-width:85ch}
 .hidden{display:none!important}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin:18px 0 8px}.legend b{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:middle;border-radius:20px}
 @media(max-width:680px){main{padding:26px 19px}header h1{max-width:none}.lead{font-size:15px;margin-bottom:27px}.figures{gap:35px;margin:28px 0}.figure figcaption{gap:3px;display:grid}.readout{grid-template-columns:1fr;gap:8px}.cases{gap:8px 16px}.controls{margin-top:28px}.disclaimer{padding-top:19px}}
@@ -32,7 +52,8 @@ h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16p
 <body><main>
 <header><div class="eyebrow">RESEARCH 01 · R18 / Diagram comparison</div>
 <h1>哪些週期先回來，哪些還沒？</h1>
-<p class="lead">不要再把不同單位的相位距離畫成同一把尺。改以真正的 Δ 年數為橫軸，標出每個條件實際重遇的時刻；局部 +1,980 和全域 +24,000 應該在同一段歷程中讀懂。</p>
+<p class="lead">不要再把不同單位的相位距離畫成同一把尺。改以真正的 Δ 年數為橫軸，標出每個條件實際重遇的時刻；依基準日期變化的局部重遇，和全域 +24,000 年離散閉合候選，應該在同一段歷程中讀懂。</p>
+<p class="base-basis">目前示例基準：<strong id="r18-baseline">2026/9/13</strong>　· 可用網址參數 <code>?date=1900-03-01</code> 對照</p>
 </header>
 <nav aria-label="圖形方案比較">
 <button type="button" data-variant="lanes" aria-pressed="true">方案 A · 全貌＋局部放大</button>
@@ -40,7 +61,14 @@ h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16p
 </nav>
 <section aria-labelledby="variant-heading">
 <h2 id="variant-heading">先看所有閉合事件，再放大局部</h2>
-<p class="explain" id="variant-explain">所有軸都代表經過年數 Δ。上圖看 0～24,000 年，下面才放大 0～2,400 年；兩張圖採不同時間尺度，並且清楚標出，不把相位刻度冒充經過時間。</p>
+<p class="explain" id="variant-explain">所有軸都代表經過年數 Δ。上圖看 0～24,000 年，局部時間窗會跟著首次年＋日重遇移動；兩張圖採不同時間尺度，並且清楚標出，不把相位刻度冒充經過時間。</p>
+<section id="r18-derivation" class="derivation hidden" aria-label="如何推得各項閉合年份">
+<header><div class="eyebrow">PROOF STEPS / 同一個公曆時間系統</div><h3>為什麼是 1,200、8,000、24,000？</h3></header>
+<div class="derivation-track">
+<div class="derivation-step"><small>01　公曆 × 年序</small><strong>LCM(400, 60) = 1,200</strong><p>公曆結構每 400 年、名義年序每 60 年歸零，首先在 +1,200 年相交。</p></div>
+<div class="derivation-step"><small>02　公曆 × 日序</small><strong>146,097 mod 60 = 57</strong><p>每 400 年經過 146,097 日，日序還差 3 格；需 20 個 400 年區塊才歸零：400 × 20 = 8,000 年。</p></div>
+<div class="derivation-step"><small>03　三個條件</small><strong>LCM(1,200, 8,000) = 24,000</strong><p>這是三種離散條件首次同時歸零，不是實際十二節界的週期。</p></div>
+</div></section>
 <div class="figures" id="figures-a">
 <figure class="figure">
 <figcaption><strong>長時間軸</strong><span>0–24,000 年 · 實際 Δ</span></figcaption>
@@ -48,7 +76,7 @@ h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16p
 <p class="subnote">每條橫列表示一組必須「同時成立」的條件；刻痕是真正閉合的 Δ 年份，不是相位位置。</p>
 </figure>
 <figure class="figure">
-<figcaption><strong>局部放大</strong><span>0–2,400 年 · 實際 Δ，獨立比例</span></figcaption>
+<figcaption><strong>局部放大</strong><span><span data-r18-local-range>0～2,400 年</span> · 實際 Δ，獨立比例</span></figcaption>
 <svg id="r18-local" class="timeline-svg" role="img" aria-label="年序與日序各自重遇的實際年份，以及第一次共同重遇"></svg>
 <p class="subnote">兩列的量都是「哪一年發生歸零」，不是「年序 −20 與日序 −3」的同單位距離。</p>
 </figure>
@@ -60,8 +88,8 @@ h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16p
 <p class="subnote">+1,200 與 +8,000 是不同條件首次交會；+24,000 是三項離散條件首次共同閉合。</p>
 </figure>
 <figure class="figure">
-<figcaption><strong>局部事件窗</strong><span>0–2,400 年 · 放大 +1,980 年序／日序重遇</span></figcaption>
-<svg id="r18-local-b" class="timeline-svg" role="img" aria-label="局部 1,980 年年序與日序第一次重遇的位置"></svg>
+<figcaption><strong>局部事件窗</strong><span><span data-r18-local-range>0～2,400 年</span> · 放大當前基準的首次年序／日序重遇</span></figcaption>
+<svg id="r18-local-b" class="timeline-svg" role="img" aria-label="局部時間窗中，年序與日序第一次重遇的實際年份"></svg>
 </figure>
 </div>
 </section>
@@ -69,7 +97,7 @@ h2{font:400 clamp(23px,2.5vw,36px)/1.35 Georgia,"Noto Serif TC",serif;margin:16p
 <div class="eyebrow">READ THE SELECTED YEAR</div>
 <h2 id="delta-heading">選一個 Δ，對照三項條件</h2>
 <div class="cases" role="group" aria-label="選取經過年數">
-<button data-delta="0" aria-pressed="false">0</button><button data-delta="400" aria-pressed="false">+400</button><button data-delta="1200" aria-pressed="false">+1,200</button><button data-delta="1980" aria-pressed="true">+1,980</button><button data-delta="8000" aria-pressed="false">+8,000</button><button data-delta="24000" aria-pressed="false">+24,000</button>
+<button data-delta="0" aria-pressed="false">0</button><button data-delta="400" aria-pressed="false">+400</button><button data-delta="1200" aria-pressed="false">+1,200</button><button data-delta="local" aria-pressed="true">首次局部</button><button data-delta="8000" aria-pressed="false">+8,000</button><button data-delta="24000" aria-pressed="false">+24,000</button>
 </div>
 <div class="readout"><strong id="selected-title" aria-live="polite">年序、日序重遇</strong><div><p id="selected-detail"></p><p id="selected-phases"></p></div></div>
 </section>
