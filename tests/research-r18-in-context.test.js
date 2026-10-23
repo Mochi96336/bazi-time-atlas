@@ -71,6 +71,8 @@ test("R19 editorial diagram keeps event loci separate from axis-only observation
  assert.match(script,/data-r18-local-marker/);
  assert.doesNotMatch(script,/stroke:C\.year,"stroke-width":2,\s*"data-r18-cursor"/);
  assert.match(html,/data-r19-delta="local"/);
+ assert.ok(html.indexOf('id="r18-context-overview"')<html.indexOf('id="r18-context-headline"'),
+  "visual and assistive reading order must agree: diagram before interpretation");
  assert.equal((html.match(/data-r19-delta=/g)||[]).length,6,"all milestone choices must be explicit");
  assert.match(css,/grid-template-areas:"diagram insight" "control insight" "evidence evidence"/);
  assert.match(css,/grid-template-areas:"diagram" "insight" "control" "evidence"/);
