@@ -886,6 +886,20 @@ function bindControls() {
   deltaStepMinus?.addEventListener("click", () => shiftBySelectedStep(-1));
   deltaStepPlus?.addEventListener("click", () => shiftBySelectedStep(1));
   deltaSlider.addEventListener("input", () => setDelta(deltaSlider.value, { source:"slider" }));
+  // Precise research milestones reuse the existing canonical setDelta event.
+  // The local milestone resolves from the R18 view's currently selected base.
+  // This creates neither a second slider nor another date/time state owner.
+  if (r18OptIn) r18Context?.querySelectorAll("[data-r19-delta]").forEach(button => {
+    button.addEventListener("click", () => {
+      const years = button.dataset.r19Delta === "local"
+        ? Number(r18Context.dataset.r18FirstLocal)
+        : Number(button.dataset.r19Delta);
+      if (!Number.isFinite(years)) return;
+      window.dispatchEvent(new CustomEvent("recurrence:select-delta", {
+        detail:{ deltaYears:years, source:"r19-milestone" }
+      }));
+    });
+  });
   window.addEventListener("recurrence:select-strip-date",handleOriginalYearStripSelection);
   window.addEventListener("recurrence:select-delta", event => {
     const deltaYears = Number(event.detail?.deltaYears);
