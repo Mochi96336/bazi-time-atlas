@@ -85,7 +85,7 @@ html[data-research-visual="r18"] #research-discrete .discrete-to-astronomy{
  .r18-context-proof{gap:15px;grid-template-columns:minmax(0,1fr)}
  .r18-context-proof > div{gap:3px;padding-left:12px;border-left:1px solid var(--research-line-subtle)}
  .r18-context-proof strong{font-size:15px}
- .r18-context figcaption{font-size:11px}
+ .r18-context figcaption{font-size:12px}
 }
 
 /* The single existing Δ toolbar moves here only in R18. Reader can test the
@@ -120,4 +120,109 @@ html[data-research-visual="r18"] #research-discrete .research-discrete-explorer-
 }
 html[data-research-visual="r18"] #research-discrete #research-year-strip{
  margin-top:clamp(32px,4vw,54px)!important;
+}
+
+
+/* R19 editorial candidate. R18 stays URL-gated, R16/R17 keep their layout.
+   A graphic and its evolving interpretation share one first-view composition. */
+@media(min-width:960px){
+ html[data-research-visual="r18"] #r18-context{
+  display:grid;
+  grid-template-columns:minmax(0,1.56fr) minmax(235px,.7fr);
+  grid-template-areas:"diagram insight" "control insight" "evidence evidence";
+  column-gap:clamp(35px,5.2vw,83px);row-gap:0;
+  align-items:start;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-overview{
+  grid-area:diagram;max-width:none;min-width:0;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-heading{
+  grid-area:insight;align-self:center;
+  margin:0;padding:15px 0 18px clamp(15px,2vw,27px);
+  border-left:1px solid var(--research-line-subtle);
+  max-width:34ch;min-width:0;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-heading strong{
+  font-size:clamp(29px,3vw,43px);line-height:1.21;
+ }
+ html[data-research-visual="r18"] #r18-context #r18-context-controls-slot{
+  grid-area:control;align-self:start;margin-top:11px;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-bottom{
+  grid-area:evidence;margin-top:clamp(35px,4.5vw,65px);
+ }
+}
+@media(max-width:959px){
+ html[data-research-visual="r18"] #r18-context{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"diagram" "insight" "control" "evidence";
+  row-gap:0;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-overview{grid-area:diagram}
+ html[data-research-visual="r18"] #r18-context .r18-context-heading{
+  grid-area:insight;margin:13px 0 12px;gap:5px;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-heading strong{
+  font-size:clamp(24px,3vw,30px);
+ }
+ html[data-research-visual="r18"] #r18-context #r18-context-controls-slot{
+  grid-area:control;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-bottom{grid-area:evidence}
+}
+html[data-research-visual="r18"] #r18-context .r19-milestones{
+ display:flex;gap:7px;align-items:center;flex-wrap:wrap;
+ padding:6px 0 0;margin:0 0 3px;
+}
+html[data-research-visual="r18"] #r18-context .r19-milestone-caption{
+ color:var(--research-text-secondary);font-size:12px;
+ margin-right:6px;
+}
+html[data-research-visual="r18"] #r18-context [data-r19-delta]{
+ appearance:none;cursor:pointer;
+ color:var(--research-text-secondary);
+ background:transparent;
+ border:1px solid var(--research-line-subtle);
+ border-radius:6px;min-height:34px;
+ padding:4px 9px;line-height:1.45;font-size:13px;
+ font-variant-numeric:tabular-nums;
+ transition:border-color .14s ease,color .14s ease;
+}
+html[data-research-visual="r18"] #r18-context [data-r19-delta]:hover,
+html[data-research-visual="r18"] #r18-context [data-r19-delta]:focus-visible{
+ border-color:var(--research-text-primary);color:var(--research-text-primary);
+}
+html[data-research-visual="r18"] #r18-context [data-r19-delta][aria-pressed="true"]{
+ border-color:var(--research-text-primary);
+ color:var(--research-text-primary);
+ background:color-mix(in srgb,var(--research-text-primary) 9%,transparent);
+}
+html[data-research-visual="r18"] #r18-context [data-r19-delta]:focus-visible{
+ outline:2px solid var(--research-text-primary);
+ outline-offset:3px;
+}
+@media(max-width:680px){
+ html[data-research-visual="r18"] #r18-context .r19-milestones{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;padding:9px 0 3px;
+ }
+ html[data-research-visual="r18"] #r18-context .r19-milestone-caption{
+  grid-column:1/-1;margin:0;font-size:12px;
+ }
+ html[data-research-visual="r18"] #r18-context [data-r19-delta]{
+  text-align:center;min-height:42px;font-size:12px;
+  padding:7px 2px;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-overview{
+  margin-top:0;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-heading{
+  margin:13px 0 5px;
+ }
+ html[data-research-visual="r18"] #r18-context .r18-context-heading p{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-research-visual="r18"] #r18-context [data-r19-delta]{
+  transition:none;
+ }
 }

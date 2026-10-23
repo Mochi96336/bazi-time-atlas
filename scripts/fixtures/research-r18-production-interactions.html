@@ -20,6 +20,12 @@ function probe(doc,label){
  check(!!doc.querySelector("#r18-context-controls-slot #delta-slider"),
    label+" original slider not adjacent to chart");
  check(doc.querySelectorAll("#delta-slider").length===1,label+" duplicate slider");
+ const milestone=doc.querySelectorAll("#r18-context [data-r19-delta]");
+ check(milestone.length===6,label+" missing precision shortcuts");
+ check(doc.querySelector("#r18-context-overview [data-r18-local-marker]"),label+" local event not visible");
+ const readhead=doc.querySelector("#r18-context-overview [data-r18-selected-year]");
+ check(readhead?.dataset.r18Readhead==="axis-only",label+" current-year readhead crosses events");
+
  check(doc.defaultView.getComputedStyle(doc.querySelector("#discrete-derivation-steps")).display==="none",
    label+" duplicate candidate cards remain in R18");
 
@@ -43,6 +49,20 @@ async function main(){
  let a=probe(doc,"initial");
  check(a.local==="1980"&&a.window==="0","initial local false");
  check(a.paints==="1","unexpected initial scan count");
+ // Actually click the presented controls. They must choose the same canonical
+ // Δ as the range input, and must not trigger 24k projection rebuilds.
+ const choice=doc.querySelector('#r18-context [data-r19-delta="400"]');
+ choice.click();
+ a=probe(doc,"milestone-400");
+ check(a.delta==="400"&&a.paints==="1","milestone 400 not canonical");
+ check(doc.querySelector('#r18-context [data-r19-delta="400"]').getAttribute("aria-pressed")==="true",
+  "current shortcut not marked active");
+ const localChoice=doc.querySelector('#r18-context [data-r19-delta="local"]');
+ check(localChoice.textContent.includes("1,980"),"dynamic local text missing");
+ localChoice.click();
+ a=probe(doc,"milestone-local-1980");
+ check(a.delta==="1980"&&a.paints==="1","milestone local not canonical");
+
  for(const delta of [400,1200,24000,1980]){
   slider(doc,delta);const x=probe(doc,"slide-"+delta);
   check(x.delta===String(delta),"slider mismatch");
@@ -51,12 +71,24 @@ async function main(){
  baseline(doc,1900,3,1);
  a=probe(doc,"base-1900");
  check(a.local==="6180"&&a.window==="4620"&&a.paints==="2","1900 cache/window wrong");
+ check(doc.querySelector('[data-r19-delta="local"]').textContent.includes("6,180"),
+   "1900 local shortcut stale");
+ doc.querySelector('[data-r19-delta="local"]').click();
+ a=probe(doc,"milestone-local-6180");
+ check(a.delta==="6180"&&a.paints==="2","1900 local shortcut incorrect");
+
  slider(doc,6180);
  a=probe(doc,"1900-local-selected");
  check(a.delta==="6180"&&a.paints==="2","1900 slider re-scan");
  baseline(doc,2100,3,1);
  a=probe(doc,"base-2100");
  check(a.local==="16080"&&a.window==="14520"&&a.paints==="3","2100 cache/window wrong");
+ check(doc.querySelector('[data-r19-delta="local"]').textContent.includes("16,080"),
+   "2100 local shortcut stale");
+ doc.querySelector('[data-r19-delta="local"]').click();
+ a=probe(doc,"milestone-local-16080");
+ check(a.delta==="16080"&&a.paints==="3","2100 local shortcut incorrect");
+
  const b=await load("../../recurrence.html?date=2026-09-13&delta=1980");
  check(b.documentElement.dataset.researchVisual==="r16","R16 default lost");
  check(b.querySelector("#r18-context").hidden===true,"R18 visible on default");

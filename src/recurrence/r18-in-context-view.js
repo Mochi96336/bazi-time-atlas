@@ -24,33 +24,38 @@ function baseSvg(svg,start,end,height,mobile){
  for(const d of [...new Set(ticks)]){
   const px=x(d);
   add(svg,"line",{x1:px,y1:y-4,x2:px,y2:y+4,stroke:C.line});
-  add(svg,"text",{x:px,y:y+19,fill:C.muted,"font-size":mobile?10:12,
+  add(svg,"text",{x:px,y:y+19,fill:C.muted,"font-size":12,
     "text-anchor":d===start?"start":d===end?"end":"middle"},fmt(d));
  }
  return {x,y};
 }
 function overview(svg,model,mobile){
- const {x,y}=baseSvg(svg,0,24000,297,mobile);
+ const {x,y}=baseSvg(svg,0,24000,334,mobile);
+ // Every endpoint is an actual recurrence event; the dashed portion is
+ // elapsed time towards first closure, never a continuously-held condition.
  const lanes=[
-  {at:1200,y:80,label:"公曆＋年序",color:C.year,events:model.overview.gregorianYear},
-  {at:8000,y:152,label:"公曆＋日序",color:C.day,events:model.overview.gregorianDay},
-  {at:24000,y:224,label:"三項共同",color:C.all,events:model.overview.all}
+  {at:1200,y:63,label:"公曆＋年序",note:"首次 +1,200",color:C.year,events:model.overview.gregorianYear},
+  {at:model.firstLocal,y:125,label:"年序＋日序",note:"局部 +"+fmt(model.firstLocal),
+    color:C.day,events:[],local:true},
+  {at:8000,y:187,label:"公曆＋日序",note:"首次 +8,000",color:C.day,events:model.overview.gregorianDay},
+  {at:24000,y:249,label:"三項共同",note:"首次 +24,000",color:C.all,events:model.overview.all}
  ];
  for(const lane of lanes){
-  add(svg,"text",{x:8,y:lane.y-10,fill:C.text,"font-size":mobile?12:16},lane.label);
-  add(svg,"text",{x:8,y:lane.y+9,fill:C.muted,"font-size":mobile?10:13},"首次 +"+fmt(lane.at));
-  add(svg,"line",{x1:x(0),y1:lane.y,x2:x(24000),y2:lane.y,stroke:C.line,opacity:.22});
+  add(svg,"text",{x:8,y:lane.y-12,fill:C.text,"font-size":mobile?13:15},lane.label);
+  add(svg,"text",{x:8,y:lane.y+8,fill:C.muted,"font-size":12},lane.note);
+  add(svg,"line",{x1:x(0),y1:lane.y,x2:x(24000),y2:lane.y,stroke:C.line,opacity:.2});
+  if(lane.at===null)continue;
   add(svg,"line",{x1:x(0),y1:lane.y,x2:x(lane.at),y2:lane.y,
-    stroke:C.muted,opacity:.8,"stroke-dasharray":"2 6"});
+    stroke:C.muted,opacity:.68,"stroke-dasharray":"2 6"});
   add(svg,"circle",{cx:x(lane.at),cy:lane.y,r:mobile?6:8,fill:"none",
-    stroke:lane.color,"stroke-width":2,"data-r18-first-closure":lane.at});
+    stroke:lane.color,"stroke-width":2,"data-r18-first-closure":lane.at,
+    ...(lane.local?{"data-r18-local-marker":lane.at}:{})});
   add(svg,"circle",{cx:x(lane.at),cy:lane.y,r:3,fill:lane.color});
   for(const d of lane.events)if(d>lane.at)
-   add(svg,"circle",{cx:x(d),cy:lane.y,r:mobile?1.6:2.4,fill:lane.color,opacity:.5});
+   add(svg,"circle",{cx:x(d),cy:lane.y,r:mobile?1.7:2.4,fill:lane.color,opacity:.5});
  }
- if(model.firstLocal!==null)
-  add(svg,"line",{x1:x(model.firstLocal),y1:49,x2:x(model.firstLocal),y2:y-6,
-    stroke:C.day,opacity:.69,"stroke-dasharray":"3 7","data-r18-local-marker":model.firstLocal});
+ svg.dataset.graphGrammar="independent-event-lanes";
+ svg.dataset.cursorPlacement="axis-only";
  svg.dataset.ready="true";
 }
 function local(svg,model,mobile){
@@ -60,7 +65,7 @@ function local(svg,model,mobile){
   {label:"日序",y:109,values:model.detail.day,color:C.day},
   {label:"兩者重遇",y:158,values:model.detail.yearDay,color:C.text}
  ]){
-  add(svg,"text",{x:8,y:row.y+3,fill:C.text,"font-size":mobile?12:15},row.label);
+  add(svg,"text",{x:8,y:row.y+3,fill:C.text,"font-size":mobile?13:15},row.label);
   add(svg,"line",{x1:x(model.detailStart),y1:row.y,x2:x(model.detailEnd),y2:row.y,
     stroke:C.line,opacity:.25});
   for(const d of row.values){
@@ -72,16 +77,20 @@ function local(svg,model,mobile){
  }
  svg.dataset.ready="true";
 }
-function cursor(svg,delta,top,bottom){
+function cursor(svg,delta,_top,_bottom){
  svg.querySelectorAll("[data-r18-cursor]").forEach(n=>n.remove());
  const start=Number(svg.dataset.startYear),end=Number(svg.dataset.endYear);
  if(delta<start||delta>end)return;
  const box=svg.viewBox.baseVal,w=box.width,left=w===340?104:175,right=w-18;
  const px=left+(right-left)*(delta-start)/(end-start);
- add(svg,"line",{x1:px,y1:top,x2:px,y2:bottom,stroke:C.year,"stroke-width":2,
-   "data-r18-cursor":"true"});
- add(svg,"rect",{x:px-4,y:top-4,width:8,height:8,fill:C.year,
-   "data-r18-cursor":"true","data-r18-selected-year":delta});
+ // The observation marker occupies only the axis band, so it NEVER covers
+ // recurrence circles, including +1,200 and the baseline-dependent +1,980.
+ const cy=box.height-33;
+ add(svg,"path",{d:"M "+px+" "+(cy-19)+" l -6 -10 h 12 Z",
+  fill:C.text,stroke:"none","data-r18-cursor":"true",
+  "data-r18-selected-year":delta,"data-r18-readhead":"axis-only"});
+ add(svg,"line",{x1:px,y1:cy-18,x2:px,y2:cy+2,stroke:C.text,"stroke-width":2,
+  "data-r18-cursor":"true","data-r18-readhead":"axis-only"});
 }
 /** Only the base date invalidates the 24k event cache; the normal Δ path repaints cursors. */
 export function renderR18Context(root,state){
@@ -121,7 +130,22 @@ export function renderR18Context(root,state){
  root.querySelector("#r18-context-local-label").textContent=
   "局部 "+fmt(journey.detailStart)+"～"+fmt(journey.detailEnd)+" 年 · 首次年＋日 +"+fmt(journey.firstLocal);
  root.querySelector("#r18-context-local-note").textContent=
-  "紫色虛線代表首次年＋日重遇 +"+fmt(journey.firstLocal)+"；金色實線與方形代表目前選取的 Δ。";
+  "紫色節點是這個基準日期的首次年＋日重遇（+"+fmt(journey.firstLocal)+"）；白色三角形位在時間軸下方，表示目前選取的 Δ。";
+ const localButton=root.querySelector('[data-r19-delta="local"]');
+ if(localButton){
+  localButton.textContent="局部 +"+fmt(journey.firstLocal);
+  localButton.disabled=journey.firstLocal===null;
+ }
+ root.querySelectorAll("[data-r19-delta]").forEach(button=>{
+  const value=button.dataset.r19Delta==="local"?journey.firstLocal:Number(button.dataset.r19Delta);
+  button.setAttribute("aria-pressed",String(value===state.deltaYears));
+ });
+ overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
+  fmt(journey.firstLocal)+"；公曆＋日序首次 8,000；三項共同首次 24,000。"+
+  "目前選取 "+fmt(state.deltaYears)+" 年，讀頭不覆蓋任何事件。");
+ localSvg.setAttribute("aria-label","依基準日期移動的局部時間窗 "+
+  fmt(journey.detailStart)+" 至 "+fmt(journey.detailEnd)+" 年；首次年序日序重遇 "+
+  fmt(journey.firstLocal)+" 年，目前選取 "+fmt(state.deltaYears)+" 年。");
  root.dataset.r18Ready="true";
  root.dataset.r18BaseDate=next;
  root.dataset.r18FirstLocal=String(journey.firstLocal);

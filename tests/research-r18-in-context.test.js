@@ -60,3 +60,28 @@ test("R18 projection cache is scoped to current base, not Δ input",()=>{
   assert.equal(recurrenceState(base,local).closed.yearSequence,true);
  }
 });
+
+test("R19 editorial diagram keeps event loci separate from axis-only observation readhead",()=>{
+ const script=readFileSync(new URL("../src/recurrence/r18-in-context-view.js",import.meta.url),"utf8");
+ const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
+ const css=readFileSync(new URL("../research-r18-context.css",import.meta.url),"utf8");
+ assert.match(script,/data-r18-readhead/);
+ assert.match(script,/cursorPlacement="axis-only"/);
+ assert.match(script,/"年序＋日序"/);
+ assert.match(script,/data-r18-local-marker/);
+ assert.doesNotMatch(script,/stroke:C\.year,"stroke-width":2,\s*"data-r18-cursor"/);
+ assert.match(html,/data-r19-delta="local"/);
+ assert.ok(html.indexOf('id="r18-context-overview"')<html.indexOf('id="r18-context-headline"'),
+  "visual and assistive reading order must agree: diagram before interpretation");
+ assert.equal((html.match(/data-r19-delta=/g)||[]).length,6,"all milestone choices must be explicit");
+ assert.match(css,/grid-template-areas:"diagram insight" "control insight" "evidence evidence"/);
+ assert.match(css,/grid-template-areas:"diagram" "insight" "control" "evidence"/);
+ assert.match(css,/min-height:42px/);
+});
+test("R19 exact milestones delegate to existing public delta event, not a second owner",()=>{
+ const script=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
+ assert.match(script,/button\.dataset\.r19Delta === "local"/);
+ assert.match(script,/new CustomEvent\("recurrence:select-delta"/);
+ assert.match(script,/source:"r19-milestone"/);
+ assert.match(script,/window\.addEventListener\("recurrence:select-delta"/);
+});
