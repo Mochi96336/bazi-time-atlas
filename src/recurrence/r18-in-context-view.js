@@ -24,7 +24,7 @@ function baseSvg(svg,start,end,height,mobile){
  for(const d of [...new Set(ticks)]){
   const px=x(d);
   add(svg,"line",{x1:px,y1:y-4,x2:px,y2:y+4,stroke:C.line});
-  add(svg,"text",{x:px,y:y+19,fill:C.muted,"font-size":mobile?10:12,
+  add(svg,"text",{x:px,y:y+19,fill:C.muted,"font-size":12,
     "text-anchor":d===start?"start":d===end?"end":"middle"},fmt(d));
  }
  return {x,y};
@@ -41,8 +41,8 @@ function overview(svg,model,mobile){
   {at:24000,y:249,label:"三項共同",note:"首次 +24,000",color:C.all,events:model.overview.all}
  ];
  for(const lane of lanes){
-  add(svg,"text",{x:8,y:lane.y-12,fill:C.text,"font-size":mobile?12:15},lane.label);
-  add(svg,"text",{x:8,y:lane.y+8,fill:C.muted,"font-size":mobile?11:12},lane.note);
+  add(svg,"text",{x:8,y:lane.y-12,fill:C.text,"font-size":mobile?13:15},lane.label);
+  add(svg,"text",{x:8,y:lane.y+8,fill:C.muted,"font-size":12},lane.note);
   add(svg,"line",{x1:x(0),y1:lane.y,x2:x(24000),y2:lane.y,stroke:C.line,opacity:.2});
   if(lane.at===null)continue;
   add(svg,"line",{x1:x(0),y1:lane.y,x2:x(lane.at),y2:lane.y,
@@ -65,7 +65,7 @@ function local(svg,model,mobile){
   {label:"日序",y:109,values:model.detail.day,color:C.day},
   {label:"兩者重遇",y:158,values:model.detail.yearDay,color:C.text}
  ]){
-  add(svg,"text",{x:8,y:row.y+3,fill:C.text,"font-size":mobile?12:15},row.label);
+  add(svg,"text",{x:8,y:row.y+3,fill:C.text,"font-size":mobile?13:15},row.label);
   add(svg,"line",{x1:x(model.detailStart),y1:row.y,x2:x(model.detailEnd),y2:row.y,
     stroke:C.line,opacity:.25});
   for(const d of row.values){
