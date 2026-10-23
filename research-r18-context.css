@@ -85,7 +85,7 @@ html[data-research-visual="r18"] #research-discrete .discrete-to-astronomy{
  .r18-context-proof{gap:15px;grid-template-columns:minmax(0,1fr)}
  .r18-context-proof > div{gap:3px;padding-left:12px;border-left:1px solid var(--research-line-subtle)}
  .r18-context-proof strong{font-size:15px}
- .r18-context figcaption{font-size:11px}
+ .r18-context figcaption{font-size:12px}
 }
 
 /* The single existing Δ toolbar moves here only in R18. Reader can test the
