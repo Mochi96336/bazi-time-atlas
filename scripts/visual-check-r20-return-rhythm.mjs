@@ -48,6 +48,8 @@ for(const s of scenes){
   'data-axis-right="'+(s.width===390?"322":"782")+'"'
  ])assert(svg.includes(token),s.name+" missing "+token);
  assert((dom.match(/data-r20-span-to="/g)||[]).length>12,s.name+" no repeated arches");
+ assert((dom.match(/data-r20-span-role="origin-to-first"/g)||[]).length===4,
+  s.name+" must distinguish four identity-to-first bridges");
  assert((dom.match(/data-r20-closure-year="24000"/g)||[]).length===4,s.name+" global closure misrepresented");
  assert((dom.match(/id="delta-slider"/g)||[]).length===1,s.name+" cloned native slider");
  assert((dom.match(/data-r19-delta="/g)||[]).length===6,s.name+" old precise controls missing");
