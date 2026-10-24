@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Research 01 — R19 / R20 / R21 幾何對照實驗</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1317;--panel:#111b20;--text:#e8edeb;--muted:#a3b4b8;--line:#385058;--gold:#eac78a;--violet:#b5a4d8;--teal:#6ecac8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;font-size:15px;line-height:1.65}
+main{max-width:1240px;margin:0 auto;padding:48px clamp(20px,5vw,72px) 90px}
+p{margin:0 0 14px}.eyebrow{letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-size:12px}
+h1{font-size:clamp(30px,4.2vw,56px);line-height:1.14;letter-spacing:-.035em;font-weight:580;margin:13px 0 18px;max-width:15ch}
+.lead{font-size:16px;color:var(--muted);max-width:67ch}
+.controls{display:flex;gap:16px 28px;flex-wrap:wrap;align-items:end;padding:26px 0;margin:34px 0 14px;border-block:1px solid var(--line)}
+.control{display:grid;gap:5px;color:var(--muted);font-size:12px}
+select,input{accent-color:var(--teal);font:inherit}
+select{border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--text);padding:10px}
+#delta-range{width:min(330px,73vw)}
+.controls output{color:var(--text);font-variant-numeric:tabular-nums;font-size:20px}
+.milestones{display:flex;gap:8px;flex-wrap:wrap;padding:0 0 24px}
+.milestones button{background:transparent;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:4px;font:inherit;cursor:pointer}
+.milestones button[aria-pressed=true]{border-color:var(--teal);color:var(--text);background:#14333a}
+.context{margin:0 0 26px;color:var(--muted);font-size:13px}
+.comparison{display:grid;gap:45px}
+.plate{border-top:1px solid var(--line);padding-top:18px;min-width:0}
+.plate-head{display:flex;gap:20px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.plate h2{font-size:clamp(21px,2.5vw,30px);font-weight:540;letter-spacing:-.025em;margin:0 0 5px}
+.plate .summary{color:var(--muted);font-size:13px;max-width:69ch}
+.plate .tag{color:var(--teal);font-size:12px;white-space:nowrap}
+figure{margin:18px 0 0}
+svg{display:block;width:100%;height:auto;overflow:visible}
+figcaption{font-size:12px;color:var(--muted);margin-top:10px;max-width:90ch}
+.section-foot{display:grid;grid-template-columns:1fr 1fr;gap:35px;border-top:1px solid var(--line);padding-top:27px;margin-top:55px}
+.section-foot h3{font-size:16px;font-weight:600;margin:0 0 10px}
+.section-foot p{font-size:13px;color:var(--muted)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding-top:7px;color:var(--muted);font-size:12px}
+.legend span:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--c)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:640px){
+ main{padding:27px 18px 65px}h1{font-size:32px}.lead{font-size:14px}
+ .controls{display:grid;grid-template-columns:1fr;gap:12px;margin:24px 0 12px;padding:20px 0}
+ #delta-range{width:100%}
+ .comparison{gap:35px}
+ .plate-head{display:block}
+ .plate .tag{display:inline-block;margin:8px 0 0}
+ .plate h2{font-size:22px}
+ .section-foot{grid-template-columns:1fr;gap:16px}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">Research 01 · Diagram grammar lab · opt-in only</div>
+<h1>把閉合年份，畫成什麼形狀？</h1>
+<p class="lead">同一組真實事件、同一條 0–24,000 年的 Δ 座標，對照 R19 事件列、R20 回返弧與 R21 離散區間場。只比較表達方式，不另建曆法、相位模型或時間控制器。</p>
+<div class="controls">
+<label class="control">基準日期
+<select id="base-date">
+<option value="2026-09-13">2026／09／13</option>
+<option value="1900-03-01">1900／03／01</option>
+<option value="2100-03-01">2100／03／01</option>
+</select></label>
+<label class="control" style="min-width:min(330px,100%)">目前觀察位置 Δ
+<input id="delta-range" type="range" min="0" max="24000" step="20" value="1980">
+</label>
+<output id="delta-output" for="delta-range">+1,980 年</output>
+</div>
+<div id="milestones" class="milestones" aria-label="精確年份快捷鍵"></div>
+<p id="date-context" class="context" aria-live="polite">使用真實 24,000 年離散事件序列。</p>
+<div class="legend">
+<span style="--c:var(--gold)">公曆＋年序</span>
+<span style="--c:var(--violet)">年序＋日序／公曆＋日序</span>
+<span style="--c:var(--teal)">三項共同</span>
+</div>
+<div class="comparison">
+<section class="plate" aria-labelledby="label-r19">
+<div class="plate-head"><h2 id="label-r19">A／R19 · 事件列</h2><span class="tag">最清楚的對照組</span></div>
+<p class="summary">四列點位落在真實年份；年序＋日序只標首次局部重遇，與 R19 原設計一致。能精確定位，但週期反覆不突出。</p>
+<figure><svg id="plot-r19" role="img"></svg><figcaption>圓點是非零閉合事件；白色時間讀頭代表選取 Δ，並非事件。</figcaption></figure>
+</section>
+<section class="plate" aria-labelledby="label-r20">
+<div class="plate-head"><h2 id="label-r20">B／R20 · 回返弧線</h2><span class="tag">最強的節奏暗示</span></div>
+<p class="summary">弧線只連接真實端點，容易讀出疏密，但形狀高度不代表任何中間相位或天文運動。</p>
+<figure><svg id="plot-r20" role="img"></svg><figcaption>首段從 Δ＝0 基準點到首次非零閉合，其他弧線才連接相鄰兩次閉合；沒有相位縱軸。</figcaption></figure>
+</section>
+<section class="plate" aria-labelledby="label-r21">
+<div class="plate-head"><h2 id="label-r21">C／R21 · 離散區間場</h2><span class="tag">新候選 · 看整體結構</span></div>
+<p class="summary">突出基準日期會改變的「年序＋日序」間距，以一列主帶搭配三列簡化參照；共同 +24,000 年以同一垂直端點聯繫。色帶表示等待區間，並不表示持續閉合。</p>
+<figure><svg id="plot-r21" role="img"></svg><figcaption>每條區間有明確起訖，不畫中途相位；第一段為基準到首次閉合。相同年份座標由全部事件共用。</figcaption></figure>
+</section>
+</div>
+<div class="section-foot">
+<div><h3>比較規則</h3><p>三張圖使用同一份 <code>buildClosureJourney()</code> 投影；R20、R21 取用共同的 <code>buildReturnRhythm()</code> 事件序列。三個不同基準日期都會重算真實年＋日閉合事件。</p></div>
+<div><h3>頁面層級仍待實驗</h3><p>此頁是獨立圖形比較，不是正式 Research 01。真正整合時還需把主圖移至年度時間條之前，並保留原有干支、基準日期控制、Δ 單一狀態，以及 02 節界驗真入口。</p></div>
+</div>
+</main>
+<script type="module">
+import {buildClosureJourney} from "../src/recurrence/r18-closure-journey.js";
+import {buildReturnRhythm,returnArcPath} from "../src/recurrence/r20-return-rhythm.js";
+const NS="http://www.w3.org/2000/svg";
+const colors={gregorianYear:"#eac78a",yearDay:"#b5a4d8",gregorianDay:"#b5a4d8",all:"#6ecac8"};
+const labels={gregorianYear:"公曆＋年序",yearDay:"年序＋日序",gregorianDay:"公曆＋日序",all:"三項共同"};
+const keys=["gregorianYear","yearDay","gregorianDay","all"];
+const data={model:null,rhythm:null,delta:1980,base:"2026-09-13"};
+const select=document.querySelector("#base-date");
+const range=document.querySelector("#delta-range");
+const milestones=document.querySelector("#milestones");
+const mobile=()=>matchMedia("(max-width:640px)").matches;
+const fmt=v=>v.toLocaleString("en-US");
+function add(svg,tag,attrs={},text){
+ const el=document.createElementNS(NS,tag);
+ for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));
+ if(text!==undefined)el.textContent=text;
+ svg.append(el);return el;
+}
+function setup(svg,height){
+ const m=mobile(),w=m?360:920,left=m?18:160,right=m?342:894;
+ svg.replaceChildren();svg.setAttribute("viewBox","0 0 "+w+" "+height);
+ svg.dataset.axisStart="0";svg.dataset.axisEnd="24000";
+ svg.dataset.axisLeft=String(left);svg.dataset.axisRight=String(right);
+ svg.dataset.baseDate=data.base;svg.dataset.delta=String(data.delta);
+ const x=t=>left+(right-left)*t/24000;
+ return {w,left,right,x,m};
+}
+function grid(svg,ax,bottom){
+ const {left,right,x}=ax;
+ add(svg,"line",{x1:left,y1:bottom,x2:right,y2:bottom,stroke:"#537079",opacity:0.7});
+ for(const t of [0,8000,16000,24000]){
+  const p=x(t);
+  add(svg,"line",{x1:p,y1:bottom-5,x2:p,y2:bottom+4,stroke:"#59747a"});
+  add(svg,"text",{x:p,y:bottom+19,fill:"#a3b4b8","font-size":ax.m?12:13,
+   "text-anchor":t===0?"start":t===24000?"end":"middle"},fmt(t));
+ }
+ const dx=x(data.delta);
+ add(svg,"path",{d:"M "+dx+" "+(bottom-24)+" l -5 -8 h 10 Z",fill:"#e8edeb"});
+ add(svg,"line",{x1:dx,y1:bottom-23,x2:dx,y2:bottom+2,stroke:"#e8edeb","stroke-width":1.5});
+}
+function label(svg,ax,y,name,first){
+ const yy=ax.m?y-48:y-16;
+ add(svg,"text",{x:ax.m?8:8,y:yy,fill:"#e8edeb","font-size":ax.m?14:15},name);
+ if(ax.m) add(svg,"text",{x:8,y:y-32,fill:"#a3b4b8","font-size":12},"首次 +"+fmt(first));
+ else add(svg,"text",{x:8,y:yy+17,fill:"#a3b4b8","font-size":12},"首次 +"+fmt(first));
+}
+function dot(svg,ax,y,t,first,old=false){
+ add(svg,"circle",{cx:ax.x(t),cy:y,r:first?5:old?2.1:2.9,
+ fill:first?"#e8edeb":old?colors.gregorianYear:"none",
+ stroke:old?"none":colors[data._track], "stroke-width":first?2:1.8,
+ "data-event-year":t,"data-series":data._track});
+}
+function renderR19(){
+ const svg=document.querySelector("#plot-r19"),m=mobile(),ys=m?[72,155,238,321]:[50,114,178,242];
+ const ax=setup(svg,m?385:309);
+ keys.forEach((key,i)=>{
+  const events=key==="yearDay"?data.rhythm.tracks[i].events.slice(0,1):data.rhythm.tracks[i].events;
+  const first=data.rhythm.tracks[i].first,y=ys[i];
+  label(svg,ax,y,labels[key],first);
+  add(svg,"line",{x1:ax.left,y1:y,x2:ax.right,y2:y,stroke:"#385058",opacity:0.7});
+  for(const t of events){data._track=key;dot(svg,ax,y,t,t===first,false);}
+ });
+ grid(svg,ax,m?353:277);
+ svg.dataset.grammar="event-lanes";
+ svg.setAttribute("aria-label","R19 真實事件列，基準 "+data.base+"，選取 Δ "+data.delta+" 年。年序日序列只顯示首次局部事件。");
+}
+function renderR20(){
+ const svg=document.querySelector("#plot-r20"),m=mobile(),ys=m?[77,170,263,356]:[69,145,221,297];
+ const ax=setup(svg,m?425:365);
+ data.rhythm.tracks.forEach((track,i)=>{
+  const key=track.key,y=ys[i];label(svg,ax,y,labels[key],track.first);
+  add(svg,"line",{x1:ax.left,y1:y,x2:ax.right,y2:y,stroke:"#385058",opacity:0.45});
+  for(const span of track.spans){
+   add(svg,"path",{d:returnArcPath(ax.x(span.from),ax.x(span.to),y),
+    fill:"none",stroke:colors[key],"stroke-width":key==="all"?2.8:1.6,opacity:.79,
+    "data-span-from":span.from,"data-span-to":span.to,"data-span-role":span.role});
+  }
+  for(const t of track.events){data._track=key;dot(svg,ax,y,t,t===track.first);}
+ });
+ grid(svg,ax,m?394:334);
+ svg.dataset.grammar="return-arches";
+ svg.setAttribute("aria-label","R20 精確閉合事件之間的回返弧線，基準 "+data.base+"，選取 Δ "+data.delta+" 年。弧高沒有相位意義。");
+}
+function renderR21(){
+ const svg=document.querySelector("#plot-r21"),m=mobile(),ax=setup(svg,m?400:286);
+ const ys=m?{yearDay:89,gregorianYear:202,gregorianDay:270,all:338}:{yearDay:78,gregorianYear:147,gregorianDay:196,all:245};
+ const fx=ax.x(24000);
+ // This shared closure spine is an equality of event x-positions, not a phase line.
+ add(svg,"line",{x1:fx,y1:m?61:53,x2:fx,y2:m?338:246,stroke:"#6ecac8","stroke-width":1,opacity:.65,"stroke-dasharray":"3 5",
+   "data-r21-shared-closure":"24000"});
+ const ordering=["yearDay","gregorianYear","gregorianDay","all"];
+ ordering.forEach((key,i)=>{
+  const track=data.rhythm.tracks.find(t=>t.key===key),y=ys[key],major=key==="yearDay";
+  label(svg,ax,y,labels[key],track.first);
+  if(major){
+   add(svg,"text",{x:ax.m?8:ax.left,y:ax.m?22:38,fill:"#b5a4d8","font-size":ax.m?11:12},
+    "非等距回返 · 這個基準日期的局部重遇");
+  }
+  add(svg,"line",{x1:ax.left,y1:y,x2:ax.right,y2:y,stroke:"#385058",opacity:0.6});
+  for(const span of track.spans){
+   const a=ax.x(span.from),b=ax.x(span.to),width=b-a;
+   const thickness=major?13:6;
+   add(svg,"rect",{x:a,y:y-thickness/2,width:width,height:thickness,
+    rx:major?2:1,fill:colors[key],opacity:major?.18:.11,
+    "data-r21-interval-from":span.from,"data-r21-interval-to":span.to,
+    "data-r21-interval-role":span.role,"data-r21-series":key});
+   // Endpoint notch is an event, not a phase sample.
+   add(svg,"line",{x1:b,y1:y-(major?12:7),x2:b,y2:y+(major?12:7),
+    stroke:colors[key],"stroke-width":major?2:1.6,opacity:.9});
+   if(major&&width>50){
+    add(svg,"text",{x:(a+b)/2,y:y-15,fill:"#c9c2dd","font-size":ax.m?10:11,
+    "text-anchor":"middle"},""+fmt(span.years));
+   }
+  }
+  for(const t of track.events){data._track=key;if(major||t===track.first||t===24000)dot(svg,ax,y,t,t===track.first);}
+ });
+ grid(svg,ax,m?369:265);
+ svg.dataset.grammar="discrete-interval-field";
+ svg.setAttribute("aria-label","R21 離散區間場，年序日序是主要參照，其他三條為次要參照；所有區間以真實非零閉合端點組成，基準 "+data.base+"。");
+}
+function render(){
+ const [year,month,day]=data.base.split("-").map(Number);
+ data.model=buildClosureJourney({year,month,day});
+ data.rhythm=buildReturnRhythm(data.model);
+ renderR19();renderR20();renderR21();
+ document.querySelector("#delta-output").textContent="+"+fmt(data.delta)+" 年";
+ document.querySelector("#date-context").textContent=
+  "基準 "+data.base.replaceAll("-","／")+
+  "：首次年序＋日序重遇 +"+fmt(data.model.firstLocal)+
+  " 年；三項共同首次 +"+fmt(data.model.firstGlobal)+" 年。四列均使用同一真實 Δ 軸。";
+ for(const b of milestones.querySelectorAll("button"))b.setAttribute("aria-pressed",String(Number(b.dataset.delta)===data.delta));
+ document.documentElement.dataset.r21Ready="true";
+ document.documentElement.dataset.r21FirstLocal=String(data.model.firstLocal);
+}
+function setDelta(v){data.delta=Number(v);range.value=String(data.delta);render();}
+function makeMilestones(){
+ milestones.replaceChildren();
+ for(const n of [...new Set([0,400,1200,data.model.firstLocal,8000,24000])]){
+  const btn=document.createElement("button");btn.type="button";btn.dataset.delta=String(n);
+  btn.textContent=n===data.model.firstLocal?"局部 +"+fmt(n):"+"+fmt(n);
+  btn.addEventListener("click",()=>setDelta(n));milestones.append(btn);
+ }
+}
+select.addEventListener("change",()=>{
+ data.base=select.value;
+ const [year,month,day]=data.base.split("-").map(Number);
+ const model=buildClosureJourney({year,month,day});
+ data.model=model;data.delta=model.firstLocal;range.value=String(data.delta);
+ makeMilestones();render();
+});
+range.addEventListener("input",()=>setDelta(range.value));
+matchMedia("(max-width:640px)").addEventListener("change",render);
+render();makeMilestones();render();
+</script>
+</body>
+</html>
