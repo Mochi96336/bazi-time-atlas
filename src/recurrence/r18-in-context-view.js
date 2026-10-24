@@ -12,13 +12,14 @@ function add(svg,tag,attrs,content){
  if(content!==undefined)n.textContent=content;
  svg.append(n);return n;
 }
-function baseSvg(svg,start,end,height,mobile){
- const w=mobile?340:800,left=mobile?104:175,right=w-18,y=height-33;
+function baseSvg(svg,start,end,height,mobile,{wideMobile=false}={}){
+ const w=mobile?340:800,left=mobile?(wideMobile?18:104):175,right=w-18,y=height-33;
  const x=d=>left+(right-left)*(d-start)/(end-start);
  svg.replaceChildren();
  svg.setAttribute("viewBox","0 0 "+w+" "+height);
  svg.dataset.axisUnit="elapsed-years";
  svg.dataset.startYear=String(start);svg.dataset.endYear=String(end);
+ svg.dataset.axisLeft=String(left);svg.dataset.axisRight=String(right);
  add(svg,"line",{x1:left,y1:y,x2:right,y2:y,stroke:C.line,opacity:.6});
  const ticks=start===0&&end===24000?[0,8000,16000,24000]:
   [0,.25,.5,.75,1].map(f=>start+Math.round((end-start)*f));
@@ -65,14 +66,16 @@ function overview(svg,model,mobile){
  * that intermediate phase dynamics follow an arch or astronomical orbit.
  */
 function returnRhythmOverview(svg,model,mobile){
- const {x}=baseSvg(svg,0,24000,374,mobile);
+ // At 390px, labels use a separate vertical band; the entire 24k axis
+ // remains linear but gains 39% more horizontal space (304px vs 218px).
+ const {x}=baseSvg(svg,0,24000,mobile?460:374,mobile,{wideMobile:true});
  const rhythm=buildReturnRhythm(model);
  const tones={year:C.year,day:C.day,all:C.all};
- const ys=[75,150,225,300];
+ const ys=mobile?[103,198,293,388]:[75,150,225,300];
  rhythm.tracks.forEach((track,i)=>{
   const y=ys[i],tone=tones[track.tone];
-  add(svg,"text",{x:8,y:y-28,fill:C.text,"font-size":mobile?13:15},track.label);
-  add(svg,"text",{x:8,y:y-10,fill:C.muted,"font-size":12},
+  add(svg,"text",{x:8,y:y-(mobile?70:28),fill:C.text,"font-size":mobile?13:15},track.label);
+  add(svg,"text",{x:8,y:y-(mobile?52:10),fill:C.muted,"font-size":12},
    (track.key==="yearDay"?"首次局部 +":"首次 +")+fmt(track.first));
   add(svg,"line",{x1:x(0),y1:y,x2:x(24000),y2:y,stroke:C.line,opacity:.22});
   for(const span of track.spans){
@@ -92,6 +95,7 @@ function returnRhythmOverview(svg,model,mobile){
   }
  });
  svg.dataset.graphGrammar="verified-return-spans";
+ svg.dataset.r20Layout=mobile?"full-width-mobile":"labeled-desktop";
  svg.dataset.spanSemantics="endpoints-only";
  svg.dataset.cursorPlacement="axis-only";
  svg.dataset.rhythmTracks=String(rhythm.tracks.length);
@@ -121,7 +125,9 @@ function cursor(svg,delta,_top,_bottom){
  svg.querySelectorAll("[data-r18-cursor]").forEach(n=>n.remove());
  const start=Number(svg.dataset.startYear),end=Number(svg.dataset.endYear);
  if(delta<start||delta>end)return;
- const box=svg.viewBox.baseVal,w=box.width,left=w===340?104:175,right=w-18;
+ const box=svg.viewBox.baseVal,w=box.width;
+ const left=Number(svg.dataset.axisLeft??(w===340?104:175));
+ const right=Number(svg.dataset.axisRight??(w-18));
  const px=left+(right-left)*(delta-start)/(end-start);
  // The observation marker occupies only the axis band, so it NEVER covers
  // recurrence circles, including +1,200 and the baseline-dependent +1,980.
