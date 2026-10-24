@@ -1,4 +1,5 @@
 import { buildClosureJourney,classifyJourneyPoint } from "./r18-closure-journey.js";
+import { buildReturnRhythm,returnArcPath } from "./r20-return-rhythm.js";
 
 const NS="http://www.w3.org/2000/svg";
 const C={text:"#ebf0ee",muted:"#a8b9bb",line:"#536569",year:"#eac78a",day:"#b5a4d8",all:"#6ecac8"};
@@ -58,6 +59,45 @@ function overview(svg,model,mobile){
  svg.dataset.cursorPlacement="axis-only";
  svg.dataset.ready="true";
 }
+/**
+ * Alternative visual grammar for the exact same production chronology.
+ * Each arch spans consecutive confirmed closure events, without claiming
+ * that intermediate phase dynamics follow an arch or astronomical orbit.
+ */
+function returnRhythmOverview(svg,model,mobile){
+ const {x}=baseSvg(svg,0,24000,374,mobile);
+ const rhythm=buildReturnRhythm(model);
+ const tones={year:C.year,day:C.day,all:C.all};
+ const ys=[75,150,225,300];
+ rhythm.tracks.forEach((track,i)=>{
+  const y=ys[i],tone=tones[track.tone];
+  add(svg,"text",{x:8,y:y-28,fill:C.text,"font-size":mobile?13:15},track.label);
+  add(svg,"text",{x:8,y:y-10,fill:C.muted,"font-size":12},
+   (track.key==="yearDay"?"首次局部 +":"首次 +")+fmt(track.first));
+  add(svg,"line",{x1:x(0),y1:y,x2:x(24000),y2:y,stroke:C.line,opacity:.22});
+  for(const span of track.spans){
+   // The return curve never rises enough to cross the prior lane's labels.
+   add(svg,"path",{d:returnArcPath(x(span.from),x(span.to),y),
+    fill:"none",stroke:tone,"stroke-width":i===3?2.8:1.7,opacity:i===3?.85:.65,
+    "data-r20-span-from":span.from,"data-r20-span-to":span.to,
+    "data-r20-span-years":span.years});
+  }
+  for(const year of track.events){
+   const first=year===track.first;
+   add(svg,"circle",{cx:x(year),cy:y,r:first?mobile?5.2:6.5:mobile?2.2:2.5,
+    fill:first?C.text:tone,stroke:first?tone:"none","stroke-width":first?2:0,
+    "data-r20-closure-year":year,
+    ...(first?{"data-r18-first-closure":year}:{}),
+    ...(track.key==="yearDay"&&first?{"data-r18-local-marker":year}:{})});
+  }
+ });
+ svg.dataset.graphGrammar="verified-return-spans";
+ svg.dataset.spanSemantics="endpoints-only";
+ svg.dataset.cursorPlacement="axis-only";
+ svg.dataset.rhythmTracks=String(rhythm.tracks.length);
+ svg.dataset.ready="true";
+}
+
 function local(svg,model,mobile){
  const {x}=baseSvg(svg,model.detailStart,model.detailEnd,206,mobile);
  for(const row of [
@@ -93,11 +133,13 @@ function cursor(svg,delta,_top,_bottom){
   "data-r18-cursor":"true","data-r18-readhead":"axis-only"});
 }
 /** Only the base date invalidates the 24k event cache; the normal Δ path repaints cursors. */
-export function renderR18Context(root,state){
+export function renderR18Context(root,state,{rhythm=false}={}){
  if(!root||!state)throw new TypeError("canonical R18 state required");
  const d=state.baseDate,next=[d.year,d.month,d.day].join("-");
  const mobile=isMobile();
- const repaint=key!==next||previousMobile!==mobile;
+ const variant=rhythm?"return-spans":"event-lanes";
+ const repaint=key!==next||previousMobile!==mobile||
+  root.dataset.r18DiagramVariant!==variant;
  if(key!==next){
   key=next;journey=null;
   try{journey=buildClosureJourney(d);}catch(error){
@@ -114,7 +156,8 @@ export function renderR18Context(root,state){
  const overviewSvg=root.querySelector("#r18-context-overview");
  const localSvg=root.querySelector("#r18-context-local");
  if(repaint){
-  overview(overviewSvg,journey,mobile);
+  if(rhythm)returnRhythmOverview(overviewSvg,journey,mobile);
+  else overview(overviewSvg,journey,mobile);
   local(localSvg,journey,mobile);
   root.dataset.r18OverviewPaints=String((Number(root.dataset.r18OverviewPaints)||0)+1);
  }
@@ -127,6 +170,12 @@ export function renderR18Context(root,state){
  root.querySelector("#r18-context-detail").textContent=
   classified?.detail??"離散相位仍由正式時間模型判讀。";
  root.querySelector("#r18-context-current").textContent="選取 Δ "+fmt(state.deltaYears)+" 年";
+ root.dataset.r18DiagramVariant=variant;
+ if(rhythm){
+  root.querySelector("#r18-context-figure-caption").textContent=
+   "弧線只連接已確認的相鄰閉合年份，表示兩事件之間經過的年數；"+
+   "不是連續相位或天文軌道。每個圓點才是實際歸零事件。";
+ }
  root.querySelector("#r18-context-local-label").textContent=
   "局部 "+fmt(journey.detailStart)+"～"+fmt(journey.detailEnd)+" 年 · 首次年＋日 +"+fmt(journey.firstLocal);
  root.querySelector("#r18-context-local-note").textContent=
@@ -140,6 +189,7 @@ export function renderR18Context(root,state){
   const value=button.dataset.r19Delta==="local"?journey.firstLocal:Number(button.dataset.r19Delta);
   button.setAttribute("aria-pressed",String(value===state.deltaYears));
  });
+ if(rhythm)root.querySelector("#r18-context-figure-caption").dataset.r20Meaning="elapsed-spans-not-phase";
  overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
   fmt(journey.firstLocal)+"；公曆＋日序首次 8,000；三項共同首次 24,000。"+
   "目前選取 "+fmt(state.deltaYears)+" 年，讀頭不覆蓋任何事件。");
