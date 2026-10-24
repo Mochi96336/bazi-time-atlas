@@ -36,7 +36,8 @@ const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
 const researchMode = new URLSearchParams(window.location.search);
-const r18OptIn = researchMode.get("r18") === "1";
+const r20OptIn = researchMode.get("r20") === "1";
+const r18OptIn = r20OptIn || researchMode.get("r18") === "1";
 const r17OptIn = !r18OptIn && researchMode.get("r17") === "1";
 const r18Context = document.querySelector("#r18-context");
 const r17Svg = document.querySelector("#r17-production-proof");
@@ -709,7 +710,7 @@ function renderState() {
     instrument.dataset.r17EvidenceState = verdict.state;
   }
   if (r18OptIn) {
-    const verdict = renderR18Context(r18Context, state);
+    const verdict = renderR18Context(r18Context, state, { rhythm:r20OptIn });
     instrument.dataset.r18EvidenceState = verdict?.kind ?? "unavailable";
     instrument.dataset.r18ProofSource = "recurrenceState";
   }
@@ -917,6 +918,7 @@ function bindControls() {
 
 function initialize() {
   document.documentElement.dataset.researchVisual = r18OptIn ? "r18" : r17OptIn ? "r17" : "r16";
+  document.documentElement.dataset.researchRhythm = r20OptIn ? "r20" : "r19";
   if (r18Context) r18Context.hidden = !r18OptIn;
   // Move—not clone—the canonical Δ tools next to the R18 primary timeline.
   // R16/R17 preserve both their original DOM position and behavior.
