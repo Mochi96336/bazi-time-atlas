@@ -25,6 +25,7 @@ for(const [base,first] of [
     assert.equal(span.to,track.events[j]);
     assert.equal(span.from,j===0?0:track.events[j-1]);
     assert.equal(span.years,span.to-span.from);
+    assert.equal(span.role,j===0?"origin-to-first":"between-returns");
     assert.ok(span.years>0);
    }
    assert.equal(track.spans.at(-1).to,24000,
@@ -56,7 +57,10 @@ test("R20 SVG arches express only intervals and never interpolate phase truth",(
  assert.match(js,/svg\.dataset\.axisLeft/);
  assert.match(js,/svg\.dataset\.axisRight/);
  assert.match(js,/spanSemantics="endpoints-only"/);
- assert.match(js,/實際閉合年份之間的回返節奏/);
+ assert.match(js,/閉合事件的間隔與回返節奏/);
+ assert.match(js,/第一段弧線從基準 Δ＝0 延伸至首次非零閉合/);
+ assert.match(js,/白色加粗刻線是首次年＋日重遇/);
+ assert.match(js,/data-r20-span-role/);
  assert.match(js,/同一條真實經過年數軸上的四種回返節奏/);
  assert.match(js,/if\(!rhythm\) overviewSvg\.setAttribute\("aria-label"/);
  assert.match(js,/不是連續相位或天文軌道/);
