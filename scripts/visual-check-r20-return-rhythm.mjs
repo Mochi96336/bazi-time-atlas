@@ -42,7 +42,10 @@ for(const s of scenes){
  ])assert(box.includes(token),s.name+" missing "+token);
  for(const token of [
   'data-graph-grammar="verified-return-spans"','data-span-semantics="endpoints-only"',
-  'data-rhythm-tracks="4"','data-cursor-placement="axis-only"'
+  'data-rhythm-tracks="4"','data-cursor-placement="axis-only"',
+  'data-r20-layout="'+(s.width===390?"full-width-mobile":"labeled-desktop")+'"',
+  'data-axis-left="'+(s.width===390?"18":"175")+'"',
+  'data-axis-right="'+(s.width===390?"322":"782")+'"
  ])assert(svg.includes(token),s.name+" missing "+token);
  assert((dom.match(/data-r20-span-to="/g)||[]).length>12,s.name+" no repeated arches");
  assert((dom.match(/data-r20-closure-year="24000"/g)||[]).length===4,s.name+" global closure misrepresented");
