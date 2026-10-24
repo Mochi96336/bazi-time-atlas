@@ -62,8 +62,9 @@ function overview(svg,model,mobile){
 }
 /**
  * Alternative visual grammar for the exact same production chronology.
- * Each arch spans consecutive confirmed closure events, without claiming
- * that intermediate phase dynamics follow an arch or astronomical orbit.
+ * The initial arch starts at the identity reference Δ=0, not a return event.
+ * Later arches join consecutive confirmed closure events. None represents
+ * intermediate phase dynamics or an astronomical orbit.
  */
 function returnRhythmOverview(svg,model,mobile){
  // At 390px, labels use a separate vertical band; the entire 24k axis
@@ -83,7 +84,7 @@ function returnRhythmOverview(svg,model,mobile){
    add(svg,"path",{d:returnArcPath(x(span.from),x(span.to),y),
     fill:"none",stroke:tone,"stroke-width":i===3?2.8:1.7,opacity:i===3?.85:.65,
     "data-r20-span-from":span.from,"data-r20-span-to":span.to,
-    "data-r20-span-years":span.years});
+    "data-r20-span-years":span.years,"data-r20-span-role":span.role});
   }
   for(const year of track.events){
    const first=year===track.first;
@@ -179,15 +180,15 @@ export function renderR18Context(root,state,{rhythm=false}={}){
  root.dataset.r18DiagramVariant=variant;
  if(rhythm){
   root.querySelector(".r18-context-eyebrow").textContent="週期回返 · 同一條 Δ 年數時間軸";
-  root.querySelector(".r18-context-figure-title span:first-child").textContent="實際閉合年份之間的回返節奏";
+  root.querySelector(".r18-context-figure-title span:first-child").textContent="閉合事件的間隔與回返節奏";
   root.querySelector("#r18-context-figure-caption").textContent=
-   "弧線只連接已確認的相鄰閉合年份，表示兩事件之間經過的年數；"+
-   "不是連續相位或天文軌道。每個圓點才是實際歸零事件。";
+   "第一段弧線從基準 Δ＝0 延伸至首次非零閉合；其餘弧線連接相鄰的閉合年份。"+
+   "它們只表示時間間隔，不是連續相位或天文軌道。圓點才是實際歸零事件。";
  }
  root.querySelector("#r18-context-local-label").textContent=
   "局部 "+fmt(journey.detailStart)+"～"+fmt(journey.detailEnd)+" 年 · 首次年＋日 +"+fmt(journey.firstLocal);
  root.querySelector("#r18-context-local-note").textContent=
-  "紫色節點是這個基準日期的首次年＋日重遇（+"+fmt(journey.firstLocal)+"）；白色三角形位在時間軸下方，表示目前選取的 Δ。";
+  "「兩者重遇」列的白色加粗刻線是首次年＋日重遇（+"+fmt(journey.firstLocal)+"）；白色三角形位在時間軸下方，表示目前選取的 Δ。";
  const localButton=root.querySelector('[data-r19-delta="local"]');
  if(localButton){
   localButton.textContent="局部 +"+fmt(journey.firstLocal);
@@ -202,7 +203,7 @@ export function renderR18Context(root,state,{rhythm=false}={}){
   const bridge=buildReturnRhythm(journey);
   overviewSvg.setAttribute("aria-label","同一條真實經過年數軸上的四種回返節奏。"+
    bridge.tracks.map(t=>t.label+" "+t.events.length+" 次歸零，首次 +"+fmt(t.first)+" 年").join("；")+
-   "。各弧線只表達相鄰兩次確認的閉合事件之間所經過的年數，不是相位曲線。"+
+   "。第一段從 Δ＝0 基準點到首次非零閉合，其餘各段連接相鄰的非零閉合事件；弧線不是相位曲線。"+
    "目前選取 Δ "+fmt(state.deltaYears)+" 年。");
  }
  if(!rhythm) overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
