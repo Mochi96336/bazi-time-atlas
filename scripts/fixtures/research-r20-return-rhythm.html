@@ -19,6 +19,10 @@ function probe(doc,label,expected){
  check(svg.dataset.spanSemantics==="endpoints-only",label+" misleading phase semantics");
  check(svg.dataset.rhythmTracks==="4",label+" missing independent cycles");
  check(svg.querySelectorAll("[data-r20-span-to]").length>10,label+" no repeated return geometry");
+ check(svg.querySelectorAll('[data-r20-span-role="origin-to-first"]').length===4,
+  label+" identity anchor mislabeled as recurrence");
+ check(svg.querySelectorAll('[data-r20-span-role="between-returns"]').length>8,
+  label+" missing recurrent event intervals");
  check(svg.querySelectorAll('[data-r20-closure-year="24000"]').length===4,label+" global candidate not closed on all tracks");
  check(svg.querySelectorAll('[data-r20-closure-year="0"]').length===0,label+" identity treated as nonzero closure");
  check(svg.querySelector("[data-r18-selected-year]")?.dataset.r18Readhead==="axis-only",
