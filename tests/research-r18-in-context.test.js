@@ -15,9 +15,10 @@ test("R18 integration retains a single live date owner, native Year strip, Δ an
  assert.match(html,/id="r18-context"/);
  assert.match(html,/id="r18-context-overview"/);
  assert.match(html,/id="r18-context-local"/);
- assert.match(view,/r18OptIn = researchMode\.get\("r18"\) === "1"/);
+ assert.match(view,/r20OptIn = researchMode\.get\("r20"\) === "1"/);
+ assert.match(view,/r18OptIn = r20OptIn \|\| researchMode\.get\("r18"\) === "1"/);
  assert.match(view,/r17OptIn = !r18OptIn/);
- assert.match(view,/renderR18Context\(r18Context, state\)/);
+ assert.match(view,/renderR18Context\(r18Context, state, \{ rhythm:r20OptIn \}\)/);
  assert.match(view,/recurrenceState\(currentBase, currentDelta\)/);
  assert.match(view,/instrument\.dataset\.r18ProofSource = "recurrenceState"/);
  assert.match(css,/html\[data-research-visual="r18"\]/);
