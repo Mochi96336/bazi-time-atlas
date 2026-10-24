@@ -172,6 +172,8 @@ export function renderR18Context(root,state,{rhythm=false}={}){
  root.querySelector("#r18-context-current").textContent="選取 Δ "+fmt(state.deltaYears)+" 年";
  root.dataset.r18DiagramVariant=variant;
  if(rhythm){
+  root.querySelector(".r18-context-eyebrow").textContent="週期回返 · 同一條 Δ 年數時間軸";
+  root.querySelector(".r18-context-figure-title span:first-child").textContent="實際閉合年份之間的回返節奏";
   root.querySelector("#r18-context-figure-caption").textContent=
    "弧線只連接已確認的相鄰閉合年份，表示兩事件之間經過的年數；"+
    "不是連續相位或天文軌道。每個圓點才是實際歸零事件。";
@@ -190,6 +192,13 @@ export function renderR18Context(root,state,{rhythm=false}={}){
   button.setAttribute("aria-pressed",String(value===state.deltaYears));
  });
  if(rhythm)root.querySelector("#r18-context-figure-caption").dataset.r20Meaning="elapsed-spans-not-phase";
+ if(rhythm){
+  const bridge=buildReturnRhythm(journey);
+  overviewSvg.setAttribute("aria-label","同一條真實經過年數軸上的四種回返節奏。"+
+   bridge.tracks.map(t=>t.label+" "+t.events.length+" 次歸零，首次 +"+fmt(t.first)+" 年").join("；")+
+   "。各弧線只表達相鄰兩次確認的閉合事件之間所經過的年數，不是相位曲線。"+
+   "目前選取 Δ "+fmt(state.deltaYears)+" 年。");
+ }
  overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
   fmt(journey.firstLocal)+"；公曆＋日序首次 8,000；三項共同首次 24,000。"+
   "目前選取 "+fmt(state.deltaYears)+" 年，讀頭不覆蓋任何事件。");
