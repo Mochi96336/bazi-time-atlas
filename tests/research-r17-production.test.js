@@ -55,7 +55,8 @@ test("R17 opt-in preserves original SVG, its model and event bindings",()=>{
  assert.match(html,/id="recurrence-wheel"/);
  assert.match(html,/id="r17-production-proof"/);
  assert.match(view,/r17OptIn = !r18OptIn && researchMode\.get\("r17"\) === "1"/);
- assert.match(view,/r18OptIn = researchMode\.get\("r18"\) === "1"/);
+ assert.match(view,/r20OptIn = researchMode\.get\("r20"\) === "1"/);
+ assert.match(view,/r18OptIn = r20OptIn \|\| researchMode\.get\("r18"\) === "1"/);
  assert.match(view,/renderR17ZeroProof\(r17Svg, state/);
  assert.match(view,/recurrenceState\(currentBase, currentDelta\)/);
  assert.match(view,/renderReturnMarkers\(state\)/);

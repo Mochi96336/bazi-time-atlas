@@ -34,7 +34,7 @@ export function buildClosureJourney(baseDate,{maxYears=24000,detailYears=2400}={
   const detail=Object.freeze(Object.fromEntries(Object.entries(allEvents)
     .map(([key,years])=>[key,Object.freeze(years.filter(d=>d>=detailStart&&d<=detailEnd))])));
   const overview=Object.freeze(Object.fromEntries(
-    ["gregorian","gregorianYear","gregorianDay","all"].map(key=>[key,Object.freeze(allEvents[key])])
+    ["gregorian","yearDay","gregorianYear","gregorianDay","all"].map(key=>[key,Object.freeze(allEvents[key])])
   ));
   const markers=[400,1200,firstLocal,8000,24000].filter((d,i,a)=>d!==null&&a.indexOf(d)===i)
     .sort((a,b)=>a-b).map(delta=>{

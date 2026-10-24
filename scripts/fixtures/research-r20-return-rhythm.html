@@ -1,0 +1,60 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><body>
+<output id="r20-check" data-ready="false">testing</output>
+<iframe id="test-page" style="width:1000px;height:950px"></iframe>
+<script>
+const out=document.querySelector("#r20-check"),frame=document.querySelector("#test-page");
+const record=[];
+function check(ok,label){if(!ok)throw Error(label+" "+JSON.stringify(record))}
+function load(url){return new Promise((res,rej)=>{frame.onload=()=>res(frame.contentDocument);frame.onerror=()=>rej(Error("iframe loading failed"));frame.src=url})}
+function probe(doc,label,expected){
+ const panel=doc.querySelector("#r18-context"),svg=doc.querySelector("#r18-context-overview");
+ const one={label,first:panel.dataset.r18FirstLocal,delta:panel.dataset.r18SelectedDelta,
+  cache:panel.dataset.r18OverviewPaints,grammar:svg.dataset.graphGrammar};
+ record.push(one);
+ check(doc.documentElement.dataset.researchVisual==="r18",label+" wrong visual entry");
+ check(doc.documentElement.dataset.researchRhythm==="r20",label+" wrong geometry entry");
+ check(panel.dataset.r18Model==="recurrenceState",label+" forked chronology");
+ check(panel.dataset.r18DiagramVariant==="return-spans",label+" wrong render variant");
+ check(svg.dataset.graphGrammar==="verified-return-spans",label+" wrong SVG grammar");
+ check(svg.dataset.spanSemantics==="endpoints-only",label+" misleading phase semantics");
+ check(svg.dataset.rhythmTracks==="4",label+" missing independent cycles");
+ check(svg.querySelectorAll("[data-r20-span-to]").length>10,label+" no repeated return geometry");
+ check(svg.querySelectorAll('[data-r20-span-role="origin-to-first"]').length===4,
+  label+" identity anchor mislabeled as recurrence");
+ check(svg.querySelectorAll('[data-r20-span-role="between-returns"]').length>8,
+  label+" missing recurrent event intervals");
+ check(svg.querySelectorAll('[data-r20-closure-year="24000"]').length===4,label+" global candidate not closed on all tracks");
+ check(svg.querySelectorAll('[data-r20-closure-year="0"]').length===0,label+" identity treated as nonzero closure");
+ check(svg.querySelector("[data-r18-selected-year]")?.dataset.r18Readhead==="axis-only",
+  label+" cursor crosses return arches");
+ check(doc.querySelectorAll("#delta-slider").length===1,label+" duplicated Δ");
+ check(doc.querySelector("#r18-context-controls-slot #delta-slider"),label+" native Δ moved away");
+ check(panel.dataset.r18FirstLocal===String(expected),label+" wrong first local");
+ check(doc.querySelector("#r18-context-figure-caption").dataset.r20Meaning==="elapsed-spans-not-phase",label+" no interpretation caveat");
+ return one;
+}
+function click(doc,d){const b=doc.querySelector('[data-r19-delta="'+d+'"]');check(b,"missing "+d);b.click();}
+function setBase(doc,y,m,d){
+ for(const [id,value] of [["base-year",y],["base-month",m],["base-day",d]])doc.querySelector("#"+id).value=String(value);
+ doc.querySelector("#base-day").dispatchEvent(new doc.defaultView.Event("change",{bubbles:true}));
+}
+async function main(){
+ let doc=await load("../../recurrence.html?date=2026-09-13&delta=1980&r20=1");
+ let a=probe(doc,"initial",1980);check(a.cache==="1","unexpected first model scan");
+ click(doc,"400");a=probe(doc,"click400",1980);check(a.delta==="400"&&a.cache==="1","shortcut rescan");
+ click(doc,"local");a=probe(doc,"clickLocal",1980);check(a.delta==="1980"&&a.cache==="1","local shortcut wrong");
+ setBase(doc,1900,3,1);a=probe(doc,"1900",6180);check(a.cache==="2","1900 model was not renewed");
+ click(doc,"local");a=probe(doc,"1900-local",6180);check(a.delta==="6180"&&a.cache==="2","1900 local failed");
+ setBase(doc,2100,3,1);a=probe(doc,"2100",16080);check(a.cache==="3","2100 model was not renewed");
+ click(doc,"local");a=probe(doc,"2100-local",16080);check(a.delta==="16080"&&a.cache==="3","2100 local failed");
+ doc=await load("../../recurrence.html?date=2026-09-13&delta=1980&r18=1");
+ check(doc.documentElement.dataset.researchRhythm==="r19","R19 not restored");
+ check(doc.querySelector("#r18-context-overview").dataset.graphGrammar==="independent-event-lanes","R19 geometry affected");
+ doc=await load("../../recurrence.html?date=2026-09-13&delta=1980");
+ check(doc.documentElement.dataset.researchVisual==="r16","R16 no longer default");
+ check(doc.querySelector("#r18-context").hidden,"R20 visible in R16");
+ out.dataset.ready="true";out.dataset.steps=String(record.length);out.dataset.r19Fallback="true";out.dataset.r16Fallback="true";
+ out.textContent=JSON.stringify(record);
+}
+main().catch(e=>{out.dataset.ready="error";out.dataset.error=e.message;out.textContent=e.stack});
+</script></body></html>

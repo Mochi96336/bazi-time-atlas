@@ -1,4 +1,5 @@
 import { buildClosureJourney,classifyJourneyPoint } from "./r18-closure-journey.js";
+import { buildReturnRhythm,returnArcPath } from "./r20-return-rhythm.js";
 
 const NS="http://www.w3.org/2000/svg";
 const C={text:"#ebf0ee",muted:"#a8b9bb",line:"#536569",year:"#eac78a",day:"#b5a4d8",all:"#6ecac8"};
@@ -11,13 +12,14 @@ function add(svg,tag,attrs,content){
  if(content!==undefined)n.textContent=content;
  svg.append(n);return n;
 }
-function baseSvg(svg,start,end,height,mobile){
- const w=mobile?340:800,left=mobile?104:175,right=w-18,y=height-33;
+function baseSvg(svg,start,end,height,mobile,{wideMobile=false}={}){
+ const w=mobile?340:800,left=mobile?(wideMobile?18:104):175,right=w-18,y=height-33;
  const x=d=>left+(right-left)*(d-start)/(end-start);
  svg.replaceChildren();
  svg.setAttribute("viewBox","0 0 "+w+" "+height);
  svg.dataset.axisUnit="elapsed-years";
  svg.dataset.startYear=String(start);svg.dataset.endYear=String(end);
+ svg.dataset.axisLeft=String(left);svg.dataset.axisRight=String(right);
  add(svg,"line",{x1:left,y1:y,x2:right,y2:y,stroke:C.line,opacity:.6});
  const ticks=start===0&&end===24000?[0,8000,16000,24000]:
   [0,.25,.5,.75,1].map(f=>start+Math.round((end-start)*f));
@@ -58,6 +60,49 @@ function overview(svg,model,mobile){
  svg.dataset.cursorPlacement="axis-only";
  svg.dataset.ready="true";
 }
+/**
+ * Alternative visual grammar for the exact same production chronology.
+ * The initial arch starts at the identity reference Δ=0, not a return event.
+ * Later arches join consecutive confirmed closure events. None represents
+ * intermediate phase dynamics or an astronomical orbit.
+ */
+function returnRhythmOverview(svg,model,mobile){
+ // At 390px, labels use a separate vertical band; the entire 24k axis
+ // remains linear but gains 39% more horizontal space (304px vs 218px).
+ const {x}=baseSvg(svg,0,24000,mobile?460:374,mobile,{wideMobile:true});
+ const rhythm=buildReturnRhythm(model);
+ const tones={year:C.year,day:C.day,all:C.all};
+ const ys=mobile?[103,198,293,388]:[75,150,225,300];
+ rhythm.tracks.forEach((track,i)=>{
+  const y=ys[i],tone=tones[track.tone];
+  add(svg,"text",{x:8,y:y-(mobile?70:28),fill:C.text,"font-size":mobile?13:15},track.label);
+  add(svg,"text",{x:8,y:y-(mobile?52:10),fill:C.muted,"font-size":12},
+   (track.key==="yearDay"?"首次局部 +":"首次 +")+fmt(track.first));
+  add(svg,"line",{x1:x(0),y1:y,x2:x(24000),y2:y,stroke:C.line,opacity:.22});
+  for(const span of track.spans){
+   // The return curve never rises enough to cross the prior lane's labels.
+   add(svg,"path",{d:returnArcPath(x(span.from),x(span.to),y),
+    fill:"none",stroke:tone,"stroke-width":i===3?2.8:1.7,opacity:i===3?.85:.65,
+    "data-r20-span-from":span.from,"data-r20-span-to":span.to,
+    "data-r20-span-years":span.years,"data-r20-span-role":span.role});
+  }
+  for(const year of track.events){
+   const first=year===track.first;
+   add(svg,"circle",{cx:x(year),cy:y,r:first?mobile?5.2:6.5:mobile?2.2:2.5,
+    fill:first?C.text:tone,stroke:first?tone:"none","stroke-width":first?2:0,
+    "data-r20-closure-year":year,
+    ...(first?{"data-r18-first-closure":year}:{}),
+    ...(track.key==="yearDay"&&first?{"data-r18-local-marker":year}:{})});
+  }
+ });
+ svg.dataset.graphGrammar="verified-return-spans";
+ svg.dataset.r20Layout=mobile?"full-width-mobile":"labeled-desktop";
+ svg.dataset.spanSemantics="endpoints-only";
+ svg.dataset.cursorPlacement="axis-only";
+ svg.dataset.rhythmTracks=String(rhythm.tracks.length);
+ svg.dataset.ready="true";
+}
+
 function local(svg,model,mobile){
  const {x}=baseSvg(svg,model.detailStart,model.detailEnd,206,mobile);
  for(const row of [
@@ -81,7 +126,9 @@ function cursor(svg,delta,_top,_bottom){
  svg.querySelectorAll("[data-r18-cursor]").forEach(n=>n.remove());
  const start=Number(svg.dataset.startYear),end=Number(svg.dataset.endYear);
  if(delta<start||delta>end)return;
- const box=svg.viewBox.baseVal,w=box.width,left=w===340?104:175,right=w-18;
+ const box=svg.viewBox.baseVal,w=box.width;
+ const left=Number(svg.dataset.axisLeft??(w===340?104:175));
+ const right=Number(svg.dataset.axisRight??(w-18));
  const px=left+(right-left)*(delta-start)/(end-start);
  // The observation marker occupies only the axis band, so it NEVER covers
  // recurrence circles, including +1,200 and the baseline-dependent +1,980.
@@ -93,11 +140,13 @@ function cursor(svg,delta,_top,_bottom){
   "data-r18-cursor":"true","data-r18-readhead":"axis-only"});
 }
 /** Only the base date invalidates the 24k event cache; the normal Δ path repaints cursors. */
-export function renderR18Context(root,state){
+export function renderR18Context(root,state,{rhythm=false}={}){
  if(!root||!state)throw new TypeError("canonical R18 state required");
  const d=state.baseDate,next=[d.year,d.month,d.day].join("-");
  const mobile=isMobile();
- const repaint=key!==next||previousMobile!==mobile;
+ const variant=rhythm?"return-spans":"event-lanes";
+ const repaint=key!==next||previousMobile!==mobile||
+  root.dataset.r18DiagramVariant!==variant;
  if(key!==next){
   key=next;journey=null;
   try{journey=buildClosureJourney(d);}catch(error){
@@ -114,7 +163,8 @@ export function renderR18Context(root,state){
  const overviewSvg=root.querySelector("#r18-context-overview");
  const localSvg=root.querySelector("#r18-context-local");
  if(repaint){
-  overview(overviewSvg,journey,mobile);
+  if(rhythm)returnRhythmOverview(overviewSvg,journey,mobile);
+  else overview(overviewSvg,journey,mobile);
   local(localSvg,journey,mobile);
   root.dataset.r18OverviewPaints=String((Number(root.dataset.r18OverviewPaints)||0)+1);
  }
@@ -127,10 +177,18 @@ export function renderR18Context(root,state){
  root.querySelector("#r18-context-detail").textContent=
   classified?.detail??"離散相位仍由正式時間模型判讀。";
  root.querySelector("#r18-context-current").textContent="選取 Δ "+fmt(state.deltaYears)+" 年";
+ root.dataset.r18DiagramVariant=variant;
+ if(rhythm){
+  root.querySelector(".r18-context-eyebrow").textContent="週期回返 · 同一條 Δ 年數時間軸";
+  root.querySelector(".r18-context-figure-title span:first-child").textContent="閉合事件的間隔與回返節奏";
+  root.querySelector("#r18-context-figure-caption").textContent=
+   "第一段弧線從基準 Δ＝0 延伸至首次非零閉合；其餘弧線連接相鄰的閉合年份。"+
+   "它們只表示時間間隔，不是連續相位或天文軌道。圓點才是實際歸零事件。";
+ }
  root.querySelector("#r18-context-local-label").textContent=
   "局部 "+fmt(journey.detailStart)+"～"+fmt(journey.detailEnd)+" 年 · 首次年＋日 +"+fmt(journey.firstLocal);
  root.querySelector("#r18-context-local-note").textContent=
-  "紫色節點是這個基準日期的首次年＋日重遇（+"+fmt(journey.firstLocal)+"）；白色三角形位在時間軸下方，表示目前選取的 Δ。";
+  "「兩者重遇」列的白色加粗刻線是首次年＋日重遇（+"+fmt(journey.firstLocal)+"）；白色三角形位在時間軸下方，表示目前選取的 Δ。";
  const localButton=root.querySelector('[data-r19-delta="local"]');
  if(localButton){
   localButton.textContent="局部 +"+fmt(journey.firstLocal);
@@ -140,7 +198,15 @@ export function renderR18Context(root,state){
   const value=button.dataset.r19Delta==="local"?journey.firstLocal:Number(button.dataset.r19Delta);
   button.setAttribute("aria-pressed",String(value===state.deltaYears));
  });
- overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
+ if(rhythm)root.querySelector("#r18-context-figure-caption").dataset.r20Meaning="elapsed-spans-not-phase";
+ if(rhythm){
+  const bridge=buildReturnRhythm(journey);
+  overviewSvg.setAttribute("aria-label","同一條真實經過年數軸上的四種回返節奏。"+
+   bridge.tracks.map(t=>t.label+" "+t.events.length+" 次歸零，首次 +"+fmt(t.first)+" 年").join("；")+
+   "。第一段從 Δ＝0 基準點到首次非零閉合，其餘各段連接相鄰的非零閉合事件；弧線不是相位曲線。"+
+   "目前選取 Δ "+fmt(state.deltaYears)+" 年。");
+ }
+ if(!rhythm) overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
   fmt(journey.firstLocal)+"；公曆＋日序首次 8,000；三項共同首次 24,000。"+
   "目前選取 "+fmt(state.deltaYears)+" 年，讀頭不覆蓋任何事件。");
  localSvg.setAttribute("aria-label","依基準日期移動的局部時間窗 "+
