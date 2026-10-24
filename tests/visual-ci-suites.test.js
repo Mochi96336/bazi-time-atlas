@@ -19,7 +19,7 @@ test("parallel visual CI retains every existing screenshot command and determina
   assert.equal(new Set(screenshotChecks).size, screenshotChecks.length, "duplicate screenshot checks");
   assert.deepEqual(
     [...screenshotChecks].sort(),
-    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs", "visual-check-research-production-rhythm.mjs", "visual-check-r17-unfolded-phase.mjs", "visual-check-r17-in-context.mjs", "visual-check-r17-production-optin.mjs", "visual-check-r18-closure-journey.mjs", "visual-check-r18-in-context.mjs"].sort(),
+    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs", "visual-check-research-production-rhythm.mjs", "visual-check-r17-unfolded-phase.mjs", "visual-check-r17-in-context.mjs", "visual-check-r17-production-optin.mjs", "visual-check-r18-closure-journey.mjs", "visual-check-r18-in-context.mjs", "visual-check-r20-return-rhythm.mjs"].sort(),
     "parallel PNG CI must preserve the complete existing visual:check inventory"
   );
   assert.ok(VISUAL_CI_SUITES["capture-material"].indexOf("visual-check-material-prototype.mjs")
@@ -33,7 +33,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 60, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, production evidence, and full-page Research rhythm evidence");
+  assert.equal(scripts.length, 61, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, production evidence, and full-page Research rhythm evidence");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
