@@ -199,7 +199,7 @@ export function renderR18Context(root,state,{rhythm=false}={}){
    "。各弧線只表達相鄰兩次確認的閉合事件之間所經過的年數，不是相位曲線。"+
    "目前選取 Δ "+fmt(state.deltaYears)+" 年。");
  }
- overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
+ if(!rhythm) overviewSvg.setAttribute("aria-label","真實 Δ 年份：公曆＋年序首次 1,200；年序＋日序首次 "+
   fmt(journey.firstLocal)+"；公曆＋日序首次 8,000；三項共同首次 24,000。"+
   "目前選取 "+fmt(state.deltaYears)+" 年，讀頭不覆蓋任何事件。");
  localSvg.setAttribute("aria-label","依基準日期移動的局部時間窗 "+
