@@ -1,0 +1,36 @@
+/*
+ * R20 return rhythm proof-of-geometry. Opt in with ?r20=1.
+ * Keep R19 line-track default for ?r18=1 and never alter default R16.
+ * The arch is an editorial bridge between exact event years, NOT a plotted
+ * phase signal, return probability, or true astronomical trajectory.
+ */
+html[data-research-rhythm="r20"] #r18-context{
+ --r20-return-datum:#6b7c80;
+}
+html[data-research-rhythm="r20"] #r18-context .r18-context-overview{
+ padding-top:clamp(6px,.8vw,12px);
+}
+html[data-research-rhythm="r20"] #r18-context-overview path[data-r20-span-to]{
+ stroke-linecap:round;
+ stroke-linejoin:round;
+ vector-effect:non-scaling-stroke;
+}
+html[data-research-rhythm="r20"] #r18-context-overview circle[data-r20-closure-year]{
+ vector-effect:non-scaling-stroke;
+}
+html[data-research-rhythm="r20"] #r18-context-figure-caption{
+ max-width:70ch;
+ line-height:1.9;
+ font-size:13px;
+}
+html[data-research-rhythm="r20"] #r18-context .r18-context-heading{
+ border-color:color-mix(in srgb, var(--research-text-primary) 25%,transparent);
+}
+@media(max-width:680px){
+ html[data-research-rhythm="r20"] #r18-context .r18-context-overview{
+  padding-top:0;
+ }
+ html[data-research-rhythm="r20"] #r18-context-figure-caption{
+  font-size:12px;line-height:1.75;
+ }
+}
