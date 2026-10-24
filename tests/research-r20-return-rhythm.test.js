@@ -49,6 +49,12 @@ test("R20 SVG arches express only intervals and never interpolate phase truth",(
  assert.match(js,/data-r20-span-to/);
  assert.match(js,/data-r20-closure-year/);
  assert.match(js,/data-r18-readhead/);
+ assert.match(js,/mobile\?460:374/);
+ assert.match(js,/wideMobile:true/);
+ assert.match(js,/mobile\?\[103,198,293,388\]/);
+ assert.match(js,/svg\.dataset\.r20Layout=mobile/);
+ assert.match(js,/svg\.dataset\.axisLeft/);
+ assert.match(js,/svg\.dataset\.axisRight/);
  assert.match(js,/spanSemantics="endpoints-only"/);
  assert.match(js,/實際閉合年份之間的回返節奏/);
  assert.match(js,/同一條真實經過年數軸上的四種回返節奏/);
