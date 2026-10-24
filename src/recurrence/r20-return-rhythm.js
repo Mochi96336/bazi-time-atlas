@@ -20,7 +20,8 @@ export function buildReturnRhythm(journey){
   const spans=events.map(delta=>{
    if(!Number.isInteger(delta)||delta<=previous||delta>journey.maxYears)
     throw new RangeError("events must strictly increase on the same Δ-year axis");
-   const span=Object.freeze({from:previous,to:delta,years:delta-previous});
+   const span=Object.freeze({from:previous,to:delta,years:delta-previous,
+    role:previous===0?"origin-to-first":"between-returns"});
    previous=delta;
    return span;
   });
