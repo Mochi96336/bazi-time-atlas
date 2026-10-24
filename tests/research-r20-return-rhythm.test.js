@@ -50,6 +50,10 @@ test("R20 SVG arches express only intervals and never interpolate phase truth",(
  assert.match(js,/data-r20-closure-year/);
  assert.match(js,/data-r18-readhead/);
  assert.match(js,/spanSemantics="endpoints-only"/);
+ assert.match(js,/實際閉合年份之間的回返節奏/);
+ assert.match(js,/同一條真實經過年數軸上的四種回返節奏/);
+ assert.match(js,/if\(!rhythm\) overviewSvg\.setAttribute\("aria-label"/);
+ assert.match(js,/不是連續相位或天文軌道/);
  assert.match(js,/root\.dataset\.r18DiagramVariant=variant/);
  assert.match(js,/rhythm\?"return-spans":"event-lanes"/);
  assert.match(controller,/const r20OptIn = researchMode\.get\("r20"\) === "1"/);
