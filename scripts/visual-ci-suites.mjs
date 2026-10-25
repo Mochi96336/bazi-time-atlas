@@ -51,6 +51,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "visual-check-r18-in-context.mjs",
     "visual-check-r20-return-rhythm.mjs",
     "visual-check-r21-geometry-compare.mjs",
+    "visual-check-alignment-motion.mjs",
     "check-tools-human-ux.mjs",
     "visual-check.mjs",
     "visual-check-research-01-diagram-lab.mjs",
