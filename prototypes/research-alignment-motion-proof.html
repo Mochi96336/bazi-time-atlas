@@ -111,7 +111,7 @@ function setDelta(value,{source="control",syncQuery=false}={}){
  $("#verdict").textContent=headline;$("#reason").textContent=reason;
  $("#delta-value").textContent=fmt(v);
  document.documentElement.dataset.alignmentReady="true";
- document.documentElement.dataset.alignmentBase=[base.year,base.month,base.day].join("-");
+ document.documentElement.dataset.alignmentBase=[base.year,String(base.month).padStart(2,"0"),String(base.day).padStart(2,"0")].join("-");
  document.documentElement.dataset.alignmentDelta=String(v);
  for(const p of $("#milestones").querySelectorAll("button"))p.setAttribute("aria-pressed",String(Number(p.dataset.year)===v));
  if(syncQuery){const u=new URL(location);u.searchParams.set("date",[base.year,String(base.month).padStart(2,"0"),String(base.day).padStart(2,"0")].join("-"));u.searchParams.set("delta",String(v));history.replaceState(null,"",u);}
