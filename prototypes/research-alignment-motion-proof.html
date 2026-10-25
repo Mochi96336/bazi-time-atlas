@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Research 01 · 動態零點對齊證明</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1418;--type:#e7eeeb;--muted:#9eafb1;--faint:#42565c;--g:#e6c080;--y:#b4a1df;--d:#68bfbc}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--type);margin:0;font:15px/1.65 system-ui,"Noto Sans TC",sans-serif}
+main{max-width:1160px;margin:auto;padding:clamp(22px,5vw,80px)}h1{font-size:clamp(32px,4.2vw,58px);line-height:1.14;letter-spacing:-.04em;font-weight:600;margin:12px 0 20px;max-width:13ch}.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--d)}.lead{max-width:63ch;color:var(--muted);margin:0 0 30px}
+.stage{border-top:1px solid var(--faint);padding-top:22px}.state-top{display:flex;align-items:start;justify-content:space-between;gap:25px;flex-wrap:wrap}.delta-kicker{font-size:12px;color:var(--muted)}.delta-number{font-size:clamp(40px,7vw,82px);font-weight:480;letter-spacing:-.055em;line-height:1.14;font-variant-numeric:tabular-nums}.delta-number small{font-size:16px;letter-spacing:0;color:var(--muted)}#verdict{font-size:clamp(19px,2.5vw,30px);line-height:1.4;font-weight:550;max-width:17ch;text-align:right}#reason{color:var(--muted);max-width:58ch;margin:10px 0 25px}
+.phase-stage{margin:30px 0 22px}.phase-guide{display:grid;grid-template-columns:148px minmax(0,1fr) 115px;gap:18px;align-items:center;font-size:12px;color:var(--muted);padding-bottom:9px}.phase-guide span:nth-child(2){text-align:center}
+.phase-lane{display:grid;grid-template-columns:148px minmax(0,1fr) 115px;gap:18px;align-items:center;min-height:102px;border-top:1px solid #2a3a40}
+.phase-name strong{display:block;color:var(--type);font-size:18px;font-weight:550}.phase-name small{font-size:12px;color:var(--muted)}
+.track{height:64px;position:relative;min-width:0}
+.track:before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--faint)}
+.track:after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#e6eeeb8f}
+.zero-label{position:absolute;left:50%;top:0;transform:translateX(-50%);font-size:11px;color:#d4e4e1;background:var(--bg);padding:0 4px}
+.phase-marker{position:absolute;top:50%;width:16px;height:16px;border:3px solid var(--accent);background:var(--bg);border-radius:50%;transform:translate(-50%,-50%);left:50%;z-index:2}
+.phase-marker[aria-hidden]{pointer-events:none}
+.phase-marker.closed{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent);background:var(--accent)}
+.distance{font-variant-numeric:tabular-nums;text-align:right}
+.distance strong{display:block;font-size:25px;font-weight:550;color:var(--accent)}.distance small{font-size:11px;color:var(--muted)}
+.track-extent{position:absolute;top:49%;height:3px;background:var(--accent);opacity:.65;left:50%;width:0;transform-origin:0% 50%}
+.caption{font-size:12px;color:var(--muted);margin:0 0 28px}
+.controls{border-top:1px solid var(--faint);border-bottom:1px solid var(--faint);padding:20px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:13px 22px;align-items:center}.controls label{color:var(--muted);font-size:12px}.controls .range{width:100%;accent-color:var(--d);cursor:pointer}
+.buttons{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 8px}button,select{font:inherit;background:transparent;border:1px solid var(--faint);color:var(--type);padding:8px 12px;border-radius:4px;cursor:pointer}button[aria-pressed="true"]{border-color:var(--d);background:#163236}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--d);outline-offset:3px}button.primary{border-color:var(--d);color:var(--d);font-weight:600}
+.play{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.play select{max-width:150px}
+.story{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:42px 0 22px;border-top:1px solid var(--faint);padding-top:30px}.story article{border-top:2px solid var(--accent);padding-top:13px}.story h2{font-size:14px;margin:0 0 6px;font-weight:550;color:var(--accent)}.story strong{font-size:clamp(22px,2.5vw,29px);letter-spacing:-.03em}.story p{font-size:13px;color:var(--muted)}
+.foot{color:var(--muted);font-size:13px;max-width:70ch;margin-top:30px}.foot a{color:var(--d)}
+@media(max-width:740px){.state-top{display:block}#verdict{text-align:left;margin-top:15px}.phase-guide,.phase-lane{grid-template-columns:94px minmax(0,1fr) 65px;gap:6px}.phase-guide{font-size:10px}.phase-lane{min-height:91px}.phase-name strong{font-size:14px}.phase-name small{font-size:10px}.track{height:56px}.distance strong{font-size:18px}.distance small{font-size:10px}.story{grid-template-columns:1fr}.story article{padding-top:12px}.controls{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.phase-marker{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<p class="eyebrow">Research 01 · Alternative to R19–R21 skins · 動態對齊證明</p>
+<h1>還差多少，才會同時對齊？</h1>
+<p class="lead">把同一個零點固定住，讓三個循環的偏移隨 Δ 移動。你能親眼看見「兩項先對齊、第三項仍差一點」，最後才知道 24,000 是怎麼來的。</p>
+<section class="stage" aria-label="三項相位距離對照">
+<div class="state-top"><div><div class="delta-kicker">距基準日期</div><div class="delta-number">+<span id="delta-value">0</span> <small>年</small></div></div><strong id="verdict" aria-live="polite">基準點：三項都是 0</strong></div>
+<p id="reason">Δ＝0 是同一天的比較，不是非零重遇。</p>
+<div class="phase-stage">
+<div class="phase-guide"><span>三個不同尺度</span><span>← 落後　共同零點　超前 →</span><span style="text-align:right">最短相位差</span></div>
+<div class="phase-lane" style="--accent:var(--g)" data-key="gregorian"><div class="phase-name"><strong>公曆結構</strong><small>模 400 年</small></div><div class="track"><span class="zero-label">0</span><div class="track-extent"></div><div class="phase-marker" aria-hidden="true"></div></div><div class="distance"><strong>0</strong><small>／ 400 年</small></div></div>
+<div class="phase-lane" style="--accent:var(--y)" data-key="yearSequence"><div class="phase-name"><strong>年序</strong><small>模 60 年</small></div><div class="track"><span class="zero-label">0</span><div class="track-extent"></div><div class="phase-marker" aria-hidden="true"></div></div><div class="distance"><strong>0</strong><small>／ 60 年</small></div></div>
+<div class="phase-lane" style="--accent:var(--d)" data-key="day"><div class="phase-name"><strong>日序</strong><small>實際日差模 60</small></div><div class="track"><span class="zero-label">0</span><div class="track-extent"></div><div class="phase-marker" aria-hidden="true"></div></div><div class="distance"><strong>0</strong><small>／ 60 日</small></div></div>
+</div>
+<p class="caption">注意：三條的單位不同，位置是各自半週期的相對偏差，不能把「20 年」和「9 日」直接比較大小。移動到 0 才代表該項離散閉合；日序由實際經過的日數計算。</p>
+<div class="controls">
+<div><label for="delta-range">拖動 Δ，看三個相位如何移動</label><input class="range" id="delta-range" type="range" min="0" max="24000" step="1" value="0"></div>
+<div class="play"><button type="button" class="primary" id="play" aria-pressed="false">▶ 播放推演</button><label for="pace" class="sr-only">動畫速度</label><select id="pace"><option value="120">慢 · 120 年／秒</option><option value="600" selected>中 · 600 年／秒</option><option value="1800">快 · 1,800 年／秒</option></select></div>
+</div>
+<div id="milestones" class="buttons" aria-label="重要的公倍數和局部閉合年份"></div>
+<div class="story">
+<article style="--accent:var(--g)"><h2>第一關 · 公曆與年序</h2><strong>LCM(400, 60) = 1,200</strong><p>400 與 60 的共同倍數先出現；但這時日序仍差 −9 日。</p></article>
+<article style="--accent:var(--d)"><h2>第二關 · 公曆與日序</h2><strong>8,000 年</strong><p>每 400 年 146,097 日，對 60 取餘是 57；連續 20 個 400 年區塊後日序才回零，但年序仍差 +20 年。</p></article>
+<article style="--accent:var(--y)"><h2>最終 · 三項共同對齊</h2><strong>LCM(1,200, 8,000) = 24,000</strong><p>不是先猜 24,000，而是看見兩組閉合要求在同一年同時成立。</p></article>
+</div>
+<label for="base">更換基準日期，檢驗局部重遇的差異：</label>
+<select id="base"><option value="2026-09-13">2026／09／13</option><option value="1900-03-01">1900／03／01</option><option value="2100-03-01">2100／03／01</option></select>
+<p class="foot">這是保留原版動態相位思想的獨立實驗。數值直接使用正式 <code>recurrenceState()</code> 和 <code>signedShortestPhase()</code>，播放則沿用既有 <code>createDeltaPlaybackController()</code>。年序是名義 60 年序；節氣、立春與真正八字年柱／日柱的驗證仍在後續研究，不應把此圖當天文結論。</p>
+</section>
+</main>
+<script type="module">
+import {recurrenceState} from "../src/recurrence/gregorian-cycle.js";
+import {signedShortestPhase} from "../src/recurrence/phase-fan-geometry.js";
+import {createDeltaPlaybackController} from "../src/recurrence/delta-playback-controller.js";
+const $=q=>document.querySelector(q),fmt=n=>n.toLocaleString("en-US");
+const lanes={gregorian:$('[data-key="gregorian"]'),yearSequence:$('[data-key="yearSequence"]'),day:$('[data-key="day"]')};
+const moduli={gregorian:400,yearSequence:60,day:60};
+let base={year:2026,month:9,day:13},delta=0,controller=null;
+const range=$("#delta-range"),btn=$("#play");
+const focus=[0,400,1200,1980,8000,24000];
+const params=new URLSearchParams(location.search);
+const validBases=new Set(["2026-09-13","1900-03-01","2100-03-01"]);
+let initialBase=validBases.has(params.get("date"))?params.get("date"):"2026-09-13";
+$("#base").value=initialBase;
+function parseDate(s){const [year,month,day]=s.split("-").map(Number);return {year,month,day};}
+base=parseDate(initialBase);
+function setDelta(value,{source="control",syncQuery=false}={}){
+ if(controller?.playing&&source!=="playback"&&source!=="playback-reset")controller.stop({commit:false});
+ const v=Math.max(0,Math.min(24000,Math.trunc(Number(value)||0)));
+ delta=v;range.value=String(v);
+ const state=recurrenceState(base,v);
+ const vals=Object.fromEntries(Object.entries(moduli).map(([key,modulus])=>
+  [key,state.phases[key]===null?null:signedShortestPhase(state.phases[key],modulus)]));
+ for(const [key,root] of Object.entries(lanes)){
+  const val=vals[key],marker=root.querySelector(".phase-marker"),distance=root.querySelector(".distance strong"),line=root.querySelector(".track-extent");
+  const available=val!==null;
+  const left=available?50+val/(moduli[key]/2)*46:50;
+  marker.style.left=left+"%";marker.style.opacity=available?"1":".2";
+  marker.classList.toggle("closed",available&&val===0);
+  line.style.left=Math.min(50,left)+"%";line.style.width=Math.abs(left-50)+"%";
+  distance.textContent=available?(val===0?"0":(val>0?"+":"")+val):"—";
+  root.dataset.signedGap=String(val);
+  root.dataset.closed=String(available&&val===0);
+ }
+ const closed=state.closed;
+ const count=Number(closed.gregorian)+Number(closed.yearSequence)+Number(closed.day);
+ let headline,reason;
+ if(v===0){headline="基準點：三項都是 0";reason="Δ＝0 是同一天的恆等比較，不是一次非零重遇。";}
+ else if(!state.targetValid){headline="目標日期不存在";reason="例如非閏年的 2 月 29 日：日序不能當成 0。";}
+ else if(count===3){headline="三項終於同時歸零";reason="公曆 400、名義 60 年序與 60 日序在同一 Δ 閉合；節界仍需另外驗真。";}
+ else if(count===2){headline="兩項已對齊，第三項還差 "+(vals.gregorian!==0?"公曆 "+vals.gregorian+" 年":vals.yearSequence!==0?"年序 "+vals.yearSequence+" 年":"日序 "+vals.day+" 日");reason="這是辨認公倍數最關鍵的時刻：先看誰已回 0，再觀察剩下的偏差。";}
+ else if(count===1){headline="一項歸零，另外兩項尚未對齊";reason="不能只看單一週期回返，必須追蹤其餘兩個零點。";}
+ else {headline="三項還沒有共同對齊";reason="觀察標記如何往共同的 0 靠近，再在各自週期邊界回繞。";}
+ $("#verdict").textContent=headline;$("#reason").textContent=reason;
+ $("#delta-value").textContent=fmt(v);
+ document.documentElement.dataset.alignmentReady="true";
+ document.documentElement.dataset.alignmentBase=[base.year,base.month,base.day].join("-");
+ document.documentElement.dataset.alignmentDelta=String(v);
+ for(const p of $("#milestones").querySelectorAll("button"))p.setAttribute("aria-pressed",String(Number(p.dataset.year)===v));
+ if(syncQuery){const u=new URL(location);u.searchParams.set("date",[base.year,String(base.month).padStart(2,"0"),String(base.day).padStart(2,"0")].join("-"));u.searchParams.set("delta",String(v));history.replaceState(null,"",u);}
+}
+function makeMilestones(){
+ const {year,month,day}=base;
+ let local=null;
+ for(let i=60;i<=24000;i+=60){const {closed}=recurrenceState(base,i);if(closed.yearSequence&&closed.day){local=i;break;}}
+ $("#milestones").replaceChildren();
+ const stops=[{year:0,label:"基準 0"},{year:400,label:"+400"},{year:1200,label:"+1,200"},
+  {year:local,label:"首次年＋日 +"+fmt(local)},{year:8000,label:"+8,000"},{year:24000,label:"+24,000"}];
+ for(const stop of stops){
+  const b=document.createElement("button");b.type="button";b.textContent=stop.label;b.dataset.year=String(stop.year);
+  b.addEventListener("click",()=>setDelta(stop.year,{syncQuery:true}));$("#milestones").append(b);
+ }
+}
+function buildController(){
+ controller?.stop({commit:false});
+ controller=createDeltaPlaybackController({playButton:btn,getDelta:()=>delta,setDelta,
+  maxDelta:()=>24000,yearsPerSecond:Number($("#pace").value),
+  onPlayingChange:playing=>{btn.textContent=playing?"Ⅱ 暫停":"▶ 播放推演";},
+  onStop:({commit})=>{if(commit)setDelta(delta,{source:"playback-end",syncQuery:true});}});
+}
+btn.addEventListener("click",()=>controller.toggle());
+$("#pace").addEventListener("change",buildController);
+range.addEventListener("input",()=>setDelta(range.value));
+range.addEventListener("change",()=>setDelta(range.value,{syncQuery:true}));
+$("#base").addEventListener("change",()=>{base=parseDate($("#base").value);makeMilestones();setDelta(0,{syncQuery:true});});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)controller.stop({commit:true});});
+const n=Number(params.get("delta"));
+buildController();makeMilestones();setDelta(Number.isInteger(n)&&n>=0&&n<=24000?n:0);
+</script>
+</body></html>
