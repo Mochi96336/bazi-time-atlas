@@ -69,6 +69,8 @@ const $=q=>document.querySelector(q),fmt=n=>n.toLocaleString("en-US");
 const lanes={gregorian:$('[data-key="gregorian"]'),yearSequence:$('[data-key="yearSequence"]'),day:$('[data-key="day"]')};
 const moduli={gregorian:400,yearSequence:60,day:60};
 let base={year:2026,month:9,day:13},delta=0,controller=null;
+let playbackStops=[0,400,1200,1980,8000,24000],stopAt=24000,holdTimer=null;
+function cancelHold(){if(holdTimer!==null){clearTimeout(holdTimer);holdTimer=null;btn.textContent="▶ 播放推演";}}
 const range=$("#delta-range"),btn=$("#play");
 const focus=[0,400,1200,1980,8000,24000];
 const params=new URLSearchParams(location.search);
@@ -78,7 +80,9 @@ $("#base").value=initialBase;
 function parseDate(s){const [year,month,day]=s.split("-").map(Number);return {year,month,day};}
 base=parseDate(initialBase);
 function setDelta(value,{source="control",syncQuery=false}={}){
- if(controller?.playing&&source!=="playback"&&source!=="playback-reset")controller.stop({commit:false});
+ if(source!=="playback"&&source!=="playback-reset"&&source!=="guided-checkpoint"){
+  cancelHold();if(controller?.playing)controller.stop({commit:false});
+ }
  const v=Math.max(0,Math.min(24000,Math.trunc(Number(value)||0)));
  delta=v;range.value=String(v);
  const state=recurrenceState(base,v);
@@ -113,30 +117,45 @@ function setDelta(value,{source="control",syncQuery=false}={}){
  if(syncQuery){const u=new URL(location);u.searchParams.set("date",[base.year,String(base.month).padStart(2,"0"),String(base.day).padStart(2,"0")].join("-"));u.searchParams.set("delta",String(v));history.replaceState(null,"",u);}
 }
 function makeMilestones(){
- const {year,month,day}=base;
  let local=null;
  for(let i=60;i<=24000;i+=60){const {closed}=recurrenceState(base,i);if(closed.yearSequence&&closed.day){local=i;break;}}
  $("#milestones").replaceChildren();
  const stops=[{year:0,label:"基準 0"},{year:400,label:"+400"},{year:1200,label:"+1,200"},
   {year:local,label:"首次年＋日 +"+fmt(local)},{year:8000,label:"+8,000"},{year:24000,label:"+24,000"}];
+ playbackStops=[...new Set(stops.map(s=>s.year))].sort((a,b)=>a-b);
  for(const stop of stops){
   const b=document.createElement("button");b.type="button";b.textContent=stop.label;b.dataset.year=String(stop.year);
   b.addEventListener("click",()=>setDelta(stop.year,{syncQuery:true}));$("#milestones").append(b);
  }
 }
 function buildController(){
- controller?.stop({commit:false});
+ cancelHold();controller?.stop({commit:false});
  controller=createDeltaPlaybackController({playButton:btn,getDelta:()=>delta,setDelta,
-  maxDelta:()=>24000,yearsPerSecond:Number($("#pace").value),
+  maxDelta:()=>stopAt,yearsPerSecond:Number($("#pace").value),
   onPlayingChange:playing=>{btn.textContent=playing?"Ⅱ 暫停":"▶ 播放推演";},
-  onStop:({commit})=>{if(commit)setDelta(delta,{source:"playback-end",syncQuery:true});}});
+  onStop:({commit})=>{
+   if(commit)setDelta(delta,{source:"guided-checkpoint",syncQuery:true});
+   // Playback clamps to the EXACT milestone. It must not skip +1200 or +8000
+   // just because it crossed that year between animation frames.
+   if(commit&&delta===stopAt&&stopAt<24000){
+    stopAt=playbackStops.find(year=>year>delta)??24000;
+    btn.textContent="✓ 已到 +"+fmt(delta)+" · 暫停觀察";
+    holdTimer=setTimeout(()=>{holdTimer=null;if(!document.hidden)controller.start();},1550);
+   }
+  }});
 }
-btn.addEventListener("click",()=>controller.toggle());
+btn.addEventListener("click",()=>{
+ if(holdTimer!==null){cancelHold();return;}
+ if(controller.playing){controller.stop({commit:true});return;}
+ if(delta>=24000)setDelta(0,{source:"playback-reset",syncQuery:true});
+ stopAt=playbackStops.find(year=>year>delta)??24000;
+ controller.start();
+});
 $("#pace").addEventListener("change",buildController);
 range.addEventListener("input",()=>setDelta(range.value));
 range.addEventListener("change",()=>setDelta(range.value,{syncQuery:true}));
 $("#base").addEventListener("change",()=>{base=parseDate($("#base").value);makeMilestones();setDelta(0,{syncQuery:true});});
-document.addEventListener("visibilitychange",()=>{if(document.hidden)controller.stop({commit:true});});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){cancelHold();controller.stop({commit:false});}});
 const n=Number(params.get("delta"));
 buildController();makeMilestones();setDelta(Number.isInteger(n)&&n>=0&&n<=24000?n:0);
 </script>
