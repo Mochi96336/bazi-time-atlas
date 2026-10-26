@@ -48,7 +48,7 @@ jobs:
           test -s tmp/rebound-26026-state/result.json
           printf '%s  %s\n'             "$EXPECTED_RESULT_SHA256"             'tmp/rebound-26026-state/result.json' | sha256sum --check -
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         if: steps.reuse_state.outcome != 'success'
         with:
           python-version: "3.12"
