@@ -151,3 +151,13 @@ html[data-research-r22="true"] #research-discrete .research-discrete-explorer-in
   animation-duration:.01ms!important;transition-duration:.01ms!important;
  }
 }
+/* Keep the selected Δ only once in the P2 verdict. The original readout now
+   supplies the target date; its existing DOM/state IDs stay intact. */
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head > span:first-child,
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head > #delta-readout,
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head > i{
+ display:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head::before{
+ content:"比較日期";font-size:11px;color:#8b9ea7;
+}
