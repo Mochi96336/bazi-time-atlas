@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R22 opt-in original fan first-reading capture</title>
+<style>html,body{margin:0;background:#071019;overflow:hidden}#stage{display:block;border:0;background:#071019}#probe{display:none}</style>
+</head>
+<body><iframe id="stage" title="Actual Research 01 R22 semicircle"></iframe>
+<output id="probe" data-ready="false"></output>
+<script>
+const p=new URLSearchParams(location.search);
+const width=Number(p.get("width"))||390;
+const height=Number(p.get("height"))||1350;
+const delta=Number(p.get("delta")??"1200");
+const date=p.get("date")||"2026-09-13";
+const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
+frame.style.width=width+"px";frame.style.height=height+"px";
+frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta,location.href).href;
+let attempts=0;
+function inspect(){
+ const doc=frame.contentDocument,root=doc?.documentElement;
+ const instrument=doc?.querySelector("#recurrence-instrument");
+ const wheel=doc?.querySelector("#recurrence-wheel");
+ const story=doc?.querySelector(".r22-phase-reading");
+ const readout=doc?.querySelector(".discrete-derivation");
+ const thesis=doc?.querySelector("#research-discrete-thesis");
+ const strip=doc?.querySelector("#research-year-strip");
+ if(root?.dataset.r22Ready!=="true"||instrument?.dataset.deltaYears!==String(delta)||!wheel||!story){
+  if(++attempts<250){setTimeout(inspect,50);return;}
+  probe.dataset.ready="error";probe.dataset.error="opt-in R22 did not render; delta "+instrument?.dataset.deltaYears;return;
+ }
+ const markers=["gregorian","year","day"].map(k=>wheel.querySelector('[data-return-marker="'+k+'"]'));
+ const signed=markers.map(m=>m?.dataset.phaseSigned??"missing").join(",");
+ const status=root.dataset.r22Status??"";
+ const nodeOrder=Boolean(instrument.compareDocumentPosition(readout)&Node.DOCUMENT_POSITION_FOLLOWING)
+  &&Boolean(readout.compareDocumentPosition(thesis)&Node.DOCUMENT_POSITION_FOLLOWING)
+  &&Boolean(thesis.compareDocumentPosition(strip)&Node.DOCUMENT_POSITION_FOLLOWING);
+ const fanBox=wheel.getBoundingClientRect();
+ const instrumentBox=instrument.getBoundingClientRect();
+ const viewHeight=frame.contentWindow.innerHeight;
+ probe.dataset.ready="true";
+ probe.dataset.delta=String(delta);
+ probe.dataset.date=date;
+ probe.dataset.width=String(width);
+ probe.dataset.signed=signed;
+ probe.dataset.status=status;
+ probe.dataset.order=String(nodeOrder);
+ probe.dataset.fanCount=String(markers.filter(Boolean).length);
+ probe.dataset.heroTop=String(Math.round(instrumentBox.top));
+ probe.dataset.heroBottom=String(Math.round(instrumentBox.bottom));
+ probe.dataset.heroAboveFirstViewport=String(instrumentBox.top<viewHeight);
+ probe.dataset.heroBeforeThesis=String(nodeOrder);
+ probe.dataset.sourceWheel=String(wheel.id==="recurrence-wheel"&&wheel.querySelectorAll(".phase-sector").length>0);
+ probe.dataset.singleDelta=String(doc.querySelectorAll("#delta-slider").length===1);
+ probe.dataset.fourPillars=String(doc.querySelectorAll("#research-time-state .research-time-pillar").length===8);
+ probe.dataset.pageOverflow=String(doc.documentElement.scrollWidth>doc.documentElement.clientWidth+4);
+ probe.dataset.fanHeight=String(Math.round(fanBox.height));
+}
+frame.addEventListener("load",inspect,{once:true});
+</script></body></html>
