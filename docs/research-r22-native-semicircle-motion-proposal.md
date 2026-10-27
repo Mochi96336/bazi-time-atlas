@@ -173,3 +173,30 @@ closed = (residue == 0)                    三層分別判斷
 - `+24,000 年：三個零點同時成立，這是離散候選，尚需節氣驗真。`
 
 三句話都必須能**從原生半圓的三個位置直接讀出來**，而不是依賴另一張靜態時間軸。
+
+
+---
+
+## P0/P1 實施紀錄（2026-10-28）
+
+### P0 觀察：優先解決主圖過晚出場
+
+已從 main 等效的成功 GitHub Visual PNG 截圖擷取原始證據：`recurrence-1440x900.png`、`recurrence-390x844.png`、`recurrence-search-390x2050.png`。1440px 桌面首屏、390px 手機首屏及 390×2050 長截圖的可見區域內，主半圓皆未出現。主要畫面先被四柱、研究標題、推導摘要及結果佔據。這是 R22 的**資訊順序問題**，不能誤當成半圓幾何本身失敗。
+
+因此將「在研究 01 的主要觀看時刻讓半圓提早可見」加入 P2 視覺驗收，不代表砍掉先前的干支／研究時刻欄；要優先重排資訊流而非加一組重複圖表。
+
+為了能檢視當前原版圖形本身（而非只看首屏），新增：
+- `scripts/fixtures/r22-native-fan-baseline.html`：載入現有 `recurrence.html`，將真實 `#recurrence-wheel` 滾動至可視位置；可用 width 320、390、768、1440。
+- `scripts/visual-check-r22-native-fan-baseline.mjs`：擷取原版 10 個 viewport × Δ 場景的 PNG，對原始 SVG 的 3 個標記及 400/60/60 模數、signed offset 做 DOM 檢查，並把截圖併入 visual CI 結果。此檢查**不代表人眼已審查截圖排版**，仍需人工判斷裁切、字級、主次。
+
+### P1 完成：真正運轉 vs 半圓最短差
+
+新增 `src/recurrence/r22-phase-motion-model.js`，**純讀取、不持有或推進 Δ**。直接從正式 `recurrenceState`、`signedShortestPhase`、`phaseAngleOnFan` 計算：
+- 三層真正的 phase residue、有號最短偏移、fan 畫面位置及 closure status；
+- 累積 `totalTurns`／`completedTurns`；日序取真實 Gregorian ordinal 間隔，不使用平均天數取代；
+- 兩次整數年份取樣之間的完整圈跨越數與 aliasing guard，絕不建議從前後位置猜測日序的中途實際旋轉；
+- 隨基準日期變動、合法且去重排序的公倍數／局部閉合精確停靠點。
+
+新增 `tests/research-r22-phase-motion.test.js`，涵蓋三基準日、特殊閏日、400／1200／1980／8000／24000、24k 時 60／400／146097 圈數，以及 shortest signed wrap 30→−29 時不允許錯誤補間。
+
+**未完成**：P2 半圓的圖內資訊設計、P3 真實導覽播放與視覺驗收。正式 Research UI／動畫仍完全不變。
