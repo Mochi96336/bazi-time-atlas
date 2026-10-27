@@ -80,8 +80,11 @@ if(enabled){
    detail="比較三層標記與共同零點的距離，觀察何時出現雙重對齊。";
   }
   document.querySelector("#r22-current-delta").textContent=fmt(delta);
-  document.querySelector("#r22-verdict").textContent=verdict;
-  document.querySelector("#r22-description").textContent=detail;
+  // Avoid repeating the same live-region announcement on every playback year.
+  const verdictNode=document.querySelector("#r22-verdict");
+  const detailNode=document.querySelector("#r22-description");
+  if(verdictNode.textContent!==verdict)verdictNode.textContent=verdict;
+  if(detailNode.textContent!==detail)detailNode.textContent=detail;
   for(const key of ["gregorian","yearSequence","day"]){
    const layer=state.layers[key],entry=reading.querySelector('[data-r22-key="'+key+'"]');
    entry.dataset.r22Closed=String(layer.closed);
