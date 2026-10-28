@@ -72,6 +72,24 @@ function inspect(){
  probe.dataset.singleDelta=String(doc.querySelectorAll("#delta-slider").length===1);
  probe.dataset.fourPillars=String(doc.querySelectorAll("#research-time-state .research-time-pillar").length===8);
  probe.dataset.pageOverflow=String(doc.documentElement.scrollWidth>doc.documentElement.clientWidth+4);
+ const client=doc.documentElement.clientWidth;
+ const scroll=doc.documentElement.scrollWidth;
+ probe.dataset.pageOverflowPx=String(scroll-client);
+ const unclipped=el=>{
+  let ancestor=el.parentElement;
+  while(ancestor&&ancestor!==doc.documentElement){
+   const overflow=doc.defaultView.getComputedStyle(ancestor).overflowX;
+   if(["hidden","clip","auto","scroll"].includes(overflow))return false;
+   ancestor=ancestor.parentElement;
+  }
+  return true;
+ };
+ const offenders=[...doc.querySelectorAll("body *")]
+  .filter(el=>el.getBoundingClientRect().right>client+4&&unclipped(el))
+  .map(el=>({tag:el.tagName,id:el.id||"",className:String(el.className?.baseVal??el.className??"").slice(0,55),
+   right:Math.round(el.getBoundingClientRect().right)}))
+  .sort((a,b)=>b.right-a.right).slice(0,10);
+ probe.dataset.overflowElements=JSON.stringify(offenders);
  probe.dataset.fanHeight=String(Math.round(fanBox.height));
 }
 frame.addEventListener("load",inspect,{once:true});
