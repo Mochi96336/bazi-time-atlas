@@ -66,7 +66,7 @@ export function createR22GuidedPlaybackController({
   publish("hold",{message:"精確停靠，觀察哪一層還沒歸零"});
   if(target===stops.at(-1)){
    // Last milestone remains visible without a hidden delayed restart.
-   stop({commit:true,reason:"complete"});
+   schedule(holdMs,()=>stop({commit:true,reason:"complete"}));
   }else{
    schedule(holdMs,proceed);
   }
@@ -127,7 +127,7 @@ export function createR22GuidedPlaybackController({
    setDelta(target,{source:"playback",syncQuery:true});
    publish("step",{message:"減少動態：逐次按播放跳至下一個停靠點"});
    target=null;
-   onStop({commit:true,reason:"reduced-motion-step"});
+   onStop({commit:false,reason:"reduced-motion-step"});
    return;
   }
   epoch++;active=true;updateButton();proceed();
