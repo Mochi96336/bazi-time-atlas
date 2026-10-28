@@ -23,6 +23,14 @@ if(enabled){
  section.insertBefore(instrument,thesis);
  section.insertBefore(controls,thesis);
  instrument.setAttribute("aria-labelledby","r22-fan-title");
+ // One unobtrusive narrative caption for the ORIGINAL play button, not a new controller.
+ const cue=document.createElement("p");
+ cue.id="r22-playback-cue";
+ cue.className="r22-playback-cue";
+ cue.setAttribute("role","status");
+ cue.setAttribute("aria-live","polite");
+ cue.textContent="播放將逐年接近重要對齊點；大段時間會明確跳轉。";
+ controls.querySelector(".research-delta-public-slider")?.after(cue);
 
  const reading=document.createElement("section");
  reading.className="r22-phase-reading";
