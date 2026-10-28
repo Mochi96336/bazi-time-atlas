@@ -32,6 +32,10 @@ const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
+// R22 preserves every original sector and reference angle; only the camera crops
+// unused space above the arcs. R16/default viewBoxes remain untouched.
+const R22_DESKTOP_FAN_VIEWBOX = "0 170 1200 580";
+const R22_MOBILE_FAN_VIEWBOX = "35 205 1130 560";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -785,7 +789,9 @@ function submitSelectedDate(event) {
 
 function syncFanViewport() {
   const mobile = mobileFanMedia.matches;
-  svg.setAttribute("viewBox", mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX);
+  svg.setAttribute("viewBox", r22GuideOptIn
+    ? (mobile ? R22_MOBILE_FAN_VIEWBOX : R22_DESKTOP_FAN_VIEWBOX)
+    : (mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX));
   svg.dataset.mobileCrop = String(mobile);
   instrument.dataset.fanViewBox = svg.getAttribute("viewBox");
 }
