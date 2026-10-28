@@ -18,7 +18,7 @@ if(enabled){
  hero.className="r22-hero-preface";
  hero.innerHTML='<span class="r22-chapter-number">01 · 同一零點</span>'+
   '<h3 id="r22-fan-title">還差多少，三層才會同時對齊？</h3>'+
-  '<p>沿用原本的三層半圓。標記表示距離基準零點的最短相位差，不是實際累積旋轉圈數。</p>';
+  '<p>共用零點固定；觀察三個標記離 0 還差多少。</p>';
  section.insertBefore(hero,thesis);
  section.insertBefore(instrument,thesis);
  section.insertBefore(controls,thesis);
@@ -47,7 +47,7 @@ if(enabled){
     '<div role="listitem" class="r22-reading-layer" data-r22-key="day">'+
       '<span>內層 · 日序 <small>60 日</small></span><strong>—</strong></div>'+
   '</div>'+
-  '<p class="r22-model-caveat">三層各有自己的單位；亮起的 0 表示該項離散閉合，並不等於完整八字重遇。</p>';
+  '<p class="r22-model-caveat" id="r22-completed-turns">三層快慢不同；半圓顯示最短差而非累積旋轉。</p>';
  instrument.querySelector(".research-fan-graphic").after(reading);
  const labels={gregorian:"公曆",yearSequence:"年序",day:"日序"};
  const units={gregorian:"年",yearSequence:"年",day:"日"};
@@ -102,6 +102,25 @@ if(enabled){
      :"無法判定";
    entry.dataset.r22Gap=layer.available?String(layer.signed):"invalid";
   }
+  // Reveal the missing physical-time distinction in ONE sentence, not a
+  // second graphic or 3 more dashboards. The true elapsed day count is
+  // proleptic Gregorian and can exceed six full 60-day turns every year.
+  const g=state.layers.gregorian,y=state.layers.yearSequence,d=state.layers.day;
+  let turnsText;
+  if(delta===0){
+   turnsText="速度關係：外層每年 1/400 圈，中層每年 1/60 圈；內層依實際 365／366 日前進，一年超過六圈。";
+  }else if(!d.available){
+   turnsText="此年同月同日無效；內層沒有可驗證的累積日數，不能將其當成歸零。";
+  }else{
+   turnsText="同樣經過 "+fmt(delta)+" 年：外層完整 "+fmt(g.completedTurns)+
+    " 圈、中層 "+fmt(y.completedTurns)+" 圈、內層 "+fmt(d.completedTurns)+
+    " 圈。半圓仍只顯示距 0 的最短偏差。";
+  }
+  const turnsNode=document.querySelector("#r22-completed-turns");
+  if(turnsNode.textContent!==turnsText)turnsNode.textContent=turnsText;
+  instrument.dataset.r22DayCompletedTurns=d.available?String(d.completedTurns):"invalid";
+  instrument.dataset.r22YearCompletedTurns=String(y.completedTurns);
+  instrument.dataset.r22GregorianCompletedTurns=String(g.completedTurns);
   root.dataset.r22Ready="true";
   root.dataset.r22Status=status;
   instrument.dataset.r22Status=status;
