@@ -30,12 +30,15 @@ const scenes=[
  {w:390,h:1350,date:"2100-03-01",d:16080,signed:"80,0,0",status:"two"}
 ];
 const records=[];
+const usedNames=new Set();
 for(const s of scenes){
  const url=new URL("scripts/fixtures/r22-live-optin.html",base);
  Object.entries({width:s.w,height:s.h,date:s.date,delta:s.d}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
  if(s.autoPlay)url.searchParams.set("autoPlay","first");
  const win="--window-size="+Math.max(500,s.w)+","+s.h;
- const label="r22-p2-original-"+s.w+"-"+s.date+"-"+s.d+(s.autoPlay?"-reduced-step":"");
+ const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.autoPlay?"-reduced-step":"");
+ if(usedNames.has(label))throw Error("[r22-p2] duplicate screenshot label "+label);
+ usedNames.add(label);
  const modeFlags=s.autoPlay?["--force-prefers-reduced-motion=reduce"]:[];
  const dom=run([win,...modeFlags,"--dump-dom",url.href],label+" DOM");
  const p=dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0]??"";
