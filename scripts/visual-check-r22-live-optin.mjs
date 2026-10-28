@@ -17,6 +17,7 @@ function assert(check,label){if(!check)throw Error("[r22-p2] "+label);}
 const scenes=[
  {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two"},
  {w:390,h:1350,date:"2026-09-13",d:0,signed:"0,0,0",status:"identity"},
+ {w:390,h:1350,date:"2026-09-13",d:0,autoPlay:true,expectedDelta:400,signed:"0,-20,-3",status:"one"},
  {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one"},
  {w:390,h:1350,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two"},
  {w:390,h:1350,date:"2026-09-13",d:1980,signed:"-20,0,0",status:"two"},
@@ -31,14 +32,15 @@ const records=[];
 for(const s of scenes){
  const url=new URL("scripts/fixtures/r22-live-optin.html",base);
  Object.entries({width:s.w,height:s.h,date:s.date,delta:s.d}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+ if(s.autoPlay)url.searchParams.set("autoPlay","first");
  const win="--window-size="+Math.max(500,s.w)+","+s.h;
- const label="r22-p2-original-"+s.w+"-"+s.date+"-"+s.d;
+ const label="r22-p2-original-"+s.w+"-"+s.date+"-"+s.d+(s.autoPlay?"-played":"");
  const dom=run([win,"--dump-dom",url.href],label+" DOM");
  const p=dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0]??"";
- for(const [k,v] of Object.entries({ready:"true",delta:s.d,date:s.date,width:s.w,
+ for(const [k,v] of Object.entries({ready:"true",delta:s.expectedDelta??s.d,date:s.date,width:s.w,
    signed:s.signed,status:s.status,order:"true",fanCount:3,
    heroAboveFirstViewport:"true",sourceWheel:"true",singleDelta:"true",fourPillars:"true",
-   pageOverflow:"false"})){
+   pageOverflow:"false",autoPlayCaptured:"true",playbackPaused:"true"})){
   assert(p.includes('data-'+k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())+'="'+v+'"'),
    label+" "+k+" expected "+v+"; probe="+p.slice(0,1400));
  }
