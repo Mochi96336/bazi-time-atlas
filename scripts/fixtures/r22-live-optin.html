@@ -90,6 +90,22 @@ function inspect(){
    right:Math.round(el.getBoundingClientRect().right)}))
   .sort((a,b)=>b.right-a.right).slice(0,10);
  probe.dataset.overflowElements=JSON.stringify(offenders);
+ const outerRing=doc.querySelector("#gregorian-ring");
+ const outerBounds=outerRing?.getBoundingClientRect();
+ const graphic=doc.querySelector(".research-fan-graphic");
+ const graphicBounds=graphic?.getBoundingClientRect();
+ const clipTolerance=4;
+ probe.dataset.fanViewBox=wheel.getAttribute("viewBox");
+ probe.dataset.outerArcTop=String(Math.round(outerBounds?.top??-1));
+ probe.dataset.outerArcBottom=String(Math.round(outerBounds?.bottom??-1));
+ probe.dataset.outerWithinGraphic=String(Boolean(outerBounds&&graphicBounds&&
+  outerBounds.left>=graphicBounds.left-clipTolerance&&
+  outerBounds.right<=graphicBounds.right+clipTolerance));
+ probe.dataset.outerVisibleAboveFold=String(Boolean(outerBounds&&outerBounds.top<viewHeight));
+ probe.dataset.dayCompletedTurns=instrument?.dataset.r22DayCompletedTurns??"missing";
+ probe.dataset.gregorianCompletedTurns=instrument?.dataset.r22GregorianCompletedTurns??"missing";
+ probe.dataset.yearCompletedTurns=instrument?.dataset.r22YearCompletedTurns??"missing";
+ probe.dataset.speedNarrative=doc.querySelector("#r22-completed-turns")?.textContent??"";
  probe.dataset.fanHeight=String(Math.round(fanBox.height));
 }
 frame.addEventListener("load",inspect,{once:true});
