@@ -9,6 +9,8 @@ import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
 import { projectOriginalStripSelection } from "./recurrence/original-strip-date-projection.js";
 import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-date-projection.js";
 import { createDeltaPlaybackController } from "./recurrence/delta-playback-controller.js";
+import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playback-controller.js";
+import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -27,6 +29,7 @@ const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
+const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
@@ -810,13 +813,13 @@ function bindControls() {
 }
 
 function initialize() {
-  deltaPlaybackController = createDeltaPlaybackController({
+  const sharedPlayback = {
     playButton:deltaPlayButton,
     playIcon:deltaPlayIcon,
     playLabel:deltaPlayLabel,
     getDelta:() => currentDelta,
     setDelta,
-    maxDelta:() => FINE_SLIDER_MAX,
+    maxDelta:() => Math.min(FINE_SLIDER_MAX,maxSelectableDelta()),
     yearsPerSecond:DELTA_PLAY_YEARS_PER_SECOND,
     onPlayingChange:playing => {
       instrument.dataset.deltaPlayback = playing ? "playing" : "stopped";
@@ -824,7 +827,31 @@ function initialize() {
     onStop:({ commit }) => {
       if (commit) syncQueryState();
     }
-  });
+  };
+  deltaPlaybackController = r22GuideOptIn
+    ? createR22GuidedPlaybackController({
+        ...sharedPlayback,
+        getStops:() => r22TeachingStops(currentBase,Math.min(FINE_SLIDER_MAX,maxSelectableDelta())),
+        getReducedMotion:() => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        onStageChange:({ stage,target,from,to }) => {
+          instrument.dataset.r22PlaybackStage = stage;
+          instrument.dataset.r22PlaybackTarget = target===null ? "" : String(target);
+          const cue=document.querySelector("#r22-playback-cue");
+          if (!cue) return;
+          const format=n=>Number(n).toLocaleString("en-US");
+          const message={
+            idle:"播放將逐年接近重要對齊點；大段時間會明確跳轉。",
+            approach:target===null?"逐年取樣":`正在逐年接近 +${format(target)} 年，標記為真實整數年取樣。`,
+            skip:`教學跳轉：+${format(from)} → +${format(to)} 年（不是等速旋轉）。`,
+            hold:target===null?"已停留":`精確停在 +${format(target)} 年，觀察仍偏離零點的那一層。`,
+            paused:"已暫停，可再次播放或直接拖曳原本 Δ。",
+            step:target===null?"逐次跳轉":`減少動態：已精確跳到 +${format(target)} 年；再按一次前往下一站。`,
+            complete:"三項離散條件的共同對齊已顯示，節氣仍需後續驗真。"
+          }[stage]??"";
+          if(cue.textContent!==message)cue.textContent=message;
+        }
+      })
+    : createDeltaPlaybackController(sharedPlayback);
   syncFanViewport();
   renderGuides();
   renderRing("day");
