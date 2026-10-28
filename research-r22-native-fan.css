@@ -250,3 +250,13 @@ html[data-research-r22="true"] .r22-model-caveat{
   margin-bottom:12px;
  }
 }
+
+
+/* P4 browser audit: the ORIGINAL year strip's 12/31 label started at its
+   100% right-edge marker and extended +17px outside the 390px page.
+   Re-anchor just its text inward; the year boundary and hit targets remain. */
+@media (max-width:480px){
+ html[data-research-r22="true"] #research-year-strip .research-year-end > strong{
+  transform:translateX(-100%);
+ }
+}
