@@ -87,6 +87,11 @@ function inspect(){
  const offenders=[...doc.querySelectorAll("body *")]
   .filter(el=>el.getBoundingClientRect().right>client+4&&unclipped(el))
   .map(el=>({tag:el.tagName,id:el.id||"",className:String(el.className?.baseVal??el.className??"").slice(0,55),
+   parentId:el.parentElement?.id||"",parentClass:String(el.parentElement?.className?.baseVal??el.parentElement?.className??"").slice(0,55),
+   text:(el.textContent||"").trim().slice(0,60),
+   top:Math.round(el.getBoundingClientRect().top),
+   left:Math.round(el.getBoundingClientRect().left),
+   width:Math.round(el.getBoundingClientRect().width),
    right:Math.round(el.getBoundingClientRect().right)}))
   .sort((a,b)=>b.right-a.right).slice(0,10);
  probe.dataset.overflowElements=JSON.stringify(offenders);
