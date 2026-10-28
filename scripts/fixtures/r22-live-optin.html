@@ -36,13 +36,14 @@ function inspect(){
   setTimeout(inspect,55);return;
  }
  if(autoPlay&&!playObserved){
-  if(instrument?.dataset.r22PlaybackStage!=="hold"||instrument?.dataset.r22PlaybackTarget!=="400"){
+  // CI's virtual-time screenshot engine does not guarantee nested iframe RAF
+  // progression. Verify the *real button and controller* in reduced-motion
+  // step mode; normal RAF and timer semantics have deterministic unit tests.
+  if(instrument?.dataset.r22PlaybackStage!=="step"||instrument?.dataset.deltaYears!=="400"){
    if(++attempts<250){setTimeout(inspect,55);return;}
-   probe.dataset.ready="error";probe.dataset.error="guided playback missed first exact +400 hold";return;
+   probe.dataset.ready="error";probe.dataset.error="reduced-motion real button failed to reach +400";return;
   }
   playObserved=true;
-  // Freeze the genuine playback's current canonical Δ for a stable screenshot.
-  doc.querySelector("#research-delta-play")?.click();
  }
  const markers=["gregorian","year","day"].map(k=>wheel.querySelector('[data-return-marker="'+k+'"]'));
  const signed=markers.map(m=>m?.dataset.phaseSigned??"missing").join(",");
