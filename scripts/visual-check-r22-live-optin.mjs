@@ -34,8 +34,9 @@ for(const s of scenes){
  Object.entries({width:s.w,height:s.h,date:s.date,delta:s.d}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
  if(s.autoPlay)url.searchParams.set("autoPlay","first");
  const win="--window-size="+Math.max(500,s.w)+","+s.h;
- const label="r22-p2-original-"+s.w+"-"+s.date+"-"+s.d+(s.autoPlay?"-played":"");
- const dom=run([win,"--dump-dom",url.href],label+" DOM");
+ const label="r22-p2-original-"+s.w+"-"+s.date+"-"+s.d+(s.autoPlay?"-reduced-step":"");
+ const modeFlags=s.autoPlay?["--force-prefers-reduced-motion=reduce"]:[];
+ const dom=run([win,...modeFlags,"--dump-dom",url.href],label+" DOM");
  const p=dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0]??"";
  for(const [k,v] of Object.entries({ready:"true",delta:s.expectedDelta??s.d,date:s.date,width:s.w,
    signed:s.signed,status:s.status,order:"true",fanCount:3,
@@ -45,7 +46,7 @@ for(const s of scenes){
    label+" "+k+" expected "+v+"; probe="+p.slice(0,1400));
  }
  const img=path.join(out,label+".png");
- run([win,"--screenshot="+img,url.href],label+" screenshot");
+ run([win,...modeFlags,"--screenshot="+img,url.href],label+" screenshot");
  const size=(await stat(img)).size;assert(size>30000,label+" blank image "+size);
  records.push({...s,bytes:size,filename:label+".png",heroTop:Number(p.match(/data-hero-top="(-?\d+)"/)?.[1])});
 }
