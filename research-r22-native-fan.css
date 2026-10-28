@@ -186,3 +186,67 @@ html[data-research-r22="true"] #research-discrete #r22-playback-cue{
  min-width:0;max-width:100%;width:auto;
  overflow-wrap:anywhere;white-space:normal;
 }
+
+
+/* R22 P4 — reframing the SAME original annular sectors, not redrawing geometry.
+   Zoom into the used semicircle rather than cropping its left/right ends.
+   The signed shortest-phase gauge does not acquire additional rotations. */
+html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+ height:clamp(335px,31vw,440px);
+}
+html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+ width:100%;left:0;top:-12px;height:calc(100% + 12px);
+}
+html[data-research-r22="true"] .research-fan-graphic .phase-label{
+ font-size:15px;font-weight:650;fill:rgba(222,234,239,.82);
+}
+html[data-research-r22="true"] .research-fan-graphic .phase-ring-name{
+ font-size:17px;stroke-width:3.6px;
+}
+html[data-research-r22="true"] .research-fan-graphic .return-marker-label{
+ font-size:17px;stroke-width:3.4px;
+}
+html[data-research-r22="true"] .research-fan-graphic .cursor-label{
+ font-size:14px;letter-spacing:.06em;
+}
+html[data-research-r22="true"] .research-fan-graphic .return-marker{
+ stroke-width:7;filter:drop-shadow(0 0 5px rgba(235,241,238,.22));
+}
+html[data-research-r22="true"] .r22-model-caveat{
+ max-width:48ch;line-height:1.7;
+}
+@media (min-width:481px) and (max-width:900px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(285px,44vw,355px);
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  width:100%;left:0;top:0;height:100%;
+ }
+}
+@media (max-width:480px){
+ html[data-research-r22="true"] #research-discrete .r22-hero-preface p{
+  max-width:37ch;line-height:1.55;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(215px,58vw,254px);
+  overflow:hidden;
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  width:100%;left:0;top:-6px;height:calc(100% + 6px);
+ }
+ html[data-research-r22="true"] .research-fan-graphic .phase-label{
+  font-size:21px;
+ }
+ html[data-research-r22="true"] .research-fan-graphic .phase-ring-name{
+  font-size:21px;stroke-width:4px;
+ }
+ html[data-research-r22="true"] .research-fan-graphic .return-marker-label{
+  font-size:22px;
+ }
+ html[data-research-r22="true"] .research-fan-graphic .cursor-label{
+  font-size:18px;
+ }
+ html[data-research-r22="true"] .r22-reading-layers{
+  margin-bottom:12px;
+ }
+}
