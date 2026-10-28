@@ -12,6 +12,8 @@ const width=Number(p.get("width"))||390;
 const height=Number(p.get("height"))||1350;
 const delta=Number(p.get("delta")??"1200");
 const date=p.get("date")||"2026-09-13";
+const autoPlay=p.get("autoPlay")==="first";
+let playStarted=false,playObserved=false;
 const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
 frame.style.width=width+"px";frame.style.height=height+"px";
 frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta,location.href).href;
@@ -24,9 +26,23 @@ function inspect(){
  const readout=doc?.querySelector(".discrete-derivation");
  const thesis=doc?.querySelector("#research-discrete-thesis");
  const strip=doc?.querySelector("#research-year-strip");
- if(root?.dataset.r22Ready!=="true"||instrument?.dataset.deltaYears!==String(delta)||!wheel||!story){
+ if(root?.dataset.r22Ready!=="true"||!wheel||!story||(!autoPlay&&instrument?.dataset.deltaYears!==String(delta))){
   if(++attempts<250){setTimeout(inspect,50);return;}
   probe.dataset.ready="error";probe.dataset.error="opt-in R22 did not render; delta "+instrument?.dataset.deltaYears;return;
+ }
+ if(autoPlay&&!playStarted){
+  playStarted=true;
+  doc.querySelector("#research-delta-play")?.click();
+  setTimeout(inspect,55);return;
+ }
+ if(autoPlay&&!playObserved){
+  if(instrument?.dataset.r22PlaybackStage!=="hold"||instrument?.dataset.r22PlaybackTarget!=="400"){
+   if(++attempts<250){setTimeout(inspect,55);return;}
+   probe.dataset.ready="error";probe.dataset.error="guided playback missed first exact +400 hold";return;
+  }
+  playObserved=true;
+  // Freeze the genuine playback's current canonical Δ for a stable screenshot.
+  doc.querySelector("#research-delta-play")?.click();
  }
  const markers=["gregorian","year","day"].map(k=>wheel.querySelector('[data-return-marker="'+k+'"]'));
  const signed=markers.map(m=>m?.dataset.phaseSigned??"missing").join(",");
@@ -38,7 +54,9 @@ function inspect(){
  const instrumentBox=instrument.getBoundingClientRect();
  const viewHeight=frame.contentWindow.innerHeight;
  probe.dataset.ready="true";
- probe.dataset.delta=String(delta);
+ probe.dataset.delta=String(autoPlay?400:delta);
+ probe.dataset.autoPlayCaptured=String(!autoPlay||playObserved);
+ probe.dataset.playbackPaused=String(!autoPlay||instrument?.dataset.deltaPlayback==="stopped");
  probe.dataset.date=date;
  probe.dataset.width=String(width);
  probe.dataset.signed=signed;
