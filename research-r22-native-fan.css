@@ -161,3 +161,18 @@ html[data-research-r22="true"] #recurrence-instrument .research-current-state-he
 html[data-research-r22="true"] #recurrence-instrument .research-current-state-head::before{
  content:"比較日期";font-size:11px;color:#8b9ea7;
 }
+
+/* The original Play/Δ row gets one quiet, truthful stage caption. */
+html[data-research-r22="true"] #r22-playback-cue{
+ margin:8px 0 0;padding:0 0 0 1px;
+ color:#91a6b0;font-size:11px;line-height:1.55;
+ flex-basis:100%;grid-column:1/-1;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-playback-stage="hold"] .r22-phase-reading{
+ border-left-color:rgba(241,231,201,.58);
+}
+@media(max-width:900px){
+ html[data-research-r22="true"] #recurrence-instrument[data-r22-playback-stage="hold"] .r22-phase-reading{
+  border-left:0;border-top-color:rgba(241,231,201,.58);
+ }
+}
