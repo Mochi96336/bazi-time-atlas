@@ -95,6 +95,18 @@ function inspect(){
    right:Math.round(el.getBoundingClientRect().right)}))
   .sort((a,b)=>b.right-a.right).slice(0,10);
  probe.dataset.overflowElements=JSON.stringify(offenders);
+ const yearEnd=doc.querySelector("#research-year-strip .research-year-end > strong");
+ if(yearEnd){
+  const computed=doc.defaultView.getComputedStyle(yearEnd);
+  const parentRect=yearEnd.parentElement.getBoundingClientRect();
+  probe.dataset.yearEndStyle=JSON.stringify({
+   viewport:doc.documentElement.clientWidth,
+   matched:yearEnd.matches('html[data-research-r22="true"] #research-year-strip .research-year-end > strong'),
+   position:computed.position,left:computed.left,right:computed.right,
+   transform:computed.transform,
+   parentLeft:Math.round(parentRect.left),parentRight:Math.round(parentRect.right)
+  });
+ }
  const outerRing=doc.querySelector("#gregorian-ring");
  const outerBounds=outerRing?.getBoundingClientRect();
  const graphic=doc.querySelector(".research-fan-graphic");
