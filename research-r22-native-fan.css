@@ -176,3 +176,13 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-playback-stage="h
   border-left:0;border-top-color:rgba(241,231,201,.58);
  }
 }
+
+/* The third grid row is a *caption*, not another min-content column.
+   Constrain it explicitly: long stage narration must wrap at 320/390px. */
+html[data-research-r22="true"] #research-discrete > .discrete-derivation > header{
+ min-width:0;max-width:100%;
+}
+html[data-research-r22="true"] #research-discrete #r22-playback-cue{
+ min-width:0;max-width:100%;width:auto;
+ overflow-wrap:anywhere;white-space:normal;
+}
