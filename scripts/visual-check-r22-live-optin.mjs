@@ -20,6 +20,7 @@ const scenes=[
  {w:390,h:1350,date:"2026-09-13",d:0,autoPlay:true,expectedDelta:400,signed:"0,-20,-3",status:"one"},
  {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one"},
  {w:390,h:1350,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two"},
+ {w:390,h:844,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",firstFold:true},
  {w:390,h:1350,date:"2026-09-13",d:1980,signed:"-20,0,0",status:"two"},
  {w:390,h:1350,date:"2026-09-13",d:8000,signed:"0,20,0",status:"two"},
  {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all"},
@@ -41,9 +42,27 @@ for(const s of scenes){
  for(const [k,v] of Object.entries({ready:"true",delta:s.expectedDelta??s.d,date:s.date,width:s.w,
    signed:s.signed,status:s.status,order:"true",fanCount:3,
    heroAboveFirstViewport:"true",sourceWheel:"true",singleDelta:"true",fourPillars:"true",
-   pageOverflow:"false",autoPlayCaptured:"true",playbackPaused:"true"})){
+   pageOverflow:"false",autoPlayCaptured:"true",playbackPaused:"true",
+   outerWithinGraphic:"true",outerVisibleAboveFold:"true",
+   fanViewBox:s.w<=480?"35 205 1130 560":"0 170 1200 580"})){
   assert(p.includes('data-'+k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())+'="'+v+'"'),
    label+" "+k+" expected "+v+"; probe="+p.slice(0,1400));
+ }
+ // P4: the original 3 real velocities cannot be inferred from the folded
+ // semicircle; verify exposed Gregorian ordinal counts and the reading sentence.
+ if(s.d===400||s.autoPlay){
+  assert(p.includes('data-day-completed-turns="2434"'),label+" actual 60-day rotations missing");
+  assert(p.includes('data-year-completed-turns="6"'),label+" true nominal-year rotations missing");
+  assert(p.includes('data-gregorian-completed-turns="1"'),label+" Gregorian rotations missing");
+ }
+ if(s.d===24000){
+  assert(p.includes('data-day-completed-turns="146097"'),label+" true 24k day turn count missing");
+  assert(p.includes('data-year-completed-turns="400"'),label+" true 24k year turn count missing");
+  assert(p.includes('data-gregorian-completed-turns="60"'),label+" true 24k outer turn count missing");
+ }
+ if(s.firstFold){
+  const arcTop=Number(p.match(/data-outer-arc-top="(-?\d+)"/)?.[1]);
+  assert(Number.isFinite(arcTop)&&arcTop<844,label+" arc never enters initial 390×844 viewport: "+arcTop);
  }
  const img=path.join(out,label+".png");
  run([win,...modeFlags,"--screenshot="+img,url.href],label+" screenshot");
