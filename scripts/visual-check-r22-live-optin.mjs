@@ -47,9 +47,12 @@ for(const s of scenes){
    heroAboveFirstViewport:"true",sourceWheel:"true",singleDelta:"true",fourPillars:"true",
    pageOverflow:"false",autoPlayCaptured:"true",playbackPaused:"true",
    outerWithinGraphic:"true",outerVisibleAboveFold:"true",
-   sectorLabelHidden:String(s.w<=360),ringLabelHidden:String(s.w<=360),
+   sectorLabelHidden:"true",ringLabelHidden:"true",
    sectorRetained:"true",markerRetained:"true",
-   fanViewBox:s.w<=480?"35 205 1130 560":"0 170 1200 580"})){
+   fanDegreeSpan:"180",fanVerticalScale:"0.66",
+   phaseShape:"signed-shortest-180-semiellipse",
+   ellipticalRail:"true",railNarrow:"true",gregorianRingLabelExists:"true",
+   fanViewBox:"0 404 1200 446"})){
   assert(p.includes('data-'+k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())+'="'+v+'"'),
    label+" "+k+" expected "+v+"; probe="+p.slice(0,1400));
  }
