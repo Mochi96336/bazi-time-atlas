@@ -47,9 +47,16 @@ for(const s of scenes){
    heroAboveFirstViewport:"true",sourceWheel:"true",singleDelta:"true",fourPillars:"true",
    pageOverflow:"false",autoPlayCaptured:"true",playbackPaused:"true",
    outerWithinGraphic:"true",outerVisibleAboveFold:"true",
+   sectorLabelHidden:String(s.w<=360),ringLabelHidden:String(s.w<=360),
+   sectorRetained:"true",markerRetained:"true",
    fanViewBox:s.w<=480?"35 205 1130 560":"0 170 1200 580"})){
   assert(p.includes('data-'+k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())+'="'+v+'"'),
    label+" "+k+" expected "+v+"; probe="+p.slice(0,1400));
+ }
+ // P5: real Play button updates diagram-adjacent narrative in reduced-motion mode.
+ if(s.autoPlay){
+  assert(p.includes('data-sampling-mode="step"'),label+" sampling stage not reflected in real original fan");
+  assert(p.includes("單步抵達 +400 年"),label+" top-of-diagram caption did not describe actual step");
  }
  // P4: the original 3 real velocities cannot be inferred from the folded
  // semicircle; verify exposed Gregorian ordinal counts and the reading sentence.
