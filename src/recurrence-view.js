@@ -11,6 +11,7 @@ import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-
 import { createDeltaPlaybackController } from "./recurrence/delta-playback-controller.js";
 import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playback-controller.js";
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
+import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -34,8 +35,10 @@ const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 // R22 preserves every original sector and reference angle; only the camera crops
 // unused space above the arcs. R16/default viewBoxes remain untouched.
-const R22_DESKTOP_FAN_VIEWBOX = "0 170 1200 580";
-const R22_MOBILE_FAN_VIEWBOX = "35 205 1130 560";
+const R22_DESKTOP_FAN_VIEWBOX = R22_SEMICIRCLE.viewBox;
+const R22_MOBILE_FAN_VIEWBOX = R22_SEMICIRCLE.viewBox;
+const VIEW_FAN_START = r22GuideOptIn ? R22_SEMICIRCLE.fanStart : FAN_START;
+const VIEW_FAN_END = r22GuideOptIn ? R22_SEMICIRCLE.fanEnd : FAN_END;
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -81,7 +84,9 @@ let deltaPlaybackController = null;
 
 function polar(radius, angleDegrees) {
   const angle = angleDegrees * Math.PI / 180;
-  return { x:CX + Math.cos(angle) * radius, y:CY + Math.sin(angle) * radius };
+  return r22GuideOptIn
+    ? r22EllipsePoint(radius,angleDegrees,CX,CY)
+    : { x:CX + Math.cos(angle) * radius, y:CY + Math.sin(angle) * radius };
 }
 
 function annularSectorPath(inner, outer, startDegrees, endDegrees) {
@@ -92,13 +97,15 @@ function annularSectorPath(inner, outer, startDegrees, endDegrees) {
   const p2 = polar(outer, end);
   const p3 = polar(inner, end);
   const p4 = polar(inner, startDegrees);
-  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${outer} ${outer} 0 ${span > 180 ? 1 : 0} 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)} L ${p3.x.toFixed(3)} ${p3.y.toFixed(3)} A ${inner} ${inner} 0 ${span > 180 ? 1 : 0} 0 ${p4.x.toFixed(3)} ${p4.y.toFixed(3)} Z`;
+  const ry = r => Number((r * (r22GuideOptIn ? R22_SEMICIRCLE.verticalScale : 1)).toFixed(3));
+  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${outer} ${ry(outer)} 0 ${span > 180 ? 1 : 0} 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)} L ${p3.x.toFixed(3)} ${p3.y.toFixed(3)} A ${inner} ${ry(inner)} 0 ${span > 180 ? 1 : 0} 0 ${p4.x.toFixed(3)} ${p4.y.toFixed(3)} Z`;
 }
 
 function arcPath(radius, startDegrees, endDegrees) {
   const p1 = polar(radius, startDegrees);
   const p2 = polar(radius, endDegrees);
-  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${radius} ${radius} 0 0 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`;
+  const ry = r22GuideOptIn ? Number((radius * R22_SEMICIRCLE.verticalScale).toFixed(3)) : radius;
+  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${radius} ${ry} 0 0 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`;
 }
 
 function svgEl(tag, attrs = {}, parent = svg) {
@@ -121,27 +128,34 @@ function formatSigned(value) {
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
   for (const [key, spec] of Object.entries(ringSpecs)) {
+    const radius=(spec.inner+spec.outer)/2;
     svgEl("path", {
-      d:annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
+      d:r22GuideOptIn
+        ? arcPath(radius, VIEW_FAN_START, VIEW_FAN_END)
+        : annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
       class:`phase-band phase-band-${key}`
     }, group);
   }
-  [270, 360, 450, 560].forEach(radius => {
+  if (!r22GuideOptIn) [270, 360, 450, 560].forEach(radius => {
     svgEl("path", { d:arcPath(radius, FAN_START, FAN_END), class:"recurrence-guide" }, group);
   });
 }
 
 function renderRing(key) {
   const spec = ringSpecs[key];
-  const cells = phaseFanCells({ modulus:spec.modulus, sectors:spec.sectors, fanStart:FAN_START, fanEnd:FAN_END });
+  const cells = phaseFanCells({ modulus:spec.modulus, sectors:spec.sectors, fanStart:VIEW_FAN_START, fanEnd:VIEW_FAN_END });
   spec.group.classList.add("recurrence-track", "phase-gauge-track");
-  spec.group.dataset.phaseGeometry = "signed-shortest-fan";
+  spec.group.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
   spec.group.dataset.phaseModulus = String(spec.modulus);
   spec.group.dataset.radialScale = key;
 
   for (const cell of cells) {
     svgEl("path", {
-      d:annularSectorPath(spec.inner, spec.outer, cell.startAngle + .06, cell.endAngle - .06),
+      d:r22GuideOptIn
+        ? annularSectorPath((spec.inner+spec.outer)/2-R22_SEMICIRCLE.railHalfWidth,
+          (spec.inner+spec.outer)/2+R22_SEMICIRCLE.railHalfWidth,
+          cell.startAngle + .08, cell.endAngle - .08)
+        : annularSectorPath(spec.inner, spec.outer, cell.startAngle + .06, cell.endAngle - .06),
       class:`phase-sector ${spec.className}`,
       "data-phase-cell":cell.index,
       "data-signed-start":cell.signedStart
@@ -149,8 +163,9 @@ function renderRing(key) {
 
     const tickAngle = cell.startAngle;
     const major = cell.index % 10 === 0 || cell.index === spec.sectors / 2;
-    const p1 = polar(spec.outer - (major ? 10 : 5), tickAngle);
-    const p2 = polar(spec.outer, tickAngle);
+    const centerRadius=(spec.inner+spec.outer)/2;
+    const p1 = polar(r22GuideOptIn ? centerRadius+(major ? 10 : 7) : spec.outer-(major ? 10 : 5), tickAngle);
+    const p2 = polar(r22GuideOptIn ? centerRadius+(major ? 22 : 14) : spec.outer, tickAngle);
     svgEl("line", {
       x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y,
       class:`phase-tick${major ? " major" : ""}`
@@ -205,12 +220,13 @@ function renderReturnMarkers(state) {
     const angle = phaseAngleOnFan({
       phase,
       modulus:spec.modulus,
-      fanStart:FAN_START,
-      fanEnd:FAN_END,
+      fanStart:VIEW_FAN_START,
+      fanEnd:VIEW_FAN_END,
       referenceAngle:CURSOR_ANGLE
     });
-    const p1 = polar(spec.inner + 5, angle);
-    const p2 = polar(spec.outer - 5, angle);
+    const centerRadius=(spec.inner+spec.outer)/2;
+    const p1 = polar(r22GuideOptIn ? centerRadius-R22_SEMICIRCLE.cursorHalfLength : spec.inner + 5, angle);
+    const p2 = polar(r22GuideOptIn ? centerRadius+R22_SEMICIRCLE.cursorHalfLength : spec.outer - 5, angle);
     svgEl("line", {
       x1:p1.x,
       y1:p1.y,
@@ -234,7 +250,7 @@ function renderReturnMarkers(state) {
         "data-phase-zero-owner":key
       }, cursorGroup);
     }
-    const labelPoint = polar(spec.outer + 9, angle);
+    const labelPoint = polar(r22GuideOptIn ? centerRadius+30 : spec.outer + 9, angle);
     const label = svgEl("text", {
       x:labelPoint.x,
       y:labelPoint.y,
@@ -882,7 +898,9 @@ function initialize() {
   renderRing("year");
   renderRing("gregorian");
   renderCursor();
-  instrument.dataset.phaseGeometry = "signed-shortest-fan";
+  instrument.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
+  instrument.dataset.fanDegreeSpan = r22GuideOptIn ? "180" : "160";
+  instrument.dataset.fanVerticalScale = r22GuideOptIn ? String(R22_SEMICIRCLE.verticalScale) : "1";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
   bindControls();
