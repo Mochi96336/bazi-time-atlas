@@ -112,7 +112,8 @@ test("R22 pausing a milestone hold cannot auto-restart after timer cancellation"
  const [,old]=r.engine.timers.entries().next().value;
  r.controller.toggle();
  assert.equal(r.controller.playing,false);
- assert.equal(r.controller.stage,"idle");
+ assert.equal(r.controller.stage,"paused");
+ assert.equal(r.stages.at(-1).reason,"paused");
  old.fn();
  assert.equal(r.controller.playing,false);
  assert.equal(r.delta,400);
@@ -149,6 +150,20 @@ test("R22 reduced-motion mode steps to one exact milestone per click; no animati
  r.controller.toggle();
  assert.equal(r.delta,400,"restart from first milestone after resetting at +24000");
  assert.ok(r.records.some(x=>x.v===0&&x.opt.source==="playback-reset"));
+});
+
+test("R22 explicitly announces user pause while visibility/manual takeover return to idle",()=>{
+ const r=make();r.controller.start();
+ assert.equal(r.controller.stage,"skip");
+ r.controller.toggle();
+ assert.equal(r.controller.stage,"paused");
+ assert.deepEqual(r.stops.at(-1),{commit:true,reason:"paused"});
+ assert.equal(r.engine.timers.size,0);
+ r.controller.start();
+ r.controller.stop({commit:false,reason:"visibility"});
+ assert.equal(r.controller.stage,"idle");
+ assert.equal(r.engine.frames.size,0);
+ assert.equal(r.engine.timers.size,0);
 });
 
 test("R22 APIs reject impossible speeds, use the supplied original button, and stop idempotently",()=>{
