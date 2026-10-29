@@ -123,6 +123,17 @@ function inspect(){
  probe.dataset.gregorianCompletedTurns=instrument?.dataset.r22GregorianCompletedTurns??"missing";
  probe.dataset.yearCompletedTurns=instrument?.dataset.r22YearCompletedTurns??"missing";
  probe.dataset.speedNarrative=doc.querySelector("#r22-completed-turns")?.textContent??"";
+ const sectorLabel=doc.querySelector("#day-ring .phase-label");
+ const ringLabel=doc.querySelector("#day-ring .phase-ring-name");
+ const sector=doc.querySelector("#day-ring .phase-sector");
+ const markerLabel=doc.querySelector('[data-return-marker="day-label"]');
+ const styleOf=el=>el?doc.defaultView.getComputedStyle(el).display:"missing";
+ probe.dataset.sectorLabelHidden=String(styleOf(sectorLabel)==="none");
+ probe.dataset.ringLabelHidden=String(styleOf(ringLabel)==="none");
+ probe.dataset.sectorRetained=String(Boolean(sector&&styleOf(sector)!=="none"));
+ probe.dataset.markerRetained=String(Boolean(markerLabel&&styleOf(markerLabel)!=="none"));
+ probe.dataset.samplingMode=instrument?.dataset.r22SamplingMode??"none";
+ probe.dataset.samplingCaption=doc.querySelector(".r22-reading-index")?.textContent??"";
  probe.dataset.fanHeight=String(Math.round(fanBox.height));
 }
 frame.addEventListener("load",inspect,{once:true});
