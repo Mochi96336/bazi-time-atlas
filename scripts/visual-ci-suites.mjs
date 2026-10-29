@@ -47,6 +47,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "visual-check.mjs",
     "visual-check-r22-native-fan-baseline.mjs",
     "visual-check-r22-live-optin.mjs",
+    "visual-check-r22-real-raf.mjs",
     "visual-check-research-01-diagram-lab.mjs",
     "visual-check-research-02-diagram-lab.mjs",
     "visual-check-research-02-production.mjs",
