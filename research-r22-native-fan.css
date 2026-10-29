@@ -294,3 +294,59 @@ html[data-research-r22="true"] .r22-model-caveat{
 html[data-research-r22="true"] .r22-reading-index{
  line-height:1.55;min-height:1.55em;overflow-wrap:anywhere;
 }
+
+
+/* P6: A genuine 180-degree low-wide semicircle composed of three NARROW
+   elliptical tracks. The old 90px-thick colored wedges belong only to R16.
+   No extra progress rings, event tracks or competing date controls. */
+html[data-research-r22="true"] #recurrence-instrument .phase-band{
+ fill:none;stroke:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-sector{
+ stroke:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .gregorian-sector{
+ fill:rgba(170,159,197,.68);
+}
+html[data-research-r22="true"] #recurrence-instrument .year-sector{
+ fill:rgba(196,173,117,.69);
+}
+html[data-research-r22="true"] #recurrence-instrument .day-sector{
+ fill:rgba(123,181,178,.73);
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-label,
+html[data-research-r22="true"] #recurrence-instrument .phase-ring-name{
+ display:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-tick{
+ stroke:rgba(217,231,235,.16);stroke-width:.95;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-tick.major{
+ stroke:rgba(227,238,233,.43);stroke-width:2;
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-line{
+ stroke-width:2.6;stroke:rgba(240,225,181,.87);
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-halo{
+ stroke-width:10;stroke:rgba(230,215,180,.095);
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker{
+ stroke-width:9;stroke-linecap:round;filter:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker.is-closed{
+ stroke-width:10;
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker-zero-node{
+ stroke-width:1.8;
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-label{
+ fill:rgba(244,233,201,.88);letter-spacing:.05em;
+}
+@media(max-width:480px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(170px,47vw,205px);
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  top:0;height:100%;left:0;width:100%;
+ }
+}
