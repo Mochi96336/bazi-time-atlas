@@ -262,3 +262,35 @@ html[data-research-r22="true"] .r22-model-caveat{
   position:absolute;left:auto;right:0;transform:none;
  }
 }
+
+
+/* R22 P5: at 320-360px the 9px-source sector numerals shrink below
+   meaningful reading size. The three original tracks/ticks/zero/return marks
+   remain intact; the nearby 3-row signed-gap text carries the full values.
+   At >=361px keep the more detailed original ring annotation. */
+@media (max-width:360px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .phase-label,
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .phase-ring-name{
+  display:none;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .phase-tick:not(.major){
+  opacity:.3;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .return-marker-label{
+  font-size:26px;stroke-width:4px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .cursor-label{
+  font-size:21px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .r22-reading-layer{
+  font-size:12px;gap:7px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .r22-reading-layer > strong{
+  font-size:16px;
+ }
+}
+/* Keep the active sampling semantics close to the main diagram, with no new
+   badges, ticker or second temporal control. */
+html[data-research-r22="true"] .r22-reading-index{
+ line-height:1.55;min-height:1.55em;overflow-wrap:anywhere;
+}
