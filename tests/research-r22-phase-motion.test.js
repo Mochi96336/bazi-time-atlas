@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {recurrenceState,gregorianOrdinal} from "../src/recurrence/gregorian-cycle.js";
 import {phaseAngleOnFan,signedShortestPhase} from "../src/recurrence/phase-fan-geometry.js";
+import {R22_SEMICIRCLE} from "../src/recurrence/r22-semicircle-geometry.js";
 import {R22_CYCLE_FACTS,r22PhaseSnapshot,r22PhaseTransition,r22TeachingStops} from "../src/recurrence/r22-phase-motion-model.js";
 
 const base={year:2026,month:9,day:13};
@@ -25,7 +26,8 @@ for(const [delta,g,y,d,common] of expected){
   for(const [key,layer] of Object.entries(snapshot.layers)){
    assert.equal(layer.residue,canonical.phases[key]);
    assert.equal(layer.closed,canonical.closed[key]);
-   assert.equal(layer.fanAngle,phaseAngleOnFan({phase:layer.residue,modulus:layer.period}));
+   assert.equal(layer.fanAngle,phaseAngleOnFan({phase:layer.residue,modulus:layer.period,
+    fanStart:R22_SEMICIRCLE.fanStart,fanEnd:R22_SEMICIRCLE.fanEnd}));
    assert.equal(layer.signed,signedShortestPhase(layer.residue,layer.period));
    assert.equal(layer.available,true);
   }
@@ -71,8 +73,8 @@ test("R22 explicitly detects the folded shortest-phase wrap instead of tweening 
  const after=r22PhaseSnapshot(base,31).layers.yearSequence;
  assert.equal(before.signed,30);
  assert.equal(after.signed,-29);
- assert.equal(before.fanAngle,-10);
- assert.ok(after.fanAngle < -160);
+ assert.equal(before.fanAngle,0);
+ assert.ok(after.fanAngle < -170);
  assert.equal(r22PhaseTransition(base,30,31).layers.yearSequence.motionInterpolationSafe,false);
 });
 
