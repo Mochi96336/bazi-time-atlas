@@ -19,7 +19,7 @@ test("parallel visual CI retains every existing screenshot command and determina
   assert.equal(new Set(screenshotChecks).size, screenshotChecks.length, "duplicate screenshot checks");
   assert.deepEqual(
     [...screenshotChecks].sort(),
-    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs", "visual-check-r22-native-fan-baseline.mjs", "visual-check-r22-live-optin.mjs"].sort(),
+    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs", "visual-check-r22-native-fan-baseline.mjs", "visual-check-r22-live-optin.mjs", "visual-check-r22-real-raf.mjs"].sort(),
     "parallel PNG CI must preserve the complete existing visual:check inventory"
   );
   assert.ok(VISUAL_CI_SUITES["capture-material"].indexOf("visual-check-material-prototype.mjs")
