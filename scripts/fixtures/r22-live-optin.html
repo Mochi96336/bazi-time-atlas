@@ -113,6 +113,14 @@ function inspect(){
  const graphicBounds=graphic?.getBoundingClientRect();
  const clipTolerance=4;
  probe.dataset.fanViewBox=wheel.getAttribute("viewBox");
+ probe.dataset.fanDegreeSpan=instrument?.dataset.fanDegreeSpan??"missing";
+ probe.dataset.fanVerticalScale=instrument?.dataset.fanVerticalScale??"missing";
+ probe.dataset.phaseShape=instrument?.dataset.phaseGeometry??"missing";
+ const railD=doc.querySelector("#gregorian-ring .phase-sector")?.getAttribute("d")??"";
+ probe.dataset.ellipticalRail=String(railD.includes("A 511.5 337.59 "));
+ probe.dataset.railNarrow=String(railD.startsWith("M ")&&railD.includes("A 498.5 329.01 "));
+ const outerCenter=doc.querySelector('[data-phase-ring-label="gregorian"]')?.getAttribute("x")??"";
+ probe.dataset.gregorianRingLabelExists=String(Boolean(outerCenter));
  probe.dataset.outerArcTop=String(Math.round(outerBounds?.top??-1));
  probe.dataset.outerArcBottom=String(Math.round(outerBounds?.bottom??-1));
  probe.dataset.outerWithinGraphic=String(Boolean(outerBounds&&graphicBounds&&
