@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R22 opt-in original fan first-reading capture</title>
+<style>html,body{margin:0;background:#071019;overflow:hidden}#stage{display:block;border:0;background:#071019}#probe{display:none}</style>
+</head>
+<body><iframe id="stage" title="Actual Research 01 R22 semicircle"></iframe>
+<output id="probe" data-ready="false"></output>
+<script>
+const p=new URLSearchParams(location.search);
+const width=Number(p.get("width"))||390;
+const height=Number(p.get("height"))||1350;
+const delta=Number(p.get("delta")??"1200");
+const date=p.get("date")||"2026-09-13";
+const autoPlay=p.get("autoPlay")==="first";
+let playStarted=false,playObserved=false;
+const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
+frame.style.width=width+"px";frame.style.height=height+"px";
+frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta,location.href).href;
+let attempts=0;
+function inspect(){
+ const doc=frame.contentDocument,root=doc?.documentElement;
+ const instrument=doc?.querySelector("#recurrence-instrument");
+ const wheel=doc?.querySelector("#recurrence-wheel");
+ const story=doc?.querySelector(".r22-phase-reading");
+ const readout=doc?.querySelector(".discrete-derivation");
+ const thesis=doc?.querySelector("#research-discrete-thesis");
+ const strip=doc?.querySelector("#research-year-strip");
+ if(root?.dataset.r22Ready!=="true"||!wheel||!story||(!autoPlay&&instrument?.dataset.deltaYears!==String(delta))){
+  if(++attempts<250){setTimeout(inspect,50);return;}
+  probe.dataset.ready="error";probe.dataset.error="opt-in R22 did not render; delta "+instrument?.dataset.deltaYears;return;
+ }
+ if(autoPlay&&!playStarted){
+  playStarted=true;
+  doc.querySelector("#research-delta-play")?.click();
+  setTimeout(inspect,55);return;
+ }
+ if(autoPlay&&!playObserved){
+  // CI's virtual-time screenshot engine does not guarantee nested iframe RAF
+  // progression. Verify the *real button and controller* in reduced-motion
+  // step mode; normal RAF and timer semantics have deterministic unit tests.
+  if(instrument?.dataset.r22PlaybackStage!=="step"||instrument?.dataset.deltaYears!=="400"){
+   if(++attempts<250){setTimeout(inspect,55);return;}
+   probe.dataset.ready="error";probe.dataset.error="reduced-motion real button failed to reach +400";return;
+  }
+  playObserved=true;
+ }
+ const markers=["gregorian","year","day"].map(k=>wheel.querySelector('[data-return-marker="'+k+'"]'));
+ const signed=markers.map(m=>m?.dataset.phaseSigned??"missing").join(",");
+ const status=root.dataset.r22Status??"";
+ const nodeOrder=Boolean(instrument.compareDocumentPosition(readout)&Node.DOCUMENT_POSITION_FOLLOWING)
+  &&Boolean(readout.compareDocumentPosition(thesis)&Node.DOCUMENT_POSITION_FOLLOWING)
+  &&Boolean(thesis.compareDocumentPosition(strip)&Node.DOCUMENT_POSITION_FOLLOWING);
+ const fanBox=wheel.getBoundingClientRect();
+ const instrumentBox=instrument.getBoundingClientRect();
+ const viewHeight=frame.contentWindow.innerHeight;
+ probe.dataset.ready="true";
+ probe.dataset.delta=String(autoPlay?400:delta);
+ probe.dataset.autoPlayCaptured=String(!autoPlay||playObserved);
+ probe.dataset.playbackPaused=String(!autoPlay||instrument?.dataset.deltaPlayback==="stopped");
+ probe.dataset.date=date;
+ probe.dataset.width=String(width);
+ probe.dataset.signed=signed;
+ probe.dataset.status=status;
+ probe.dataset.order=String(nodeOrder);
+ probe.dataset.fanCount=String(markers.filter(Boolean).length);
+ probe.dataset.heroTop=String(Math.round(instrumentBox.top));
+ probe.dataset.heroBottom=String(Math.round(instrumentBox.bottom));
+ probe.dataset.heroAboveFirstViewport=String(instrumentBox.top<viewHeight);
+ probe.dataset.heroBeforeThesis=String(nodeOrder);
+ probe.dataset.sourceWheel=String(wheel.id==="recurrence-wheel"&&wheel.querySelectorAll(".phase-sector").length>0);
+ probe.dataset.singleDelta=String(doc.querySelectorAll("#delta-slider").length===1);
+ probe.dataset.fourPillars=String(doc.querySelectorAll("#research-time-state .research-time-pillar").length===8);
+ probe.dataset.pageOverflow=String(doc.documentElement.scrollWidth>doc.documentElement.clientWidth+4);
+ const client=doc.documentElement.clientWidth;
+ const scroll=doc.documentElement.scrollWidth;
+ probe.dataset.pageOverflowPx=String(scroll-client);
+ const unclipped=el=>{
+  let ancestor=el.parentElement;
+  while(ancestor&&ancestor!==doc.documentElement){
+   const overflow=doc.defaultView.getComputedStyle(ancestor).overflowX;
+   if(["hidden","clip","auto","scroll"].includes(overflow))return false;
+   ancestor=ancestor.parentElement;
+  }
+  return true;
+ };
+ const offenders=[...doc.querySelectorAll("body *")]
+  .filter(el=>el.getBoundingClientRect().right>client+4&&unclipped(el))
+  .map(el=>({tag:el.tagName,id:el.id||"",className:String(el.className?.baseVal??el.className??"").slice(0,55),
+   parentId:el.parentElement?.id||"",parentClass:String(el.parentElement?.className?.baseVal??el.parentElement?.className??"").slice(0,55),
+   text:(el.textContent||"").trim().slice(0,60),
+   top:Math.round(el.getBoundingClientRect().top),
+   left:Math.round(el.getBoundingClientRect().left),
+   width:Math.round(el.getBoundingClientRect().width),
+   right:Math.round(el.getBoundingClientRect().right)}))
+  .sort((a,b)=>b.right-a.right).slice(0,10);
+ probe.dataset.overflowElements=JSON.stringify(offenders);
+ const yearEnd=doc.querySelector("#research-year-strip .research-year-end > strong");
+ if(yearEnd){
+  const computed=doc.defaultView.getComputedStyle(yearEnd);
+  const parentRect=yearEnd.parentElement.getBoundingClientRect();
+  probe.dataset.yearEndStyle=JSON.stringify({
+   viewport:doc.documentElement.clientWidth,
+   matched:yearEnd.matches('html[data-research-r22="true"] #research-year-strip .research-year-end > strong'),
+   position:computed.position,left:computed.left,right:computed.right,
+   transform:computed.transform,
+   parentLeft:Math.round(parentRect.left),parentRight:Math.round(parentRect.right)
+  });
+ }
+ const outerRing=doc.querySelector("#gregorian-ring");
+ const outerBounds=outerRing?.getBoundingClientRect();
+ const graphic=doc.querySelector(".research-fan-graphic");
+ const graphicBounds=graphic?.getBoundingClientRect();
+ const clipTolerance=4;
+ probe.dataset.fanViewBox=wheel.getAttribute("viewBox");
+ probe.dataset.fanDegreeSpan=instrument?.dataset.fanDegreeSpan??"missing";
+ probe.dataset.fanVerticalScale=instrument?.dataset.fanVerticalScale??"missing";
+ probe.dataset.phaseShape=instrument?.dataset.phaseGeometry??"missing";
+ const railD=doc.querySelector("#gregorian-ring .phase-sector")?.getAttribute("d")??"";
+ probe.dataset.ellipticalRail=String(railD.includes("A 511.5 337.59 "));
+ probe.dataset.railNarrow=String(railD.startsWith("M ")&&railD.includes("A 498.5 329.01 "));
+ const outerCenter=doc.querySelector('[data-phase-ring-label="gregorian"]')?.getAttribute("x")??"";
+ probe.dataset.gregorianRingLabelExists=String(Boolean(outerCenter));
+ probe.dataset.outerArcTop=String(Math.round(outerBounds?.top??-1));
+ probe.dataset.outerArcBottom=String(Math.round(outerBounds?.bottom??-1));
+ probe.dataset.outerWithinGraphic=String(Boolean(outerBounds&&graphicBounds&&
+  outerBounds.left>=graphicBounds.left-clipTolerance&&
+  outerBounds.right<=graphicBounds.right+clipTolerance));
+ probe.dataset.outerVisibleAboveFold=String(Boolean(outerBounds&&outerBounds.top<viewHeight));
+ probe.dataset.dayCompletedTurns=instrument?.dataset.r22DayCompletedTurns??"missing";
+ probe.dataset.gregorianCompletedTurns=instrument?.dataset.r22GregorianCompletedTurns??"missing";
+ probe.dataset.yearCompletedTurns=instrument?.dataset.r22YearCompletedTurns??"missing";
+ probe.dataset.speedNarrative=doc.querySelector("#r22-completed-turns")?.textContent??"";
+ const sectorLabel=doc.querySelector("#day-ring .phase-label");
+ const ringLabel=doc.querySelector("#day-ring .phase-ring-name");
+ const sector=doc.querySelector("#day-ring .phase-sector");
+ const markerLabel=doc.querySelector('[data-return-marker="day-label"]');
+ const styleOf=el=>el?doc.defaultView.getComputedStyle(el).display:"missing";
+ probe.dataset.sectorLabelHidden=String(styleOf(sectorLabel)==="none");
+ probe.dataset.ringLabelHidden=String(styleOf(ringLabel)==="none");
+ probe.dataset.sectorRetained=String(Boolean(sector&&styleOf(sector)!=="none"));
+ probe.dataset.markerRetained=String(Boolean(markerLabel&&styleOf(markerLabel)!=="none"));
+ probe.dataset.samplingMode=instrument?.dataset.r22SamplingMode??"none";
+ probe.dataset.samplingCaption=doc.querySelector(".r22-reading-index")?.textContent??"";
+ probe.dataset.fanHeight=String(Math.round(fanBox.height));
+}
+frame.addEventListener("load",inspect,{once:true});
+</script></body></html>

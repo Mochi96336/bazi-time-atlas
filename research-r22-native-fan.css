@@ -1,0 +1,352 @@
+/* R22 opt-in only. Preserve the ORIGINAL R16 semicircle and its 3 genuine SVG tracks. */
+/* DOM has already been reordered by r22-native-fan-view.js, including tab/read order. */
+html[data-research-r22="true"] #research-discrete .r22-hero-preface{
+ margin:20px 0 4px; padding:17px 0 0;border-top:1px solid rgba(169,191,206,.22);
+}
+html[data-research-r22="true"] .r22-chapter-number,
+html[data-research-r22="true"] .r22-reading-index{
+ display:block;letter-spacing:.09em;font-size:11px;color:#83a6b9;
+}
+html[data-research-r22="true"] .r22-hero-preface h3{
+ margin:7px 0 8px;font-size:clamp(23px,2.8vw,36px);
+ font-weight:560;letter-spacing:-.035em;line-height:1.2;color:#e7eeef;
+}
+html[data-research-r22="true"] .r22-hero-preface p{
+ font-size:13px;line-height:1.7;color:#9aaeb8;margin:0;max-width:64ch;
+}
+html[data-research-r22="true"] #recurrence-instrument{
+ display:grid;grid-template-columns:minmax(0,1.55fr) minmax(275px,.75fr);
+ align-items:center;column-gap:clamp(22px,4vw,66px);
+ margin:8px 0 0;min-height:0;width:100%;position:relative;overflow:visible;
+ border:0;border-radius:0;background:transparent;box-shadow:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+ grid-column:1;grid-row:1;
+ width:100%;height:clamp(350px,34vw,485px);overflow:hidden;
+ position:relative;
+}
+html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+ top:-54px;left:0;width:100%;height:calc(100% + 54px);display:block;
+}
+html[data-research-r22="true"] #recurrence-instrument .recurrence-legend,
+html[data-research-r22="true"] #recurrence-instrument .phase-gauge-caption{
+ display:none;
+}
+html[data-research-r22="true"] .r22-phase-reading{
+ grid-column:2;grid-row:1;align-self:center;min-width:0;max-width:415px;
+ padding:16px 0 15px 22px;border-left:1px solid rgba(145,176,194,.3);
+}
+html[data-research-r22="true"] .r22-reading-delta{
+ display:flex;align-items:baseline;gap:6px;margin:14px 0 8px;
+}
+html[data-research-r22="true"] .r22-reading-delta > span{color:#93a2a9;font-size:13px}
+html[data-research-r22="true"] .r22-reading-delta > strong{
+ color:#e5ecec;font-size:clamp(32px,3.5vw,54px);font-weight:520;
+ letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1.1;
+}
+html[data-research-r22="true"] #r22-verdict{
+ margin:14px 0 5px;font-size:clamp(20px,2vw,27px);
+ font-weight:570;letter-spacing:-.025em;line-height:1.35;color:#e1e9e9;
+}
+html[data-research-r22="true"] #r22-description{
+ color:#bac9cb;font-size:14px;line-height:1.55;margin:5px 0 19px;
+}
+html[data-research-r22="true"] .r22-reading-layers{display:grid;gap:0;margin:0 0 20px}
+html[data-research-r22="true"] .r22-reading-layer{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;
+ gap:12px;padding:9px 0;border-bottom:1px solid rgba(133,157,169,.16);
+ font-size:13px;color:#aabdc8;
+}
+html[data-research-r22="true"] .r22-reading-layer small{
+ font-size:11px;color:#7b919c;margin-left:3px;
+}
+html[data-research-r22="true"] .r22-reading-layer strong{
+ font-size:17px;font-weight:570;letter-spacing:-.015em;
+ font-variant-numeric:tabular-nums;color:#d5dee0;white-space:nowrap;
+}
+html[data-research-r22="true"] .r22-reading-layer[data-r22-closed="true"] strong{
+ color:#f1e7c9;
+}
+html[data-research-r22="true"] .r22-model-caveat{
+ margin:0;color:#879ca5;font-size:11.5px;line-height:1.65;
+}
+html[data-research-r22="true"] #recurrence-instrument .recurrence-readout.research-current-state{
+ grid-column:1/-1;grid-row:2;
+ position:relative;left:auto;bottom:auto;transform:none;width:100%;max-width:none;
+ margin:0;padding:12px 0;border-top:1px solid rgba(139,160,171,.18);text-align:left;
+}
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-phases,
+html[data-research-r22="true"] #recurrence-instrument #closure-summary{display:none}
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head{
+ display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;
+}
+html[data-research-r22="true"] #research-discrete > .discrete-derivation{
+ margin:0 0 38px;padding-bottom:22px;border-bottom:1px solid rgba(157,177,190,.22);
+}
+html[data-research-r22="true"] #research-discrete > #research-discrete-thesis{
+ margin-top:35px;
+}
+html[data-research-r22="true"] #research-discrete > #research-year-strip{
+ margin-top:27px;
+}
+html[data-research-r22="true"] .r22-phase-reading,
+html[data-research-r22="true"] .research-fan-graphic .return-marker,
+html[data-research-r22="true"] .research-fan-graphic .return-marker-zero-node{
+ transition:none;animation:none;
+}
+html[data-research-r22="true"][data-r22-status="all"] .r22-phase-reading{
+ border-left-color:rgba(241,231,201,.62);
+}
+html[data-research-r22="true"] #research-discrete .research-discrete-explorer-intro{
+ display:none;
+}
+@media(max-width:900px){
+ html[data-research-r22="true"] #recurrence-instrument{
+  grid-template-columns: minmax(0,1fr);column-gap:0;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  grid-column:1;grid-row:1;height:clamp(330px,53vw,435px);
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  top:-46px;height:calc(100% + 46px);left:-5%;width:110%;
+ }
+ html[data-research-r22="true"] .r22-phase-reading{
+  grid-column:1;grid-row:2;max-width:none;
+  border-left:0;border-top:1px solid rgba(139,165,180,.28);
+  padding:17px 0 12px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .recurrence-readout.research-current-state{
+  grid-row:3;
+ }
+}
+@media(max-width:480px){
+ html[data-research-r22="true"] #research-discrete .r22-hero-preface{
+  margin:12px 0 0;padding-top:10px;
+ }
+ html[data-research-r22="true"] .r22-hero-preface h3{font-size:22px;margin:6px 0}
+ html[data-research-r22="true"] .r22-hero-preface p{font-size:12px}
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(250px,83vw,320px);overflow:hidden;
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  top:-39px;height:calc(100% + 39px);left:-16%;width:132%;
+ }
+ html[data-research-r22="true"] .r22-phase-reading{padding:10px 0 8px}
+ html[data-research-r22="true"] .r22-reading-delta{margin:7px 0 3px}
+ html[data-research-r22="true"] .r22-reading-delta > strong{font-size:31px}
+ html[data-research-r22="true"] #r22-verdict{font-size:20px;margin:5px 0}
+ html[data-research-r22="true"] #r22-description{font-size:12px;margin-bottom:8px}
+ html[data-research-r22="true"] .r22-reading-layer{padding:5px 0;font-size:12px}
+ html[data-research-r22="true"] .r22-reading-layer strong{font-size:15px}
+ html[data-research-r22="true"] .r22-model-caveat{font-size:10px;margin-top:9px}
+ html[data-research-r22="true"] #research-discrete > .discrete-derivation{
+  margin-bottom:25px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-research-r22="true"] *,
+ html[data-research-r22="true"] *::before,
+ html[data-research-r22="true"] *::after{
+  scroll-behavior:auto!important;
+  animation-duration:.01ms!important;transition-duration:.01ms!important;
+ }
+}
+/* Keep the selected Δ only once in the P2 verdict. The original readout now
+   supplies the target date; its existing DOM/state IDs stay intact. */
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head > span:first-child,
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head > #delta-readout,
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head > i{
+ display:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .research-current-state-head::before{
+ content:"比較日期";font-size:11px;color:#8b9ea7;
+}
+
+/* The original Play/Δ row gets one quiet, truthful stage caption. */
+html[data-research-r22="true"] #r22-playback-cue{
+ margin:8px 0 0;padding:0 0 0 1px;
+ color:#91a6b0;font-size:11px;line-height:1.55;
+ flex-basis:100%;grid-column:1/-1;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-playback-stage="hold"] .r22-phase-reading{
+ border-left-color:rgba(241,231,201,.58);
+}
+@media(max-width:900px){
+ html[data-research-r22="true"] #recurrence-instrument[data-r22-playback-stage="hold"] .r22-phase-reading{
+  border-left:0;border-top-color:rgba(241,231,201,.58);
+ }
+}
+
+/* The third grid row is a *caption*, not another min-content column.
+   Constrain it explicitly: long stage narration must wrap at 320/390px. */
+html[data-research-r22="true"] #research-discrete > .discrete-derivation > header{
+ min-width:0;max-width:100%;
+}
+html[data-research-r22="true"] #research-discrete #r22-playback-cue{
+ min-width:0;max-width:100%;width:auto;
+ overflow-wrap:anywhere;white-space:normal;
+}
+
+
+/* R22 P4 — reframing the SAME original annular sectors, not redrawing geometry.
+   Zoom into the used semicircle rather than cropping its left/right ends.
+   The signed shortest-phase gauge does not acquire additional rotations. */
+html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+ height:clamp(335px,31vw,440px);
+}
+html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+ width:100%;left:0;top:-12px;height:calc(100% + 12px);
+}
+html[data-research-r22="true"] .research-fan-graphic .phase-label{
+ font-size:15px;font-weight:650;fill:rgba(222,234,239,.82);
+}
+html[data-research-r22="true"] .research-fan-graphic .phase-ring-name{
+ font-size:17px;stroke-width:3.6px;
+}
+html[data-research-r22="true"] .research-fan-graphic .return-marker-label{
+ font-size:17px;stroke-width:3.4px;
+}
+html[data-research-r22="true"] .research-fan-graphic .cursor-label{
+ font-size:14px;letter-spacing:.06em;
+}
+html[data-research-r22="true"] .research-fan-graphic .return-marker{
+ stroke-width:7;filter:drop-shadow(0 0 5px rgba(235,241,238,.22));
+}
+html[data-research-r22="true"] .r22-model-caveat{
+ max-width:48ch;line-height:1.7;
+}
+@media (min-width:481px) and (max-width:900px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(285px,44vw,355px);
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  width:100%;left:0;top:0;height:100%;
+ }
+}
+@media (max-width:480px){
+ html[data-research-r22="true"] #research-discrete .r22-hero-preface p{
+  max-width:37ch;line-height:1.55;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(215px,58vw,254px);
+  overflow:hidden;
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  width:100%;left:0;top:-6px;height:calc(100% + 6px);
+ }
+ html[data-research-r22="true"] .research-fan-graphic .phase-label{
+  font-size:21px;
+ }
+ html[data-research-r22="true"] .research-fan-graphic .phase-ring-name{
+  font-size:21px;stroke-width:4px;
+ }
+ html[data-research-r22="true"] .research-fan-graphic .return-marker-label{
+  font-size:22px;
+ }
+ html[data-research-r22="true"] .research-fan-graphic .cursor-label{
+  font-size:18px;
+ }
+ html[data-research-r22="true"] .r22-reading-layers{
+  margin-bottom:12px;
+ }
+}
+
+
+/* P4 browser audit: the ORIGINAL year strip's 12/31 label started at its
+   100% right-edge marker and extended +17px outside the 390px page.
+   Re-anchor just its text inward; the year boundary and hit targets remain. */
+@media (max-width:480px){
+ html[data-research-r22="true"] #research-year-strip .research-year-end > strong{
+  /* Position the box itself inside the 100% endpoint. A transform alone
+     cannot shrink the scroll overflow region of its original layout box. */
+  position:absolute;left:auto;right:0;transform:none;
+ }
+}
+
+
+/* R22 P5: at 320-360px the 9px-source sector numerals shrink below
+   meaningful reading size. The three original tracks/ticks/zero/return marks
+   remain intact; the nearby 3-row signed-gap text carries the full values.
+   At >=361px keep the more detailed original ring annotation. */
+@media (max-width:360px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .phase-label,
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .phase-ring-name{
+  display:none;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .phase-tick:not(.major){
+  opacity:.3;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .return-marker-label{
+  font-size:26px;stroke-width:4px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic .cursor-label{
+  font-size:21px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .r22-reading-layer{
+  font-size:12px;gap:7px;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .r22-reading-layer > strong{
+  font-size:16px;
+ }
+}
+/* Keep the active sampling semantics close to the main diagram, with no new
+   badges, ticker or second temporal control. */
+html[data-research-r22="true"] .r22-reading-index{
+ line-height:1.55;min-height:1.55em;overflow-wrap:anywhere;
+}
+
+
+/* P6: A genuine 180-degree low-wide semicircle composed of three NARROW
+   elliptical tracks. The old 90px-thick colored wedges belong only to R16.
+   No extra progress rings, event tracks or competing date controls. */
+html[data-research-r22="true"] #recurrence-instrument .phase-band{
+ fill:none;stroke:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-sector{
+ stroke:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .gregorian-sector{
+ fill:rgba(170,159,197,.68);
+}
+html[data-research-r22="true"] #recurrence-instrument .year-sector{
+ fill:rgba(196,173,117,.69);
+}
+html[data-research-r22="true"] #recurrence-instrument .day-sector{
+ fill:rgba(123,181,178,.73);
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-label,
+html[data-research-r22="true"] #recurrence-instrument .phase-ring-name{
+ display:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-tick{
+ stroke:rgba(217,231,235,.16);stroke-width:.95;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-tick.major{
+ stroke:rgba(227,238,233,.43);stroke-width:2;
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-line{
+ stroke-width:2.6;stroke:rgba(240,225,181,.87);
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-halo{
+ stroke-width:10;stroke:rgba(230,215,180,.095);
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker{
+ stroke-width:9;stroke-linecap:round;filter:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker.is-closed{
+ stroke-width:10;
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker-zero-node{
+ stroke-width:1.8;
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-label{
+ fill:rgba(244,233,201,.88);letter-spacing:.05em;
+}
+@media(max-width:480px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(170px,47vw,205px);
+ }
+ html[data-research-r22="true"] #recurrence-instrument #recurrence-wheel{
+  top:0;height:100%;left:0;width:100%;
+ }
+}

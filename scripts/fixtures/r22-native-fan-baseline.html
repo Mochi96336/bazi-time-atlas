@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R22 native fan P0 screenshot fixture</title>
+<style>
+html,body{margin:0;min-height:100%;background:#071019;overflow:hidden}
+#stage{display:block;border:0;background:#071019}
+#probe{display:none}
+</style>
+</head>
+<body>
+<iframe id="stage" title="Actual original Research 01 semicircle; no recreated diagram"></iframe>
+<output id="probe" data-ready="false"></output>
+<script>
+const params=new URLSearchParams(location.search);
+const width=Math.max(320,Math.min(1600,Number(params.get("width"))||390));
+const height=Math.max(720,Math.min(2200,Number(params.get("height"))||1100));
+const date=params.get("date")||"2026-09-13";
+const delta=Number(params.get("delta")||"1200");
+const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
+document.body.style.width=width+"px";
+frame.style.width=width+"px";
+frame.style.height=height+"px";
+frame.src=new URL("../../recurrence.html?date="+encodeURIComponent(date)+"&delta="+delta,location.href).href;
+let tries=0;
+function examine(){
+ const win=frame.contentWindow;
+ const doc=frame.contentDocument;
+ const instrument=doc?.querySelector("#recurrence-instrument");
+ const wheel=doc?.querySelector("#recurrence-wheel");
+ if(!wheel||instrument?.dataset.deltaYears!==String(delta)||wheel.querySelectorAll("[data-return-marker]").length<6){
+  if(++tries<300){setTimeout(examine,50);return;}
+  probe.dataset.ready="error";probe.dataset.error="R22 baseline source never initialized";return;
+ }
+ const names=["gregorian","year","day"];
+ const marker=names.map(name=>wheel.querySelector('[data-return-marker="'+name+'"]'));
+ if(marker.some(m=>!m)){probe.dataset.ready="error";probe.dataset.error="missing canonical R16 return marker";return;}
+ instrument.scrollIntoView({block:"start",behavior:"instant"});
+ win.scrollBy(0,-15);
+ const box=wheel.getBoundingClientRect();
+ const container=instrument.getBoundingClientRect();
+ const signed=marker.map(m=>m.dataset.phaseSigned).join(",");
+ const mods=marker.map(m=>m.dataset.phaseModulus).join(",");
+ probe.dataset.ready="true";
+ probe.dataset.date=date;
+ probe.dataset.delta=String(delta);
+ probe.dataset.width=String(width);
+ probe.dataset.signed=signed;
+ probe.dataset.moduli=mods;
+ probe.dataset.layers=String(marker.length);
+ probe.dataset.visualMode=instrument.dataset.phaseGeometry||"";
+ probe.dataset.wheelBox=[box.x,box.y,box.width,box.height].map(x=>Math.round(x)).join(",");
+ probe.dataset.containerBox=[container.x,container.y,container.width,container.height].map(x=>Math.round(x)).join(",");
+ probe.dataset.documentScroll=String(Math.round(win.scrollY));
+}
+frame.addEventListener("load",examine,{once:true});
+</script>
+</body></html>
