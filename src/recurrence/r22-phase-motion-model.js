@@ -1,8 +1,9 @@
 import {recurrenceState,findFirstLocalYearSequenceDayRecurrence,validateGregorianDate} from "./gregorian-cycle.js";
 import {phaseAngleOnFan,signedShortestPhase} from "./phase-fan-geometry.js";
+import {R22_SEMICIRCLE} from "./r22-semicircle-geometry.js";
 
 // Research 01 R22: read-only view model. It never owns or advances Δ.
-// The 160-degree fan displays shortest signed residue; unwrapped turns
+// The 180-degree semiellipse displays shortest signed residue; unwrapped turns
 // belong to the mathematical timeline, not the fan marker's animation.
 const SERIES=Object.freeze([
  Object.freeze({key:"gregorian",phaseKey:"gregorian",period:400,unit:"years"}),
@@ -22,7 +23,8 @@ function layer(spec,model){
  }
  const signed=signedShortestPhase(phase,spec.period);
  return Object.freeze({key:spec.key,period:spec.period,unit:spec.unit,available:true,
-  residue:phase,signed,fanAngle:phaseAngleOnFan({phase,modulus:spec.period}),
+  residue:phase,signed,fanAngle:phaseAngleOnFan({phase,modulus:spec.period,
+   fanStart:R22_SEMICIRCLE.fanStart,fanEnd:R22_SEMICIRCLE.fanEnd}),
   completedTurns:Math.floor(amount/spec.period),totalTurns:amount/spec.period,
   closed:model.closed[spec.phaseKey]});
 }
@@ -36,7 +38,7 @@ export function r22PhaseSnapshot(baseDate,deltaYears){
   deltaYears,elapsedDays:state.dayDelta,layers,
   closedKeys,closedCount:closedKeys.length,
   commonClosed:deltaYears>0&&closedKeys.length===3,
-  zeroDatumAngle:-90,fanStart:-170,fanEnd:-10,
+  zeroDatumAngle:-90,fanStart:R22_SEMICIRCLE.fanStart,fanEnd:R22_SEMICIRCLE.fanEnd,
   displaySemantics:"folded-shortest-signed-residue-not-rotation",
   samplingSemantics:"exact-integer-year-states-only"
  });
