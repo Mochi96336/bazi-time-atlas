@@ -53,7 +53,7 @@ export function createR22GuidedPlaybackController({
   const wasActive=active;
   active=false;epoch++;
   clearScheduled();target=null;
-  publish(reason==="complete"?"complete":"idle",{reason});
+  publish(reason==="complete"?"complete":reason==="paused"?"paused":"idle",{reason});
   updateButton();
   if(wasActive)onStop({commit,reason});
  }
