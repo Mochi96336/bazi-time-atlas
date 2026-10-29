@@ -842,6 +842,24 @@ function initialize() {
         onStageChange:({ stage,target,from,to }) => {
           instrument.dataset.r22PlaybackStage = stage;
           instrument.dataset.r22PlaybackTarget = target===null ? "" : String(target);
+          // The user watches the semicircle, not the controls below it. Mirror
+          // honest time-sampling semantics beside the actual SVG itself.
+          const inline=document.querySelector(".r22-reading-index");
+          const fmtYear=n=>Number(n).toLocaleString("en-US");
+          const inlineMessages={
+            idle:"相位對照 · 真實整數年取樣",
+            paused:"已暫停 · 檢查標記與共同零點",
+            skip:from===undefined||to===undefined?"教學跳年 · 非連續轉動":
+              `教學跳年 +${fmtYear(from)} → +${fmtYear(to)} · 非連續轉動`,
+            approach:"逐年取樣 · 日序每年經過六圈以上",
+            hold:target===null?"精確停靠 · 比較三層":"停靠 +"+fmtYear(target)+" 年 · 哪層仍未歸零？",
+            step:target===null?"逐站精確跳轉":"單步抵達 +"+fmtYear(target)+" 年",
+            complete:"三項共同歸零 · 離散候選"
+          };
+          instrument.dataset.r22SamplingMode=stage;
+          if(inline&&inline.textContent!==inlineMessages[stage]){
+            inline.textContent=inlineMessages[stage]??inlineMessages.idle;
+          }
           const cue=document.querySelector("#r22-playback-cue");
           if (!cue) return;
           const format=n=>Number(n).toLocaleString("en-US");
