@@ -11,6 +11,7 @@ import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-
 import { createDeltaPlaybackController } from "./recurrence/delta-playback-controller.js";
 import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playback-controller.js";
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
+import {r22StudyMode,r22StudyReading,r22StudyGapArc,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
 import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
 import {
   phaseAngleOnFan,
@@ -31,6 +32,8 @@ const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
+// Explicit experimental sketches only; default R22 P7 and R16 are untouched.
+const r22Study = r22GuideOptIn ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 // R22 preserves every original sector and reference angle; only the camera crops
@@ -242,6 +245,47 @@ function renderCursor() {
 
 function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
+  cursorGroup.querySelector("[data-r22-study-overlay]")?.remove();
+  if(r22Study){
+    const data=r22StudyReading(state);
+    const overlay=document.createElementNS(NS,"g");
+    overlay.setAttribute("data-r22-study-overlay",r22Study);
+    overlay.setAttribute("aria-hidden","true");
+    // Put the teaching overlay *under* the original current-phase markers.
+    cursorGroup.insertBefore(overlay,cursorGroup.firstChild);
+    if(r22Study==="gap"){
+      for(const key of R22_STUDY_KEYS){
+        const layer=data.layers[key],d=r22StudyGapArc(layer);
+        if(!d)continue; // The absent span means this layer is exactly at zero.
+        svgEl("path",{
+          d,class:"r22-study-distance r22-study-distance-"+key,
+          "data-r22-gap-rail":key,
+          "data-r22-gap-angle":Math.abs(layer.angle+90).toFixed(3)
+        },overlay);
+      }
+    }else{
+      // The second candidate is about co-closure, not how far the pointer
+      // travelled. Leave the three moving markers intact; draw fixed slots
+      // at the *shared* reference angle to make open conditions visible.
+      for(const key of R22_STUDY_KEYS){
+        const layer=data.layers[key];
+        const point=polar(layer.radius,CURSOR_ANGLE);
+        svgEl("circle",{
+          cx:point.x,cy:point.y,r:layer.closed?13:10,
+          class:"r22-study-slot "+(layer.closed?"is-closed":"is-open"),
+          "data-r22-closure-rail":key,
+          "data-r22-closure-state":layer.available?(layer.closed?"closed":"open"):"unavailable"
+        },overlay);
+      }
+      const at=polar(602,CURSOR_ANGLE);
+      const textNode=svgEl("text",{
+        x:at.x,y:at.y,
+        class:"r22-study-closure-score",
+        "data-r22-closure-count":data.closedCount
+      },overlay);
+      textNode.textContent=data.identity?"基準":data.closedCount+"/3 閉合";
+    }
+  }
   const phases = {
     day:state.phases.day,
     year:state.phases.yearSequence,
@@ -936,6 +980,7 @@ function initialize() {
   renderCursor();
   instrument.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
   instrument.dataset.fanDegreeSpan = r22GuideOptIn ? "180" : "160";
+  instrument.dataset.r22Study = r22Study || "baseline";
   instrument.dataset.fanVerticalScale = r22GuideOptIn ? String(R22_SEMICIRCLE.verticalScale) : "1";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
