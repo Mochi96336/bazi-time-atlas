@@ -117,8 +117,17 @@ function inspect(){
  probe.dataset.fanVerticalScale=instrument?.dataset.fanVerticalScale??"missing";
  probe.dataset.phaseShape=instrument?.dataset.phaseGeometry??"missing";
  const railD=doc.querySelector("#gregorian-ring .phase-sector")?.getAttribute("d")??"";
- probe.dataset.ellipticalRail=String(railD.includes("A 511.5 337.59 "));
- probe.dataset.railNarrow=String(railD.startsWith("M ")&&railD.includes("A 498.5 329.01 "));
+ probe.dataset.ellipticalRail=String(railD.includes("A 518 341.88 "));
+ probe.dataset.railNarrow=String(railD.startsWith("M ")&&railD.includes("A 492 324.72 "));
+ probe.dataset.railWidth="26";
+ probe.dataset.materialGradients=String(wheel.querySelectorAll('linearGradient[id^="r22-material-"]').length);
+ probe.dataset.materialUnits=String([...wheel.querySelectorAll('linearGradient[id^="r22-material-"]')].every(g=>g.getAttribute("gradientUnits")==="userSpaceOnUse"));
+ probe.dataset.zeroGuideCount=String(wheel.querySelectorAll("[data-r22-zero-rail]").length);
+ probe.dataset.hasLongZeroNeedle=String(Boolean(wheel.querySelector(".cursor-halo")||wheel.querySelector(".cursor-line:not(.r22-zero-guide)")));
+ probe.dataset.zeroGuideAligned=String([...wheel.querySelectorAll("[data-r22-zero-rail]")].every(el=>
+  el.getAttribute("x1")===el.getAttribute("x2")&&Number(el.getAttribute("x1"))===600));
+ const closedLabels=[...wheel.querySelectorAll('.return-marker-label[data-phase-closed="true"]')];
+ probe.dataset.closedLabelQuiet=String(closedLabels.every(el=>doc.defaultView.getComputedStyle(el).opacity==="0"));
  const outerCenter=doc.querySelector('[data-phase-ring-label="gregorian"]')?.getAttribute("x")??"";
  probe.dataset.gregorianRingLabelExists=String(Boolean(outerCenter));
  probe.dataset.outerArcTop=String(Math.round(outerBounds?.top??-1));
