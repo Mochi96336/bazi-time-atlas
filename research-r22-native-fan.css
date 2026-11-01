@@ -350,3 +350,62 @@ html[data-research-r22="true"] #recurrence-instrument .cursor-label{
   top:0;height:100%;left:0;width:100%;
  }
 }
+
+
+/* P7 after actual P5/P6 comparisons: reduce clutter, NOT visual mass.
+   Recessed underlay and one coordinate-stable graphite/brass/teal surface
+   for each of the original three half-elliptical tracks. */
+html[data-research-r22="true"] #recurrence-instrument .phase-band{
+ fill:none;stroke-width:33px;opacity:.14;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-band-gregorian{
+ stroke:#8d829e;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-band-year{
+ stroke:#b6a072;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-band-day{
+ stroke:#78a2a3;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-sector{
+ stroke:rgba(10,19,26,.36);stroke-width:.75;
+}
+html[data-research-r22="true"] #recurrence-instrument .gregorian-sector{
+ fill:url(#r22-material-gregorian);
+}
+html[data-research-r22="true"] #recurrence-instrument .year-sector{
+ fill:url(#r22-material-year);
+}
+html[data-research-r22="true"] #recurrence-instrument .day-sector{
+ fill:url(#r22-material-day);
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-tick{
+ opacity:.28;stroke-width:.85;
+}
+html[data-research-r22="true"] #recurrence-instrument .phase-tick.major{
+ opacity:.85;stroke-width:1.8;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-zero-guide{
+ stroke:rgba(246,226,172,.62);stroke-width:2.25;stroke-linecap:round;
+ filter:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker{
+ stroke-width:6.5;filter:drop-shadow(0 0 3px rgba(241,230,184,.1));
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker.is-closed{
+ stroke-width:7.5;
+}
+html[data-research-r22="true"] #recurrence-instrument .return-marker-label[data-phase-closed="true"]{
+ opacity:0;
+}
+html[data-research-r22="true"] #recurrence-instrument .cursor-label{
+ font-size:15px;fill:rgba(239,224,177,.82);
+}
+@media(max-width:480px){
+ html[data-research-r22="true"] #recurrence-instrument .research-fan-graphic{
+  height:clamp(185px,50vw,224px);
+ }
+ html[data-research-r22="true"] #recurrence-instrument .cursor-label{
+  font-size:20px;
+ }
+}
