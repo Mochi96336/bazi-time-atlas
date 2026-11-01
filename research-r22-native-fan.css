@@ -409,3 +409,46 @@ html[data-research-r22="true"] #recurrence-instrument .cursor-label{
   font-size:20px;
  }
 }
+
+
+/* P8 visual competition: TWO different truthful readings of THE SAME
+   existing half-ellipse. No added timeline, rail or source of date state.
+   Baseline P7 stays exactly as before when ?r22-study is absent. */
+html[data-research-r22="true"] #recurrence-instrument .r22-study-distance{
+ fill:none;stroke-width:8;stroke-linecap:butt;pointer-events:none;
+ filter:drop-shadow(0 0 3px rgba(226,229,214,.13));
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-distance-gregorian{
+ stroke:#dbccd9;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-distance-year{
+ stroke:#e7c891;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-distance-day{
+ stroke:#a7d7d4;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-slot{
+ stroke-width:3;pointer-events:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-slot.is-closed{
+ fill:rgba(233,216,163,.12);stroke:rgba(248,225,160,.94);
+ filter:drop-shadow(0 0 4px rgba(245,220,149,.35));
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-slot.is-open{
+ fill:none;stroke:rgba(176,192,199,.44);stroke-dasharray:4 3;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-closure-score{
+ font-size:16px;font-weight:740;fill:rgba(233,221,187,.84);
+ text-anchor:middle;letter-spacing:.05em;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-study="closure"] .cursor-label{
+ opacity:0;
+}
+@media(max-width:480px){
+ html[data-research-r22="true"] #recurrence-instrument .r22-study-distance{
+  stroke-width:10;
+ }
+ html[data-research-r22="true"] #recurrence-instrument .r22-study-closure-score{
+  font-size:21px;
+ }
+}
