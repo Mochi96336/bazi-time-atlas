@@ -127,6 +127,25 @@ function formatSigned(value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
+  if (r22GuideOptIn) {
+    // A single coordinate-stable material gradient across ALL sectors in a
+    // ring; per-sector object-bounding-box gradients would create fake stripes.
+    const defs=svg.querySelector("defs") ?? svgEl("defs",{},svg);
+    const palettes={
+      gregorian:["#a69ab6","#7c718a","#494456"],
+      year:["#b4a06d","#88764f","#554c39"],
+      day:["#82aaa8","#5b8485","#345b62"]
+    };
+    for(const [key,colors] of Object.entries(palettes)){
+      const gradient=svgEl("linearGradient",{
+        id:"r22-material-"+key,
+        gradientUnits:"userSpaceOnUse",x1:CX,y1:480,x2:CX,y2:CY
+      },defs);
+      [0,0.52,1].forEach((t,i)=>svgEl("stop",{
+        offset:String(t*100)+"%","stop-color":colors[i]
+      },gradient));
+    }
+  }
   for (const [key, spec] of Object.entries(ringSpecs)) {
     const radius=(spec.inner+spec.outer)/2;
     svgEl("path", {
@@ -196,10 +215,26 @@ function renderRing(key) {
 }
 
 function renderCursor() {
-  const inner = polar(258, CURSOR_ANGLE);
-  const outer = polar(575, CURSOR_ANGLE);
-  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
-  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
+  if(r22GuideOptIn){
+    // Three short ticks show ONE shared phase datum. Avoid the former
+    // single long needle passing across unrelated spaces between tracks.
+    for(const [key,spec] of Object.entries(ringSpecs)){
+      const radius=(spec.inner+spec.outer)/2;
+      const half=R22_SEMICIRCLE.railHalfWidth+5;
+      const inner=polar(radius-half,CURSOR_ANGLE);
+      const outer=polar(radius+half,CURSOR_ANGLE);
+      svgEl("line",{
+        x1:inner.x,y1:inner.y,x2:outer.x,y2:outer.y,
+        class:"cursor-line r22-zero-guide",
+        "data-r22-zero-rail":key
+      },cursorGroup);
+    }
+  }else{
+    const inner = polar(258, CURSOR_ANGLE);
+    const outer = polar(575, CURSOR_ANGLE);
+    svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
+    svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
+  }
   const labelPoint = polar(595, CURSOR_ANGLE);
   const label = svgEl("text", { x:labelPoint.x, y:labelPoint.y, class:"cursor-label" }, cursorGroup);
   label.textContent = "基準 · 0";
@@ -255,7 +290,8 @@ function renderReturnMarkers(state) {
       x:labelPoint.x,
       y:labelPoint.y,
       class:`return-marker-label return-marker-label-${key}`,
-      "data-return-marker":`${key}-label`
+      "data-return-marker":`${key}-label`,
+      "data-phase-closed":String(phase === 0)
     }, cursorGroup);
     label.textContent = formatSigned(signed);
   }
