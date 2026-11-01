@@ -27,7 +27,18 @@ const scenes=[
  {w:768,h:1220,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two"},
  {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two"},
  {w:390,h:1350,date:"1900-03-01",d:6180,signed:"180,0,0",status:"two"},
- {w:390,h:1350,date:"2100-03-01",d:16080,signed:"80,0,0",status:"two"}
+ {w:390,h:1350,date:"2100-03-01",d:16080,signed:"80,0,0",status:"two"},
+ // P8: judge two DIFFERENT information encodings against the exact P7 baseline
+ // at matched dates/Δ/viewport sizes. No styling-only A/B.
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"gap"},
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"closure"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",study:"gap"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",study:"closure"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",study:"gap"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",study:"closure"},
+ {w:390,h:1350,date:"2026-09-13",d:0,signed:"0,0,0",status:"identity",study:"closure"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"gap"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"closure"}
 ];
 const records=[];
 const usedNames=new Set();
@@ -35,8 +46,9 @@ for(const s of scenes){
  const url=new URL("scripts/fixtures/r22-live-optin.html",base);
  Object.entries({width:s.w,height:s.h,date:s.date,delta:s.d}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
  if(s.autoPlay)url.searchParams.set("autoPlay","first");
+ if(s.study)url.searchParams.set("study",s.study);
  const win="--window-size="+Math.max(500,s.w)+","+s.h;
- const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.autoPlay?"-reduced-step":"");
+ const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.study?"-study-"+s.study:"")+(s.autoPlay?"-reduced-step":"");
  if(usedNames.has(label))throw Error("[r22-p2] duplicate screenshot label "+label);
  usedNames.add(label);
  const modeFlags=s.autoPlay?["--force-prefers-reduced-motion=reduce"]:[];
@@ -51,6 +63,11 @@ for(const s of scenes){
    sectorRetained:"true",markerRetained:"true",
    fanDegreeSpan:"180",fanVerticalScale:"0.66",
    phaseShape:"signed-shortest-180-semiellipse",
+   studyMode:s.study||"baseline",studyOverlay:s.study||"none",
+   studyGapCount:String(s.study==="gap"?(s.d===1200?1:s.d===400?2:0):0),
+   studySlotCount:String(s.study==="closure"?3:0),
+   studyClosedSlots:String(s.study==="closure"?(s.d===1200?2:s.d===400?1:s.d===24000||s.d===0?3:0):0),
+   studyScore:s.study==="closure"?(s.d===0?"基準":s.d===400?"1/3 閉合":s.d===1200?"2/3 閉合":"3/3 閉合"):"none",
    ellipticalRail:"true",railNarrow:"true",railWidth:"26",
    materialGradients:"3",materialUnits:"true",zeroGuideCount:"3",
    zeroGuideAligned:"true",hasLongZeroNeedle:"false",closedLabelQuiet:"true",
