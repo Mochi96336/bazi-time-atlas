@@ -26,6 +26,9 @@ test("P6 is mathematically a COMPLETE 180-degree low ellipse, not the old 160-de
  assert.equal(g.radii.day,315);
  assert.equal(g.radii.year,405);
  assert.equal(g.radii.gregorian,505);
+ assert.equal(g.railHalfWidth*2,26,"P7 should keep sculptural mass without P5 thick wedges");
+ assert.ok(g.railHalfWidth*2<32);
+ assert.ok(g.railHalfWidth*2>20);
  assert.throws(()=>r22EllipsePoint(-1,-90),RangeError);
  assert.throws(()=>r22EllipseSweep(400,0,210),RangeError);
 });
