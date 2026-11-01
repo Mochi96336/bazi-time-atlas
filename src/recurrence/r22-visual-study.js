@@ -14,7 +14,7 @@ export function r22StudyMode(value){
 }
 export function r22StudyReading(state){
  const layers=Object.freeze(Object.fromEntries(R22_STUDY_KEYS.map(key=>{
-  const phase=state.phases[key],spec=SCALES[key];
+  const phase=state.phases[key==="year"?"yearSequence":key],spec=SCALES[key];
   const available=phase!==null&&phase!==undefined;
   const angle=available?phaseAngleOnFan({
    phase,modulus:spec.modulus,
