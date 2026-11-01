@@ -51,7 +51,10 @@ for(const s of scenes){
    sectorRetained:"true",markerRetained:"true",
    fanDegreeSpan:"180",fanVerticalScale:"0.66",
    phaseShape:"signed-shortest-180-semiellipse",
-   ellipticalRail:"true",railNarrow:"true",gregorianRingLabelExists:"true",
+   ellipticalRail:"true",railNarrow:"true",railWidth:"26",
+   materialGradients:"3",materialUnits:"true",zeroGuideCount:"3",
+   zeroGuideAligned:"true",hasLongZeroNeedle:"false",closedLabelQuiet:"true",
+   gregorianRingLabelExists:"true",
    fanViewBox:"0 404 1200 446"})){
   assert(p.includes('data-'+k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())+'="'+v+'"'),
    label+" "+k+" expected "+v+"; probe="+p.slice(0,1400));
