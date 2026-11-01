@@ -13,10 +13,12 @@ const height=Number(p.get("height"))||1350;
 const delta=Number(p.get("delta")??"1200");
 const date=p.get("date")||"2026-09-13";
 const autoPlay=p.get("autoPlay")==="first";
+const study=p.get("study")||"";
 let playStarted=false,playObserved=false;
 const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
 frame.style.width=width+"px";frame.style.height=height+"px";
-frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta,location.href).href;
+frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta+
+ (study?"&r22-study="+encodeURIComponent(study):""),location.href).href;
 let attempts=0;
 function inspect(){
  const doc=frame.contentDocument,root=doc?.documentElement;
@@ -149,6 +151,12 @@ function inspect(){
  probe.dataset.ringLabelHidden=String(styleOf(ringLabel)==="none");
  probe.dataset.sectorRetained=String(Boolean(sector&&styleOf(sector)!=="none"));
  probe.dataset.markerRetained=String(Boolean(markerLabel&&styleOf(markerLabel)!=="none"));
+ probe.dataset.studyMode=instrument?.dataset.r22Study??"none";
+ probe.dataset.studyOverlay=wheel.querySelector("[data-r22-study-overlay]")?.getAttribute("data-r22-study-overlay")??"none";
+ probe.dataset.studyGapCount=String(wheel.querySelectorAll("[data-r22-gap-rail]").length);
+ probe.dataset.studySlotCount=String(wheel.querySelectorAll("[data-r22-closure-rail]").length);
+ probe.dataset.studyClosedSlots=String(wheel.querySelectorAll('[data-r22-closure-state="closed"]').length);
+ probe.dataset.studyScore=wheel.querySelector("[data-r22-closure-count]")?.textContent??"none";
  probe.dataset.samplingMode=instrument?.dataset.r22SamplingMode??"none";
  probe.dataset.samplingCaption=doc.querySelector(".r22-reading-index")?.textContent??"";
  probe.dataset.fanHeight=String(Math.round(fanBox.height));
