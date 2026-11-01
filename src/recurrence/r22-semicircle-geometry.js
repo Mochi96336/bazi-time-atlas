@@ -5,7 +5,8 @@ export const R22_SEMICIRCLE=Object.freeze({
  fanEnd:0,
  centerAngle:-90,
  verticalScale:0.66,
- railHalfWidth:6.5,
+ // P7: restore visible mass without reverting to 90px filled P5 wedges.
+ railHalfWidth:13,
  cursorHalfLength:17,
  // Original ring radii / order; only their drawn width changes in R22.
  radii:Object.freeze({day:315,year:405,gregorian:505}),
