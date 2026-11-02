@@ -157,6 +157,16 @@ function inspect(){
  probe.dataset.studySlotCount=String(wheel.querySelectorAll("[data-r22-closure-rail]").length);
  probe.dataset.studyClosedSlots=String(wheel.querySelectorAll('[data-r22-closure-state="closed"]').length);
  probe.dataset.studyScore=wheel.querySelector("[data-r22-closure-count]")?.textContent??"none";
+ const missingNotes=[...wheel.querySelectorAll("[data-r22-missing-label]")];
+ probe.dataset.studyMissingCount=String(missingNotes.length);
+ probe.dataset.studyMissingKeys=missingNotes.map(n=>n.getAttribute("data-r22-missing-label")).join(",")||"none";
+ probe.dataset.studyMissingText=missingNotes.map(n=>n.textContent).join("|")||"none";
+ probe.dataset.studyMissingSigned=missingNotes.map(n=>n.getAttribute("data-r22-missing-signed")).join(",")||"none";
+ probe.dataset.studyMissingLeaders=String(wheel.querySelectorAll("[data-r22-missing-leader]").length);
+ probe.dataset.studyMissingInView=String(missingNotes.every(n=>{
+  const r=n.getBoundingClientRect(),g=graphic.getBoundingClientRect();
+  return r.left>=g.left-2&&r.right<=g.right+2&&r.top>=g.top-2&&r.bottom<=g.bottom+2;
+ }));
  probe.dataset.samplingMode=instrument?.dataset.r22SamplingMode??"none";
  probe.dataset.samplingCaption=doc.querySelector(".r22-reading-index")?.textContent??"";
  probe.dataset.fanHeight=String(Math.round(fanBox.height));
