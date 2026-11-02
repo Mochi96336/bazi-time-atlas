@@ -13,6 +13,7 @@ import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playb
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
 import {r22StudyMode,r22StudyReading,r22StudyGapArc,r22MissingStudyCallout,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
 import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
+import {r22ArtMode,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -34,6 +35,8 @@ const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
 // Explicit experimental sketches only; default R22 P7 and R16 are untouched.
 const r22Study = r22GuideOptIn ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
+// P10 is an art-only opt-in: P7 / P8 / P9 and R16 are not reskinned.
+const r22Art = r22GuideOptIn ? r22ArtMode(new URLSearchParams(location.search).get("r22-art")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 // R22 preserves every original sector and reference angle; only the camera crops
@@ -134,7 +137,7 @@ function renderGuides() {
     // A single coordinate-stable material gradient across ALL sectors in a
     // ring; per-sector object-bounding-box gradients would create fake stripes.
     const defs=svg.querySelector("defs") ?? svgEl("defs",{},svg);
-    const palettes={
+    const palettes=r22Art ? R22_ART_MATERIALS[r22Art] : {
       gregorian:["#a69ab6","#7c718a","#494456"],
       year:["#b4a06d","#88764f","#554c39"],
       day:["#82aaa8","#5b8485","#345b62"]
@@ -207,6 +210,19 @@ function renderRing(key) {
     }
   }
 
+  if(r22Art){
+    // A continuous, whole-ring material surface. The original segmented
+    // paths remain below it for structure/test fidelity but are not visible.
+    // This eliminates all 40/60 tiny angular cracks, and the three radial
+    // bands exactly touch at r=360 and r=450 (no artificial air gap).
+    svgEl("path",{
+      d:annularSectorPath(spec.inner,spec.outer,VIEW_FAN_START,VIEW_FAN_END),
+      class:"r22-art-surface r22-art-surface-"+key,
+      "data-r22-art-surface":key,
+      "data-r22-art-inner":spec.inner,
+      "data-r22-art-outer":spec.outer
+    },spec.group);
+  }
   const directLabelPoint = polar((spec.inner + spec.outer) / 2, RING_LABEL_ANGLE);
   const directLabel = svgEl("text", {
     x:directLabelPoint.x,
@@ -215,6 +231,20 @@ function renderRing(key) {
     "data-phase-ring-label":key
   }, spec.group);
   directLabel.textContent = spec.displayLabel;
+}
+
+function renderArtSeams(){
+  if(!r22Art)return;
+  const group=svgEl("g",{"data-r22-art-seams":r22Art},svg);
+  svg.insertBefore(group,cursorGroup);
+  // The separators are etched on a SINGLE body, never empty gutters.
+  for(const radius of [270,360,450,560]){
+    svgEl("path",{
+      d:arcPath(radius,VIEW_FAN_START,VIEW_FAN_END),
+      class:"r22-art-contour"+([360,450].includes(radius)?" is-seam":" is-edge"),
+      "data-r22-art-contour":radius
+    },group);
+  }
 }
 
 function renderCursor() {
@@ -1001,10 +1031,12 @@ function initialize() {
   renderRing("day");
   renderRing("year");
   renderRing("gregorian");
+  renderArtSeams();
   renderCursor();
   instrument.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
   instrument.dataset.fanDegreeSpan = r22GuideOptIn ? "180" : "160";
   instrument.dataset.r22Study = r22Study || "baseline";
+  instrument.dataset.r22Art = r22Art || "baseline";
   instrument.dataset.fanVerticalScale = r22GuideOptIn ? String(R22_SEMICIRCLE.verticalScale) : "1";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
