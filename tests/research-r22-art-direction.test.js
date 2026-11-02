@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {R22_ART_BANDS,R22_QUIET_BANDS,R22_ART_MATERIALS,R22_ART_FINISHES,r22ArtMode,r22ArtFinish,r22ArtBandsForFinish,r22ArtGeometry} from "../src/recurrence/r22-art-direction.js";
+import {R22_ART_BANDS,R22_ART_MATERIALS,R22_ART_FINISHES,r22ArtMode,r22ArtFinish,r22ArtGeometry} from "../src/recurrence/r22-art-direction.js";
 import {R22_SEMICIRCLE} from "../src/recurrence/r22-semicircle-geometry.js";
 
 test("P10 tests ONLY explicit art opt-in; default R22 and R16 are unaffected",()=>{
@@ -37,7 +37,7 @@ test("P10 material palettes are a family, not original purple/bronze/teal trifec
 });
 
 test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R16",()=>{
- for(const finish of ["bevel","satin","monolith","quiet"]){
+ for(const finish of ["bevel","satin","monolith"]){
   assert.equal(r22ArtFinish(finish,"graphite"),finish);
   assert.equal(r22ArtFinish(finish,"warm"),"");
   assert.equal(r22ArtFinish(finish,""),"");
@@ -46,9 +46,9 @@ test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R1
  assert.equal(r22ArtFinish(null,"graphite"),"");
 });
 test("P10.1 shared world-space illumination uses one 5-stop palette per finish",()=>{
- assert.equal(Object.keys(R22_ART_FINISHES).length,4);
+ assert.equal(Object.keys(R22_ART_FINISHES).length,3);
  for(const [mode,spec] of Object.entries(R22_ART_FINISHES)){
-  if(mode==="monolith"||mode==="quiet"){
+  if(mode==="monolith"){
    assert.deepEqual(Object.keys(spec.radial),["cx","cy","r","transform"]);
    assert.ok(spec.radial.r>0);
    assert.match(spec.radial.transform,/^matrix\(/);
@@ -59,19 +59,5 @@ test("P10.1 shared world-space illumination uses one 5-stop palette per finish",
   assert.equal(spec.colors.length,5);
   spec.colors.forEach(color=>assert.match(color,/^#[0-9a-f]{6}$/i));
  }
- assert.deepEqual(r22ArtGeometry().map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);
-});
-
-// Same palette and light field, different distribution of radial space.
-test("P10.3 quiet hierarchy keeps 150 units total and zero seams",()=>{
- const quiet=r22ArtGeometry("quiet");
- assert.deepEqual(quiet.map(b=>[b.inner,b.outer]),[[410,466],[466,515],[515,560]]);
- assert.deepEqual(quiet.map(b=>b.outer-b.inner),[56,49,45]);
- assert.equal(quiet.at(-1).outer-quiet[0].inner,150);
- for(let i=1;i<quiet.length;i++)assert.equal(quiet[i-1].outer,quiet[i].inner);
- assert.equal(r22ArtBandsForFinish("quiet"),R22_QUIET_BANDS);
- assert.equal(r22ArtBandsForFinish("monolith"),R22_ART_BANDS);
- assert.deepEqual(R22_ART_FINISHES.quiet.radial,R22_ART_FINISHES.monolith.radial);
- assert.deepEqual(R22_ART_FINISHES.quiet.colors,R22_ART_FINISHES.monolith.colors);
  assert.deepEqual(r22ArtGeometry().map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);
 });

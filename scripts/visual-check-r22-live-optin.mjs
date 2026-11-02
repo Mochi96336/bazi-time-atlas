@@ -73,11 +73,7 @@ const scenes=[
  // P10.2 shared radial illumination; no doubled relief at joints.
  {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"monolith"},
  {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"graphite",finish:"monolith"},
- {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"monolith"},
- // P10.3 ratio-only study: same radial lighting, same 150-unit silhouette.
- {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"quiet"},
- {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"graphite",finish:"quiet"},
- {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"quiet"}
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"monolith"}
 ];
 const records=[];
 const usedNames=new Set();
@@ -107,7 +103,7 @@ for(const s of scenes){
    artMode:s.art||"baseline",finishMode:s.finish||"baseline",
    finishGradient:String(s.finish?1:0),
    finishCoats:String(s.finish?3:0),
-   finishReliefs:String(s.finish&&!["monolith","quiet"].includes(s.finish)?4:0),
+   finishReliefs:String(s.finish&&s.finish!=="monolith"?4:0),
    finishRims:String(s.finish?2:0),
    artSurfaces:String(s.art?3:0),
    artAdjacent:String(Boolean(s.art)),

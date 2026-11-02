@@ -37,29 +37,16 @@ export const R22_ART_FINISHES=Object.freeze({
  monolith:Object.freeze({
   radial:Object.freeze({cx:570,cy:500,r:650,transform:"matrix(1 0 0 .8 0 100)"}),
   colors:Object.freeze(["#9aa7ae","#83949c","#627580","#475965","#2f414d"])
- }),
- // P10.3 changes ONLY band proportions; lighting remains identical.
- quiet:Object.freeze({
-  radial:Object.freeze({cx:570,cy:500,r:650,transform:"matrix(1 0 0 .8 0 100)"}),
-  colors:Object.freeze(["#9aa7ae","#83949c","#627580","#475965","#2f414d"])
  })
 });
-export const R22_QUIET_BANDS=Object.freeze({
- day:Object.freeze({inner:410,outer:466}),
- year:Object.freeze({inner:466,outer:515}),
- gregorian:Object.freeze({inner:515,outer:560})
-});
-export function r22ArtBandsForFinish(finish){
- return finish==="quiet"?R22_QUIET_BANDS:R22_ART_BANDS;
-}
 export function r22ArtFinish(value,art){
  return art==="graphite"&&Object.hasOwn(R22_ART_FINISHES,value)?value:"";
 }
 export function r22ArtMode(value){
  return Object.hasOwn(R22_ART_MATERIALS,value)?value:"";
 }
-export function r22ArtGeometry(finish=""){
- const bands=Object.entries(r22ArtBandsForFinish(finish)).map(([key,dimensions])=>
+export function r22ArtGeometry(){
+ const bands=Object.entries(R22_ART_BANDS).map(([key,dimensions])=>
   Object.freeze({key,...dimensions}));
  for(let i=1;i<bands.length;i++){
   if(bands[i-1].outer!==bands[i].inner){
