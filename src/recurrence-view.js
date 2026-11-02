@@ -222,8 +222,8 @@ function renderRing(key) {
       d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
       class:"r22-art-surface r22-art-surface-"+key,
       "data-r22-art-surface":key,
-      "data-r22-art-inner":spec.inner,
-      "data-r22-art-outer":spec.outer
+      "data-r22-art-inner":band.inner,
+      "data-r22-art-outer":band.outer
     },spec.group);
   }
   const directLabelPoint = polar((spec.inner + spec.outer) / 2, RING_LABEL_ANGLE);
