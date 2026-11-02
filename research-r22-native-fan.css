@@ -484,3 +484,63 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-study="missing"] 
 }
 /* The direct labels replace only the former undersized numeric glyphs in
    the active P9 experiment, so the same gap is not labeled twice. */
+
+
+/* P10 — large-form visual study, intentionally BEFORE any P9 label changes.
+   One continuous laminated half-ellipse, three touching surfaces, no gutters.
+   Graphite and warm graphite are two material studies, not new time modes.
+   P7/default and both earlier P8/P9 variants remain pixel-identical. */
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .phase-band,
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .phase-sector,
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .phase-tick{
+ opacity:0;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-surface{
+ stroke:none;stroke-width:0;pointer-events:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-surface-gregorian{
+ fill:url(#r22-material-gregorian);
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-surface-year{
+ fill:url(#r22-material-year);
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-surface-day{
+ fill:url(#r22-material-day);
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-contour{
+ fill:none;vector-effect:non-scaling-stroke;
+ pointer-events:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-contour.is-seam{
+ stroke:rgba(11,18,24,.54);stroke-width:1.6px;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-art-contour.is-edge{
+ stroke:rgba(185,199,207,.18);stroke-width:.9px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-art="warm"] .r22-art-contour.is-seam{
+ stroke:rgba(30,26,24,.62);
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-art="warm"] .r22-art-contour.is-edge{
+ stroke:rgba(224,207,186,.19);
+}
+/* Three time-scales are now differentiated by radial hierarchy, not
+   competing purple / gold / cyan high-chroma strips. A single warm material
+   accent belongs to moving data and the shared zero datum only. */
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]){
+ --gregorian:#e7d5b2;--year:#e7d5b2;--day:#e7d5b2;
+ --cursor:#f5e4bc;
+}
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .return-marker:not(.is-closed){
+ stroke:rgba(239,219,180,.91);stroke-width:8;
+ filter:drop-shadow(0 0 2px rgba(246,225,187,.17));
+}
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .return-marker.is-closed{
+ stroke:#fff0c9;stroke-width:10;
+ filter:drop-shadow(0 0 4px rgba(255,230,172,.23));
+}
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .r22-zero-guide{
+ stroke:rgba(247,224,178,.6);
+}
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite"],[data-r22-art="warm"]) .cursor-label{
+ fill:rgba(231,210,174,.78);
+}
