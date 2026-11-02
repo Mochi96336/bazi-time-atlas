@@ -215,8 +215,10 @@ function renderRing(key) {
     // paths remain below it for structure/test fidelity but are not visible.
     // This eliminates all 40/60 tiny angular cracks, and the three radial
     // bands exactly touch at r=360 and r=450 (no artificial air gap).
+    const band=R22_ART_BANDS[key];
+    if(band.inner!==spec.inner||band.outer!==spec.outer)throw Error("P10 art band / original phase spec drift");
     svgEl("path",{
-      d:annularSectorPath(spec.inner,spec.outer,VIEW_FAN_START,VIEW_FAN_END),
+      d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
       class:"r22-art-surface r22-art-surface-"+key,
       "data-r22-art-surface":key,
       "data-r22-art-inner":spec.inner,
