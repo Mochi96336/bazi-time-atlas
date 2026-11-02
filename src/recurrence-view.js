@@ -142,7 +142,8 @@ function renderGuides() {
       year:["#b4a06d","#88764f","#554c39"],
       day:["#82aaa8","#5b8485","#345b62"]
     };
-    for(const [key,colors] of Object.entries(palettes)){
+    for(const key of ["gregorian","year","day"]){
+      const colors=palettes[key];
       const gradient=svgEl("linearGradient",{
         id:"r22-material-"+key,
         gradientUnits:"userSpaceOnUse",x1:CX,y1:480,x2:CX,y2:CY
