@@ -2,9 +2,11 @@
 // with ZERO radial air gap; only material and seam separate the three periods.
 // Phase, date, Δ and zero-angle geometry are deliberately unchanged.
 export const R22_ART_BANDS=Object.freeze({
- day:Object.freeze({inner:270,outer:360}),
- year:Object.freeze({inner:360,outer:450}),
- gregorian:Object.freeze({inner:450,outer:560})
+ // The first P10 screenshot used full 270..560 and became a bulky arch.
+ // Keep three touching bands but reduce the entire body to 150 radial units.
+ day:Object.freeze({inner:410,outer:460}),
+ year:Object.freeze({inner:460,outer:510}),
+ gregorian:Object.freeze({inner:510,outer:560})
 });
 export const R22_ART_MATERIALS=Object.freeze({
  graphite:Object.freeze({
