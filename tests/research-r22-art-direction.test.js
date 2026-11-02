@@ -13,12 +13,12 @@ test("P10 tests ONLY explicit art opt-in; default R22 and R16 are unaffected",()
 test("P10 three sculpted bands have ZERO radial air gap",()=>{
  const bands=r22ArtGeometry();
  assert.deepEqual(bands.map(b=>b.key),["day","year","gregorian"]);
- assert.deepEqual(bands.map(b=>[b.inner,b.outer]),[[270,360],[360,450],[450,560]]);
+ assert.deepEqual(bands.map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);
  for(let i=1;i<bands.length;i++) assert.equal(bands[i].inner,bands[i-1].outer);
- assert.equal(bands.at(-1).outer-bands[0].inner,290);
+ assert.equal(bands.at(-1).outer-bands[0].inner,150);
  assert.equal(R22_SEMICIRCLE.fanEnd-R22_SEMICIRCLE.fanStart,180);
  assert.equal(R22_SEMICIRCLE.verticalScale,.66);
- assert.equal(R22_ART_BANDS.day.inner,270);
+ assert.equal(R22_ART_BANDS.day.inner,410);
 });
 test("P10 material palettes are a family, not original purple/bronze/teal trifecta",()=>{
  const blueHue=/#(?:78aabd|aa97c8|c5a96f)/i;
