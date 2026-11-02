@@ -11,7 +11,7 @@ import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-
 import { createDeltaPlaybackController } from "./recurrence/delta-playback-controller.js";
 import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playback-controller.js";
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
-import {r22StudyMode,r22StudyReading,r22StudyGapArc,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
+import {r22StudyMode,r22StudyReading,r22StudyGapArc,r22MissingStudyCallout,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
 import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
 import {
   phaseAngleOnFan,
@@ -263,7 +263,7 @@ function renderReturnMarkers(state) {
           "data-r22-gap-angle":Math.abs(layer.angle+90).toFixed(3)
         },overlay);
       }
-    }else{
+    }else if(r22Study==="closure"){
       // The second candidate is about co-closure, not how far the pointer
       // travelled. Leave the three moving markers intact; draw fixed slots
       // at the *shared* reference angle to make open conditions visible.
@@ -284,6 +284,30 @@ function renderReturnMarkers(state) {
         "data-r22-closure-count":data.closedCount
       },overlay);
       textNode.textContent=data.identity?"基準":data.closedCount+"/3 閉合";
+    }else if(r22Study==="missing"){
+      // P9: name the ACTUAL condition that remains on the original rail.
+      // At Δ=0 and all-closed states there is no missing-condition label.
+      for(const key of R22_STUDY_KEYS){
+        const layer=data.layers[key];
+        const residue=state.phases[key==="year"?"yearSequence":key];
+        const callout=r22MissingStudyCallout(key,layer,residue,data.closedCount,state.deltaYears);
+        if(!callout)continue;
+        svgEl("line",{
+          x1:callout.point.x.toFixed(3),y1:callout.point.y.toFixed(3),
+          x2:callout.labelX,y2:callout.labelY-14,
+          class:"r22-study-missing-leader r22-study-missing-leader-"+key,
+          "data-r22-missing-leader":key
+        },overlay);
+        const note=svgEl("text",{
+          x:callout.labelX,y:callout.labelY,
+          "text-anchor":callout.anchor,
+          class:"r22-study-missing-label r22-study-missing-label-"+key,
+          "data-r22-missing-label":key,
+          "data-r22-missing-signed":String(callout.signed),
+          "data-r22-missing-rail":key
+        },overlay);
+        note.textContent=callout.text;
+      }
     }
   }
   const phases = {
