@@ -22,6 +22,21 @@ export const R22_ART_MATERIALS=Object.freeze({
   seam:"#25211f",marker:"#f0d3a5"
  })
 });
+// P10.1: both finishes SHARE a single world-space light field across all
+// three touching bands. No new temporal state and no palette per layer.
+export const R22_ART_FINISHES=Object.freeze({
+ bevel:Object.freeze({
+  axis:Object.freeze([245,505,1035,720]),
+  colors:Object.freeze(["#354751","#687883","#a3aeb2","#657680","#303f4a"])
+ }),
+ satin:Object.freeze({
+  axis:Object.freeze([165,545,1050,710]),
+  colors:Object.freeze(["#44515a","#6a7983","#869398","#68757e","#424c54"])
+ })
+});
+export function r22ArtFinish(value,art){
+ return art==="graphite"&&Object.hasOwn(R22_ART_FINISHES,value)?value:"";
+}
 export function r22ArtMode(value){
  return Object.hasOwn(R22_ART_MATERIALS,value)?value:"";
 }

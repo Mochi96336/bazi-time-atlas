@@ -13,7 +13,7 @@ import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playb
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
 import {r22StudyMode,r22StudyReading,r22StudyGapArc,r22MissingStudyCallout,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
 import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
-import {r22ArtMode,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
+import {r22ArtMode,r22ArtFinish,R22_ART_FINISHES,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -37,6 +37,9 @@ const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") ===
 // P10 is a deliberately isolated art-only experiment: no annotations or
 // status overlays may compete until the large form has been evaluated.
 const r22Art = r22GuideOptIn ? r22ArtMode(new URLSearchParams(location.search).get("r22-art")) : "";
+// Existing P10 graphite/warm remain unchanged; the two surface treatments
+// exist ONLY as explicit P10.1 graphite experiments.
+const r22Finish = r22ArtFinish(new URLSearchParams(location.search).get("r22-finish"),r22Art);
 const r22Study = r22GuideOptIn&&!r22Art ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
@@ -143,6 +146,16 @@ function renderGuides() {
       year:["#b4a06d","#88764f","#554c39"],
       day:["#82aaa8","#5b8485","#345b62"]
     };
+    if(r22Finish){
+      const finish=R22_ART_FINISHES[r22Finish];
+      const [x1,y1,x2,y2]=finish.axis;
+      const gradient=svgEl("linearGradient",{
+        id:"r22-finish-master",gradientUnits:"userSpaceOnUse",x1,y1,x2,y2
+      },defs);
+      [0,.26,.49,.75,1].forEach((offset,i)=>svgEl("stop",{
+        offset:(offset*100)+"%","stop-color":finish.colors[i]
+      },gradient));
+    }
     for(const key of ["gregorian","year","day"]){
       const colors=palettes[key];
       const gradient=svgEl("linearGradient",{
@@ -216,7 +229,7 @@ function renderRing(key) {
     // A continuous, whole-ring material surface. The original segmented
     // paths remain below it for structure/test fidelity but are not visible.
     // This eliminates all 40/60 tiny angular cracks, and the three radial
-    // bands exactly touch at r=360 and r=450 (no artificial air gap).
+    // bands exactly touch at r=460 and r=510 (no artificial air gap).
     const band=R22_ART_BANDS[key];
     svgEl("path",{
       d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
@@ -225,6 +238,15 @@ function renderRing(key) {
       "data-r22-art-inner":band.inner,
       "data-r22-art-outer":band.outer
     },spec.group);
+    if(r22Finish){
+      // Thin translucent finish coat: keeps three physical strata legible
+      // without resetting the SAME underlying highlight on every band.
+      svgEl("path",{
+        d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
+        class:"r22-finish-coat r22-finish-coat-"+key,
+        "data-r22-finish-coat":key
+      },spec.group);
+    }
   }
   const directLabelPoint = polar((spec.inner + spec.outer) / 2, RING_LABEL_ANGLE);
   const directLabel = svgEl("text", {
@@ -247,6 +269,27 @@ function renderArtSeams(){
       class:"r22-art-contour"+([460,510].includes(radius)?" is-seam":" is-edge"),
       "data-r22-art-contour":radius
     },group);
+  }
+  if(r22Finish){
+    // Four light/shade hairlines, not holes: ±2.4 units around the
+    // two real shared edges. Widths are screen-space CSS strokes.
+    for(const seam of [460,510]){
+      for(const side of ["inner","outer"]){
+        const r=seam+(side==="inner"?-2.4:2.4);
+        svgEl("path",{
+          d:arcPath(r,VIEW_FAN_START,VIEW_FAN_END),
+          class:"r22-finish-relief is-"+side,
+          "data-r22-finish-relief":seam+":"+side
+        },group);
+      }
+    }
+    for(const radius of [411.5,558.5]){
+      svgEl("path",{
+        d:arcPath(radius,VIEW_FAN_START,VIEW_FAN_END),
+        class:"r22-finish-rim",
+        "data-r22-finish-rim":radius
+      },group);
+    }
   }
 }
 
@@ -1044,6 +1087,7 @@ function initialize() {
   instrument.dataset.fanDegreeSpan = r22GuideOptIn ? "180" : "160";
   instrument.dataset.r22Study = r22Study || "baseline";
   instrument.dataset.r22Art = r22Art || "baseline";
+  instrument.dataset.r22Finish = r22Finish || "baseline";
   instrument.dataset.fanVerticalScale = r22GuideOptIn ? String(R22_SEMICIRCLE.verticalScale) : "1";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();

@@ -61,7 +61,15 @@ const scenes=[
  {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",art:"graphite"},
  {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",art:"warm"},
  {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite"},
- {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"warm"}
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"warm"},
+ // P10.1: same actual geometry, dates, phase and markers; two shared-light
+ // finish variants instead of another set of competing layer palettes.
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"bevel"},
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"satin"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"graphite",finish:"bevel"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",art:"graphite",finish:"satin"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"bevel"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"satin"}
 ];
 const records=[];
 const usedNames=new Set();
@@ -71,8 +79,9 @@ for(const s of scenes){
  if(s.autoPlay)url.searchParams.set("autoPlay","first");
  if(s.study)url.searchParams.set("study",s.study);
  if(s.art)url.searchParams.set("art",s.art);
+ if(s.finish)url.searchParams.set("finish",s.finish);
  const win="--window-size="+Math.max(500,s.w)+","+s.h;
- const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.study?"-study-"+s.study:"")+(s.art?"-art-"+s.art:"")+(s.autoPlay?"-reduced-step":"");
+ const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.study?"-study-"+s.study:"")+(s.art?"-art-"+s.art:"")+(s.finish?"-finish-"+s.finish:"")+(s.autoPlay?"-reduced-step":"");
  if(usedNames.has(label))throw Error("[r22-p2] duplicate screenshot label "+label);
  usedNames.add(label);
  const modeFlags=s.autoPlay?["--force-prefers-reduced-motion=reduce"]:[];
@@ -87,7 +96,11 @@ for(const s of scenes){
    sectorRetained:"true",markerRetained:"true",
    fanDegreeSpan:"180",fanVerticalScale:"0.66",
    phaseShape:"signed-shortest-180-semiellipse",
-   artMode:s.art||"baseline",
+   artMode:s.art||"baseline",finishMode:s.finish||"baseline",
+   finishGradient:String(s.finish?1:0),
+   finishCoats:String(s.finish?3:0),
+   finishReliefs:String(s.finish?4:0),
+   finishRims:String(s.finish?2:0),
    artSurfaces:String(s.art?3:0),
    artAdjacent:String(Boolean(s.art)),
    artContours:String(s.art?4:0),

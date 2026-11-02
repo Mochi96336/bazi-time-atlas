@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {R22_ART_BANDS,R22_ART_MATERIALS,r22ArtMode,r22ArtGeometry} from "../src/recurrence/r22-art-direction.js";
+import {R22_ART_BANDS,R22_ART_MATERIALS,R22_ART_FINISHES,r22ArtMode,r22ArtFinish,r22ArtGeometry} from "../src/recurrence/r22-art-direction.js";
 import {R22_SEMICIRCLE} from "../src/recurrence/r22-semicircle-geometry.js";
 
 test("P10 tests ONLY explicit art opt-in; default R22 and R16 are unaffected",()=>{
@@ -34,4 +34,24 @@ test("P10 material palettes are a family, not original purple/bronze/teal trifec
   assert.match(palette.seam,/^#[0-9a-f]{6}$/i);
   assert.match(palette.marker,/^#[0-9a-f]{6}$/i);
  }
+});
+
+test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R16",()=>{
+ for(const finish of ["bevel","satin"]){
+  assert.equal(r22ArtFinish(finish,"graphite"),finish);
+  assert.equal(r22ArtFinish(finish,"warm"),"");
+  assert.equal(r22ArtFinish(finish,""),"");
+ }
+ assert.equal(r22ArtFinish("unknown","graphite"),"");
+ assert.equal(r22ArtFinish(null,"graphite"),"");
+});
+test("P10.1 shared world-space illumination uses one 5-stop palette per finish",()=>{
+ assert.equal(Object.keys(R22_ART_FINISHES).length,2);
+ for(const spec of Object.values(R22_ART_FINISHES)){
+  assert.equal(spec.axis.length,4);
+  assert.equal(spec.colors.length,5);
+  assert.ok(spec.axis[0]<spec.axis[2]);
+  spec.colors.forEach(color=>assert.match(color,/^#[0-9a-f]{6}$/i));
+ }
+ assert.deepEqual(r22ArtGeometry().map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);
 });

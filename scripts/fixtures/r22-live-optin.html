@@ -15,12 +15,14 @@ const date=p.get("date")||"2026-09-13";
 const autoPlay=p.get("autoPlay")==="first";
 const study=p.get("study")||"";
 const art=p.get("art")||"";
+const finish=p.get("finish")||"";
 let playStarted=false,playObserved=false;
 const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
 frame.style.width=width+"px";frame.style.height=height+"px";
 frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta+
  (study?"&r22-study="+encodeURIComponent(study):"")+
- (art?"&r22-art="+encodeURIComponent(art):""),location.href).href;
+ (art?"&r22-art="+encodeURIComponent(art):"")+
+ (finish?"&r22-finish="+encodeURIComponent(finish):""),location.href).href;
 let attempts=0;
 function inspect(){
  const doc=frame.contentDocument,root=doc?.documentElement;
@@ -154,6 +156,11 @@ function inspect(){
  probe.dataset.sectorRetained=String(Boolean(sector&&styleOf(sector)!=="none"));
  probe.dataset.markerRetained=String(Boolean(markerLabel&&styleOf(markerLabel)!=="none"));
  probe.dataset.artMode=instrument?.dataset.r22Art??"none";
+ probe.dataset.finishMode=instrument?.dataset.r22Finish??"none";
+ probe.dataset.finishGradient=String(wheel.querySelectorAll("#r22-finish-master").length);
+ probe.dataset.finishCoats=String(wheel.querySelectorAll("[data-r22-finish-coat]").length);
+ probe.dataset.finishReliefs=String(wheel.querySelectorAll("[data-r22-finish-relief]").length);
+ probe.dataset.finishRims=String(wheel.querySelectorAll("[data-r22-finish-rim]").length);
  const surfaces=[...wheel.querySelectorAll("[data-r22-art-surface]")];
  const bands=surfaces.map(el=>({
   key:el.getAttribute("data-r22-art-surface"),
@@ -166,7 +173,7 @@ function inspect(){
   bands[2].outer===560);
  probe.dataset.artContours=String(wheel.querySelectorAll("[data-r22-art-contour]").length);
  probe.dataset.artSeams=String(wheel.querySelectorAll(".r22-art-contour.is-seam").length);
- probe.dataset.artSeamFill=String(surfaces.every(el=>doc.defaultView.getComputedStyle(el).fill.includes("r22-material-")));
+ probe.dataset.artSeamFill=String(surfaces.every(el=>doc.defaultView.getComputedStyle(el).fill.includes(finish?"r22-finish-master":"r22-material-")));
  probe.dataset.studyMode=instrument?.dataset.r22Study??"none";
  probe.dataset.studyOverlay=wheel.querySelector("[data-r22-study-overlay]")?.getAttribute("data-r22-study-overlay")??"none";
  probe.dataset.studyGapCount=String(wheel.querySelectorAll("[data-r22-gap-rail]").length);
