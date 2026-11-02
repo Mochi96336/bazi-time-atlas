@@ -34,9 +34,10 @@ const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
 // Explicit experimental sketches only; default R22 P7 and R16 are untouched.
-const r22Study = r22GuideOptIn ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
-// P10 is an art-only opt-in: P7 / P8 / P9 and R16 are not reskinned.
+// P10 is a deliberately isolated art-only experiment: no annotations or
+// status overlays may compete until the large form has been evaluated.
 const r22Art = r22GuideOptIn ? r22ArtMode(new URLSearchParams(location.search).get("r22-art")) : "";
+const r22Study = r22GuideOptIn&&!r22Art ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 // R22 preserves every original sector and reference angle; only the camera crops
@@ -217,7 +218,6 @@ function renderRing(key) {
     // This eliminates all 40/60 tiny angular cracks, and the three radial
     // bands exactly touch at r=360 and r=450 (no artificial air gap).
     const band=R22_ART_BANDS[key];
-    if(band.inner!==spec.inner||band.outer!==spec.outer)throw Error("P10 art band / original phase spec drift");
     svgEl("path",{
       d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
       class:"r22-art-surface r22-art-surface-"+key,
@@ -241,10 +241,10 @@ function renderArtSeams(){
   const group=svgEl("g",{"data-r22-art-seams":r22Art},svg);
   svg.insertBefore(group,cursorGroup);
   // The separators are etched on a SINGLE body, never empty gutters.
-  for(const radius of [270,360,450,560]){
+  for(const radius of [410,460,510,560]){
     svgEl("path",{
       d:arcPath(radius,VIEW_FAN_START,VIEW_FAN_END),
-      class:"r22-art-contour"+([360,450].includes(radius)?" is-seam":" is-edge"),
+      class:"r22-art-contour"+([460,510].includes(radius)?" is-seam":" is-edge"),
       "data-r22-art-contour":radius
     },group);
   }
@@ -255,8 +255,10 @@ function renderCursor() {
     // Three short ticks show ONE shared phase datum. Avoid the former
     // single long needle passing across unrelated spaces between tracks.
     for(const [key,spec] of Object.entries(ringSpecs)){
-      const radius=(spec.inner+spec.outer)/2;
-      const half=R22_SEMICIRCLE.railHalfWidth+5;
+      const radius=r22Art
+        ?(R22_ART_BANDS[key].inner+R22_ART_BANDS[key].outer)/2
+        :(spec.inner+spec.outer)/2;
+      const half=r22Art?22:R22_SEMICIRCLE.railHalfWidth+5;
       const inner=polar(radius-half,CURSOR_ANGLE);
       const outer=polar(radius+half,CURSOR_ANGLE);
       svgEl("line",{
@@ -360,7 +362,9 @@ function renderReturnMarkers(state) {
       fanEnd:VIEW_FAN_END,
       referenceAngle:CURSOR_ANGLE
     });
-    const centerRadius=(spec.inner+spec.outer)/2;
+    const centerRadius=r22Art
+      ?(R22_ART_BANDS[key].inner+R22_ART_BANDS[key].outer)/2
+      :(spec.inner+spec.outer)/2;
     const p1 = polar(r22GuideOptIn ? centerRadius-R22_SEMICIRCLE.cursorHalfLength : spec.inner + 5, angle);
     const p2 = polar(r22GuideOptIn ? centerRadius+R22_SEMICIRCLE.cursorHalfLength : spec.outer - 5, angle);
     svgEl("line", {
@@ -376,7 +380,7 @@ function renderReturnMarkers(state) {
       "data-phase-modulus":spec.modulus
     }, cursorGroup);
     if (phase === 0) {
-      const zeroPoint = polar((spec.inner + spec.outer) / 2, angle);
+      const zeroPoint = polar(centerRadius, angle);
       svgEl("circle", {
         cx:zeroPoint.x,
         cy:zeroPoint.y,
