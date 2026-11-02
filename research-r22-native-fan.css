@@ -547,7 +547,7 @@ html[data-research-r22="true"] #recurrence-instrument:is([data-r22-art="graphite
 
 /* R22 P10.1 — one continuous light field across all three layers.
    These are new opt-in finish studies; existing P10 material stays intact. */
-html[data-research-r22="true"] #recurrence-instrument:is([data-r22-finish="bevel"],[data-r22-finish="satin"]) .r22-art-surface{
+html[data-research-r22="true"] #recurrence-instrument:is([data-r22-finish="bevel"],[data-r22-finish="satin"],[data-r22-finish="monolith"]) .r22-art-surface{
  fill:url(#r22-finish-master);
 }
 html[data-research-r22="true"] #recurrence-instrument .r22-finish-coat{
@@ -583,4 +583,17 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="satin"] .
 }
 html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="satin"] .r22-finish-rim{
  stroke:rgba(193,208,211,.15);stroke-width:.8px;
+}
+
+/* P10.2: same three contiguous geometries, one radial illumination,
+   two restrained seams; no extra bevel/relief hairlines. */
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="monolith"] .r22-finish-coat{opacity:0}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="monolith"] .r22-art-contour.is-seam{
+ stroke:rgba(10,20,29,.40);stroke-width:1px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="monolith"] .r22-art-contour.is-edge{
+ stroke:rgba(179,199,209,.20);stroke-width:.75px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="monolith"] .r22-finish-rim{
+ stroke:rgba(198,218,225,.19);stroke-width:.8px;
 }

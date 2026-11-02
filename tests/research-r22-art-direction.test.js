@@ -37,7 +37,7 @@ test("P10 material palettes are a family, not original purple/bronze/teal trifec
 });
 
 test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R16",()=>{
- for(const finish of ["bevel","satin"]){
+ for(const finish of ["bevel","satin","monolith"]){
   assert.equal(r22ArtFinish(finish,"graphite"),finish);
   assert.equal(r22ArtFinish(finish,"warm"),"");
   assert.equal(r22ArtFinish(finish,""),"");
@@ -46,11 +46,17 @@ test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R1
  assert.equal(r22ArtFinish(null,"graphite"),"");
 });
 test("P10.1 shared world-space illumination uses one 5-stop palette per finish",()=>{
- assert.equal(Object.keys(R22_ART_FINISHES).length,2);
- for(const spec of Object.values(R22_ART_FINISHES)){
-  assert.equal(spec.axis.length,4);
+ assert.equal(Object.keys(R22_ART_FINISHES).length,3);
+ for(const [mode,spec] of Object.entries(R22_ART_FINISHES)){
+  if(mode==="monolith"){
+   assert.deepEqual(Object.keys(spec.radial),["cx","cy","r","transform"]);
+   assert.ok(spec.radial.r>0);
+   assert.match(spec.radial.transform,/^matrix\(/);
+  }else{
+   assert.equal(spec.axis.length,4);
+   assert.ok(spec.axis[0]<spec.axis[2]);
+  }
   assert.equal(spec.colors.length,5);
-  assert.ok(spec.axis[0]<spec.axis[2]);
   spec.colors.forEach(color=>assert.match(color,/^#[0-9a-f]{6}$/i));
  }
  assert.deepEqual(r22ArtGeometry().map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);

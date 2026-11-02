@@ -148,10 +148,16 @@ function renderGuides() {
     };
     if(r22Finish){
       const finish=R22_ART_FINISHES[r22Finish];
-      const [x1,y1,x2,y2]=finish.axis;
-      const gradient=svgEl("linearGradient",{
-        id:"r22-finish-master",gradientUnits:"userSpaceOnUse",x1,y1,x2,y2
-      },defs);
+      const gradient=finish.radial
+        ?svgEl("radialGradient",{
+          id:"r22-finish-master",gradientUnits:"userSpaceOnUse",
+          cx:finish.radial.cx,cy:finish.radial.cy,r:finish.radial.r,
+          gradientTransform:finish.radial.transform
+        },defs)
+        :svgEl("linearGradient",{
+          id:"r22-finish-master",gradientUnits:"userSpaceOnUse",
+          x1:finish.axis[0],y1:finish.axis[1],x2:finish.axis[2],y2:finish.axis[3]
+        },defs);
       [0,.26,.49,.75,1].forEach((offset,i)=>svgEl("stop",{
         offset:(offset*100)+"%","stop-color":finish.colors[i]
       },gradient));
@@ -273,14 +279,16 @@ function renderArtSeams(){
   if(r22Finish){
     // Four light/shade hairlines, not holes: ±2.4 units around the
     // two real shared edges. Widths are screen-space CSS strokes.
-    for(const seam of [460,510]){
-      for(const side of ["inner","outer"]){
-        const r=seam+(side==="inner"?-2.4:2.4);
-        svgEl("path",{
-          d:arcPath(r,VIEW_FAN_START,VIEW_FAN_END),
-          class:"r22-finish-relief is-"+side,
-          "data-r22-finish-relief":seam+":"+side
-        },group);
+    if(r22Finish!=="monolith"){
+      for(const seam of [460,510]){
+        for(const side of ["inner","outer"]){
+          const r=seam+(side==="inner"?-2.4:2.4);
+          svgEl("path",{
+            d:arcPath(r,VIEW_FAN_START,VIEW_FAN_END),
+            class:"r22-finish-relief is-"+side,
+            "data-r22-finish-relief":seam+":"+side
+          },group);
+        }
       }
     }
     for(const radius of [411.5,558.5]){

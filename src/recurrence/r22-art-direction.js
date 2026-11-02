@@ -32,6 +32,11 @@ export const R22_ART_FINISHES=Object.freeze({
  satin:Object.freeze({
   axis:Object.freeze([165,545,1050,710]),
   colors:Object.freeze(["#44515a","#6a7983","#869398","#68757e","#424c54"])
+ }),
+ // P10.2: a single radial pool of light, not multiple bevel ridges.
+ monolith:Object.freeze({
+  radial:Object.freeze({cx:570,cy:500,r:650,transform:"matrix(1 0 0 .8 0 100)"}),
+  colors:Object.freeze(["#9aa7ae","#83949c","#627580","#475965","#2f414d"])
  })
 });
 export function r22ArtFinish(value,art){
