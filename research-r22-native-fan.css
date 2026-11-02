@@ -452,3 +452,35 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-study="closure"] 
   font-size:21px;
  }
 }
+
+
+/* P9 deliberately replaces neither the geometry nor the time narrative.
+   This is a thin, named annotation tethered to the true moving marker.
+   Only the not-yet-closed conditions get one caption per existing rail;
+   never light up a false "elapsed-progress" segment. */
+html[data-research-r22="true"] #recurrence-instrument .r22-study-missing-leader{
+ stroke:rgba(210,221,223,.48);stroke-width:2.3;
+ stroke-linecap:round;stroke-dasharray:5 8;
+ pointer-events:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-missing-label{
+ font-family:inherit;font-size:42px;font-weight:710;
+ letter-spacing:.015em;
+ fill:#f0eee5;stroke:#101a22;stroke-width:6px;
+ stroke-linejoin:round;paint-order:stroke;
+ pointer-events:none;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-missing-label-gregorian{
+ fill:#d8c3dd;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-missing-label-year{
+ fill:#efd5a0;
+}
+html[data-research-r22="true"] #recurrence-instrument .r22-study-missing-label-day{
+ fill:#b5dedd;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-study="missing"] .return-marker-label:not([data-phase-closed="true"]){
+ opacity:0;
+}
+/* The direct labels replace only the former undersized numeric glyphs in
+   the active P9 experiment, so the same gap is not labeled twice. */
