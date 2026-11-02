@@ -38,7 +38,18 @@ const scenes=[
  {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",study:"closure"},
  {w:390,h:1350,date:"2026-09-13",d:0,signed:"0,0,0",status:"identity",study:"closure"},
  {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"gap"},
- {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"closure"}
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"closure"},
+ // P9 independent experiment: NAME each actually missing phase on its own
+ // moving marker; prove that both identity and magnitude survive at 320px.
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"missing"},
+ {w:320,h:1330,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",study:"missing"},
+ {w:390,h:1350,date:"2026-09-13",d:0,signed:"0,0,0",status:"identity",study:"missing"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",study:"missing"},
+ {w:390,h:1350,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"missing"},
+ {w:390,h:1350,date:"2026-09-13",d:1980,signed:"-20,0,0",status:"two",study:"missing"},
+ {w:390,h:1350,date:"2026-09-13",d:8000,signed:"0,20,0",status:"two",study:"missing"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",study:"missing"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"missing"}
 ];
 const records=[];
 const usedNames=new Set();
@@ -68,6 +79,12 @@ for(const s of scenes){
    studySlotCount:String(s.study==="closure"?3:0),
    studyClosedSlots:String(s.study==="closure"?(s.d===1200?2:s.d===400?1:s.d===24000||s.d===0?3:0):0),
    studyScore:s.study==="closure"?(s.d===0?"基準":s.d===400?"1/3 閉合":s.d===1200?"2/3 閉合":"3/3 閉合"):"none",
+   studyMissingCount:String(s.study==="missing"?(s.d===400?2:[1200,1980,8000].includes(s.d)?1:0):0),
+   studyMissingKeys:s.study==="missing"?(s.d===400?"year,day":s.d===1200?"day":s.d===1980?"gregorian":s.d===8000?"year":"none"):"none",
+   studyMissingText:s.study==="missing"?(s.d===400?"年序 −20年|日序 −3日":s.d===1200?"日序 −9日":s.d===1980?"公曆 −20年":s.d===8000?"年序 +20年":"none"):"none",
+   studyMissingSigned:s.study==="missing"?(s.d===400?"-20,-3":s.d===1200?"-9":s.d===1980?"-20":s.d===8000?"20":"none"):"none",
+   studyMissingLeaders:String(s.study==="missing"?(s.d===400?2:[1200,1980,8000].includes(s.d)?1:0):0),
+   studyMissingInView:"true",
    ellipticalRail:"true",railNarrow:"true",railWidth:"26",
    materialGradients:"3",materialUnits:"true",zeroGuideCount:"3",
    zeroGuideAligned:"true",hasLongZeroNeedle:"false",closedLabelQuiet:"true",
