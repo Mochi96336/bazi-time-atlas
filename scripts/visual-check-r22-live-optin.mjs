@@ -49,7 +49,19 @@ const scenes=[
  {w:390,h:1350,date:"2026-09-13",d:1980,signed:"-20,0,0",status:"two",study:"missing"},
  {w:390,h:1350,date:"2026-09-13",d:8000,signed:"0,20,0",status:"two",study:"missing"},
  {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",study:"missing"},
- {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"missing"}
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",study:"missing"},
+ // P10 FIRST resolve large-scale form / palette, not another information
+ // annotation. Same original 180° shape, three touching full-width bands.
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite"},
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"warm"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"graphite"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"warm"},
+ {w:390,h:1350,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite"},
+ {w:390,h:1350,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"warm"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",art:"graphite"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",art:"warm"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"warm"}
 ];
 const records=[];
 const usedNames=new Set();
@@ -58,8 +70,9 @@ for(const s of scenes){
  Object.entries({width:s.w,height:s.h,date:s.date,delta:s.d}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
  if(s.autoPlay)url.searchParams.set("autoPlay","first");
  if(s.study)url.searchParams.set("study",s.study);
+ if(s.art)url.searchParams.set("art",s.art);
  const win="--window-size="+Math.max(500,s.w)+","+s.h;
- const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.study?"-study-"+s.study:"")+(s.autoPlay?"-reduced-step":"");
+ const label="r22-p2-original-"+s.w+"x"+s.h+"-"+s.date+"-"+s.d+(s.study?"-study-"+s.study:"")+(s.art?"-art-"+s.art:"")+(s.autoPlay?"-reduced-step":"");
  if(usedNames.has(label))throw Error("[r22-p2] duplicate screenshot label "+label);
  usedNames.add(label);
  const modeFlags=s.autoPlay?["--force-prefers-reduced-motion=reduce"]:[];
@@ -74,6 +87,12 @@ for(const s of scenes){
    sectorRetained:"true",markerRetained:"true",
    fanDegreeSpan:"180",fanVerticalScale:"0.66",
    phaseShape:"signed-shortest-180-semiellipse",
+   artMode:s.art||"baseline",
+   artSurfaces:String(s.art?3:0),
+   artAdjacent:String(Boolean(s.art)),
+   artContours:String(s.art?4:0),
+   artSeams:String(s.art?2:0),
+   artSeamFill:"true",
    studyMode:s.study||"baseline",studyOverlay:s.study||"none",
    studyGapCount:String(s.study==="gap"?(s.d===1200?1:s.d===400?2:0):0),
    studySlotCount:String(s.study==="closure"?3:0),
