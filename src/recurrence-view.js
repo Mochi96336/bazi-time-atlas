@@ -13,7 +13,7 @@ import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playb
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
 import {r22StudyMode,r22StudyReading,r22StudyGapArc,r22MissingStudyCallout,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
 import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
-import {r22ArtMode,r22ArtFinish,R22_ART_FINISHES,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
+import {r22ArtMode,r22ArtFinish,r22ArtBandsForFinish,R22_ART_FINISHES,R22_ART_MATERIALS} from "./recurrence/r22-art-direction.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -40,6 +40,7 @@ const r22Art = r22GuideOptIn ? r22ArtMode(new URLSearchParams(location.search).g
 // Existing P10 graphite/warm remain unchanged; the two surface treatments
 // exist ONLY as explicit P10.1 graphite experiments.
 const r22Finish = r22ArtFinish(new URLSearchParams(location.search).get("r22-finish"),r22Art);
+const r22Bands = r22ArtBandsForFinish(r22Finish);
 const r22Study = r22GuideOptIn&&!r22Art ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
@@ -236,7 +237,7 @@ function renderRing(key) {
     // paths remain below it for structure/test fidelity but are not visible.
     // This eliminates all 40/60 tiny angular cracks, and the three radial
     // bands exactly touch at r=460 and r=510 (no artificial air gap).
-    const band=R22_ART_BANDS[key];
+    const band=r22Bands[key];
     svgEl("path",{
       d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
       class:"r22-art-surface r22-art-surface-"+key,
@@ -269,18 +270,19 @@ function renderArtSeams(){
   const group=svgEl("g",{"data-r22-art-seams":r22Art},svg);
   svg.insertBefore(group,cursorGroup);
   // The separators are etched on a SINGLE body, never empty gutters.
-  for(const radius of [410,460,510,560]){
+  const seams=[r22Bands.day.outer,r22Bands.year.outer];
+  for(const radius of [r22Bands.day.inner,...seams,r22Bands.gregorian.outer]){
     svgEl("path",{
       d:arcPath(radius,VIEW_FAN_START,VIEW_FAN_END),
-      class:"r22-art-contour"+([460,510].includes(radius)?" is-seam":" is-edge"),
+      class:"r22-art-contour"+(seams.includes(radius)?" is-seam":" is-edge"),
       "data-r22-art-contour":radius
     },group);
   }
   if(r22Finish){
     // Four light/shade hairlines, not holes: ±2.4 units around the
     // two real shared edges. Widths are screen-space CSS strokes.
-    if(r22Finish!=="monolith"){
-      for(const seam of [460,510]){
+    if(r22Finish!=="monolith"&&r22Finish!=="quiet"){
+      for(const seam of seams){
         for(const side of ["inner","outer"]){
           const r=seam+(side==="inner"?-2.4:2.4);
           svgEl("path",{
@@ -307,7 +309,7 @@ function renderCursor() {
     // single long needle passing across unrelated spaces between tracks.
     for(const [key,spec] of Object.entries(ringSpecs)){
       const radius=r22Art
-        ?(R22_ART_BANDS[key].inner+R22_ART_BANDS[key].outer)/2
+        ?(r22Bands[key].inner+r22Bands[key].outer)/2
         :(spec.inner+spec.outer)/2;
       const half=r22Art?22:R22_SEMICIRCLE.railHalfWidth+5;
       const inner=polar(radius-half,CURSOR_ANGLE);
@@ -414,7 +416,7 @@ function renderReturnMarkers(state) {
       referenceAngle:CURSOR_ANGLE
     });
     const centerRadius=r22Art
-      ?(R22_ART_BANDS[key].inner+R22_ART_BANDS[key].outer)/2
+      ?(r22Bands[key].inner+r22Bands[key].outer)/2
       :(spec.inner+spec.outer)/2;
     const p1 = polar(r22GuideOptIn ? centerRadius-R22_SEMICIRCLE.cursorHalfLength : spec.inner + 5, angle);
     const p2 = polar(r22GuideOptIn ? centerRadius+R22_SEMICIRCLE.cursorHalfLength : spec.outer - 5, angle);
