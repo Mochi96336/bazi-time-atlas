@@ -102,11 +102,13 @@ function examine(){
    probe.dataset.ready="true";
   },error=>{
    probe.dataset.ready="error";
-   probe.dataset.error="R16 reflow test: "+String(error);
+   probe.dataset.error="R16 reflow test at "+probe.dataset.r16ReflowStage+": "+String(error);
   });
  }
 }
 async function runR16ReflowProof(){
+ const stage=s=>{probe.dataset.r16ReflowStage=s;};
+ stage("initial");
  const win=frame.contentWindow,doc=frame.contentDocument;
  const details=doc.querySelector("#discrete-phase-fan-details");
  const wheel=doc.querySelector("#recurrence-wheel");
@@ -129,6 +131,7 @@ async function runR16ReflowProof(){
  const initialAngles=[...wheel.querySelectorAll(".return-marker")].map(m=>m.dataset.returnAngle).join(",");
  if(!checkSpacing())throw Error("initial mobile labels overlap");
  // Crucially: resize the SAME embedded page, not a new load.
+ stage("desktop-width");
  frame.style.width="768px";
  await sleep(160);
  if(win.innerWidth<=480)throw Error("desktop resize not applied");
@@ -139,19 +142,23 @@ async function runR16ReflowProof(){
  ))throw Error("stale mobile text offset/size survived desktop resize");
  // Emulate the actual accordion being collapsed and reopened after
  // viewport changes; the hidden state must never freeze a text offset.
+ stage("collapse");
  details.open=false;
  await sleep(50);
  frame.style.width=width+"px";
  await sleep(160);
+ stage("reopen");
  details.open=true;
  await sleep(160);
  if(!checkSpacing())throw Error("reopened mobile fan has overlapping labels");
  // Changing the year count must redraw from canonical phase positions.
+ stage("move-delta");
  win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
   detail:{deltaYears:delta===400?2937:400,source:"visual-reflow-probe"}
  }));
  await sleep(120);
  if(!checkSpacing())throw Error("labels overlap after Delta movement");
+ stage("return-delta");
  win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
   detail:{deltaYears:delta,source:"visual-reflow-probe"}
  }));
@@ -161,6 +168,7 @@ async function runR16ReflowProof(){
  if(angles!==initialAngles)throw Error("phase angles changed across reflow");
  if(wheel.querySelectorAll("[data-phase-cell]").length!==160)throw Error("lost original fan cells");
  doc.querySelector("#recurrence-instrument").scrollIntoView({block:"start",behavior:"instant"});
+ stage("done");
 }
 frame.addEventListener("load",examine,{once:true});
 </script>

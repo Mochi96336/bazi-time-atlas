@@ -59,7 +59,7 @@ for(const s of scenes){
  const name="r16-p1-original-fan-"+s.width+"-delta-"+s.delta+(s.polish?"-r16-polish":"")+(s.reflow?"-reflow":"");
  const dom=run([size,"--dump-dom",uri.href],name+" DOM");
  const probe=dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0]??"";
- check(probe.includes('data-ready="true"'),name+" not loaded: "+probe.slice(0,450));
+ check(probe.includes('data-ready="true"'),name+" not loaded: "+probe.slice(0,450)+"; detail="+(probe.match(/data-error="[^"]*"/)?.[0]??"unknown")));
  check(probe.includes('data-width="'+s.width+'"'),name+" not true viewport "+s.width);
  check(probe.includes('data-delta="'+s.delta+'"'),name+" wrong timeline Δ");
  check(probe.includes('data-moduli="400,60,60"'),name+" changed genuine cycle units");
