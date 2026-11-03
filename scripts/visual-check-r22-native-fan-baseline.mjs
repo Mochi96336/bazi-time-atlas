@@ -67,10 +67,14 @@ for(const s of scenes){
  check(probe.includes('data-phase-cells="160"'),name+" did not retain all 40+60+60 cells");
  check(probe.includes('data-clip-active-labels="false"'),name+" phase labels clipped outside SVG");
  if(s.polish&&s.width<=480){
-  check(probe.includes('data-r16-label-name-overlap="false"'),name+" phase text too close to original ring name");
+  check(probe.includes('data-r16-text-avoid-failed="false"'),name+" no safe label placement found");
+  check(probe.includes('data-r16-label-name-overlap="false"'),name+" original ring name collision remains: "+probe.match(/data-r16-text-diagnose="[^"]*"/)?.[0]);
  }
+
  if(s.polish&&s.delta!==24000){
-  check(probe.includes('data-active-label-font="'+(s.width<=480?29:16)+'"'),name+" active phase text size not applied");
+  const font=Number(probe.match(/data-active-label-font="([0-9.]+)"/)?.[1]);
+  check(Number.isFinite(font)&&font>=(s.width<=480?14:16)&&font<=(s.width<=480?29:16),
+    name+" active phase label must remain legible (got "+font+")");
  }
  // P1 must keep the original line grid exactly: the washed-out version was
  // visually rejected after comparing the ACTUAL unfolded fan screenshots.

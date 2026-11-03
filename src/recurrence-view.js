@@ -350,20 +350,38 @@ function avoidR16MobileNameCollisions() {
   const positioned=[];
   for(const label of labels){
     const rivals=[...names,...positioned];
-    if(rivals.every(rival=>!adjacent(label,rival))){positioned.push(label);continue;}
     const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
-    // Try the shortest shifts first. All distances are source-SVG units,
-    // never the changing year/day phase displacement itself.
-    const offsets=[[-12,-8],[-21,-13],[-32,-15],[0,-18],[-26,0],
-                   [12,-12],[22,-14],[-40,-20],[0,22]];
+    const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
+    if(rivals.every(rival=>!adjacent(label,rival))){positioned.push(label);continue;}
+    // Keep the pointer at the exact calculated phase angle. Try a few
+    // close text placements; if crowded, reduce only THIS label, never
+    // weaken the original grid or displace its line.
+    const offsets=[[0,0],[-12,-8],[12,-10],[20,-10],[-21,-13],
+      [30,-14],[0,-18],[-26,0],[32,0],[-32,-15],
+      [0,22],[40,-20],[-40,-20],[26,18],[-26,18]];
+    const sizes=[originalSize,26,23,20,17,14].filter((n,i,a)=>
+      n<=originalSize&&a.indexOf(n)===i
+    );
     let used=null;
-    for(const [dx,dy] of offsets){
-      label.setAttribute("x",(x+dx).toFixed(3));
-      label.setAttribute("y",(y+dy).toFixed(3));
-      if(rivals.every(rival=>!adjacent(label,rival))){used=[dx,dy];break;}
+    for(const fontSize of sizes){
+      label.style.fontSize=fontSize+"px";
+      for(const [dx,dy] of offsets){
+        label.setAttribute("x",(x+dx).toFixed(3));
+        label.setAttribute("y",(y+dy).toFixed(3));
+        if(rivals.every(rival=>!adjacent(label,rival))){
+          used={dx,dy,fontSize};break;
+        }
+      }
+      if(used)break;
     }
-    if(!used){label.setAttribute("x",x);label.setAttribute("y",y);}
-    else label.dataset.r16TextOffset=used.join(",");
+    if(!used){
+      label.style.removeProperty("font-size");
+      label.setAttribute("x",x);label.setAttribute("y",y);
+      label.dataset.r16AvoidFailed="true";
+    }else{
+      if(used.dx||used.dy)label.dataset.r16TextOffset=[used.dx,used.dy].join(",");
+      if(used.fontSize!==originalSize)label.dataset.r16TextSize=String(used.fontSize);
+    }
     positioned.push(label);
   }
 }

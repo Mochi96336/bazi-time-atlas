@@ -78,6 +78,12 @@ function examine(){
     A.top<B.bottom+clearance&&A.bottom+clearance>B.top;
  };
  probe.dataset.r16TextShiftCount=String(activePhaseLabels.filter(el=>el.dataset.r16TextOffset).length);
+ probe.dataset.r16TextShrinkCount=String(activePhaseLabels.filter(el=>el.dataset.r16TextSize).length);
+ probe.dataset.r16TextAvoidFailed=String(activePhaseLabels.some(el=>el.dataset.r16AvoidFailed));
+ probe.dataset.r16TextDiagnose=activePhaseLabels.map(el=>{
+  const ring=namesOnFan.find(n=>overlaps(el,n));
+  return el.textContent+":"+(ring?.getAttribute("data-phase-ring-label")||"ok");
+ }).join("|");
  probe.dataset.r16LabelNameOverlap=String(activePhaseLabels.some(el=>namesOnFan.some(n=>overlaps(el,n))));
  probe.dataset.clipActiveLabels=String(activePhaseLabels.some(el=>{
   const rc=el.getBoundingClientRect(),svg=wheel.getBoundingClientRect();
