@@ -19,6 +19,7 @@ const height=Math.max(720,Math.min(2200,Number(params.get("height"))||1100));
 const date=params.get("date")||"2026-09-13";
 const delta=Number(params.get("delta")||"1200");
 const polish=params.get("polish")==="1";
+const reflow=params.get("reflow")==="1";
 const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
 document.body.style.width=width+"px";
 frame.style.width=width+"px";
@@ -47,7 +48,7 @@ function examine(){
  const fanRect=doc.querySelector(".research-fan-graphic").getBoundingClientRect();
  const signed=marker.map(m=>m.dataset.phaseSigned).join(",");
  const mods=marker.map(m=>m.dataset.phaseModulus).join(",");
- probe.dataset.ready="true";
+ probe.dataset.ready=reflow?"pending":"true";
  probe.dataset.date=date;
  probe.dataset.delta=String(delta);
  probe.dataset.width=String(width);
@@ -85,6 +86,7 @@ function examine(){
   return el.textContent+":"+(ring?.getAttribute("data-phase-ring-label")||"ok");
  }).join("|");
  probe.dataset.r16LabelNameOverlap=String(activePhaseLabels.some(el=>namesOnFan.some(n=>overlaps(el,n))));
+ probe.dataset.r16PhaseLabelOverlap=String(activePhaseLabels.some((el,i)=>activePhaseLabels.slice(0,i).some(other=>overlaps(el,other))));
  probe.dataset.clipActiveLabels=String(activePhaseLabels.some(el=>{
   const rc=el.getBoundingClientRect(),svg=wheel.getBoundingClientRect();
   return rc.left<svg.left-2||rc.right>svg.right+2||rc.top<svg.top-2||rc.bottom>svg.bottom+2;
@@ -94,6 +96,71 @@ function examine(){
  probe.dataset.fanInViewport=String(fanRect.top < height-15 && fanRect.bottom > 15);
  probe.dataset.fanTop=String(Math.round(fanRect.top));
  probe.dataset.documentScroll=String(Math.round(win.scrollY));
+ if(reflow){
+  runR16ReflowProof().then(()=>{
+   probe.dataset.r16Reflow="success";
+   probe.dataset.ready="true";
+  },error=>{
+   probe.dataset.ready="error";
+   probe.dataset.error="R16 reflow test: "+String(error);
+  });
+ }
+}
+async function runR16ReflowProof(){
+ const win=frame.contentWindow,doc=frame.contentDocument;
+ const details=doc.querySelector("#discrete-phase-fan-details");
+ const wheel=doc.querySelector("#recurrence-wheel");
+ if(!polish||!details?.open)throw Error("original fan accordion not open");
+ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ const labels=()=>[...wheel.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+ const checkSpacing=()=>{
+  const stationary=[...wheel.querySelectorAll("[data-phase-ring-label]")];
+  const dynamic=labels();
+  const collide=(a,b)=>{
+   const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+   return A.left<B.right+6&&A.right+6>B.left&&A.top<B.bottom+6&&A.bottom+6>B.top;
+  };
+  return !dynamic.some((label,i)=>
+   stationary.some(node=>collide(label,node))||
+   dynamic.slice(0,i).some(node=>collide(label,node))||
+   label.dataset.r16AvoidFailed
+  );
+ };
+ const initialAngles=[...wheel.querySelectorAll(".return-marker")].map(m=>m.dataset.returnAngle).join(",");
+ if(!checkSpacing())throw Error("initial mobile labels overlap");
+ // Crucially: resize the SAME embedded page, not a new load.
+ frame.style.width="768px";
+ await sleep(160);
+ if(win.innerWidth<=480)throw Error("desktop resize not applied");
+ const desktopLabels=labels();
+ if(desktopLabels.some(el=>el.dataset.r16TextOffset||el.dataset.r16TextSize||
+  (el.dataset.r16BaseX!==undefined&&el.getAttribute("x")!==el.dataset.r16BaseX)||
+  Number.parseFloat(win.getComputedStyle(el).fontSize)!==16
+ ))throw Error("stale mobile text offset/size survived desktop resize");
+ // Emulate the actual accordion being collapsed and reopened after
+ // viewport changes; the hidden state must never freeze a text offset.
+ details.open=false;
+ await sleep(50);
+ frame.style.width=width+"px";
+ await sleep(160);
+ details.open=true;
+ await sleep(160);
+ if(!checkSpacing())throw Error("reopened mobile fan has overlapping labels");
+ // Changing the year count must redraw from canonical phase positions.
+ win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
+  detail:{deltaYears:delta===400?2937:400,source:"visual-reflow-probe"}
+ }));
+ await sleep(120);
+ if(!checkSpacing())throw Error("labels overlap after Delta movement");
+ win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
+  detail:{deltaYears:delta,source:"visual-reflow-probe"}
+ }));
+ await sleep(120);
+ if(!checkSpacing())throw Error("labels overlap after returning to starting Delta");
+ const angles=[...wheel.querySelectorAll(".return-marker")].map(m=>m.dataset.returnAngle).join(",");
+ if(angles!==initialAngles)throw Error("phase angles changed across reflow");
+ if(wheel.querySelectorAll("[data-phase-cell]").length!==160)throw Error("lost original fan cells");
+ doc.querySelector("#recurrence-instrument").scrollIntoView({block:"start",behavior:"instant"});
 }
 frame.addEventListener("load",examine,{once:true});
 </script>

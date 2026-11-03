@@ -38,7 +38,11 @@ const scenes=[
  {width:1440,height:1200,delta:1200,signed:"0,0,-9",polish:true},
  {width:1440,height:1200,delta:24000,signed:"0,0,0",polish:true},
  {width:320,height:1200,delta:2937,signed:"137,-3,-23",polish:true},
- {width:1440,height:1200,delta:2937,signed:"137,-3,-23",polish:true}
+ {width:1440,height:1200,delta:2937,signed:"137,-3,-23",polish:true},
+ // Same DOM: resize mobile→desktop→mobile, collapse/reopen the native
+ // phase-fan drilldown, drag Delta to another phase and back.
+ {width:390,height:1250,delta:400,signed:"0,-20,-3",polish:true,reflow:true},
+ {width:320,height:1200,delta:2937,signed:"137,-3,-23",polish:true,reflow:true}
 ];
 const evidence=[];
 const baselineImageBytes=new Map();
@@ -49,9 +53,10 @@ for(const s of scenes){
  uri.searchParams.set("width",String(s.width));
  uri.searchParams.set("height",String(s.height));
  if(s.polish)uri.searchParams.set("polish","1");
+ if(s.reflow)uri.searchParams.set("reflow","1");
  const w=Math.max(s.width,500);
  const size="--window-size="+w+","+s.height;
- const name="r22-p0-original-fan-"+s.width+"-delta-"+s.delta+(s.polish?"-r16-polish":"");
+ const name="r22-p0-original-fan-"+s.width+"-delta-"+s.delta+(s.polish?"-r16-polish":"")+(s.reflow?"-reflow":"");
  const dom=run([size,"--dump-dom",uri.href],name+" DOM");
  const probe=dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0]??"";
  check(probe.includes('data-ready="true"'),name+" not loaded: "+probe.slice(0,450));
@@ -61,6 +66,7 @@ for(const s of scenes){
  check(probe.includes('data-signed="'+s.signed+'"'),name+" unexpected signed phases "+probe.slice(0,500));
  check(probe.includes('data-layers="3"'),name+" not the existing three-layer fan");
  check(probe.includes('data-visual-mode="signed-shortest-fan"'),name+" wrong fan");
+ if(s.reflow)check(probe.includes('data-r16-reflow="success"'),name+" resize/accordion/Delta dynamic proof failed: "+probe.slice(0,700));
  check(probe.includes('data-fan-in-viewport="true"'),name+" test framed the page header, not the semicircle; "+
   probe.match(/data-fan-top="(-?\d+)"/)?.[0]);
  check(probe.includes('data-r16-polish="'+(s.polish?"true":"baseline")+'"'),name+" unexpected P1 opt-in state");
@@ -69,6 +75,7 @@ for(const s of scenes){
  if(s.polish&&s.width<=480){
   check(probe.includes('data-r16-text-avoid-failed="false"'),name+" no safe label placement found");
   check(probe.includes('data-r16-label-name-overlap="false"'),name+" original ring name collision remains: "+probe.match(/data-r16-text-diagnose="[^"]*"/)?.[0]);
+  check(probe.includes('data-r16-phase-label-overlap="false"'),name+" phase labels overlap each other");
  }
 
  if(s.polish&&s.delta!==24000){

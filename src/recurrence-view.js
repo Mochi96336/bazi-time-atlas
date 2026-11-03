@@ -338,9 +338,24 @@ function renderCursor() {
 // exact angular position, 160 sector boundaries and all static ring names
 // remain the same. Use rendered text bounds rather than angle-specific hacks.
 function avoidR16MobileNameCollisions() {
-  if(!r16PolishOptIn||!mobileFanMedia.matches)return;
-  const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
+  if(!r16PolishOptIn)return;
   const labels=[...cursorGroup.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+  // Every pass is a fresh calculation. Otherwise orientation changes can
+  // compound old offsets or leave mobile-sized text on the desktop.
+  for(const label of labels){
+    if(label.dataset.r16BaseX===undefined){
+      label.dataset.r16BaseX=label.getAttribute("x");
+      label.dataset.r16BaseY=label.getAttribute("y");
+    }
+    label.setAttribute("x",label.dataset.r16BaseX);
+    label.setAttribute("y",label.dataset.r16BaseY);
+    label.style.removeProperty("font-size");
+    delete label.dataset.r16TextOffset;
+    delete label.dataset.r16TextSize;
+    delete label.dataset.r16AvoidFailed;
+  }
+  if(!mobileFanMedia.matches||!instrument.getClientRects().length)return;
+  const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
   const clearance=6; // real CSS px, protects small static ring-name text
   const adjacent=(a,b)=>{
     const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
@@ -384,6 +399,16 @@ function avoidR16MobileNameCollisions() {
     }
     positioned.push(label);
   }
+}
+
+let r16ReflowRequest=0;
+function scheduleR16LabelReflow(){
+  if(!r16PolishOptIn)return;
+  if(r16ReflowRequest)cancelAnimationFrame(r16ReflowRequest);
+  r16ReflowRequest=requestAnimationFrame(()=>{
+    r16ReflowRequest=0;
+    avoidR16MobileNameCollisions();
+  });
 }
 
 function renderReturnMarkers(state) {
@@ -1060,6 +1085,7 @@ function syncFanViewport() {
     : (mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX));
   svg.dataset.mobileCrop = String(mobile);
   instrument.dataset.fanViewBox = svg.getAttribute("viewBox");
+  scheduleR16LabelReflow();
 }
 
 function bindControls() {
@@ -1082,6 +1108,19 @@ function bindControls() {
     if (document.hidden) deltaPlaybackController?.stop();
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
+  if(r16PolishOptIn){
+    // Width can change without crossing 480px (rotation, split-screen,
+    // desktop resizing). Always resolve against the new screen coordinates.
+    window.addEventListener("resize",scheduleR16LabelReflow);
+    // The original Research 01 fan lives inside a dynamically created
+    // <details>; while collapsed, SVG bounds are zero and cannot be used.
+    // On expansion, measure only after the disclosure has laid out.
+    document.addEventListener("toggle",event=>{
+      if(event.target.id==="discrete-phase-fan-details"&&event.target.open){
+        scheduleR16LabelReflow();
+      }
+    },true);
+  }
 }
 
 function initialize() {
