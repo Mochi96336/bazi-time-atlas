@@ -253,13 +253,24 @@ function avoidR16MobileNameCollisions() {
 }
 
 let r16ReflowRequest=0;
+let r16ReflowSettledTimer=0;
 function scheduleR16LabelReflow(){
   if(!r16PolishOptIn)return;
   if(r16ReflowRequest)cancelAnimationFrame(r16ReflowRequest);
+  if(r16ReflowSettledTimer)clearTimeout(r16ReflowSettledTimer);
+  // Flush current layout immediately; a closed <details> has empty bounds,
+  // so this can be a no-op until it has been opened.
+  avoidR16MobileNameCollisions();
+  // Recheck at frame layout and at the settled layout. Headless Chromium and
+  // browser tabs can defer a rAF when <details> was just revealed.
   r16ReflowRequest=requestAnimationFrame(()=>{
     r16ReflowRequest=0;
     avoidR16MobileNameCollisions();
   });
+  r16ReflowSettledTimer=setTimeout(()=>{
+    r16ReflowSettledTimer=0;
+    avoidR16MobileNameCollisions();
+  },100);
 }
 
 function renderReturnMarkers(state) {

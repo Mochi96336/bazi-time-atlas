@@ -150,7 +150,22 @@ async function runR16ReflowProof(){
  stage("reopen");
  details.open=true;
  await sleep(160);
- if(!checkSpacing())throw Error("reopened mobile fan has overlapping labels");
+ if(!checkSpacing()){
+  const debug=labels().map(label=>{
+   const rect=label.getBoundingClientRect();
+   return [
+    label.textContent,
+    Math.round(rect.x),Math.round(rect.y),
+    Math.round(rect.width),Math.round(rect.height),
+    label.dataset.r16TextOffset||"none",
+    label.dataset.r16TextSize||"default"
+   ].join(":");
+  });
+  const instrumentRect=doc.querySelector("#recurrence-instrument").getBoundingClientRect();
+  throw Error("reopened mobile fan has overlapping labels; width="+win.innerWidth+
+   " open="+details.open+" box="+Math.round(instrumentRect.width)+"x"+
+   Math.round(instrumentRect.height)+" phase="+debug.join("|"));
+ }
  // Changing the year count must redraw from canonical phase positions.
  stage("move-delta");
  win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
