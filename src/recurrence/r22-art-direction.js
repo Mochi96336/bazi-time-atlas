@@ -37,7 +37,9 @@ export const R22_ART_FINISHES=Object.freeze({
  monolith:Object.freeze({
   radial:Object.freeze({cx:570,cy:500,r:650,transform:"matrix(1 0 0 .8 0 100)"}),
   colors:Object.freeze(["#9aa7ae","#83949c","#627580","#475965","#2f414d"])
- })
+ }),
+ // P10.4: non-metallic study, one opaque fill shared by all three bands.
+ matte:Object.freeze({solid:"#65747e"})
 });
 export function r22ArtFinish(value,art){
  return art==="graphite"&&Object.hasOwn(R22_ART_FINISHES,value)?value:"";

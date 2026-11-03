@@ -73,7 +73,12 @@ const scenes=[
  // P10.2 shared radial illumination; no doubled relief at joints.
  {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"monolith"},
  {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"graphite",finish:"monolith"},
- {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"monolith"}
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"monolith"},
+ // P10.4 true no-gradient, no faux-metal finish, same dates and phases.
+ {w:320,h:1330,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"matte"},
+ {w:390,h:1350,date:"2026-09-13",d:400,signed:"0,-20,-3",status:"one",art:"graphite",finish:"matte"},
+ {w:390,h:1350,date:"2026-09-13",d:24000,signed:"0,0,0",status:"all",art:"graphite",finish:"matte"},
+ {w:1440,h:1100,date:"2026-09-13",d:1200,signed:"0,0,-9",status:"two",art:"graphite",finish:"matte"}
 ];
 const records=[];
 const usedNames=new Set();
@@ -101,10 +106,12 @@ for(const s of scenes){
    fanDegreeSpan:"180",fanVerticalScale:"0.66",
    phaseShape:"signed-shortest-180-semiellipse",
    artMode:s.art||"baseline",finishMode:s.finish||"baseline",
-   finishGradient:String(s.finish?1:0),
-   finishCoats:String(s.finish?3:0),
-   finishReliefs:String(s.finish&&s.finish!=="monolith"?4:0),
-   finishRims:String(s.finish?2:0),
+   finishGradient:String(s.finish&&s.finish!=="matte"?1:0),
+   finishCoats:String(s.finish&&s.finish!=="matte"?3:0),
+   finishReliefs:String(s.finish&&!["monolith","matte"].includes(s.finish)?4:0),
+   finishRims:String(s.finish&&s.finish!=="matte"?2:0),
+   r22GradientNodes:String(s.finish==="matte"?0:(s.finish?4:3)),
+   matteNoFx:"true",
    artSurfaces:String(s.art?3:0),
    artAdjacent:String(Boolean(s.art)),
    artContours:String(s.art?4:0),
@@ -122,7 +129,7 @@ for(const s of scenes){
    studyMissingLeaders:String(s.study==="missing"?(s.d===400?2:[1200,1980,8000].includes(s.d)?1:0):0),
    studyMissingInView:"true",
    ellipticalRail:"true",railNarrow:"true",railWidth:"26",
-   materialGradients:"3",materialUnits:"true",zeroGuideCount:"3",
+   materialGradients:String(s.finish==="matte"?0:3),materialUnits:"true",zeroGuideCount:"3",
    zeroGuideAligned:"true",hasLongZeroNeedle:"false",closedLabelQuiet:"true",
    gregorianRingLabelExists:"true",
    fanViewBox:"0 404 1200 446"})){

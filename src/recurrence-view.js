@@ -137,7 +137,8 @@ function formatSigned(value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
-  if (r22GuideOptIn) {
+  if (r22GuideOptIn && r22Finish!=="matte") {
+    // Matte: not even unused SVG gradient definitions are created.
     // A single coordinate-stable material gradient across ALL sectors in a
     // ring; per-sector object-bounding-box gradients would create fake stripes.
     const defs=svg.querySelector("defs") ?? svgEl("defs",{},svg);
@@ -244,7 +245,7 @@ function renderRing(key) {
       "data-r22-art-inner":band.inner,
       "data-r22-art-outer":band.outer
     },spec.group);
-    if(r22Finish){
+    if(r22Finish&&r22Finish!=="matte"){
       // Thin translucent finish coat: keeps three physical strata legible
       // without resetting the SAME underlying highlight on every band.
       svgEl("path",{
@@ -276,7 +277,7 @@ function renderArtSeams(){
       "data-r22-art-contour":radius
     },group);
   }
-  if(r22Finish){
+  if(r22Finish&&r22Finish!=="matte"){
     // Four light/shade hairlines, not holes: ±2.4 units around the
     // two real shared edges. Widths are screen-space CSS strokes.
     if(r22Finish!=="monolith"){

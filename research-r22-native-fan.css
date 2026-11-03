@@ -597,3 +597,32 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="monolith"
 html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="monolith"] .r22-finish-rim{
  stroke:rgba(198,218,225,.19);stroke-width:.8px;
 }
+
+/* P10.4 Matte: one opaque body, two structural seams. No gradients,
+   glazing, additional bevels, rims, glow or drop shadows. */
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .r22-art-surface{
+ fill:#65747e;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .r22-art-contour.is-seam{
+ stroke:rgba(15,30,39,.46);stroke-width:1.15px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .r22-art-contour.is-edge{
+ stroke:rgba(199,211,216,.15);stroke-width:.7px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"]{
+ --gregorian:#e4ded0;--year:#e4ded0;--day:#e4ded0;
+ --cursor:#e4ded0;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .return-marker,
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .return-marker:not(.is-closed){
+ filter:none;stroke:#e4ded0;stroke-width:8px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .return-marker.is-closed{
+ filter:none;stroke:#eee7da;stroke-width:9px;
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .r22-zero-guide{
+ stroke:rgba(228,222,208,.66);
+}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .cursor-label{
+ fill:#d5cfc3;
+}
