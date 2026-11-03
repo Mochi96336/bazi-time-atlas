@@ -69,7 +69,17 @@ function examine(){
  const sector=wheel.querySelector(".phase-sector");
  probe.dataset.sectorStrokeWidth=sector?win.getComputedStyle(sector).strokeWidth:"missing";
  probe.dataset.majorTickWidth=major?win.getComputedStyle(major).strokeWidth:"missing";
- probe.dataset.clipActiveLabels=String([...wheel.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')].some(el=>{
+ const activePhaseLabels=[...wheel.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+ const namesOnFan=[...wheel.querySelectorAll("[data-phase-ring-label]")];
+ const clearance=6;
+ const overlaps=(a,b)=>{
+  const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+  return A.left<B.right+clearance&&A.right+clearance>B.left&&
+    A.top<B.bottom+clearance&&A.bottom+clearance>B.top;
+ };
+ probe.dataset.r16TextShiftCount=String(activePhaseLabels.filter(el=>el.dataset.r16TextOffset).length);
+ probe.dataset.r16LabelNameOverlap=String(activePhaseLabels.some(el=>namesOnFan.some(n=>overlaps(el,n))));
+ probe.dataset.clipActiveLabels=String(activePhaseLabels.some(el=>{
   const rc=el.getBoundingClientRect(),svg=wheel.getBoundingClientRect();
   return rc.left<svg.left-2||rc.right>svg.right+2||rc.top<svg.top-2||rc.bottom>svg.bottom+2;
  }));

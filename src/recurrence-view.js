@@ -334,6 +334,40 @@ function renderCursor() {
   label.textContent = "基準 · 0";
 }
 
+// Only the *existing* nonzero phase text may be shifted. The pointer line,
+// exact angular position, 160 sector boundaries and all static ring names
+// remain the same. Use rendered text bounds rather than angle-specific hacks.
+function avoidR16MobileNameCollisions() {
+  if(!r16PolishOptIn||!mobileFanMedia.matches)return;
+  const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
+  const labels=[...cursorGroup.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+  const clearance=6; // real CSS px, protects small static ring-name text
+  const adjacent=(a,b)=>{
+    const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+    return A.left < B.right+clearance&&A.right+clearance>B.left&&
+      A.top < B.bottom+clearance&&A.bottom+clearance>B.top;
+  };
+  const positioned=[];
+  for(const label of labels){
+    const rivals=[...names,...positioned];
+    if(rivals.every(rival=>!adjacent(label,rival))){positioned.push(label);continue;}
+    const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
+    // Try the shortest shifts first. All distances are source-SVG units,
+    // never the changing year/day phase displacement itself.
+    const offsets=[[-12,-8],[-21,-13],[-32,-15],[0,-18],[-26,0],
+                   [12,-12],[22,-14],[-40,-20],[0,22]];
+    let used=null;
+    for(const [dx,dy] of offsets){
+      label.setAttribute("x",(x+dx).toFixed(3));
+      label.setAttribute("y",(y+dy).toFixed(3));
+      if(rivals.every(rival=>!adjacent(label,rival))){used=[dx,dy];break;}
+    }
+    if(!used){label.setAttribute("x",x);label.setAttribute("y",y);}
+    else label.dataset.r16TextOffset=used.join(",");
+    positioned.push(label);
+  }
+}
+
 function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
   cursorGroup.querySelector("[data-r22-study-overlay]")?.remove();
@@ -456,6 +490,7 @@ function renderReturnMarkers(state) {
     }, cursorGroup);
     label.textContent = formatSigned(signed);
   }
+  avoidR16MobileNameCollisions();
 }
 
 function readBaseDate() {

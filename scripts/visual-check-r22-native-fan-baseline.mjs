@@ -66,6 +66,9 @@ for(const s of scenes){
  check(probe.includes('data-r16-polish="'+(s.polish?"true":"baseline")+'"'),name+" unexpected P1 opt-in state");
  check(probe.includes('data-phase-cells="160"'),name+" did not retain all 40+60+60 cells");
  check(probe.includes('data-clip-active-labels="false"'),name+" phase labels clipped outside SVG");
+ if(s.polish&&s.width<=480){
+  check(probe.includes('data-r16-label-name-overlap="false"'),name+" phase text too close to original ring name");
+ }
  if(s.polish&&s.delta!==24000){
   check(probe.includes('data-active-label-font="'+(s.width<=480?29:16)+'"'),name+" active phase text size not applied");
  }
