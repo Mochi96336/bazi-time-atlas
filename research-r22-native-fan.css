@@ -626,3 +626,15 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .
 html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="matte"] .cursor-label{
  fill:#d5cfc3;
 }
+
+/* P10.5 Ink: no gradient or faux-metal texture, purely opaque ground. */
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .r22-art-surface{fill:#394a54}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .r22-art-contour.is-seam{stroke:rgba(213,222,225,.28);stroke-width:1px}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .r22-art-contour.is-edge{stroke:rgba(205,218,223,.12);stroke-width:.7px}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"]{--gregorian:#ece6db;--year:#ece6db;--day:#ece6db;--cursor:#ece6db}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .return-marker{filter:none;stroke:#ece6db;stroke-width:9px}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .return-marker.is-closed{filter:none;stroke:#ece6db;stroke-width:9px}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .return-marker-label:not([data-phase-closed="true"]){fill:#f0ede5;stroke:#0b151e;stroke-width:4px}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .r22-zero-guide{stroke:rgba(236,230,219,.70)}
+html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .cursor-label{fill:#d5d0c6}
+@media(max-width:480px){html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .return-marker-label:not([data-phase-closed="true"]){font-size:40px;stroke-width:5px}}

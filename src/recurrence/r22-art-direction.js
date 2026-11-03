@@ -39,8 +39,13 @@ export const R22_ART_FINISHES=Object.freeze({
   colors:Object.freeze(["#9aa7ae","#83949c","#627580","#475965","#2f414d"])
  }),
  // P10.4: non-metallic study, one opaque fill shared by all three bands.
- matte:Object.freeze({solid:"#65747e"})
+ matte:Object.freeze({solid:"#65747e"}),
+ // Ink: no light simulation; a darker solid body cedes attention to phase.
+ ink:Object.freeze({solid:"#394a54"})
 });
+export function r22FlatFinish(finish){
+ return Boolean(finish&&R22_ART_FINISHES[finish]?.solid);
+}
 export function r22ArtFinish(value,art){
  return art==="graphite"&&Object.hasOwn(R22_ART_FINISHES,value)?value:"";
 }

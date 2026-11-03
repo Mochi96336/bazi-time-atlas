@@ -13,7 +13,7 @@ import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playb
 import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
 import {r22StudyMode,r22StudyReading,r22StudyGapArc,r22MissingStudyCallout,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
 import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
-import {r22ArtMode,r22ArtFinish,R22_ART_FINISHES,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
+import {r22ArtMode,r22ArtFinish,r22FlatFinish,R22_ART_FINISHES,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -40,6 +40,7 @@ const r22Art = r22GuideOptIn ? r22ArtMode(new URLSearchParams(location.search).g
 // Existing P10 graphite/warm remain unchanged; the two surface treatments
 // exist ONLY as explicit P10.1 graphite experiments.
 const r22Finish = r22ArtFinish(new URLSearchParams(location.search).get("r22-finish"),r22Art);
+const r22Flat = r22FlatFinish(r22Finish);
 const r22Study = r22GuideOptIn&&!r22Art ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
@@ -137,7 +138,7 @@ function formatSigned(value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
-  if (r22GuideOptIn && r22Finish!=="matte") {
+  if (r22GuideOptIn && !r22Flat) {
     // Matte: not even unused SVG gradient definitions are created.
     // A single coordinate-stable material gradient across ALL sectors in a
     // ring; per-sector object-bounding-box gradients would create fake stripes.
@@ -245,7 +246,7 @@ function renderRing(key) {
       "data-r22-art-inner":band.inner,
       "data-r22-art-outer":band.outer
     },spec.group);
-    if(r22Finish&&r22Finish!=="matte"){
+    if(r22Finish&&!r22Flat){
       // Thin translucent finish coat: keeps three physical strata legible
       // without resetting the SAME underlying highlight on every band.
       svgEl("path",{
@@ -277,7 +278,7 @@ function renderArtSeams(){
       "data-r22-art-contour":radius
     },group);
   }
-  if(r22Finish&&r22Finish!=="matte"){
+  if(r22Finish&&!r22Flat){
     // Four light/shade hairlines, not holes: ±2.4 units around the
     // two real shared edges. Widths are screen-space CSS strokes.
     if(r22Finish!=="monolith"){

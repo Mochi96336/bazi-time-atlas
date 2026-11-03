@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {R22_ART_BANDS,R22_ART_MATERIALS,R22_ART_FINISHES,r22ArtMode,r22ArtFinish,r22ArtGeometry} from "../src/recurrence/r22-art-direction.js";
+import {R22_ART_BANDS,R22_ART_MATERIALS,R22_ART_FINISHES,r22ArtMode,r22ArtFinish,r22FlatFinish,r22ArtGeometry} from "../src/recurrence/r22-art-direction.js";
 import {R22_SEMICIRCLE} from "../src/recurrence/r22-semicircle-geometry.js";
 
 test("P10 tests ONLY explicit art opt-in; default R22 and R16 are unaffected",()=>{
@@ -37,7 +37,7 @@ test("P10 material palettes are a family, not original purple/bronze/teal trifec
 });
 
 test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R16",()=>{
- for(const finish of ["bevel","satin","monolith","matte"]){
+ for(const finish of ["bevel","satin","monolith","matte","ink"]){
   assert.equal(r22ArtFinish(finish,"graphite"),finish);
   assert.equal(r22ArtFinish(finish,"warm"),"");
   assert.equal(r22ArtFinish(finish,""),"");
@@ -46,9 +46,9 @@ test("P10.1 finishes require explicit graphite art mode, never affect warm/P7/R1
  assert.equal(r22ArtFinish(null,"graphite"),"");
 });
 test("P10.1 shared world-space illumination uses one 5-stop palette per finish",()=>{
- assert.equal(Object.keys(R22_ART_FINISHES).length,4);
+ assert.equal(Object.keys(R22_ART_FINISHES).length,5);
  for(const [mode,spec] of Object.entries(R22_ART_FINISHES)){
-  if(mode==="matte"){
+  if(mode==="matte"||mode==="ink"){
    assert.deepEqual(Object.keys(spec),["solid"]);
    assert.match(spec.solid,/^#[0-9a-f]{6}$/i);
    assert.ok(!Object.hasOwn(spec,"colors"));
@@ -72,5 +72,14 @@ test("P10.4 matte has one solid colour, no three-tone gradient or lighting",()=>
  assert.deepEqual(R22_ART_FINISHES.matte,{solid:"#65747e"});
  assert.equal(r22ArtFinish("matte","graphite"),"matte");
  assert.equal(r22ArtFinish("matte","warm"),"");
+ assert.deepEqual(r22ArtGeometry().map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);
+});
+
+test("Ink is an opt-in flat field, preserving original geometry and old finishes",()=>{
+ assert.equal(R22_ART_FINISHES.ink.solid,"#394a54");
+ assert.equal(r22ArtFinish("ink","graphite"),"ink");
+ assert.equal(r22ArtFinish("ink","warm"),"");
+ for(const f of ["ink","matte"])assert.equal(r22FlatFinish(f),true);
+ for(const f of ["","bevel","satin","monolith"])assert.equal(r22FlatFinish(f),false);
  assert.deepEqual(r22ArtGeometry().map(b=>[b.inner,b.outer]),[[410,460],[460,510],[510,560]]);
 });
