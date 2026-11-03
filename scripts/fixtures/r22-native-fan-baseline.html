@@ -23,8 +23,10 @@ const frame=document.querySelector("#stage"),probe=document.querySelector("#prob
 document.body.style.width=width+"px";
 frame.style.width=width+"px";
 frame.style.height=height+"px";
+// Native fragment navigation happens before the screenshot, unlike the
+// previous asynchronous scrollIntoView that left 100% of PNGs above the fan.
 frame.src=new URL("../../recurrence.html?date="+encodeURIComponent(date)+"&delta="+delta+
- (polish?"&r16-polish=1":""),location.href).href;
+ (polish?"&r16-polish=1":"")+"#recurrence-instrument",location.href).href;
 let tries=0;
 function examine(){
  const win=frame.contentWindow;
@@ -42,6 +44,7 @@ function examine(){
  win.scrollBy(0,-15);
  const box=wheel.getBoundingClientRect();
  const container=instrument.getBoundingClientRect();
+ const fanRect=doc.querySelector(".research-fan-graphic").getBoundingClientRect();
  const signed=marker.map(m=>m.dataset.phaseSigned).join(",");
  const mods=marker.map(m=>m.dataset.phaseModulus).join(",");
  probe.dataset.ready="true";
@@ -70,6 +73,8 @@ function examine(){
  }));
  probe.dataset.wheelBox=[box.x,box.y,box.width,box.height].map(x=>Math.round(x)).join(",");
  probe.dataset.containerBox=[container.x,container.y,container.width,container.height].map(x=>Math.round(x)).join(",");
+ probe.dataset.fanInViewport=String(fanRect.top < height-15 && fanRect.bottom > 15);
+ probe.dataset.fanTop=String(Math.round(fanRect.top));
  probe.dataset.documentScroll=String(Math.round(win.scrollY));
 }
 frame.addEventListener("load",examine,{once:true});

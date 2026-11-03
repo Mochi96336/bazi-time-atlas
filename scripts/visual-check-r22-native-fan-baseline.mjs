@@ -1,5 +1,5 @@
 import {spawnSync} from "node:child_process";
-import {mkdir,stat,writeFile} from "node:fs/promises";
+import {mkdir,stat,writeFile,readFile} from "node:fs/promises";
 import path from "node:path";
 
 const host=process.env.BASE_URL??"http://127.0.0.1:4173/";
@@ -35,6 +35,7 @@ const scenes=[
  {width:1440,height:1200,delta:24000,signed:"0,0,0",polish:true}
 ];
 const evidence=[];
+const baselineImageBytes=new Map();
 for(const s of scenes){
  const uri=new URL("scripts/fixtures/r22-native-fan-baseline.html",host);
  uri.searchParams.set("date","2026-09-13");
@@ -54,6 +55,8 @@ for(const s of scenes){
  check(probe.includes('data-signed="'+s.signed+'"'),name+" unexpected signed phases "+probe.slice(0,500));
  check(probe.includes('data-layers="3"'),name+" not the existing three-layer fan");
  check(probe.includes('data-visual-mode="signed-shortest-fan"'),name+" wrong fan");
+ check(probe.includes('data-fan-in-viewport="true"'),name+" test framed the page header, not the semicircle; "+
+  probe.match(/data-fan-top="(-?\d+)"/)?.[0]);
  check(probe.includes('data-r16-polish="'+(s.polish?"true":"baseline")+'"'),name+" unexpected P1 opt-in state");
  check(probe.includes('data-phase-cells="160"'),name+" did not retain all 40+60+60 cells");
  check(probe.includes('data-clip-active-labels="false"'),name+" phase labels clipped outside SVG");
@@ -68,6 +71,16 @@ for(const s of scenes){
  run([size,"--screenshot="+out,uri.href],name+" screenshot");
  const bytes=(await stat(out)).size;
  check(bytes>25000,name+" blank screenshot ("+bytes+" bytes)");
+ // The previous "green" visual suite captured only the untouched page header
+ // for BOTH variants. Refuse acceptance unless every paired PNG really differs.
+ const key=s.width+"/"+s.delta;
+ const png=await readFile(out);
+ if(s.polish){
+  const before=baselineImageBytes.get(key);
+  check(before&&(!png.equals(before)),name+" screenshot pixel bytes identical to default: fan NOT visible");
+ }else{
+  baselineImageBytes.set(key,png);
+ }
  evidence.push({...s,bytes,file:name+".png"});
 }
 await writeFile(path.join(output,"r22-p0-evidence.json"),JSON.stringify({status:"captured-current-native-main",
