@@ -33,6 +33,9 @@ const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
+// R16 P1: improve ONLY the live original diagram's hierarchy by opt-in.
+// No change to 160°/290-unit geometry, 40/60/60 segmentation, phase, or Δ.
+const r16PolishOptIn = !r22GuideOptIn && new URLSearchParams(window.location.search).get("r16-polish") === "1";
 // Explicit experimental sketches only; default R22 P7 and R16 are untouched.
 // P10 is a deliberately isolated art-only experiment: no annotations or
 // status overlays may compete until the large form has been evaluated.
@@ -1096,6 +1099,7 @@ function initialize() {
   instrument.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
   instrument.dataset.fanDegreeSpan = r22GuideOptIn ? "180" : "160";
   instrument.dataset.r22Study = r22Study || "baseline";
+  instrument.dataset.r16Polish = r16PolishOptIn ? "true" : "baseline";
   instrument.dataset.r22Art = r22Art || "baseline";
   instrument.dataset.r22Finish = r22Finish || "baseline";
   instrument.dataset.fanVerticalScale = r22GuideOptIn ? String(R22_SEMICIRCLE.verticalScale) : "1";

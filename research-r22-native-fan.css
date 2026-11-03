@@ -639,3 +639,27 @@ html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .re
 html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .r22-zero-guide{stroke:rgba(236,230,219,.70)}
 html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .cursor-label{fill:#d5d0c6}
 @media(max-width:480px){html[data-research-r22="true"] #recurrence-instrument[data-r22-finish="ink"] .return-marker-label:not([data-phase-closed="true"]){font-size:40px;stroke-width:5px}}
+
+
+/* R16 P1: inspect the ACTUAL existing 160° concentric chart, not the R22
+   flattened sketch. An opt-in-only typographic/tick hierarchy study:
+   all 160 original sectors, 290 total radial units, three band identities,
+   marker angles and the common zero datum remain untouched. No new palette,
+   gradients, glow, labels, geometry or width changes. */
+#recurrence-instrument[data-r16-polish="true"] .phase-sector{
+ stroke:rgba(217,230,233,.13);stroke-width:1.15px;
+}
+#recurrence-instrument[data-r16-polish="true"] .phase-tick:not(.major){
+ stroke:rgba(223,235,236,.22);stroke-width:.9px;
+}
+#recurrence-instrument[data-r16-polish="true"] .phase-tick.major{
+ stroke:rgba(229,237,239,.65);stroke-width:1.55px;
+}
+#recurrence-instrument[data-r16-polish="true"] .return-marker-label:not([data-phase-closed="true"]){
+ font-size:16px;font-weight:800;stroke-width:3.2px;
+}
+@media(max-width:480px){
+ #recurrence-instrument[data-r16-polish="true"] .return-marker-label:not([data-phase-closed="true"]){
+  font-size:29px;stroke-width:4px;
+ }
+}

@@ -25,7 +25,14 @@ const scenes=[
  {width:390,height:1250,delta:24000,signed:"0,0,0"},
  {width:768,height:1200,delta:1200,signed:"0,0,-9"},
  {width:1440,height:1200,delta:1200,signed:"0,0,-9"},
- {width:1440,height:1200,delta:24000,signed:"0,0,0"}
+ {width:1440,height:1200,delta:24000,signed:"0,0,0"},
+ // R16 P1 opt-in: same actual original SVG, not reconstructed art.
+ // Capture 0/+400/+1200/+24000, mobile and desktop, next to original.
+ {width:320,height:1200,delta:1200,signed:"0,0,-9",polish:true},
+ {width:390,height:1250,delta:400,signed:"0,-20,-3",polish:true},
+ {width:390,height:1250,delta:24000,signed:"0,0,0",polish:true},
+ {width:1440,height:1200,delta:1200,signed:"0,0,-9",polish:true},
+ {width:1440,height:1200,delta:24000,signed:"0,0,0",polish:true}
 ];
 const evidence=[];
 for(const s of scenes){
@@ -34,9 +41,10 @@ for(const s of scenes){
  uri.searchParams.set("delta",String(s.delta));
  uri.searchParams.set("width",String(s.width));
  uri.searchParams.set("height",String(s.height));
+ if(s.polish)uri.searchParams.set("polish","1");
  const w=Math.max(s.width,500);
  const size="--window-size="+w+","+s.height;
- const name="r22-p0-original-fan-"+s.width+"-delta-"+s.delta;
+ const name="r22-p0-original-fan-"+s.width+"-delta-"+s.delta+(s.polish?"-r16-polish":"");
  const dom=run([size,"--dump-dom",uri.href],name+" DOM");
  const probe=dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0]??"";
  check(probe.includes('data-ready="true"'),name+" not loaded: "+probe.slice(0,450));
@@ -46,6 +54,16 @@ for(const s of scenes){
  check(probe.includes('data-signed="'+s.signed+'"'),name+" unexpected signed phases "+probe.slice(0,500));
  check(probe.includes('data-layers="3"'),name+" not the existing three-layer fan");
  check(probe.includes('data-visual-mode="signed-shortest-fan"'),name+" wrong fan");
+ check(probe.includes('data-r16-polish="'+(s.polish?"true":"baseline")+'"'),name+" unexpected P1 opt-in state");
+ check(probe.includes('data-phase-cells="160"'),name+" did not retain all 40+60+60 cells");
+ check(probe.includes('data-clip-active-labels="false"'),name+" phase labels clipped outside SVG");
+ if(s.polish&&s.delta!==24000){
+  check(probe.includes('data-active-label-font="'+(s.width<=480?29:16)+'"'),name+" active phase text size not applied");
+ }
+ if(s.polish){
+  check(probe.includes('data-minor-tick-width="0.9px"'),name+" minor ticks not refined");
+  check(probe.includes('data-major-tick-width="1.55px"'),name+" major ticks not refined");
+ }
  const out=path.join(output,name+".png");
  run([size,"--screenshot="+out,uri.href],name+" screenshot");
  const bytes=(await stat(out)).size;
