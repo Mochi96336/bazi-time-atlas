@@ -26,13 +26,19 @@ const scenes=[
  {width:768,height:1200,delta:1200,signed:"0,0,-9"},
  {width:1440,height:1200,delta:1200,signed:"0,0,-9"},
  {width:1440,height:1200,delta:24000,signed:"0,0,0"},
+ // The exact +2937 year alignment provided in the user's current screenshot:
+ // Gregorian +137 / Year -3 / Day -23.
+ {width:320,height:1200,delta:2937,signed:"137,-3,-23"},
+ {width:1440,height:1200,delta:2937,signed:"137,-3,-23"},
  // R16 P1 opt-in: same actual original SVG, not reconstructed art.
  // Capture 0/+400/+1200/+24000, mobile and desktop, next to original.
  {width:320,height:1200,delta:1200,signed:"0,0,-9",polish:true},
  {width:390,height:1250,delta:400,signed:"0,-20,-3",polish:true},
  {width:390,height:1250,delta:24000,signed:"0,0,0",polish:true},
  {width:1440,height:1200,delta:1200,signed:"0,0,-9",polish:true},
- {width:1440,height:1200,delta:24000,signed:"0,0,0",polish:true}
+ {width:1440,height:1200,delta:24000,signed:"0,0,0",polish:true},
+ {width:320,height:1200,delta:2937,signed:"137,-3,-23",polish:true},
+ {width:1440,height:1200,delta:2937,signed:"137,-3,-23",polish:true}
 ];
 const evidence=[];
 const baselineImageBytes=new Map();
@@ -63,10 +69,11 @@ for(const s of scenes){
  if(s.polish&&s.delta!==24000){
   check(probe.includes('data-active-label-font="'+(s.width<=480?29:16)+'"'),name+" active phase text size not applied");
  }
- if(s.polish){
-  check(probe.includes('data-minor-tick-width="0.9px"'),name+" minor ticks not refined");
-  check(probe.includes('data-major-tick-width="1.55px"'),name+" major ticks not refined");
- }
+ // P1 must keep the original line grid exactly: the washed-out version was
+ // visually rejected after comparing the ACTUAL unfolded fan screenshots.
+ check(probe.includes('data-sector-stroke-width="0.9px"'),name+" changed original sector divisions");
+ check(probe.includes('data-minor-tick-width="1px"'),name+" changed original minor ticks");
+ check(probe.includes('data-major-tick-width="1.35px"'),name+" changed original major ticks");
  const out=path.join(output,name+".png");
  run([size,"--screenshot="+out,uri.href],name+" screenshot");
  const bytes=(await stat(out)).size;

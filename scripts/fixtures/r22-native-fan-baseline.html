@@ -66,6 +66,8 @@ function examine(){
  const minor=wheel.querySelector(".phase-tick:not(.major)");
  const major=wheel.querySelector(".phase-tick.major");
  probe.dataset.minorTickWidth=minor?win.getComputedStyle(minor).strokeWidth:"missing";
+ const sector=wheel.querySelector(".phase-sector");
+ probe.dataset.sectorStrokeWidth=sector?win.getComputedStyle(sector).strokeWidth:"missing";
  probe.dataset.majorTickWidth=major?win.getComputedStyle(major).strokeWidth:"missing";
  probe.dataset.clipActiveLabels=String([...wheel.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')].some(el=>{
   const rc=el.getBoundingClientRect(),svg=wheel.getBoundingClientRect();
