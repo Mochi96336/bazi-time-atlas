@@ -30,6 +30,8 @@ const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
+// Explicit opt-in: visual polish of the ORIGINAL 160° discrete phase fan.
+const r16PolishOptIn = new URLSearchParams(location.search).get("r16-polish")==="1";
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -183,6 +185,83 @@ function renderCursor() {
   label.textContent = "基準 · 0";
 }
 
+// Only the *existing* nonzero phase text may be shifted. The pointer line,
+// exact angular position, 160 sector boundaries and all static ring names
+// remain the same. Use rendered text bounds rather than angle-specific hacks.
+function avoidR16MobileNameCollisions() {
+  if(!r16PolishOptIn)return;
+  const labels=[...cursorGroup.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+  // Every pass is a fresh calculation. Otherwise orientation changes can
+  // compound old offsets or leave mobile-sized text on the desktop.
+  for(const label of labels){
+    if(label.dataset.r16BaseX===undefined){
+      label.dataset.r16BaseX=label.getAttribute("x");
+      label.dataset.r16BaseY=label.getAttribute("y");
+    }
+    label.setAttribute("x",label.dataset.r16BaseX);
+    label.setAttribute("y",label.dataset.r16BaseY);
+    label.style.removeProperty("font-size");
+    delete label.dataset.r16TextOffset;
+    delete label.dataset.r16TextSize;
+    delete label.dataset.r16AvoidFailed;
+  }
+  if(!mobileFanMedia.matches||!instrument.getClientRects().length)return;
+  const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
+  const clearance=6; // real CSS px, protects small static ring-name text
+  const adjacent=(a,b)=>{
+    const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+    return A.left < B.right+clearance&&A.right+clearance>B.left&&
+      A.top < B.bottom+clearance&&A.bottom+clearance>B.top;
+  };
+  const positioned=[];
+  for(const label of labels){
+    const rivals=[...names,...positioned];
+    const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
+    const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
+    if(rivals.every(rival=>!adjacent(label,rival))){positioned.push(label);continue;}
+    // Keep the pointer at the exact calculated phase angle. Try a few
+    // close text placements; if crowded, reduce only THIS label, never
+    // weaken the original grid or displace its line.
+    const offsets=[[0,0],[-12,-8],[12,-10],[20,-10],[-21,-13],
+      [30,-14],[0,-18],[-26,0],[32,0],[-32,-15],
+      [0,22],[40,-20],[-40,-20],[26,18],[-26,18]];
+    const sizes=[originalSize,26,23,20,17,14].filter((n,i,a)=>
+      n<=originalSize&&a.indexOf(n)===i
+    );
+    let used=null;
+    for(const fontSize of sizes){
+      label.style.fontSize=fontSize+"px";
+      for(const [dx,dy] of offsets){
+        label.setAttribute("x",(x+dx).toFixed(3));
+        label.setAttribute("y",(y+dy).toFixed(3));
+        if(rivals.every(rival=>!adjacent(label,rival))){
+          used={dx,dy,fontSize};break;
+        }
+      }
+      if(used)break;
+    }
+    if(!used){
+      label.style.removeProperty("font-size");
+      label.setAttribute("x",x);label.setAttribute("y",y);
+      label.dataset.r16AvoidFailed="true";
+    }else{
+      if(used.dx||used.dy)label.dataset.r16TextOffset=[used.dx,used.dy].join(",");
+      if(used.fontSize!==originalSize)label.dataset.r16TextSize=String(used.fontSize);
+    }
+    positioned.push(label);
+  }
+}
+
+let r16ReflowRequest=0;
+function scheduleR16LabelReflow(){
+  if(!r16PolishOptIn)return;
+  if(r16ReflowRequest)cancelAnimationFrame(r16ReflowRequest);
+  r16ReflowRequest=requestAnimationFrame(()=>{
+    r16ReflowRequest=0;
+    avoidR16MobileNameCollisions();
+  });
+}
+
 function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
   const phases = {
@@ -232,10 +311,12 @@ function renderReturnMarkers(state) {
       x:labelPoint.x,
       y:labelPoint.y,
       class:`return-marker-label return-marker-label-${key}`,
-      "data-return-marker":`${key}-label`
+      "data-return-marker":`${key}-label`,
+      "data-phase-closed":String(phase===0)
     }, cursorGroup);
     label.textContent = formatSigned(signed);
   }
+  avoidR16MobileNameCollisions();
 }
 
 function readBaseDate() {
@@ -785,6 +866,7 @@ function syncFanViewport() {
   svg.setAttribute("viewBox", mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX);
   svg.dataset.mobileCrop = String(mobile);
   instrument.dataset.fanViewBox = svg.getAttribute("viewBox");
+  scheduleR16LabelReflow();
 }
 
 function bindControls() {
@@ -807,6 +889,19 @@ function bindControls() {
     if (document.hidden) deltaPlaybackController?.stop();
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
+  if(r16PolishOptIn){
+    // Width can change without crossing 480px (rotation, split-screen,
+    // desktop resizing). Always resolve against the new screen coordinates.
+    window.addEventListener("resize",scheduleR16LabelReflow);
+    // The original Research 01 fan lives inside a dynamically created
+    // <details>; while collapsed, SVG bounds are zero and cannot be used.
+    // On expansion, measure only after the disclosure has laid out.
+    document.addEventListener("toggle",event=>{
+      if(event.target.id==="discrete-phase-fan-details"&&event.target.open){
+        scheduleR16LabelReflow();
+      }
+    },true);
+  }
 }
 
 function initialize() {
@@ -832,6 +927,7 @@ function initialize() {
   renderRing("gregorian");
   renderCursor();
   instrument.dataset.phaseGeometry = "signed-shortest-fan";
+  instrument.dataset.r16Polish = r16PolishOptIn ? "true" : "baseline";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
   bindControls();
