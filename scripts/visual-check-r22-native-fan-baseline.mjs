@@ -84,7 +84,14 @@ for(const s of scenes){
  const png=await readFile(out);
  if(s.polish){
   const before=baselineImageBytes.get(key);
-  check(before&&(!png.equals(before)),name+" screenshot pixel bytes identical to default: fan NOT visible");
+  check(Boolean(before),name+" missing matching original screenshot");
+  const isFullClosure=s.signed==="0,0,0";
+  // P1 changes ONLY existing non-zero phase label size. At the true 24k
+  // three-way closure there are no active labels, so identical pixels are
+  // the CORRECT result, not evidence of a missed capture.
+  if(!isFullClosure){
+   check(!png.equals(before),name+" visible nonzero labels unchanged: invalid A/B capture");
+  }
  }else{
   baselineImageBytes.set(key,png);
  }
