@@ -893,14 +893,20 @@ function bindControls() {
     // Width can change without crossing 480px (rotation, split-screen,
     // desktop resizing). Always resolve against the new screen coordinates.
     window.addEventListener("resize",scheduleR16LabelReflow);
-    // The original Research 01 fan lives inside a dynamically created
-    // <details>; while collapsed, SVG bounds are zero and cannot be used.
-    // On expansion, measure only after the disclosure has laid out.
-    document.addEventListener("toggle",event=>{
-      if(event.target.id==="discrete-phase-fan-details"&&event.target.open){
+    // Research 01 wraps the fan in a dynamically created <details>.
+    // A capture-phase "toggle" listener was insufficient when it reopened
+    // programmatically after a viewport change. The open attribute is the
+    // authoritative signal; observe it even before the wrapper is created.
+    const disclosureObserver=new MutationObserver(records=>{
+      if(records.some(record=>
+        record.target.id==="discrete-phase-fan-details"&&record.target.open
+      )){
         scheduleR16LabelReflow();
       }
-    },true);
+    });
+    disclosureObserver.observe(document.body,{
+      subtree:true,attributes:true,attributeFilter:["open"]
+    });
   }
 }
 
