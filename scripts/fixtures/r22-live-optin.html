@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R22 opt-in original fan first-reading capture</title>
+<style>html,body{margin:0;background:#071019;overflow:hidden}#stage{display:block;border:0;background:#071019}#probe{display:none}</style>
+</head>
+<body><iframe id="stage" title="Actual Research 01 R22 semicircle"></iframe>
+<output id="probe" data-ready="false"></output>
+<script>
+const p=new URLSearchParams(location.search);
+const width=Number(p.get("width"))||390;
+const height=Number(p.get("height"))||1350;
+const delta=Number(p.get("delta")??"1200");
+const date=p.get("date")||"2026-09-13";
+const autoPlay=p.get("autoPlay")==="first";
+const study=p.get("study")||"";
+const art=p.get("art")||"";
+const finish=p.get("finish")||"";
+let playStarted=false,playObserved=false;
+const frame=document.querySelector("#stage"),probe=document.querySelector("#probe");
+frame.style.width=width+"px";frame.style.height=height+"px";
+frame.src=new URL("../../recurrence.html?r22=1&date="+encodeURIComponent(date)+"&delta="+delta+
+ (study?"&r22-study="+encodeURIComponent(study):"")+
+ (art?"&r22-art="+encodeURIComponent(art):"")+
+ (finish?"&r22-finish="+encodeURIComponent(finish):""),location.href).href;
+let attempts=0;
+function inspect(){
+ const doc=frame.contentDocument,root=doc?.documentElement;
+ const instrument=doc?.querySelector("#recurrence-instrument");
+ const wheel=doc?.querySelector("#recurrence-wheel");
+ const story=doc?.querySelector(".r22-phase-reading");
+ const readout=doc?.querySelector(".discrete-derivation");
+ const thesis=doc?.querySelector("#research-discrete-thesis");
+ const strip=doc?.querySelector("#research-year-strip");
+ if(root?.dataset.r22Ready!=="true"||!wheel||!story||(!autoPlay&&instrument?.dataset.deltaYears!==String(delta))){
+  if(++attempts<250){setTimeout(inspect,50);return;}
+  probe.dataset.ready="error";probe.dataset.error="opt-in R22 did not render; delta "+instrument?.dataset.deltaYears;return;
+ }
+ if(autoPlay&&!playStarted){
+  playStarted=true;
+  doc.querySelector("#research-delta-play")?.click();
+  setTimeout(inspect,55);return;
+ }
+ if(autoPlay&&!playObserved){
+  // CI's virtual-time screenshot engine does not guarantee nested iframe RAF
+  // progression. Verify the *real button and controller* in reduced-motion
+  // step mode; normal RAF and timer semantics have deterministic unit tests.
+  if(instrument?.dataset.r22PlaybackStage!=="step"||instrument?.dataset.deltaYears!=="400"){
+   if(++attempts<250){setTimeout(inspect,55);return;}
+   probe.dataset.ready="error";probe.dataset.error="reduced-motion real button failed to reach +400";return;
+  }
+  playObserved=true;
+ }
+ const markers=["gregorian","year","day"].map(k=>wheel.querySelector('[data-return-marker="'+k+'"]'));
+ const signed=markers.map(m=>m?.dataset.phaseSigned??"missing").join(",");
+ const status=root.dataset.r22Status??"";
+ const nodeOrder=Boolean(instrument.compareDocumentPosition(readout)&Node.DOCUMENT_POSITION_FOLLOWING)
+  &&Boolean(readout.compareDocumentPosition(thesis)&Node.DOCUMENT_POSITION_FOLLOWING)
+  &&Boolean(thesis.compareDocumentPosition(strip)&Node.DOCUMENT_POSITION_FOLLOWING);
+ const fanBox=wheel.getBoundingClientRect();
+ const instrumentBox=instrument.getBoundingClientRect();
+ const viewHeight=frame.contentWindow.innerHeight;
+ probe.dataset.ready="true";
+ probe.dataset.delta=String(autoPlay?400:delta);
+ probe.dataset.autoPlayCaptured=String(!autoPlay||playObserved);
+ probe.dataset.playbackPaused=String(!autoPlay||instrument?.dataset.deltaPlayback==="stopped");
+ probe.dataset.date=date;
+ probe.dataset.width=String(width);
+ probe.dataset.signed=signed;
+ probe.dataset.status=status;
+ probe.dataset.order=String(nodeOrder);
+ probe.dataset.fanCount=String(markers.filter(Boolean).length);
+ probe.dataset.heroTop=String(Math.round(instrumentBox.top));
+ probe.dataset.heroBottom=String(Math.round(instrumentBox.bottom));
+ probe.dataset.heroAboveFirstViewport=String(instrumentBox.top<viewHeight);
+ probe.dataset.heroBeforeThesis=String(nodeOrder);
+ probe.dataset.sourceWheel=String(wheel.id==="recurrence-wheel"&&wheel.querySelectorAll(".phase-sector").length>0);
+ probe.dataset.singleDelta=String(doc.querySelectorAll("#delta-slider").length===1);
+ probe.dataset.fourPillars=String(doc.querySelectorAll("#research-time-state .research-time-pillar").length===8);
+ probe.dataset.pageOverflow=String(doc.documentElement.scrollWidth>doc.documentElement.clientWidth+4);
+ const client=doc.documentElement.clientWidth;
+ const scroll=doc.documentElement.scrollWidth;
+ probe.dataset.pageOverflowPx=String(scroll-client);
+ const unclipped=el=>{
+  let ancestor=el.parentElement;
+  while(ancestor&&ancestor!==doc.documentElement){
+   const overflow=doc.defaultView.getComputedStyle(ancestor).overflowX;
+   if(["hidden","clip","auto","scroll"].includes(overflow))return false;
+   ancestor=ancestor.parentElement;
+  }
+  return true;
+ };
+ const offenders=[...doc.querySelectorAll("body *")]
+  .filter(el=>el.getBoundingClientRect().right>client+4&&unclipped(el))
+  .map(el=>({tag:el.tagName,id:el.id||"",className:String(el.className?.baseVal??el.className??"").slice(0,55),
+   parentId:el.parentElement?.id||"",parentClass:String(el.parentElement?.className?.baseVal??el.parentElement?.className??"").slice(0,55),
+   text:(el.textContent||"").trim().slice(0,60),
+   top:Math.round(el.getBoundingClientRect().top),
+   left:Math.round(el.getBoundingClientRect().left),
+   width:Math.round(el.getBoundingClientRect().width),
+   right:Math.round(el.getBoundingClientRect().right)}))
+  .sort((a,b)=>b.right-a.right).slice(0,10);
+ probe.dataset.overflowElements=JSON.stringify(offenders);
+ const yearEnd=doc.querySelector("#research-year-strip .research-year-end > strong");
+ if(yearEnd){
+  const computed=doc.defaultView.getComputedStyle(yearEnd);
+  const parentRect=yearEnd.parentElement.getBoundingClientRect();
+  probe.dataset.yearEndStyle=JSON.stringify({
+   viewport:doc.documentElement.clientWidth,
+   matched:yearEnd.matches('html[data-research-r22="true"] #research-year-strip .research-year-end > strong'),
+   position:computed.position,left:computed.left,right:computed.right,
+   transform:computed.transform,
+   parentLeft:Math.round(parentRect.left),parentRight:Math.round(parentRect.right)
+  });
+ }
+ const outerRing=doc.querySelector("#gregorian-ring");
+ const outerBounds=outerRing?.getBoundingClientRect();
+ const graphic=doc.querySelector(".research-fan-graphic");
+ const graphicBounds=graphic?.getBoundingClientRect();
+ const clipTolerance=4;
+ probe.dataset.fanViewBox=wheel.getAttribute("viewBox");
+ probe.dataset.fanDegreeSpan=instrument?.dataset.fanDegreeSpan??"missing";
+ probe.dataset.fanVerticalScale=instrument?.dataset.fanVerticalScale??"missing";
+ probe.dataset.phaseShape=instrument?.dataset.phaseGeometry??"missing";
+ const railD=doc.querySelector("#gregorian-ring .phase-sector")?.getAttribute("d")??"";
+ probe.dataset.ellipticalRail=String(railD.includes("A 518 341.88 "));
+ probe.dataset.railNarrow=String(railD.startsWith("M ")&&railD.includes("A 492 324.72 "));
+ probe.dataset.railWidth="26";
+ probe.dataset.materialGradients=String(wheel.querySelectorAll('linearGradient[id^="r22-material-"]').length);
+ probe.dataset.materialUnits=String([...wheel.querySelectorAll('linearGradient[id^="r22-material-"]')].every(g=>g.getAttribute("gradientUnits")==="userSpaceOnUse"));
+ probe.dataset.zeroGuideCount=String(wheel.querySelectorAll("[data-r22-zero-rail]").length);
+ probe.dataset.hasLongZeroNeedle=String(Boolean(wheel.querySelector(".cursor-halo")||wheel.querySelector(".cursor-line:not(.r22-zero-guide)")));
+ probe.dataset.zeroGuideAligned=String([...wheel.querySelectorAll("[data-r22-zero-rail]")].every(el=>
+  el.getAttribute("x1")===el.getAttribute("x2")&&Number(el.getAttribute("x1"))===600));
+ const closedLabels=[...wheel.querySelectorAll('.return-marker-label[data-phase-closed="true"]')];
+ probe.dataset.closedLabelQuiet=String(closedLabels.every(el=>doc.defaultView.getComputedStyle(el).opacity==="0"));
+ const outerCenter=doc.querySelector('[data-phase-ring-label="gregorian"]')?.getAttribute("x")??"";
+ probe.dataset.gregorianRingLabelExists=String(Boolean(outerCenter));
+ probe.dataset.outerArcTop=String(Math.round(outerBounds?.top??-1));
+ probe.dataset.outerArcBottom=String(Math.round(outerBounds?.bottom??-1));
+ probe.dataset.outerWithinGraphic=String(Boolean(outerBounds&&graphicBounds&&
+  outerBounds.left>=graphicBounds.left-clipTolerance&&
+  outerBounds.right<=graphicBounds.right+clipTolerance));
+ probe.dataset.outerVisibleAboveFold=String(Boolean(outerBounds&&outerBounds.top<viewHeight));
+ probe.dataset.dayCompletedTurns=instrument?.dataset.r22DayCompletedTurns??"missing";
+ probe.dataset.gregorianCompletedTurns=instrument?.dataset.r22GregorianCompletedTurns??"missing";
+ probe.dataset.yearCompletedTurns=instrument?.dataset.r22YearCompletedTurns??"missing";
+ probe.dataset.speedNarrative=doc.querySelector("#r22-completed-turns")?.textContent??"";
+ const sectorLabel=doc.querySelector("#day-ring .phase-label");
+ const ringLabel=doc.querySelector("#day-ring .phase-ring-name");
+ const sector=doc.querySelector("#day-ring .phase-sector");
+ const markerLabel=doc.querySelector('[data-return-marker="day-label"]');
+ const styleOf=el=>el?doc.defaultView.getComputedStyle(el).display:"missing";
+ probe.dataset.sectorLabelHidden=String(styleOf(sectorLabel)==="none");
+ probe.dataset.ringLabelHidden=String(styleOf(ringLabel)==="none");
+ probe.dataset.sectorRetained=String(Boolean(sector&&styleOf(sector)!=="none"));
+ probe.dataset.markerRetained=String(Boolean(markerLabel&&styleOf(markerLabel)!=="none"));
+ probe.dataset.artMode=instrument?.dataset.r22Art??"none";
+ probe.dataset.finishMode=instrument?.dataset.r22Finish??"none";
+ probe.dataset.finishGradient=String(wheel.querySelectorAll("#r22-finish-master").length);
+ probe.dataset.r22GradientNodes=String(wheel.querySelectorAll('linearGradient[id^="r22-material-"],#r22-finish-master').length);
+ probe.dataset.activeMarkerFont=String(Number.parseFloat(doc.defaultView.getComputedStyle(
+  wheel.querySelector('.return-marker-label:not([data-phase-closed="true"])')??wheel).fontSize));
+ probe.dataset.finishCoats=String(wheel.querySelectorAll("[data-r22-finish-coat]").length);
+ probe.dataset.finishReliefs=String(wheel.querySelectorAll("[data-r22-finish-relief]").length);
+ probe.dataset.finishRims=String(wheel.querySelectorAll("[data-r22-finish-rim]").length);
+ const surfaces=[...wheel.querySelectorAll("[data-r22-art-surface]")];
+ const bands=surfaces.map(el=>({
+  key:el.getAttribute("data-r22-art-surface"),
+  inner:Number(el.getAttribute("data-r22-art-inner")),
+  outer:Number(el.getAttribute("data-r22-art-outer"))
+ })).sort((a,b)=>a.inner-b.inner);
+ probe.dataset.artSurfaces=String(surfaces.length);
+ probe.dataset.artAdjacent=String(bands.length===3&&bands[0].inner===410&&
+  bands[0].outer===bands[1].inner&&bands[1].outer===bands[2].inner&&
+  bands[2].outer===560);
+ probe.dataset.artContours=String(wheel.querySelectorAll("[data-r22-art-contour]").length);
+ probe.dataset.artSeams=String(wheel.querySelectorAll(".r22-art-contour.is-seam").length);
+ probe.dataset.artSeamFill=String(surfaces.every(el=>{
+  const fill=doc.defaultView.getComputedStyle(el).fill;
+  return ["matte","ink"].includes(finish)
+   ?fill===(finish==="ink"?"rgb(57, 74, 84)":"rgb(101, 116, 126)")
+   :fill.includes(finish?"r22-finish-master":"r22-material-");
+ }));
+ probe.dataset.matteNoFx=String(!["matte","ink"].includes(finish)||(
+  wheel.querySelectorAll("linearGradient,radialGradient,[data-r22-finish-coat],[data-r22-finish-rim],[data-r22-finish-relief]").length===0&&
+  [...wheel.querySelectorAll(".return-marker")].every(el=>doc.defaultView.getComputedStyle(el).filter==="none")
+ ));
+ probe.dataset.studyMode=instrument?.dataset.r22Study??"none";
+ probe.dataset.studyOverlay=wheel.querySelector("[data-r22-study-overlay]")?.getAttribute("data-r22-study-overlay")??"none";
+ probe.dataset.studyGapCount=String(wheel.querySelectorAll("[data-r22-gap-rail]").length);
+ probe.dataset.studySlotCount=String(wheel.querySelectorAll("[data-r22-closure-rail]").length);
+ probe.dataset.studyClosedSlots=String(wheel.querySelectorAll('[data-r22-closure-state="closed"]').length);
+ probe.dataset.studyScore=wheel.querySelector("[data-r22-closure-count]")?.textContent??"none";
+ const missingNotes=[...wheel.querySelectorAll("[data-r22-missing-label]")];
+ probe.dataset.studyMissingCount=String(missingNotes.length);
+ probe.dataset.studyMissingKeys=missingNotes.map(n=>n.getAttribute("data-r22-missing-label")).join(",")||"none";
+ probe.dataset.studyMissingText=missingNotes.map(n=>n.textContent).join("|")||"none";
+ probe.dataset.studyMissingSigned=missingNotes.map(n=>n.getAttribute("data-r22-missing-signed")).join(",")||"none";
+ probe.dataset.studyMissingLeaders=String(wheel.querySelectorAll("[data-r22-missing-leader]").length);
+ probe.dataset.studyMissingInView=String(missingNotes.every(n=>{
+  const r=n.getBoundingClientRect(),g=graphic.getBoundingClientRect();
+  return r.left>=g.left-2&&r.right<=g.right+2&&r.top>=g.top-2&&r.bottom<=g.bottom+2;
+ }));
+ probe.dataset.samplingMode=instrument?.dataset.r22SamplingMode??"none";
+ probe.dataset.samplingCaption=doc.querySelector(".r22-reading-index")?.textContent??"";
+ probe.dataset.fanHeight=String(Math.round(fanBox.height));
+}
+frame.addEventListener("load",inspect,{once:true});
+</script></body></html>

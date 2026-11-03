@@ -146,7 +146,9 @@ test("default single-date readout and responsive fan preserve paired comparisons
     layout.includes('research-cycle-inline-row[data-side="base"] {display:none}'));
   assert.match(recurrenceView,/MOBILE_FAN_VIEWBOX = "0 90 1200 630"/);
   assert.match(recurrenceView,/function syncFanViewport\(\)/);
-  assert.match(recurrenceView,/svg\.setAttribute\("viewBox", mobile \? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX\)/);
+  // R16 retains its exact original crop. R22 may reframe only its opt-in SVG camera.
+  assert.match(recurrenceView,/: \(mobile \? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX\)/);
+  assert.match(recurrenceView,/r22GuideOptIn[\s\S]*?R22_MOBILE_FAN_VIEWBOX : R22_DESKTOP_FAN_VIEWBOX/);
   assert.match(layout,/height:clamp\(235px,calc\(52\.5vw \+ 64px\),270px\)/);
   assert.match(layout,/top:80px;[\s\S]*?height:calc\(100% - 80px\)/);
   assert.match(recurrenceHtml,/class="research-fan-graphic"/);

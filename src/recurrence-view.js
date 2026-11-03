@@ -9,6 +9,11 @@ import { BERGER_MODEL } from "./recurrence/berger-orbit.js";
 import { projectOriginalStripSelection } from "./recurrence/original-strip-date-projection.js";
 import { projectExplicitResearchTargetDate } from "./recurrence/explicit-target-date-projection.js";
 import { createDeltaPlaybackController } from "./recurrence/delta-playback-controller.js";
+import { createR22GuidedPlaybackController } from "./recurrence/r22-guided-playback-controller.js";
+import { r22TeachingStops } from "./recurrence/r22-phase-motion-model.js";
+import {r22StudyMode,r22StudyReading,r22StudyGapArc,r22MissingStudyCallout,R22_STUDY_KEYS} from "./recurrence/r22-visual-study.js";
+import { R22_SEMICIRCLE, r22EllipsePoint } from "./recurrence/r22-semicircle-geometry.js";
+import {r22ArtMode,r22ArtFinish,r22FlatFinish,R22_ART_FINISHES,R22_ART_MATERIALS,R22_ART_BANDS} from "./recurrence/r22-art-direction.js";
 import {
   phaseAngleOnFan,
   phaseFanCells,
@@ -27,8 +32,27 @@ const MAX_GREGORIAN_YEAR = 10_000_000;
 const FINE_SLIDER_MAX = GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD;
 const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
+const r22GuideOptIn = new URLSearchParams(window.location.search).get("r22") === "1";
+// R16 P1: improve ONLY the live original diagram's hierarchy by opt-in.
+// No change to 160°/290-unit geometry, 40/60/60 segmentation, phase, or Δ.
+const r16PolishOptIn = !r22GuideOptIn && new URLSearchParams(window.location.search).get("r16-polish") === "1";
+// Explicit experimental sketches only; default R22 P7 and R16 are untouched.
+// P10 is a deliberately isolated art-only experiment: no annotations or
+// status overlays may compete until the large form has been evaluated.
+const r22Art = r22GuideOptIn ? r22ArtMode(new URLSearchParams(location.search).get("r22-art")) : "";
+// Existing P10 graphite/warm remain unchanged; the two surface treatments
+// exist ONLY as explicit P10.1 graphite experiments.
+const r22Finish = r22ArtFinish(new URLSearchParams(location.search).get("r22-finish"),r22Art);
+const r22Flat = r22FlatFinish(r22Finish);
+const r22Study = r22GuideOptIn&&!r22Art ? r22StudyMode(new URLSearchParams(location.search).get("r22-study")) : "";
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
+// R22 preserves every original sector and reference angle; only the camera crops
+// unused space above the arcs. R16/default viewBoxes remain untouched.
+const R22_DESKTOP_FAN_VIEWBOX = R22_SEMICIRCLE.viewBox;
+const R22_MOBILE_FAN_VIEWBOX = R22_SEMICIRCLE.viewBox;
+const VIEW_FAN_START = r22GuideOptIn ? R22_SEMICIRCLE.fanStart : FAN_START;
+const VIEW_FAN_END = r22GuideOptIn ? R22_SEMICIRCLE.fanEnd : FAN_END;
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -74,7 +98,9 @@ let deltaPlaybackController = null;
 
 function polar(radius, angleDegrees) {
   const angle = angleDegrees * Math.PI / 180;
-  return { x:CX + Math.cos(angle) * radius, y:CY + Math.sin(angle) * radius };
+  return r22GuideOptIn
+    ? r22EllipsePoint(radius,angleDegrees,CX,CY)
+    : { x:CX + Math.cos(angle) * radius, y:CY + Math.sin(angle) * radius };
 }
 
 function annularSectorPath(inner, outer, startDegrees, endDegrees) {
@@ -85,13 +111,15 @@ function annularSectorPath(inner, outer, startDegrees, endDegrees) {
   const p2 = polar(outer, end);
   const p3 = polar(inner, end);
   const p4 = polar(inner, startDegrees);
-  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${outer} ${outer} 0 ${span > 180 ? 1 : 0} 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)} L ${p3.x.toFixed(3)} ${p3.y.toFixed(3)} A ${inner} ${inner} 0 ${span > 180 ? 1 : 0} 0 ${p4.x.toFixed(3)} ${p4.y.toFixed(3)} Z`;
+  const ry = r => Number((r * (r22GuideOptIn ? R22_SEMICIRCLE.verticalScale : 1)).toFixed(3));
+  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${outer} ${ry(outer)} 0 ${span > 180 ? 1 : 0} 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)} L ${p3.x.toFixed(3)} ${p3.y.toFixed(3)} A ${inner} ${ry(inner)} 0 ${span > 180 ? 1 : 0} 0 ${p4.x.toFixed(3)} ${p4.y.toFixed(3)} Z`;
 }
 
 function arcPath(radius, startDegrees, endDegrees) {
   const p1 = polar(radius, startDegrees);
   const p2 = polar(radius, endDegrees);
-  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${radius} ${radius} 0 0 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`;
+  const ry = r22GuideOptIn ? Number((radius * R22_SEMICIRCLE.verticalScale).toFixed(3)) : radius;
+  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${radius} ${ry} 0 0 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`;
 }
 
 function svgEl(tag, attrs = {}, parent = svg) {
@@ -113,28 +141,72 @@ function formatSigned(value) {
 
 function renderGuides() {
   const group = document.querySelector("#recurrence-guides");
+  if (r22GuideOptIn && !r22Flat) {
+    // Matte: not even unused SVG gradient definitions are created.
+    // A single coordinate-stable material gradient across ALL sectors in a
+    // ring; per-sector object-bounding-box gradients would create fake stripes.
+    const defs=svg.querySelector("defs") ?? svgEl("defs",{},svg);
+    const palettes=r22Art ? R22_ART_MATERIALS[r22Art] : {
+      gregorian:["#a69ab6","#7c718a","#494456"],
+      year:["#b4a06d","#88764f","#554c39"],
+      day:["#82aaa8","#5b8485","#345b62"]
+    };
+    if(r22Finish){
+      const finish=R22_ART_FINISHES[r22Finish];
+      const gradient=finish.radial
+        ?svgEl("radialGradient",{
+          id:"r22-finish-master",gradientUnits:"userSpaceOnUse",
+          cx:finish.radial.cx,cy:finish.radial.cy,r:finish.radial.r,
+          gradientTransform:finish.radial.transform
+        },defs)
+        :svgEl("linearGradient",{
+          id:"r22-finish-master",gradientUnits:"userSpaceOnUse",
+          x1:finish.axis[0],y1:finish.axis[1],x2:finish.axis[2],y2:finish.axis[3]
+        },defs);
+      [0,.26,.49,.75,1].forEach((offset,i)=>svgEl("stop",{
+        offset:(offset*100)+"%","stop-color":finish.colors[i]
+      },gradient));
+    }
+    for(const key of ["gregorian","year","day"]){
+      const colors=palettes[key];
+      const gradient=svgEl("linearGradient",{
+        id:"r22-material-"+key,
+        gradientUnits:"userSpaceOnUse",x1:CX,y1:480,x2:CX,y2:CY
+      },defs);
+      [0,0.52,1].forEach((t,i)=>svgEl("stop",{
+        offset:String(t*100)+"%","stop-color":colors[i]
+      },gradient));
+    }
+  }
   for (const [key, spec] of Object.entries(ringSpecs)) {
+    const radius=(spec.inner+spec.outer)/2;
     svgEl("path", {
-      d:annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
+      d:r22GuideOptIn
+        ? arcPath(radius, VIEW_FAN_START, VIEW_FAN_END)
+        : annularSectorPath(spec.inner + 2, spec.outer - 2, FAN_START, FAN_END),
       class:`phase-band phase-band-${key}`
     }, group);
   }
-  [270, 360, 450, 560].forEach(radius => {
+  if (!r22GuideOptIn) [270, 360, 450, 560].forEach(radius => {
     svgEl("path", { d:arcPath(radius, FAN_START, FAN_END), class:"recurrence-guide" }, group);
   });
 }
 
 function renderRing(key) {
   const spec = ringSpecs[key];
-  const cells = phaseFanCells({ modulus:spec.modulus, sectors:spec.sectors, fanStart:FAN_START, fanEnd:FAN_END });
+  const cells = phaseFanCells({ modulus:spec.modulus, sectors:spec.sectors, fanStart:VIEW_FAN_START, fanEnd:VIEW_FAN_END });
   spec.group.classList.add("recurrence-track", "phase-gauge-track");
-  spec.group.dataset.phaseGeometry = "signed-shortest-fan";
+  spec.group.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
   spec.group.dataset.phaseModulus = String(spec.modulus);
   spec.group.dataset.radialScale = key;
 
   for (const cell of cells) {
     svgEl("path", {
-      d:annularSectorPath(spec.inner, spec.outer, cell.startAngle + .06, cell.endAngle - .06),
+      d:r22GuideOptIn
+        ? annularSectorPath((spec.inner+spec.outer)/2-R22_SEMICIRCLE.railHalfWidth,
+          (spec.inner+spec.outer)/2+R22_SEMICIRCLE.railHalfWidth,
+          cell.startAngle + .08, cell.endAngle - .08)
+        : annularSectorPath(spec.inner, spec.outer, cell.startAngle + .06, cell.endAngle - .06),
       class:`phase-sector ${spec.className}`,
       "data-phase-cell":cell.index,
       "data-signed-start":cell.signedStart
@@ -142,8 +214,9 @@ function renderRing(key) {
 
     const tickAngle = cell.startAngle;
     const major = cell.index % 10 === 0 || cell.index === spec.sectors / 2;
-    const p1 = polar(spec.outer - (major ? 10 : 5), tickAngle);
-    const p2 = polar(spec.outer, tickAngle);
+    const centerRadius=(spec.inner+spec.outer)/2;
+    const p1 = polar(r22GuideOptIn ? centerRadius+(major ? 10 : 7) : spec.outer-(major ? 10 : 5), tickAngle);
+    const p2 = polar(r22GuideOptIn ? centerRadius+(major ? 22 : 14) : spec.outer, tickAngle);
     svgEl("line", {
       x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y,
       class:`phase-tick${major ? " major" : ""}`
@@ -163,6 +236,29 @@ function renderRing(key) {
     }
   }
 
+  if(r22Art){
+    // A continuous, whole-ring material surface. The original segmented
+    // paths remain below it for structure/test fidelity but are not visible.
+    // This eliminates all 40/60 tiny angular cracks, and the three radial
+    // bands exactly touch at r=460 and r=510 (no artificial air gap).
+    const band=R22_ART_BANDS[key];
+    svgEl("path",{
+      d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
+      class:"r22-art-surface r22-art-surface-"+key,
+      "data-r22-art-surface":key,
+      "data-r22-art-inner":band.inner,
+      "data-r22-art-outer":band.outer
+    },spec.group);
+    if(r22Finish&&!r22Flat){
+      // Thin translucent finish coat: keeps three physical strata legible
+      // without resetting the SAME underlying highlight on every band.
+      svgEl("path",{
+        d:annularSectorPath(band.inner,band.outer,VIEW_FAN_START,VIEW_FAN_END),
+        class:"r22-finish-coat r22-finish-coat-"+key,
+        "data-r22-finish-coat":key
+      },spec.group);
+    }
+  }
   const directLabelPoint = polar((spec.inner + spec.outer) / 2, RING_LABEL_ANGLE);
   const directLabel = svgEl("text", {
     x:directLabelPoint.x,
@@ -173,18 +269,215 @@ function renderRing(key) {
   directLabel.textContent = spec.displayLabel;
 }
 
+function renderArtSeams(){
+  if(!r22Art)return;
+  const group=svgEl("g",{"data-r22-art-seams":r22Art},svg);
+  svg.insertBefore(group,cursorGroup);
+  // The separators are etched on a SINGLE body, never empty gutters.
+  for(const radius of [410,460,510,560]){
+    svgEl("path",{
+      d:arcPath(radius,VIEW_FAN_START,VIEW_FAN_END),
+      class:"r22-art-contour"+([460,510].includes(radius)?" is-seam":" is-edge"),
+      "data-r22-art-contour":radius
+    },group);
+  }
+  if(r22Finish&&!r22Flat){
+    // Four light/shade hairlines, not holes: ±2.4 units around the
+    // two real shared edges. Widths are screen-space CSS strokes.
+    if(r22Finish!=="monolith"){
+      for(const seam of [460,510]){
+        for(const side of ["inner","outer"]){
+          const r=seam+(side==="inner"?-2.4:2.4);
+          svgEl("path",{
+            d:arcPath(r,VIEW_FAN_START,VIEW_FAN_END),
+            class:"r22-finish-relief is-"+side,
+            "data-r22-finish-relief":seam+":"+side
+          },group);
+        }
+      }
+    }
+    for(const radius of [411.5,558.5]){
+      svgEl("path",{
+        d:arcPath(radius,VIEW_FAN_START,VIEW_FAN_END),
+        class:"r22-finish-rim",
+        "data-r22-finish-rim":radius
+      },group);
+    }
+  }
+}
+
 function renderCursor() {
-  const inner = polar(258, CURSOR_ANGLE);
-  const outer = polar(575, CURSOR_ANGLE);
-  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
-  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
+  if(r22GuideOptIn){
+    // Three short ticks show ONE shared phase datum. Avoid the former
+    // single long needle passing across unrelated spaces between tracks.
+    for(const [key,spec] of Object.entries(ringSpecs)){
+      const radius=r22Art
+        ?(R22_ART_BANDS[key].inner+R22_ART_BANDS[key].outer)/2
+        :(spec.inner+spec.outer)/2;
+      const half=r22Art?22:R22_SEMICIRCLE.railHalfWidth+5;
+      const inner=polar(radius-half,CURSOR_ANGLE);
+      const outer=polar(radius+half,CURSOR_ANGLE);
+      svgEl("line",{
+        x1:inner.x,y1:inner.y,x2:outer.x,y2:outer.y,
+        class:"cursor-line r22-zero-guide",
+        "data-r22-zero-rail":key
+      },cursorGroup);
+    }
+  }else{
+    const inner = polar(258, CURSOR_ANGLE);
+    const outer = polar(575, CURSOR_ANGLE);
+    svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
+    svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
+  }
   const labelPoint = polar(595, CURSOR_ANGLE);
   const label = svgEl("text", { x:labelPoint.x, y:labelPoint.y, class:"cursor-label" }, cursorGroup);
   label.textContent = "基準 · 0";
 }
 
+// Only the *existing* nonzero phase text may be shifted. The pointer line,
+// exact angular position, 160 sector boundaries and all static ring names
+// remain the same. Use rendered text bounds rather than angle-specific hacks.
+function avoidR16MobileNameCollisions() {
+  if(!r16PolishOptIn)return;
+  const labels=[...cursorGroup.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+  // Every pass is a fresh calculation. Otherwise orientation changes can
+  // compound old offsets or leave mobile-sized text on the desktop.
+  for(const label of labels){
+    if(label.dataset.r16BaseX===undefined){
+      label.dataset.r16BaseX=label.getAttribute("x");
+      label.dataset.r16BaseY=label.getAttribute("y");
+    }
+    label.setAttribute("x",label.dataset.r16BaseX);
+    label.setAttribute("y",label.dataset.r16BaseY);
+    label.style.removeProperty("font-size");
+    delete label.dataset.r16TextOffset;
+    delete label.dataset.r16TextSize;
+    delete label.dataset.r16AvoidFailed;
+  }
+  if(!mobileFanMedia.matches||!instrument.getClientRects().length)return;
+  const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
+  const clearance=6; // real CSS px, protects small static ring-name text
+  const adjacent=(a,b)=>{
+    const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+    return A.left < B.right+clearance&&A.right+clearance>B.left&&
+      A.top < B.bottom+clearance&&A.bottom+clearance>B.top;
+  };
+  const positioned=[];
+  for(const label of labels){
+    const rivals=[...names,...positioned];
+    const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
+    const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
+    if(rivals.every(rival=>!adjacent(label,rival))){positioned.push(label);continue;}
+    // Keep the pointer at the exact calculated phase angle. Try a few
+    // close text placements; if crowded, reduce only THIS label, never
+    // weaken the original grid or displace its line.
+    const offsets=[[0,0],[-12,-8],[12,-10],[20,-10],[-21,-13],
+      [30,-14],[0,-18],[-26,0],[32,0],[-32,-15],
+      [0,22],[40,-20],[-40,-20],[26,18],[-26,18]];
+    const sizes=[originalSize,26,23,20,17,14].filter((n,i,a)=>
+      n<=originalSize&&a.indexOf(n)===i
+    );
+    let used=null;
+    for(const fontSize of sizes){
+      label.style.fontSize=fontSize+"px";
+      for(const [dx,dy] of offsets){
+        label.setAttribute("x",(x+dx).toFixed(3));
+        label.setAttribute("y",(y+dy).toFixed(3));
+        if(rivals.every(rival=>!adjacent(label,rival))){
+          used={dx,dy,fontSize};break;
+        }
+      }
+      if(used)break;
+    }
+    if(!used){
+      label.style.removeProperty("font-size");
+      label.setAttribute("x",x);label.setAttribute("y",y);
+      label.dataset.r16AvoidFailed="true";
+    }else{
+      if(used.dx||used.dy)label.dataset.r16TextOffset=[used.dx,used.dy].join(",");
+      if(used.fontSize!==originalSize)label.dataset.r16TextSize=String(used.fontSize);
+    }
+    positioned.push(label);
+  }
+}
+
+let r16ReflowRequest=0;
+function scheduleR16LabelReflow(){
+  if(!r16PolishOptIn)return;
+  if(r16ReflowRequest)cancelAnimationFrame(r16ReflowRequest);
+  r16ReflowRequest=requestAnimationFrame(()=>{
+    r16ReflowRequest=0;
+    avoidR16MobileNameCollisions();
+  });
+}
+
 function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
+  cursorGroup.querySelector("[data-r22-study-overlay]")?.remove();
+  if(r22Study){
+    const data=r22StudyReading(state);
+    const overlay=document.createElementNS(NS,"g");
+    overlay.setAttribute("data-r22-study-overlay",r22Study);
+    overlay.setAttribute("aria-hidden","true");
+    // Put the teaching overlay *under* the original current-phase markers.
+    cursorGroup.insertBefore(overlay,cursorGroup.firstChild);
+    if(r22Study==="gap"){
+      for(const key of R22_STUDY_KEYS){
+        const layer=data.layers[key],d=r22StudyGapArc(layer);
+        if(!d)continue; // The absent span means this layer is exactly at zero.
+        svgEl("path",{
+          d,class:"r22-study-distance r22-study-distance-"+key,
+          "data-r22-gap-rail":key,
+          "data-r22-gap-angle":Math.abs(layer.angle+90).toFixed(3)
+        },overlay);
+      }
+    }else if(r22Study==="closure"){
+      // The second candidate is about co-closure, not how far the pointer
+      // travelled. Leave the three moving markers intact; draw fixed slots
+      // at the *shared* reference angle to make open conditions visible.
+      for(const key of R22_STUDY_KEYS){
+        const layer=data.layers[key];
+        const point=polar(layer.radius,CURSOR_ANGLE);
+        svgEl("circle",{
+          cx:point.x,cy:point.y,r:layer.closed?13:10,
+          class:"r22-study-slot "+(layer.closed?"is-closed":"is-open"),
+          "data-r22-closure-rail":key,
+          "data-r22-closure-state":layer.available?(layer.closed?"closed":"open"):"unavailable"
+        },overlay);
+      }
+      const at=polar(602,CURSOR_ANGLE);
+      const textNode=svgEl("text",{
+        x:at.x,y:at.y,
+        class:"r22-study-closure-score",
+        "data-r22-closure-count":data.closedCount
+      },overlay);
+      textNode.textContent=data.identity?"基準":data.closedCount+"/3 閉合";
+    }else if(r22Study==="missing"){
+      // P9: name the ACTUAL condition that remains on the original rail.
+      // At Δ=0 and all-closed states there is no missing-condition label.
+      for(const key of R22_STUDY_KEYS){
+        const layer=data.layers[key];
+        const residue=state.phases[key==="year"?"yearSequence":key];
+        const callout=r22MissingStudyCallout(key,layer,residue,data.closedCount,state.deltaYears);
+        if(!callout)continue;
+        svgEl("line",{
+          x1:callout.point.x.toFixed(3),y1:callout.point.y.toFixed(3),
+          x2:callout.labelX,y2:callout.labelY-14,
+          class:"r22-study-missing-leader r22-study-missing-leader-"+key,
+          "data-r22-missing-leader":key
+        },overlay);
+        const note=svgEl("text",{
+          x:callout.labelX,y:callout.labelY,
+          "text-anchor":callout.anchor,
+          class:"r22-study-missing-label r22-study-missing-label-"+key,
+          "data-r22-missing-label":key,
+          "data-r22-missing-signed":String(callout.signed),
+          "data-r22-missing-rail":key
+        },overlay);
+        note.textContent=callout.text;
+      }
+    }
+  }
   const phases = {
     day:state.phases.day,
     year:state.phases.yearSequence,
@@ -198,12 +491,15 @@ function renderReturnMarkers(state) {
     const angle = phaseAngleOnFan({
       phase,
       modulus:spec.modulus,
-      fanStart:FAN_START,
-      fanEnd:FAN_END,
+      fanStart:VIEW_FAN_START,
+      fanEnd:VIEW_FAN_END,
       referenceAngle:CURSOR_ANGLE
     });
-    const p1 = polar(spec.inner + 5, angle);
-    const p2 = polar(spec.outer - 5, angle);
+    const centerRadius=r22Art
+      ?(R22_ART_BANDS[key].inner+R22_ART_BANDS[key].outer)/2
+      :(spec.inner+spec.outer)/2;
+    const p1 = polar(r22GuideOptIn ? centerRadius-R22_SEMICIRCLE.cursorHalfLength : spec.inner + 5, angle);
+    const p2 = polar(r22GuideOptIn ? centerRadius+R22_SEMICIRCLE.cursorHalfLength : spec.outer - 5, angle);
     svgEl("line", {
       x1:p1.x,
       y1:p1.y,
@@ -217,7 +513,7 @@ function renderReturnMarkers(state) {
       "data-phase-modulus":spec.modulus
     }, cursorGroup);
     if (phase === 0) {
-      const zeroPoint = polar((spec.inner + spec.outer) / 2, angle);
+      const zeroPoint = polar(centerRadius, angle);
       svgEl("circle", {
         cx:zeroPoint.x,
         cy:zeroPoint.y,
@@ -227,15 +523,17 @@ function renderReturnMarkers(state) {
         "data-phase-zero-owner":key
       }, cursorGroup);
     }
-    const labelPoint = polar(spec.outer + 9, angle);
+    const labelPoint = polar(r22GuideOptIn ? centerRadius+30 : spec.outer + 9, angle);
     const label = svgEl("text", {
       x:labelPoint.x,
       y:labelPoint.y,
       class:`return-marker-label return-marker-label-${key}`,
-      "data-return-marker":`${key}-label`
+      "data-return-marker":`${key}-label`,
+      "data-phase-closed":String(phase === 0)
     }, cursorGroup);
     label.textContent = formatSigned(signed);
   }
+  avoidR16MobileNameCollisions();
 }
 
 function readBaseDate() {
@@ -782,9 +1080,12 @@ function submitSelectedDate(event) {
 
 function syncFanViewport() {
   const mobile = mobileFanMedia.matches;
-  svg.setAttribute("viewBox", mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX);
+  svg.setAttribute("viewBox", r22GuideOptIn
+    ? (mobile ? R22_MOBILE_FAN_VIEWBOX : R22_DESKTOP_FAN_VIEWBOX)
+    : (mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX));
   svg.dataset.mobileCrop = String(mobile);
   instrument.dataset.fanViewBox = svg.getAttribute("viewBox");
+  scheduleR16LabelReflow();
 }
 
 function bindControls() {
@@ -807,16 +1108,29 @@ function bindControls() {
     if (document.hidden) deltaPlaybackController?.stop();
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
+  if(r16PolishOptIn){
+    // Width can change without crossing 480px (rotation, split-screen,
+    // desktop resizing). Always resolve against the new screen coordinates.
+    window.addEventListener("resize",scheduleR16LabelReflow);
+    // The original Research 01 fan lives inside a dynamically created
+    // <details>; while collapsed, SVG bounds are zero and cannot be used.
+    // On expansion, measure only after the disclosure has laid out.
+    document.addEventListener("toggle",event=>{
+      if(event.target.id==="discrete-phase-fan-details"&&event.target.open){
+        scheduleR16LabelReflow();
+      }
+    },true);
+  }
 }
 
 function initialize() {
-  deltaPlaybackController = createDeltaPlaybackController({
+  const sharedPlayback = {
     playButton:deltaPlayButton,
     playIcon:deltaPlayIcon,
     playLabel:deltaPlayLabel,
     getDelta:() => currentDelta,
     setDelta,
-    maxDelta:() => FINE_SLIDER_MAX,
+    maxDelta:() => Math.min(FINE_SLIDER_MAX,maxSelectableDelta()),
     yearsPerSecond:DELTA_PLAY_YEARS_PER_SECOND,
     onPlayingChange:playing => {
       instrument.dataset.deltaPlayback = playing ? "playing" : "stopped";
@@ -824,14 +1138,63 @@ function initialize() {
     onStop:({ commit }) => {
       if (commit) syncQueryState();
     }
-  });
+  };
+  deltaPlaybackController = r22GuideOptIn
+    ? createR22GuidedPlaybackController({
+        ...sharedPlayback,
+        getStops:() => r22TeachingStops(currentBase,Math.min(FINE_SLIDER_MAX,maxSelectableDelta())),
+        getReducedMotion:() => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        onStageChange:({ stage,target,from,to }) => {
+          instrument.dataset.r22PlaybackStage = stage;
+          instrument.dataset.r22PlaybackTarget = target===null ? "" : String(target);
+          // The user watches the semicircle, not the controls below it. Mirror
+          // honest time-sampling semantics beside the actual SVG itself.
+          const inline=document.querySelector(".r22-reading-index");
+          const fmtYear=n=>Number(n).toLocaleString("en-US");
+          const inlineMessages={
+            idle:"相位對照 · 真實整數年取樣",
+            paused:"已暫停 · 檢查標記與共同零點",
+            skip:from===undefined||to===undefined?"教學跳年 · 非連續轉動":
+              `教學跳年 +${fmtYear(from)} → +${fmtYear(to)} · 非連續轉動`,
+            approach:"逐年取樣 · 日序每年經過六圈以上",
+            hold:target===null?"精確停靠 · 比較三層":"停靠 +"+fmtYear(target)+" 年 · 哪層仍未歸零？",
+            step:target===null?"逐站精確跳轉":"單步抵達 +"+fmtYear(target)+" 年",
+            complete:"三項共同歸零 · 離散候選"
+          };
+          instrument.dataset.r22SamplingMode=stage;
+          if(inline&&inline.textContent!==inlineMessages[stage]){
+            inline.textContent=inlineMessages[stage]??inlineMessages.idle;
+          }
+          const cue=document.querySelector("#r22-playback-cue");
+          if (!cue) return;
+          const format=n=>Number(n).toLocaleString("en-US");
+          const message={
+            idle:"播放將逐年接近重要對齊點；大段時間會明確跳轉。",
+            approach:target===null?"逐年取樣":`正在逐年接近 +${format(target)} 年，標記為真實整數年取樣。`,
+            skip:`教學跳轉：+${format(from)} → +${format(to)} 年（不是等速旋轉）。`,
+            hold:target===null?"已停留":`精確停在 +${format(target)} 年，觀察仍偏離零點的那一層。`,
+            paused:"已暫停，可再次播放或直接拖曳原本 Δ。",
+            step:target===null?"逐次跳轉":`減少動態：已精確跳到 +${format(target)} 年；再按一次前往下一站。`,
+            complete:"三項離散條件的共同對齊已顯示，節氣仍需後續驗真。"
+          }[stage]??"";
+          if(cue.textContent!==message)cue.textContent=message;
+        }
+      })
+    : createDeltaPlaybackController(sharedPlayback);
   syncFanViewport();
   renderGuides();
   renderRing("day");
   renderRing("year");
   renderRing("gregorian");
+  renderArtSeams();
   renderCursor();
-  instrument.dataset.phaseGeometry = "signed-shortest-fan";
+  instrument.dataset.phaseGeometry = r22GuideOptIn ? "signed-shortest-180-semiellipse" : "signed-shortest-fan";
+  instrument.dataset.fanDegreeSpan = r22GuideOptIn ? "180" : "160";
+  instrument.dataset.r22Study = r22Study || "baseline";
+  instrument.dataset.r16Polish = r16PolishOptIn ? "true" : "baseline";
+  instrument.dataset.r22Art = r22Art || "baseline";
+  instrument.dataset.r22Finish = r22Finish || "baseline";
+  instrument.dataset.fanVerticalScale = r22GuideOptIn ? String(R22_SEMICIRCLE.verticalScale) : "1";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
   bindControls();
