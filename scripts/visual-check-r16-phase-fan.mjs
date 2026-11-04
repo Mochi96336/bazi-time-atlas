@@ -66,7 +66,14 @@ for(const s of scenes){
  check(probe.includes('data-signed="'+s.signed+'"'),name+" unexpected signed phases "+probe.slice(0,500));
  check(probe.includes('data-layers="3"'),name+" not the existing three-layer fan");
  check(probe.includes('data-visual-mode="signed-shortest-fan"'),name+" wrong fan");
- if(s.reflow)check(probe.includes('data-r16-reflow="success"'),name+" resize/accordion/Delta dynamic proof failed: "+probe.slice(0,700));
+ if(s.reflow){
+  check(probe.includes('data-r16-reflow="success"'),name+" resize/accordion/Delta dynamic proof failed: "+probe.slice(0,700));
+  const n=Number(probe.match(/data-r16-sweep-count="(\d+)"/)?.[1]);
+  check(n>=50,name+" phase sweep was not completed (n="+n+")");
+  console.log("[r16-p1] "+s.width+"px phase sweep: "+n+
+   " samples, total "+probe.match(/data-r16-sweep-total-ms="(\d+)"/)?.[1]+
+   "ms, max spacing-check "+probe.match(/data-r16-sweep-max-check-ms="(\d+)"/)?.[1]+"ms");
+ }
  check(probe.includes('data-fan-in-viewport="true"'),name+" test framed the page header, not the semicircle; "+
   probe.match(/data-fan-top="(-?\d+)"/)?.[0]);
  check(probe.includes('data-r16-polish="'+(s.polish?"true":"baseline")+'"'),name+" unexpected P1 opt-in state");

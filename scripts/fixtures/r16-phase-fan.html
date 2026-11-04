@@ -182,6 +182,46 @@ async function runR16ReflowProof(){
  const angles=[...wheel.querySelectorAll(".return-marker")].map(m=>m.dataset.returnAngle).join(",");
  if(angles!==initialAngles)throw Error("phase angles changed across reflow");
  if(wheel.querySelectorAll("[data-phase-cell]").length!==160)throw Error("lost original fan cells");
+ // Deterministic playback/slider stress without reloading the page. The
+ // original screenshot matrix only probed a few phase positions; this covers
+ // both near-zero transitions and combinations spanning 24,000 years.
+ stage("phase-sweep");
+ const samples=[0,1,2,3,58,59,60,61,199,200,399,400,401,799,800,
+  1199,1200,1201,1980,2936,2937,2938,3999,4000,4001,
+  7999,8000,8001,11999,12000,12001,15999,16000,20000,
+  23998,23999,24000,...Array.from({length:20},(_,i)=>i*1199)];
+ const unique=[...new Set(samples)].sort((a,b)=>a-b);
+ const start=win.performance.now();
+ let maxDuration=0;
+ for(const selected of unique){
+  win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
+   detail:{deltaYears:selected,source:"visual-phase-sweep"}
+  }));
+  const checkStart=win.performance.now();
+  if(doc.querySelector("#recurrence-instrument").dataset.deltaYears!==String(selected)){
+   throw Error("sweep failed to update Delta at "+selected);
+  }
+  if(!checkSpacing()){
+   const marker=[...wheel.querySelectorAll('.return-marker-label')].map(el=>
+    el.textContent+(el.dataset.r16AvoidFailed?"[failed]":"")
+   ).join(",");
+   throw Error("text collision at Delta "+selected+" in "+win.innerWidth+
+    "px viewport; labels="+marker);
+  }
+  maxDuration=Math.max(maxDuration,win.performance.now()-checkStart);
+  if(wheel.querySelectorAll("[data-phase-cell]").length!==160)
+   throw Error("sector count changed at "+selected);
+ }
+ probe.dataset.r16SweepCount=String(unique.length);
+ probe.dataset.r16SweepMaxCheckMs=String(Math.round(maxDuration));
+ probe.dataset.r16SweepTotalMs=String(Math.round(win.performance.now()-start));
+ // Restore exact starting state and ensure zero stale offsets.
+ win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
+  detail:{deltaYears:delta,source:"visual-phase-sweep-reset"}
+ }));
+ if(!checkSpacing())throw Error("overlap after phase sweep reset");
+ const finalAngles=[...wheel.querySelectorAll(".return-marker")].map(m=>m.dataset.returnAngle).join(",");
+ if(finalAngles!==initialAngles)throw Error("phase angles changed after sweep reset");
  doc.querySelector("#recurrence-instrument").scrollIntoView({block:"start",behavior:"instant"});
  stage("done");
 }
