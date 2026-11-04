@@ -71,6 +71,11 @@ page.addEventListener("load",async()=>{
    d.querySelector('input[name="confidence"][value="high"]').click();
    d.getElementById("study-answer").requestSubmit();
   }
+  await eventually(()=>!d.getElementById("study-diagnostic").hidden,"diagnostic did not appear");
+  check(d.getElementById("study-result").hidden,"results leaked before diagnostic response");
+  d.querySelector('input[name="cue"][value="geometry"]').click();
+  d.querySelector('input[name="difficulty"][value="future-recurrence"]').click();
+  d.getElementById("study-reflection").requestSubmit();
   await eventually(()=>!d.getElementById("study-result").hidden,"results were not shown");
   check(d.getElementById("study-review").children.length===4,"not four result explanations");
   check(d.getElementById("study-summary").textContent.includes("4／4"),"four model-grounded answers not scored");
