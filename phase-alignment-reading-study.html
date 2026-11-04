@@ -40,6 +40,32 @@
         <button class="primary" id="study-submit" type="submit">送出，下一張</button>
       </form>
     </section>
+    <section id="study-diagnostic" class="study-section" aria-labelledby="diagnostic-title" hidden>
+      <h2 id="diagnostic-title">判讀方式紀錄</h2>
+      <p>四張圖已看完，答案仍未公布。最後記錄你是如何判斷的；這不是計分題。</p>
+      <form id="study-reflection" autocomplete="off">
+        <fieldset>
+          <legend>你主要依靠什麼辨認零點？</legend>
+          <div class="study-reflection-choices">
+            <label><input type="radio" name="cue" value="geometry" required> 半圓上的指示線與共同基準位置</label>
+            <label><input type="radio" name="cue" value="numbers"> 相位數字（例如 +0 與非零差值）</label>
+            <label><input type="radio" name="cue" value="both"> 圖形位置與數字一起判斷</label>
+            <label><input type="radio" name="cue" value="guess"> 主要靠猜測，無法穩定辨認</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>哪一件事最不容易從原圖看出來？</legend>
+          <div class="study-reflection-choices">
+            <label><input type="radio" name="difficulty" value="ring-identity" required> 分辨三個圈層各代表什麼</label>
+            <label><input type="radio" name="difficulty" value="zero-alignment"> 看出哪個圈層已回到零點</label>
+            <label><input type="radio" name="difficulty" value="unit-comparison"> 理解不同週期的相位距離不能直接比較</label>
+            <label><input type="radio" name="difficulty" value="future-recurrence"> 從當下位置推論未來何時再次完整對齊</label>
+            <label><input type="radio" name="difficulty" value="none"> 以上都沒有明顯困難</label>
+          </div>
+        </fieldset>
+        <button class="primary" type="submit">查看四題結果</button>
+      </form>
+    </section>
     <section id="study-result" class="study-section" aria-labelledby="result-title" hidden>
       <h2 id="result-title">判讀結果</h2>
       <p id="study-summary" aria-live="polite"></p>
