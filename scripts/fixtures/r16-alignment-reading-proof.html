@@ -42,6 +42,10 @@ page.addEventListener("load",async()=>{
   check(source.querySelectorAll(".phase-ring-name").length===3,"three native names absent");
   check(source.querySelectorAll("[data-return-marker]").length>=6,"phase markers absent");
   check(source.getElementById("discrete-phase-fan-details")?.open,"original native disclosure stayed closed");
+  check(instrument.parentElement===source.body,"fan still trapped behind the original Research page");
+  const introHeader=source.getElementById("research-question-title");
+  check(source.defaultView.getComputedStyle(introHeader).visibility==="hidden",
+    "original Research header is leaking into the blind diagram test");
   const bounds=wheel.getBoundingClientRect();
   check(bounds.width>200&&bounds.height>230,"fan has no rendered dimensions");
   check(bounds.top<sub.contentWindow.innerHeight&&bounds.bottom>0,"fan is outside screenshot viewport");

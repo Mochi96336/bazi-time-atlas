@@ -29,10 +29,20 @@ function makeSourceURL(){
 // We only hide unrelated explanatory text in this *study's iframe*.
 function maskSurroundingExplanation(doc){
   if(doc.getElementById("alignment-reading-frame-style"))return;
+  const instrument=doc.getElementById("recurrence-instrument");
+  // Fixed positioning alone did not isolate the fan: the original Research
+  // intro remained in front of the diagram in actual 390/900px screenshots.
+  // Move the EXISTING instrument (never clone or redraw it) to the top-level
+  // body stacking context. Keep other research modules mounted for their
+  // own source updates, but make them completely invisible in this iframe.
+  doc.body.classList.add("research-task-primary");
+  doc.body.append(instrument);
   const style=doc.createElement("style");
   style.id="alignment-reading-frame-style";
   style.textContent=[
     "html,body{margin:0!important;overflow:hidden!important;background:#0d1110!important}",
+    "body>:not(#recurrence-instrument){visibility:hidden!important;opacity:0!important;pointer-events:none!important}",
+    "body>#recurrence-instrument{visibility:visible!important;opacity:1!important}",
     "#recurrence-instrument{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;z-index:999999!important}",
     "#recurrence-instrument>.research-fan-graphic{height:100vh!important;max-height:none!important;margin:0!important;padding:0!important}",
     "#recurrence-instrument>.recurrence-readout{display:none!important}",
