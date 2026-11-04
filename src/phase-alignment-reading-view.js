@@ -4,13 +4,13 @@ import {
 } from "./recurrence/phase-alignment-study.js";
 
 const $=id=>document.getElementById(id);
-const intro=$("study-intro"),trial=$("study-trial"),result=$("study-result");
+const intro=$("study-intro"),trial=$("study-trial"),diagnostic=$("study-diagnostic"),result=$("study-result");
 const frame=$("study-source-frame");
 const answerForm=$("study-answer"),choices=$("study-choices");
 const status=$("study-status");
 const optionNames=new Map(READING_STUDY_OPTIONS.map(x=>[x.id,x.label]));
 
-let order=[],responses=[],index=0,startedAt=0,sessionStarted=null;
+let order=[],responses=[],index=0,startedAt=0,sessionStarted=null,diagnosticResponse=null;
 let sourceReady=null,frameReady=false;
 const setStatus=message=>{status.textContent=message;};
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -135,8 +135,10 @@ async function startStudy(){
       ?[...READING_STUDY_DELTAS]:shuffledStudyDeltas();
     responses=[];
     index=0;
+    diagnosticResponse=null;
+    $("study-reflection").reset();
     sessionStarted=new Date().toISOString();
-    intro.hidden=true;result.hidden=true;trial.hidden=false;
+    intro.hidden=true;result.hidden=true;diagnostic.hidden=true;trial.hidden=false;
     await showTrial();
   }catch(error){
     trial.hidden=true;intro.hidden=false;
@@ -153,6 +155,12 @@ function explanation(item){
     labels[key]+" "+(item.signed[key]>0?"+":"")+item.signed[key]
   ).join("／");
   return "回到 0 的是 "+closed.map(key=>labels[key]).join("、")+"。"+phases+"。";
+}
+
+function showDiagnostic(){
+  trial.hidden=true;
+  diagnostic.hidden=false;
+  setStatus("四題已作答。請先記錄判讀方式，正解仍未公開。");
 }
 
 function showResults(){
@@ -180,8 +188,9 @@ function showResults(){
     reviews.append(article);
   }
   trial.hidden=true;
+  diagnostic.hidden=true;
   result.hidden=false;
-  setStatus("四題已完成。答案現在才公布，結果只存在本頁記憶體中。");
+  setStatus("四題與判讀方式紀錄已完成。答案現在才公布，結果只存在本頁記憶體中。");
 }
 
 function exportResult(){
@@ -192,6 +201,7 @@ function exportResult(){
     baseDate:READING_STUDY_BASE,
     startedUtc:sessionStarted,completedUtc:new Date().toISOString(),
     order:[...order],results:evaluateAlignmentReading(responses),
+    diagnostic:diagnosticResponse,
     note:"四題的局部零點辨識，不推論完整八字週期；未測得實機播放 FPS"
   };
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"});
@@ -205,6 +215,16 @@ function exportResult(){
 $("study-start").addEventListener("click",startStudy);
 $("study-restart").addEventListener("click",startStudy);
 $("study-export").addEventListener("click",exportResult);
+$("study-reflection").addEventListener("submit",event=>{
+  event.preventDefault();
+  if(responses.length!==READING_STUDY_DELTAS.length)return;
+  const data=new FormData(event.currentTarget);
+  const cue=data.get("cue"),difficulty=data.get("difficulty");
+  if(!["geometry","numbers","both","guess"].includes(cue)||
+     !["ring-identity","zero-alignment","unit-comparison","future-recurrence","none"].includes(difficulty))return;
+  diagnosticResponse={cue:String(cue),difficulty:String(difficulty)};
+  showResults();
+});
 answerForm.addEventListener("submit",async event=>{
   event.preventDefault();
   const data=new FormData(answerForm);
@@ -215,7 +235,7 @@ answerForm.addEventListener("submit",async event=>{
   responses.push({deltaYears:order[index],choice:String(choice),
     confidence:String(confidence),elapsedMs});
   index++;
-  if(index===order.length){showResults();return;}
+  if(index===order.length){showDiagnostic();return;}
   $("study-submit").disabled=true;
   try{await showTrial();}
   catch(error){setStatus("下一張圖載入失敗："+String(error.message||error));}
