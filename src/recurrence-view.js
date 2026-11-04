@@ -206,6 +206,12 @@ function avoidR16MobileNameCollisions() {
     delete label.dataset.r16AvoidFailed;
   }
   if(!mobileFanMedia.matches||!instrument.getClientRects().length)return;
+  // At common closure all three phases are zero: there is no moving
+  // label to place. Avoid measuring the fixed names needlessly.
+  if(!labels.length){
+    instrument.dataset.r16LayoutReads="0";
+    return;
+  }
   const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
   const clearance=6; // CSS pixels (unaffected by SVG viewBox)
   let measuredRects=0;
