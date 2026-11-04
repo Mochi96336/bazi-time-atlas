@@ -224,7 +224,13 @@ function avoidR16MobileNameCollisions() {
     // weaken the original grid or displace its line.
     const offsets=[[0,0],[-12,-8],[12,-10],[20,-10],[-21,-13],
       [30,-14],[0,-18],[-26,0],[32,0],[-32,-15],
-      [0,22],[40,-20],[-40,-20],[26,18],[-26,18]];
+      [0,22],[40,-20],[-40,-20],[26,18],[-26,18],
+      // In some real phases (e.g. year -21 at Delta 399) the fixed ring
+      // name and the moving number have nearly the same angle. Exhaust
+      // nearby offsets before displacing a line or deleting information.
+      [-50,-15],[-55,0],[-64,-18],[-72,0],[-72,24],
+      [50,-15],[55,0],[64,-18],[72,0],[72,24],
+      [0,-32],[0,32],[-50,30],[50,30]];
     const sizes=[originalSize,26,23,20,17,14].filter((n,i,a)=>
       n<=originalSize&&a.indexOf(n)===i
     );

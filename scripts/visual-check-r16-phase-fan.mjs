@@ -29,6 +29,7 @@ const scenes=[
  // The exact +2937 year alignment provided in the user's current screenshot:
  // Gregorian +137 / Year -3 / Day -23.
  {width:320,height:1200,delta:2937,signed:"137,-3,-23"},
+ {width:320,height:1200,delta:399,signed:"-8,-21,-1"},
  {width:1440,height:1200,delta:2937,signed:"137,-3,-23"},
  // R16 P1 opt-in: same actual original SVG, not reconstructed art.
  // Capture 0/+400/+1200/+24000, mobile and desktop, next to original.
@@ -38,6 +39,7 @@ const scenes=[
  {width:1440,height:1200,delta:1200,signed:"0,0,-9",polish:true},
  {width:1440,height:1200,delta:24000,signed:"0,0,0",polish:true},
  {width:320,height:1200,delta:2937,signed:"137,-3,-23",polish:true},
+ {width:320,height:1200,delta:399,signed:"-8,-21,-1",polish:true},
  {width:1440,height:1200,delta:2937,signed:"137,-3,-23",polish:true},
  // Same DOM: resize mobile→desktop→mobile, collapse/reopen the native
  // phase-fan drilldown, drag Delta to another phase and back.
