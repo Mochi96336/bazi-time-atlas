@@ -43,7 +43,8 @@ test("randomized presentations contain exactly the same four cases",()=>{
 test("isolated reading test uses the production R16 iframe and does not leak answers",()=>{
  const html=readFileSync(new URL("../phase-alignment-reading-study.html",import.meta.url),"utf8");
  const view=readFileSync(new URL("../src/phase-alignment-reading-view.js",import.meta.url),"utf8");
- assert.match(view,/recurrence\.html\?date=/);
+ assert.match(view,/new URL\("\.\/recurrence\.html",location\.href\)/);
+ assert.match(view,/searchParams\.set\("date","2026-09-13"\)/);
  assert.match(view,/recurrence:select-delta/);
  assert.match(view,/data-phase-cell/);
  assert.match(view,/dataset\.phaseSigned/);
