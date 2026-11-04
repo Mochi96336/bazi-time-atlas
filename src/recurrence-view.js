@@ -207,27 +207,31 @@ function avoidR16MobileNameCollisions() {
   }
   if(!mobileFanMedia.matches||!instrument.getClientRects().length)return;
   const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
-  const clearance=6; // real CSS px, protects small static ring-name text
-  const adjacent=(a,b)=>{
-    const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
-    return A.left < B.right+clearance&&A.right+clearance>B.left&&
-      A.top < B.bottom+clearance&&A.bottom+clearance>B.top;
+  const clearance=6; // CSS pixels (unaffected by SVG viewBox)
+  let measuredRects=0;
+  const measure=element=>{
+    measuredRects++;
+    return element.getBoundingClientRect();
   };
+  const adjacent=(a,b)=>
+    a.left<b.right+clearance&&a.right+clearance>b.left&&
+    a.top<b.bottom+clearance&&a.bottom+clearance>b.top;
   const positioned=[];
   for(const label of labels){
-    const rivals=[...names,...positioned];
+    // Measure each stationary text only once per moving label, not once
+    // for every candidate. The bounding box of translated SVG text is
+    // linear in its x/y coordinate: no layout read needed per candidate.
+    const rivals=[...names,...positioned].map(measure);
     const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
     const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
-    if(rivals.every(rival=>!adjacent(label,rival))){positioned.push(label);continue;}
-    // Keep the pointer at the exact calculated phase angle. Try a few
-    // close text placements; if crowded, reduce only THIS label, never
-    // weaken the original grid or displace its line.
+    const initial=measure(label);
+    if(rivals.every(rect=>!adjacent(initial,rect))){
+      positioned.push(label);continue;
+    }
+    const matrix=label.getScreenCTM();
     const offsets=[[0,0],[-12,-8],[12,-10],[20,-10],[-21,-13],
       [30,-14],[0,-18],[-26,0],[32,0],[-32,-15],
       [0,22],[40,-20],[-40,-20],[26,18],[-26,18],
-      // In some real phases (e.g. year -21 at Delta 399) the fixed ring
-      // name and the moving number have nearly the same angle. Exhaust
-      // nearby offsets before displacing a line or deleting information.
       [-50,-15],[-55,0],[-64,-18],[-72,0],[-72,24],
       [50,-15],[55,0],[64,-18],[72,0],[72,24],
       [0,-32],[0,32],[-50,30],[50,30]];
@@ -235,27 +239,41 @@ function avoidR16MobileNameCollisions() {
       n<=originalSize&&a.indexOf(n)===i
     );
     let used=null;
-    for(const fontSize of sizes){
-      label.style.fontSize=fontSize+"px";
-      for(const [dx,dy] of offsets){
-        label.setAttribute("x",(x+dx).toFixed(3));
-        label.setAttribute("y",(y+dy).toFixed(3));
-        if(rivals.every(rival=>!adjacent(label,rival))){
-          used={dx,dy,fontSize};break;
+    if(matrix){
+      for(const fontSize of sizes){
+        if(fontSize!==originalSize)label.style.fontSize=fontSize+"px";
+        // One actual geometry measurement at each font size. Candidate
+        // translations use the SVG-to-screen transform, with no writes.
+        const rect=fontSize===originalSize?initial:measure(label);
+        for(const [dx,dy] of offsets){
+          const sx=matrix.a*dx+matrix.c*dy;
+          const sy=matrix.b*dx+matrix.d*dy;
+          const moved={
+            left:rect.left+sx,right:rect.right+sx,
+            top:rect.top+sy,bottom:rect.bottom+sy
+          };
+          if(rivals.every(rival=>!adjacent(moved,rival))){
+            used={dx,dy,fontSize};break;
+          }
         }
+        if(used)break;
       }
-      if(used)break;
     }
     if(!used){
       label.style.removeProperty("font-size");
-      label.setAttribute("x",x);label.setAttribute("y",y);
       label.dataset.r16AvoidFailed="true";
     }else{
-      if(used.dx||used.dy)label.dataset.r16TextOffset=[used.dx,used.dy].join(",");
+      // Commit the chosen location only once; the pointer line never moves.
+      if(used.dx||used.dy){
+        label.setAttribute("x",(x+used.dx).toFixed(3));
+        label.setAttribute("y",(y+used.dy).toFixed(3));
+        label.dataset.r16TextOffset=[used.dx,used.dy].join(",");
+      }
       if(used.fontSize!==originalSize)label.dataset.r16TextSize=String(used.fontSize);
     }
     positioned.push(label);
   }
+  instrument.dataset.r16LayoutReads=String(measuredRects);
 }
 
 let r16ReflowRequest=0;

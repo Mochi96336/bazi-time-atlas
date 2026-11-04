@@ -72,9 +72,12 @@ for(const s of scenes){
   check(probe.includes('data-r16-reflow="success"'),name+" resize/accordion/Delta dynamic proof failed: "+probe.slice(0,700));
   const n=Number(probe.match(/data-r16-sweep-count="(\d+)"/)?.[1]);
   check(n>=50,name+" phase sweep was not completed (n="+n+")");
+  const reads=Number(probe.match(/data-r16-sweep-max-layout-reads="(\d+)"/)?.[1]);
+  check(reads>0&&reads<=40,name+" phase label layout read budget exceeded: "+reads);
   console.log("[r16-p1] "+s.width+"px phase sweep: "+n+
    " samples, total "+probe.match(/data-r16-sweep-total-ms="(\d+)"/)?.[1]+
-   "ms, max spacing-check "+probe.match(/data-r16-sweep-max-check-ms="(\d+)"/)?.[1]+"ms");
+   "ms, max spacing-check "+probe.match(/data-r16-sweep-max-check-ms="(\d+)"/)?.[1]+
+   "ms, max label layout reads "+probe.match(/data-r16-sweep-max-layout-reads="(\d+)"/)?.[1]);
  }
  check(probe.includes('data-fan-in-viewport="true"'),name+" test framed the page header, not the semicircle; "+
   probe.match(/data-fan-top="(-?\d+)"/)?.[0]);

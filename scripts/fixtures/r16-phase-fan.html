@@ -79,6 +79,7 @@ function examine(){
     A.top<B.bottom+clearance&&A.bottom+clearance>B.top;
  };
  probe.dataset.r16TextShiftCount=String(activePhaseLabels.filter(el=>el.dataset.r16TextOffset).length);
+ probe.dataset.r16LayoutReads=instrument.dataset.r16LayoutReads??"not-measured";
  probe.dataset.r16TextShrinkCount=String(activePhaseLabels.filter(el=>el.dataset.r16TextSize).length);
  probe.dataset.r16TextAvoidFailed=String(activePhaseLabels.some(el=>el.dataset.r16AvoidFailed));
  probe.dataset.r16TextDiagnose=activePhaseLabels.map(el=>{
@@ -193,6 +194,7 @@ async function runR16ReflowProof(){
  const unique=[...new Set(samples)].sort((a,b)=>a-b);
  const start=win.performance.now();
  let maxDuration=0;
+ let maxLayoutReads=0;
  for(const selected of unique){
   win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
    detail:{deltaYears:selected,source:"visual-phase-sweep"}
@@ -201,6 +203,11 @@ async function runR16ReflowProof(){
   if(doc.querySelector("#recurrence-instrument").dataset.deltaYears!==String(selected)){
    throw Error("sweep failed to update Delta at "+selected);
   }
+  const reads=Number(doc.querySelector("#recurrence-instrument").dataset.r16LayoutReads);
+  if(!Number.isFinite(reads)||reads>40){
+   throw Error("excessive layout reads at Delta "+selected+": "+reads);
+  }
+  maxLayoutReads=Math.max(maxLayoutReads,reads);
   if(!checkSpacing()){
    const marker=[...wheel.querySelectorAll('.return-marker-label')].map(el=>
     el.textContent+(el.dataset.r16AvoidFailed?"[failed]":"")
@@ -213,6 +220,7 @@ async function runR16ReflowProof(){
    throw Error("sector count changed at "+selected);
  }
  probe.dataset.r16SweepCount=String(unique.length);
+ probe.dataset.r16SweepMaxLayoutReads=String(maxLayoutReads);
  probe.dataset.r16SweepMaxCheckMs=String(Math.round(maxDuration));
  probe.dataset.r16SweepTotalMs=String(Math.round(win.performance.now()-start));
  // Restore exact starting state and ensure zero stale offsets.
