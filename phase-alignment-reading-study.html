@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>週期對齊｜原版相位扇判讀實驗</title>
+  <link rel="stylesheet" href="./phase-alignment-reading-study.css">
+</head>
+<body>
+  <main class="study-shell">
+    <header class="study-head">
+      <div class="study-eyebrow">RESEARCH 01 / READING TEST</div>
+      <h1>能只看半圓，辨認哪些週期已對齊嗎？</h1>
+      <p>這不是新的半圓設計。直接使用現有 R16「離散相位扇」，只測試它能不能把三個週期的共同零點說清楚。</p>
+    </header>
+    <section id="study-intro" class="study-section" aria-labelledby="intro-title">
+      <h2 id="intro-title">四張圖，四次判斷</h2>
+      <p>每次只顯示原版半圓，不提供 Δ、旁邊的推導表或正確答案。請判斷圖上哪幾圈回到同一個「基準 0」。答案會在四題全部作答後一起公布，避免前一題提示下一題。</p>
+      <p class="study-scope">模型範圍：固定 2026/09/13 的 proleptic Gregorian 日期、400 年公曆結構、60 年序與 60 日序。這不是完整八字或節氣週期的測試。</p>
+      <button id="study-start" type="button" class="primary">開始判讀</button>
+    </section>
+    <section id="study-trial" class="study-section" aria-labelledby="trial-title" hidden>
+      <div class="study-topline"><span id="trial-count">第 1／4 題</span><span>看圖回答 · 暫不公布 Δ</span></div>
+      <h2 id="trial-title">哪些圈已經回到共同零點？</h2>
+      <div class="study-frame-wrap">
+        <iframe id="study-source-frame" title="原版 R16 離散相位扇；不含推導文字" loading="eager" tabindex="-1"></iframe>
+      </div>
+      <form id="study-answer" autocomplete="off">
+        <fieldset>
+          <legend>依照圖中相位標記，選出對齊的圈層</legend>
+          <div id="study-choices" class="study-choices"></div>
+        </fieldset>
+        <fieldset class="study-confidence">
+          <legend>你對這個判斷有多確定？</legend>
+          <label><input type="radio" name="confidence" value="high" required> 確定</label>
+          <label><input type="radio" name="confidence" value="medium"> 大致確定</label>
+          <label><input type="radio" name="confidence" value="low"> 猜測</label>
+        </fieldset>
+        <button class="primary" id="study-submit" type="submit">送出，下一張</button>
+      </form>
+    </section>
+    <section id="study-result" class="study-section" aria-labelledby="result-title" hidden>
+      <h2 id="result-title">判讀結果</h2>
+      <p id="study-summary" aria-live="polite"></p>
+      <div id="study-review" class="study-review"></div>
+      <p class="study-scope">此測試衡量四個指定狀態的「哪幾圈對齊」判讀正確率、反應時間與信心；它不能單獨證明讀者能從靜態圖推導下次完整重合年份，也不代表所有使用者的普遍表現。</p>
+      <div class="study-actions">
+        <button id="study-export" type="button">匯出本機 JSON</button>
+        <button id="study-restart" type="button">再試一次</button>
+      </div>
+    </section>
+    <p id="study-status" class="study-status" role="status" aria-live="polite">原始圖形尚未載入。</p>
+    <footer class="study-foot">
+      <p>不收集姓名、不上傳答案；所有判讀與計時都在本機完成。記錄必須由使用者自行匯出。</p>
+      <a href="./recurrence.html#recurrence-instrument">返回原本的研究頁</a>
+    </footer>
+  </main>
+  <script type="module" src="./src/phase-alignment-reading-view.js"></script>
+</body>
+</html>
