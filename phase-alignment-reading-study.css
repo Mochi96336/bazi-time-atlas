@@ -1,6 +1,6 @@
 :root{color-scheme:dark;--base:#0d1110;--line:#354039;--ink:#ecf0e9;--muted:#a0aba2;--accent:#d3d9ca}
 *{box-sizing:border-box}
-body{margin:0;background:var(--base);color:var(--ink);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+body{margin:0;background:var(--base);color:var(--ink);font:15px/1.6 "Noto Sans CJK TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
 button,input{font:inherit}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .study-shell{width:min(820px,100%);margin:auto;padding:34px clamp(14px,4vw,32px) 70px}
@@ -37,6 +37,6 @@ legend{font-weight:640;margin-bottom:10px}
  .study-shell{padding-top:19px}
  .study-section{padding:14px;border-radius:12px}
  .study-choices{grid-template-columns:1fr}
- #study-source-frame{height:485px}
+ #study-source-frame{height:350px}
  .study-topline{font-size:11px}
 }
