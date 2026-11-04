@@ -169,6 +169,11 @@ function showResults(){
   const meanSeconds=assessed.reduce((n,x)=>n+x.elapsedMs,0)/assessed.length/1000;
   $("study-summary").textContent="判讀正確 "+correct+"／"+assessed.length+
     " 題；平均作答 "+meanSeconds.toFixed(1)+" 秒。這不是普遍讀者的統計結果。";
+  const cueLabels={geometry:"主要看位置與基準線",numbers:"主要讀相位數字",both:"位置與數字並用",guess:"主要靠猜測"};
+  const difficultyLabels={"ring-identity":"辨認圈層身份","zero-alignment":"辨認歸零","unit-comparison":"理解不同單位不能直接比較","future-recurrence":"推論未來完整對齊","none":"沒有明顯困難"};
+  $("study-diagnostic-summary").textContent=diagnosticResponse
+    ?"自述判讀方式："+cueLabels[diagnosticResponse.cue]+"；最難處："+difficultyLabels[diagnosticResponse.difficulty]+"。（自陳紀錄，不代表客觀判讀正確）"
+    :"";
   const reviews=$("study-review");
   reviews.replaceChildren();
   for(let j=0;j<assessed.length;j++){
