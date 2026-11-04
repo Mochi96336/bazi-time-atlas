@@ -40,3 +40,8 @@ legend{font-weight:640;margin-bottom:10px}
  #study-source-frame{height:350px}
  .study-topline{font-size:11px}
 }
+
+.study-reflection-choices{display:grid;gap:8px}
+.study-reflection-choices label{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:10px 12px;cursor:pointer}
+.study-reflection-choices label:has(input:checked){border-color:#cdd7c8;background:#263328}
+.study-reflection-choices input{margin-top:5px}
