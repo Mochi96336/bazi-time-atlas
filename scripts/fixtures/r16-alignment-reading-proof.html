@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Original R16 alignment reading study · browser proof</title>
+<style>
+html,body{margin:0;background:#0d1110}
+#page{display:block;border:0;width:390px;height:1350px;background:#0d1110}
+#probe{display:none}
+</style></head><body>
+<iframe id="page" title="R16 alignment reading study"></iframe>
+<output id="probe" data-ready="false" data-error="initializing"></output>
+<script>
+const query=new URLSearchParams(location.search);
+const width=[320,390,900].includes(Number(query.get("width")))?Number(query.get("width")):390;
+const finish=query.get("finish")==="1";
+const page=document.getElementById("page"),probe=document.getElementById("probe");
+page.style.width=width+"px";
+page.style.height=width>540?"1200px":"1350px";
+const url=new URL("../../phase-alignment-reading-study.html?order=fixed",location.href);
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const check=(yes,message)=>{if(!yes)throw Error(message)};
+async function eventually(predicate,message){
+ for(let i=0;i<250;i++){
+  if(predicate())return;
+  await wait(50);
+ }
+ throw Error(message);
+}
+page.addEventListener("load",async()=>{
+ try{
+  const d=page.contentDocument;
+  check(d.querySelectorAll("#study-trial").length===1,"missing trial screen");
+  d.getElementById("study-start").click();
+  const sub=d.getElementById("study-source-frame");
+  await eventually(()=>!d.getElementById("study-trial").hidden&&
+    sub.contentDocument?.querySelectorAll("[data-phase-cell]").length===160&&
+    sub.contentDocument?.getElementById("alignment-reading-frame-style"),
+    "original 160-sector fan not initialized or isolated");
+  const source=sub.contentDocument,wheel=source.getElementById("recurrence-wheel");
+  const instrument=source.getElementById("recurrence-instrument");
+  check(instrument.dataset.phaseGeometry==="signed-shortest-fan","R16 original fan changed");
+  check(source.querySelectorAll(".phase-ring-name").length===3,"three native names absent");
+  check(source.querySelectorAll("[data-return-marker]").length>=6,"phase markers absent");
+  check(source.getElementById("discrete-phase-fan-details")?.open,"original native disclosure stayed closed");
+  check(instrument.parentElement===source.body,"fan still trapped behind the original Research page");
+  const introHeader=source.getElementById("research-question-title");
+  check(source.defaultView.getComputedStyle(introHeader).visibility==="hidden",
+    "original Research header is leaking into the blind diagram test");
+  const bounds=wheel.getBoundingClientRect();
+  check(bounds.width>200&&bounds.height>230,"fan has no rendered dimensions");
+  check(bounds.top<sub.contentWindow.innerHeight&&bounds.bottom>0,"fan is outside screenshot viewport");
+  const legend=source.querySelector("#recurrence-instrument .recurrence-legend");
+  check(source.defaultView.getComputedStyle(legend).display==="none","answer-reading legend was not masked");
+  const sourceStates=["400","1200","8000","24000"];
+  const answers=["gregorian","gregorian-year","gregorian-day","all"];
+  check(instrument.dataset.deltaYears==="400","first card did not begin at Delta 400");
+  probe.dataset.sourceR16="true";
+  probe.dataset.originalCells=String(source.querySelectorAll("[data-phase-cell]").length);
+  probe.dataset.sourceWidth=String(sub.contentWindow.innerWidth);
+  probe.dataset.wheelBox=[bounds.x,bounds.y,bounds.width,bounds.height].map(Math.round).join(",");
+  probe.dataset.answeredBeforeReveal=String(d.getElementById("study-result").hidden);
+  if(!finish){probe.dataset.ready="true";return;}
+  for(let i=0;i<answers.length;i++){
+   await eventually(()=>
+      instrument.dataset.deltaYears===sourceStates[i]&&
+      d.getElementById("trial-count").textContent.includes(String(i+1)),
+      "study did not present case "+sourceStates[i]);
+   const radio=d.querySelector('input[name="alignment"][value="'+answers[i]+'"]');
+   check(Boolean(radio),"answer option not available");
+   radio.click();
+   d.querySelector('input[name="confidence"][value="high"]').click();
+   d.getElementById("study-answer").requestSubmit();
+  }
+  await eventually(()=>!d.getElementById("study-diagnostic").hidden,"diagnostic did not appear");
+  check(d.getElementById("study-result").hidden,"results leaked before diagnostic response");
+  d.querySelector('input[name="cue"][value="geometry"]').click();
+  d.querySelector('input[name="difficulty"][value="future-recurrence"]').click();
+  d.getElementById("study-reflection").requestSubmit();
+  await eventually(()=>!d.getElementById("study-result").hidden,"results were not shown");
+  check(d.getElementById("study-review").children.length===4,"not four result explanations");
+  check(d.getElementById("study-summary").textContent.includes("4／4"),"four model-grounded answers not scored");
+  probe.dataset.fourCaseScoring="true";
+  probe.dataset.ready="true";
+ }catch(error){
+  probe.dataset.error=String(error.stack||error);
+  probe.dataset.ready="error";
+ }
+});
+page.src=url.href;
+</script></body></html>
