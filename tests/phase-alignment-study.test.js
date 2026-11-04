@@ -55,4 +55,8 @@ test("isolated reading test uses the production R16 iframe and does not leak ans
  assert.doesNotMatch(html,/r16-polish=1|r22=1/);
  assert.match(html,/id="study-trial"/);
  assert.match(html,/id="study-result"/);
+ assert.match(html,/id="study-diagnostic"/);
+ assert.match(html,/id="study-reflection"/);
+ assert.match(view,/diagnostic:diagnosticResponse/);
+ assert.match(view,/showDiagnostic\(\)/);
 });
