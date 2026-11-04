@@ -30,6 +30,8 @@ const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
+// Explicit opt-in: visual polish of the ORIGINAL 160° discrete phase fan.
+const r16PolishOptIn = new URLSearchParams(location.search).get("r16-polish")==="1";
 
 const svg = document.querySelector("#recurrence-wheel");
 const instrument = document.querySelector("#recurrence-instrument");
@@ -183,6 +185,126 @@ function renderCursor() {
   label.textContent = "基準 · 0";
 }
 
+// Only the *existing* nonzero phase text may be shifted. The pointer line,
+// exact angular position, 160 sector boundaries and all static ring names
+// remain the same. Use rendered text bounds rather than angle-specific hacks.
+function avoidR16MobileNameCollisions() {
+  if(!r16PolishOptIn)return;
+  const labels=[...cursorGroup.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
+  // Every pass is a fresh calculation. Otherwise orientation changes can
+  // compound old offsets or leave mobile-sized text on the desktop.
+  for(const label of labels){
+    if(label.dataset.r16BaseX===undefined){
+      label.dataset.r16BaseX=label.getAttribute("x");
+      label.dataset.r16BaseY=label.getAttribute("y");
+    }
+    label.setAttribute("x",label.dataset.r16BaseX);
+    label.setAttribute("y",label.dataset.r16BaseY);
+    label.style.removeProperty("font-size");
+    delete label.dataset.r16TextOffset;
+    delete label.dataset.r16TextSize;
+    delete label.dataset.r16AvoidFailed;
+  }
+  if(!mobileFanMedia.matches||!instrument.getClientRects().length)return;
+  // At common closure all three phases are zero: there is no moving
+  // label to place. Avoid measuring the fixed names needlessly.
+  if(!labels.length){
+    instrument.dataset.r16LayoutReads="0";
+    return;
+  }
+  const names=[...svg.querySelectorAll("[data-phase-ring-label]")];
+  const clearance=6; // CSS pixels (unaffected by SVG viewBox)
+  let measuredRects=0;
+  const measure=element=>{
+    measuredRects++;
+    return element.getBoundingClientRect();
+  };
+  const adjacent=(a,b)=>
+    a.left<b.right+clearance&&a.right+clearance>b.left&&
+    a.top<b.bottom+clearance&&a.bottom+clearance>b.top;
+  // Fixed ring names do not change within a phase update. Share these
+  // measured rectangles across all three moving labels.
+  const fixedBounds=names.map(measure);
+  const positioned=[];
+  for(const label of labels){
+    // Earlier moving labels can change; the original ring-name rectangles
+    // cannot. Evaluate candidate SVG translations without layout reads.
+    const rivals=[...fixedBounds,...positioned.map(measure)];
+    const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
+    const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
+    const initial=measure(label);
+    if(rivals.every(rect=>!adjacent(initial,rect))){
+      positioned.push(label);continue;
+    }
+    const matrix=label.getScreenCTM();
+    const offsets=[[0,0],[-12,-8],[12,-10],[20,-10],[-21,-13],
+      [30,-14],[0,-18],[-26,0],[32,0],[-32,-15],
+      [0,22],[40,-20],[-40,-20],[26,18],[-26,18],
+      [-50,-15],[-55,0],[-64,-18],[-72,0],[-72,24],
+      [50,-15],[55,0],[64,-18],[72,0],[72,24],
+      [0,-32],[0,32],[-50,30],[50,30]];
+    const sizes=[originalSize,26,23,20,17,14].filter((n,i,a)=>
+      n<=originalSize&&a.indexOf(n)===i
+    );
+    let used=null;
+    if(matrix){
+      for(const fontSize of sizes){
+        if(fontSize!==originalSize)label.style.fontSize=fontSize+"px";
+        // One actual geometry measurement at each font size. Candidate
+        // translations use the SVG-to-screen transform, with no writes.
+        const rect=fontSize===originalSize?initial:measure(label);
+        for(const [dx,dy] of offsets){
+          const sx=matrix.a*dx+matrix.c*dy;
+          const sy=matrix.b*dx+matrix.d*dy;
+          const moved={
+            left:rect.left+sx,right:rect.right+sx,
+            top:rect.top+sy,bottom:rect.bottom+sy
+          };
+          if(rivals.every(rival=>!adjacent(moved,rival))){
+            used={dx,dy,fontSize};break;
+          }
+        }
+        if(used)break;
+      }
+    }
+    if(!used){
+      label.style.removeProperty("font-size");
+      label.dataset.r16AvoidFailed="true";
+    }else{
+      // Commit the chosen location only once; the pointer line never moves.
+      if(used.dx||used.dy){
+        label.setAttribute("x",(x+used.dx).toFixed(3));
+        label.setAttribute("y",(y+used.dy).toFixed(3));
+        label.dataset.r16TextOffset=[used.dx,used.dy].join(",");
+      }
+      if(used.fontSize!==originalSize)label.dataset.r16TextSize=String(used.fontSize);
+    }
+    positioned.push(label);
+  }
+  instrument.dataset.r16LayoutReads=String(measuredRects);
+}
+
+let r16ReflowRequest=0;
+let r16ReflowSettledTimer=0;
+function scheduleR16LabelReflow(){
+  if(!r16PolishOptIn)return;
+  if(r16ReflowRequest)cancelAnimationFrame(r16ReflowRequest);
+  if(r16ReflowSettledTimer)clearTimeout(r16ReflowSettledTimer);
+  // Flush current layout immediately; a closed <details> has empty bounds,
+  // so this can be a no-op until it has been opened.
+  avoidR16MobileNameCollisions();
+  // Recheck at frame layout and at the settled layout. Headless Chromium and
+  // browser tabs can defer a rAF when <details> was just revealed.
+  r16ReflowRequest=requestAnimationFrame(()=>{
+    r16ReflowRequest=0;
+    avoidR16MobileNameCollisions();
+  });
+  r16ReflowSettledTimer=setTimeout(()=>{
+    r16ReflowSettledTimer=0;
+    avoidR16MobileNameCollisions();
+  },100);
+}
+
 function renderReturnMarkers(state) {
   cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
   const phases = {
@@ -232,10 +354,12 @@ function renderReturnMarkers(state) {
       x:labelPoint.x,
       y:labelPoint.y,
       class:`return-marker-label return-marker-label-${key}`,
-      "data-return-marker":`${key}-label`
+      "data-return-marker":`${key}-label`,
+      "data-phase-closed":String(phase===0)
     }, cursorGroup);
     label.textContent = formatSigned(signed);
   }
+  avoidR16MobileNameCollisions();
 }
 
 function readBaseDate() {
@@ -785,6 +909,7 @@ function syncFanViewport() {
   svg.setAttribute("viewBox", mobile ? MOBILE_FAN_VIEWBOX : DEFAULT_FAN_VIEWBOX);
   svg.dataset.mobileCrop = String(mobile);
   instrument.dataset.fanViewBox = svg.getAttribute("viewBox");
+  scheduleR16LabelReflow();
 }
 
 function bindControls() {
@@ -807,6 +932,25 @@ function bindControls() {
     if (document.hidden) deltaPlaybackController?.stop();
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
+  if(r16PolishOptIn){
+    // Width can change without crossing 480px (rotation, split-screen,
+    // desktop resizing). Always resolve against the new screen coordinates.
+    window.addEventListener("resize",scheduleR16LabelReflow);
+    // Research 01 wraps the fan in a dynamically created <details>.
+    // A capture-phase "toggle" listener was insufficient when it reopened
+    // programmatically after a viewport change. The open attribute is the
+    // authoritative signal; observe it even before the wrapper is created.
+    const disclosureObserver=new MutationObserver(records=>{
+      if(records.some(record=>
+        record.target.id==="discrete-phase-fan-details"&&record.target.open
+      )){
+        scheduleR16LabelReflow();
+      }
+    });
+    disclosureObserver.observe(document.body,{
+      subtree:true,attributes:true,attributeFilter:["open"]
+    });
+  }
 }
 
 function initialize() {
@@ -832,6 +976,7 @@ function initialize() {
   renderRing("gregorian");
   renderCursor();
   instrument.dataset.phaseGeometry = "signed-shortest-fan";
+  instrument.dataset.r16Polish = r16PolishOptIn ? "true" : "baseline";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
   const initialDelta = applyQueryPreset();
   bindControls();
