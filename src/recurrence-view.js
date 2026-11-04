@@ -216,12 +216,14 @@ function avoidR16MobileNameCollisions() {
   const adjacent=(a,b)=>
     a.left<b.right+clearance&&a.right+clearance>b.left&&
     a.top<b.bottom+clearance&&a.bottom+clearance>b.top;
+  // Fixed ring names do not change within a phase update. Share these
+  // measured rectangles across all three moving labels.
+  const fixedBounds=names.map(measure);
   const positioned=[];
   for(const label of labels){
-    // Measure each stationary text only once per moving label, not once
-    // for every candidate. The bounding box of translated SVG text is
-    // linear in its x/y coordinate: no layout read needed per candidate.
-    const rivals=[...names,...positioned].map(measure);
+    // Earlier moving labels can change; the original ring-name rectangles
+    // cannot. Evaluate candidate SVG translations without layout reads.
+    const rivals=[...fixedBounds,...positioned.map(measure)];
     const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
     const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
     const initial=measure(label);
