@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>週期接縫 · R16 幾何研究｜BaZi Time Atlas</title>
+  <link rel="stylesheet" href="./research-r16-closure-spine.css">
+</head>
+<body>
+<main class="page">
+  <header class="page-head">
+    <div class="eyebrow">BAZI TIME ATLAS / RESEARCH 01 / GEOMETRY EXPERIMENT</div>
+    <h1>週期接縫</h1>
+    <p>原本的 160° 三層半圓。現在不是多加一個圖，而是讓回到零點的圈層在同一條基準線上直接接合。向前推進，每一步都是整整 400 年。</p>
+  </header>
+
+  <section class="study" aria-label="三圈接縫幾何研究原型">
+    <div class="figure-head">
+      <span>離散步進 · 每步 400 年</span>
+      <strong id="current-time" aria-live="off">Δ +400 年</strong>
+    </div>
+    <svg id="closure-fan" viewBox="0 206 1200 525" role="img" aria-label="三圈相位的連續接縫半圓">
+      <g id="fan-bands"></g>
+      <g id="fan-cells"></g>
+      <g id="fan-datum"></g>
+      <g id="fan-markers"></g>
+      <g id="fan-labels"></g>
+    </svg>
+    <div class="figure-caption" id="geometry-caption" aria-live="polite">移動時間查看三圈的位置。</div>
+  </section>
+
+  <section class="controller" aria-label="時間推進">
+    <div class="step-row">
+      <button id="previous-step" type="button" aria-label="往前一步，減少 400 年">− 400</button>
+      <input id="step-slider" type="range" min="0" max="60" step="1" value="1" aria-label="每次推進 400 年，共 60 步" aria-describedby="step-explanation">
+      <button id="next-step" type="button" aria-label="往後一步，增加 400 年">+ 400</button>
+      <button id="play-steps" type="button">播放 400 年步進</button>
+    </div>
+    <div class="step-meta">
+      <output id="step-output" for="step-slider">第 1 / 60 步</output>
+      <span id="step-explanation">整數快照；不是三個圓盤平滑轉動的動畫</span>
+    </div>
+    <nav class="milestones" aria-label="切換代表性狀態">
+      <button data-step="0" type="button">0</button>
+      <button data-step="1" type="button">400</button>
+      <button data-step="3" type="button">1,200</button>
+      <button data-step="20" type="button">8,000</button>
+      <button data-step="60" type="button">24,000</button>
+    </nav>
+  </section>
+
+  <section class="readouts" aria-label="三個相位的數學核對">
+    <div><span>外圈 / 400 年</span><strong id="value-gregorian">0</strong><small id="state-gregorian">回到零點</small></div>
+    <div><span>中圈 / 60 年</span><strong id="value-year">−20</strong><small id="state-year">尚未歸零</small></div>
+    <div><span>內圈 / 60 日</span><strong id="value-day">−3</strong><small id="state-day">尚未歸零</small></div>
+  </section>
+
+  <footer class="foot">
+    <p>這是幾何原型，不更動正式 R16，也不宣稱完整八字每 24,000 年重複。只研究固定公曆月日、400 年結構、60 年序、60 日序之間的重合。</p>
+    <p>模型直接使用 <code>recurrenceState</code> 與原版 <code>phaseAngleOnFan</code>；半徑、160°、40／60／60 分格沿用 R16。<a id="original-link" href="../recurrence.html?date=2026-09-13&amp;delta=400#recurrence-instrument">在正式 R16 查看同一個 Δ</a></p>
+  </footer>
+</main>
+<script type="module" src="../src/recurrence/closure-spine-view.js"></script>
+</body>
+</html>
