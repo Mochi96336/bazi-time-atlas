@@ -1,0 +1,50 @@
+import { mkdir, stat } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+
+const baseURL=process.env.BASE_URL??"http://127.0.0.1:4173/";
+const outputDir=path.resolve("tmp/visual-check");
+function findBrowser(){
+  if(process.env.CHROMIUM_BIN)return process.env.CHROMIUM_BIN;
+  for(const name of ["chromium","chromium-browser","google-chrome","google-chrome-stable"]){
+    const candidate=spawnSync("sh",["-lc","command -v "+name],{encoding:"utf8"});
+    if(candidate.status===0 && candidate.stdout.trim())return candidate.stdout.trim();
+  }
+  throw Error("Chromium required for R16 closure spine visual check");
+}
+const browser=findBrowser();
+function run(args,label){
+  let result;
+  for(let attempt=0;attempt<2;attempt++){
+    result=spawnSync(browser,args,{encoding:"utf8",timeout:attempt?60000:40000,maxBuffer:12*1024*1024});
+    if(result.status===0)return result.stdout;
+  }
+  throw Error("Chromium "+label+" failed: "+(result?.stderr??"").slice(-1600));
+}
+function browserArgs(width){
+  return [
+    "--headless=new","--no-sandbox","--disable-dev-shm-usage","--disable-gpu",
+    "--hide-scrollbars","--force-device-scale-factor=1",
+    "--run-all-compositor-stages-before-draw","--virtual-time-budget=13000",
+    "--window-size="+Math.max(width,500)+",1400"
+  ];
+}
+await mkdir(outputDir,{recursive:true});
+for(const width of [320,390,900]){
+  const url=new URL("scripts/fixtures/r16-closure-spine-proof.html?width="+width,baseURL).href;
+  const html=run([...browserArgs(width),"--dump-dom",url],width+"px DOM");
+  for(const evidence of [
+    'data-ready="true"','data-original-geometry="true"','data-cells="160"',
+    'data-broken8000="true"','data-complete24000="true"'
+  ]) {
+    if(!html.includes(evidence)){
+      throw Error("R16 closure browser failure at "+width+": "+evidence+
+        " probe="+(html.match(/<output id="probe"[^>]*>/)?.[0]??"missing"));
+    }
+  }
+  const target=path.join(outputDir,"r16-closure-spine-8000-"+width+"px.png");
+  run([...browserArgs(width),"--screenshot="+target,url],width+"px screenshot");
+  const size=(await stat(target)).size;
+  if(size<18000)throw Error("empty R16 closure screenshot at "+width+": "+size);
+  console.log("[closure-spine] PASS "+width+"px, saved "+target+" ("+size+" bytes)");
+}
