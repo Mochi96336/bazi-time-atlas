@@ -31,7 +31,6 @@ button:disabled{opacity:.42;cursor:default}
 #closure-fan .zero-guide{stroke:#c2b9a0;stroke-width:2;opacity:.46;stroke-dasharray:6 9}
 #closure-fan .phase-mark{stroke:var(--phase);stroke-width:5;stroke-linecap:butt}
 #closure-fan .closure-run{stroke:var(--spine);stroke-width:10;stroke-linecap:butt}
-#closure-fan .ring-title{font:640 25px "Noto Sans CJK TC","Noto Sans TC",sans-serif;fill:#d3d8ce;paint-order:stroke;stroke:#212721;stroke-width:5}
 #closure-fan .origin-title{font:650 25px "Noto Sans CJK TC","Noto Sans TC",sans-serif;fill:var(--spine)}
 #closure-fan .zero-hair{stroke:#252c27;stroke-width:1.4}
 .figure-caption{font-size:14px;min-height:43px;padding:6px 10px 14px;text-align:center;color:#d8ddcf}
