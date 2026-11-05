@@ -53,8 +53,10 @@ function drawStatic() {
   for(const radius of [270,360,450,560]) {
     attrs("path",{d:arc(radius,CLOSURE_FAN.start,CLOSURE_FAN.end),class:"fan-arc"},datum);
   }
-  // The original R16 zero ray: a reference, not a fourth band.
-  lineAt(262,567,CLOSURE_FAN.zero,{class:"zero-guide"},datum);
+  // Two short datum stubs locate zero without drawing a false bridge
+  // through a nonzero middle ring (the +8,000 year counterexample).
+  lineAt(252,270,CLOSURE_FAN.zero,{class:"zero-guide"},datum);
+  lineAt(560,590,CLOSURE_FAN.zero,{class:"zero-guide"},datum);
   const origin=polar(595,CLOSURE_FAN.zero);
   attrs("text",{x:origin.x,y:origin.y,class:"origin-title","text-anchor":"middle"},labels).textContent="基準 0";
   for(const ring of CLOSURE_RINGS) {
