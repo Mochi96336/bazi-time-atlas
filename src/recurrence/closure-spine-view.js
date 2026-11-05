@@ -59,10 +59,6 @@ function drawStatic() {
   lineAt(560,590,CLOSURE_FAN.zero,{class:"zero-guide"},datum);
   const origin=polar(595,CLOSURE_FAN.zero);
   attrs("text",{x:origin.x,y:origin.y,class:"origin-title","text-anchor":"middle"},labels).textContent="基準 0";
-  for(const ring of CLOSURE_RINGS) {
-    const p=polar((ring.inner+ring.outer)/2,-148);
-    attrs("text",{x:p.x,y:p.y,class:"ring-title","text-anchor":"middle"},labels).textContent=ring.title;
-  }
 }
 const signedText=n=>n===0?"0":n>0?"+"+n:"−"+Math.abs(n);
 function description(snapshot) {
