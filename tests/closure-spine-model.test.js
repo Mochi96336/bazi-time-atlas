@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   CLOSURE_BASE_DATE,CLOSURE_STEP_YEARS,CLOSURE_STEPS,CLOSURE_RINGS,
-  CLOSURE_MILESTONES,closureStateForStep,closureRuns,closureCells
+  CLOSURE_MILESTONES,closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs
 } from "../src/recurrence/closure-spine-model.js";
 import { recurrenceState } from "../src/recurrence/gregorian-cycle.js";
 import { phaseAngleOnFan } from "../src/recurrence/phase-fan-geometry.js";
@@ -76,4 +76,31 @@ test("experiment is isolated from official recurrence UI",()=>{
   assert.match(view,/setInterval/);
   assert.doesNotMatch(view,/linear-gradient|radial-gradient/);
   assert.doesNotMatch(html,/tracker|telemetry|r16-polish=1|r22=1/);
+});
+
+test("closure-aware playback preserves exact events instead of 360ms flashes",()=>{
+  const ordinary=closurePlaybackDwellMs(closureStateForStep(1));
+  const year=closurePlaybackDwellMs(closureStateForStep(3));
+  const day=closurePlaybackDwellMs(closureStateForStep(20));
+  const full=closurePlaybackDwellMs(closureStateForStep(60));
+  assert.ok(ordinary > 100 && ordinary < 250);
+  assert.ok(year >= ordinary * 3,"every third step must visibly linger");
+  assert.ok(day > year,"rarer day closure must visibly linger longer");
+  assert.ok(full > day,"joint closure should be the longest event");
+  let joint=0,yearOnly=0,dayOnly=0,ordinaryCount=0;
+  for(let k=1;k<=CLOSURE_STEPS;k++){
+    const state=closureStateForStep(k);
+    const delay=closurePlaybackDwellMs(state);
+    if(state.allClosed){joint++;assert.equal(delay,full);}
+    else if(state.closedKeys.includes("day")){dayOnly++;assert.equal(delay,day);}
+    else if(state.closedKeys.includes("year")){yearOnly++;assert.equal(delay,year);}
+    else {ordinaryCount++;assert.equal(delay,ordinary);}
+  }
+  assert.deepEqual({joint,yearOnly,dayOnly,ordinaryCount},
+    {joint:1,yearOnly:19,dayOnly:2,ordinaryCount:38});
+  const view=readFileSync(new URL("../src/recurrence/closure-spine-view.js",import.meta.url),"utf8");
+  assert.match(view,/schedulePlaybackStep/);
+  assert.match(view,/closurePlaybackDwellMs\(closureStateForStep\(step\)\)/);
+  assert.match(view,/setTimeout/);
+  assert.doesNotMatch(view,/setInterval\(/);
 });
