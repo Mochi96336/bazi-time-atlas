@@ -1,6 +1,6 @@
 import {
   CLOSURE_FAN,CLOSURE_RINGS,CLOSURE_MILESTONES,CLOSURE_STEPS,
-  closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs
+  closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs,closureVisitedCells
 } from "./closure-spine-model.js";
 
 const NS="http://www.w3.org/2000/svg";
@@ -72,6 +72,16 @@ function description(snapshot) {
 function drawSnapshot() {
   const snapshot=closureStateForStep(step);
   markers.replaceChildren();
+  // Use the original 160 sector paths, not new symbols or an auxiliary ring.
+  // Only a cell that was visited at an exact 400-year snapshot is tinted.
+  const visited=closureVisitedCells(step);
+  for(const cell of cells.querySelectorAll("[data-phase-cell]")) {
+    const ring=cell.dataset.ring;
+    const index=Number(cell.dataset.phaseCell);
+    const hasVisited=visited[ring].includes(index);
+    cell.classList.toggle("is-visited",hasVisited);
+    cell.dataset.visited=String(hasVisited);
+  }
   for(const ring of snapshot.rings) {
     if(ring.closed)continue;
     lineAt(ring.inner+12,ring.outer-12,ring.angle,{
