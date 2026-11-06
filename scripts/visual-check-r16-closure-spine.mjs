@@ -64,3 +64,20 @@ for(const step of [1,3,60]){
   if((await stat(out)).size<18000)throw Error("empty canonical screenshot "+years);
   console.log("[closure-spine] PASS extra canonical state Δ+"+years);
 }
+
+{
+  // The original R16 and the new geometry are compared from their actual
+  // same-origin SVG DOMs; no hand-redrawn stand-in is accepted.
+  const url=new URL("prototypes/research-r16-closure-side-by-side.html?step=20",baseURL).href;
+  const args=browserArgs(1440).map(arg=>arg.startsWith("--virtual-time-budget=")?"--virtual-time-budget=25000":arg);
+  const html=run([...args,"--dump-dom",url],"R16 original-vs-closure comparison");
+  if(!html.includes('data-ready="true"')||!html.includes('data-comparison-step="20"')){
+    throw Error("original-vs-closure comparison failed to synchronize both real SVGs: "+
+      (html.match(/<body[^>]*>/)?.[0]??"body absent")+
+      " status="+(html.match(/<p id="comparison-status"[^>]*>[\\s\\S]*?<\\/p>/)?.[0]??"status absent"));
+  }
+  const screenshot=path.join(outputDir,"r16-original-vs-closure-8000-1440px.png");
+  run([...args,"--screenshot="+screenshot,url],"R16 original-vs-closure screenshot");
+  if((await stat(screenshot)).size<25000)throw Error("empty R16 comparison screenshot");
+  console.log("[closure-spine] PASS original R16 vs closure geometry at Δ+8,000");
+}
