@@ -74,7 +74,7 @@ for(const step of [1,3,60]){
   if(!html.includes('data-ready="true"')||!html.includes('data-comparison-step="20"')){
     throw Error("original-vs-closure comparison failed to synchronize both real SVGs: "+
       (html.match(/<body[^>]*>/)?.[0]??"body absent")+
-      " status="+(html.match(/<p id="comparison-status"[^>]*>[\\s\\S]*?<\\/p>/)?.[0]??"status absent"));
+      " status="+html.slice(html.indexOf('id="comparison-status"'),html.indexOf('id="comparison-status"')+180));
   }
   const screenshot=path.join(outputDir,"r16-original-vs-closure-8000-1440px.png");
   run([...args,"--screenshot="+screenshot,url],"R16 original-vs-closure screenshot");
