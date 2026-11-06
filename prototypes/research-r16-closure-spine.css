@@ -59,11 +59,11 @@ button:disabled{opacity:.42;cursor:default}
   .study{padding:9px 3px 0}
   .figure-head{padding-inline:10px;font-size:11px}
   .figure-caption{font-size:12px;padding-inline:10px}
-  .step-row{flex-wrap:wrap}
-  #step-slider{flex-basis:calc(100% - 150px);order:0}
-  #previous-step{order:-1}
-  #next-step{order:1}
-  #play-steps{order:2;width:100%;min-width:0}
+  .step-row{display:grid;grid-template-columns:70px minmax(0,1fr) 70px;gap:8px;align-items:center}
+  #previous-step{grid-column:1;grid-row:1;padding:6px 4px;font-size:13px}
+  #step-slider{grid-column:2;grid-row:1;width:100%;min-width:0}
+  #next-step{grid-column:3;grid-row:1;padding:6px 4px;font-size:13px}
+  #play-steps{grid-column:1/-1;grid-row:2;width:100%;min-width:0}
   .step-meta{flex-direction:column;gap:1px}
   .milestones button{padding:7px 3px;font-size:13px}
   .readouts>div{padding:12px 8px}
