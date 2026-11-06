@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   CLOSURE_BASE_DATE,CLOSURE_STEP_YEARS,CLOSURE_STEPS,CLOSURE_RINGS,
-  CLOSURE_MILESTONES,closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs,closureVisitedCells
+  CLOSURE_MILESTONES,closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs,closureCycleCells,CLOSURE_STEP_PERIODS
 } from "../src/recurrence/closure-spine-model.js";
 import { recurrenceState } from "../src/recurrence/gregorian-cycle.js";
 import { phaseAngleOnFan } from "../src/recurrence/phase-fan-geometry.js";
@@ -122,10 +122,10 @@ test("the full 160-degree fan endpoints fit inside the experimental viewBox",()=
   }
 });
 
-test("existing cells reveal 1, 3 and 20 landing positions without changing sector count",()=>{
+test("existing cells restart at every exact 3-step and 20-step zero",()=>{
   for(let k=0;k<=CLOSURE_STEPS;k++){
-    const trace=closureVisitedCells(k);
-    const expected={gregorian:1,year:Math.min(k+1,3),day:Math.min(k+1,20)};
+    const trace=closureCycleCells(k);
+    const expected={gregorian:1,year:k%3+1,day:k%20+1};
     for(const ring of CLOSURE_RINGS){
       const indices=trace[ring.key];
       assert.equal(indices.length,expected[ring.key],ring.key+" visits at k="+k);
@@ -139,10 +139,21 @@ test("existing cells reveal 1, 3 and 20 landing positions without changing secto
       assert.ok(indices.includes(currentIndex),"current landing must be in history");
     }
   }
-  const at60=closureVisitedCells(60);
-  assert.deepEqual(at60.year,[10,30,50],"three exact year landing directions");
-  assert.equal(at60.day.length,20,"twenty exact day landing directions");
-  assert.equal(at60.gregorian.length,1,"Gregorian always returns each 400-year step");
-  assert.throws(()=>closureVisitedCells(-1),RangeError);
-  assert.throws(()=>closureVisitedCells(61),RangeError);
+  assert.deepEqual(CLOSURE_STEP_PERIODS,{gregorian:1,year:3,day:20});
+  assert.deepEqual(closureCycleCells(2).year,[10,30,50],
+    "year ring visits three unique angles before clearing at k=3");
+  assert.deepEqual(closureCycleCells(3).year,[30],
+    "year ring must clear its previous lap at k=3");
+  assert.equal(closureCycleCells(19).day.length,20,
+    "day ring visits twenty unique angles before clearing at k=20");
+  assert.deepEqual(closureCycleCells(20).day,[30],
+    "day ring clears its previous lap at k=20");
+  assert.deepEqual(closureCycleCells(20).year,[10,30,50],
+    "year ring does NOT reset when only day ring returns");
+  assert.deepEqual(closureCycleCells(59).day.length,20);
+  assert.deepEqual(closureCycleCells(59).year.length,3);
+  assert.deepEqual(closureCycleCells(60),{day:[30],year:[30],gregorian:[20]},
+    "all three lap histories restart together at 24,000 years");
+  assert.throws(()=>closureCycleCells(-1),RangeError);
+  assert.throws(()=>closureCycleCells(61),RangeError);
 });
