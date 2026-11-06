@@ -116,6 +116,10 @@ function drawSnapshot({echoPrevious=false}={}) {
       duration:ECHO_MS,easing:"ease-out",fill:"forwards"
     });
     departing.onfinish=()=>old.remove();
+    // Offscreen / headless SVG animation timelines can pause even while
+    // JavaScript timers advance. A wall-clock cleanup guarantees the echo
+    // never survives beyond a single 400-year step.
+    setTimeout(()=>old.remove(),ECHO_MS+16);
     current.animate([{opacity:.64},{opacity:1}],{
       duration:ECHO_MS,easing:"ease-out"
     });
