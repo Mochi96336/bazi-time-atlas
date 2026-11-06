@@ -27,9 +27,8 @@ button:disabled{opacity:.42;cursor:default}
 #closure-fan .fan-band{stroke:none}
 #closure-fan .fan-cell{stroke:#535c54;stroke-width:.9;stroke-linejoin:round}
 #closure-fan .fan-cell.major{stroke:#839084;stroke-width:1.5}
-/* In the browser comparison, 20 strongly tinted inner cells formed a
-   distracting zebra pattern. Historical landings stay subordinate to the
-   live phase markers and zero closure, using ONE graphite hue family. */
+/* Current-lap landing cells remain subordinate to the live phase marker.
+   At each exact 3-step or 20-step return the prior lap is cleared. */
 #closure-fan .fan-cell.is-visited[data-ring="day"]{fill:#303b34}
 #closure-fan .fan-cell.is-visited[data-ring="year"]{fill:#526157}
 #closure-fan .fan-cell.is-visited[data-ring="gregorian"]{fill:#4d594e}
