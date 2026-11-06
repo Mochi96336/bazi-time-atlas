@@ -157,3 +157,24 @@ test("existing cells restart at every exact 3-step and 20-step zero",()=>{
   assert.throws(()=>closureCycleCells(-1),RangeError);
   assert.throws(()=>closureCycleCells(61),RangeError);
 });
+
+test("motion design echoes exact snapshots but never interpolates cyclic phases",()=>{
+  const view=readFileSync(new URL("../src/recurrence/closure-spine-view.js",import.meta.url),"utf8");
+  assert.match(view,/const ECHO_MS=128/);
+  assert.match(view,/data-snapshot-layer="echo"/);
+  assert.match(view,/data-snapshot-layer="active"/);
+  assert.match(view,/data-exact-step/);
+  assert.match(view,/prefers-reduced-motion: reduce/);
+  assert.match(view,/old\.animate\(\[\{opacity/);
+  assert.match(view,/current\.animate\(\[\{opacity/);
+  assert.doesNotMatch(view,/transform.*rotate|rotation:|\binterpolat(?:e|ion)\(/,
+    "phase must never be swept through invented half-fan positions");
+  for(const k of [0,1,2,3,19,20,59,60]) {
+    const snapshot=closureStateForStep(k);
+    for(const ring of snapshot.rings) {
+      assert.equal(ring.angle,phaseAngleOnFan({
+        phase:ring.phase,modulus:ring.modulus
+      }),"motion must preserve the exact R16 fan position");
+    }
+  }
+});
