@@ -167,6 +167,8 @@ test("motion design echoes exact snapshots but never interpolates cyclic phases"
   assert.match(view,/prefers-reduced-motion: reduce/);
   assert.match(view,/old\.animate\(\[\{opacity/);
   assert.match(view,/current\.animate\(\[\{opacity/);
+  assert.match(view,/setTimeout\(\(\)=>old\.remove\(\),ECHO_MS\+16\)/,
+    "detached/offscreen animation must never leave a stale marker");
   assert.doesNotMatch(view,/transform.*rotate|rotation:|\binterpolat(?:e|ion)\(/,
     "phase must never be swept through invented half-fan positions");
   for(const k of [0,1,2,3,19,20,59,60]) {
