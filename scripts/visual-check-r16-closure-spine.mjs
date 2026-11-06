@@ -81,3 +81,19 @@ for(const step of [1,3,60]){
   if((await stat(screenshot)).size<25000)throw Error("empty R16 comparison screenshot");
   console.log("[closure-spine] PASS original R16 vs closure geometry at Δ+8,000");
 }
+// Compare partial year closure and total closure on the exact same two SVGs.
+// This makes the source-vs-experiment claim falsifiable on real screenshots.
+for (const step of [3,60]) {
+  const url=new URL("prototypes/research-r16-closure-side-by-side.html?step="+step,baseURL).href;
+  const args=browserArgs(1440).map(arg=>arg.startsWith("--virtual-time-budget=")?"--virtual-time-budget=25000":arg);
+  const html=run([...args,"--dump-dom",url],"R16 side-by-side step "+step);
+  if(!html.includes('data-ready="true"')||!html.includes('data-comparison-step="'+step+'"')){
+    throw Error("R16 original comparison failed at step="+step+" "+
+      (html.match(/<body[^>]*>/)?.[0]??"body missing"));
+  }
+  const years=step*400;
+  const image=path.join(outputDir,"r16-original-vs-closure-"+years+"-1440px.png");
+  run([...args,"--screenshot="+image,url],"R16 comparison screenshot step "+step);
+  if((await stat(image)).size<25000)throw Error("empty comparison screenshot "+years);
+  console.log("[closure-spine] PASS original R16 vs closure geometry at Δ+"+years);
+}
