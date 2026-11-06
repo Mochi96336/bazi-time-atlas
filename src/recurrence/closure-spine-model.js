@@ -91,3 +91,16 @@ export function closureCells() {
 export const CLOSURE_MILESTONES = Object.freeze([0,1,3,20,60].map(step=>Object.freeze({
   step,deltaYears:step*CLOSURE_STEP_YEARS
 })));
+
+/**
+ * Presentation time, NOT elapsed calendar time.
+ * Every 400-year step is a discrete exact snapshot. We hold true zero
+ * encounters longer so the three-step and twenty-step rhythms remain visible.
+ * No interpolation, new event geometry, or calendar change is introduced.
+ */
+export function closurePlaybackDwellMs(snapshot) {
+  if (snapshot.allClosed) return 1600;
+  if (snapshot.closedKeys.includes("day")) return 1050;
+  if (snapshot.closedKeys.includes("year")) return 530;
+  return 170;
+}
