@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   CLOSURE_BASE_DATE,CLOSURE_STEP_YEARS,CLOSURE_STEPS,CLOSURE_RINGS,
-  CLOSURE_MILESTONES,closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs
+  CLOSURE_MILESTONES,closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs,closureVisitedCells
 } from "../src/recurrence/closure-spine-model.js";
 import { recurrenceState } from "../src/recurrence/gregorian-cycle.js";
 import { phaseAngleOnFan } from "../src/recurrence/phase-fan-geometry.js";
@@ -120,4 +120,29 @@ test("the full 160-degree fan endpoints fit inside the experimental viewBox",()=
       }
     }
   }
+});
+
+test("existing cells reveal 1, 3 and 20 landing positions without changing sector count",()=>{
+  for(let k=0;k<=CLOSURE_STEPS;k++){
+    const trace=closureVisitedCells(k);
+    const expected={gregorian:1,year:Math.min(k+1,3),day:Math.min(k+1,20)};
+    for(const ring of CLOSURE_RINGS){
+      const indices=trace[ring.key];
+      assert.equal(indices.length,expected[ring.key],ring.key+" visits at k="+k);
+      assert.equal(new Set(indices).size,indices.length);
+      for(const index of indices){
+        assert.ok(Number.isInteger(index)&&index>=0&&index<ring.sectors);
+      }
+      const current=closureStateForStep(k).rings.find(r=>r.key===ring.key);
+      const scaled=(current.angle+170)/160*ring.sectors;
+      const currentIndex=Math.max(0,Math.min(ring.sectors-1,Math.floor(scaled+1e-8)));
+      assert.ok(indices.includes(currentIndex),"current landing must be in history");
+    }
+  }
+  const at60=closureVisitedCells(60);
+  assert.deepEqual(at60.year,[10,30,50],"three exact year landing directions");
+  assert.equal(at60.day.length,20,"twenty exact day landing directions");
+  assert.equal(at60.gregorian.length,1,"Gregorian always returns each 400-year step");
+  assert.throws(()=>closureVisitedCells(-1),RangeError);
+  assert.throws(()=>closureVisitedCells(61),RangeError);
 });
