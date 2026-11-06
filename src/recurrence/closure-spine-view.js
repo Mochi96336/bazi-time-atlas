@@ -1,6 +1,6 @@
 import {
   CLOSURE_FAN,CLOSURE_RINGS,CLOSURE_MILESTONES,CLOSURE_STEPS,
-  closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs,closureVisitedCells
+  closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs,closureCycleCells,CLOSURE_STEP_PERIODS
 } from "./closure-spine-model.js";
 
 const NS="http://www.w3.org/2000/svg";
@@ -73,8 +73,8 @@ function drawSnapshot() {
   const snapshot=closureStateForStep(step);
   markers.replaceChildren();
   // Use the original 160 sector paths, not new symbols or an auxiliary ring.
-  // Only a cell that was visited at an exact 400-year snapshot is tinted.
-  const visited=closureVisitedCells(step);
+  // A ring's previous-lap cells clear at its exact 3-step / 20-step reset.
+  const visited=closureCycleCells(step);
   for(const cell of cells.querySelectorAll("[data-phase-cell]")) {
     const ring=cell.dataset.ring;
     const index=Number(cell.dataset.phaseCell);
@@ -104,7 +104,9 @@ function drawSnapshot() {
   for(const ring of snapshot.rings) {
     $("value-"+ring.key).textContent=signedText(ring.signed);
     const stateEl=$("state-"+ring.key);
-    stateEl.textContent=ring.closed?"接到共同零點":"偏離共同零點";
+    const period=CLOSURE_STEP_PERIODS[ring.key];
+    const remaining=period-step%period;
+    stateEl.textContent=ring.closed?`已歸零 · 每 ${period} 步一輪`:`距回零 ${remaining} 步`;
     stateEl.classList.toggle("is-closed",ring.closed);
   }
   for(const button of document.querySelectorAll(".milestones button")) {
