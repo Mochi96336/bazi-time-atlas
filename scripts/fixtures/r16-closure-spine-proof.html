@@ -48,6 +48,15 @@ page.addEventListener("load",async()=>{
     // Take the visually important broken 8,000-year state as screenshot.
     api.setStep(20);
     check(!api.snapshot().rings.find(r=>r.key==="year").closed,"8,000 year middle ring accidentally closed");
+    const minus=doc.getElementById("previous-step").getBoundingClientRect();
+    const plus=doc.getElementById("next-step").getBoundingClientRect();
+    check(Math.abs(minus.top-plus.top)<2,"±400 controls are not on the same row at "+width);
+    const playback=doc.getElementById("play-steps");
+    playback.click();
+    check(playback.getAttribute("aria-pressed")==="true","playback did not enter running state");
+    playback.click();
+    check(playback.getAttribute("aria-pressed")==="false","playback did not pause");
+    check(api.snapshot().step===20,"pausing unexpectedly changed the exact phase step");
     probe.dataset.ready="true";
     probe.dataset.cells="160";
     probe.dataset.originalGeometry="true";
