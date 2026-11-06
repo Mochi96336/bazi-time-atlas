@@ -48,3 +48,19 @@ for(const width of [320,390,900]){
   if(size<18000)throw Error("empty R16 closure screenshot at "+width+": "+size);
   console.log("[closure-spine] PASS "+width+"px, saved "+target+" ("+size+" bytes)");
 }
+
+for(const step of [1,3,60]){
+  // 8,000/step 20 was captured above. Three more states provide a
+  // four-panel *real-browser* comparison with identical 390px framing.
+  const url=new URL("scripts/fixtures/r16-closure-spine-proof.html?width=390&targetStep="+step,baseURL).href;
+  const html=run([...browserArgs(390),"--dump-dom",url],"390px step="+step+" DOM");
+  if(!html.includes('data-ready="true"')||!html.includes('data-final-step="'+step+'"')){
+    throw Error("R16 canonical state not ready: step="+step+" "+
+      (html.match(/<output id="probe"[^>]*>/)?.[0]??"missing"));
+  }
+  const years=step*400;
+  const out=path.join(outputDir,"r16-closure-spine-"+years+"-390px.png");
+  run([...browserArgs(390),"--screenshot="+out,url],"390px step="+step+" screenshot");
+  if((await stat(out)).size<18000)throw Error("empty canonical screenshot "+years);
+  console.log("[closure-spine] PASS extra canonical state Δ+"+years);
+}
