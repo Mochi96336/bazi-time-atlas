@@ -104,3 +104,20 @@ test("closure-aware playback preserves exact events instead of 360ms flashes",()
   assert.match(view,/setTimeout/);
   assert.doesNotMatch(view,/setInterval\(/);
 });
+
+test("the full 160-degree fan endpoints fit inside the experimental viewBox",()=>{
+  const html=readFileSync(new URL("../prototypes/research-r16-closure-spine.html",import.meta.url),"utf8");
+  const match=html.match(/id="closure-fan" viewBox="([\\d.]+) ([\\d.]+) ([\\d.]+) ([\\d.]+)"/);
+  assert.ok(match,"fan must own a known viewBox");
+  const [x,y,width,height]=match.slice(1).map(Number);
+  for(const ring of CLOSURE_RINGS){
+    for(const radius of [ring.inner,ring.outer]){
+      for(const deg of [-170,-10]){
+        const px=600+radius*Math.cos(deg*Math.PI/180);
+        const py=820+radius*Math.sin(deg*Math.PI/180);
+        assert.ok(px>x&&px<x+width,`x clipping at ${ring.key} / ${deg}`);
+        assert.ok(py>y&&py<y+height,`y clipping at ${ring.key} / ${deg}`);
+      }
+    }
+  }
+});
