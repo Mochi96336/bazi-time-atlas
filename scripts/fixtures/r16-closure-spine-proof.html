@@ -75,6 +75,28 @@ page.addEventListener("load",async()=>{
     playback.click();
     check(playback.getAttribute("aria-pressed")==="false","playback did not pause");
     check(api.snapshot().step===20,"pausing unexpectedly changed the exact phase step");
+    // Verify one real manual 400-year transition. The old position can
+    // briefly echo but no invented in-between phase angle is rendered.
+    api.setStep(1);
+    const before=doc.querySelector('[data-snapshot-layer="active"] [data-ring-phase="year"]');
+    const beforeAngle=Number(before.dataset.returnAngle);
+    doc.getElementById("next-step").click();
+    check(api.snapshot().step===2,"one +400 step failed");
+    const active=doc.querySelector('[data-snapshot-layer="active"]');
+    check(active?.dataset.exactStep==="2","new marker layer is not exact k=2");
+    const newYear=active.querySelector('[data-ring-phase="year"]');
+    check(Number(newYear.dataset.returnAngle)===
+      Number(api.snapshot().rings.find(r=>r.key==="year").angle.toFixed(3)),
+      "new marker angle differs from exact source phase");
+    if(!page.contentWindow.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      const echo=doc.querySelector('[data-snapshot-layer="echo"]');
+      check(Boolean(echo),"manual +400 should briefly echo preceding snapshot");
+      check(echo.getAttribute("aria-hidden")==="true","old echo must be hidden from accessibility");
+      check(Number(echo.querySelector('[data-ring-phase="year"]').dataset.returnAngle)===beforeAngle,
+        "echo is not the unchanged previous exact angle");
+      await wait(220);
+      check(!doc.querySelector('[data-snapshot-layer="echo"]'),"old echo survived its 128ms fade");
+    }
     // The same fixture can capture four equally grounded geometry snapshots.
     api.setStep(finalStep);
     probe.dataset.finalStep=String(finalStep);
