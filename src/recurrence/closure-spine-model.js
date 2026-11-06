@@ -104,3 +104,30 @@ export function closurePlaybackDwellMs(snapshot) {
   if (snapshot.closedKeys.includes("year")) return 530;
   return 170;
 }
+
+
+/**
+ * Exact visited phase *positions* on the existing R16 sectors, as 400-year
+ * snapshots advance from the shared zero. The pale cells are the history
+ * of landings, never another event track or concurrent occupancy.
+ * All positions are computed from the original recurrenceState angles.
+ */
+export function closureVisitedCells(step) {
+  if (!Number.isInteger(step) || step < 0 || step > CLOSURE_STEPS) {
+    throw new RangeError("step must be an integer from 0 to 60");
+  }
+  const visits = Object.fromEntries(CLOSURE_RINGS.map(r => [r.key, new Set()]));
+  for (let index=0;index<=step;index++) {
+    const snapshot=closureStateForStep(index);
+    for (const ring of snapshot.rings) {
+      const fraction=(ring.angle-CLOSURE_FAN.start)/(CLOSURE_FAN.end-CLOSURE_FAN.start);
+      // A marker sits exactly on a cell boundary. Always choose the cell
+      // immediately to its right; the positive half-cycle ends at sector 59.
+      const cell=Math.max(0,Math.min(ring.sectors-1,Math.floor(fraction*ring.sectors+1e-8)));
+      visits[ring.key].add(cell);
+    }
+  }
+  return Object.freeze(Object.fromEntries(
+    Object.entries(visits).map(([key,set])=>[key,Object.freeze([...set].sort((a,b)=>a-b))])
+  ));
+}
