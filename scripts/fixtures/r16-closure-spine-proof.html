@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R16 closure spine geometry browser proof</title>
+<style>
+html,body{margin:0;background:#0d1110}
+#page{display:block;border:0;width:390px;height:1100px;background:#0d1110}
+#probe{display:none}
+</style></head><body>
+<iframe id="page" title="R16 closure spine prototype"></iframe>
+<output id="probe" data-ready="false" data-error="initializing"></output>
+<script>
+const qs=new URLSearchParams(location.search);
+const width=[320,390,900].includes(Number(qs.get("width")))?Number(qs.get("width")):390;
+const finalStep=[1,3,20,60].includes(Number(qs.get("targetStep")))?Number(qs.get("targetStep")):20;
+const page=document.getElementById("page"),probe=document.getElementById("probe");
+page.style.width=width+"px";
+page.style.height=width>540?"1200px":"1100px";
+const check=(ok,msg)=>{if(!ok)throw Error(msg)};
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function eventually(predicate,msg){
+  for(let i=0;i<200;i++){if(predicate())return;await wait(70);}
+  throw Error(msg);
+}
+page.addEventListener("load",async()=>{
+  try {
+    const doc=page.contentDocument;
+    await eventually(()=>doc.getElementById("closure-fan")?.querySelectorAll("[data-phase-cell]").length===160 &&
+      page.contentWindow.__closureSpineDebug,"prototype did not render");
+    const api=page.contentWindow.__closureSpineDebug;
+    const fan=doc.getElementById("closure-fan");
+    check(doc.querySelectorAll("[data-phase-cell]").length===160,"160 original fan sectors changed");
+    check(doc.documentElement.scrollWidth<=doc.documentElement.clientWidth+2,"horizontal overflow at "+width);
+    const box=fan.getBoundingClientRect();
+    check(box.width>=width*.7 && box.height>60,"diagram unexpectedly small or absent");
+    for(const expected of [
+      [1,["gregorian"]],
+      [3,["year,gregorian"]],
+      [20,["day","gregorian"]],
+      [60,["day,year,gregorian"]]
+    ]) {
+      api.setStep(expected[0]);
+      const actual=[...doc.querySelectorAll(".closure-run")].map(el=>el.dataset.closedRings);
+      check(JSON.stringify(actual)===JSON.stringify(expected[1]),
+        "incorrect closure segments at "+expected[0]+": "+JSON.stringify(actual));
+      const visited={};
+      for(const key of ["day","year","gregorian"]){
+        visited[key]=doc.querySelectorAll('[data-ring="'+key+'"][data-visited="true"]').length;
+      }
+      const n=expected[0];
+      check(visited.day===n%20+1,"day lap failed to restart at "+n);
+      check(visited.year===n%3+1,"year lap failed to restart at "+n);
+      check(visited.gregorian===1,"Gregorian landing count wrong at "+n);
+    }
+    // Before each recurrence, its ring displays a complete lap;
+    // the very next exact-zero snapshot clears only that ring's lap.
+    for(const [k,dayCount,yearCount] of [[2,3,3],[3,4,1],[19,20,2],[20,1,3],[59,20,3],[60,1,1]]){
+      api.setStep(k);
+      check(doc.querySelectorAll('[data-ring="day"][data-visited="true"]').length===dayCount,
+        "incorrect day lap count at "+k);
+      check(doc.querySelectorAll('[data-ring="year"][data-visited="true"]').length===yearCount,
+        "incorrect year lap count at "+k);
+    }
+    check(api.snapshot().allClosed,"60th step not fully aligned");
+    check(doc.getElementById("geometry-caption").textContent.includes("完整重合"),"closing caption absent");
+    // Take the visually important broken 8,000-year state as screenshot.
+    api.setStep(20);
+    check(!api.snapshot().rings.find(r=>r.key==="year").closed,"8,000 year middle ring accidentally closed");
+    const minus=doc.getElementById("previous-step").getBoundingClientRect();
+    const plus=doc.getElementById("next-step").getBoundingClientRect();
+    check(Math.abs(minus.top-plus.top)<2,"±400 controls are not on the same row at "+width);
+    const playback=doc.getElementById("play-steps");
+    playback.click();
+    check(playback.getAttribute("aria-pressed")==="true","playback did not enter running state");
+    playback.click();
+    check(playback.getAttribute("aria-pressed")==="false","playback did not pause");
+    check(api.snapshot().step===20,"pausing unexpectedly changed the exact phase step");
+    // Verify one real manual 400-year transition. The old position can
+    // briefly echo but no invented in-between phase angle is rendered.
+    api.setStep(1);
+    const before=doc.querySelector('[data-snapshot-layer="active"] [data-ring-phase="year"]');
+    const beforeAngle=Number(before.dataset.returnAngle);
+    doc.getElementById("next-step").click();
+    check(api.snapshot().step===2,"one +400 step failed");
+    const active=doc.querySelector('[data-snapshot-layer="active"]');
+    check(active?.dataset.exactStep==="2","new marker layer is not exact k=2");
+    const newYear=active.querySelector('[data-ring-phase="year"]');
+    check(Number(newYear.dataset.returnAngle)===
+      Number(api.snapshot().rings.find(r=>r.key==="year").angle.toFixed(3)),
+      "new marker angle differs from exact source phase");
+    if(!page.contentWindow.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      const echo=doc.querySelector('[data-snapshot-layer="echo"]');
+      check(Boolean(echo),"manual +400 should briefly echo preceding snapshot");
+      check(echo.getAttribute("aria-hidden")==="true","old echo must be hidden from accessibility");
+      check(Number(echo.querySelector('[data-ring-phase="year"]').dataset.returnAngle)===beforeAngle,
+        "echo is not the unchanged previous exact angle");
+      await wait(220);
+      check(!doc.querySelector('[data-snapshot-layer="echo"]'),"old echo survived its 128ms fade");
+    }
+    // The same fixture can capture four equally grounded geometry snapshots.
+    api.setStep(finalStep);
+    probe.dataset.finalStep=String(finalStep);
+    probe.dataset.dayLandings=String(doc.querySelectorAll('[data-ring="day"][data-visited="true"]').length);
+    probe.dataset.yearLandings=String(doc.querySelectorAll('[data-ring="year"][data-visited="true"]').length);
+    probe.dataset.ready="true";
+    probe.dataset.cells="160";
+    probe.dataset.originalGeometry="true";
+    probe.dataset.broken8000="true";
+    probe.dataset.complete24000="true";
+    probe.dataset.viewport=String(width);
+    probe.dataset.fanBox=[box.width,box.height].map(Math.round).join(",");
+  } catch(error){
+    probe.dataset.error=String(error.stack||error);
+    probe.dataset.ready="error";
+  }
+});
+page.src=new URL("../../prototypes/research-r16-closure-spine.html?step=1",location.href).href;
+</script>
+</body></html>
