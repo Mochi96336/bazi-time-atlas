@@ -1,6 +1,6 @@
 import {
   CLOSURE_FAN,CLOSURE_RINGS,CLOSURE_MILESTONES,CLOSURE_STEPS,
-  closureStateForStep,closureRuns,closureCells
+  closureStateForStep,closureRuns,closureCells,closurePlaybackDwellMs
 } from "./closure-spine-model.js";
 
 const NS="http://www.w3.org/2000/svg";
@@ -10,7 +10,7 @@ const bands=$("fan-bands"),cells=$("fan-cells"),datum=$("fan-datum");
 const markers=$("fan-markers"),labels=$("fan-labels");
 const startStep=Number(new URLSearchParams(location.search).get("step")??1);
 let step=Number.isInteger(startStep)&&startStep>=0&&startStep<=CLOSURE_STEPS?startStep:1;
-let interval=null;
+let playbackTimer=null;
 
 function polar(radius,deg) {
   const a=deg*Math.PI/180;
@@ -105,8 +105,8 @@ function drawSnapshot() {
   $("original-link").href="../recurrence.html?date=2026-09-13&delta="+snapshot.deltaYears+"#recurrence-instrument";
 }
 function stopPlayback() {
-  if(interval!==null)clearInterval(interval);
-  interval=null;
+  if(playbackTimer!==null)clearTimeout(playbackTimer);
+  playbackTimer=null;
   $("play-steps").textContent="播放 400 年步進";
   $("play-steps").setAttribute("aria-pressed","false");
 }
@@ -117,18 +117,26 @@ function setStep(next,{stop=true}={}) {
   step=clamped;
   drawSnapshot();
 }
+// A fixed 360ms interval hid the year/day zero events in a single flash.
+// Instead, hold the *same exact geometry* longer at genuine zero events.
+// Dwell times are pedagogic playback timing, never phase durations.
+function schedulePlaybackStep(){
+  const dwell=closurePlaybackDwellMs(closureStateForStep(step));
+  playbackTimer=setTimeout(()=>{
+    playbackTimer=null;
+    if(step>=CLOSURE_STEPS){stopPlayback();return;}
+    setStep(step+1,{stop:false});
+    if(step===CLOSURE_STEPS){stopPlayback();return;}
+    schedulePlaybackStep();
+  },dwell);
+}
 function togglePlayback(){
-  if(interval!==null){stopPlayback();return;}
+  if(playbackTimer!==null){stopPlayback();return;}
   if(step===CLOSURE_STEPS)setStep(0);
   $("play-steps").textContent="暫停";
   $("play-steps").setAttribute("aria-pressed","true");
-  // Deliberate integer snapshots: shortest signed phase jumps at ±half-cycle.
-  // Smooth interpolation would invent a false rotation through the fan.
-  interval=setInterval(()=>{
-    if(step>=CLOSURE_STEPS){stopPlayback();return;}
-    setStep(step+1,{stop:false});
-    if(step===CLOSURE_STEPS)stopPlayback();
-  },360);
+  // Integer snapshots only; shortest signed phase jumps at half-cycle.
+  schedulePlaybackStep();
 }
 drawStatic();
 drawSnapshot();
