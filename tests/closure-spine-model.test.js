@@ -73,7 +73,7 @@ test("experiment is isolated from official recurrence UI",()=>{
   assert.match(html,/id="original-link"/);
   assert.match(view,/closureRuns\(snapshot\)/);
   assert.match(view,/closureCells\(\)/);
-  assert.match(view,/setInterval/);
+  assert.match(view,/schedulePlaybackStep/);
   assert.doesNotMatch(view,/linear-gradient|radial-gradient/);
   assert.doesNotMatch(html,/tracker|telemetry|r16-polish=1|r22=1/);
 });
@@ -107,7 +107,7 @@ test("closure-aware playback preserves exact events instead of 360ms flashes",()
 
 test("the full 160-degree fan endpoints fit inside the experimental viewBox",()=>{
   const html=readFileSync(new URL("../prototypes/research-r16-closure-spine.html",import.meta.url),"utf8");
-  const match=html.match(/id="closure-fan" viewBox="([\\d.]+) ([\\d.]+) ([\\d.]+) ([\\d.]+)"/);
+  const match=html.match(/id="closure-fan" viewBox="([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+)"/);
   assert.ok(match,"fan must own a known viewBox");
   const [x,y,width,height]=match.slice(1).map(Number);
   for(const ring of CLOSURE_RINGS){
