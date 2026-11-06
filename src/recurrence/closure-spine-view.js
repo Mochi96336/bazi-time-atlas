@@ -69,9 +69,24 @@ function description(snapshot) {
   const open=snapshot.rings.filter(r=>!r.closed).map(r=>r.title).reverse();
   return "歸零：" +closed.join("、")+"；偏離："+open.join("、")+"。";
 }
-function drawSnapshot() {
+// A 400-year jump is not a continuous physical rotation within the 160° fan.
+// The previous *exact* snapshot is briefly echoed, without tweening angles,
+// rotating tracks, or introducing intermediate 400-year phase values.
+const ECHO_MS=128;
+function drawSnapshot({echoPrevious=false}={}) {
   const snapshot=closureStateForStep(step);
-  markers.replaceChildren();
+  const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  markers.querySelectorAll('[data-snapshot-layer="echo"]').forEach(node=>node.remove());
+  const old=markers.querySelector('[data-snapshot-layer="active"]');
+  const echo=echoPrevious&&!reducedMotion&&old;
+  if(echo) {
+    old.dataset.snapshotLayer="echo";
+    old.setAttribute("aria-hidden","true");
+    old.style.pointerEvents="none";
+  } else {
+    markers.replaceChildren();
+  }
+  const current=attrs("g",{"data-snapshot-layer":"active","data-exact-step":step},markers);
   // Use the original 160 sector paths, not new symbols or an auxiliary ring.
   // A ring's previous-lap cells clear at its exact 3-step / 20-step reset.
   const visited=closureCycleCells(step);
@@ -87,14 +102,23 @@ function drawSnapshot() {
     lineAt(ring.inner+12,ring.outer-12,ring.angle,{
       class:"phase-mark","data-ring-phase":ring.key,
       "data-phase-signed":ring.signed,"data-return-angle":ring.angle.toFixed(3)
-    },markers);
+    },current);
   }
   // Closure is an actual uninterrupted geometry, *only* where touching
   // annuli have zero phase. At +8,000 the middle ring stays visibly broken.
   for(const run of closureRuns(snapshot)){
     lineAt(run.inner,run.outer,CLOSURE_FAN.zero,{
       class:"closure-run","data-closed-rings":run.keys.join(",")
-    },markers);
+    },current);
+  }
+  if(echo) {
+    const departing=old.animate([{opacity:.30},{opacity:0}],{
+      duration:ECHO_MS,easing:"ease-out",fill:"forwards"
+    });
+    departing.onfinish=()=>old.remove();
+    current.animate([{opacity:.64},{opacity:1}],{
+      duration:ECHO_MS,easing:"ease-out"
+    });
   }
   $("current-time").textContent="Δ +"+snapshot.deltaYears.toLocaleString("en-US")+" 年";
   $("step-output").textContent="第 "+step+" / 60 步";
@@ -122,12 +146,12 @@ function stopPlayback() {
   $("play-steps").textContent="播放 400 年步進";
   $("play-steps").setAttribute("aria-pressed","false");
 }
-function setStep(next,{stop=true}={}) {
+function setStep(next,{stop=true,echoPrevious=false}={}) {
   if(stop)stopPlayback();
   const clamped=Math.max(0,Math.min(CLOSURE_STEPS,Math.round(next)));
-  if(!Number.isFinite(clamped))return;
+  if(!Number.isFinite(clamped)||clamped===step)return;
   step=clamped;
-  drawSnapshot();
+  drawSnapshot({echoPrevious});
 }
 // A fixed 360ms interval hid the year/day zero events in a single flash.
 // Instead, hold the *same exact geometry* longer at genuine zero events.
@@ -137,7 +161,7 @@ function schedulePlaybackStep(){
   playbackTimer=setTimeout(()=>{
     playbackTimer=null;
     if(step>=CLOSURE_STEPS){stopPlayback();return;}
-    setStep(step+1,{stop:false});
+    setStep(step+1,{stop:false,echoPrevious:true});
     if(step===CLOSURE_STEPS){stopPlayback();return;}
     schedulePlaybackStep();
   },dwell);
@@ -153,8 +177,8 @@ function togglePlayback(){
 drawStatic();
 drawSnapshot();
 $("step-slider").addEventListener("input",event=>setStep(Number(event.target.value)));
-$("previous-step").addEventListener("click",()=>setStep(step-1));
-$("next-step").addEventListener("click",()=>setStep(step+1));
+$("previous-step").addEventListener("click",()=>setStep(step-1,{echoPrevious:true}));
+$("next-step").addEventListener("click",()=>setStep(step+1,{echoPrevious:true}));
 $("play-steps").addEventListener("click",togglePlayback);
 document.querySelectorAll(".milestones button").forEach(button=>
   button.addEventListener("click",()=>setStep(Number(button.dataset.step)))
