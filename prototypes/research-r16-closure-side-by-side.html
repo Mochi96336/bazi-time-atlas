@@ -54,7 +54,7 @@ footer a{color:#e4dfc6}
  <section class="panel"><div class="panel-head"><strong>接縫實驗</strong><small>當下歸零、歷次相位落點</small></div><iframe id="candidate" title="R16 幾何接縫與既有分格歷次落點"></iframe></section>
 </div>
 <p id="comparison-status" role="status">正在準備兩個原始 SVG...</p>
-<footer><p>僅在本頁的同源 iframe 中裁剪到相同的 SVG viewBox；沒有修改原始程式，也沒有混入 #614 字體精修。右圖的淡亮分格是沿 400 年整數步進曾經走過的相位位置，不代表同時發生的時間事件。</p>
+<footer><p>僅在本頁的同源 iframe 中裁剪到相同的 SVG viewBox，原版比較側暫時隱藏無關的天文殘差層，以便只比較三個離散週期；沒有修改原始程式，也沒有混入 #614 字體精修。右圖的淡亮分格是沿 400 年整數步進曾經走過的相位位置，不代表同時發生的時間事件。</p>
 <a href="./research-r16-closure-spine.html">返回可播放原型</a></footer>
 </main>
 <script type="module">
@@ -76,6 +76,10 @@ function isolate(frame,svgId){
   style.textContent=[
     "html,body{margin:0!important;padding:0!important;overflow:hidden!important;background:#0d1110!important;height:100%!important}",
     "body>*:not(#"+svgId+"){display:none!important}",
+    // The source SVG also includes an astronomy-residual overlay not present
+    // in this 3-cycle prototype. Suppress only that unrelated layer inside
+    // the comparison iframe; the original SVG and its phase markers remain.
+    svgId==="recurrence-wheel"?"#astronomy-residual-ring{display:none!important}":"",
     "#"+svgId+"{display:block!important;position:fixed!important;inset:0!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;width:100vw!important;height:100vh!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;z-index:10!important;overflow:visible!important}"
   ].join("\n");
   doc.head.append(style);
