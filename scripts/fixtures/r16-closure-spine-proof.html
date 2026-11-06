@@ -12,6 +12,7 @@ html,body{margin:0;background:#0d1110}
 <script>
 const qs=new URLSearchParams(location.search);
 const width=[320,390,900].includes(Number(qs.get("width")))?Number(qs.get("width")):390;
+const finalStep=[1,3,20,60].includes(Number(qs.get("targetStep")))?Number(qs.get("targetStep")):20;
 const page=document.getElementById("page"),probe=document.getElementById("probe");
 page.style.width=width+"px";
 page.style.height=width>540?"1200px":"1100px";
@@ -42,6 +43,14 @@ page.addEventListener("load",async()=>{
       const actual=[...doc.querySelectorAll(".closure-run")].map(el=>el.dataset.closedRings);
       check(JSON.stringify(actual)===JSON.stringify(expected[1]),
         "incorrect closure segments at "+expected[0]+": "+JSON.stringify(actual));
+      const visited={};
+      for(const key of ["day","year","gregorian"]){
+        visited[key]=doc.querySelectorAll('[data-ring="'+key+'"][data-visited="true"]').length;
+      }
+      const n=expected[0];
+      check(visited.day===Math.min(n+1,20),"incorrect distinct day landings at "+n);
+      check(visited.year===Math.min(n+1,3),"incorrect distinct year landings at "+n);
+      check(visited.gregorian===1,"incorrect Gregorian landing count at "+n);
     }
     check(api.snapshot().allClosed,"60th step not fully aligned");
     check(doc.getElementById("geometry-caption").textContent.includes("完整重合"),"closing caption absent");
@@ -57,6 +66,11 @@ page.addEventListener("load",async()=>{
     playback.click();
     check(playback.getAttribute("aria-pressed")==="false","playback did not pause");
     check(api.snapshot().step===20,"pausing unexpectedly changed the exact phase step");
+    // The same fixture can capture four equally grounded geometry snapshots.
+    api.setStep(finalStep);
+    probe.dataset.finalStep=String(finalStep);
+    probe.dataset.dayLandings=String(doc.querySelectorAll('[data-ring="day"][data-visited="true"]').length);
+    probe.dataset.yearLandings=String(doc.querySelectorAll('[data-ring="year"][data-visited="true"]').length);
     probe.dataset.ready="true";
     probe.dataset.cells="160";
     probe.dataset.originalGeometry="true";
