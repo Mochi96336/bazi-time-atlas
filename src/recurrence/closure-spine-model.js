@@ -106,28 +106,43 @@ export function closurePlaybackDwellMs(snapshot) {
 }
 
 
+// Three independent repeat periods measured in *400-year steps*.
+// Gregorian date structure is zero every step. Nominal year phase changes
+// +400 mod 60 = +40; Gregorian ordinal day phase changes +146097 mod 60 = +57.
+function greatestCommonDivisor(a,b) {
+  while (b !== 0) [a,b] = [b,a % b];
+  return a;
+}
+
+export const CLOSURE_STEP_PERIODS = Object.freeze({
+  gregorian:1,
+  year:60 / greatestCommonDivisor(60,CLOSURE_STEP_YEARS % 60),
+  day:60 / greatestCommonDivisor(60,GREGORIAN_400_YEAR_DAYS % 60)
+});
+
 /**
- * Exact visited phase *positions* on the existing R16 sectors, as 400-year
- * snapshots advance from the shared zero. The pale cells are the history
- * of landings, never another event track or concurrent occupancy.
- * All positions are computed from the original recurrenceState angles.
+ * A snapshot of the *current* lap, not the entire accumulated history.
+ * Each R16 annulus reuses its original cells. At a mathematically exact
+ * recurrence (step % period === 0) that ring resets to only the zero cell;
+ * this makes the 3 / 20 step cadence visible rather than saturating forever.
+ * Positions remain sampled at exact 400-year steps only.
  */
-export function closureVisitedCells(step) {
+export function closureCycleCells(step) {
   if (!Number.isInteger(step) || step < 0 || step > CLOSURE_STEPS) {
     throw new RangeError("step must be an integer from 0 to 60");
   }
-  const visits = Object.fromEntries(CLOSURE_RINGS.map(r => [r.key, new Set()]));
-  for (let index=0;index<=step;index++) {
-    const snapshot=closureStateForStep(index);
-    for (const ring of snapshot.rings) {
-      const fraction=(ring.angle-CLOSURE_FAN.start)/(CLOSURE_FAN.end-CLOSURE_FAN.start);
-      // A marker sits exactly on a cell boundary. Always choose the cell
-      // immediately to its right; the positive half-cycle ends at sector 59.
+  const cells={};
+  for (const ring of CLOSURE_RINGS) {
+    const cycleLength=CLOSURE_STEP_PERIODS[ring.key];
+    const start=step - step % cycleLength;
+    const visited=new Set();
+    for (let k=start;k<=step;k++) {
+      const current=closureStateForStep(k).rings.find(r=>r.key===ring.key);
+      const fraction=(current.angle-CLOSURE_FAN.start)/(CLOSURE_FAN.end-CLOSURE_FAN.start);
       const cell=Math.max(0,Math.min(ring.sectors-1,Math.floor(fraction*ring.sectors+1e-8)));
-      visits[ring.key].add(cell);
+      visited.add(cell);
     }
+    cells[ring.key]=Object.freeze([...visited].sort((a,b)=>a-b));
   }
-  return Object.freeze(Object.fromEntries(
-    Object.entries(visits).map(([key,set])=>[key,Object.freeze([...set].sort((a,b)=>a-b))])
-  ));
+  return Object.freeze(cells);
 }
