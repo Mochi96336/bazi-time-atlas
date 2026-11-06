@@ -27,6 +27,7 @@ button:disabled{opacity:.42;cursor:default}
 #closure-fan .fan-band{stroke:none}
 #closure-fan .fan-cell{stroke:#535c54;stroke-width:.9;stroke-linejoin:round}
 #closure-fan .fan-cell.major{stroke:#839084;stroke-width:1.5}
+#closure-fan .fan-cell.is-visited{fill:#526259}
 #closure-fan .fan-arc{fill:none;stroke:#757f73;stroke-width:1.6}
 #closure-fan .zero-guide{stroke:#c2b9a0;stroke-width:2;opacity:.46;stroke-dasharray:6 9}
 #closure-fan .phase-mark{stroke:var(--phase);stroke-width:5;stroke-linecap:butt}
