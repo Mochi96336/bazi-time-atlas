@@ -75,12 +75,13 @@ test("nonzero or missing phases are not connected or replaced by a false guide",
   assert.throws(()=>zeroPhaseRadialRuns([{key:"bad",inner:400,outer:200}],{bad:0}),RangeError);
 });
 
-test("new seam is opt-in and preserves the existing R16 ring markup",()=>{
+test("native seam defaults on in the Draft, and legacy R16 remains a reversible fallback",()=>{
   const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
   const css=readFileSync(new URL("../recurrence.css",import.meta.url),"utf8");
-  assert.match(view,/get\("r16-seam"\)==="1"/);
-  assert.match(view,/ZERO_SEAM_PREVIEW \? \[\[258,270\],\[560,575\]\] : \[\[258,575\]\]/);
-  assert.match(view,/if\(ZERO_SEAM_PREVIEW\)/);
+  assert.match(view,/get\("r16-seam"\)!=="0"/,
+    "the legacy solid datum remains an explicit opt-out");
+  assert.match(view,/ZERO_SEAM_ENABLED \? \[\[258,270\],\[560,575\]\] : \[\[258,575\]\]/);
+  assert.match(view,/if\(ZERO_SEAM_ENABLED\)/);
   assert.match(view,/class:"cursor-reference-guide", "aria-hidden":"true"/,
     "nonzero phases still need a weak zero-direction reference");
   assert.match(css,/\.cursor-reference-guide \{[^}]*stroke-dasharray:3 11;/,
@@ -89,7 +90,7 @@ test("new seam is opt-in and preserves the existing R16 ring markup",()=>{
     "reference must stay below live phase-marker contrast");
   assert.match(view,/zeroPhaseRadialRuns\(bands,phases\)/);
   assert.match(view,/"data-closure-seam":run.keys.join\(","\)/);
-  assert.match(view,/instrument.dataset.zeroSeamPreview = String\(ZERO_SEAM_PREVIEW\)/);
+  assert.match(view,/instrument.dataset.zeroSeamMode = ZERO_SEAM_ENABLED \? "native" : "legacy"/);
   assert.match(css,/\.return-closure-seam \{ stroke:var\(--cursor\); stroke-width:6\.5;/,
     "seam must use exactly the original closed-marker stroke weight");
   assert.doesNotMatch(css,/\.return-closure-seam \{[^}]*vector-effect:non-scaling-stroke/,
