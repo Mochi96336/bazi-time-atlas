@@ -81,6 +81,12 @@ test("new seam is opt-in and preserves the existing R16 ring markup",()=>{
   assert.match(view,/get\("r16-seam"\)==="1"/);
   assert.match(view,/ZERO_SEAM_PREVIEW \? \[\[258,270\],\[560,575\]\] : \[\[258,575\]\]/);
   assert.match(view,/if\(ZERO_SEAM_PREVIEW\)/);
+  assert.match(view,/class:"cursor-reference-guide", "aria-hidden":"true"/,
+    "nonzero phases still need a weak zero-direction reference");
+  assert.match(css,/\.cursor-reference-guide \{[^}]*stroke-dasharray:3 11;/,
+    "reference must be dashed, distinct from solid zero seam");
+  assert.match(css,/\.cursor-reference-guide \{[^}]*stroke-opacity:\.26;/,
+    "reference must stay below live phase-marker contrast");
   assert.match(view,/zeroPhaseRadialRuns\(bands,phases\)/);
   assert.match(view,/"data-closure-seam":run.keys.join\(","\)/);
   assert.match(view,/instrument.dataset.zeroSeamPreview = String\(ZERO_SEAM_PREVIEW\)/);
