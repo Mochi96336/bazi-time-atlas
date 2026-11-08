@@ -85,10 +85,23 @@ function check(delta,expected){
     "experiment flag was not enabled");
   fail(od.querySelectorAll(".cursor-line").length===1,"original baseline was mutated");
   fail(pd.querySelectorAll(".cursor-line").length===2,"preview needs two datum stubs");
+  fail(od.querySelectorAll(".cursor-reference-guide").length===0,
+    "new faint zero reference escaped into unmodified R16");
+  const guide=pd.querySelector(".cursor-reference-guide");
+  fail(Boolean(guide),"experimental R16 lost the zero direction for nonzero phases");
+  const guideStyle=preview.contentWindow.getComputedStyle(guide);
+  fail(guideStyle.strokeDasharray!=="none"&&
+    Number(guideStyle.strokeOpacity)<0.5,
+    "zero reference must be dashed and visibly weaker than closure seam");
   fail(od.querySelectorAll("[data-closure-seam]").length===0,"seam escaped default");
   const present=[...pd.querySelectorAll("[data-closure-seam]")].map(el=>el.dataset.closureSeam);
   fail(JSON.stringify(present)===JSON.stringify(expected),
     "incorrect joined annuli at "+delta+": "+JSON.stringify(present));
+  if(delta===399){
+    fail(present.length===0,"a false bright seam was added at nonzero Δ399");
+    fail(pd.querySelectorAll(".cursor-reference-guide").length===1,
+      "zero reference should remain visible even with no closure");
+  }
   for(const key of ["day","year","gregorian"]){
     const a=od.querySelector('[data-return-marker="'+key+'"]');
     const b=pd.querySelector('[data-return-marker="'+key+'"]');
