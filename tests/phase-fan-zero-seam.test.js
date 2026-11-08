@@ -84,6 +84,9 @@ test("new seam is opt-in and preserves the existing R16 ring markup",()=>{
   assert.match(view,/zeroPhaseRadialRuns\(bands,phases\)/);
   assert.match(view,/"data-closure-seam":run.keys.join\(","\)/);
   assert.match(view,/instrument.dataset.zeroSeamPreview = String\(ZERO_SEAM_PREVIEW\)/);
-  assert.match(css,/\.return-closure-seam \{/);
+  assert.match(css,/\.return-closure-seam \{ stroke:var\(--cursor\); stroke-width:6\.5;/,
+    "seam must use exactly the original closed-marker stroke weight");
+  assert.doesNotMatch(css,/\.return-closure-seam \{[^}]*vector-effect:non-scaling-stroke/,
+    "fixed-pixel seam thickness becomes too heavy on mobile");
   assert.doesNotMatch(view,/closure-spine-model/);
 });
