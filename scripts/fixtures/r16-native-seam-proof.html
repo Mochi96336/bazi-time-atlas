@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>R16 原版／原生接縫 A/B 圖面驗收</title>
+<title>R16 舊基準／原生接縫預設 A/B 圖面驗收</title>
 <style>
 :root{color-scheme:dark;--ink:#e8eee9;--muted:#a7b0a6;--bg:#0d1110}
 *{box-sizing:border-box}
@@ -25,14 +25,14 @@ footer{font-size:12px;color:var(--muted);margin-top:8px}
 @media(max-width:700px){.cards{grid-template-columns:1fr}iframe{height:260px}}
 </style></head>
 <body><main>
-<header><div><h1>R16 原版 × 原生零點接縫</h1>
-<p>完全相同的 160°、160 分格、刻度與數字；右邊只在真正歸零的位置連接既有線條。</p></div>
+<header><div><h1>R16 舊基準 × 新預設接縫</h1>
+<p>完全相同的 160°、160 分格、刻度與數字；右邊是本 Draft 的新預設，左邊可由 r16-seam=0 恢復。</p></div>
 <strong id="comparison-delta">Δ +8,000 年</strong></header>
 <div class="cards">
-  <section class="card"><div class="card-head"><strong>R16 原版</strong><span>原始貫穿零點線</span></div><iframe id="original" title="R16 原版"></iframe></section>
-  <section class="card"><div class="card-head"><strong>接縫模式</strong><span>保留原版其餘幾何</span></div><iframe id="preview" title="R16 零點接縫預覽"></iframe></section>
+  <section class="card"><div class="card-head"><strong>原版基準</strong><span>r16-seam=0 · 保留舊線</span></div><iframe id="original" title="R16 原版"></iframe></section>
+  <section class="card"><div class="card-head"><strong>候選預設</strong><span>真正歸零才有亮色接縫</span></div><iframe id="preview" title="R16 零點接縫預覽"></iframe></section>
 </div>
-<footer>只在預覽模式使用 <code>r16-seam=1</code>。原版頁面、相位公式及圈層資訊不變。</footer>
+<footer>這是在 Draft 分支的預設候選：可用 <code>r16-seam=0</code> 隨時恢復舊線；相位公式、圈層文字與分格都不變。</footer>
 <output id="probe" data-ready="false"></output>
 </main>
 <script>
@@ -90,10 +90,10 @@ function check(delta,expected){
   go(original,delta);
   go(preview,delta);
   const od=original.contentDocument,pd=preview.contentDocument;
-  fail(od.querySelector("#recurrence-instrument").dataset.zeroSeamPreview==="false",
-    "default seam is accidentally enabled");
-  fail(pd.querySelector("#recurrence-instrument").dataset.zeroSeamPreview==="true",
-    "experiment flag was not enabled");
+  fail(od.querySelector("#recurrence-instrument").dataset.zeroSeamMode==="legacy",
+    "legacy opt-out failed");
+  fail(pd.querySelector("#recurrence-instrument").dataset.zeroSeamMode==="native",
+    "native default failed");
   fail(od.querySelectorAll(".cursor-line").length===1,"original baseline was mutated");
   fail(pd.querySelectorAll(".cursor-line").length===2,"preview needs two datum stubs");
   fail(od.querySelectorAll(".cursor-reference-guide").length===0,
@@ -145,8 +145,8 @@ function isolate(frame){
   doc.head.append(style);
 }
 async function run(){
-  original.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000",location.href).href;
-  preview.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000&r16-seam=1",location.href).href;
+  original.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000&r16-seam=0",location.href).href;
+  preview.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000",location.href).href;
   await ready();
   if(requestedFrame!==null){
     for(const el of [original,preview]){
