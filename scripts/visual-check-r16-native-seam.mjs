@@ -27,21 +27,25 @@ await mkdir(outputDir,{recursive:true});
 for(const [delta,width,height] of [
   [399,1440,1050],[400,1440,1050],
   [1200,1440,1050],[8000,1440,1050],[24000,1440,1050],
-  [399,390,1450],[8000,390,1450],[24000,390,1450]
+  [399,320,1450],[399,390,1450],[8000,390,1450],[24000,390,1450]
 ]){
-  const url=new URL("scripts/fixtures/r16-native-seam-proof.html?delta="+delta,baseURL).href;
+  const mobile=width<500;
+  const url=new URL("scripts/fixtures/r16-native-seam-proof.html?delta="+delta+
+    (mobile?"&frame="+width:""),baseURL).href;
   const html=chromium([...args(width,height),"--dump-dom",url],"Δ"+delta+" viewport "+width);
   for(const evidence of [
     'data-ready="true"','data-original-baseline="true"',
     'data-only-native-seam="true"','data-all-cases="true"',
-    'data-delta="'+delta+'"'
+    'data-delta="'+delta+'"',
+    ...(mobile?['data-frame-width="'+width+'"']:[ ])
   ]){
     if(!html.includes(evidence)){
       throw Error("R16 native seam proof failed Δ"+delta+" "+width+"px: "+evidence+
         " "+(html.match(/<output id="probe"[^>]*>/)?.[0]??"probe missing"));
     }
   }
-  const name="r16-native-seam-"+delta+"-"+width+"px.png";
+  // "frame390" is explicit: Chromium's outer PNG may itself be 500px wide.
+  const name="r16-native-seam-"+delta+"-"+(mobile?"frame"+width:width+"px")+".png";
   const file=path.join(outputDir,name);
   chromium([...args(width,height),"--screenshot="+file,url],"screenshot "+name);
   if((await stat(file)).size<18000)throw Error("empty native R16 screenshot "+name);
