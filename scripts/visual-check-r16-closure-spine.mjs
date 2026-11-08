@@ -97,3 +97,28 @@ for (const step of [3,60]) {
   if((await stat(image)).size<25000)throw Error("empty comparison screenshot "+years);
   console.log("[closure-spine] PASS original R16 vs closure geometry at Δ+"+years);
 }
+
+{
+  // The product question is temporal, not merely whether four static frames
+  // match. Playback starts at k=0 and drives both actual SVGs through 60
+  // *model-timed* exact states, without browser-side phase interpolation.
+  const url=new URL("prototypes/research-r16-closure-side-by-side.html?step=20&autoplay=1",baseURL).href;
+  const args=browserArgs(1440).map(arg=>
+    arg.startsWith("--virtual-time-budget=")?"--virtual-time-budget=38000":arg
+  );
+  const html=run([...args,"--dump-dom",url],"R16 full 60-step comparison");
+  for(const expected of [
+    'data-ready="true"',
+    'data-comparison-sync="true"',
+    'data-comparison-step="60"',
+    'data-playback-state="complete"',
+    'data-playback-frames="60"'
+  ]){
+    if(!html.includes(expected)){
+      throw Error("R16 60-step synchronized playback failed "+expected+
+        " body="+(html.match(/<body[^>]*>/)?.[0]??"missing")+
+        " status="+html.slice(html.indexOf('id="comparison-status"'),html.indexOf('id="comparison-status"')+220));
+    }
+  }
+  console.log("[closure-spine] PASS synchronized original / experiment playback k=0..60");
+}
