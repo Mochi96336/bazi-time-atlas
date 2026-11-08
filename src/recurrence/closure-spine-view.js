@@ -188,4 +188,8 @@ document.querySelectorAll(".milestones button").forEach(button=>
   button.addEventListener("click",()=>setStep(Number(button.dataset.step)))
 );
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopPlayback()});
-window.__closureSpineDebug=Object.freeze({snapshot:()=>closureStateForStep(step),setStep});
+window.__closureSpineDebug=Object.freeze({
+  snapshot:()=>closureStateForStep(step),
+  dwellMs:()=>closurePlaybackDwellMs(closureStateForStep(step)),
+  setStep
+});
