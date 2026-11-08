@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>R16 原版／原生接縫 A/B 圖面驗收</title>
+<style>
+:root{color-scheme:dark;--ink:#e8eee9;--muted:#a7b0a6;--bg:#0d1110}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:14px/1.5 "Noto Sans CJK TC","Noto Sans TC",system-ui,sans-serif}
+main{width:min(1450px,100%);margin:auto;padding:18px clamp(10px,3vw,30px) 25px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+header h1{font-size:clamp(22px,3vw,30px);margin:0;letter-spacing:-.05em}
+header p{font-size:12px;color:var(--muted);margin:3px 0 13px}
+#comparison-delta{font-weight:700;font-variant-numeric:tabular-nums}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{border:1px solid #3e4740;border-radius:10px;overflow:hidden;background:#151c17;padding:9px}
+.card-head{display:flex;justify-content:space-between;gap:8px;padding:2px 8px}
+.card-head strong{font-size:15px}
+.card-head span{font-size:12px;color:var(--muted)}
+iframe{width:100%;height:360px;display:block;border:0;background:#101612;pointer-events:none}
+footer{font-size:12px;color:var(--muted);margin-top:8px}
+#probe{display:none}
+@media(max-width:700px){.cards{grid-template-columns:1fr}iframe{height:260px}}
+</style></head>
+<body><main>
+<header><div><h1>R16 原版 × 原生零點接縫</h1>
+<p>完全相同的 160°、160 分格、刻度與數字；右邊只在真正歸零的位置連接既有線條。</p></div>
+<strong id="comparison-delta">Δ +8,000 年</strong></header>
+<div class="cards">
+  <section class="card"><div class="card-head"><strong>R16 原版</strong><span>原始貫穿零點線</span></div><iframe id="original" title="R16 原版"></iframe></section>
+  <section class="card"><div class="card-head"><strong>接縫模式</strong><span>保留原版其餘幾何</span></div><iframe id="preview" title="R16 零點接縫預覽"></iframe></section>
+</div>
+<footer>只在預覽模式使用 <code>r16-seam=1</code>。原版頁面、相位公式及圈層資訊不變。</footer>
+<output id="probe" data-ready="false"></output>
+</main>
+<script>
+const qs=new URLSearchParams(location.search);
+const target=Number(qs.get("delta")??8000);
+const supported=[0,399,400,1200,8000,24000];
+const finalDelta=supported.includes(target)?target:8000;
+const original=document.getElementById("original");
+const preview=document.getElementById("preview");
+const probe=document.getElementById("probe");
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const fail=(condition,message)=>{if(!condition)throw Error(message)};
+const cases=[
+  [0,["day,year,gregorian"]],
+  [399,[]],
+  [400,["gregorian"]],
+  [1200,["year,gregorian"]],
+  [8000,["day","gregorian"]],
+  [24000,["day,year,gregorian"]]
+];
+async function ready(){
+  for(let i=0;i<300;i++){
+    const od=original.contentDocument,pd=preview.contentDocument;
+    const a=od?.querySelector("#recurrence-instrument");
+    const b=pd?.querySelector("#recurrence-instrument");
+    if(a?.dataset.phaseGeometry==="signed-shortest-fan"&&
+      b?.dataset.phaseGeometry==="signed-shortest-fan"&&
+      od.querySelectorAll("[data-phase-cell]").length===160&&
+      pd.querySelectorAll("[data-phase-cell]").length===160)return;
+    await wait(80);
+  }
+  throw Error("R16 baseline/preview did not render");
+}
+function go(frame,delta){
+  const win=frame.contentWindow;
+  win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
+    detail:{deltaYears:delta,source:"native-zero-seam-verification"}
+  }));
+  const doc=frame.contentDocument;
+  fail(doc.querySelector("#recurrence-instrument").dataset.deltaYears===String(delta),
+    "delta mismatch "+delta);
+}
+function check(delta,expected){
+  go(original,delta);
+  go(preview,delta);
+  const od=original.contentDocument,pd=preview.contentDocument;
+  fail(od.querySelector("#recurrence-instrument").dataset.zeroSeamPreview==="false",
+    "default seam is accidentally enabled");
+  fail(pd.querySelector("#recurrence-instrument").dataset.zeroSeamPreview==="true",
+    "experiment flag was not enabled");
+  fail(od.querySelectorAll(".cursor-line").length===1,"original baseline was mutated");
+  fail(pd.querySelectorAll(".cursor-line").length===2,"preview needs two datum stubs");
+  fail(od.querySelectorAll("[data-closure-seam]").length===0,"seam escaped default");
+  const present=[...pd.querySelectorAll("[data-closure-seam]")].map(el=>el.dataset.closureSeam);
+  fail(JSON.stringify(present)===JSON.stringify(expected),
+    "incorrect joined annuli at "+delta+": "+JSON.stringify(present));
+  for(const key of ["day","year","gregorian"]){
+    const a=od.querySelector('[data-return-marker="'+key+'"]');
+    const b=pd.querySelector('[data-return-marker="'+key+'"]');
+    fail(a&&b, "marker absent in "+key);
+    fail(a.dataset.returnAngle===b.dataset.returnAngle,"marker angle changed: "+key);
+    fail(a.dataset.phaseRaw===b.dataset.phaseRaw,"phase changed: "+key);
+    fail(a.dataset.phaseSigned===b.dataset.phaseSigned,"signed phase changed: "+key);
+    const aRing=od.querySelector("#"+key+"-ring"),bRing=pd.querySelector("#"+key+"-ring");
+    fail(aRing.querySelectorAll("[data-phase-cell]").length===
+      bRing.querySelectorAll("[data-phase-cell]").length,"ring cells altered: "+key);
+    const aLabel=aRing.querySelector('[data-phase-ring-label="'+key+'"]');
+    const bLabel=bRing.querySelector('[data-phase-ring-label="'+key+'"]');
+    fail(aLabel?.textContent===bLabel?.textContent,"ring labels changed: "+key);
+  }
+  fail(od.querySelectorAll("[data-phase-cell]").length===160,"source cells changed");
+  fail(pd.querySelectorAll("[data-phase-cell]").length===160,"preview cells changed");
+}
+function isolate(frame){
+  const doc=frame.contentDocument;
+  const svg=doc.querySelector("#recurrence-wheel");
+  if(svg.parentElement!==doc.body)doc.body.append(svg);
+  svg.setAttribute("viewBox","0 190 1200 600");
+  const style=doc.createElement("style");
+  style.textContent=[
+   "html,body{margin:0!important;padding:0!important;overflow:hidden!important;background:#0d1110!important;height:100%!important}",
+   "body>*:not(#recurrence-wheel){display:none!important}",
+   "#astronomy-residual-ring{display:none!important}",
+   "#recurrence-wheel{position:fixed!important;inset:0!important;left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-height:0!important;transform:none!important;margin:0!important;z-index:10!important}"
+  ].join("\n");
+  doc.head.append(style);
+}
+async function run(){
+  original.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000",location.href).href;
+  preview.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000&r16-seam=1",location.href).href;
+  await ready();
+  for(const [delta,expected] of cases)check(delta,expected);
+  // Not just canonical 400-year checkpoints: real base date and unrelated Δ
+  // are still handled by the very same source recurrenceState model.
+  for(const delta of [1,60,399,400,1980,2937]) {
+    go(original,delta);
+    go(preview,delta);
+    for(const key of ["day","year","gregorian"]){
+      const a=original.contentDocument.querySelector('[data-return-marker="'+key+'"]');
+      const b=preview.contentDocument.querySelector('[data-return-marker="'+key+'"]');
+      fail(a.dataset.returnAngle===b.dataset.returnAngle,
+        "noncanonical phase diverged at delta="+delta+" key="+key);
+    }
+  }
+  // Reposition the two true DOMs into a common geometry viewport for PNG.
+  check(finalDelta,cases.find(([delta])=>delta===finalDelta)[1]);
+  isolate(original);
+  isolate(preview);
+  document.getElementById("comparison-delta").textContent="Δ +"+finalDelta.toLocaleString("en-US")+" 年";
+  probe.dataset.ready="true";
+  probe.dataset.delta=String(finalDelta);
+  probe.dataset.originalBaseline="true";
+  probe.dataset.onlyNativeSeam="true";
+  probe.dataset.allCases="true";
+}
+run().catch(error=>{probe.dataset.ready="error";probe.dataset.error=String(error.stack??error)});
+</script>
+</body></html>
