@@ -99,6 +99,9 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
 .return-marker-year { stroke:var(--year); }
 .return-marker-day { stroke:var(--day); }
 .return-marker.is-closed { stroke:var(--cursor); stroke-width:6.5; }
+/* Opt-in geometry only: the original R16 markers and color identity stay.
+   A run crosses an annulus edge only when BOTH adjoining rings are zero. */
+.return-closure-seam { stroke:var(--cursor); stroke-width:7; stroke-linecap:butt; vector-effect:non-scaling-stroke; pointer-events:none; }
 .return-marker-label { font-size:10px; font-weight:900; text-anchor:middle; dominant-baseline:middle; paint-order:stroke; stroke:#0d1110; stroke-width:3px; }
 .return-marker-label-gregorian { fill:var(--gregorian); }
 .return-marker-label-year { fill:var(--year); }
