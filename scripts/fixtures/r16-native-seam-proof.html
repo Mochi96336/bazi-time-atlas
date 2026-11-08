@@ -40,9 +40,20 @@ const qs=new URLSearchParams(location.search);
 const target=Number(qs.get("delta")??8000);
 const supported=[0,399,400,1200,8000,24000];
 const finalDelta=supported.includes(target)?target:8000;
+// Headless Chromium may clamp window width to 500px. Test the ACTUAL iframe
+// rendering viewport (the page containing R16), never a filename's "390".
+const frame=Number(qs.get("frame"));
+const requestedFrame=[320,390].includes(frame)?frame:null;
 const original=document.getElementById("original");
 const preview=document.getElementById("preview");
 const probe=document.getElementById("probe");
+if(requestedFrame!==null){
+  for(const el of [original,preview]){
+    el.style.width=requestedFrame+"px";
+    el.style.maxWidth="none";
+    el.style.marginInline="auto";
+  }
+}
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const fail=(condition,message)=>{if(!condition)throw Error(message)};
 const cases=[
@@ -137,6 +148,16 @@ async function run(){
   original.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000",location.href).href;
   preview.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000&r16-seam=1",location.href).href;
   await ready();
+  if(requestedFrame!==null){
+    for(const el of [original,preview]){
+      const measured=el.getBoundingClientRect().width;
+      fail(Math.abs(measured-requestedFrame)<1,
+        "requested R16 iframe "+requestedFrame+"px but measured "+measured+"px");
+      fail(el.contentWindow.innerWidth===requestedFrame,
+        "inner R16 viewport differs from the requested mobile width");
+    }
+    probe.dataset.frameWidth=String(requestedFrame);
+  }
   for(const [delta,expected] of cases)check(delta,expected);
   // Not just canonical 400-year checkpoints: real base date and unrelated Δ
   // are still handled by the very same source recurrenceState model.
