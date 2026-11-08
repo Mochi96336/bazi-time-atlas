@@ -15,6 +15,7 @@ import {
   signedShortestPhase
 } from "./recurrence/phase-fan-geometry.js";
 import { publishResearchTimeSelection } from "./research/research-time-state.js";
+import { zeroPhaseRadialRuns } from "./recurrence/phase-fan-zero-seam.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -29,6 +30,9 @@ const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
+// Opt-in R16 integration study. Default remains pixel-identical to main.
+// This tests the native R16 visual grammar, NOT the separate #616 skin.
+const ZERO_SEAM_PREVIEW = new URLSearchParams(location.search).get("r16-seam")==="1";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -174,22 +178,47 @@ function renderRing(key) {
 }
 
 function renderCursor() {
-  const inner = polar(258, CURSOR_ANGLE);
-  const outer = polar(575, CURSOR_ANGLE);
-  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-halo" }, cursorGroup);
-  svgEl("line", { x1:inner.x, y1:inner.y, x2:outer.x, y2:outer.y, class:"cursor-line" }, cursorGroup);
+  // R16's original baseline crosses every ring, even when no phase is closed.
+  // In this isolated preview it is split into two guide stubs so that the
+  // only lines within the rings are actual zero-phase closures.
+  const sections=ZERO_SEAM_PREVIEW ? [[258,270],[560,575]] : [[258,575]];
+  for(const [innerRadius,outerRadius] of sections){
+    const inner=polar(innerRadius,CURSOR_ANGLE);
+    const outer=polar(outerRadius,CURSOR_ANGLE);
+    svgEl("line",{x1:inner.x,y1:inner.y,x2:outer.x,y2:outer.y,class:"cursor-halo"},cursorGroup);
+    svgEl("line",{x1:inner.x,y1:inner.y,x2:outer.x,y2:outer.y,class:"cursor-line"},cursorGroup);
+  }
   const labelPoint = polar(595, CURSOR_ANGLE);
   const label = svgEl("text", { x:labelPoint.x, y:labelPoint.y, class:"cursor-label" }, cursorGroup);
   label.textContent = "基準 · 0";
 }
 
 function renderReturnMarkers(state) {
-  cursorGroup.querySelectorAll("[data-return-marker]").forEach(node => node.remove());
+  cursorGroup.querySelectorAll("[data-return-marker], [data-closure-seam]").forEach(node => node.remove());
   const phases = {
     day:state.phases.day,
     year:state.phases.yearSequence,
     gregorian:state.phases.gregorian
   };
+
+  if(ZERO_SEAM_PREVIEW){
+    const bands=["day","year","gregorian"].map(key=>({
+      key,inner:ringSpecs[key].inner,outer:ringSpecs[key].outer
+    }));
+    // Drawing these exact contiguous runs underneath R16's native markers
+    // fills the old 5px band-edge gaps without linking nonzero rings.
+    for(const run of zeroPhaseRadialRuns(bands,phases)){
+      const p1=polar(run.inner,CURSOR_ANGLE);
+      const p2=polar(run.outer,CURSOR_ANGLE);
+      svgEl("line",{
+        x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,
+        class:"return-closure-seam",
+        "data-closure-seam":run.keys.join(","),
+        "data-closure-inner":run.inner,
+        "data-closure-outer":run.outer
+      },cursorGroup);
+    }
+  }
 
   for (const [key, spec] of Object.entries(ringSpecs)) {
     const phase = phases[key];
@@ -833,6 +862,7 @@ function initialize() {
   renderCursor();
   instrument.dataset.phaseGeometry = "signed-shortest-fan";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
+  instrument.dataset.zeroSeamPreview = String(ZERO_SEAM_PREVIEW);
   const initialDelta = applyQueryPreset();
   bindControls();
   instrument.dataset.baseDateValid = "true";
