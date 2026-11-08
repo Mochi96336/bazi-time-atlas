@@ -180,3 +180,25 @@ test("motion design echoes exact snapshots but never interpolates cyclic phases"
     }
   }
 });
+
+test("original and prototype can play one synchronized 0-to-60 comparison",()=>{
+  const html=readFileSync(new URL("../prototypes/research-r16-closure-side-by-side.html",import.meta.url),"utf8");
+  const model=readFileSync(new URL("../src/recurrence/closure-spine-view.js",import.meta.url),"utf8");
+  assert.match(html,/id="compare-play"/);
+  assert.match(html,/detail:\{deltaYears:step\*400/);
+  assert.match(html,/__closureSpineDebug\.setStep\(step,\{echoPrevious\}\)/);
+  assert.match(html,/__closureSpineDebug\.snapshot\(\)\.step!==step/);
+  assert.match(html,/__closureSpineDebug\.dwellMs\(\)/);
+  assert.match(html,/setTimeout\(\(\)=>\{/);
+  assert.match(html,/if\(step===60\)\{stopPlayback\(\);return;\}/);
+  assert.match(html,/document\.body\.dataset\.comparisonSync="true"/);
+  assert.match(html,/document\.body\.dataset\.playbackState="running"/);
+  assert.match(html,/document\.addEventListener\("visibilitychange"/);
+  assert.match(model,/dwellMs:\(\)=>closurePlaybackDwellMs\(closureStateForStep\(step\)\)/);
+  assert.doesNotMatch(html,/setInterval\(/);
+  for(let k=0;k<60;k++){
+    const event=closureStateForStep(k);
+    const time=closurePlaybackDwellMs(event);
+    assert.ok(time>=150 && time<=1600);
+  }
+});
