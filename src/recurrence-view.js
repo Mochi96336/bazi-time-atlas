@@ -30,9 +30,10 @@ const PHASE_MODULUS = Object.freeze({ gregorian:400, year:60, day:60 });
 const DELTA_PLAY_YEARS_PER_SECOND = 20;
 const DEFAULT_FAN_VIEWBOX = "0 0 1200 720";
 const MOBILE_FAN_VIEWBOX = "0 90 1200 630";
-// Opt-in R16 integration study. Default remains pixel-identical to main.
-// This tests the native R16 visual grammar, NOT the separate #616 skin.
-const ZERO_SEAM_PREVIEW = new URLSearchParams(location.search).get("r16-seam")==="1";
+// R16's native zero-phase seam is the proposed default on this Draft branch.
+// Keep a deliberate legacy fallback: ?r16-seam=0 restores the original solid
+// reference line without modifying the phase model, ring geometry or labels.
+const ZERO_SEAM_ENABLED = new URLSearchParams(location.search).get("r16-seam")!=="0";
 const mobileFanMedia = window.matchMedia("(max-width: 480px)");
 
 const svg = document.querySelector("#recurrence-wheel");
@@ -179,9 +180,9 @@ function renderRing(key) {
 
 function renderCursor() {
   // R16's original baseline crosses every ring, even when no phase is closed.
-  // In this isolated preview it is split into two guide stubs so that the
-  // only lines within the rings are actual zero-phase closures.
-  if(ZERO_SEAM_PREVIEW){
+  // In native mode the zero direction is a faint reference, not a claim
+  // that the three phase cycles are all aligned.
+  if(ZERO_SEAM_ENABLED){
     // Keep the *reference* zero direction readable even when no ring returns.
     // A faint, dashed datum is not a connected return seam; exact closures
     // below are the only bright solid geometry within the annuli.
@@ -191,7 +192,7 @@ function renderCursor() {
       class:"cursor-reference-guide", "aria-hidden":"true"
     },cursorGroup);
   }
-  const sections=ZERO_SEAM_PREVIEW ? [[258,270],[560,575]] : [[258,575]];
+  const sections=ZERO_SEAM_ENABLED ? [[258,270],[560,575]] : [[258,575]];
   for(const [innerRadius,outerRadius] of sections){
     const inner=polar(innerRadius,CURSOR_ANGLE);
     const outer=polar(outerRadius,CURSOR_ANGLE);
@@ -211,7 +212,7 @@ function renderReturnMarkers(state) {
     gregorian:state.phases.gregorian
   };
 
-  if(ZERO_SEAM_PREVIEW){
+  if(ZERO_SEAM_ENABLED){
     const bands=["day","year","gregorian"].map(key=>({
       key,inner:ringSpecs[key].inner,outer:ringSpecs[key].outer
     }));
@@ -872,7 +873,7 @@ function initialize() {
   renderCursor();
   instrument.dataset.phaseGeometry = "signed-shortest-fan";
   instrument.dataset.phaseRadialOrder = "day,year,gregorian";
-  instrument.dataset.zeroSeamPreview = String(ZERO_SEAM_PREVIEW);
+  instrument.dataset.zeroSeamMode = ZERO_SEAM_ENABLED ? "native" : "legacy";
   const initialDelta = applyQueryPreset();
   bindControls();
   instrument.dataset.baseDateValid = "true";
