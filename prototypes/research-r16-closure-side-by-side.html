@@ -69,6 +69,7 @@ let step=[1,3,20,60].includes(initial)?initial:20;
 let ready=false;
 let playTimer=null;
 let playing=false;
+let playedFrames=0;
 const playButton=$("compare-play");
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const fixedViewBox="0 190 1200 600";
@@ -111,6 +112,10 @@ function displayStep(next,{echoPrevious=false}={}){
   document.body.dataset.comparisonSync="true";
   $("comparison-status").textContent="原版 R16 與接縫原型都在 Δ +"+(step*400).toLocaleString("en-US")+" 年。";
   document.body.dataset.comparisonStep=String(step);
+  if(playing) {
+    playedFrames+=1;
+    document.body.dataset.playbackFrames=String(playedFrames);
+  }
 }
 function stopPlayback(){
   if(playTimer!==null)clearTimeout(playTimer);
@@ -144,6 +149,8 @@ function togglePlayback(){
   if(playing){stopPlayback();return;}
   try {
     displayStep(0);
+    playedFrames=0;
+    document.body.dataset.playbackFrames="0";
     playing=true;
     playButton.textContent="暫停同步播放";
     playButton.setAttribute("aria-pressed","true");
