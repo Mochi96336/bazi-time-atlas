@@ -181,6 +181,16 @@ function renderCursor() {
   // R16's original baseline crosses every ring, even when no phase is closed.
   // In this isolated preview it is split into two guide stubs so that the
   // only lines within the rings are actual zero-phase closures.
+  if(ZERO_SEAM_PREVIEW){
+    // Keep the *reference* zero direction readable even when no ring returns.
+    // A faint, dashed datum is not a connected return seam; exact closures
+    // below are the only bright solid geometry within the annuli.
+    const from=polar(270,CURSOR_ANGLE),to=polar(560,CURSOR_ANGLE);
+    svgEl("line",{
+      x1:from.x,y1:from.y,x2:to.x,y2:to.y,
+      class:"cursor-reference-guide", "aria-hidden":"true"
+    },cursorGroup);
+  }
   const sections=ZERO_SEAM_PREVIEW ? [[258,270],[560,575]] : [[258,575]];
   for(const [innerRadius,outerRadius] of sections){
     const inner=polar(innerRadius,CURSOR_ANGLE);
