@@ -1,0 +1,77 @@
+:root{
+  color-scheme:dark;
+  --bg:#0d1110;
+  --surface:#151b18;
+  --line:#3b443e;
+  --ink:#eceee7;
+  --muted:#a7afa5;
+  --spine:#f0e8ce;
+  --phase:#adb5a9;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:"Noto Sans CJK TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.55}
+button,input{font:inherit}
+button{background:#1d2620;border:1px solid #576159;border-radius:7px;color:var(--ink);min-height:44px;padding:8px 14px;cursor:pointer}
+button:hover{border-color:#bdc5b5}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--spine);outline-offset:3px}
+button:disabled{opacity:.42;cursor:default}
+.page{width:min(1080px,100%);margin:0 auto;padding:32px clamp(14px,4vw,38px) 60px}
+.eyebrow{font-size:11px;font-weight:720;letter-spacing:.13em;color:#b5bcb0}
+.page-head h1{margin:12px 0 9px;font-size:clamp(32px,5vw,52px);font-weight:640;letter-spacing:-.05em;line-height:1.12}
+.page-head p{max-width:780px;margin:0 0 25px;color:var(--muted);font-size:14px}
+.study{background:#141916;border:1px solid #323b34;border-radius:10px;padding:14px 12px 0}
+.figure-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 9px;color:var(--muted);font-size:12px}
+.figure-head strong{color:var(--ink);font-size:clamp(17px,3vw,23px);font-variant-numeric:tabular-nums;font-weight:620}
+#closure-fan{display:block;width:100%;height:auto;overflow:visible}
+#closure-fan .fan-band{stroke:none}
+#closure-fan .fan-cell{stroke:#535c54;stroke-width:.9;stroke-linejoin:round}
+#closure-fan .fan-cell.major{stroke:#839084;stroke-width:1.5}
+/* Current-lap landing cells remain subordinate to the live phase marker.
+   At each exact 3-step or 20-step return the prior lap is cleared. */
+#closure-fan .fan-cell.is-visited[data-ring="day"]{fill:#303b34}
+#closure-fan .fan-cell.is-visited[data-ring="year"]{fill:#526157}
+#closure-fan .fan-cell.is-visited[data-ring="gregorian"]{fill:#4d594e}
+#closure-fan .fan-arc{fill:none;stroke:#757f73;stroke-width:1.6}
+#closure-fan .zero-guide{stroke:#c2b9a0;stroke-width:2;opacity:.46;stroke-dasharray:6 9}
+#closure-fan .phase-mark{stroke:var(--phase);stroke-width:5;stroke-linecap:butt}
+#closure-fan .closure-run{stroke:var(--spine);stroke-width:10;stroke-linecap:butt}
+#closure-fan .origin-title{font:650 25px "Noto Sans CJK TC","Noto Sans TC",sans-serif;fill:var(--spine)}
+#closure-fan .zero-hair{stroke:#252c27;stroke-width:1.4}
+.figure-caption{font-size:14px;min-height:43px;padding:6px 10px 14px;text-align:center;color:#d8ddcf}
+.controller{margin-top:19px}
+.step-row{display:flex;align-items:center;gap:9px}
+#step-slider{flex:1;width:100%;min-width:0;accent-color:#e9e2c8;cursor:pointer}
+#play-steps{min-width:148px}
+.step-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px;margin:8px 0 18px}
+#step-output{white-space:nowrap;color:var(--ink);font-variant-numeric:tabular-nums}
+.milestones{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.milestones button{font-variant-numeric:tabular-nums}
+.milestones button[aria-current="true"]{background:#313b32;border-color:#e1dbc1;color:#fff2d1}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-block:1px solid var(--line);margin-top:25px}
+.readouts>div{display:flex;flex-direction:column;padding:19px 20px;min-width:0}
+.readouts>div+div{border-left:1px solid var(--line)}
+.readouts span{font-size:12px;color:var(--muted)}
+.readouts strong{font:600 clamp(25px,4.5vw,37px)/1.2 system-ui,sans-serif;font-variant-numeric:tabular-nums;margin:7px 0 3px}
+.readouts small{font-size:12px;color:var(--muted)}
+.readouts small.is-closed{color:var(--spine)}
+.foot{font-size:12px;color:var(--muted);max-width:860px;margin:22px 0}
+.foot p{margin:8px 0}
+.foot a{color:#e7e0c4}
+.foot code{font-size:11px;color:#e0e6d8}
+@media(max-width:680px){
+  .page{padding-top:18px}
+  .study{padding:9px 3px 0}
+  .figure-head{padding-inline:10px;font-size:11px}
+  .figure-caption{font-size:12px;padding-inline:10px}
+  .step-row{display:grid;grid-template-columns:70px minmax(0,1fr) 70px;gap:8px;align-items:center}
+  #previous-step{grid-column:1;grid-row:1;padding:6px 4px;font-size:13px}
+  #step-slider{grid-column:2;grid-row:1;width:100%;min-width:0}
+  #next-step{grid-column:3;grid-row:1;padding:6px 4px;font-size:13px}
+  #play-steps{grid-column:1/-1;grid-row:2;width:100%;min-width:0}
+  .step-meta{flex-direction:column;gap:1px}
+  .milestones button{padding:7px 3px;font-size:13px}
+  .readouts>div{padding:12px 8px}
+  .readouts span,.readouts small{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
