@@ -27,7 +27,7 @@ await mkdir(outputDir,{recursive:true});
 for(const [delta,width,height] of [
   [399,1440,1050],[400,1440,1050],
   [1200,1440,1050],[8000,1440,1050],[24000,1440,1050],
-  [8000,390,1450],[24000,390,1450]
+  [399,390,1450],[8000,390,1450],[24000,390,1450]
 ]){
   const url=new URL("scripts/fixtures/r16-native-seam-proof.html?delta="+delta,baseURL).href;
   const html=chromium([...args(width,height),"--dump-dom",url],"Δ"+delta+" viewport "+width);
