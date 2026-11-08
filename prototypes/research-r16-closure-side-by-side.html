@@ -16,7 +16,9 @@ small,p{color:var(--muted)}
 header p{margin:4px 0 16px;max-width:710px}
 nav{display:flex;gap:7px;flex-wrap:wrap;margin:4px 0 20px}
 button{font:inherit;min-width:72px;min-height:42px;background:#19221c;color:var(--ink);border:1px solid #657064;border-radius:6px;cursor:pointer;padding:6px 12px}
-button[aria-current=true]{border-color:#e4dcc2;background:#323a32}
+button[aria-current=true],button[aria-pressed=true]{border-color:#e4dcc2;background:#323a32}
+#compare-play{min-width:176px}
+#compare-play:disabled{opacity:.48;cursor:default}
 button:focus-visible,a:focus-visible{outline:2px solid #f0e8ce;outline-offset:3px}
 .panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .panel{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#111713;padding:12px}
@@ -41,9 +43,10 @@ footer a{color:#e4dfc6}
 <header><div>
 <small>BAZI TIME ATLAS / RESEARCH 01 / VISUAL COMPARISON</small>
 <h1>R16 原版 × 週期接縫</h1>
-<p>同一日期、同一個 Δ、同一套相位計算與 160°／160 分格。左邊是原始 R16 SVG；右邊是接縫與歷次落點的研究原型。兩者都不是手繪的示意圖片。</p>
+<p>同一日期、同一個 Δ、同一套相位計算與 160°／160 分格。從零點同步播放 60 個 400 年步進，直接比較原始 R16 與接縫實驗如何表達重複對齊。</p>
 </div><strong id="delta-title">Δ +8,000 年</strong></header>
 <nav aria-label="切換同一個比較年份">
+  <button id="compare-play" aria-pressed="false" type="button" disabled>從零點同步播放</button>
   <button data-step="1" type="button">+400</button>
   <button data-step="3" type="button">+1,200</button>
   <button data-step="20" type="button">+8,000</button>
@@ -64,6 +67,9 @@ const q=new URLSearchParams(location.search);
 const initial=Number(q.get("step"));
 let step=[1,3,20,60].includes(initial)?initial:20;
 let ready=false;
+let playTimer=null;
+let playing=false;
+const playButton=$("compare-play");
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const fixedViewBox="0 190 1200 600";
 function isolate(frame,svgId){
@@ -85,22 +91,69 @@ function isolate(frame,svgId){
   doc.head.append(style);
   return svg;
 }
-function displayStep(next){
+function displayStep(next,{echoPrevious=false}={}){
   if(!ready)return;
+  if(!Number.isInteger(next)||next<0||next>60)throw new RangeError("comparison step must be 0..60");
   step=next;
   const win=original.contentWindow;
   win.dispatchEvent(new win.CustomEvent("recurrence:select-delta",{
     detail:{deltaYears:step*400,source:"r16-closure-geometry-compare"}
   }));
-  candidate.contentWindow.__closureSpineDebug.setStep(step);
+  candidate.contentWindow.__closureSpineDebug.setStep(step,{echoPrevious});
   $("delta-title").textContent="Δ +"+(step*400).toLocaleString("en-US")+" 年";
   document.querySelectorAll("nav [data-step]").forEach(button=>
     button.setAttribute("aria-current",String(Number(button.dataset.step)===step))
   );
   const stamp=original.contentDocument.getElementById("recurrence-instrument").dataset.deltaYears;
   if(stamp!==String(step*400))throw Error("original R16 did not update Δ to "+step*400);
+  if(candidate.contentWindow.__closureSpineDebug.snapshot().step!==step)
+    throw Error("comparison prototype out of sync at "+step);
+  document.body.dataset.comparisonSync="true";
   $("comparison-status").textContent="原版 R16 與接縫原型都在 Δ +"+(step*400).toLocaleString("en-US")+" 年。";
   document.body.dataset.comparisonStep=String(step);
+}
+function stopPlayback(){
+  if(playTimer!==null)clearTimeout(playTimer);
+  playTimer=null;
+  playing=false;
+  playButton.textContent="從零點同步播放";
+  playButton.setAttribute("aria-pressed","false");
+  document.body.dataset.playbackState=step===60?"complete":"idle";
+}
+function schedulePlayback(){
+  // Read both timing and phase from the new prototype's actual source model;
+  // do not introduce a second approximation of the 3/20/60 step cadence.
+  const delay=candidate.contentWindow.__closureSpineDebug.dwellMs();
+  playTimer=setTimeout(()=>{
+    playTimer=null;
+    if(!playing)return;
+    try {
+      if(step>=60){stopPlayback();return;}
+      displayStep(step+1,{echoPrevious:true});
+      if(step===60){stopPlayback();return;}
+      schedulePlayback();
+    } catch(error) {
+      stopPlayback();
+      document.body.dataset.playbackState="error";
+      $("comparison-status").textContent=String(error);
+    }
+  },delay);
+}
+function togglePlayback(){
+  if(!ready)return;
+  if(playing){stopPlayback();return;}
+  try {
+    displayStep(0);
+    playing=true;
+    playButton.textContent="暫停同步播放";
+    playButton.setAttribute("aria-pressed","true");
+    document.body.dataset.playbackState="running";
+    schedulePlayback();
+  } catch(error){
+    stopPlayback();
+    document.body.dataset.playbackState="error";
+    $("comparison-status").textContent=String(error);
+  }
 }
 async function prepare(){
   original.src=new URL("../recurrence.html?date=2026-09-13&delta="+(step*400),location.href).href;
@@ -118,6 +171,8 @@ async function prepare(){
       ready=true;
       displayStep(step);
       document.body.dataset.ready="true";
+      playButton.disabled=false;
+      if(q.get("autoplay")==="1")togglePlayback();
       return;
     }
     await wait(100);
@@ -127,9 +182,18 @@ async function prepare(){
 document.querySelectorAll("nav [data-step]").forEach(button=>{
  button.addEventListener("click",()=>{
    if(!ready)return;
-   try{displayStep(Number(button.dataset.step))}
-   catch(err){$("comparison-status").textContent=String(err.message||err)}
+   try{stopPlayback();displayStep(Number(button.dataset.step))}
+   catch(err){document.body.dataset.comparisonSync="false";$("comparison-status").textContent=String(err.message||err)}
  });
+});
+playButton.addEventListener("click",togglePlayback);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)stopPlayback()});
+window.__r16Comparison=Object.freeze({
+  getStep:()=>step,
+  isPlaying:()=>playing,
+  setStep:next=>{stopPlayback();displayStep(next)},
+  play:togglePlayback,
+  stop:stopPlayback
 });
 prepare().catch(err=>{
   $("comparison-status").textContent="並排比較尚未就緒："+String(err.message||err);
