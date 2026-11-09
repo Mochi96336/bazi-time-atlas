@@ -116,7 +116,7 @@ function examine(){
  probe.dataset.fanTop=String(Math.round(fanRect.top));
  probe.dataset.documentScroll=String(Math.round(win.scrollY));
  if(reflow){
-  runR16ReflowProof().then(()=>{
+  runR16ReflowProof(checkSeamTopology).then(()=>{
    probe.dataset.r16Reflow="success";
    probe.dataset.ready="true";
   },error=>{
@@ -125,7 +125,7 @@ function examine(){
   });
  }
 }
-async function runR16ReflowProof(){
+async function runR16ReflowProof(checkSeamTopology){
  const stage=s=>{probe.dataset.r16ReflowStage=s;};
  stage("initial");
  const win=frame.contentWindow,doc=frame.contentDocument;
