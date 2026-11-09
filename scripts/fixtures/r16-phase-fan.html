@@ -57,6 +57,24 @@ function examine(){
  probe.dataset.layers=String(marker.length);
  probe.dataset.visualMode=instrument.dataset.phaseGeometry||"";
  probe.dataset.r16Polish=instrument.dataset.r16Polish??"missing";
+ // A single R16 view now renders both geometry (#617) and labels (#614).
+ // Verify correct native seam topology independently from text placement.
+ function checkSeamTopology(){
+  if(instrument.dataset.zeroSeamMode!=="native")throw Error("native seam was disabled");
+  let pending=[],expected=[];
+  for(const key of ["day","year","gregorian"]){
+   if(wheel.querySelector('[data-return-marker="'+key+'"]')?.dataset.phaseRaw==="0")pending.push(key);
+   else if(pending.length){expected.push(pending.join(","));pending=[];}
+  }
+  if(pending.length)expected.push(pending.join(","));
+  const actual=[...wheel.querySelectorAll("[data-closure-seam]")].map(node=>node.dataset.closureSeam);
+  if(JSON.stringify(actual)!==JSON.stringify(expected))
+   throw Error("seam topology differs from phase markers at Delta "+
+    instrument.dataset.deltaYears+": "+JSON.stringify(actual)+"/"+JSON.stringify(expected));
+  return actual;
+ }
+ probe.dataset.r16SeamMode=instrument.dataset.zeroSeamMode;
+ probe.dataset.r16SeamTopology=checkSeamTopology().join("|");
  probe.dataset.phaseCells=String(wheel.querySelectorAll("[data-phase-cell]").length);
  probe.dataset.markerAngles=marker.map(m=>m.dataset.returnAngle).join(",");
  probe.dataset.fanViewBox=wheel.getAttribute("viewBox");
@@ -218,6 +236,7 @@ async function runR16ReflowProof(){
   maxDuration=Math.max(maxDuration,win.performance.now()-checkStart);
   if(wheel.querySelectorAll("[data-phase-cell]").length!==160)
    throw Error("sector count changed at "+selected);
+  checkSeamTopology();
  }
  probe.dataset.r16SweepCount=String(unique.length);
  probe.dataset.r16SweepMaxLayoutReads=String(maxLayoutReads);
