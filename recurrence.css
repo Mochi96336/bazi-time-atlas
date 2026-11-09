@@ -93,12 +93,18 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   vector-effect:non-scaling-stroke;
 }
 .cursor-line { stroke:var(--cursor); stroke-width:2.2; }.cursor-halo { stroke:rgba(241,230,183,.17); stroke-width:9; }
+/* Reference is only a direction, not a return. Bright uninterrupted segments
+   are drawn separately by .return-closure-seam for genuinely closed annuli. */
+.cursor-reference-guide { stroke:var(--cursor); stroke-width:1.8; stroke-opacity:.26; stroke-dasharray:3 11; fill:none; pointer-events:none; }
 .cursor-label { fill:var(--cursor); font-size:9px; font-weight:800; letter-spacing:.12em; text-anchor:middle; }
 .return-marker { stroke-width:5.5; stroke-linecap:round; filter:drop-shadow(0 0 7px rgba(238,242,237,.22)); }
 .return-marker-gregorian { stroke:var(--gregorian); }
 .return-marker-year { stroke:var(--year); }
 .return-marker-day { stroke:var(--day); }
 .return-marker.is-closed { stroke:var(--cursor); stroke-width:6.5; }
+/* Opt-in geometry only: the original R16 markers and color identity stay.
+   A run crosses an annulus edge only when BOTH adjoining rings are zero. */
+.return-closure-seam { stroke:var(--cursor); stroke-width:6.5; stroke-linecap:butt; pointer-events:none; }
 .return-marker-label { font-size:10px; font-weight:900; text-anchor:middle; dominant-baseline:middle; paint-order:stroke; stroke:#0d1110; stroke-width:3px; }
 .return-marker-label-gregorian { fill:var(--gregorian); }
 .return-marker-label-year { fill:var(--year); }
@@ -192,3 +198,17 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   .milestone-head,.milestone-row { grid-template-columns:64px 42px 42px 42px 1fr; }
   .model-boundary summary { min-height:42px; display:flex; align-items:center; }
 }
+/* R16 P1 after REAL matched Chromium screenshots:
+   Preserve original bold 160-cell radial division and major/minor ticks.
+   Lightening the grid made the fan flatter and measurably less readable.
+   Only existing NONZERO moving-phase text receives restrained enlargement.
+   No geometry, fills, edges, tick density, colours, gradients or new marks. */
+#recurrence-instrument[data-r16-polish="true"] .return-marker-label:not([data-phase-closed="true"]){
+ font-size:16px;font-weight:800;stroke-width:3.2px;
+}
+@media(max-width:480px){
+ #recurrence-instrument[data-r16-polish="true"] .return-marker-label:not([data-phase-closed="true"]){
+  font-size:29px;stroke-width:4px;
+ }
+}
+

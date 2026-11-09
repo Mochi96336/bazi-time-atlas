@@ -528,9 +528,12 @@ body {
   stroke: rgba(215, 176, 122, .78);
 }
 
-/* Ivory is the single closure / datum highlight. */
+/* Ivory is the single closure / datum highlight. The native seam and
+   faint reference share this exact source color with the original zero. */
 .research-fan-graphic .cursor-line,
-.research-fan-graphic .return-marker.is-closed {
+.research-fan-graphic .return-marker.is-closed,
+.research-fan-graphic .return-closure-seam,
+.research-fan-graphic .cursor-reference-guide {
   stroke: var(--research-fan-datum);
 }
 .research-fan-graphic .cursor-halo {

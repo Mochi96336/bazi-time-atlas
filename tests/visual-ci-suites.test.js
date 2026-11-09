@@ -19,7 +19,7 @@ test("parallel visual CI retains every existing screenshot command and determina
   assert.equal(new Set(screenshotChecks).size, screenshotChecks.length, "duplicate screenshot checks");
   assert.deepEqual(
     [...screenshotChecks].sort(),
-    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs"].sort(),
+    [...priorCommands, "visual-check-determinacy.mjs", "visual-check-r16-native-seam.mjs", "visual-check-r16-phase-fan.mjs", "visual-check-research-01-diagram-lab.mjs", "visual-check-research-02-diagram-lab.mjs", "visual-check-research-02-production.mjs", "visual-check-research-03-diagram-lab.mjs", "visual-check-research-03-production.mjs"].sort(),
     "parallel PNG CI must preserve the complete existing visual:check inventory"
   );
   assert.ok(VISUAL_CI_SUITES["capture-material"].indexOf("visual-check-material-prototype.mjs")
@@ -33,7 +33,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 53, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, and Research production evidence");
+  assert.equal(scripts.length, 55, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, and Research production evidence");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
@@ -41,6 +41,12 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
   assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
+  assert.ok(VISUAL_CI_SUITES["capture-pages"].includes("visual-check-r16-phase-fan.mjs"),
+    "#614 label-layout regression runs alongside #617 native seam");
+  assert.ok(
+    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-r16-native-seam.mjs"),
+    "native R16 opt-in seam must be compared with unmodified R16 in real Chromium"
+  );
   assert.ok(
     VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-01-diagram-lab.mjs"),
     "Research 01 diagram lab must keep deterministic desktop/mobile PNG evidence"
