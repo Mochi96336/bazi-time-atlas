@@ -198,3 +198,17 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   .milestone-head,.milestone-row { grid-template-columns:64px 42px 42px 42px 1fr; }
   .model-boundary summary { min-height:42px; display:flex; align-items:center; }
 }
+/* R16 P1 after REAL matched Chromium screenshots:
+   Preserve original bold 160-cell radial division and major/minor ticks.
+   Lightening the grid made the fan flatter and measurably less readable.
+   Only existing NONZERO moving-phase text receives restrained enlargement.
+   No geometry, fills, edges, tick density, colours, gradients or new marks. */
+#recurrence-instrument[data-r16-polish="true"] .return-marker-label:not([data-phase-closed="true"]){
+ font-size:16px;font-weight:800;stroke-width:3.2px;
+}
+@media(max-width:480px){
+ #recurrence-instrument[data-r16-polish="true"] .return-marker-label:not([data-phase-closed="true"]){
+  font-size:29px;stroke-width:4px;
+ }
+}
+
