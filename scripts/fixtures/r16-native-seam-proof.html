@@ -133,16 +133,43 @@ function check(delta,expected){
 function isolate(frame){
   const doc=frame.contentDocument;
   const svg=doc.querySelector("#recurrence-wheel");
-  if(svg.parentElement!==doc.body)doc.body.append(svg);
+  const host=svg.closest(".research-fan-graphic");
+  fail(Boolean(host),"the actual R16 palette owner is missing");
+
+  // The original R16 palette is intentionally scoped to
+  // .research-fan-graphic .{gregorian,year,day}-sector. Moving SVG alone
+  // to <body> silently restored the old purple/ochre/cyan fallback colors.
+  // Isolate the ORIGINAL wrapper with the actual SVG, not a detached SVG.
+  const palette=()=>{
+    const expected={
+      gregorian:"rgb(47, 61, 76)",year:"rgb(65, 86, 104)",
+      day:"rgb(85, 109, 128)"
+    };
+    const colors={};
+    for(const [key,color] of Object.entries(expected)){
+      const sector=host.querySelector("#"+key+"-ring .phase-sector");
+      const fill=frame.contentWindow.getComputedStyle(sector).fill;
+      fail(fill===color,
+        "R16 original graphite palette lost on "+key+": "+fill+
+        " (expected "+color+")");
+      colors[key]=fill;
+    }
+    return JSON.stringify(colors);
+  };
+  const before=palette();
+  if(host.parentElement!==doc.body)doc.body.append(host);
   svg.setAttribute("viewBox","0 190 1200 600");
   const style=doc.createElement("style");
   style.textContent=[
    "html,body{margin:0!important;padding:0!important;overflow:hidden!important;background:#0d1110!important;height:100%!important}",
-   "body>*:not(#recurrence-wheel){display:none!important}",
+   "body>*:not(.research-fan-graphic){display:none!important}",
+   ".research-fan-graphic{display:block!important;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;padding:0!important;overflow:hidden!important}",
+   ".research-fan-graphic>*:not(#recurrence-wheel){display:none!important}",
    "#astronomy-residual-ring{display:none!important}",
    "#recurrence-wheel{position:fixed!important;inset:0!important;left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-height:0!important;transform:none!important;margin:0!important;z-index:10!important}"
   ].join("\n");
   doc.head.append(style);
+  fail(palette()===before,"R16 palette mutated during A/B image isolation");
 }
 async function run(){
   original.src=new URL("../../recurrence.html?date=2026-09-13&delta=8000&r16-seam=0",location.href).href;
@@ -180,6 +207,7 @@ async function run(){
   probe.dataset.delta=String(finalDelta);
   probe.dataset.originalBaseline="true";
   probe.dataset.onlyNativeSeam="true";
+  probe.dataset.paletteProof="true";
   probe.dataset.allCases="true";
 }
 run().catch(error=>{probe.dataset.ready="error";probe.dataset.error=String(error.stack??error)});
