@@ -35,7 +35,7 @@ for(const [delta,width,height] of [
   const html=chromium([...args(width,height),"--dump-dom",url],"Δ"+delta+" viewport "+width);
   for(const evidence of [
     'data-ready="true"','data-original-baseline="true"',
-    'data-only-native-seam="true"','data-all-cases="true"',
+    'data-only-native-seam="true"','data-palette-proof="true"','data-all-cases="true"',
     'data-delta="'+delta+'"',
     ...(mobile?['data-frame-width="'+width+'"']:[ ])
   ]){
