@@ -78,6 +78,7 @@ test("nonzero or missing phases are not connected or replaced by a false guide",
 test("native seam defaults on in the Draft, and legacy R16 remains a reversible fallback",()=>{
   const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
   const css=readFileSync(new URL("../recurrence.css",import.meta.url),"utf8");
+  const calibration=readFileSync(new URL("../research-color-calibration.css",import.meta.url),"utf8");
   assert.match(view,/get\("r16-seam"\)!=="0"/,
     "the legacy solid datum remains an explicit opt-out");
   assert.match(view,/ZERO_SEAM_ENABLED \? \[\[258,270\],\[560,575\]\] : \[\[258,575\]\]/);
@@ -95,5 +96,12 @@ test("native seam defaults on in the Draft, and legacy R16 remains a reversible 
     "seam must use exactly the original closed-marker stroke weight");
   assert.doesNotMatch(css,/\.return-closure-seam \{[^}]*vector-effect:non-scaling-stroke/,
     "fixed-pixel seam thickness becomes too heavy on mobile");
+  assert.match(calibration,/\.research-fan-graphic \.return-marker\.is-closed,\s*\.research-fan-graphic \.return-closure-seam,\s*\.research-fan-graphic \.cursor-reference-guide\s*\{\s*stroke: var\(--research-fan-datum\);/s,
+    "new seam and reference must share the original R16 ivory color token");
+  for(const [ring,color] of [["gregorian","#2f3d4c"],["year","#415668"],["day","#556d80"]]){
+    const token=ring==="gregorian"?"outer":ring==="year"?"middle":"inner";
+    assert.ok(calibration.includes("--research-fan-"+token+": "+color),
+      "the original R16 "+ring+" ring must retain its color");
+  }
   assert.doesNotMatch(view,/closure-spine-model/);
 });
