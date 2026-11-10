@@ -63,7 +63,7 @@ function examine(){
   const el=doc.querySelector(selector);
   return el?Number.parseFloat(win.getComputedStyle(el).fontSize):0;
  };
- probe.dataset.legendTitleFont=String(fontPx(".research-legend-never-used, .recurrence-legend span"));
+ probe.dataset.legendTitleFont=String(fontPx(".recurrence-legend span"));
  probe.dataset.legendValueFont=String(fontPx(".recurrence-legend strong"));
  probe.dataset.stateLabelFont=String(fontPx(".research-current-state-phases small"));
  probe.dataset.stateValueFont=String(fontPx(".research-current-state-phases strong"));
