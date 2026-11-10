@@ -1418,8 +1418,9 @@
    Do not expand SVG glyphs, redraw annuli, or change the 160-cell clock. */
 @media (max-width: 480px) {
   .research-task-primary .research-fan-graphic .recurrence-legend {
+    top: 29px;
     max-width: calc(100% - 10px);
-    gap: 8px;
+    gap: 4px;
   }
   .research-task-primary .research-fan-graphic .recurrence-legend div {
     grid-template-columns: 7px 57px minmax(0, 1fr);
@@ -1428,11 +1429,11 @@
   }
   .research-task-primary .research-fan-graphic .recurrence-legend span {
     font-size: 11px;
-    line-height: 1.4;
+    line-height: 1.2;
   }
   .research-task-primary .research-fan-graphic .recurrence-legend strong {
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.2;
     font-variant-numeric: tabular-nums;
   }
   .research-task-primary .research-current-state-head > span {
