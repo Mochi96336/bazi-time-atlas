@@ -572,3 +572,52 @@ body {
 .research-outline a span {
   color:color-mix(in srgb,var(--research-task-accent) 68%,#7f8b91);
 }
+
+/* R16 reading-quality pass: mobile data is read as HTML first, the 160-cell
+   SVG remains a spatial verification instrument. Do NOT enlarge more
+   polar annotations: its 1200-unit viewBox compresses them on phones.
+   Preserve the original graphite annuli, markers and zero-seam semantics. */
+@media (max-width: 480px) {
+  .research-task-primary .research-fan-graphic .recurrence-legend {
+    max-width: calc(100% - 10px);
+    gap: 8px;
+  }
+  .research-task-primary .research-fan-graphic .recurrence-legend div {
+    grid-template-columns: 7px 57px minmax(0, 1fr);
+    gap: 7px;
+    align-items: baseline;
+  }
+  .research-task-primary .research-fan-graphic .recurrence-legend span {
+    color: #a3b1b9;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .research-task-primary .research-fan-graphic .recurrence-legend strong {
+    font-size: 12px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+  }
+  .research-task-primary .research-current-state-head > span {
+    color: #9baab2;
+    font-size: 10.5px;
+  }
+  .research-task-primary .research-current-state-head > strong {
+    font-size: 13px;
+  }
+  .research-task-primary .research-current-state-phases {
+    flex-wrap: wrap;
+    row-gap: 5px;
+  }
+  .research-task-primary .research-current-state-phases small {
+    color: #a3b1b9;
+    font-size: 10px;
+  }
+  .research-task-primary .research-current-state-phases strong {
+    font-size: 12px;
+  }
+  .research-task-primary .recurrence-readout.research-current-state > p {
+    color: #a1afb6;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+}
