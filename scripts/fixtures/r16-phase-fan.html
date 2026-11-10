@@ -57,6 +57,23 @@ function examine(){
  probe.dataset.layers=String(marker.length);
  probe.dataset.visualMode=instrument.dataset.phaseGeometry||"";
  probe.dataset.r16Polish=instrument.dataset.r16Polish??"missing";
+ // Real CSS-pixel reading contract: unlike SVG font sizes, these HTML values
+ // must stay legible at 320/390 CSS px without relying on zoom.
+ const fontPx=selector=>{
+  const el=doc.querySelector(selector);
+  return el?Number.parseFloat(win.getComputedStyle(el).fontSize):0;
+ };
+ probe.dataset.legendTitleFont=String(fontPx(".research-legend-never-used, .recurrence-legend span"));
+ probe.dataset.legendValueFont=String(fontPx(".recurrence-legend strong"));
+ probe.dataset.stateLabelFont=String(fontPx(".research-current-state-phases small"));
+ probe.dataset.stateValueFont=String(fontPx(".research-current-state-phases strong"));
+ probe.dataset.stateSummaryFont=String(fontPx(".recurrence-readout.research-current-state > p"));
+ const legend=doc.querySelector(".recurrence-legend");
+ const state=doc.querySelector(".research-current-state-phases");
+ probe.dataset.legendOverflow=String(
+  [...legend.querySelectorAll("div")].some(el=>el.getBoundingClientRect().right>win.innerWidth+1));
+ probe.dataset.stateOverflow=String(state.scrollWidth>state.clientWidth+1);
+
  // A single R16 view now renders both geometry (#617) and labels (#614).
  // Verify correct native seam topology independently from text placement.
  function checkSeamTopology(){
