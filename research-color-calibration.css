@@ -572,3 +572,17 @@ body {
 .research-outline a span {
   color:color-mix(in srgb,var(--research-task-accent) 68%,#7f8b91);
 }
+
+/* R16 reading pass: colors only, typography belongs to compact-surface. */
+@media (max-width: 480px) {
+  .research-task-primary .research-fan-graphic .recurrence-legend span,
+  .research-task-primary .research-current-state-phases small {
+    color: #a3b1b9;
+  }
+  .research-task-primary .research-current-state-head > span {
+    color: #9baab2;
+  }
+  .research-task-primary .recurrence-readout.research-current-state > p {
+    color: #a1afb6;
+  }
+}
