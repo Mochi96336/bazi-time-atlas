@@ -85,6 +85,24 @@ for(const s of scenes){
  check(probe.includes('data-r16-seam-mode="native"'),name+
   " native R16 zero seam was not active with the selected label setting");
  check(probe.includes('data-phase-cells="160"'),name+" did not retain all 40+60+60 cells");
+ if(s.width<=480){
+  const minFonts={
+   "legend-title-font":11,
+   "legend-value-font":12,
+   "state-label-font":10,
+   "state-value-font":12,
+   "state-summary-font":11
+  };
+  for(const [key,min] of Object.entries(minFonts)){
+   const value=Number(probe.match(new RegExp('data-'+key+'="([0-9.]+)"'))?.[1]);
+   check(Number.isFinite(value)&&value>=min,name+
+    " real HTML CSS-pixel font below "+min+"px for "+key+": "+value);
+  }
+  check(probe.includes('data-legend-overflow="false"'),name+
+   " enlarged phase legend spills beyond the 320/390 CSS-pixel viewport");
+  check(probe.includes('data-state-overflow="false"'),name+
+   " enlarged phase status row overflows horizontally");
+ }
  check(probe.includes('data-clip-active-labels="false"'),name+" phase labels clipped outside SVG");
  if(s.polish&&s.width<=480){
   check(probe.includes('data-r16-text-avoid-failed="false"'),name+" no safe label placement found");
