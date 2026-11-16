@@ -52,5 +52,7 @@ test("existing Research reading path uses concrete examples without adding new c
   assert.match(html,/正負數是相對起點的最短位移，不是節氣提前或延後的天數/);
   assert.match(html,/依序點上方 \+400、\+8,000、\+24,000 年的里程碑/);
   assert.match(html,/三圈都為 0，也還要繼續 02 驗證節界/);
+  const css=readFileSync(new URL("../research-discrete-density.css",import.meta.url),"utf8");
+  assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] > header p,[\s\S]*?#research-discrete \.research-discrete-explorer-intro \{\s*font-size: 12px;/);
   assert.doesNotMatch(html,/class="research-reading-card"|id="research-reading-wizard"/);
 });
