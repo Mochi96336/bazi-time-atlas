@@ -106,7 +106,20 @@ function expectSignedEvidenceCopy(dom, { year, day }, label, url) {
   }
 }
 
+function expectReaderMeaning(dom, fragments, label, url) {
+  const meaning = dom.match(/<p id="closure-summary">([^<]*)<\/p>/)?.[1] ?? "";
+  for (const fragment of fragments) {
+    if (!meaning.includes(fragment)) {
+      throw new Error(`${label}: reader-facing conclusion lacks "${fragment}": ${meaning}; ${url}`);
+    }
+  }
+}
+
 function expectDiscreteComprehension(dom, url) {
+  if (!dom.includes("每圈的 0 只代表該循環序位回到起點") ||
+      !dom.includes("依序點上方 +400、+8,000、+24,000 年的里程碑")) {
+    throw new Error(`Research 01 must instruct readers how to interpret 0 and compare concrete milestones: ${url}`);
+  }
   if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 與基準同相位 · 左右為距 0 的最短循環位移")) {
     throw new Error(`phase gauge does not explain its zero / signed-shortest semantics: ${url}`);
   }
@@ -232,6 +245,7 @@ if (Number(attr(jiazi,"data-jiazi-tick-count"))<6 ||
 }
 console.log("[recurrence] PASS named Year/Day base+target xx/60 inside ORIGINAL one Jiazi-anchored strip: "+local.url);
 
+expectReaderMeaning(local.dom, ["此起點 60 年序＋60 日序首次重遇","公曆結構仍未歸零"], "local 1980", local.url);
 expectFixedGauge(local.dom, local.url);
 expectDiscreteComprehension(local.dom, local.url);
 if (!/此起點 60 年序＋60 日序首次重遇/.test(local.dom) || !/1,980 年/.test(local.dom)) {
@@ -261,6 +275,7 @@ const global = expectCase(
   },
   "24000-year global recurrence"
 );
+expectReaderMeaning(global.dom, ["三個離散相位同時歸零","只證明離散候選","02 檢查十二節界"], "global 24000", global.url);
 expectFixedGauge(global.dom, global.url);
 expectDiscreteComprehension(global.dom, global.url);
 expectConsolidatedGlobalPeriod(global.dom, global.url);
@@ -337,6 +352,7 @@ const sourceDerived8000 = expectCase(
   },
   "8000-year source-derived seasonal evidence"
 );
+expectReaderMeaning(sourceDerived8000.dom, ["公曆結構＋60 日序閉合","60 年序仍偏"], "8000", sourceDerived8000.url);
 const sourceDerivedStrip = tagById(sourceDerived8000.dom, "research-year-strip");
 if (
   attr(sourceDerivedStrip, "data-li-chun-boundary-status") !== "resolved-research-evidence" ||
@@ -477,6 +493,7 @@ const gregorian = expectCase(
   },
   "400-year Gregorian recurrence"
 );
+expectReaderMeaning(gregorian.dom, ["公曆結構回原位","60 年序與 60 日序仍未歸零","不代表節界重現"], "400", gregorian.url);
 expectFixedGauge(gregorian.dom, gregorian.url);
 expectDiscreteComprehension(gregorian.dom, gregorian.url);
 if (!/公曆結構回原位/.test(gregorian.dom)) {
