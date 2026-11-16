@@ -16,6 +16,7 @@ import {
 } from "./recurrence/phase-fan-geometry.js";
 import { publishResearchTimeSelection } from "./research/research-time-state.js";
 import { zeroPhaseRadialRuns } from "./recurrence/phase-fan-zero-seam.js";
+import { explainDiscreteResult } from "./recurrence/discrete-reading.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const CX = 600;
@@ -610,15 +611,7 @@ function updateDeltaScaleMode() {
 }
 
 function stateMeaning(state, localYears) {
-  if (state.deltaYears === 0) return "基準點";
-  if (state.closed.gregorian && state.closed.yearSequence && state.closed.day) return "三個離散相位同時歸零";
-  if (state.deltaYears === localYears && state.closed.yearSequence && state.closed.day) return "此起點 60 年序＋60 日序首次重遇";
-  if (state.closed.gregorian && state.closed.yearSequence) return "公曆結構＋60 年序閉合；60 日序仍偏";
-  if (state.closed.gregorian && state.closed.day) return "公曆結構＋60 日序閉合；60 年序仍偏";
-  if (state.closed.gregorian) return "公曆結構回原位";
-  if (state.closed.yearSequence) return "60 年序回原位";
-  if (state.closed.day) return "60 日序回原位";
-  return "沒有完整閉合";
+  return explainDiscreteResult(state, localYears);
 }
 
 function derivationPhase(label, closed, phase, modulus) {
