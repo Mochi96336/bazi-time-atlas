@@ -25,7 +25,6 @@
     document.body.style.height=height+"px";
     frame.style.width=width+"px";
     frame.style.height=height+"px";
-    frame.src=new URL("../../recurrence.html?date=2026-09-13&delta=24000",location.href).href;
     const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     frame.addEventListener("load",async()=>{
       try{
@@ -55,6 +54,9 @@
         probe.dataset.error=String(error);
       }
     });
+    // Observe the iframe before navigation: a fast cached frame must not
+    // finish before its proof listener has been registered.
+    frame.src=new URL("../../recurrence.html?date=2026-09-13&delta=24000",location.href).href;
   </script>
 </body>
 </html>
