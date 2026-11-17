@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import {captureReadyProof} from "./chromium-ready-proof.mjs";
 
 const baseURL=process.env.BASE_URL??"http://127.0.0.1:4173/";
 
@@ -66,8 +67,18 @@ console.log("[research-r3] PASS old mode=dates link migrates compare→original 
 
 // True native geometry + R1/R2 authority/gesture guards.
 for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?preciseBoundary=before","?preciseBoundary=after","?width=320","?width=768","?desktop=1","?deep=1","?precise=1","?selector=1","?selector=1&deep=1"]){
-  const proof=dump("scripts/fixtures/research-original-r0-390.html"+suffix,15000);
-  const tag=opening(proof.dom,"probe","output");
+  let proof=dump("scripts/fixtures/research-original-r0-390.html"+suffix,15000);
+  let tag=opening(proof.dom,"probe","output");
+  if(attr(tag,"data-ready")!=="true"){
+    // The virtual-time snapshot can race the nested iframe load/rAF, leaving
+    // data-error="initializing". Verify real readiness before declaring a
+    // regression; assert the very same proof fields below.
+    const live=await captureReadyProof({
+      url:proof.url,selector:"#probe",width:500,height:1800,timeoutMs:50000
+    });
+    proof={url:proof.url,dom:live.html};
+    tag=opening(proof.dom,"probe","output");
+  }
   if(
     attr(tag,"data-ready")!=="true" ||
     attr(tag,"data-original-strip")!=="visible" ||
