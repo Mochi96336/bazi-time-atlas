@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import {captureReadyProof} from "./chromium-ready-proof.mjs";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 
@@ -20,21 +21,6 @@ function dump(path) {
   if (result.status !== 0) {
     process.stderr.write(result.stderr ?? "");
     throw new Error(`Chromium DOM probe failed: ${url}`);
-  }
-  return { url, dom:result.stdout };
-}
-
-function dumpViewport(path, width, height) {
-  const url = new URL(path, baseURL).href;
-  const browserWidth = width;
-  const result = spawnSync(findBrowser(), [
-    "--headless=new", "--no-sandbox", "--disable-gpu", "--force-device-scale-factor=1", "--hide-scrollbars",
-    "--run-all-compositor-stages-before-draw", "--virtual-time-budget=1200",
-    `--window-size=${browserWidth},${height}`, "--dump-dom", url
-  ], { encoding:"utf8", maxBuffer:16 * 1024 * 1024 });
-  if (result.status !== 0) {
-    process.stderr.write(result.stderr ?? "");
-    throw new Error(`Chromium geometry probe failed: ${url}`);
   }
   return { url, dom:result.stdout };
 }
@@ -384,12 +370,19 @@ const anchorViewports = [
 ];
 for (const target of ["research-astronomy","research-evidence"]) {
   for (const viewport of anchorViewports) {
-    const geometry = dumpViewport(
+    const geometryURL = new URL(
       `scripts/fixtures/research-task-anchor-geometry.html?target=${target}&width=${viewport.width}&height=${viewport.height}`,
-      viewport.width,
-      viewport.height
-    );
-    const probeTag = geometry.dom.match(/<output[^>]*id="probe"[^>]*>/)?.[0] ?? "";
+      baseURL
+    ).href;
+    // The heading proof needs two real requestAnimationFrames and an 80ms
+    // layout delay. A 1200ms virtual-time dump can snapshot data-ready=false
+    // before either callback runs. Observe the existing fixture's REAL proof
+    // instead, keeping the same sticky, heading gap and position assertions.
+    const {proof:probeTag}=await captureReadyProof({
+      url:geometryURL,selector:"#probe",width:viewport.width,
+      height:viewport.height,timeoutMs:30000,html:false
+    });
+    const geometry={url:geometryURL};
     if (!probeTag.includes('data-ready="true"')) {
       const probeError = probeTag.match(/data-error="([^"]*)"/)?.[1] ?? "no probe error";
       throw new Error(`Research anchor geometry probe did not become ready for ${target} / ${viewport.key}: ${probeError}: ${geometry.url}`);
