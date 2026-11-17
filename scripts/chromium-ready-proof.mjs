@@ -22,16 +22,16 @@ function chromiumBinary(){
  * page. Never substitute a fake ready result or ignore a failed assertion.
  * Returns the actual post-ready DOM and optionally a same-session PNG.
  */
-export async function captureReadyProof({url,selector="#probe",width=500,height=900,
+export async function captureReadyProof({url,selector="#probe",width=500,height=900,deviceScaleFactor=1,
   timeoutMs=35000,screenshotPath=null,html=true,readyValue="true",additionalArgs=[]}){
   if(!/^https?:\/\//.test(url))throw Error("Ready proof requires an HTTP(S) URL");
   const dir=await mkdtemp(path.join(tmpdir(),"bazi-ready-proof-"));
   const browser=spawn(chromiumBinary(),[
-    "--headless=new","--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+    "--headless=new","--no-sandbox","--disable-dev-shm-usage",
     "--hide-scrollbars","--no-first-run","--no-default-browser-check",
     "--disable-background-timer-throttling","--disable-renderer-backgrounding",
     "--remote-allow-origins=*","--remote-debugging-port=0",
-    "--user-data-dir="+dir,"--force-device-scale-factor=1",
+    "--user-data-dir="+dir,"--force-device-scale-factor="+deviceScaleFactor,
     "--window-size="+width+","+height,...additionalArgs,url
   ],{stdio:["ignore","ignore","pipe"]});
   let stderr="",ws,seq=0;
