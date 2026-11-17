@@ -1,53 +1,35 @@
-import { mkdir,stat,writeFile } from "node:fs/promises";
-import { spawnSync } from "node:child_process";
+// Capture the real loaded Research 03 iframe after its production proof reports
+// readiness. CDP keeps the DOM assertion and PNG in the SAME renderer session.
+import {mkdir,stat,writeFile} from "node:fs/promises";
 import path from "node:path";
+import {captureReadyProof} from "./chromium-ready-proof.mjs";
 
 const baseURL=process.env.BASE_URL??"http://127.0.0.1:4173/";
 const outputDir=path.resolve("tmp/visual-check");
 const viewports=[{key:"1440x900",width:1440,height:900},{key:"390x844",width:390,height:844}];
-
-function findBrowser(){
-  if(process.env.CHROMIUM_BIN)return process.env.CHROMIUM_BIN;
-  for(const candidate of ["chromium","chromium-browser","google-chrome","google-chrome-stable"]){
-    const probe=spawnSync("sh",["-lc","command -v "+candidate],{encoding:"utf8"});
-    if(probe.status===0&&probe.stdout.trim())return probe.stdout.trim();
-  }
-  throw new Error("No Chromium/Chrome executable found");
-}
-function browserArgs(){return[
-  "--headless=new","--no-sandbox","--disable-dev-shm-usage","--hide-scrollbars",
-  "--force-device-scale-factor=1","--run-all-compositor-stages-before-draw","--virtual-time-budget=4500"
-]}
-function run(browser,argv,label){
-  let last;
-  for(let attempt=1;attempt<=2;attempt+=1){
-    const result=spawnSync(browser,argv,{encoding:"utf8",timeout:attempt===1?30000:50000,killSignal:"SIGKILL"});
-    if(result.status===0)return result;
-    last=result;
-  }
-  process.stderr.write(last?.stderr??"");
-  throw new Error("Chromium failed for "+label);
-}
-
+const required=["data-ready=\"true\"","data-time-context=\"evidence\"","data-time-kicker=\"03 · 四柱判定／同一太陽黃經\"","data-conclusion-grammar=\"alignment-fork\"","data-pillar-grammar=\"pillar-verdict\""];
 await mkdir(outputDir,{recursive:true});
-const browser=findBrowser(),captures=[];
+const captures=[];
 for(const viewport of viewports){
   const harness="scripts/fixtures/research-03-production-visual.html?width="+viewport.width+"&height="+viewport.height;
   const url=new URL(harness,baseURL).href;
-  const dom=run(browser,[...browserArgs(),"--window-size="+viewport.width+","+viewport.height,"--dump-dom",url],"Research 03 DOM").stdout;
-  for(const required of [
-    'data-ready="true"',
-    'data-time-context="evidence"',
-    'data-time-kicker="03 · 四柱判定／同一太陽黃經"',
-    'data-conclusion-grammar="alignment-fork"',
-    'data-pillar-grammar="pillar-verdict"'
-  ]) if(!dom.includes(required))throw new Error("Research 03 production harness missing "+required);
-
   const fileName="research-03-production-"+viewport.key+".png";
   const filePath=path.join(outputDir,fileName);
-  run(browser,[...browserArgs(),"--window-size="+viewport.width+","+viewport.height,"--screenshot="+filePath,url],fileName);
+  const {proof,html,diagnostics}=await captureReadyProof({
+    url,selector:"#probe",width:Math.max(viewport.width,500),
+    height:viewport.height,timeoutMs:55000,screenshotPath:filePath
+  });
+  for(const expected of required){
+    if(!proof.includes(expected))
+      throw Error("Research 03 live proof missing "+expected+": "+proof);
+  }
+  // The probe belongs to the actual browser DOM, not a static fixture
+  // string or a test-only invented ready token.
+  if(!html.includes('id="probe"')||diagnostics.status!=="true")
+    throw Error("Research 03 no real post-ready DOM evidence");
   const info=await stat(filePath);
-  if(info.size<25000)throw new Error(fileName+" unexpectedly small");
+  if(info.size<25000)throw Error(fileName+" unexpectedly small: "+info.size);
   captures.push({viewport:viewport.key,file:fileName,bytes:info.size,url});
 }
-await writeFile(path.join(outputDir,"research-03-production-evidence.json"),JSON.stringify({browser,baseURL,captures},null,2)+"\n","utf8");
+await writeFile(path.join(outputDir,"research-03-production-evidence.json"),
+  JSON.stringify({baseURL,captures,readiness:"CDP live DOM and same-session screenshot"},null,2)+"\n","utf8");

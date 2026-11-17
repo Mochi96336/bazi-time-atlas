@@ -2165,3 +2165,13 @@
 .research-phase-fan-drilldown + .discrete-derivation {
   margin-top:var(--research-space-3);
 }
+
+/* Reader-first Research 01: the two existing proof instructions must be
+   legible in actual CSS px, even with the compact mobile research layout.
+   No added panels, fan geometry, palette or hierarchy changes. */
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] > header p,
+#research-discrete .research-discrete-explorer-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #a2b0b7;
+}

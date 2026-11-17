@@ -1,11 +1,13 @@
+/* Shared Research time: use the existing blue-graphite material family,
+   not the former olive-green translucent panel; no layout or data changes. */
 .research-time-state {
   position:sticky;
   top:8px;
   z-index:24;
   margin:14px 0 22px;
-  border:1px solid rgba(238,242,237,.09);
+  border:1px solid var(--research-line);
   border-radius:12px;
-  background:rgba(8,12,10,.94);
+  background:rgba(14,21,29,.96);
   box-shadow:0 14px 42px rgba(0,0,0,.26);
   backdrop-filter:blur(14px);
 }
@@ -16,7 +18,7 @@
   justify-content:space-between;
   gap:16px;
   padding:9px 12px 7px;
-  border-bottom:1px solid rgba(238,242,237,.055);
+  border-bottom:1px solid var(--research-line-soft);
 }
 .research-time-state-head span {
   display:block;
@@ -48,7 +50,7 @@
   padding:9px 12px 10px;
 }
 .research-time-side + .research-time-side {
-  border-left:1px solid rgba(238,242,237,.055);
+  border-left:1px solid var(--research-line-soft);
 }
 .research-time-side > header {
   display:flex;
@@ -125,7 +127,7 @@
   .research-time-side { padding:7px 9px 8px; }
   .research-time-side + .research-time-side {
     border-left:0;
-    border-top:1px solid rgba(238,242,237,.045);
+    border-top:1px solid var(--research-line-soft);
   }
   .research-time-side > header { margin-bottom:5px; }
   .research-time-pillars { gap:2px; }
@@ -233,7 +235,7 @@
   }
   .research-time-state[data-stuck="true"] .research-time-side + .research-time-side {
     border-top:0;
-    border-left:1px solid rgba(238,242,237,.045);
+    border-left:1px solid var(--research-line-soft);
   }
   .research-time-state[data-stuck="true"] .research-time-side > header {
     display:grid;
