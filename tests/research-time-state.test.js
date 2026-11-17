@@ -97,6 +97,15 @@ test("shared Research time state condenses only after the same sticky node is st
   assert.doesNotMatch(view,/cloneNode|appendChild\(root\.clone|createElement\(["']section["']\)/);
 });
 
+test("shared Research time surface stays neutral graphite in full and sticky states", async () => {
+  const css=await readFile(new URL("../research-time-state.css", import.meta.url),"utf8");
+  assert.match(css,/\.research-time-state\s*\{[^}]*background:rgba\(14,21,29,\.96\);/s);
+  assert.match(css,/\.research-time-state\s*\{[^}]*border:1px solid var\(--research-line\);/s);
+  assert.match(css,/\.research-time-state-head\s*\{[^}]*border-bottom:1px solid var\(--research-line-soft\);/s);
+  assert.doesNotMatch(css,/rgba\(8,12,10,\.94\)/,
+    "the green-tinted 01/02/03 shared-time panel must not return");
+});
+
 test("shared Research time state uses the Research semantic palette", async () => {
   const css = await readFile(new URL("../research-time-state.css", import.meta.url), "utf8");
   assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/);
