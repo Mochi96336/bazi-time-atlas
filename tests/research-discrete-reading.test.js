@@ -56,3 +56,14 @@ test("existing Research reading path uses concrete examples without adding new c
   assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] > header p,[\s\S]*?#research-discrete \.research-discrete-explorer-intro \{\s*font-size: 12px;/);
   assert.doesNotMatch(html,/class="research-reading-card"|id="research-reading-wizard"/);
 });
+
+test("Research 01 prioritizes readable evidence instead of truncating milestone reasoning",()=>{
+  const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
+  const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
+  assert.match(html,/01 先建立離散候選；02 再檢查真正的十二節界/);
+  assert.match(html,/只先算離散候選，不直接等同完整四柱週期/);
+  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:11px;/);
+  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:10px;/);
+  assert.match(css,/\.research-outline small \{\s*font-size:9px;/);
+  assert.doesNotMatch(html,/research-reading-card|research-reading-wizard/);
+});
