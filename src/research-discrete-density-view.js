@@ -53,6 +53,14 @@ function updatePhaseFanPreview(details, instrument) {
     ["year", instrument.dataset.yearSequencePhaseSigned],
     ["day", instrument.dataset.dayPhaseSigned]
   ];
+  // A user-selected milestone may momentarily emphasize the resulting zero
+  // values. The instrument remains the only authority for signed phases.
+  // Do not replay the effect for continuous slider/playback updates.
+  const arrival = instrument.dataset.phaseArrival === selected &&
+    selected !== details.dataset.phasePreviewLastDelta &&
+    Number(selected) > 0;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const arrived = [];
   let zeroCount = 0;
   for (const [key, raw] of inputs) {
     const element = details.querySelector(`[data-phase-preview="${key}"]`);
@@ -63,7 +71,19 @@ function updatePhaseFanPreview(details, instrument) {
     element.dataset.phaseState = !available ? "unknown" : zero ? "zero" : "shifted";
     const value = element.querySelector("em");
     if (value) value.textContent = !available ? "—" : Number(raw) > 0 ? `+${raw}` : String(raw).replace("-", "−");
+    if (arrival && zero) {
+      arrived.push(key);
+      if (!reduceMotion && value?.animate) {
+        value.animate([
+          {opacity:.62,filter:"brightness(1)"},
+          {opacity:1,filter:"brightness(1.35)",offset:.32},
+          {opacity:1,filter:"brightness(1)"}
+        ], {duration:390,easing:"ease-out"});
+      }
+    }
   }
+  details.dataset.phasePreviewLastDelta = selected;
+  details.dataset.phasePreviewArrival = arrived.join(",");
   let proofStatus;
   let proofText;
   if (Number(selected) === 0) {

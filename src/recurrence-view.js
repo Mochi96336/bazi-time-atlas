@@ -80,6 +80,8 @@ const ringSpecs = Object.freeze({
 
 let currentBase = { year:2026, month:9, day:13 };
 let currentDelta = 0;
+let lastRenderedDelta = null;
+const ARRIVAL_DELTA_SOURCES = new Set(["entry-local", "entry-global", "derivation", "canonical"]);
 let candidateStates = [];
 let deltaPlaybackController = null;
 
@@ -330,7 +332,7 @@ function scheduleR16LabelReflow(){
   },100);
 }
 
-function renderReturnMarkers(state) {
+function renderReturnMarkers(state, arriveAtZero = false) {
   cursorGroup.querySelectorAll("[data-return-marker], [data-closure-seam]").forEach(node => node.remove());
   const phases = {
     day:state.phases.day,
@@ -388,7 +390,7 @@ function renderReturnMarkers(state) {
         cx:zeroPoint.x,
         cy:zeroPoint.y,
         r:4.1,
-        class:`return-marker-zero-node return-marker-zero-node-${key}`,
+        class:`return-marker-zero-node return-marker-zero-node-${key}${arriveAtZero ? " is-arriving" : ""}`,
         "data-return-marker":`${key}-zero-node`,
         "data-phase-zero-owner":key
       }, cursorGroup);
@@ -781,7 +783,16 @@ function renderState() {
     return;
   }
 
-  renderReturnMarkers(state);
+  // A milestone selection is a discrete comparison, not motion through all
+  // intervening years. Never cue a return on Δ=0, initial load, scrubbing,
+  // playback, or an unchanged selection.
+  const milestoneArrival = lastRenderedDelta !== null &&
+    lastRenderedDelta !== currentDelta &&
+    currentDelta > 0 && state.targetValid &&
+    ARRIVAL_DELTA_SOURCES.has(instrument.dataset.deltaSource);
+  renderReturnMarkers(state, milestoneArrival);
+  lastRenderedDelta = currentDelta;
+  instrument.dataset.phaseArrival = milestoneArrival ? String(currentDelta) : "none";
 
   setText("gregorian-phase-readout", phaseReadout(state.phases.gregorian, 400));
   setText("year-phase-readout", phaseReadout(state.phases.yearSequence, 60));

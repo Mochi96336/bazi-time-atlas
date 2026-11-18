@@ -416,3 +416,17 @@ test("R16 disclosure previews only the canonical signed phase state before openi
   assert.match(css, /\.research-phase-fan-drilldown > summary \.phase-fan-preview/);
   assert.doesNotMatch(view, /function updatePhaseFanPreview[\s\S]*?function bindPhaseFanPreview\([\s\S]*?recurrenceState\(/);
 });
+
+test("milestone zero arrival is event-scoped; no continuous ring or phase animation", () => {
+  assert.match(recurrenceView, /ARRIVAL_DELTA_SOURCES = new Set\(\["entry-local", "entry-global", "derivation", "canonical"\]\)/);
+  assert.match(recurrenceView, /lastRenderedDelta !== null &&[\s\S]*?lastRenderedDelta !== currentDelta &&[\s\S]*?currentDelta > 0 && state\.targetValid/);
+  assert.match(recurrenceView, /instrument\.dataset\.phaseArrival = milestoneArrival \? String\(currentDelta\) : "none"/);
+  assert.match(recurrenceView, /renderReturnMarkers\(state, milestoneArrival\)/);
+  assert.match(view, /instrument\.dataset\.phaseArrival === selected/);
+  assert.match(view, /selected !== details\.dataset\.phasePreviewLastDelta/);
+  assert.match(view, /prefers-reduced-motion: reduce/);
+  assert.match(view, /value\.animate\(/);
+  assert.match(css, /\.research-phase-fan-drilldown\[open\] \.return-marker-zero-node\.is-arriving/);
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.doesNotMatch(css.slice(css.indexOf("@keyframes research-r16-zero-arrival")), /rotate\(|translate\(|linear infinite/);
+});

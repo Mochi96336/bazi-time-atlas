@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { captureReadyProof } from "./chromium-ready-proof.mjs";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 
@@ -561,3 +562,13 @@ if (gregorian.dom.includes('class="milestone-table"') || gregorian.dom.includes(
   throw new Error(`retired milestone detail table returned: ${gregorian.url}`);
 }
 console.log(`[recurrence] PASS 400-year case keeps visible signed phase provenance in one compact current-state rail: ${gregorian.url}`);
+const arrivalURL = new URL("scripts/fixtures/research-phase-arrival.html",baseURL).href;
+const arrivalProof = await captureReadyProof({
+  url:arrivalURL, selector:"#probe", width:390, height:800,
+  timeoutMs:30000, html:false
+});
+if (!arrivalProof.proof.includes('data-ready="true"') ||
+    !arrivalProof.proof.includes('data-results="identity:none|400:gregorian|1980:year,day|24000:gregorian,year,day|slider:none|playback:none|same:none"')) {
+  throw new Error(`Research milestone animation ran outside the intended zero events: ${arrivalProof.proof} ${arrivalURL}`);
+}
+console.log("[recurrence] PASS milestone arrival only on explicitly chosen nonzero Δ; unchanged, slider and playback never animate");

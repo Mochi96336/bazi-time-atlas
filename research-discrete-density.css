@@ -2237,3 +2237,21 @@
   .research-phase-fan-drilldown > summary .phase-fan-preview em { font-size:11px; }
   .research-phase-fan-drilldown > summary .phase-fan-preview-title small { font-size:9px; }
 }
+
+/* Arrival is a short, one-off confirmation on an existing exact zero marker.
+   It does NOT interpolate the annulus, angles or calendar year. */
+.research-phase-fan-drilldown[open] .return-marker-zero-node.is-arriving {
+  animation:research-r16-zero-arrival 390ms ease-out 1;
+  transform-box:fill-box;
+  transform-origin:center;
+}
+@keyframes research-r16-zero-arrival {
+  0% { opacity:.62; stroke-width:1.25; }
+  32% { opacity:1; stroke-width:2.8; }
+  100% { opacity:1; stroke-width:1.25; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .research-phase-fan-drilldown[open] .return-marker-zero-node.is-arriving {
+    animation:none;
+  }
+}

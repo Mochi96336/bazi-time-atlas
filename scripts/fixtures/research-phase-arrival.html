@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><title>R16 milestone arrival verification</title></head>
+<body>
+  <output id="probe" data-ready="false" data-results=""></output>
+  <iframe id="research" style="width:390px;height:700px;border:0"></iframe>
+  <script>
+    const probe=document.querySelector("#probe");
+    const iframe=document.querySelector("#research");
+    const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    function fail(reason){probe.dataset.error=reason;probe.dataset.ready="error";}
+    async function run(){
+      const doc=iframe.contentDocument;
+      const instrument=doc.querySelector("#recurrence-instrument");
+      const details=doc.querySelector("#discrete-phase-fan-details");
+      if(!instrument||!details)throw Error("discrete instrumentation missing");
+      const results=[];
+      const expected={
+        "400":"gregorian",
+        "1980":"year,day",
+        "24000":"gregorian,year,day"
+      };
+      const phaseArrival=()=>details.dataset.phasePreviewArrival||"none";
+      const delta=()=>instrument.dataset.deltaYears;
+      async function check(label,button,expectedDelta,expectedArrival){
+        button.click();
+        await sleep(0); // deliver MutationObserver callbacks
+        if(delta()!==String(expectedDelta))
+          throw Error(label+" delta "+delta()+" != "+expectedDelta);
+        const actual=phaseArrival();
+        if(actual!==expectedArrival)
+          throw Error(label+" arrival "+actual+" != "+expectedArrival);
+        const marked=[...doc.querySelectorAll(".return-marker-zero-node.is-arriving")]
+          .map(node=>node.getAttribute("data-phase-zero-owner")).sort().join(",")||"none";
+        if(marked!==(expectedArrival==="none"?"none":expectedArrival.split(",").sort().join(",")))
+          throw Error(label+" SVG arrival "+marked+" != "+expectedArrival);
+        results.push(label+":"+actual);
+      }
+      if(delta()!=="0"||instrument.dataset.phaseArrival!=="none")throw Error("initial baseline animated");
+      results.push("identity:"+phaseArrival());
+      const derived=value=>doc.querySelector('.discrete-derivation-step[data-delta-years="'+value+'"]');
+      await check("400",derived(400),400,expected["400"]);
+      await check("1980",doc.querySelector('[data-research-entry="local"]'),1980,expected["1980"]);
+      await check("24000",doc.querySelector('[data-research-entry="global"]'),24000,expected["24000"]);
+      const slider=doc.querySelector("#delta-slider");
+      slider.value="23999";
+      slider.dispatchEvent(new Event("input",{bubbles:true}));
+      await sleep(0);
+      if(instrument.dataset.phaseArrival!=="none"||phaseArrival()!=="none")
+        throw Error("slider changed state but animated");
+      results.push("slider:none");
+      slider.value="24000";
+      slider.dispatchEvent(new Event("input",{bubbles:true}));
+      await sleep(0);
+      if(instrument.dataset.phaseArrival!=="none"||phaseArrival()!=="none")
+        throw Error("slider returning to 24000 animated");
+      // Playback is a separate guarded source, even if it reaches a closed Δ.
+      iframe.contentWindow.dispatchEvent(new CustomEvent("recurrence:select-delta",{
+        detail:{deltaYears:400,source:"playback"}
+      }));
+      await sleep(0);
+      if(instrument.dataset.phaseArrival!=="none"||phaseArrival()!=="none")
+        throw Error("playback source animated");
+      results.push("playback:none");
+      await check("same",derived(400),400,"none");
+      const result=results.join("|");
+      const want="identity:none|400:gregorian|1980:year,day|24000:gregorian,year,day|slider:none|playback:none|same:none";
+      if(result!==want)throw Error(result+" != "+want);
+      probe.dataset.results=result;
+      probe.dataset.ready="true";
+    }
+    iframe.addEventListener("load",()=>{
+      // Load is necessary, not sufficient for asynchronous ESM initialization.
+      (async()=>{
+        const deadline=Date.now()+18000;
+        while(Date.now()<deadline){
+          const doc=iframe.contentDocument;
+          const instrument=doc?.querySelector("#recurrence-instrument");
+          const details=doc?.querySelector("#discrete-phase-fan-details");
+          if(instrument?.dataset.phaseArrival==="none"&&
+             details?.dataset.phasePreviewStatus==="identity"&&
+             doc.querySelector('.discrete-derivation-step[data-delta-years="1980"]')) {
+            await run();
+            return;
+          }
+          await sleep(80);
+        }
+        throw Error("ESM phase preview not initialized");
+      })().catch(e=>fail(String(e?.message||e)));
+    },{once:true});
+    iframe.src="../../recurrence.html?date=2026-09-13&delta=0";
+  </script>
+</body>
+</html>
