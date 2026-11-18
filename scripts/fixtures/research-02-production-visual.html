@@ -44,6 +44,17 @@
         root.scrollIntoView({block:"start"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
+        const bodyPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".seasonal-drift-evidence-copy p")).fontSize);
+        const statPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".seasonal-drift-stat.verdict small")).fontSize);
+        const boundaryPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".seasonal-boundary-proof-head p")).fontSize);
+        if(bodyPx<12.5||statPx<11||boundaryPx<12)
+          throw new Error(`Research 02 evidence prose is too small: lede ${bodyPx}px, statistic ${statPx}px, zero-line note ${boundaryPx}px`);
+        const heading=doc.querySelector("#research-astronomy > .research-task-head");
+        if(heading && heading.scrollWidth>heading.clientWidth+2)
+          throw new Error("Research 02 heading overflows its viewport");
+        probe.dataset.readingLedePx=String(bodyPx);
+        probe.dataset.readingStatPx=String(statPx);
+        probe.dataset.readingBoundaryPx=String(boundaryPx);
         probe.dataset.ready="true";
         probe.dataset.grammar=root.dataset.diagramGrammar||"";
         probe.dataset.proofReady=proof.dataset.ready||"";
