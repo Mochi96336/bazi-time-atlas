@@ -67,3 +67,14 @@ test("Research 03 states both reference frames before the four-pillar verdict",a
   assert.match(fixture,/Reference frame comparison must appear before pillars/);
   assert.match(view,/日／時仍是「未能判定」/);
 });
+
+test("Research 01 stops repeating its mobile path; Research 03 mobile evidence uses one readable column",async()=>{
+  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
+  assert.match(css,/#research-discrete > \.research-discrete-scope \{ display:none; \}/);
+  assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] \.research-condition-route \{\s*display:none;/);
+  assert.match(css,/#research-evidence \.research-alignment-fork \{\s*grid-template-columns:minmax\(0,1fr\);/);
+  assert.match(css,/#research-evidence \.determinacy-panel\[data-diagram-grammar="pillar-verdict"\] \.determinacy-grid \{\s*grid-template-columns:minmax\(0,1fr\);/);
+  assert.match(css,/#research-evidence \.research-alignment-fork small \{[\s\S]*?font-size:13px;/);
+  assert.match(fixture,/Research 03 mobile reasons are unreadable or cramped/);
+});
