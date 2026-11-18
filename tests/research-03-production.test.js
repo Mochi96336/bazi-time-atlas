@@ -58,3 +58,12 @@ test("Research 01–03 composition uses readable adjacent verdicts instead of ta
   assert.match(fixture,/cardHeight>205\|\|statusGap>32/);
   assert.doesNotMatch(css,/linear-gradient|radial-gradient|box-shadow/);
 });
+
+test("Research 03 states both reference frames before the four-pillar verdict",async()=>{
+  const view=await readFile(new URL("../src/research-absolute-boundary-consequence-view.js",import.meta.url),"utf8");
+  const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
+  assert.match(view,/determinacy\.insertAdjacentElement\("beforebegin",panel\)/);
+  assert.doesNotMatch(view,/determinacy\.insertAdjacentElement\("afterend",panel\)/);
+  assert.match(fixture,/Reference frame comparison must appear before pillars/);
+  assert.match(view,/日／時仍是「未能判定」/);
+});
