@@ -44,6 +44,8 @@
         doc.getElementById("research-evidence")?.scrollIntoView({block:"start"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
+        if(!(conclusion.getBoundingClientRect().top<determinacy.getBoundingClientRect().top))
+          throw new Error("Reference frame comparison must appear before pillars");
         const timeState=doc?.getElementById("research-time-state");
         const timeKicker=doc?.getElementById("research-time-kicker");
         if(timeState?.dataset.context!=="evidence"||timeKicker?.textContent.trim()!=="03 · 四柱判定／同一太陽黃經"){
