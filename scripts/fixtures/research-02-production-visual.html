@@ -52,6 +52,20 @@
         const heading=doc.querySelector("#research-astronomy > .research-task-head");
         if(heading && heading.scrollWidth>heading.clientWidth+2)
           throw new Error("Research 02 heading overflows its viewport");
+        const orbitDetails=doc.querySelector("#seasonal-drift-orbit-details");
+        const transition=doc.querySelector("#research-case-transition");
+        const modelScope=doc.querySelector(".research-model-scope");
+        const boundarySelect=doc.querySelector("#seasonal-boundary-select");
+        if(!orbitDetails||orbitDetails.open||
+          !transition?.textContent.includes("01 的選取不會改寫節界證據")||
+          !modelScope?.textContent.includes("獨立驗證")||
+          boundarySelect?.options.length!==13)
+          throw new Error("Research 02 missing fixed-case boundary, model caveat, closed orbit, or 12 native Jie options");
+        const verdict=doc.querySelector(".seasonal-drift-evidence-note");
+        if(!(verdict.compareDocumentPosition(orbitDetails)&Node.DOCUMENT_POSITION_FOLLOWING))
+          throw new Error("Research 02 result must precede optional orbit");
+        probe.dataset.orbitClosed=String(!orbitDetails.open);
+        probe.dataset.nativeJieCount=String(boundarySelect.options.length-1);
         probe.dataset.readingLedePx=String(bodyPx);
         probe.dataset.readingStatPx=String(statPx);
         probe.dataset.readingBoundaryPx=String(boundaryPx);
