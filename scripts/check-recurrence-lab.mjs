@@ -172,6 +172,25 @@ function expectDiscreteComprehension(dom, url) {
   }
 }
 
+function expectPhaseFanPreview(dom, { selected, values, context }, url) {
+  const detail = tagById(dom,"discrete-phase-fan-details");
+  if (attr(detail,"data-phase-preview-status") !== context) {
+    throw new Error(`Phase fan disclosure misclassifies ${selected} as ${attr(detail,"data-phase-preview-status")}: ${url}`);
+  }
+  for (const [key, expected] of Object.entries(values)) {
+    const line = dom.match(new RegExp(`<span[^>]*data-phase-preview="${key}"[^>]*>[^<]*<em>[^<]*<\\/em><\\/span>`))?.[0] ?? "";
+    if (!line || !line.includes(`<em>${expected}</em>`)) {
+      throw new Error(`Phase fan preview ${key} should show ${expected}: ${url}`);
+    }
+  }
+  if (selected === 0 && !dom.includes("基準 · 非重遇")) {
+    throw new Error(`Zero delta must be identity, not proof of recurrence: ${url}`);
+  }
+  if (selected === 24000 && !dom.includes("離散候選 · 待驗節界")) {
+    throw new Error(`Full discrete closure must not claim full BaZi recurrence: ${url}`);
+  }
+}
+
 function expectResearchEntry(dom, { localYears, selected }, url) {
   const local = dom.match(/<button[^>]*data-research-entry="local"[^>]*>/)?.[0] ?? "";
   const global = dom.match(/<button[^>]*data-research-entry="global"[^>]*>/)?.[0] ?? "";
@@ -232,6 +251,7 @@ const local = expectCase(
   "1980-year local recurrence"
 );
 expectResearchEntry(local.dom, { localYears:1980, selected:1980 }, local.url);
+expectPhaseFanPreview(local.dom, { selected:1980, values:{ gregorian:"−20",year:"0",day:"0" },context:"partial" }, local.url);
 const linkedCycles = tagById(local.dom, "research-cycle-comparison");
 const linkedDayWheel = tagById(local.dom, "research-sexagenary-wheel");
 if (
@@ -296,6 +316,7 @@ const global = expectCase(
   "24000-year global recurrence"
 );
 expectResearchEntry(global.dom, { localYears:1980, selected:24000 }, global.url);
+expectPhaseFanPreview(global.dom, { selected:24000, values:{ gregorian:"0",year:"0",day:"0" },context:"candidate" }, global.url);
 expectReaderMeaning(global.dom, ["三個離散相位同時歸零","只證明離散候選","02 檢查十二節界"], "global 24000", global.url);
 expectFixedGauge(global.dom, global.url);
 expectDiscreteComprehension(global.dom, global.url);
@@ -334,6 +355,7 @@ if (
 
 const beforeLiChun = expectCase("recurrence.html?date=2024-02-01&delta=0", {"data-target-date":"2024-02-01"}, "pre-Li Chun year identity");
 const afterLiChun = expectCase("recurrence.html?date=2024-02-10&delta=0", {"data-target-date":"2024-02-10"}, "post-Li Chun year identity");
+expectPhaseFanPreview(afterLiChun.dom, { selected:0, values:{ gregorian:"0",year:"0",day:"0" },context:"identity" }, afterLiChun.url);
 if (
   !beforeLiChun.dom.includes('id="research-cycles-year-base">約癸卯') ||
   !afterLiChun.dom.includes('id="research-cycles-year-base">約甲辰') ||
@@ -515,6 +537,7 @@ const gregorian = expectCase(
   "400-year Gregorian recurrence"
 );
 expectResearchEntry(gregorian.dom, { localYears:1980, selected:400 }, gregorian.url);
+expectPhaseFanPreview(gregorian.dom, { selected:400, values:{ gregorian:"0",year:"−20",day:"−3" },context:"partial" }, gregorian.url);
 expectReaderMeaning(gregorian.dom, ["公曆結構回原位","60 年序與 60 日序仍未歸零","不代表節界重現"], "400", gregorian.url);
 expectFixedGauge(gregorian.dom, gregorian.url);
 expectDiscreteComprehension(gregorian.dom, gregorian.url);

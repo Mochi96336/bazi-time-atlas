@@ -399,3 +399,20 @@ test("first-screen research milestones reuse the canonical delta state and date-
   assert.match(recurrenceView,/只成立候選，仍需 02 驗十二節界/);
   assert.match(recurrenceView,/!state\.targetValid/);
 });
+
+test("R16 disclosure previews only the canonical signed phase state before opening", () => {
+  assert.match(view, /function updatePhaseFanPreview\(details, instrument\)/);
+  assert.match(view, /instrument\.dataset\.gregorianPhaseSigned/);
+  assert.match(view, /instrument\.dataset\.yearSequencePhaseSigned/);
+  assert.match(view, /instrument\.dataset\.dayPhaseSigned/);
+  assert.match(view, /instrument\.dataset\.targetDate !== "invalid"/);
+  for (const key of ["gregorian","year","day"]) {
+    assert.ok(view.includes(`data-phase-preview="${key}"`));
+  }
+  assert.match(view, /data-phase-preview="gregorian"/);
+  assert.match(view, /基準 · 非重遇/);
+  assert.match(view, /離散候選 · 待驗節界/);
+  assert.match(view, /observer\.observe\(instrument/);
+  assert.match(css, /\.research-phase-fan-drilldown > summary \.phase-fan-preview/);
+  assert.doesNotMatch(view, /function updatePhaseFanPreview[\s\S]*?function bindPhaseFanPreview\([\s\S]*?recurrenceState\(/);
+});

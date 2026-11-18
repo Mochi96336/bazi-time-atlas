@@ -42,6 +42,65 @@ function revealPhaseFanHash(details, instrument) {
   });
 }
 
+// The compact proof is a view of recurrence-view's existing phase data
+// attributes. It never recomputes a cycle or creates a second delta owner.
+function updatePhaseFanPreview(details, instrument) {
+  const selected = instrument.dataset.deltaYears;
+  if (selected === undefined) return;
+  const targetValid = instrument.dataset.targetDate !== "invalid";
+  const inputs = [
+    ["gregorian", instrument.dataset.gregorianPhaseSigned],
+    ["year", instrument.dataset.yearSequencePhaseSigned],
+    ["day", instrument.dataset.dayPhaseSigned]
+  ];
+  let zeroCount = 0;
+  for (const [key, raw] of inputs) {
+    const element = details.querySelector(`[data-phase-preview="${key}"]`);
+    if (!element) continue;
+    const available = raw !== undefined && raw !== "invalid";
+    const zero = available && Number(raw) === 0;
+    if (zero) zeroCount++;
+    element.dataset.phaseState = !available ? "unknown" : zero ? "zero" : "shifted";
+    const value = element.querySelector("em");
+    if (value) value.textContent = !available ? "—" : Number(raw) > 0 ? `+${raw}` : String(raw).replace("-", "−");
+  }
+  let proofStatus;
+  let proofText;
+  if (Number(selected) === 0) {
+    proofStatus = "identity";
+    proofText = "基準 · 非重遇";
+  } else if (!targetValid) {
+    proofStatus = "unresolved";
+    proofText = "目標日期不存在";
+  } else if (zeroCount === 3) {
+    proofStatus = "candidate";
+    proofText = "離散候選 · 待驗節界";
+  } else {
+    proofStatus = "partial";
+    proofText = `${zeroCount}/3 序位歸零`;
+  }
+  details.dataset.phasePreviewStatus = proofStatus;
+  const context = details.querySelector("#phase-fan-preview-context");
+  if (context) context.textContent = proofText;
+}
+
+function bindPhaseFanPreview(details, instrument) {
+  if (details.dataset.phasePreviewBound === "true") return;
+  details.dataset.phasePreviewBound = "true";
+  const observer = new MutationObserver(() => updatePhaseFanPreview(details, instrument));
+  observer.observe(instrument, {
+    attributes:true,
+    attributeFilter:[
+      "data-delta-years",
+      "data-target-date",
+      "data-gregorian-phase-signed",
+      "data-year-sequence-phase-signed",
+      "data-day-phase-signed"
+    ]
+  });
+  updatePhaseFanPreview(details, instrument);
+}
+
 function ensurePhaseFanDrilldown() {
   const instrument = researchDiscrete?.querySelector("#recurrence-instrument");
   if (!instrument) return null;
@@ -54,12 +113,18 @@ function ensurePhaseFanDrilldown() {
     details.dataset.researchDrilldown = "discrete-phase-fan";
 
     const summary = document.createElement("summary");
-    summary.innerHTML = "<span>離散相位扇</span><strong>公曆結構 · 60 年序 · 60 日序的距 0 位置</strong>";
+    summary.innerHTML = `<span class="phase-fan-preview-title">離散相位扇<small id="phase-fan-preview-context">等候相位</small></span>
+      <strong class="phase-fan-preview" aria-label="三項離散相位">
+        <span data-phase-preview="gregorian">公曆 <em>—</em></span>
+        <span data-phase-preview="year">年序 <em>—</em></span>
+        <span data-phase-preview="day">日序 <em>—</em></span>
+      </strong>`;
 
     instrument.insertAdjacentElement("beforebegin", details);
     details.append(summary, instrument);
   }
 
+  bindPhaseFanPreview(details, instrument);
   revealPhaseFanHash(details, instrument);
   return details;
 }
