@@ -118,7 +118,7 @@ function expectReaderMeaning(dom, fragments, label, url) {
 
 function expectDiscreteComprehension(dom, url) {
   if (!dom.includes("每圈的 0 只代表該循環序位回到起點") ||
-      !dom.includes("依序點上方 +400、+8,000、+24,000 年的里程碑")) {
+      !dom.includes("要查看 +400／+1,200／+8,000 的中間證據")) {
     throw new Error(`Research 01 must instruct readers how to interpret 0 and compare concrete milestones: ${url}`);
   }
   if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 與基準同相位 · 左右為距 0 的最短循環位移")) {
@@ -197,6 +197,17 @@ function expectResearchEntry(dom, { localYears, selected }, url) {
   const global = dom.match(/<button[^>]*data-research-entry="global"[^>]*>/)?.[0] ?? "";
   if (!local || !global || attr(local,"data-delta-years") !== String(localYears)) {
     throw new Error(`Research entry is not using the computed local milestone: ${url}`);
+  }
+  const structural = dom.match(/<details[^>]*id="research-structural-milestones"[^>]*>/)?.[0] ?? "";
+  if (!structural || !dom.includes('class="research-structural-milestone-grid"')) {
+    throw new Error(`Research 01 lost optional intermediate evidence: ${url}`);
+  }
+  const intermediateOpen = /\\sopen(?:\\s|=|>)/.test(structural);
+  if ([400,1200,8000].includes(selected) && !intermediateOpen) {
+    throw new Error(`Selected intermediate delta is hidden in collapsed supporting evidence: ${url}`);
+  }
+  if (selected === 0 && intermediateOpen) {
+    throw new Error(`Default Research 01 should prioritize the core +local to +24k argument: ${url}`);
   }
   if (attr(local,"aria-pressed") !== String(selected === localYears) ||
       attr(global,"aria-pressed") !== String(selected === 24000)) {
