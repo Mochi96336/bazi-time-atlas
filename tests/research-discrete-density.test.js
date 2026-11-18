@@ -380,3 +380,21 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
+test("first-screen research milestones reuse the canonical delta state and date-specific local result", () => {
+  const entry=recurrenceHtml.indexOf('class="research-entry"');
+  const outline=recurrenceHtml.indexOf('class="research-outline"');
+  const time=recurrenceHtml.indexOf('id="research-time-state"');
+  assert.ok(entry > 0 && entry < outline && outline < time,
+    "first-screen comparison precedes the outline and shared time card");
+  assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
+  assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
+  assert.doesNotMatch(recurrenceHtml.slice(entry,outline),/\+1,980/);
+  assert.match(recurrenceView,/function syncResearchEntry\(state, localYears\)/);
+  assert.match(recurrenceView,/findFirstLocalYearSequenceDayRecurrence\(currentBase\)/);
+  assert.match(recurrenceView,/researchEntryLocal\.dataset\.deltaYears = String\(localYears\)/);
+  assert.match(recurrenceView,/setDelta\(localYears, \{ source:"entry-local" \}\)/);
+  assert.match(recurrenceView,/setDelta\(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD, \{ source:"entry-global" \}\)/);
+  assert.match(recurrenceView,/Δ=0 是同一基準，不是週期重遇/);
+  assert.match(recurrenceView,/只成立候選，仍需 02 驗十二節界/);
+  assert.match(recurrenceView,/!state\.targetValid/);
+});

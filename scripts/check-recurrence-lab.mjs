@@ -172,6 +172,25 @@ function expectDiscreteComprehension(dom, url) {
   }
 }
 
+function expectResearchEntry(dom, { localYears, selected }, url) {
+  const local = dom.match(/<button[^>]*data-research-entry="local"[^>]*>/)?.[0] ?? "";
+  const global = dom.match(/<button[^>]*data-research-entry="global"[^>]*>/)?.[0] ?? "";
+  if (!local || !global || attr(local,"data-delta-years") !== String(localYears)) {
+    throw new Error(`Research entry is not using the computed local milestone: ${url}`);
+  }
+  if (attr(local,"aria-pressed") !== String(selected === localYears) ||
+      attr(global,"aria-pressed") !== String(selected === 24000)) {
+    throw new Error(`Research entry selection disagrees with the shared delta: ${url}`);
+  }
+  if (!dom.includes(`id="research-entry-local-years">+${localYears.toLocaleString("en-US")} 年<`)) {
+    throw new Error(`Research entry does not render the computed local year: ${url}`);
+  }
+  const current = dom.match(/id="research-entry-selection"[^>]*>([^<]*)<\/p>/)?.[1] ?? "";
+  if (!current.includes(`目前 Δ=${selected.toLocaleString("en-US")} 年`)) {
+    throw new Error(`Research entry result did not follow the original delta: ${url}`);
+  }
+}
+
 function expectConsolidatedGlobalPeriod(dom, url) {
   const preset = dom.match(/<button[^>]*data-delta-years="24000"[^>]*>[^<]*<\/button>/)?.[0] ?? "";
   if (!preset.includes(">全域 24,000</button>")) {
@@ -212,6 +231,7 @@ const local = expectCase(
   },
   "1980-year local recurrence"
 );
+expectResearchEntry(local.dom, { localYears:1980, selected:1980 }, local.url);
 const linkedCycles = tagById(local.dom, "research-cycle-comparison");
 const linkedDayWheel = tagById(local.dom, "research-sexagenary-wheel");
 if (
@@ -275,6 +295,7 @@ const global = expectCase(
   },
   "24000-year global recurrence"
 );
+expectResearchEntry(global.dom, { localYears:1980, selected:24000 }, global.url);
 expectReaderMeaning(global.dom, ["三個離散相位同時歸零","只證明離散候選","02 檢查十二節界"], "global 24000", global.url);
 expectFixedGauge(global.dom, global.url);
 expectDiscreteComprehension(global.dom, global.url);
@@ -493,6 +514,7 @@ const gregorian = expectCase(
   },
   "400-year Gregorian recurrence"
 );
+expectResearchEntry(gregorian.dom, { localYears:1980, selected:400 }, gregorian.url);
 expectReaderMeaning(gregorian.dom, ["公曆結構回原位","60 年序與 60 日序仍未歸零","不代表節界重現"], "400", gregorian.url);
 expectFixedGauge(gregorian.dom, gregorian.url);
 expectDiscreteComprehension(gregorian.dom, gregorian.url);
