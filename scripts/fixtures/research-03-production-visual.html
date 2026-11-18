@@ -66,6 +66,26 @@
         const statusGap=(cardStatus?.getBoundingClientRect().top??0)-(cardHeader?.getBoundingClientRect().bottom??0);
         if(cardHeight>205||statusGap>32)
           throw new Error(`Research 03 still has decorative blank cards: card=${cardHeight}px, gap=${statusGap}px`);
+        // Mobile: screenshot readiness also proves meaningful reader-sized
+        // text and a full-width reference-frame / pillar evidence hierarchy.
+        if(width<=390){
+          const fork=doc.querySelector(".research-alignment-fork");
+          const forkReason=doc.querySelector(".research-alignment-fork small");
+          const forkNote=doc.querySelector(".absolute-boundary-note");
+          const grid=doc.querySelector(".determinacy-grid");
+          const forkReasonPx=Number.parseFloat(win.getComputedStyle(forkReason).fontSize);
+          const forkNotePx=Number.parseFloat(win.getComputedStyle(forkNote).fontSize);
+          const reasonPx=Number.parseFloat(win.getComputedStyle(firstCard.querySelector("p")).fontSize);
+          const forkColumns=win.getComputedStyle(fork).gridTemplateColumns.split(" ").length;
+          const pillarColumns=win.getComputedStyle(grid).gridTemplateColumns.split(" ").length;
+          if(forkReasonPx<12.5||forkNotePx<12.5||reasonPx<12.5||
+             forkColumns!==1||pillarColumns!==1)
+            throw new Error(`Research 03 mobile reasons are unreadable or cramped: fork=${forkReasonPx}px, note=${forkNotePx}px, reason=${reasonPx}px, columns=${forkColumns}/${pillarColumns}`);
+          if(fork.scrollWidth>fork.clientWidth+2||grid.scrollWidth>grid.clientWidth+2)
+            throw new Error("Research 03 mobile evidence columns overflow");
+          probe.dataset.compositionMobileForkPx=String(forkReasonPx);
+          probe.dataset.compositionMobilePillarPx=String(reasonPx);
+        }
         probe.dataset.compositionCardHeight=String(Math.round(cardHeight));
         probe.dataset.compositionStatusGap=String(Math.round(statusGap));
         probe.dataset.readingVerdictPx=String(verdictPx);
