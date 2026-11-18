@@ -114,7 +114,7 @@ function ensurePhaseFanDrilldown() {
 
     const summary = document.createElement("summary");
     summary.innerHTML = `<span class="phase-fan-preview-title">離散相位扇<small id="phase-fan-preview-context">等候相位</small></span>
-      <strong class="phase-fan-preview" aria-label="三項離散相位">
+      <strong class="phase-fan-preview">
         <span data-phase-preview="gregorian">公曆 <em>—</em></span>
         <span data-phase-preview="year">年序 <em>—</em></span>
         <span data-phase-preview="day">日序 <em>—</em></span>

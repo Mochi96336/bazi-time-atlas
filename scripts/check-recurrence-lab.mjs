@@ -396,6 +396,7 @@ const sourceDerived8000 = expectCase(
   "8000-year source-derived seasonal evidence"
 );
 expectReaderMeaning(sourceDerived8000.dom, ["公曆結構＋60 日序閉合","60 年序仍偏"], "8000", sourceDerived8000.url);
+expectPhaseFanPreview(sourceDerived8000.dom, { selected:8000, values:{ gregorian:"0",year:"+20",day:"0" },context:"partial" }, sourceDerived8000.url);
 const sourceDerivedStrip = tagById(sourceDerived8000.dom, "research-year-strip");
 if (
   attr(sourceDerivedStrip, "data-li-chun-boundary-status") !== "resolved-research-evidence" ||
