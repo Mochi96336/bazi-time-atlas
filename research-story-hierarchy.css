@@ -125,3 +125,77 @@
     font-size:12px;
   }
 }
+
+
+/* Research 01 milestones above the fold are controls, not a duplicate
+   two-card conclusion. Keep the same button semantics and shared delta. */
+.research-question-intro .research-entry-choices { display:flex; flex-wrap:wrap; gap:0; }
+.research-question-intro .research-entry-choice {
+  flex:1 1 240px;
+  display:flex; flex-wrap:wrap; align-items:baseline; align-content:center;
+  column-gap:8px; row-gap:3px; min-height:52px; padding-block:8px;
+}
+.research-question-intro .research-entry-choice > strong { font-size:17px; }
+.research-question-intro .research-entry-choice > span { flex:1 1 145px; }
+
+/* Research 02 uses a fixed 2026–26026 model, unlike the editable 01
+   year/delta owner. Explain this BEFORE the fixed evidence begins. */
+#research-astronomy .research-case-transition {
+  margin:0 0 15px; padding:12px 0 12px 12px;
+  border-left:2px solid var(--research-candidate);
+  display:grid; gap:5px; max-width:88ch;
+  color:#b5c2c7; font-size:12.5px; line-height:1.6;
+}
+#research-astronomy .research-case-transition strong { color:#dfebe9; font-size:12.5px; }
+#research-astronomy .research-case-transition b { color:#e2c794; font-weight:650; }
+#research-astronomy .research-model-scope {
+  max-width:88ch; margin:12px 0; padding:8px 0;
+  color:#b6c4c9; font-size:12px; line-height:1.6;
+  border-bottom:1px solid var(--research-line-subtle);
+}
+#research-astronomy .research-model-scope strong { color:#d3dedf; }
+
+/* Preserve the interactive SVG, and offer a true native keyboard/touch
+   selector. Do not intercept its native arrow keys via the parent section. */
+#research-astronomy .seasonal-boundary-keyboard {
+  display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap;
+  gap:8px; margin:8px 0 0; color:#b6c4c9; font-size:11.5px; line-height:1.4;
+}
+#research-astronomy .seasonal-boundary-keyboard select {
+  color:#e2e8e8; background:#182127; border:1px solid #64747b;
+  border-radius:4px; padding:8px 10px; max-width:100%; min-height:38px;
+  font:inherit; font-size:12px;
+}
+#research-astronomy .seasonal-boundary-keyboard select:focus-visible {
+  outline:2px solid #c5d5d9; outline-offset:2px;
+}
+
+/* Keep 02 zero-line verdict before the OPTIONAL explanation. */
+#research-astronomy .seasonal-drift-orbit-details {
+  margin-top:14px;
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-subtle);
+}
+#research-astronomy .seasonal-drift-orbit-details > summary {
+  cursor:pointer; padding:12px 0;
+  display:flex; flex-wrap:wrap; align-items:center;
+  gap:5px 20px; color:#c4d0d2; font-size:12px; line-height:1.5;
+}
+#research-astronomy .seasonal-drift-orbit-details > summary strong {
+  margin-left:auto; color:#9aabb1; font-size:11px; font-weight:520;
+}
+#research-astronomy .seasonal-drift-orbit-details[open] .seasonal-drift-orbit-explainer { margin-top:4px; }
+#research-astronomy .seasonal-drift-orbit-details > summary:focus-visible {
+  outline:2px solid #c5d5d9; outline-offset:2px;
+}
+@media(max-width:480px) {
+  .research-question-intro .research-entry-choice { flex-basis:100%; min-height:0; padding:8px 2px; }
+  .research-question-intro .research-entry-choice + .research-entry-choice {
+    border-left:0; border-top:1px solid var(--research-line-subtle); padding-left:2px;
+  }
+  #research-astronomy .research-case-transition { padding:10px 0 10px 10px; font-size:12px; }
+  #research-astronomy .research-model-scope { font-size:11.5px; }
+  #research-astronomy .seasonal-boundary-keyboard { justify-content:flex-start; }
+  #research-astronomy .seasonal-boundary-keyboard select { flex:1 1 200px; }
+  #research-astronomy .seasonal-drift-orbit-details > summary strong { margin-left:0; }
+}
