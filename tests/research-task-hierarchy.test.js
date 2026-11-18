@@ -223,3 +223,18 @@ test("mobile Research primary interactions meet the same tap-target floor as dis
   );
   assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:42px;\s*\}/);
 });
+test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-safe Jie selection",async()=>{
+  const js=await readFile(new URL("../src/research-seasonal-drift-evidence-view.js",import.meta.url),"utf8");
+  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  assert.match(astronomy,/id="research-case-transition"/);
+  assert.match(astronomy,/01 的選取不會改寫節界證據/);
+  assert.match(astronomy,/class="research-model-scope"/);
+  assert.match(astronomy,/目標年框架尚未取得獨立驗證/);
+  assert.match(astronomy,/id="seasonal-drift-orbit-details"/);
+  assert.ok(astronomy.indexOf('class="seasonal-drift-evidence-note"') <
+    astronomy.indexOf('id="seasonal-drift-orbit-details"'));
+  assert.match(astronomy,/id="seasonal-boundary-select"/);
+  assert.match(js,/boundarySelect\.addEventListener\("change"/);
+  assert.match(js,/event\.target instanceof HTMLSelectElement/);
+  assert.match(css,/\.research-case-transition/);
+});
