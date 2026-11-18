@@ -49,6 +49,17 @@
         if(timeState?.dataset.context!=="evidence"||timeKicker?.textContent.trim()!=="03 · 四柱判定／同一太陽黃經"){
           throw new Error("Research 03 sticky time context did not switch from the shared seasonal owner");
         }
+        const verdictPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".determinacy-verdict small")).fontSize);
+        const cardPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".determinacy-card p")).fontSize);
+        const footPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".determinacy-foot")).fontSize);
+        if(verdictPx<12||cardPx<11.5||footPx<11.5)
+          throw new Error(`Research 03 condition text too small: verdict ${verdictPx}px, pillar ${cardPx}px, boundary ${footPx}px`);
+        const heading=doc.querySelector("#research-evidence > .research-task-head");
+        if(heading && heading.scrollWidth>heading.clientWidth+2)
+          throw new Error("Research 03 heading overflows its viewport");
+        probe.dataset.readingVerdictPx=String(verdictPx);
+        probe.dataset.readingCardPx=String(cardPx);
+        probe.dataset.readingFootPx=String(footPx);
         probe.dataset.ready="true";
         probe.dataset.timeContext=timeState.dataset.context||"";
         probe.dataset.timeKicker=timeKicker.textContent.trim();

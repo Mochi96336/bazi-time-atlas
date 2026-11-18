@@ -23,6 +23,10 @@ for(const viewport of viewports){
     if(!proof.includes(expected))
       throw Error("Research 02 live proof missing "+expected+": "+proof);
   }
+  for (const label of ["readingLedePx","readingStatPx","readingBoundaryPx"]) {
+    if (!new RegExp(`data-${label.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())}="[0-9.]+?".*?`).test(proof))
+      throw Error("Research 02 real computed reading size missing: "+label+": "+proof);
+  }
   // The probe belongs to the actual browser DOM, not a static fixture
   // string or a test-only invented ready token.
   if(!html.includes('id="probe"')||diagnostics.status!=="true")

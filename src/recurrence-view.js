@@ -64,6 +64,8 @@ const shiftFeedback = document.querySelector("#research-shift-feedback");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const derivationSteps = document.querySelector("#discrete-derivation-steps");
 const discreteRouteLocal = document.querySelector("#research-discrete-route-local");
+const researchEntryLocal = document.querySelector('[data-research-entry="local"]');
+const researchEntryGlobal = document.querySelector('[data-research-entry="global"]');
 const cursorGroup = document.querySelector("#recurrence-cursor");
 const DERIVATION_STRUCTURAL_DELTAS = Object.freeze([0, 400, 1200, 8000, 24_000]);
 
@@ -78,6 +80,8 @@ const ringSpecs = Object.freeze({
 
 let currentBase = { year:2026, month:9, day:13 };
 let currentDelta = 0;
+let lastRenderedDelta = null;
+const ARRIVAL_DELTA_SOURCES = new Set(["entry-local", "entry-global", "derivation", "canonical"]);
 let candidateStates = [];
 let deltaPlaybackController = null;
 
@@ -328,7 +332,7 @@ function scheduleR16LabelReflow(){
   },100);
 }
 
-function renderReturnMarkers(state) {
+function renderReturnMarkers(state, arriveAtZero = false) {
   cursorGroup.querySelectorAll("[data-return-marker], [data-closure-seam]").forEach(node => node.remove());
   const phases = {
     day:state.phases.day,
@@ -386,7 +390,7 @@ function renderReturnMarkers(state) {
         cx:zeroPoint.x,
         cy:zeroPoint.y,
         r:4.1,
-        class:`return-marker-zero-node return-marker-zero-node-${key}`,
+        class:`return-marker-zero-node return-marker-zero-node-${key}${arriveAtZero ? " is-arriving" : ""}`,
         "data-return-marker":`${key}-zero-node`,
         "data-phase-zero-owner":key
       }, cursorGroup);
@@ -648,6 +652,18 @@ function derivationMeaning(deltaYears, localYears) {
   return "離散相位比較";
 }
 
+function derivationBrief(state) {
+  if (!state.targetValid) return "目標日期不存在 · 日序無法比較";
+  const phases = [
+    ["公曆", state.closed.gregorian],
+    ["年序", state.closed.yearSequence],
+    ["日序", state.closed.day]
+  ];
+  const aligned = phases.filter(([, closed]) => closed).map(([label]) => label);
+  const shifted = phases.filter(([, closed]) => !closed).map(([label]) => label);
+  return `${aligned.length ? aligned.join("＋") + "歸零" : "皆未歸零"}；${shifted.length ? shifted.join("＋") + "仍偏" : "三項全歸零"}`;
+}
+
 function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
   derivationSteps.replaceChildren();
@@ -689,7 +705,9 @@ function renderDerivation(states, localYears) {
         ? "global-discrete"
         : "structural";
     button.title = derivationMeaning(deltaYears, localYears);
-    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears, localYears)}</small>`;
+    const isStructural = !isLocalYearDay && [400, 1200, 8000].includes(deltaYears);
+    const explanatoryCopy = isStructural ? derivationBrief(state) : derivationMeaning(deltaYears, localYears);
+    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${explanatoryCopy}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
     derivationSteps.appendChild(button);
   }
@@ -739,6 +757,37 @@ function phaseReadout(phase, modulus) {
   return `${phase} / ${modulus}${signed === 0 ? "" : ` · 最短 ${formatSigned(signed)}`}`;
 }
 
+function syncResearchEntry(state, localYears) {
+  const hasLocal = Number.isInteger(localYears) && localYears > 0;
+  if (researchEntryLocal) {
+    researchEntryLocal.disabled = !hasLocal;
+    if (hasLocal) researchEntryLocal.dataset.deltaYears = String(localYears);
+    else delete researchEntryLocal.dataset.deltaYears;
+    researchEntryLocal.setAttribute("aria-pressed", String(hasLocal && currentDelta === localYears));
+    setText("research-entry-local-years", hasLocal ? `+${localYears.toLocaleString("en-US")} 年` : "暫無局部重遇");
+    const localState = hasLocal ? recurrenceState(currentBase, localYears) : null;
+    setText("research-entry-local-detail", !localState ? "此基準日期尚無可用的局部重遇"
+      : !localState.targetValid ? "目標日期不存在，不能認定日序歸零"
+      : localState.closed.gregorian ? "三項序位歸零 · 仍須節界驗真"
+      : "年、日歸零 · 公曆代理尚未歸零");
+  }
+  researchEntryGlobal?.setAttribute("aria-pressed", String(currentDelta === GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD));
+
+  let reading;
+  if (currentDelta === 0) {
+    reading = "Δ=0 是同一基準，不是週期重遇。";
+  } else if (!state.targetValid) {
+    reading = "目標日期不存在；不能判定日序或完整閉合。";
+  } else if (state.closed.gregorian && state.closed.yearSequence && state.closed.day) {
+    reading = "三項離散序位皆為 0；只成立候選，仍需 02 驗十二節界。";
+  } else if (state.closed.yearSequence && state.closed.day) {
+    reading = "年序與日序已歸零；公曆代理尚未歸零。";
+  } else {
+    reading = `公曆代理${state.closed.gregorian ? "歸零" : "未歸零"} · 年序${state.closed.yearSequence ? "歸零" : "未歸零"} · 日序${state.closed.day ? "歸零" : "未歸零"}。`;
+  }
+  setText("research-entry-selection", `目前 Δ=${currentDelta.toLocaleString("en-US")} 年：${reading}`);
+}
+
 function renderState() {
   let state;
   try {
@@ -748,7 +797,16 @@ function renderState() {
     return;
   }
 
-  renderReturnMarkers(state);
+  // A milestone selection is a discrete comparison, not motion through all
+  // intervening years. Never cue a return on Δ=0, initial load, scrubbing,
+  // playback, or an unchanged selection.
+  const milestoneArrival = lastRenderedDelta !== null &&
+    lastRenderedDelta !== currentDelta &&
+    currentDelta > 0 && state.targetValid &&
+    ARRIVAL_DELTA_SOURCES.has(instrument.dataset.deltaSource);
+  renderReturnMarkers(state, milestoneArrival);
+  lastRenderedDelta = currentDelta;
+  instrument.dataset.phaseArrival = milestoneArrival ? String(currentDelta) : "none";
 
   setText("gregorian-phase-readout", phaseReadout(state.phases.gregorian, 400));
   setText("year-phase-readout", phaseReadout(state.phases.yearSequence, 60));
@@ -762,6 +820,7 @@ function renderState() {
 
   const localYears = findFirstLocalYearSequenceDayRecurrence(currentBase)?.deltaYears ?? null;
   setText("closure-summary", stateMeaning(state, localYears));
+  syncResearchEntry(state, localYears);
 
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.targetDate = state.targetValid ? formatDate(state.targetDate) : "invalid";
@@ -949,6 +1008,13 @@ function syncFanViewport() {
 function bindControls() {
   selectedDateForm?.addEventListener("submit",submitSelectedDate);
   deltaPlayButton?.addEventListener("click", () => deltaPlaybackController?.toggle());
+  researchEntryLocal?.addEventListener("click", () => {
+    const localYears = Number(researchEntryLocal.dataset.deltaYears);
+    if (!researchEntryLocal.disabled && Number.isInteger(localYears) && localYears > 0)
+      setDelta(localYears, { source:"entry-local" });
+  });
+  researchEntryGlobal?.addEventListener("click", () =>
+    setDelta(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD, { source:"entry-global" }));
   jumpInstantForm?.addEventListener("submit",applyJumpInstant);
   [yearInput, monthInput, dayInput].forEach(input => input.addEventListener("change", updateBaseDate));
   deltaNumber.addEventListener("change", () => setDelta(deltaNumber.value, { source:"number" }));

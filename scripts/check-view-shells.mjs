@@ -114,7 +114,7 @@ requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Othe
 requireEqual(attr(probe, "data-recurrence-question-text"), "八字多久會重複一次？", "Research question changed", url);
 requireEqual(attr(probe, "data-recurrence-alignment-count"), "2", "Research header must keep exactly two compact alignment relations", url);
 requireEqual(attr(probe, "data-recurrence-alignment-text"), "年柱60 同一節令下固定對齊 月柱60|日柱60 同一時辰下固定對齊 時柱60", "Research alignment explanation changed", url);
-requireEqual(attr(probe, "data-recurrence-next-text"), "所以先找年柱 × 日柱何時一起回來，再檢查節氣位置；24,000 年若成為共同格點，也只先算離散候選，不直接等同完整四柱週期。", "Research inference line changed", url);
+requireEqual(attr(probe, "data-recurrence-next-text"), "所以先找年柱 × 日柱何時重遇；+24,000 年只先算離散候選，不直接等同完整四柱週期。", "Research inference line changed", url);
 requireEqual(attr(probe, "data-recurrence-spine-discrete"), "24,000 離散候選", "Research discrete spine lost fixed main-story state", url);
 requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "TT 提前 10–14 d", "Research astronomy spine lost fixed main-story state", url);
 requireEqual(attr(probe, "data-recurrence-spine-evidence"), "24,000 ≠ 完整週期", "Research evidence spine lost fixed main-story state", url);

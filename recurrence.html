@@ -21,6 +21,8 @@
   <link rel="stylesheet" href="./research-seasonal-drift-evidence.css">
   <link rel="stylesheet" href="./research-absolute-boundary-consequence.css">
   <link rel="stylesheet" href="./research-time-state.css">
+  <link rel="stylesheet" href="./research-entry.css">
+  <link rel="stylesheet" href="./research-evidence-reading.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -36,7 +38,23 @@
       <div class="research-question-copy">
         <h1 id="research-question-title">八字多久會重複一次？</h1>
         <p class="lede">四柱都落在六十甲子序列上，但不是四個彼此獨立、可以任意錯開的轉盤。</p>
-        <p class="research-question-next"><span>所以先找</span><strong>年柱 × 日柱</strong><span>何時一起回來，再檢查節氣位置；24,000 年若成為共同格點，也只先算離散候選，不直接等同完整四柱週期。</span></p>
+        <p class="research-question-next"><span>所以先找</span><strong>年柱 × 日柱</strong><span>何時重遇；+24,000 年只先算離散候選，不直接等同完整四柱週期。</span></p>
+        <div class="research-entry" role="group" aria-label="用同一個研究時間比較兩個關鍵里程碑">
+          <p class="research-entry-label">先看差在哪 · 點選里程碑套用下方同一個研究時間</p>
+          <div class="research-entry-choices">
+            <button class="research-entry-choice research-entry-local" type="button" data-research-entry="local" aria-pressed="false" disabled>
+              <span>年序＋日序的第一次重遇</span>
+              <strong id="research-entry-local-years">計算中</strong>
+              <small id="research-entry-local-detail">依基準日期計算</small>
+            </button>
+            <button class="research-entry-choice research-entry-global" type="button" data-research-entry="global" aria-pressed="false">
+              <span>三項離散條件同時歸零</span>
+              <strong>+24,000 年</strong>
+              <small>僅是離散候選 · 02 再驗十二節</small>
+            </button>
+          </div>
+          <p class="research-entry-selection" id="research-entry-selection">Δ=0 是同一基準，不是週期重遇。</p>
+        </div>
       </div>
 
       <div class="research-alignment-map research-question-aside" role="group" aria-label="年月與日時在相同節令或時辰下的固定對齊關係">
@@ -106,7 +124,7 @@
         <div class="research-task-index">01</div>
         <div><div class="eyebrow">年序／日序</div><h2 id="research-discrete-title">粗略週期從哪裡來？</h2></div>
       </header>
-      <p class="research-discrete-scope">先找年序＋日序的局部重遇，再補季節位置代理。01 只建立離散候選；02 才用真正的十二節界驗真。</p>
+      <p class="research-discrete-scope">01 先建立離散候選；02 再檢查真正的十二節界。</p>
 
       <section id="research-discrete-thesis" class="research-discrete-thesis" data-diagram-grammar="condition-ladder" aria-labelledby="research-discrete-thesis-title">
         <header>
@@ -376,7 +394,7 @@
           <div class="seasonal-drift-evidence-copy">
             <div class="eyebrow">主線案例 · 固定 2026 → 26026</div>
             <h3 id="seasonal-drift-evidence-title">24,000 年後，年界與月界還在原位嗎？</h3>
-            <p><strong>先只問一件事：十二個「節」有沒有回到同一時間位置。</strong>八字年柱在立春切換，月柱在十二個「節」切換。01 找到的是離散候選；02 把 0 天定義成真正重合，再逐一檢查這些年界與月界。原因與全年細節放到判決之後。</p>
+            <p>八字年柱在立春切換，月柱在十二個「節」切換。01 找到的是離散候選；02 把 0 天定義成真正重合，逐條檢查節界，再用俯視圖解釋偏移原因。</p>
           </div>
         </header>
 
@@ -505,7 +523,7 @@
         <div class="determinacy-verdict">
           <span>固定 +24,000 公曆年</span>
           <strong>≠ 完整「時間 → 八字」精確週期</strong>
-          <small>同一太陽位置下年／月可回到同柱，不代表固定公曆時間的整套四柱也一起重現。</small>
+          <small>同一太陽黃經下年／月可回同柱；但固定推進 +24,000 公曆年，仍不足以判定日／時，也不能推出完整四柱重現。</small>
         </div>
         <div class="determinacy-head">
           <strong class="determinacy-label">四柱可判範圍</strong>

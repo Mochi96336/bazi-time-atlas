@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { captureReadyProof } from "./chromium-ready-proof.mjs";
 
 const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4173/";
 
@@ -172,6 +173,44 @@ function expectDiscreteComprehension(dom, url) {
   }
 }
 
+function expectPhaseFanPreview(dom, { selected, values, context }, url) {
+  const detail = tagById(dom,"discrete-phase-fan-details");
+  if (attr(detail,"data-phase-preview-status") !== context) {
+    throw new Error(`Phase fan disclosure misclassifies ${selected} as ${attr(detail,"data-phase-preview-status")}: ${url}`);
+  }
+  for (const [key, expected] of Object.entries(values)) {
+    const line = dom.match(new RegExp(`<span[^>]*data-phase-preview="${key}"[^>]*>[^<]*<em>[^<]*<\\/em><\\/span>`))?.[0] ?? "";
+    if (!line || !line.includes(`<em>${expected}</em>`)) {
+      throw new Error(`Phase fan preview ${key} should show ${expected}: ${url}`);
+    }
+  }
+  if (selected === 0 && !dom.includes("基準 · 非重遇")) {
+    throw new Error(`Zero delta must be identity, not proof of recurrence: ${url}`);
+  }
+  if (selected === 24000 && !dom.includes("離散候選 · 待驗節界")) {
+    throw new Error(`Full discrete closure must not claim full BaZi recurrence: ${url}`);
+  }
+}
+
+function expectResearchEntry(dom, { localYears, selected }, url) {
+  const local = dom.match(/<button[^>]*data-research-entry="local"[^>]*>/)?.[0] ?? "";
+  const global = dom.match(/<button[^>]*data-research-entry="global"[^>]*>/)?.[0] ?? "";
+  if (!local || !global || attr(local,"data-delta-years") !== String(localYears)) {
+    throw new Error(`Research entry is not using the computed local milestone: ${url}`);
+  }
+  if (attr(local,"aria-pressed") !== String(selected === localYears) ||
+      attr(global,"aria-pressed") !== String(selected === 24000)) {
+    throw new Error(`Research entry selection disagrees with the shared delta: ${url}`);
+  }
+  if (!dom.includes(`id="research-entry-local-years">+${localYears.toLocaleString("en-US")} 年<`)) {
+    throw new Error(`Research entry does not render the computed local year: ${url}`);
+  }
+  const current = dom.match(/id="research-entry-selection"[^>]*>([^<]*)<\/p>/)?.[1] ?? "";
+  if (!current.includes(`目前 Δ=${selected.toLocaleString("en-US")} 年`)) {
+    throw new Error(`Research entry result did not follow the original delta: ${url}`);
+  }
+}
+
 function expectConsolidatedGlobalPeriod(dom, url) {
   const preset = dom.match(/<button[^>]*data-delta-years="24000"[^>]*>[^<]*<\/button>/)?.[0] ?? "";
   if (!preset.includes(">全域 24,000</button>")) {
@@ -212,6 +251,8 @@ const local = expectCase(
   },
   "1980-year local recurrence"
 );
+expectResearchEntry(local.dom, { localYears:1980, selected:1980 }, local.url);
+expectPhaseFanPreview(local.dom, { selected:1980, values:{ gregorian:"−20",year:"0",day:"0" },context:"partial" }, local.url);
 const linkedCycles = tagById(local.dom, "research-cycle-comparison");
 const linkedDayWheel = tagById(local.dom, "research-sexagenary-wheel");
 if (
@@ -275,6 +316,8 @@ const global = expectCase(
   },
   "24000-year global recurrence"
 );
+expectResearchEntry(global.dom, { localYears:1980, selected:24000 }, global.url);
+expectPhaseFanPreview(global.dom, { selected:24000, values:{ gregorian:"0",year:"0",day:"0" },context:"candidate" }, global.url);
 expectReaderMeaning(global.dom, ["三個離散相位同時歸零","只證明離散候選","02 檢查十二節界"], "global 24000", global.url);
 expectFixedGauge(global.dom, global.url);
 expectDiscreteComprehension(global.dom, global.url);
@@ -313,6 +356,7 @@ if (
 
 const beforeLiChun = expectCase("recurrence.html?date=2024-02-01&delta=0", {"data-target-date":"2024-02-01"}, "pre-Li Chun year identity");
 const afterLiChun = expectCase("recurrence.html?date=2024-02-10&delta=0", {"data-target-date":"2024-02-10"}, "post-Li Chun year identity");
+expectPhaseFanPreview(afterLiChun.dom, { selected:0, values:{ gregorian:"0",year:"0",day:"0" },context:"identity" }, afterLiChun.url);
 if (
   !beforeLiChun.dom.includes('id="research-cycles-year-base">約癸卯') ||
   !afterLiChun.dom.includes('id="research-cycles-year-base">約甲辰') ||
@@ -353,6 +397,7 @@ const sourceDerived8000 = expectCase(
   "8000-year source-derived seasonal evidence"
 );
 expectReaderMeaning(sourceDerived8000.dom, ["公曆結構＋60 日序閉合","60 年序仍偏"], "8000", sourceDerived8000.url);
+expectPhaseFanPreview(sourceDerived8000.dom, { selected:8000, values:{ gregorian:"0",year:"+20",day:"0" },context:"partial" }, sourceDerived8000.url);
 const sourceDerivedStrip = tagById(sourceDerived8000.dom, "research-year-strip");
 if (
   attr(sourceDerivedStrip, "data-li-chun-boundary-status") !== "resolved-research-evidence" ||
@@ -493,6 +538,17 @@ const gregorian = expectCase(
   },
   "400-year Gregorian recurrence"
 );
+expectResearchEntry(gregorian.dom, { localYears:1980, selected:400 }, gregorian.url);
+for (const structuralVerdict of [
+  "公曆歸零；年序＋日序仍偏",
+  "公曆＋年序歸零；日序仍偏",
+  "公曆＋日序歸零；年序仍偏"
+]) {
+  if (!gregorian.dom.includes(`<small>${structuralVerdict}</small>`)) {
+    throw new Error(`Research structural verdict is missing from the actual card: ${structuralVerdict}`);
+  }
+}
+expectPhaseFanPreview(gregorian.dom, { selected:400, values:{ gregorian:"0",year:"−20",day:"−3" },context:"partial" }, gregorian.url);
 expectReaderMeaning(gregorian.dom, ["公曆結構回原位","60 年序與 60 日序仍未歸零","不代表節界重現"], "400", gregorian.url);
 expectFixedGauge(gregorian.dom, gregorian.url);
 expectDiscreteComprehension(gregorian.dom, gregorian.url);
@@ -515,3 +571,13 @@ if (gregorian.dom.includes('class="milestone-table"') || gregorian.dom.includes(
   throw new Error(`retired milestone detail table returned: ${gregorian.url}`);
 }
 console.log(`[recurrence] PASS 400-year case keeps visible signed phase provenance in one compact current-state rail: ${gregorian.url}`);
+const arrivalURL = new URL("scripts/fixtures/research-phase-arrival.html",baseURL).href;
+const arrivalProof = await captureReadyProof({
+  url:arrivalURL, selector:"#probe", width:390, height:800,
+  timeoutMs:30000, html:false
+});
+if (!arrivalProof.proof.includes('data-ready="true"') ||
+    !arrivalProof.proof.includes('data-results="identity:none|400:gregorian|1980:year,day|24000:gregorian,year,day|slider:none|playback:none|same:none"')) {
+  throw new Error(`Research milestone animation ran outside the intended zero events: ${arrivalProof.proof} ${arrivalURL}`);
+}
+console.log("[recurrence] PASS milestone arrival only on explicitly chosen nonzero Δ; unchanged, slider and playback never animate");

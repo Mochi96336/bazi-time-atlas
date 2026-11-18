@@ -380,3 +380,53 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
+test("first-screen research milestones reuse the canonical delta state and date-specific local result", () => {
+  const entry=recurrenceHtml.indexOf('class="research-entry"');
+  const outline=recurrenceHtml.indexOf('class="research-outline"');
+  const time=recurrenceHtml.indexOf('id="research-time-state"');
+  assert.ok(entry > 0 && entry < outline && outline < time,
+    "first-screen comparison precedes the outline and shared time card");
+  assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
+  assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
+  assert.doesNotMatch(recurrenceHtml.slice(entry,outline),/\+1,980/);
+  assert.match(recurrenceHtml,/href="\.\/research-entry\.css"/);
+  assert.match(recurrenceView,/function syncResearchEntry\(state, localYears\)/);
+  assert.match(recurrenceView,/findFirstLocalYearSequenceDayRecurrence\(currentBase\)/);
+  assert.match(recurrenceView,/researchEntryLocal\.dataset\.deltaYears = String\(localYears\)/);
+  assert.match(recurrenceView,/setDelta\(localYears, \{ source:"entry-local" \}\)/);
+  assert.match(recurrenceView,/setDelta\(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD, \{ source:"entry-global" \}\)/);
+  assert.match(recurrenceView,/Δ=0 是同一基準，不是週期重遇/);
+  assert.match(recurrenceView,/只成立候選，仍需 02 驗十二節界/);
+  assert.match(recurrenceView,/!state\.targetValid/);
+});
+
+test("R16 disclosure previews only the canonical signed phase state before opening", () => {
+  assert.match(view, /function updatePhaseFanPreview\(details, instrument\)/);
+  assert.match(view, /instrument\.dataset\.gregorianPhaseSigned/);
+  assert.match(view, /instrument\.dataset\.yearSequencePhaseSigned/);
+  assert.match(view, /instrument\.dataset\.dayPhaseSigned/);
+  assert.match(view, /instrument\.dataset\.targetDate !== "invalid"/);
+  for (const key of ["gregorian","year","day"]) {
+    assert.ok(view.includes(`data-phase-preview="${key}"`));
+  }
+  assert.match(view, /data-phase-preview="gregorian"/);
+  assert.match(view, /基準 · 非重遇/);
+  assert.match(view, /離散候選 · 待驗節界/);
+  assert.match(view, /observer\.observe\(instrument/);
+  assert.match(css, /\.research-phase-fan-drilldown > summary \.phase-fan-preview/);
+  assert.doesNotMatch(view, /function updatePhaseFanPreview[\s\S]*?function bindPhaseFanPreview\([\s\S]*?recurrenceState\(/);
+});
+
+test("milestone zero arrival is event-scoped; no continuous ring or phase animation", () => {
+  assert.match(recurrenceView, /ARRIVAL_DELTA_SOURCES = new Set\(\["entry-local", "entry-global", "derivation", "canonical"\]\)/);
+  assert.match(recurrenceView, /lastRenderedDelta !== null &&[\s\S]*?lastRenderedDelta !== currentDelta &&[\s\S]*?currentDelta > 0 && state\.targetValid/);
+  assert.match(recurrenceView, /instrument\.dataset\.phaseArrival = milestoneArrival \? String\(currentDelta\) : "none"/);
+  assert.match(recurrenceView, /renderReturnMarkers\(state, milestoneArrival\)/);
+  assert.match(view, /instrument\.dataset\.phaseArrival === selected/);
+  assert.match(view, /selected !== details\.dataset\.phasePreviewLastDelta/);
+  assert.match(view, /prefers-reduced-motion: reduce/);
+  assert.match(view, /value\.animate\(/);
+  assert.match(css, /\.research-phase-fan-drilldown\[open\] \.return-marker-zero-node\.is-arriving/);
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.doesNotMatch(css.slice(css.indexOf("@keyframes research-r16-zero-arrival")), /rotate\(|translate\(|linear infinite/);
+});
