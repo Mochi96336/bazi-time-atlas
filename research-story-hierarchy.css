@@ -1,0 +1,127 @@
+/* Research reading composition P1. This is a structural pass, not a new
+   calendar or astronomy model: the original interactive data and SVG remain.
+   Move the actual verdict next to its label; reduce whitespace that was
+   previously mistaken for a visual hierarchy. No gradients or new palette. */
+
+/* 01: the two main milestones remain the proof. The intermediate checks are
+   legible compact supporting evidence, not three weak 86px empty panels. */
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+  min-height:148px;
+  padding:16px 18px;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
+  font-size:clamp(30px,3.25vw,43px);
+  line-height:1.08;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+  min-height:148px;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
+  min-height:0;
+  padding:10px 1px 8px;
+  opacity:1;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > strong {
+  font-size:17px;
+  color:#c0cdd2;
+  line-height:1.22;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > small {
+  display:block;
+  margin-top:5px;
+  color:#aebdc2;
+  font-size:11.5px;
+  line-height:1.4;
+}
+
+/* 02: conclude the zero-line proof with a bridge to the actual pillar test,
+   not a second set of instructions to read the already-visible figure. */
+#research-astronomy .seasonal-drift-evidence-note {
+  max-width:86ch;
+  color:#b6c1c5;
+  font-size:12.5px;
+  line-height:1.6;
+}
+#research-astronomy .seasonal-drift-evidence-note strong {
+  color:#d5e0e0;
+}
+
+/* 03: replace tall showcase cells with an evidence matrix.
+   The actual computed statuses and reasons stay adjacent to each pillar. */
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid {
+  align-items:stretch;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card {
+  min-height:0;
+  padding:15px 16px 18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
+  margin-top:0;
+  font-size:clamp(22px,1.8vw,28px);
+  line-height:1.2;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
+  margin-top:10px;
+  padding-top:0;
+  font-size:14px;
+  line-height:1.4;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p {
+  margin-top:6px;
+  font-size:12.5px;
+  line-height:1.6;
+  color:#b6c5ca;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-foot {
+  font-size:12.5px;
+  line-height:1.6;
+  color:#b8c5c9;
+}
+
+@media(max-width:820px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+    min-height:0;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+    min-height:0;
+  }
+}
+@media(max-width:480px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+    padding:13px 14px;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
+    font-size:clamp(27px,7vw,32px);
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
+    min-height:0;
+    padding:10px 0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card {
+    min-height:0;
+    padding:13px 12px 16px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
+    font-size:24px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
+    margin-top:9px;
+    font-size:13px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p {
+    font-size:12px;
+  }
+}

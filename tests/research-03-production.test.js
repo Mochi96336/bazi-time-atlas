@@ -46,3 +46,15 @@ test("Research 02/03 explanations retain explicit reference frames and visual hi
   assert.match(css,/#research-evidence \.determinacy-panel \.determinacy-card p/);
   assert.doesNotMatch(css,/linear-gradient|radial-gradient|rotate\(/);
 });
+
+test("Research 01–03 composition uses readable adjacent verdicts instead of tall empty cells",async()=>{
+  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
+  assert.match(html,/href="\.\/research-story-hierarchy\.css"/);
+  assert.match(html,/02 → 03 · 證據的後果/);
+  assert.match(css,/\.determinacy-card \{\s*min-height:0;/);
+  assert.match(css,/\.determinacy-card \.determinacy-status \{\s*margin-top:10px;\s*padding-top:0;/);
+  assert.match(css,/\.discrete-derivation-step\[data-milestone="structural"\] \{\s*min-height:0;/);
+  assert.match(fixture,/cardHeight>205\|\|statusGap>32/);
+  assert.doesNotMatch(css,/linear-gradient|radial-gradient|box-shadow/);
+});

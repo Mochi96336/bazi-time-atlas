@@ -57,6 +57,15 @@
         const heading=doc.querySelector("#research-evidence > .research-task-head");
         if(heading && heading.scrollWidth>heading.clientWidth+2)
           throw new Error("Research 03 heading overflows its viewport");
+        const firstCard=doc.querySelector(".determinacy-card");
+        const cardHeader=firstCard?.querySelector("header");
+        const cardStatus=firstCard?.querySelector(".determinacy-status");
+        const cardHeight=firstCard?.getBoundingClientRect().height??0;
+        const statusGap=(cardStatus?.getBoundingClientRect().top??0)-(cardHeader?.getBoundingClientRect().bottom??0);
+        if(cardHeight>205||statusGap>32)
+          throw new Error(`Research 03 still has decorative blank cards: card=${cardHeight}px, gap=${statusGap}px`);
+        probe.dataset.compositionCardHeight=String(Math.round(cardHeight));
+        probe.dataset.compositionStatusGap=String(Math.round(statusGap));
         probe.dataset.readingVerdictPx=String(verdictPx);
         probe.dataset.readingCardPx=String(cardPx);
         probe.dataset.readingFootPx=String(footPx);
