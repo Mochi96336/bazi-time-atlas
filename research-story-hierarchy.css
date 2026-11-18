@@ -158,6 +158,7 @@
 /* Preserve the interactive SVG, and offer a true native keyboard/touch
    selector. Do not intercept its native arrow keys via the parent section. */
 #research-astronomy .seasonal-boundary-keyboard {
+  grid-column:1 / -1;
   display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap;
   gap:8px; margin:8px 0 0; color:#b6c4c9; font-size:11.5px; line-height:1.4;
 }
