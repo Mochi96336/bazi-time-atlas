@@ -202,7 +202,7 @@ function expectResearchEntry(dom, { localYears, selected }, url) {
   if (!structural || !dom.includes('class="research-structural-milestone-grid"')) {
     throw new Error(`Research 01 lost optional intermediate evidence: ${url}`);
   }
-  const intermediateOpen = /\\sopen(?:\\s|=|>)/.test(structural);
+  const intermediateOpen = /\sopen(?:\s|=|>)/.test(structural);
   if ([400,1200,8000].includes(selected) && !intermediateOpen) {
     throw new Error(`Selected intermediate delta is hidden in collapsed supporting evidence: ${url}`);
   }
