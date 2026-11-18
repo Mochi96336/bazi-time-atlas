@@ -430,3 +430,15 @@ test("milestone zero arrival is event-scoped; no continuous ring or phase animat
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(css.slice(css.indexOf("@keyframes research-r16-zero-arrival")), /rotate\(|translate\(|linear infinite/);
 });
+
+test("Research 01 primary proof stays visible while 400/1200/8000 supporting checks are an accessible disclosure",async()=>{
+  const story=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  assert.match(recurrenceView,/structuralDetails\.id = "research-structural-milestones"/);
+  assert.match(recurrenceView,/structuralDetails\.open = wasStructuralOpen \|\| \[400,1200,8000\]\.includes\(currentDelta\)/);
+  assert.match(recurrenceView,/if \(isStructural\) structuralGrid\.appendChild\(button\)/);
+  assert.match(recurrenceView,/else derivationSteps\.appendChild\(button\)/);
+  assert.match(story,/\.research-structural-milestone-grid \{\s*display:grid;/);
+  assert.match(story,/\.research-structural-milestones > summary:focus-visible/);
+  assert.match(recurrenceHtml,/要查看 \+400／\+1,200／\+8,000 的中間證據/);
+  assert.doesNotMatch(recurrenceHtml,/依序點上方 \+400、\+8,000、\+24,000/);
+});
