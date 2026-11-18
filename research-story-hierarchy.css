@@ -200,3 +200,95 @@
   #research-astronomy .seasonal-boundary-keyboard select { flex:1 1 200px; }
   #research-astronomy .seasonal-drift-orbit-details > summary strong { margin-left:0; }
 }
+
+
+/* Research 01: the interactive top choices already select the same milestones
+   that the derivation renders. Suppress redundant small-screen copy, not
+   the state, buttons, data, or original year/day controls. */
+#research-discrete > .research-discrete-scope { display:none; }
+@media(max-width:820px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-condition-route {
+    display:none;
+  }
+}
+@media(max-width:480px) {
+  .research-question-intro .research-entry-choice > small { display:none; }
+  .research-question-intro .research-entry-label { font-size:12px; }
+  .research-question-intro .research-entry-choice > span { font-size:12px; }
+  .research-question-intro .research-entry-choice > strong { font-size:19px; }
+  .research-question-intro .research-entry-selection { font-size:12px; }
+
+  /* Research 03: the 2-column forks made actual model qualifications 8.5px.
+     Use wide evidence rows; each label, verdict, and condition reads in order. */
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head h3 {
+    font-size:20px;
+    line-height:1.32;
+  }
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head p {
+    font-size:13px;
+    line-height:1.62;
+  }
+  #research-evidence .research-fork-source { font-size:12px; padding-block:9px; }
+  #research-evidence .research-alignment-fork {
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    margin-top:10px;
+  }
+  #research-evidence .research-alignment-fork article {
+    padding:12px 10px 13px;
+    border-bottom:1px solid var(--research-line-subtle);
+  }
+  #research-evidence .research-alignment-fork span { font-size:12px; line-height:1.5; }
+  #research-evidence .research-alignment-fork strong { font-size:17px; line-height:1.4; margin-top:4px; }
+  #research-evidence .research-alignment-fork small {
+    font-size:13px;
+    line-height:1.6;
+    margin-top:6px;
+    color:#b1bfc3;
+  }
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note {
+    font-size:13px;
+    line-height:1.6;
+  }
+
+  /* 1-column pillar results: do not shrink the justification to fit two
+     180px cards. Each status stays close to the specific year/month/day/hour. */
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid {
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card {
+    min-height:0;
+    padding:12px 10px 13px;
+    border-left:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header {
+    display:flex;
+    align-items:baseline;
+    justify-content:flex-start;
+    gap:8px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span {
+    font-size:11px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
+    font-size:21px;
+    line-height:1.28;
+    margin-top:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
+    font-size:15px;
+    line-height:1.48;
+    margin-top:7px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p {
+    font-size:13px;
+    line-height:1.6;
+    margin-top:6px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict small,
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-foot {
+    font-size:13px;
+    line-height:1.6;
+  }
+}
