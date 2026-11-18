@@ -2181,7 +2181,7 @@
 .research-phase-fan-drilldown > summary {
   grid-template-columns:minmax(98px,1fr) auto 14px;
   gap:10px;
-  min-height:48px;
+  min-height:44px;
 }
 .research-phase-fan-drilldown > summary .phase-fan-preview-title {
   display:grid;
