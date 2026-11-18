@@ -389,6 +389,7 @@ test("first-screen research milestones reuse the canonical delta state and date-
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
   assert.doesNotMatch(recurrenceHtml.slice(entry,outline),/\+1,980/);
+  assert.match(recurrenceHtml,/href="\.\/research-entry\.css"/);
   assert.match(recurrenceView,/function syncResearchEntry\(state, localYears\)/);
   assert.match(recurrenceView,/findFirstLocalYearSequenceDayRecurrence\(currentBase\)/);
   assert.match(recurrenceView,/researchEntryLocal\.dataset\.deltaYears = String\(localYears\)/);

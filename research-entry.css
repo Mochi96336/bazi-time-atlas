@@ -1,0 +1,90 @@
+/* Research 01: compact entry choices are navigation into the ONE existing
+   delta controller. Keep the full derivation and phase fan as deeper evidence. */
+.research-entry {
+  margin-top:18px;
+  max-width:620px;
+}
+.research-entry-label {
+  margin:0 0 7px;
+  color:#91a0a6;
+  font-size:10px;
+  line-height:1.45;
+}
+.research-entry-choices {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.research-entry-choice {
+  display:grid;
+  justify-items:start;
+  align-content:start;
+  gap:4px;
+  min-width:0;
+  min-height:91px;
+  padding:12px 13px;
+  border:1px solid rgba(174,194,202,.18);
+  border-radius:11px;
+  background:rgba(133,157,171,.035);
+  color:#e2e8e8;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .15s ease, background-color .15s ease;
+}
+.research-entry-choice > span {
+  color:#aab7ba;
+  font-size:10px;
+  line-height:1.4;
+}
+.research-entry-choice > strong {
+  color:#b7d7de;
+  font-size:clamp(17px,1.8vw,21px);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.025em;
+  line-height:1.15;
+}
+.research-entry-choice > small {
+  color:#96a6ae;
+  font-size:10px;
+  line-height:1.45;
+}
+.research-entry-global > strong { color:#e0bf86; }
+.research-entry-choice:hover:not(:disabled) { border-color:rgba(185,208,220,.46); }
+.research-entry-choice[aria-pressed="true"] {
+  border-color:rgba(158,195,204,.66);
+  background:rgba(137,172,184,.09);
+}
+.research-entry-global[aria-pressed="true"] {
+  border-color:rgba(220,190,138,.60);
+  background:rgba(201,169,111,.075);
+}
+.research-entry-choice:focus-visible {
+  outline:2px solid #b7d7de;
+  outline-offset:3px;
+}
+.research-entry-choice:disabled {
+  opacity:.52;
+  cursor:default;
+}
+.research-entry-selection {
+  min-height:1.4em;
+  margin:8px 0 0;
+  color:#a2b0b5;
+  font-size:10.5px;
+  line-height:1.5;
+}
+@media (max-width:480px) {
+  .research-entry { margin-top:12px; }
+  .research-entry-label { font-size:10px; }
+  .research-entry-choices { gap:7px; }
+  .research-entry-choice { min-height:88px; padding:10px 9px; }
+  .research-entry-choice > span { font-size:10px; }
+  .research-entry-choice > strong { font-size:18px; }
+  .research-entry-choice > small { font-size:10px; }
+  .research-entry-selection { margin-top:7px; font-size:10px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .research-entry-choice { transition:none; }
+}
