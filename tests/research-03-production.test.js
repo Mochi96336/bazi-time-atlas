@@ -39,7 +39,7 @@ test("Research 03 production does not redraw Research 02 evidence",()=>{
 test("Research 02/03 explanations retain explicit reference frames and visual hierarchy",async()=>{
   const css=await readFile(new URL("../research-evidence-reading.css",import.meta.url),"utf8");
   assert.match(html,/href="\.\/research-evidence-reading\.css"/);
-  assert.match(html,/以 0 天表示節界重合/);
+  assert.match(html,/把 0 天定義成真正重合/);
   assert.match(html,/同一太陽黃經下年／月可回同柱/);
   assert.match(html,/仍不足以判定日／時/);
   assert.match(css,/#research-astronomy \.seasonal-drift-summary \.seasonal-drift-stat small/);
