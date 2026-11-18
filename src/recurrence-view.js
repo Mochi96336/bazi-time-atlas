@@ -652,6 +652,18 @@ function derivationMeaning(deltaYears, localYears) {
   return "離散相位比較";
 }
 
+function derivationBrief(state) {
+  if (!state.targetValid) return "目標日期不存在 · 日序無法比較";
+  const phases = [
+    ["公曆", state.closed.gregorian],
+    ["年序", state.closed.yearSequence],
+    ["日序", state.closed.day]
+  ];
+  const aligned = phases.filter(([, closed]) => closed).map(([label]) => label);
+  const shifted = phases.filter(([, closed]) => !closed).map(([label]) => label);
+  return `${aligned.length ? aligned.join("＋") + "歸零" : "皆未歸零"}；${shifted.length ? shifted.join("＋") + "仍偏" : "三項全歸零"}`;
+}
+
 function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
   derivationSteps.replaceChildren();
@@ -693,7 +705,9 @@ function renderDerivation(states, localYears) {
         ? "global-discrete"
         : "structural";
     button.title = derivationMeaning(deltaYears, localYears);
-    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${derivationMeaning(deltaYears, localYears)}</small>`;
+    const isStructural = !isLocalYearDay && [400, 1200, 8000].includes(deltaYears);
+    const explanatoryCopy = isStructural ? derivationBrief(state) : derivationMeaning(deltaYears, localYears);
+    button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${explanatoryCopy}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
     derivationSteps.appendChild(button);
   }

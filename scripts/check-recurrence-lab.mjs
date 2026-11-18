@@ -539,6 +539,15 @@ const gregorian = expectCase(
   "400-year Gregorian recurrence"
 );
 expectResearchEntry(gregorian.dom, { localYears:1980, selected:400 }, gregorian.url);
+for (const structuralVerdict of [
+  "公曆歸零；年序＋日序仍偏",
+  "公曆＋年序歸零；日序仍偏",
+  "公曆＋日序歸零；年序仍偏"
+]) {
+  if (!gregorian.dom.includes(`<small>${structuralVerdict}</small>`)) {
+    throw new Error(`Research structural verdict is missing from the actual card: ${structuralVerdict}`);
+  }
+}
 expectPhaseFanPreview(gregorian.dom, { selected:400, values:{ gregorian:"0",year:"−20",day:"−3" },context:"partial" }, gregorian.url);
 expectReaderMeaning(gregorian.dom, ["公曆結構回原位","60 年序與 60 日序仍未歸零","不代表節界重現"], "400", gregorian.url);
 expectFixedGauge(gregorian.dom, gregorian.url);

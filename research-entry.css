@@ -156,3 +156,16 @@
     font-size:11px;
   }
 }
+
+/* Structural milestones are secondary, but their verdict must remain visible
+   without hover on phones. Full provenance stays in each button's title. */
+#research-discrete .research-discrete-thesis .discrete-derivation-step[data-milestone="structural"] {
+  opacity:.90;
+}
+#research-discrete .research-discrete-thesis .discrete-derivation-step[data-milestone="structural"] > small {
+  display:block;
+  margin-top:6px;
+  color:#a9b8bf;
+  font-size:11px;
+  line-height:1.4;
+}

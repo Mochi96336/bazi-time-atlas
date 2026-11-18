@@ -67,3 +67,12 @@ test("Research 01 prioritizes readable evidence instead of truncating milestone 
   assert.match(css,/\.research-outline small \{\s*font-size:9px;/);
   assert.doesNotMatch(html,/research-reading-card|research-reading-wizard/);
 });
+
+test("structural year cards show the comparison verdict on mobile, not a hidden tooltip",()=>{
+  const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
+  const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
+  assert.match(view,/function derivationBrief\(state\)/);
+  assert.match(view,/const isStructural = !isLocalYearDay && \[400, 1200, 8000\]\.includes\(deltaYears\)/);
+  assert.match(view,/isStructural \? derivationBrief\(state\) : derivationMeaning\(deltaYears, localYears\)/);
+  assert.match(css,/\.discrete-derivation-step\[data-milestone="structural"\] > small \{\s*display:block;/);
+});
