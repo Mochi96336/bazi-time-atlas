@@ -179,8 +179,13 @@ iframe.addEventListener("load",async()=>{
   const globalStep=derivationSteps?.querySelector('[data-milestone="global-discrete"]');
   const localToGlobalBridge=derivationSteps?.querySelector(".discrete-derivation-bridge");
   const milestoneSteps=[...(derivationSteps?.querySelectorAll(".discrete-derivation-step")??[])];
+  const structuralDetails=derivationSteps?.querySelector("#research-structural-milestones");
+  const structuralSteps=[...(structuralDetails?.querySelectorAll(".discrete-derivation-step")??[])];
   check(milestoneSteps.length===6 &&
-    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,400,1200,8000,1980,24000" &&
+    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,1980,24000,400,1200,8000" &&
+    structuralDetails && !structuralDetails.open &&
+    structuralSteps.map(step=>step.dataset.deltaYears).join(",")==="400,1200,8000" &&
+    structuralDetails.querySelector("summary")?.textContent.includes("補充驗算") &&
     zeroStep && zeroStep.textContent.includes("0 年") &&
     localStep && localStep.dataset.deltaYears==="1980" &&
     localStep.textContent.includes("首次重遇") &&
