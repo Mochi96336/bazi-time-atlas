@@ -666,7 +666,16 @@ function derivationBrief(state) {
 
 function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
+  const wasStructuralOpen = derivationSteps.querySelector("#research-structural-milestones")?.open === true;
   derivationSteps.replaceChildren();
+  const structuralDetails = document.createElement("details");
+  structuralDetails.id = "research-structural-milestones";
+  structuralDetails.className = "research-structural-milestones";
+  structuralDetails.open = wasStructuralOpen || [400,1200,8000].includes(currentDelta);
+  structuralDetails.innerHTML = '<summary><span>補充驗算 · +400 / +1,200 / +8,000 年</span><small>比較哪些序位已歸零、哪些仍偏離</small></summary>';
+  const structuralGrid = document.createElement("div");
+  structuralGrid.className = "research-structural-milestone-grid";
+  structuralDetails.appendChild(structuralGrid);
   if (discreteRouteLocal) {
     discreteRouteLocal.textContent = Number.isInteger(localYears)
       ? `+${localYears.toLocaleString("en-US")}`
@@ -709,8 +718,10 @@ function renderDerivation(states, localYears) {
     const explanatoryCopy = isStructural ? derivationBrief(state) : derivationMeaning(deltaYears, localYears);
     button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${explanatoryCopy}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
-    derivationSteps.appendChild(button);
+    if (isStructural) structuralGrid.appendChild(button);
+    else derivationSteps.appendChild(button);
   }
+  if (structuralGrid.childElementCount) derivationSteps.appendChild(structuralDetails);
 }
 
 function rebuildCandidates() {
@@ -821,6 +832,12 @@ function renderState() {
   const localYears = findFirstLocalYearSequenceDayRecurrence(currentBase)?.deltaYears ?? null;
   setText("closure-summary", stateMeaning(state, localYears));
   syncResearchEntry(state, localYears);
+  // The supporting candidates are normally folded, but selecting one from
+  // the shared Delta control must reveal the evidence it is highlighting.
+  if ([400,1200,8000].includes(currentDelta)) {
+    const structuralDetails = document.querySelector("#research-structural-milestones");
+    if (structuralDetails) structuralDetails.open = true;
+  }
 
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.targetDate = state.targetValid ? formatDate(state.targetDate) : "invalid";
