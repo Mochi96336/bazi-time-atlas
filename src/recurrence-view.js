@@ -699,7 +699,7 @@ function renderDerivation(states, localYears) {
       bridge.className = "discrete-derivation-bridge";
       bridge.dataset.fromDeltaYears = String(localYears);
       bridge.dataset.toDeltaYears = String(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD);
-      bridge.innerHTML = `<span>還缺：太陽年中的季節位置</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>不是找 ${localYears.toLocaleString("en-US")} 的倍數；而是把判定收緊到季節位置代理也回基準</small>`;
+      bridge.innerHTML = `<span>還缺：太陽年中的季節位置</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>不是在局部重遇後再補 20 年：那會使年／日序偏離；必須找三項於同一 Δ 同時歸零。不是找 ${localYears.toLocaleString("en-US")} 的倍數；而是把判定收緊到季節位置代理也回基準</small>`;
       derivationSteps.appendChild(bridge);
     }
 
