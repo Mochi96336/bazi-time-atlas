@@ -91,7 +91,7 @@ for (const expected of [
   "主線案例 · 固定 2026 → 26026",
   "12 / 12",
   "全部提前",
-  "0 天 = 完全重合"
+  "0 天＝固定年差後，TT 到達時間重合"
 ]) {
   if (!identityProbe.dom.includes(expected)) {
     throw new Error(`Research fixed main story missing at default delta=0 "${expected}": ${identityProbe.url}`);
@@ -245,7 +245,7 @@ for (const expected of [
   "60 年序",
   "60 日序",
   "季節形狀 RMS",
-  "0 天 = 完全重合",
+  "0 天＝固定年差後，TT 到達時間重合",
   "四柱可判範圍",
   "固定 +24,000 · 同一太陽黃經",
   "年／月可回同柱 · 日／時未能判定",
