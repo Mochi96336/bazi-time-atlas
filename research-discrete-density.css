@@ -2149,20 +2149,19 @@
 }
 
 
-/* Research 01 density: the 660px phase fan is verification evidence, not part
-   of the mandatory 01 → 02 reading spine. Keep Δ controls visible below it. */
-.research-phase-fan-drilldown {
+/* Research 01: the three-cycle phase fan is visible primary evidence.
+   Keep the existing geometry and Δ controls; only secondary diagrams collapse. */
+.research-phase-fan-panel {
   margin-top:var(--research-space-4);
+  border-top:1px solid rgba(238,242,237,.08);
+  border-bottom:1px solid rgba(238,242,237,.08);
 }
-.research-phase-fan-drilldown > .recurrence-instrument {
-  margin-top:0;
+.research-phase-fan-panel > .recurrence-instrument {
+  margin-top:var(--research-space-2);
   border-top:0;
   border-radius:0;
 }
-.research-phase-fan-drilldown[open] > .recurrence-instrument {
-  margin-top:var(--research-space-2);
-}
-.research-phase-fan-drilldown + .discrete-derivation {
+.research-phase-fan-panel + .discrete-derivation {
   margin-top:var(--research-space-3);
 }
 
@@ -2176,36 +2175,43 @@
   color: #a2b0b7;
 }
 
-/* Research 01: same signed phase, readable before expanding R16. The real
-   zero-seam, sector angles and existing marker palette remain untouched. */
-.research-phase-fan-drilldown > summary {
-  grid-template-columns:minmax(98px,1fr) auto 14px;
+/* The signed-phase legend stays above the always-visible instrument.
+   The real zero seam, sector angles and marker palette remain untouched. */
+.research-phase-fan-panel > header {
+  display:grid;
+  grid-template-columns:minmax(98px,1fr) auto;
+  align-items:center;
   gap:10px;
   min-height:44px;
+  padding:7px 2px;
+  border-bottom:1px solid rgba(238,242,237,.045);
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview-title {
+.research-phase-fan-panel > header .phase-fan-preview-title {
+  margin:0;
   display:grid;
   gap:3px;
   color:#c7d1d5;
   font-size:12px;
   line-height:1.2;
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview-title small {
+.research-phase-fan-panel > header .phase-fan-preview-title small {
   color:#8b9ba3;
   font-size:10px;
   font-weight:500;
   line-height:1.2;
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview {
+.research-phase-fan-panel > header .phase-fan-preview {
   display:flex;
   align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
   gap:12px;
   color:#a3b3b9;
   font-size:11px;
   font-weight:550;
   font-variant-numeric:tabular-nums;
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview > span {
+.research-phase-fan-panel > header .phase-fan-preview > span {
   display:inline-flex;
   align-items:center;
   gap:5px;
@@ -2214,33 +2220,33 @@
   font-weight:550;
   letter-spacing:0;
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview em {
+.research-phase-fan-panel > header .phase-fan-preview em {
   color:#8da0a9;
   font-size:12px;
   font-style:normal;
   font-weight:680;
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview [data-phase-state="zero"] em {
+.research-phase-fan-panel > header .phase-fan-preview [data-phase-state="zero"] em {
   color:var(--research-fan-datum,#dce5e3);
   font-weight:800;
 }
-.research-phase-fan-drilldown > summary .phase-fan-preview [data-phase-state="unknown"] em {
+.research-phase-fan-panel > header .phase-fan-preview [data-phase-state="unknown"] em {
   color:#6d7980;
 }
 @media(max-width:480px) {
-  .research-phase-fan-drilldown > summary {
-    grid-template-columns:minmax(74px,1fr) auto 14px;
+  .research-phase-fan-panel > header {
+    grid-template-columns:minmax(0,1fr);
     gap:6px;
   }
-  .research-phase-fan-drilldown > summary .phase-fan-preview { gap:7px; }
-  .research-phase-fan-drilldown > summary .phase-fan-preview > span { font-size:10px;gap:3px; }
-  .research-phase-fan-drilldown > summary .phase-fan-preview em { font-size:11px; }
-  .research-phase-fan-drilldown > summary .phase-fan-preview-title small { font-size:9px; }
+  .research-phase-fan-panel > header .phase-fan-preview { gap:7px;justify-content:flex-start; }
+  .research-phase-fan-panel > header .phase-fan-preview > span { font-size:10px;gap:3px; }
+  .research-phase-fan-panel > header .phase-fan-preview em { font-size:11px; }
+  .research-phase-fan-panel > header .phase-fan-preview-title small { font-size:9px; }
 }
 
 /* Arrival is a short, one-off confirmation on an existing exact zero marker.
    It does NOT interpolate the annulus, angles or calendar year. */
-.research-phase-fan-drilldown[open] .return-marker-zero-node.is-arriving {
+.research-phase-fan-panel .return-marker-zero-node.is-arriving {
   animation:research-r16-zero-arrival 390ms ease-out 1;
   transform-box:fill-box;
   transform-origin:center;
@@ -2251,7 +2257,7 @@
   100% { opacity:1; stroke-width:1.25; }
 }
 @media(prefers-reduced-motion:reduce) {
-  .research-phase-fan-drilldown[open] .return-marker-zero-node.is-arriving {
+  .research-phase-fan-panel .return-marker-zero-node.is-arriving {
     animation:none;
   }
 }
