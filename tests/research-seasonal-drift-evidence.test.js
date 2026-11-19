@@ -22,14 +22,14 @@ test("Research 02 keeps the fixed +24k story visible before the delta sandbox", 
     researchEvidenceStart > dynamicPanelStart
   );
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
-  assert.match(html, /01 找到的是離散候選；02 把 0 天定義成真正重合/);
+  assert.match(html, /01 找到的是離散候選；02 以固定公曆年差後的 TT 到達時間差為零線/);
   assert.doesNotMatch(html, /seasonal-drift-case-gate|seasonal-drift-use-case|data-case-aligned/);
   assert.doesNotMatch(css, /seasonal-drift-case-gate|data-case-aligned/);
   assert.doesNotMatch(view, /syncCaseAlignment|caseButton|caseGateTitle|caseGateCopy/);
 });
 
 test("02 explicitly bridges from the free delta explorer back to the fixed +24k argument", () => {
-  assert.match(html, /01 找到的是離散候選；02 把 0 天定義成真正重合/);
+  assert.match(html, /01 找到的是離散候選；02 以固定公曆年差後的 TT 到達時間差為零線/);
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
 });
 
@@ -95,7 +95,7 @@ test("curve and orbit share one longitude cursor without calling it a physical E
 test("total view visualizes advance from zero before shape decomposition", () => {
   assert.match(view, /DATA\.driftDays\.map\(value => -value\)/);
   assert.match(view, /const min = 0;\s*const max = 15/);
-  assert.match(view, /zeroCaption\.textContent = "0 = 完全重合"/);
+  assert.match(view, /zeroCaption\.textContent = "0 = TT 時差為零"/);
   assert.match(view, /class:"seasonal-drift-gap-line"/);
   assert.match(view, /gapLabel\.textContent = humanDrift\(selectedDrift\(\),2\)/);
   assert.match(html, /先看結論 · 八字節界/);
@@ -180,7 +180,7 @@ test("Research 02 hierarchy leads with zero-line proof, then orbit, then deep cu
 
   assert.ok(summary >= 0 && verdict > summary && cursor > verdict);
   assert.ok(proof > cursor && orbit > proof && detail > orbit && controls > detail && curve > controls);
-  assert.match(html, /0 天 = 完全重合/);
+  assert.match(html, /0 天＝固定年差後，TT 到達時間重合/);
   assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
   assert.match(html, /看完整節界偏移/);
   assert.match(html, /扣除平均，看年內起伏/);
