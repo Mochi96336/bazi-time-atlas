@@ -64,6 +64,42 @@
         const verdict=doc.querySelector(".seasonal-drift-evidence-note");
         if(!(verdict.compareDocumentPosition(orbitDetails)&Node.DOCUMENT_POSITION_FOLLOWING))
           throw new Error("Research 02 result must precede optional orbit");
+        // Real interaction contract: native Jie selection updates the
+        // shared solar cursor, the visible 02 time strip and the 03 pillar
+        // evidence. A static count of <option> elements does not prove this.
+        const determinacy=doc.getElementById("four-pillar-determinacy");
+        const timeState=doc.getElementById("research-time-state");
+        const timeTitle=doc.getElementById("research-time-title");
+        const instrument=doc.getElementById("recurrence-instrument");
+        const originalDelta=instrument?.dataset.deltaYears;
+        const selectJie=async(longitude,name)=>{
+          boundarySelect.value=String(longitude);
+          boundarySelect.dispatchEvent(new win.Event("change",{bubbles:true}));
+          for(let i=0;i<70;i++){
+            if(root.dataset.selectedLongitude===String(longitude)&&
+              determinacy?.dataset.selectedLongitude===String(longitude)&&
+              timeState?.dataset.owner==="seasonal"&&
+              timeTitle?.textContent.includes(name))break;
+            await wait(40);
+          }
+          if(root.dataset.selectedLongitude!==String(longitude)||
+            determinacy?.dataset.selectedLongitude!==String(longitude)||
+            timeState?.dataset.owner!=="seasonal"||
+            !timeTitle?.textContent.includes(name)||
+            boundarySelect.value!==String(longitude)||
+            instrument?.dataset.deltaYears!==originalDelta||
+            orbitDetails.open)
+            throw new Error("Jie picker did not keep 02,03 and the shared time owner in sync at "+longitude);
+        };
+        await selectJie(45,"立夏");
+        await selectJie(315,"立春");
+        const componentWidth=root.getBoundingClientRect().width;
+        if(root.scrollWidth>root.clientWidth+2||
+          componentWidth>width+2||
+          boundarySelect.scrollWidth>boundarySelect.clientWidth+2)
+          throw new Error("Research 02 overflows its responsive viewport at "+width+"px");
+        probe.dataset.nativeSelectionChecked="true";
+        probe.dataset.responsiveWidth=String(width);
         probe.dataset.orbitClosed=String(!orbitDetails.open);
         probe.dataset.nativeJieCount=String(boundarySelect.options.length-1);
         probe.dataset.readingLedePx=String(bodyPx);
