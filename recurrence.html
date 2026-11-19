@@ -504,22 +504,24 @@
       </section>
       <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
-      <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
+      </details>
+
+      <section id="near-recurrence-detail" class="near-search-panel" aria-label="長時間回歸搜尋，Berger 快速近似模型">
         <div class="near-search-head">
           <div class="near-search-copy">
-            <strong>近回歸排名</strong>
+            <strong>長時間回歸搜尋</strong>
             <small>24,000 年整數倍 · 季節形狀最大值 → RMS · 近似 ≠ 真正週期</small>
           </div>
           <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
           <div class="near-stat best"><span>搜尋最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
           <div class="near-stat"><span>搜尋最佳殘差</span><strong id="near-best-residual">—</strong><small>最大絕對值 / RMS</small></div>
         </div>
+        <p class="near-search-scope">只比較 Berger 1978 快速近似模型下的季節形狀殘差，候選為 +24,000 年的整數倍；這不是完整節界回歸，也不是獨立驗證的深時間天文預測。</p>
         <div class="near-search-body">
           <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
           <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名"></div>
         </div>
       </section>
-      </details>
     </section>
 
     <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">
