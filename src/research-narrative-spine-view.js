@@ -15,5 +15,5 @@ function setOutcome(name, text, state) {
 // The outline summarizes the fixed argument of this page, not the current Δ
 // selected in the 01 sandbox. The live explorer has its own readouts.
 setOutcome("discrete", "24,000 離散候選", "candidate");
-setOutcome("astronomy", "TT 提前 10–14 d", "offset");
-setOutcome("evidence", "24,000 ≠ 完整週期", "conclusion");
+setOutcome("astronomy", "模型推算：TT 提前 10–14 d", "offset");
+setOutcome("evidence", "模型內：24,000 ≠ 完整週期", "conclusion");
