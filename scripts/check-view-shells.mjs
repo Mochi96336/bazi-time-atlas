@@ -89,7 +89,7 @@ requireEqual(attr(probe, "data-recurrence-lede-hidden"), "false", "Research ques
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
-requireEqual(attr(probe, "data-recurrence-phase-fan-details-open"), "false", "Phase-fan verification evidence must stay closed by default", url);
+requireEqual(attr(probe, "data-recurrence-phase-fan-primary-visible"), "true", "Primary three-cycle fan must remain visible outside a disclosure", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the primary delta derivation, not between fan and controls", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
@@ -102,7 +102,7 @@ requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "P
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
 requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research 01 derivation thesis must start in the first mobile viewport before the date explorer", url);
 requireEqual(attr(probe, "data-recurrence-year-day-single-owner"), "true", "Single-date Year/Day evidence must keep one owner without duplicating the zero-year baseline", url);
-requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
+requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the primary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
@@ -142,8 +142,10 @@ const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
 const outlineHeight = Number(attr(probe, "data-recurrence-outline-height"));
 const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const taskHeadBottom = Number(attr(probe, "data-recurrence-task-head-bottom"));
-const phaseFanTop = Number(attr(probe, "data-recurrence-phase-fan-details-top"));
-const phaseFanHeight = Number(attr(probe, "data-recurrence-phase-fan-details-height"));
+const phaseFanTop = Number(attr(probe, "data-recurrence-phase-fan-panel-top"));
+const phaseFanHeight = Number(attr(probe, "data-recurrence-phase-fan-panel-height"));
+const phaseFanWidth = Number(attr(probe, "data-recurrence-phase-fan-panel-width"));
+const instrumentHeight = Number(attr(probe, "data-recurrence-instrument-height"));
 const comparisonTop = Number(attr(probe, "data-recurrence-primary-comparison-top"));
 const comparisonBottom = Number(attr(probe, "data-recurrence-primary-comparison-bottom"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
@@ -166,11 +168,15 @@ if (
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, phaseFanRail=${phaseFanTop}, deltaRail=${derivationTop}): ${url}`
   );
 }
-// The large fan is now optional verification evidence. The default mobile flow
-// should pay only for one compact disclosure rail; expanded fan geometry is
-// audited by the dedicated Year-Day production check.
-if (!Number.isFinite(phaseFanHeight) || phaseFanHeight < 38 || phaseFanHeight > 48) {
-  throw new Error(`Research phase-fan verification rail escaped its compact range (${phaseFanHeight}px): ${url}`);
+// The primary phase fan must occupy actual layout space instead of being a
+// hidden disclosure. Preserve its complete diagram and ensure it fits 390px.
+if (
+  !Number.isFinite(phaseFanHeight) || !Number.isFinite(instrumentHeight) ||
+  !Number.isFinite(phaseFanWidth) || instrumentHeight <= 0 ||
+  phaseFanHeight < instrumentHeight || phaseFanWidth < 300 || phaseFanWidth > 390 ||
+  !(phaseFanTop + phaseFanHeight <= derivationTop)
+) {
+  throw new Error(`Research primary phase fan must remain fully laid out before Δ controls (fan=${phaseFanWidth}x${phaseFanHeight}, instrument=${instrumentHeight}, next=${derivationTop}): ${url}`);
 }
 if (
   !Number.isFinite(deltaSettingsHeight)
