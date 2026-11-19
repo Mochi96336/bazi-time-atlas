@@ -78,3 +78,23 @@ test("Research 01 stops repeating its mobile path; Research 03 mobile evidence u
   assert.match(css,/#research-evidence \.research-alignment-fork small \{[\s\S]*?font-size:13px;/);
   assert.match(fixture,/Research 03 mobile reasons are unreadable or cramped/);
 });
+
+test("Research conclusions state the TT time baseline and deep-time validation boundary at the point of claim",async()=>{
+  const html=await readFile(new URL("../recurrence.html",import.meta.url),"utf8");
+  const view=await readFile(new URL("../src/research-absolute-boundary-consequence-view.js",import.meta.url),"utf8");
+  const visual02=await readFile(new URL("../scripts/fixtures/research-02-production-visual.html",import.meta.url),"utf8");
+  const check02=await readFile(new URL("../scripts/visual-check-research-02-production.mjs",import.meta.url),"utf8");
+  const check03=await readFile(new URL("../scripts/visual-check-research-03-production.mjs",import.meta.url),"utf8");
+  assert.match(html,/TT\(26026, λ\) − TT\(2026, λ\) − 8,765,820 日/);
+  assert.match(html,/為什麼要 8,000 年/);
+  assert.match(html,/目標年框架/);
+  assert.match(html,/模型內：並非固定時間下的精確節界回歸/);
+  assert.match(view,/targetYearFrameIndependentlyValidated="false"/);
+  assert.match(view,/尚未獨立驗證目標年框架/);
+  assert.match(visual02,/selectJie\(45,"立夏"\)/);
+  assert.match(visual02,/selectJie\(315,"立春"\)/);
+  for(const width of [320,390,480,481,660,1440]){
+    assert.match(check02,new RegExp('width:'+width+'(?:,|})'));
+    assert.match(check03,new RegExp('width:'+width+'(?:,|})'));
+  }
+});
