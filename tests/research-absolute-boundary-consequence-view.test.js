@@ -15,7 +15,7 @@ test("Research 03 explains the two reference frames before the fixed +24k pillar
   const conclusionScript=html.indexOf("research-absolute-boundary-consequence-view.js");
   const determinacyScript=html.indexOf("four-pillar-determinacy-view.js");
   assert.ok(conclusionScript>=0&&determinacyScript>conclusionScript);
-  assert.match(html,/class="determinacy-verdict"[\s\S]*固定 \+24,000 公曆年[\s\S]*≠ 完整「時間 → 八字」精確週期/);
+  assert.match(html,/class="determinacy-verdict"[\s\S]*固定 \+24,000 公曆年[\s\S]*模型內：並非固定時間下的精確節界回歸/);
   assert.match(view,/determinacy\.insertAdjacentElement\("beforebegin",panel\)/);
   assert.match(view,/publishFixedEvidence\(\)/);
   assert.match(view,/absoluteBoundaryReferenceJie="displaced"/);
