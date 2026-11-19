@@ -86,4 +86,4 @@ for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?preciseBoundary=
     attr(tag,"data-duplicate-story")!=="absent"
   ) throw Error("Original-strip proof failed "+suffix+": "+(attr(tag,"data-error")??proof.url));
 }
-console.log("[research-r3] PASS 320/390/768/1440 original strip, Li Chun ambiguity, drag guards and deep-delta ownership");
+console.log("[research-r3] PASS 320/390/480/481/660/768/1440 original strip, Li Chun ambiguity, drag guards and deep-delta ownership");
