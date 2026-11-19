@@ -97,12 +97,14 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
 
-test("Research 01 keeps the large phase fan as optional verification while Delta stays primary", () => {
+test("Research 01 keeps the three-cycle phase fan permanently visible", () => {
   assert.match(discreteJs, /id = "discrete-phase-fan-details"/);
-  assert.match(discreteJs, /research-phase-fan-drilldown/);
+  assert.match(discreteJs, /research-phase-fan-panel/);
+  assert.match(discreteJs, /document\.createElement\("section"\)/);
+  assert.doesNotMatch(discreteJs, /document\.createElement\("details"\);\s*details\.id = "discrete-phase-fan-details"/);
   assert.match(discreteJs, /離散相位扇/);
   assert.match(discreteJs, /revealPhaseFanHash/);
-  assert.match(discreteCss, /\.research-phase-fan-drilldown/);
+  assert.match(discreteCss, /\.research-phase-fan-panel > header/);
   assert.doesNotMatch(html, /<details[^>]*id="discrete-phase-fan-details"/);
 });
 
