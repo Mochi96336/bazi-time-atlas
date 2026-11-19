@@ -111,8 +111,10 @@ if(split.dom.includes('class="seasonal-drift-gap-line"')){
 
 const deep=dump("total",0,"near-recurrence-detail");
 const deepTools=detailsTag(deep.dom,"secondary-astronomy-tools");
-if(!deepTools||!/\sopen(?:\s|=|>)/.test(deepTools)){
-  throw Error("deep link did not reopen the folded delta sandbox: "+deep.url);
+if(!deepTools||/\sopen(?:\s|=|>)/.test(deepTools)||
+   !deep.dom.includes('id="near-recurrence-detail"')||
+   !deep.dom.includes('id="near-recurrence-chart"')){
+  throw Error("long-horizon chart must stay visible outside the closed delta sandbox: "+deep.url);
 }
 
 console.log("[seasonal-drift-evidence] PASS fixed +24k story stays visible across delta sandbox states");
