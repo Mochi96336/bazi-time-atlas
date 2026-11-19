@@ -148,6 +148,7 @@
           <small>不是三個獨立週期：01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真。</small>
         </div>
         <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
+        <p class="research-discrete-proof-equation"><strong>為什麼要 8,000 年？</strong>公曆每 400 年有 146,097 日；除以 60 餘 57，須重複 20 個 400 年週期（20 × 57 = 1,140，為 60 的倍數），日序才歸零。因此「公曆＋日序」需 8,000 年；「公曆＋年序」需 LCM(400, 60) = 1,200 年。兩者同時成立才得到 24,000 年。</p>
         <p class="discrete-derivation-rule"><strong>推導關係：</strong>LCM(1,200, 8,000) = 24,000。局部重遇不是拿來找倍數，而是指出「年＋日已回來，還缺季節位置」這個條件差。</p>
       </section>
 
@@ -158,13 +159,14 @@
           <strong id="research-year-strip-title">年度時間條</strong>
           <div class="research-year-actions">
             <form id="research-target-date-form" class="research-date-picker" aria-label="選擇時間條所顯示的日期">
-              <label for="research-target-date-input">日期</label>
+              <label for="research-target-date-input">比較目標日</label>
               <input id="research-target-date-input" type="text" inputmode="numeric" autocomplete="off"
-                value="2026/09/13" placeholder="YYYY/MM/DD" aria-describedby="research-target-date-feedback">
+                value="2026/09/13" placeholder="YYYY/MM/DD" aria-describedby="research-target-date-help research-target-date-feedback">
               <button type="submit" id="research-target-date-apply">前往</button>
             </form>
 
           </div>
+          <small id="research-target-date-help" class="research-target-date-help">選擇比較目標日期會保留目前 Δ 年位移，並反推基準日期。</small>
           <small id="research-target-date-feedback" class="research-target-date-feedback" role="status" aria-live="polite" hidden></small>
           <span id="research-controls-base" hidden>2026/09/13</span>
           <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
@@ -396,15 +398,16 @@
           <div class="seasonal-drift-evidence-copy">
             <div class="eyebrow">主線案例 · 固定 2026 → 26026</div>
             <h3 id="seasonal-drift-evidence-title">24,000 年後，年界與月界還在原位嗎？</h3>
-            <p>八字年柱在立春切換，月柱在十二個「節」切換。01 找到的是離散候選；02 把 0 天定義成真正重合，逐條檢查節界，再視需要展開俯視圖解釋原因。</p>
+            <p>八字年柱在立春切換，月柱在十二個「節」切換。01 找到的是離散候選；02 以固定公曆年差後的 TT 到達時間差為零線，逐條檢查節界，再視需要展開俯視圖解釋原因。</p>
           </div>
         </header>
 
+        <p class="research-model-scope"><strong>證據範圍：</strong>以下 12 條節界位移來自尚未獨立驗證 26026 年框架的深時間研究模型；與固定 24,000 個延伸公曆平均年（TT 基準）比較。不是實測誤差，也不等於完整民用四柱的確定預測。</p>
         <div class="seasonal-drift-summary" aria-live="polite">
           <div class="seasonal-drift-stat verdict">
             <span>先看結論 · 八字節界</span>
-            <strong><b id="seasonal-drift-jie-count">12 / 12</b> 全部提前</strong>
-            <small><b id="seasonal-drift-jie-range">提前 10.235–14.177 天</b> · 沒有任何一條碰到 0</small>
+            <strong><b id="seasonal-drift-jie-count">12 / 12</b> 在模型中全部提前</strong>
+            <small><b id="seasonal-drift-jie-range">模型值提前 10.235–14.177 天</b> · 相對固定年差均未回到零</small>
           </div>
           <div class="seasonal-drift-stat cursor">
             <span>目前游標</span>
@@ -415,21 +418,21 @@
           </div>
         </div>
 
-        <p class="research-model-scope"><strong>證據範圍：</strong>10–14 天提前量是 2026 → 26026 的深時間研究模型結果；目標年框架尚未取得獨立驗證，不能視為民用時刻或完整四柱的確定預測。</p>
+        
         <section class="seasonal-boundary-proof" aria-labelledby="seasonal-boundary-proof-title">
           <header class="seasonal-boundary-proof-head">
             <div>
               <span>判定基準</span>
-              <strong id="seasonal-boundary-proof-title">0 天 = 完全重合</strong>
+              <strong id="seasonal-boundary-proof-title">0 天＝固定年差後，TT 到達時間重合</strong>
             </div>
-            <p>十二個八字「節」全部離開 0；點任一節界可同步研究時間，也可展開下方俯視圖。</p>
+            <p>太陽黃經在兩側本來就相同；此處比較的是同一節界到達時間：TT(26026, λ) − TT(2026, λ) − 8,765,820 日。模型中的十二節均未回到零線。點選節界可同步研究時間。</p>
             <label class="seasonal-boundary-keyboard" for="seasonal-boundary-select"><span>鍵盤／觸控選節</span><select id="seasonal-boundary-select" aria-label="選擇十二個八字節界，更新圖表與研究時間"><option value="">自訂黃經 · 非十二節</option></select></label>
           </header>
           <svg id="seasonal-boundary-proof-svg" class="seasonal-drift-svg" role="img"
             aria-label="十二個八字節界相對零天重合基準的提前量；全部提前約十至十四天"></svg>
         </section>
 
-        <p class="seasonal-drift-evidence-note"><strong>02 → 03 · 證據的後果：</strong>十二個節界都沒有回到 0 天，因此離散候選不能直接視為固定公曆時間下的完整八字週期。下一節逐柱說明哪些條件仍可判定。</p>
+        <p class="seasonal-drift-evidence-note"><strong>02 → 03 · 證據的後果：</strong>在目前深時間模型內，十二個節界相對固定公曆年差都沒有回到 0 天；因此離散候選不能直接視為固定公曆時間下的完整八字週期。下一節逐柱說明哪些條件仍可判定。</p>
         <details id="seasonal-drift-orbit-details" class="seasonal-drift-orbit-details"><summary><span>深入解釋：同一太陽黃經，為什麼到達時間不同？</span><strong>展開軌道與時間相位圖</strong></summary>
         <div class="seasonal-drift-orbit-panel seasonal-drift-orbit-explainer">
           <div class="seasonal-drift-orbit-head">
@@ -528,9 +531,9 @@
 
       <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" data-diagram-grammar="pillar-verdict" aria-label="固定加二萬四千年、目前選定太陽黃經的四柱可判定範圍">
         <div class="determinacy-verdict">
-          <span>固定 +24,000 公曆年</span>
-          <strong>≠ 完整「時間 → 八字」精確週期</strong>
-          <small>同一太陽黃經下年／月可回同柱；但固定推進 +24,000 公曆年，仍不足以判定日／時，也不能推出完整四柱重現。</small>
+          <span>固定 +24,000 公曆年 · 深時間研究模型（尚未獨立驗證）</span>
+          <strong>模型內：並非固定時間下的精確節界回歸</strong>
+          <small>同一太陽黃經下年／月可依條件回同柱；但模型中固定推進 +24,000 公曆年並未讓十二節界時間重合。日／時仍未能判定，不能把模型結果當成經獨立驗證的完整四柱週期反證。</small>
         </div>
         <div class="determinacy-head">
           <strong class="determinacy-label">四柱可判範圍</strong>
