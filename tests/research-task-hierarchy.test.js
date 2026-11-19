@@ -229,7 +229,7 @@ test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-s
   assert.match(astronomy,/id="research-case-transition"/);
   assert.match(astronomy,/01 的選取不會改寫節界證據/);
   assert.match(astronomy,/class="research-model-scope"/);
-  assert.match(astronomy,/目標年框架尚未取得獨立驗證/);
+  assert.match(astronomy,/尚未獨立驗證 26026 年框架/);
   assert.match(astronomy,/id="seasonal-drift-orbit-details"/);
   assert.ok(astronomy.indexOf('class="seasonal-drift-evidence-note"') <
     astronomy.indexOf('id="seasonal-drift-orbit-details"'));
