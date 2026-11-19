@@ -442,3 +442,21 @@ test("Research 01 primary proof stays visible while 400/1200/8000 supporting che
   assert.match(recurrenceHtml,/要查看 \+400／\+1,200／\+8,000 的中間證據/);
   assert.doesNotMatch(recurrenceHtml,/依序點上方 \+400、\+8,000、\+24,000/);
 });
+
+test("Research 01 proves 8,000 days closure and the 24,000 LCM without confusing local offset",()=>{
+  const gregorian400=146097;
+  const dayRemainder=gregorian400%60;
+  assert.equal(dayRemainder,57);
+  for(let cycles=1;cycles<20;cycles++)
+    assert.notEqual((cycles*dayRemainder)%60,0);
+  assert.equal((20*dayRemainder)%60,0);
+  const gcd=(a,b)=>b?gcd(b,a%b):a;
+  const lcm=(a,b)=>a/gcd(a,b)*b;
+  assert.equal(lcm(400,60),1200);
+  assert.equal(400*20,8000);
+  assert.equal(lcm(1200,8000),24000);
+  assert.match(recurrenceHtml,/class="research-discrete-proof-equation"/);
+  assert.match(recurrenceHtml,/146,097 日/);
+  assert.match(recurrenceHtml,/20 × 57 = 1,140/);
+  assert.match(recurrenceView,/不是在局部重遇後再補 20 年/);
+});
