@@ -128,7 +128,7 @@ test("astronomy task answers where the +24k candidate fails and keeps the sandbo
   assert.match(astronomy, /春分相對公曆的絕對位移另算/);
   assert.match(astronomy, /id="astronomy-term-grid"/);
   assert.match(astronomy, /class="near-search-panel"/);
-  assert.match(astronomy, /<strong>近回歸排名<\/strong>/);
+  assert.match(astronomy, /<strong>長時間回歸搜尋<\/strong>/);
   assert.doesNotMatch(astronomy, /離散全閉合後，哪次天文形狀最接近？|只評估 24,000 年整數倍/);
   assert.match(nearCss, /\.near-search-copy\s*\{[\s\S]*display:flex/);
   assert.doesNotMatch(nearCss, /near-search-copy h2|near-search-copy p/);
