@@ -433,3 +433,77 @@
     color:#aabac1;
   }
 }
+
+
+/* Research claim audit: make the missing arithmetic a readable part of the
+   main proof rather than burying the 8,000-year derivation in a disclosure. */
+#research-discrete .research-discrete-proof-equation {
+  margin:15px 0 5px;
+  padding:10px 12px;
+  border-left:2px solid var(--research-candidate);
+  color:#bfccd1;
+  font-size:13px;
+  line-height:1.68;
+  max-width:89ch;
+}
+#research-discrete .research-discrete-proof-equation strong {
+  display:block;
+  color:#e2e8e8;
+  font-size:13px;
+  line-height:1.45;
+  margin-bottom:3px;
+}
+/* Date-only chooser selects the target and preserves Delta by recalculating
+   its baseline. Its explanation must not be interpreted as another control. */
+#research-discrete .research-year-head .research-target-date-help {
+  display:block;
+  grid-column:1 / -1;
+  max-width:84ch;
+  font-size:11.5px;
+  font-weight:400;
+  line-height:1.55;
+  color:#aebcc0;
+}
+/* Source and model scope are visible before reading the impressive 12/12. */
+#research-astronomy .research-model-scope {
+  margin:8px 0 11px;
+  padding:8px 0;
+  font-size:12.5px;
+  line-height:1.65;
+}
+#research-astronomy .seasonal-boundary-proof-head strong {
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.4;
+}
+#research-astronomy .seasonal-boundary-proof-head p {
+  max-width:88ch;
+  font-size:12.5px;
+  line-height:1.6;
+}
+/* Read the conditional scientific claim as prose, not as decorative meta. */
+#research-evidence .determinacy-panel .determinacy-verdict span {
+  font-size:12px;
+  line-height:1.5;
+  white-space:normal;
+}
+#research-evidence .determinacy-panel .determinacy-verdict small {
+  max-width:86ch;
+  line-height:1.65;
+}
+@media(max-width:480px) {
+  #research-discrete .research-discrete-proof-equation {
+    font-size:13px;
+    line-height:1.65;
+    margin:12px 0 5px;
+    padding:9px 10px;
+  }
+  #research-discrete .research-year-head .research-target-date-help {
+    font-size:12px;
+    line-height:1.6;
+  }
+  #research-astronomy .research-model-scope,
+  #research-astronomy .seasonal-boundary-proof-head p {
+    font-size:12.5px;
+  }
+}
