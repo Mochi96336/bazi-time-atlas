@@ -1050,19 +1050,9 @@ function bindControls() {
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
   if(r16PolishOptIn){
-    // Refresh labels if viewport width changes, or if the R16 panel is
-    // re-expanded. Collision computations never change marker angles.
+    // The primary R16 fan is never collapsed. Keep label collision
+    // reflow tied to viewport changes without observing disclosures.
     window.addEventListener("resize",scheduleR16LabelReflow);
-    const disclosureObserver=new MutationObserver(records=>{
-      if(records.some(record=>
-        record.target.id==="discrete-phase-fan-details"&&record.target.open
-      )){
-        scheduleR16LabelReflow();
-      }
-    });
-    disclosureObserver.observe(document.body,{
-      subtree:true,attributes:true,attributeFilter:["open"]
-    });
   }
 }
 
