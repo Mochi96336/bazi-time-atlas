@@ -400,7 +400,7 @@ test("first-screen research milestones reuse the canonical delta state and date-
   assert.match(recurrenceView,/!state\.targetValid/);
 });
 
-test("R16 disclosure previews only the canonical signed phase state before opening", () => {
+test("R16 primary panel previews the canonical signed phase above the visible fan", () => {
   assert.match(view, /function updatePhaseFanPreview\(details, instrument\)/);
   assert.match(view, /instrument\.dataset\.gregorianPhaseSigned/);
   assert.match(view, /instrument\.dataset\.yearSequencePhaseSigned/);
@@ -413,7 +413,7 @@ test("R16 disclosure previews only the canonical signed phase state before openi
   assert.match(view, /基準 · 非重遇/);
   assert.match(view, /離散候選 · 待驗節界/);
   assert.match(view, /observer\.observe\(instrument/);
-  assert.match(css, /\.research-phase-fan-drilldown > summary \.phase-fan-preview/);
+  assert.match(css, /\.research-phase-fan-panel > header \.phase-fan-preview/);
   assert.doesNotMatch(view, /function updatePhaseFanPreview[\s\S]*?function bindPhaseFanPreview\([\s\S]*?recurrenceState\(/);
 });
 
@@ -426,7 +426,7 @@ test("milestone zero arrival is event-scoped; no continuous ring or phase animat
   assert.match(view, /selected !== details\.dataset\.phasePreviewLastDelta/);
   assert.match(view, /prefers-reduced-motion: reduce/);
   assert.match(view, /value\.animate\(/);
-  assert.match(css, /\.research-phase-fan-drilldown\[open\] \.return-marker-zero-node\.is-arriving/);
+  assert.match(css, /\.research-phase-fan-panel \.return-marker-zero-node\.is-arriving/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(css.slice(css.indexOf("@keyframes research-r16-zero-arrival")), /rotate\(|translate\(|linear infinite/);
 });
