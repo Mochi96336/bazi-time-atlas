@@ -275,7 +275,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
         class:"seasonal-drift-zero-caption",
         "text-anchor":"end"
       }, curveSvg);
-      zeroCaption.textContent = "0 = 完全重合";
+      zeroCaption.textContent = "0 = TT 時差為零";
     }
 
     const path = values.map((value,index) =>
