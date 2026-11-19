@@ -142,7 +142,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
       const label=svgEl("text",{
         x:left-12,y:y+4,"text-anchor":"end",class:"seasonal-proof-axis"
       },boundaryProofSvg);
-      label.textContent=tick===0?"0 = 重合":tick+" d";
+      label.textContent=tick===0?"0 d = TT 對齊":tick+" d";
     }
 
     JIE_SUMMARY.rows.forEach((row,index)=>{
