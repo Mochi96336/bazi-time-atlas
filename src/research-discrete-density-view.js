@@ -35,7 +35,6 @@ function hashTargetsPhaseFan(details, instrument) {
 
 function revealPhaseFanHash(details, instrument) {
   if (!details || !instrument || !hashTargetsPhaseFan(details, instrument)) return;
-  details.open = true;
   requestAnimationFrame(() => {
     const id = decodeURIComponent(location.hash.slice(1));
     document.getElementById(id)?.scrollIntoView({ block:"start" });
@@ -121,32 +120,35 @@ function bindPhaseFanPreview(details, instrument) {
   updatePhaseFanPreview(details, instrument);
 }
 
-function ensurePhaseFanDrilldown() {
+// The 3-cycle instrument is primary Research 01 evidence, never a disclosure.
+// Preserve the historical anchor id for existing deep links.
+function ensurePhaseFanPanel() {
   const instrument = researchDiscrete?.querySelector("#recurrence-instrument");
   if (!instrument) return null;
 
-  let details = instrument.closest("#discrete-phase-fan-details");
-  if (!details) {
-    details = document.createElement("details");
-    details.id = "discrete-phase-fan-details";
-    details.className = "research-discrete-drilldown research-phase-fan-drilldown";
-    details.dataset.researchDrilldown = "discrete-phase-fan";
+  let panel = instrument.closest("#discrete-phase-fan-details");
+  if (!panel) {
+    panel = document.createElement("section");
+    panel.id = "discrete-phase-fan-details";
+    panel.className = "research-phase-fan-panel";
+    panel.dataset.researchPrimaryFigure = "discrete-phase-fan";
+    panel.setAttribute("aria-labelledby", "phase-fan-title");
 
-    const summary = document.createElement("summary");
-    summary.innerHTML = `<span class="phase-fan-preview-title">離散相位扇<small id="phase-fan-preview-context">等候相位</small></span>
+    const header = document.createElement("header");
+    header.innerHTML = `<h3 id="phase-fan-title" class="phase-fan-preview-title">離散相位扇<small id="phase-fan-preview-context">等候相位</small></h3>
       <strong class="phase-fan-preview">
         <span data-phase-preview="gregorian">公曆 <em>—</em></span>
         <span data-phase-preview="year">年序 <em>—</em></span>
         <span data-phase-preview="day">日序 <em>—</em></span>
       </strong>`;
 
-    instrument.insertAdjacentElement("beforebegin", details);
-    details.append(summary, instrument);
+    instrument.insertAdjacentElement("beforebegin", panel);
+    panel.append(header, instrument);
   }
 
-  bindPhaseFanPreview(details, instrument);
-  revealPhaseFanHash(details, instrument);
-  return details;
+  bindPhaseFanPreview(panel, instrument);
+  revealPhaseFanHash(panel, instrument);
+  return panel;
 }
 
 function hashTargetsCycle(details, cycle) {
@@ -217,7 +219,7 @@ function syncDiscretePresentation() {
   if (!researchDiscrete) return;
   removeDuplicateScopeNote();
   consolidateGlobalPeriod();
-  ensurePhaseFanDrilldown();
+  ensurePhaseFanPanel();
   ensureSexagenaryDrilldown();
 }
 
