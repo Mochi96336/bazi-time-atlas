@@ -87,7 +87,7 @@ test("Research conclusions state the TT time baseline and deep-time validation b
   const check03=await readFile(new URL("../scripts/visual-check-research-03-production.mjs",import.meta.url),"utf8");
   assert.match(html,/TT\(26026, λ\) − TT\(2026, λ\) − 8,765,820 日/);
   assert.match(html,/為什麼要 8,000 年/);
-  assert.match(html,/目標年框架/);
+  assert.match(html,/尚未獨立驗證 26026 年框架/);
   assert.match(html,/模型內：並非固定時間下的精確節界回歸/);
   assert.match(view,/targetYearFrameIndependentlyValidated="false"/);
   assert.match(view,/尚未獨立驗證目標年框架/);
