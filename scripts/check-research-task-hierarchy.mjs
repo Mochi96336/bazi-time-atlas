@@ -202,17 +202,17 @@ if (/^<details[^>]*\sopen(?:\s|=|>)/.test(epochSupport)) {
 
 const defaultEvidenceProbe = dump("recurrence.html?delta=24000");
 const defaultEvidence = sectionById(defaultEvidenceProbe.dom, "research-evidence");
-const phaseFanDetail = detailsById(defaultEvidenceProbe.dom, "discrete-phase-fan-details");
-if (!phaseFanDetail || !phaseFanDetail.includes('id="recurrence-instrument"')) {
-  throw new Error(`Research 01 phase fan did not move behind its verification disclosure: ${defaultEvidenceProbe.url}`);
-}
-if (/^<details[^>]*\sopen(?:\s|=|>)/.test(phaseFanDetail)) {
-  throw new Error(`Research 01 phase fan must stay closed by default: ${defaultEvidenceProbe.url}`);
+const phaseFanPanel = sectionById(defaultEvidenceProbe.dom, "discrete-phase-fan-details");
+if (!phaseFanPanel || !phaseFanPanel.includes('data-research-primary-figure="discrete-phase-fan"') ||
+    !phaseFanPanel.includes('id="recurrence-instrument"') ||
+    !phaseFanPanel.includes('id="phase-fan-title"') ||
+    phaseFanPanel.includes("<summary")) {
+  throw new Error(`Research 01 must show the three-cycle phase fan as primary, non-collapsible evidence: ${defaultEvidenceProbe.url}`);
 }
 const phaseFanDeepLink = dump("recurrence.html?delta=24000#recurrence-instrument");
-const phaseFanDeepLinkDetail = detailsById(phaseFanDeepLink.dom, "discrete-phase-fan-details");
-if (!phaseFanDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(phaseFanDeepLinkDetail) || !phaseFanDeepLinkDetail.includes('id="recurrence-instrument"')) {
-  throw new Error(`direct phase-fan hash did not auto-open verification evidence: ${phaseFanDeepLink.url}`);
+const phaseFanDeepLinkPanel = sectionById(phaseFanDeepLink.dom, "discrete-phase-fan-details");
+if (!phaseFanDeepLinkPanel || !phaseFanDeepLinkPanel.includes('id="recurrence-instrument"')) {
+  throw new Error(`direct phase-fan hash lost its visible instrument: ${phaseFanDeepLink.url}`);
 }
 
 const defaultProofSupport = detailsById(defaultEvidenceProbe.dom, "proof-chain-support-details");
