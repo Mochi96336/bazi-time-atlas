@@ -1,0 +1,282 @@
+{
+  "analysis-first-screen-polish.css": {
+    "important": 0,
+    "hexColors": 14,
+    "smallFonts": 34
+  },
+  "analysis-first-screen.css": {
+    "important": 0,
+    "hexColors": 8,
+    "smallFonts": 12
+  },
+  "analysis-tools-rail.css": {
+    "important": 0,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
+  "astronomical-residuals.css": {
+    "important": 3,
+    "hexColors": 45,
+    "smallFonts": 0
+  },
+  "atlas-guide.css": {
+    "important": 0,
+    "hexColors": 13,
+    "smallFonts": 0
+  },
+  "atlas-solar-time-analysis.css": {
+    "important": 2,
+    "hexColors": 0,
+    "smallFonts": 15
+  },
+  "atlas-visible-ten-gods.css": {
+    "important": 1,
+    "hexColors": 10,
+    "smallFonts": 11
+  },
+  "birth-advanced.css": {
+    "important": 0,
+    "hexColors": 4,
+    "smallFonts": 6
+  },
+  "birth.css": {
+    "important": 0,
+    "hexColors": 24,
+    "smallFonts": 28
+  },
+  "branch-punishments.css": {
+    "important": 0,
+    "hexColors": 10,
+    "smallFonts": 16
+  },
+  "classification-overlay.css": {
+    "important": 0,
+    "hexColors": 16,
+    "smallFonts": 9
+  },
+  "cross-view.css": {
+    "important": 0,
+    "hexColors": 12,
+    "smallFonts": 8
+  },
+  "desktop-tools-workspace.css": {
+    "important": 4,
+    "hexColors": 7,
+    "smallFonts": 10
+  },
+  "discrete-phase.css": {
+    "important": 2,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
+  "four-pillar-determinacy.css": {
+    "important": 0,
+    "hexColors": 36,
+    "smallFonts": 0
+  },
+  "ganzhi-inspector.css": {
+    "important": 5,
+    "hexColors": 32,
+    "smallFonts": 25
+  },
+  "graphite-m2-material.css": {
+    "important": 0,
+    "hexColors": 1,
+    "smallFonts": 0
+  },
+  "hidden-stems.css": {
+    "important": 0,
+    "hexColors": 4,
+    "smallFonts": 8
+  },
+  "instrument-first.css": {
+    "important": 0,
+    "hexColors": 3,
+    "smallFonts": 7
+  },
+  "inverse-time-search.css": {
+    "important": 7,
+    "hexColors": 8,
+    "smallFonts": 14
+  },
+  "kinetic-atlas.css": {
+    "important": 6,
+    "hexColors": 48,
+    "smallFonts": 25
+  },
+  "kinetic-boundaries.css": {
+    "important": 0,
+    "hexColors": 9,
+    "smallFonts": 11
+  },
+  "legacy-dark.css": {
+    "important": 0,
+    "hexColors": 64,
+    "smallFonts": 5
+  },
+  "main-action-hierarchy.css": {
+    "important": 0,
+    "hexColors": 2,
+    "smallFonts": 0
+  },
+  "mean-solar-time.css": {
+    "important": 0,
+    "hexColors": 16,
+    "smallFonts": 36
+  },
+  "mobile-legend.css": {
+    "important": 1,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
+  "mobile-time.css": {
+    "important": 0,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
+  "navigation-workspace.css": {
+    "important": 53,
+    "hexColors": 19,
+    "smallFonts": 10
+  },
+  "near-recurrence.css": {
+    "important": 0,
+    "hexColors": 19,
+    "smallFonts": 0
+  },
+  "pillar-relations.css": {
+    "important": 0,
+    "hexColors": 25,
+    "smallFonts": 32
+  },
+  "radial-hierarchy.css": {
+    "important": 0,
+    "hexColors": 23,
+    "smallFonts": 15
+  },
+  "recurrence-target-clock.css": {
+    "important": 0,
+    "hexColors": 13,
+    "smallFonts": 11
+  },
+  "recurrence.css": {
+    "important": 0,
+    "hexColors": 41,
+    "smallFonts": 0
+  },
+  "relation-models.css": {
+    "important": 0,
+    "hexColors": 10,
+    "smallFonts": 12
+  },
+  "research-absolute-boundary-consequence.css": {
+    "important": 0,
+    "hexColors": 5,
+    "smallFonts": 0
+  },
+  "research-astronomy-drilldown.css": {
+    "important": 0,
+    "hexColors": 13,
+    "smallFonts": 0
+  },
+  "research-color-calibration.css": {
+    "important": 2,
+    "hexColors": 184,
+    "smallFonts": 0
+  },
+  "research-compact-surface.css": {
+    "important": 40,
+    "hexColors": 67,
+    "smallFonts": 0
+  },
+  "research-cycle-comparison.css": {
+    "important": 0,
+    "hexColors": 2,
+    "smallFonts": 0
+  },
+  "research-discrete-density.css": {
+    "important": 12,
+    "hexColors": 96,
+    "smallFonts": 0
+  },
+  "research-entry.css": {
+    "important": 0,
+    "hexColors": 10,
+    "smallFonts": 0
+  },
+  "research-evidence-drilldown.css": {
+    "important": 0,
+    "hexColors": 4,
+    "smallFonts": 0
+  },
+  "research-evidence-reading.css": {
+    "important": 0,
+    "hexColors": 12,
+    "smallFonts": 0
+  },
+  "research-foundations.css": {
+    "important": 0,
+    "hexColors": 11,
+    "smallFonts": 0
+  },
+  "research-seasonal-drift-evidence.css": {
+    "important": 2,
+    "hexColors": 44,
+    "smallFonts": 0
+  },
+  "research-sexagenary-cycle.css": {
+    "important": 0,
+    "hexColors": 18,
+    "smallFonts": 0
+  },
+  "research-tasks.css": {
+    "important": 0,
+    "hexColors": 16,
+    "smallFonts": 0
+  },
+  "research-time-state.css": {
+    "important": 0,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
+  "research-year-strip-interaction.css": {
+    "important": 0,
+    "hexColors": 3,
+    "smallFonts": 0
+  },
+  "scale-emphasis.css": {
+    "important": 2,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
+  "selected-instant-editor.css": {
+    "important": 2,
+    "hexColors": 7,
+    "smallFonts": 5
+  },
+  "site-nav.css": {
+    "important": 0,
+    "hexColors": 3,
+    "smallFonts": 6
+  },
+  "styles.css": {
+    "important": 11,
+    "hexColors": 37,
+    "smallFonts": 21
+  },
+  "ten-gods.css": {
+    "important": 0,
+    "hexColors": 12,
+    "smallFonts": 30
+  },
+  "tokens.css": {
+    "important": 0,
+    "hexColors": 10,
+    "smallFonts": 0
+  },
+  "ux-analysis.css": {
+    "important": 3,
+    "hexColors": 9,
+    "smallFonts": 5
+  }
+}

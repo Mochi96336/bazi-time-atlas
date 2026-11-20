@@ -2,6 +2,12 @@
    Page foundations (kinetic-atlas.css, research-foundations.css, legacy-dark.css)
    map their role names onto these values instead of inventing neighbouring
    blacks, golds or type sizes. Load this file before any page stylesheet. */
+/* Repair C4: cascade layer order for new and migrated stylesheets. Legacy
+   page files stay unlayered (and therefore win) until each is migrated into
+   `page`; new component files go into `components`. See docs/repair-plan.md. */
+@layer tokens, base, components, page, overrides;
+
+@layer tokens {
 :root {
   /* Field: the one page background (Home Art H2.5 B2 authority). */
   --site-field: #0a0d13;
@@ -46,8 +52,11 @@
 
   --font-sans: "Noto Sans TC", "Noto Sans CJK TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
 }
+}
 
-:where(button, a, input, select, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--site-focus);
-  outline-offset: 2px;
+@layer base {
+  :where(button, a, input, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--site-focus);
+    outline-offset: 2px;
+  }
 }
