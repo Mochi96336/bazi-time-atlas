@@ -54,3 +54,20 @@
     .rda-source, .rda-x-label, .rda-y-label, .rda-y-title { font-size: 14px; }
   }
 }
+
+/* Repair E3: scroll-triggered reveal in time order (see installReveal). */
+@layer components {
+  .research-drift-accumulation[data-reveal] .rda-point {
+    transition: opacity 420ms ease, transform 420ms ease;
+    transition-delay: calc(var(--i) * 520ms);
+  }
+  .research-drift-accumulation[data-reveal] .rda-link {
+    transition: opacity 900ms ease 300ms;
+  }
+  .research-drift-accumulation[data-reveal="pending"] .rda-point { opacity: 0; transform: translateY(-8px); }
+  .research-drift-accumulation[data-reveal="pending"] .rda-link { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) {
+    .research-drift-accumulation .rda-point,
+    .research-drift-accumulation .rda-link { transition: none; }
+  }
+}

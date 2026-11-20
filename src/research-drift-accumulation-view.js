@@ -55,7 +55,7 @@ function render() {
 
   const marks = el("g", { class:"rda-points" }, svg);
   points.forEach((point, index) => {
-    const g = el("g", { class:`rda-point${index === points.length - 1 ? " is-final" : ""}`, "data-delta-years":point.deltaYears }, marks);
+    const g = el("g", { class:`rda-point${index === points.length - 1 ? " is-final" : ""}`, "data-delta-years":point.deltaYears, style:`--i:${index}` }, marks);
     el("circle", { cx:x(point.deltaYears), cy:y(point.driftDays), r:index === points.length - 1 ? 7 : 5.5 }, g);
     // Label placement per epoch: the base sits below its point (the 1,980-year
     // point is close to it horizontally and labels above); the final point
@@ -81,7 +81,24 @@ function render() {
   svg.dataset.ready = "true";
 }
 
+// Repair E3: when the chart scrolls into view, the four epochs appear in time
+// order so the reader watches the drift accumulate. Reduced motion, or no
+// IntersectionObserver, shows the final chart immediately.
+function installReveal() {
+  const figure = svg.closest(".research-drift-accumulation");
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  if (!figure || reduced || typeof IntersectionObserver !== "function") return;
+  figure.dataset.reveal = "pending";
+  const observer = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    figure.dataset.reveal = "revealed";
+    observer.disconnect();
+  }, { threshold:.45 });
+  observer.observe(figure);
+}
+
 if (svg) {
   render();
   compactMedia.addEventListener("change", render);
+  installReveal();
 }
