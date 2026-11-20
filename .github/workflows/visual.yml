@@ -38,8 +38,8 @@ jobs:
       # only need the vendor file that npm test used to generate as a side effect.
       - name: Prepare browser vendor dependency
         run: npm run vendor:prepare
-      - name: Install lightweight CJK font for browser tests and screenshots
-        run: sudo apt-get install -y --no-install-recommends fonts-wqy-microhei >/dev/null
+      - name: Install pinned CJK font with official-mirror fallback
+        run: bash scripts/install-ci-cjk-font.sh
       - name: Locate system Chromium
         run: |
           command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable

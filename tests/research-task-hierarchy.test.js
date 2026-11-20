@@ -97,12 +97,14 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
 
-test("Research 01 keeps the large phase fan as optional verification while Delta stays primary", () => {
+test("Research 01 keeps the three-cycle phase fan permanently visible", () => {
   assert.match(discreteJs, /id = "discrete-phase-fan-details"/);
-  assert.match(discreteJs, /research-phase-fan-drilldown/);
+  assert.match(discreteJs, /research-phase-fan-panel/);
+  assert.match(discreteJs, /document\.createElement\("section"\)/);
+  assert.doesNotMatch(discreteJs, /document\.createElement\("details"\);\s*details\.id = "discrete-phase-fan-details"/);
   assert.match(discreteJs, /離散相位扇/);
   assert.match(discreteJs, /revealPhaseFanHash/);
-  assert.match(discreteCss, /\.research-phase-fan-drilldown/);
+  assert.match(discreteCss, /\.research-phase-fan-panel > header/);
   assert.doesNotMatch(html, /<details[^>]*id="discrete-phase-fan-details"/);
 });
 
@@ -126,7 +128,7 @@ test("astronomy task answers where the +24k candidate fails and keeps the sandbo
   assert.match(astronomy, /春分相對公曆的絕對位移另算/);
   assert.match(astronomy, /id="astronomy-term-grid"/);
   assert.match(astronomy, /class="near-search-panel"/);
-  assert.match(astronomy, /<strong>近回歸排名<\/strong>/);
+  assert.match(astronomy, /<strong>長時間回歸搜尋<\/strong>/);
   assert.doesNotMatch(astronomy, /離散全閉合後，哪次天文形狀最接近？|只評估 24,000 年整數倍/);
   assert.match(nearCss, /\.near-search-copy\s*\{[\s\S]*display:flex/);
   assert.doesNotMatch(nearCss, /near-search-copy h2|near-search-copy p/);
@@ -221,5 +223,20 @@ test("mobile Research primary interactions meet the same tap-target floor as dis
     recurrenceCss,
     /@media \(max-width:480px\)[\s\S]*\.base-date input\s*\{[^}]*min-height:42px;[\s\S]*\.delta-dock input\[type="number"\]\s*\{\s*min-height:42px;\s*\}[\s\S]*\.candidate-buttons button\s*\{\s*min-height:42px;[\s\S]*\.delta-slider-wrap input\s*\{\s*min-height:32px;\s*\}[\s\S]*\.model-boundary summary\s*\{\s*min-height:42px;/
   );
-  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:42px;\s*\}/);
+  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:44px;\s*\}/);
+});
+test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-safe Jie selection",async()=>{
+  const js=await readFile(new URL("../src/research-seasonal-drift-evidence-view.js",import.meta.url),"utf8");
+  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  assert.match(astronomy,/id="research-case-transition"/);
+  assert.match(astronomy,/01 的選取不會改寫節界證據/);
+  assert.match(astronomy,/class="research-model-scope"/);
+  assert.match(astronomy,/尚未獨立驗證 26026 年框架/);
+  assert.match(astronomy,/id="seasonal-drift-orbit-details"/);
+  assert.ok(astronomy.indexOf('class="seasonal-drift-evidence-note"') <
+    astronomy.indexOf('id="seasonal-drift-orbit-details"'));
+  assert.match(astronomy,/id="seasonal-boundary-select"/);
+  assert.match(js,/boundarySelect\.addEventListener\("change"/);
+  assert.match(js,/event\.target instanceof HTMLSelectElement/);
+  assert.match(css,/\.research-case-transition/);
 });

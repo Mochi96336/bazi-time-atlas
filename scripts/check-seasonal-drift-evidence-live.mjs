@@ -59,16 +59,16 @@ for(const delta of [0,400,1980,24000]){
     'data-mode="total"',
     'class="seasonal-drift-curve-path"',
     'class="seasonal-drift-gap-line"',
-    '0 = 完全重合',
+    '0 = TT 時差為零',
     '先看結論 · 八字節界',
     'id="seasonal-drift-selected-total-human">提前 10.883 天',
     'id="absolute-boundary-consequence"',
     'research-recurrence-conclusion',
-    '≠ 完整「時間 → 八字」精確週期',
+    '模型內：並非固定時間下的精確節界回歸',
     'data-diagram-grammar="pillar-verdict"',
     'data-diagram-grammar="alignment-fork"',
     '固定推進 24,000 公曆年',
-    '節界時間沒有重現',
+    '本模型內：節界到達時間未重現',
     'id="four-pillar-determinacy"',
     'data-mode="shared-seasonal"',
     'data-selected-longitude="315"',
@@ -111,8 +111,23 @@ if(split.dom.includes('class="seasonal-drift-gap-line"')){
 
 const deep=dump("total",0,"near-recurrence-detail");
 const deepTools=detailsTag(deep.dom,"secondary-astronomy-tools");
-if(!deepTools||!/\sopen(?:\s|=|>)/.test(deepTools)){
-  throw Error("deep link did not reopen the folded delta sandbox: "+deep.url);
+if(!deepTools||/\sopen(?:\s|=|>)/.test(deepTools)||
+   !deep.dom.includes('id="near-recurrence-detail"')||
+   !deep.dom.includes('id="near-recurrence-chart"')){
+  throw Error("long-horizon chart must stay visible outside the closed delta sandbox: "+deep.url);
 }
+requireTokens(deep,[
+  'data-near-chart-y-unit="hours"',
+  'data-near-chart-candidate-count="41"',
+  'class="near-grid-line"',
+  'class="near-axis-label near-y-label"',
+  '十二節最大形狀殘差',
+  '橫軸：距基準的 Δ 年數（千年）',
+  '最接近基準的 6 組',
+  'data-phase-preview="gregorian"',
+  '外圈 · 公曆 400 年',
+  '中圈 · 年序 60 年',
+  '內圈 · 日序 60 日'
+],"readable phase legend and long-horizon hour/Δ axes");
 
 console.log("[seasonal-drift-evidence] PASS fixed +24k story stays visible across delta sandbox states");

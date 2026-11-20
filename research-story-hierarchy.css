@@ -1,0 +1,509 @@
+/* Research reading composition P1. This is a structural pass, not a new
+   calendar or astronomy model: the original interactive data and SVG remain.
+   Move the actual verdict next to its label; reduce whitespace that was
+   previously mistaken for a visual hierarchy. No gradients or new palette. */
+
+/* 01: the two main milestones remain the proof. The intermediate checks are
+   legible compact supporting evidence, not three weak 86px empty panels. */
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+  min-height:148px;
+  padding:16px 18px;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
+  font-size:clamp(30px,3.25vw,43px);
+  line-height:1.08;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+  min-height:148px;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
+  min-height:0;
+  padding:10px 1px 8px;
+  opacity:1;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > strong {
+  font-size:17px;
+  color:#c0cdd2;
+  line-height:1.22;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > small {
+  display:block;
+  margin-top:5px;
+  color:#aebdc2;
+  font-size:11.5px;
+  line-height:1.4;
+}
+
+/* 02: conclude the zero-line proof with a bridge to the actual pillar test,
+   not a second set of instructions to read the already-visible figure. */
+#research-astronomy .seasonal-drift-evidence-note {
+  max-width:86ch;
+  color:#b6c1c5;
+  font-size:12.5px;
+  line-height:1.6;
+}
+#research-astronomy .seasonal-drift-evidence-note strong {
+  color:#d5e0e0;
+}
+
+/* 03: replace tall showcase cells with an evidence matrix.
+   The actual computed statuses and reasons stay adjacent to each pillar. */
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid {
+  align-items:stretch;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card {
+  min-height:0;
+  padding:15px 16px 18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
+  margin-top:0;
+  font-size:clamp(22px,1.8vw,28px);
+  line-height:1.2;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
+  margin-top:10px;
+  padding-top:0;
+  font-size:14px;
+  line-height:1.4;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p {
+  margin-top:6px;
+  font-size:12.5px;
+  line-height:1.6;
+  color:#b6c5ca;
+}
+#research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-foot {
+  font-size:12.5px;
+  line-height:1.6;
+  color:#b8c5c9;
+}
+
+@media(max-width:820px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+    min-height:0;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+    min-height:0;
+  }
+}
+@media(max-width:480px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+    padding:13px 14px;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
+    font-size:clamp(27px,7vw,32px);
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
+    min-height:0;
+    padding:10px 0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card {
+    min-height:0;
+    padding:13px 12px 16px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
+    font-size:24px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
+    margin-top:9px;
+    font-size:13px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p {
+    font-size:12px;
+  }
+}
+
+
+/* Research 01 milestones above the fold are controls, not a duplicate
+   two-card conclusion. Keep the same button semantics and shared delta. */
+.research-question-intro .research-entry-choices { display:flex; flex-wrap:wrap; gap:0; }
+.research-question-intro .research-entry-choice {
+  flex:1 1 240px;
+  display:flex; flex-wrap:wrap; align-items:baseline; align-content:center;
+  column-gap:8px; row-gap:3px; min-height:52px; padding-block:8px;
+}
+.research-question-intro .research-entry-choice > strong { font-size:17px; }
+.research-question-intro .research-entry-choice > span { flex:1 1 145px; }
+
+/* Research 02 uses a fixed 2026–26026 model, unlike the editable 01
+   year/delta owner. Explain this BEFORE the fixed evidence begins. */
+#research-astronomy .research-case-transition {
+  margin:0 0 15px; padding:12px 0 12px 12px;
+  border-left:2px solid var(--research-candidate);
+  display:grid; gap:5px; max-width:88ch;
+  color:#b5c2c7; font-size:12.5px; line-height:1.6;
+}
+#research-astronomy .research-case-transition strong { color:#dfebe9; font-size:12.5px; }
+#research-astronomy .research-case-transition b { color:#e2c794; font-weight:650; }
+#research-astronomy .research-model-scope {
+  max-width:88ch; margin:12px 0; padding:8px 0;
+  color:#b6c4c9; font-size:12px; line-height:1.6;
+  border-bottom:1px solid var(--research-line-subtle);
+}
+#research-astronomy .research-model-scope strong { color:#d3dedf; }
+
+/* Preserve the interactive SVG, and offer a true native keyboard/touch
+   selector. Do not intercept its native arrow keys via the parent section. */
+#research-astronomy .seasonal-boundary-keyboard {
+  grid-column:1 / -1;
+  display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap;
+  gap:8px; margin:8px 0 0; color:#b6c4c9; font-size:11.5px; line-height:1.4;
+}
+#research-astronomy .seasonal-boundary-keyboard select {
+  color:#e2e8e8; background:#182127; border:1px solid #64747b;
+  border-radius:4px; padding:8px 10px; max-width:100%; min-height:38px;
+  font:inherit; font-size:12px;
+}
+#research-astronomy .seasonal-boundary-keyboard select:focus-visible {
+  outline:2px solid #c5d5d9; outline-offset:2px;
+}
+
+/* Keep 02 zero-line verdict before the OPTIONAL explanation. */
+#research-astronomy .seasonal-drift-orbit-details {
+  margin-top:14px;
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-subtle);
+}
+#research-astronomy .seasonal-drift-orbit-details > summary {
+  cursor:pointer; padding:12px 0;
+  display:flex; flex-wrap:wrap; align-items:center;
+  gap:5px 20px; color:#c4d0d2; font-size:12px; line-height:1.5;
+}
+#research-astronomy .seasonal-drift-orbit-details > summary strong {
+  margin-left:auto; color:#9aabb1; font-size:11px; font-weight:520;
+}
+#research-astronomy .seasonal-drift-orbit-details[open] .seasonal-drift-orbit-explainer { margin-top:4px; }
+#research-astronomy .seasonal-drift-orbit-details > summary:focus-visible {
+  outline:2px solid #c5d5d9; outline-offset:2px;
+}
+@media(max-width:480px) {
+  .research-question-intro .research-entry-choice { flex-basis:100%; min-height:0; padding:8px 2px; }
+  .research-question-intro .research-entry-choice + .research-entry-choice {
+    border-left:0; border-top:1px solid var(--research-line-subtle); padding-left:2px;
+  }
+  #research-astronomy .research-case-transition { padding:10px 0 10px 10px; font-size:12px; }
+  #research-astronomy .research-model-scope { font-size:11.5px; }
+  #research-astronomy .seasonal-boundary-keyboard { justify-content:flex-start; }
+  #research-astronomy .seasonal-boundary-keyboard select { flex:1 1 200px; }
+  #research-astronomy .seasonal-drift-orbit-details > summary strong { margin-left:0; }
+}
+
+
+/* Research 01: the interactive top choices already select the same milestones
+   that the derivation renders. Suppress redundant small-screen copy, not
+   the state, buttons, data, or original year/day controls. */
+#research-discrete > .research-discrete-scope { display:none; }
+@media(max-width:820px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-condition-route {
+    display:none;
+  }
+}
+@media(max-width:480px) {
+  .research-question-intro .research-entry-choice > small { display:none; }
+  .research-question-intro .research-entry-label { font-size:12px; }
+  .research-question-intro .research-entry-choice > span { font-size:12px; }
+  .research-question-intro .research-entry-choice > strong { font-size:19px; }
+  .research-question-intro .research-entry-selection { font-size:12px; }
+
+  /* Research 03: the 2-column forks made actual model qualifications 8.5px.
+     Use wide evidence rows; each label, verdict, and condition reads in order. */
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head h3 {
+    font-size:20px;
+    line-height:1.32;
+  }
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-head p {
+    font-size:13px;
+    line-height:1.62;
+  }
+  #research-evidence .research-fork-source { font-size:12px; padding-block:9px; }
+  #research-evidence .research-alignment-fork {
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    margin-top:10px;
+  }
+  #research-evidence .research-alignment-fork article {
+    padding:12px 10px 13px;
+    border-bottom:1px solid var(--research-line-subtle);
+  }
+  #research-evidence .research-alignment-fork span { font-size:12px; line-height:1.5; }
+  #research-evidence .research-alignment-fork strong { font-size:17px; line-height:1.4; margin-top:4px; }
+  #research-evidence .research-alignment-fork small {
+    font-size:13px;
+    line-height:1.6;
+    margin-top:6px;
+    color:#b1bfc3;
+  }
+  #research-evidence .absolute-boundary-consequence[data-diagram-grammar="alignment-fork"] .absolute-boundary-note {
+    font-size:13px;
+    line-height:1.6;
+  }
+
+  /* 1-column pillar results: do not shrink the justification to fit two
+     180px cards. Each status stays close to the specific year/month/day/hour. */
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid {
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card {
+    min-height:0;
+    padding:12px 10px 13px;
+    border-left:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header {
+    display:flex;
+    align-items:baseline;
+    justify-content:flex-start;
+    gap:8px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span {
+    font-size:11px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
+    font-size:21px;
+    line-height:1.28;
+    margin-top:0;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
+    font-size:15px;
+    line-height:1.48;
+    margin-top:7px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p {
+    font-size:13px;
+    line-height:1.6;
+    margin-top:6px;
+  }
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-verdict small,
+  #research-evidence .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-foot {
+    font-size:13px;
+    line-height:1.6;
+  }
+}
+
+
+/* Research 01 narrative hierarchy: +local and +24,000 are the always-visible
+   comparison. Intermediate calendar checks remain interactive, but are
+   supplemental evidence in the SAME state and DOM. */
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-structural-milestones {
+  grid-column:1 / -1;
+  grid-row:2;
+  min-width:0;
+  margin-top:8px;
+  border-top:1px solid var(--research-line-subtle);
+  border-bottom:1px solid var(--research-line-subtle);
+}
+#research-discrete .research-structural-milestones > summary {
+  cursor:pointer;
+  min-height:44px;
+  padding:10px 8px;
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:4px 14px;
+  color:#bdcdd1;
+  font-size:12.5px;
+  line-height:1.45;
+}
+#research-discrete .research-structural-milestones > summary small {
+  margin-left:auto;
+  color:#9aaeb5;
+  font-size:11.5px;
+  line-height:1.5;
+}
+#research-discrete .research-structural-milestones > summary:focus-visible {
+  outline:2px solid #c5d5d9;
+  outline-offset:2px;
+}
+#research-discrete .research-structural-milestone-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  padding:5px 7px 12px;
+}
+#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"]
+.research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"] {
+  grid-column:auto;
+  grid-row:auto;
+  min-height:0;
+  padding:10px 9px;
+}
+#research-discrete .research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"]:focus-visible {
+  outline:2px solid #c5d5d9;
+  outline-offset:2px;
+}
+
+/* A causal transition, not a 150px visual spacer. The +local→+24k bridge
+   stays the SAME generated state and its exact signed phase is preserved. */
+@media(max-width:820px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-structural-milestones {
+    grid-column:1 / -1;
+    grid-row:4;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+    display:grid;
+    grid-template-columns:22px minmax(0,1fr);
+    gap:2px 10px;
+    justify-content:stretch;
+    align-items:start;
+    min-height:0;
+    padding:12px 10px;
+    text-align:left;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge::before {
+    display:none;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge::after {
+    grid-column:1;
+    grid-row:1 / span 3;
+    content:"↓";
+    align-self:start;
+    margin:0;
+    font-size:17px;
+    line-height:1.2;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > span {
+    grid-column:2;
+    grid-row:1;
+    font-size:12px;
+    line-height:1.45;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > strong {
+    grid-column:2;
+    grid-row:2;
+    font-size:16px;
+    line-height:1.35;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > small {
+    grid-column:2;
+    grid-row:3;
+    font-size:11.5px;
+    line-height:1.5;
+  }
+  #research-discrete .research-structural-milestone-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:480px) {
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin {
+    margin:10px 0 12px;
+    padding:9px 0;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin > small {
+    display:none;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin > strong {
+    font-size:12.5px;
+    line-height:1.4;
+  }
+  #research-discrete .research-structural-milestones > summary {
+    padding:10px 5px;
+    font-size:12.5px;
+  }
+  #research-discrete .research-structural-milestones > summary small {
+    margin-left:0;
+    font-size:11.5px;
+  }
+  #research-discrete .research-structural-milestone-grid {
+    grid-template-columns:1fr;
+    gap:0;
+    padding:0 4px 10px;
+  }
+  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"]
+  .research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"] {
+    padding:9px 6px;
+    border-bottom:1px solid var(--research-line-subtle);
+  }
+  #research-discrete .research-discrete-explorer-intro {
+    margin:8px 0 12px;
+    font-size:12px;
+    line-height:1.6;
+    color:#aabac1;
+  }
+}
+
+
+/* Research claim audit: make the missing arithmetic a readable part of the
+   main proof rather than burying the 8,000-year derivation in a disclosure. */
+#research-discrete .research-discrete-proof-equation {
+  margin:15px 0 5px;
+  padding:10px 12px;
+  border-left:2px solid var(--research-candidate);
+  color:#bfccd1;
+  font-size:13px;
+  line-height:1.68;
+  max-width:89ch;
+}
+#research-discrete .research-discrete-proof-equation strong {
+  display:block;
+  color:#e2e8e8;
+  font-size:13px;
+  line-height:1.45;
+  margin-bottom:3px;
+}
+/* Date-only chooser selects the target and preserves Delta by recalculating
+   its baseline. Its explanation must not be interpreted as another control. */
+#research-discrete .research-year-head .research-target-date-help {
+  display:block;
+  grid-column:1 / -1;
+  max-width:84ch;
+  font-size:11.5px;
+  font-weight:400;
+  line-height:1.55;
+  color:#aebcc0;
+}
+/* Source and model scope are visible before reading the impressive 12/12. */
+#research-astronomy .research-model-scope {
+  margin:8px 0 11px;
+  padding:8px 0;
+  font-size:12.5px;
+  line-height:1.65;
+}
+#research-astronomy .seasonal-boundary-proof-head strong {
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.4;
+}
+#research-astronomy .seasonal-boundary-proof-head p {
+  max-width:88ch;
+  font-size:12.5px;
+  line-height:1.6;
+}
+/* Read the conditional scientific claim as prose, not as decorative meta. */
+#research-evidence .determinacy-panel .determinacy-verdict span {
+  font-size:12px;
+  line-height:1.5;
+  white-space:normal;
+}
+#research-evidence .determinacy-panel .determinacy-verdict small {
+  max-width:86ch;
+  line-height:1.65;
+}
+@media(max-width:480px) {
+  #research-discrete .research-discrete-proof-equation {
+    font-size:13px;
+    line-height:1.65;
+    margin:12px 0 5px;
+    padding:9px 10px;
+  }
+  #research-discrete .research-year-head .research-target-date-help {
+    font-size:12px;
+    line-height:1.6;
+  }
+  #research-astronomy .research-model-scope,
+  #research-astronomy .seasonal-boundary-proof-head p {
+    font-size:12.5px;
+  }
+}
