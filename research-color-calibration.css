@@ -329,8 +329,8 @@ body {
   border-bottom-color: var(--research-line-soft);
 }
 .determinacy-label,
-.proof-chain-head h2,
-.epoch-audit-head h2 { color: #b5c1c4; }
+.proof-chain-head h2, .proof-chain-head h3,
+.epoch-audit-head h2, .epoch-audit-head h3 { color: #b5c1c4; }
 .determinacy-scope {
   border-left-color: color-mix(in srgb, var(--research-evidence) 34%, transparent);
 }

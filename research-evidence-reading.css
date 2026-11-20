@@ -109,3 +109,25 @@
   #research-evidence .determinacy-panel .determinacy-card:nth-child(odd) { padding-left:0; }
   #research-evidence .determinacy-panel .determinacy-card:nth-child(even) { padding-left:12px; }
 }
+
+/* Repair D4: one heading scale across Research — H1 > section H2 > H3 >
+   disclosure headings. Section ids give enough specificity to override the
+   per-component sizes that previously made H3 (30px) larger than H2 (24px). */
+#research-discrete .research-task-head h2,
+#research-astronomy .research-task-head h2,
+#research-evidence .research-task-head h2 {
+  color: var(--research-text-primary);
+  font-size: var(--type-section);
+  line-height: 1.2;
+}
+#research-discrete h3,
+#research-astronomy h3,
+#research-evidence h3 {
+  font-size: clamp(1.25rem, 2vw, 1.375rem);
+  line-height: 1.3;
+}
+#research-evidence .proof-chain-head h3,
+#research-evidence .epoch-audit-head h3 {
+  font-size: var(--type-subsection);
+  color: var(--research-text-secondary);
+}

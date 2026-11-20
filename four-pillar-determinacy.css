@@ -67,7 +67,7 @@
   align-items:center;
 }
 .proof-chain-head .eyebrow { display:none; }
-.proof-chain-head h2 { margin:0; font-size:13px; line-height:1.3; letter-spacing:-.01em; font-weight:650; color:#abb5ae; }
+.proof-chain-head h2, .proof-chain-head h3 { margin:0; font-size:13px; line-height:1.3; letter-spacing:-.01em; font-weight:650; color:#abb5ae; }
 .proof-chain-head p { display:none; }
 .proof-chain-blocker { padding-left:12px; border-left:2px solid rgba(191,147,117,.38); }
 .proof-chain-blocker span { display:block; color:#6f7871; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }

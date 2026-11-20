@@ -333,7 +333,7 @@ function ensurePanel() {
     <div class="proof-chain-head">
       <div>
         <div class="eyebrow">Day / Hour resolution proof chain</div>
-        <h2>要把日柱、時柱解鎖，真正缺的是哪一層？</h2>
+        <h3>要把日柱、時柱解鎖，真正缺的是哪一層？</h3>
         <p>這裡把 seasonal TT anchors、target instant reference basis、Earth rotation，以及 Day / Hour 的 local clock convention 分開。4006 有節氣 anchors，不代表 recurrence 已經有可投影的 TT / UT1 target instant。</p>
       </div>
       <div class="proof-chain-blocker">
@@ -366,7 +366,7 @@ function ensureEpochAuditPanel() {
     <div class="epoch-audit-head">
       <div>
         <div class="eyebrow">Absolute seasonal epoch · source audit</div>
-        <h2>知道節氣時刻，不等於知道當天的精確時間。</h2>
+        <h3>知道節氣時刻，不等於知道當天的精確時間。</h3>
         <p>這裡只稽核 source/provider 能否提供 absolute seasonal anchors。direct-event runtime 的 canonical crossings 與 recurrence 的 typed target-instant reference basis 是不同能力；後者必須由 target-instant contract 明示，不從 anchors 推定。</p>
       </div>
       <div class="epoch-audit-summary">
