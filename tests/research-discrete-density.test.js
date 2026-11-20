@@ -413,7 +413,11 @@ test("R16 primary panel previews the canonical signed phase above the visible fa
   assert.match(view, /基準 · 非重遇/);
   assert.match(view, /離散候選 · 待驗節界/);
   assert.match(view, /observer\.observe\(instrument/);
-  assert.match(css, /\.research-phase-fan-panel > header \.phase-fan-preview/);
+  assert.match(css, /\.research-phase-fan-panel \.phase-fan-preview/);
+  assert.match(view, /外圈 · 公曆 400 年/);
+  assert.match(view, /中圈 · 年序 60 年/);
+  assert.match(view, /內圈 · 日序 60 日/);
+  assert.match(view, /回到零位/);
   assert.doesNotMatch(view, /function updatePhaseFanPreview[\s\S]*?function bindPhaseFanPreview\([\s\S]*?recurrenceState\(/);
 });
 
