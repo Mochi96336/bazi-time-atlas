@@ -2175,73 +2175,88 @@
   color: #a2b0b7;
 }
 
-/* The signed-phase legend stays above the always-visible instrument.
-   The real zero seam, sector angles and marker palette remain untouched. */
+/* The primary figure has one quiet reading key, not a second instrument.
+   Order matches the actual fan geometry: outer 400, middle 60, inner 60.
+   Monochrome track rules distinguish depth without introducing new hues. */
 .research-phase-fan-panel > header {
   display:grid;
-  grid-template-columns:minmax(98px,1fr) auto;
-  align-items:center;
-  gap:10px;
-  min-height:44px;
-  padding:7px 2px;
-  border-bottom:1px solid rgba(238,242,237,.045);
+  gap:11px;
+  padding:11px 2px 12px;
+  border-bottom:1px solid rgba(238,242,237,.07);
 }
-.research-phase-fan-panel > header .phase-fan-preview-title {
+.research-phase-fan-panel .phase-fan-preview-heading {
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  gap:5px 12px;
+}
+.research-phase-fan-panel .phase-fan-preview-title {
   margin:0;
-  display:grid;
-  gap:3px;
   color:#c7d1d5;
   font-size:12px;
-  line-height:1.2;
+  line-height:1.3;
+  font-weight:650;
 }
-.research-phase-fan-panel > header .phase-fan-preview-title small {
-  color:#8b9ba3;
-  font-size:10px;
-  font-weight:500;
-  line-height:1.2;
-}
-.research-phase-fan-panel > header .phase-fan-preview {
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-  gap:12px;
-  color:#a3b3b9;
+.research-phase-fan-panel #phase-fan-preview-context {
+  color:#94a5ad;
   font-size:11px;
-  font-weight:550;
+  line-height:1.4;
+}
+.research-phase-fan-panel .phase-fan-preview {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
   font-variant-numeric:tabular-nums;
 }
-.research-phase-fan-panel > header .phase-fan-preview > span {
-  display:inline-flex;
-  align-items:center;
+.research-phase-fan-panel .phase-fan-preview > span {
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:baseline;
   gap:5px;
-  white-space:nowrap;
+  padding-top:8px;
+  border-top:2px solid #63727b;
+}
+.research-phase-fan-panel .phase-fan-preview > span[data-phase-preview="year"] { border-top-color:#899aa5; }
+.research-phase-fan-panel .phase-fan-preview > span[data-phase-preview="day"] { border-top-color:#b1c0c8; }
+.research-phase-fan-panel .phase-fan-track {
+  grid-column:1 / -1;
+  color:#a9b8c0;
   font-size:11px;
-  font-weight:550;
-  letter-spacing:0;
+  line-height:1.35;
 }
-.research-phase-fan-panel > header .phase-fan-preview em {
-  color:#8da0a9;
-  font-size:12px;
+.research-phase-fan-panel .phase-fan-preview em {
+  min-width:0;
+  color:#b3bec5;
+  font-size:18px;
+  line-height:1.2;
   font-style:normal;
-  font-weight:680;
+  font-weight:700;
 }
-.research-phase-fan-panel > header .phase-fan-preview [data-phase-state="zero"] em {
+.research-phase-fan-panel .phase-fan-phase-state {
+  color:#8c9ba4;
+  font-size:10px;
+  line-height:1.2;
+  text-align:right;
+  white-space:nowrap;
+}
+.research-phase-fan-panel .phase-fan-preview [data-phase-state="zero"] em,
+.research-phase-fan-panel .phase-fan-preview [data-phase-state="zero"] .phase-fan-phase-state {
   color:var(--research-fan-datum,#dce5e3);
-  font-weight:800;
 }
-.research-phase-fan-panel > header .phase-fan-preview [data-phase-state="unknown"] em {
-  color:#6d7980;
+.research-phase-fan-panel .phase-fan-preview [data-phase-state="unknown"] em,
+.research-phase-fan-panel .phase-fan-preview [data-phase-state="unknown"] .phase-fan-phase-state {
+  color:#718088;
 }
 @media(max-width:480px) {
-  .research-phase-fan-panel > header {
-    grid-template-columns:minmax(0,1fr);
-    gap:6px;
-  }
-  .research-phase-fan-panel > header .phase-fan-preview { gap:7px;justify-content:flex-start; }
-  .research-phase-fan-panel > header .phase-fan-preview > span { font-size:10px;gap:3px; }
-  .research-phase-fan-panel > header .phase-fan-preview em { font-size:11px; }
-  .research-phase-fan-panel > header .phase-fan-preview-title small { font-size:9px; }
+  .research-phase-fan-panel > header { gap:9px;padding:10px 2px 11px; }
+  .research-phase-fan-panel .phase-fan-preview { gap:7px; }
+  .research-phase-fan-panel .phase-fan-preview > span { gap:4px;padding-top:7px; }
+  .research-phase-fan-panel .phase-fan-track { font-size:10px; }
+  .research-phase-fan-panel .phase-fan-preview em { font-size:16px; }
+  .research-phase-fan-panel .phase-fan-phase-state { font-size:9px; }
+  .research-phase-fan-panel #phase-fan-preview-context { font-size:10px; }
 }
 
 /* Arrival is a short, one-off confirmation on an existing exact zero marker.
