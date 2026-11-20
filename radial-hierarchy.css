@@ -499,15 +499,4 @@
   #solar-track .term-label.active-cycle-label { font-size: 15.5px; }
   #kinetic-instrument:not([data-classification-overlay="on"]) #zodiac-track .active-cycle-label { font-size: 15.5px; }
 }
-
-/* Repair E2: boundary-crossing flash on the active read-head label. */
-@keyframes read-head-crossing {
-  0% { fill: var(--cursor); opacity: .55; }
-  35% { fill: var(--cursor); opacity: 1; }
-  100% { opacity: 1; }
-}
-.active-cycle-label.is-crossing { animation: read-head-crossing 700ms ease-out; }
-@media (prefers-reduced-motion: reduce) {
-  .active-cycle-label.is-crossing { animation: none; }
-}
 }

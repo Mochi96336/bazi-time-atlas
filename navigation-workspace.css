@@ -325,4 +325,16 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   .mobile-time-dock .mobile-time-actions #mobile-now-button,
   .mobile-time-dock .mobile-time-actions #mobile-time-apply { min-height:44px !important; min-width:44px !important; font-size:12px !important; }
 }
+
+/* The dial is focusable for keyboard time moves (E6). A focus ring around the
+   whole 1200x760 SVG reads as a stray white frame and repaints the wheel layer,
+   so keyboard focus is shown on the selected-instant readout instead. */
+#kinetic-wheel:focus,
+#kinetic-wheel:focus-visible { outline:none; }
+#kinetic-instrument:has(#kinetic-wheel:focus-visible) #instant-readout {
+  text-decoration:underline;
+  text-decoration-color:var(--site-focus, #e4d9ad);
+  text-decoration-thickness:2px;
+  text-underline-offset:7px;
+}
 }

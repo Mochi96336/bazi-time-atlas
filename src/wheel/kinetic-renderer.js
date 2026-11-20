@@ -32,14 +32,12 @@ const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
 // Repair B4: SVG-unit gap between the gold read-head line and the active
 // label, so the line no longer strikes through the first glyph.
 const READ_HEAD_LABEL_GAP = 6;
-const BOUNDARY_FLASH_GAP_MS = 700;
 
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
   const cycleStaticLabels = new Map();
   const activeCycleLabels = new Map();
   const crowdedCycleLabels = new Map();
-  const lastBoundaryFlash = new Map();
   const activeLabelFontCache = new WeakMap();
   const activeCycleIndices = new Map();
   const lastActiveCycleIndex = new Map();
@@ -274,17 +272,16 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     activeCycleLabels.set(id, activeLabel);
   }
 
-  // Repair E2: a pillar change briefly lights its read-head label. Shared
-  // boundaries (立春 changes Year and Month) light together. Each ring flashes
-  // at most once per BOUNDARY_FLASH_GAP_MS so fast playback cannot strobe.
-  function flashBoundaryCrossing(id, node) {
-    const now = performance.now();
-    if (now - (lastBoundaryFlash.get(id) ?? -Infinity) < BOUNDARY_FLASH_GAP_MS) return;
-    lastBoundaryFlash.set(id, now);
-    node.classList.remove("is-crossing");
-    // Restart the CSS animation on the same element.
-    void node.getBBox?.();
-    node.classList.add("is-crossing");
+  function setCrowdedLabel(id, label) {
+    const previous = crowdedCycleLabels.get(id) ?? null;
+    if (previous === label) return;
+    previous?.classList.remove("is-active-crowded");
+    if (label) {
+      label.classList.add("is-active-crowded");
+      crowdedCycleLabels.set(id, label);
+    } else {
+      crowdedCycleLabels.delete(id);
+    }
   }
 
   function activeLabelFontUnits(node) {
@@ -305,13 +302,9 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     if (Number.isInteger(previousIndex) && indexChanged) {
       staticLabels?.get(previousIndex)?.classList.remove("is-active-shadowed");
     }
-    const crowded = crowdedCycleLabels.get(id);
-    if (crowded) {
-      crowded.classList.remove("is-active-crowded");
-      crowdedCycleLabels.delete(id);
-    }
 
     if (!Number.isInteger(activeIndex) || activeIndex < 0 || activeIndex >= sexagenary.length) {
+      setCrowdedLabel(id, null);
       node.setAttribute("visibility", "hidden");
       node.removeAttribute("data-cycle-index");
       node.removeAttribute("data-cycle-label");
@@ -346,7 +339,6 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       node.textContent = label;
       staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
       lastActiveCycleIndex.set(id, activeIndex);
-      if (Number.isInteger(previousIndex)) flashBoundaryCrossing(id, node);
     }
     // Repair B4: the read-head label starts at the datum and runs toward the
     // next sector. When it would reach that sector's resting label, hide the
@@ -357,13 +349,9 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const gapUnits = gapDegrees * Math.PI / 180 * radius;
     const fontUnits = activeLabelFontUnits(node);
     const needed = READ_HEAD_LABEL_GAP + label.length * fontUnits * 1.05 + fontUnits * 1.2;
-    if (gapUnits < needed) {
-      const nextLabel = staticLabels?.get(nextIndex);
-      if (nextLabel) {
-        nextLabel.classList.add("is-active-crowded");
-        crowdedCycleLabels.set(id, nextLabel);
-      }
-    }
+    // Only touch classes when the crowded label changes: per-frame class
+    // churn invalidates style for the whole wheel while it is being dragged.
+    setCrowdedLabel(id, gapUnits < needed ? staticLabels?.get(nextIndex) ?? null : null);
   }
 
   function updateActiveAnnualLabel(kind, activeIndex, coordinate) {
