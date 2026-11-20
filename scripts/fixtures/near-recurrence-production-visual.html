@@ -56,6 +56,12 @@
         const realWidth=chart.getBoundingClientRect().width;
         const intrinsicWidth=chart.viewBox.baseVal.width;
         const chartKey=doc.querySelector(".near-chart-meta strong")?.textContent||"";
+        const panelLeft=panel.getBoundingClientRect().left;
+        const headingLeft=panel.querySelector(".near-search-copy")?.getBoundingClientRect().left??panelLeft;
+        const readingInset=headingLeft-panelLeft;
+        if(width<=480 && (readingInset<9.5 || readingInset>11))
+          throw Error("Mobile near-search text needs a 10px inset from its existing panel edge: "+
+            JSON.stringify({width,panelLeft,headingLeft,readingInset}));
         if(axisPx<10.5 || maxRowHeight<44 || Math.abs(realWidth-intrinsicWidth)>2 ||
           panel.scrollWidth>panel.clientWidth+2 ||
           !chartKey.includes("小時") || !chartKey.includes("最大形狀殘差"))
@@ -70,6 +76,7 @@
         win.scrollTo({top:Math.max(0,panelTop-75),behavior:"instant"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
+        probe.dataset.readingInset=String(readingInset);
         probe.dataset.axisPx=String(axisPx);
         probe.dataset.rankingTouchHeight=String(maxRowHeight);
         probe.dataset.chartWidth=String(realWidth);
