@@ -176,12 +176,14 @@ function expectDiscreteComprehension(dom, url) {
 function expectPhaseFanPreview(dom, { selected, values, context }, url) {
   const detail = tagById(dom,"discrete-phase-fan-details");
   if (attr(detail,"data-phase-preview-status") !== context) {
-    throw new Error(`Phase fan disclosure misclassifies ${selected} as ${attr(detail,"data-phase-preview-status")}: ${url}`);
+    throw new Error(`Visible phase fan panel misclassifies ${selected} as ${attr(detail,"data-phase-preview-status")}: ${url}`);
   }
   for (const [key, expected] of Object.entries(values)) {
-    const line = dom.match(new RegExp(`<span[^>]*data-phase-preview="${key}"[^>]*>[^<]*<em>[^<]*<\\/em><\\/span>`))?.[0] ?? "";
-    if (!line || !line.includes(`<em>${expected}</em>`)) {
-      throw new Error(`Phase fan preview ${key} should show ${expected}: ${url}`);
+    // Each phase now contains its ring label and state alongside the value.
+    // Assert the canonical signed number, not the former flat span markup.
+    const value = dom.match(new RegExp(`<span[^>]*data-phase-preview="${key}"[^>]*>[\\s\\S]*?<em>([^<]*)<\\/em>`))?.[1] ?? null;
+    if (value !== expected) {
+      throw new Error(`Phase fan preview ${key} should show ${expected}, got ${value}: ${url}`);
     }
   }
   if (selected === 0 && !dom.includes("基準 · 非重遇")) {
