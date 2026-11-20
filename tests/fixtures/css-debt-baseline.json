@@ -84,11 +84,6 @@
     "hexColors": 1,
     "smallFonts": 0
   },
-  "hidden-stems.css": {
-    "important": 0,
-    "hexColors": 4,
-    "smallFonts": 8
-  },
   "instrument-first.css": {
     "important": 0,
     "hexColors": 3,
@@ -144,6 +139,11 @@
     "hexColors": 19,
     "smallFonts": 0
   },
+  "pillar-proof-flow.css": {
+    "important": 0,
+    "hexColors": 0,
+    "smallFonts": 0
+  },
   "pillar-relations.css": {
     "important": 0,
     "hexColors": 25,
@@ -197,6 +197,11 @@
   "research-discrete-density.css": {
     "important": 12,
     "hexColors": 96,
+    "smallFonts": 0
+  },
+  "research-drift-accumulation.css": {
+    "important": 0,
+    "hexColors": 0,
     "smallFonts": 0
   },
   "research-entry.css": {
