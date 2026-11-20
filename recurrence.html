@@ -40,7 +40,8 @@
       <div class="research-question-copy">
         <h1 id="research-question-title">八字多久會重複一次？</h1>
         <p class="lede">四柱都落在六十甲子序列上，但不是四個彼此獨立、可以任意錯開的轉盤。</p>
-        <p class="research-question-next"><span>所以先找</span><strong>年柱 × 日柱</strong><span>何時重遇；+24,000 年只先算離散候選，不直接等同完整四柱週期。</span></p>
+        <p class="research-question-next"><span>所以先找</span><strong>年柱 × 日柱</strong><span>何時<a class="research-term" href="#term-recurrence">重遇</a>；+24,000 年只先算<a class="research-term" href="#term-discrete">離散候選</a>，不直接等同完整四柱週期。</span></p>
+        <p class="research-glossary-link"><a href="#research-glossary">看不懂名詞？頁尾有白話解釋 ↓</a></p>
       </div>
 
       <div class="research-alignment-map research-question-aside" role="group" aria-label="年月與日時在相同節令或時辰下的固定對齊關係">
@@ -132,7 +133,7 @@
       <section id="research-discrete-thesis" class="research-discrete-thesis" data-diagram-grammar="condition-ladder" aria-labelledby="research-discrete-thesis-title">
         <header>
           <div><div class="eyebrow">離散推導</div><h3 id="research-discrete-thesis-title">先看局部重遇缺哪一層，再把條件補滿</h3></div>
-          <p>讀法：每圈的 0 只代表該循環序位回到起點；正負數是相對起點的最短位移，不是節氣提前或延後的天數。公曆 400 年結構只是日曆代理，真正的十二節界要到 02 檢查。</p>
+          <p>讀法：每圈的 0 只代表該循環序位回到起點；正負數是相對起點的最短位移，不是節氣提前或延後的天數。公曆 400 年結構只是日曆<a class="research-term" href="#term-proxy">代理</a>，真正的<a class="research-term" href="#term-jie">十二節</a>界要到 02 檢查。</p>
         </header>
         <div class="research-condition-route" aria-label="局部重遇到 24,000 年離散候選的主閱讀路徑">
           <strong id="research-discrete-route-local">局部重遇</strong>
@@ -545,6 +546,25 @@
 
       <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian/TT reference lattice 的 10–14 天位移與節界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區，以及由民用時刻定義的完整四柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
     </section>
+
+    <section id="research-glossary" class="research-glossary" aria-labelledby="research-glossary-title">
+      <h2 id="research-glossary-title">名詞解釋</h2>
+      <p class="research-glossary-lead">這頁用到的專有名詞，用白話說明。</p>
+      <dl>
+        <div id="term-ganzhi"><dt>干支／六十甲子</dt><dd>10 個天干和 12 個地支輪流配對，共 60 組，用完一輪再從「甲子」開始。年、月、日、時各自都用這 60 組在輪。</dd></div>
+        <div id="term-pillars"><dt>四柱</dt><dd>用年、月、日、時各一組干支，描述一個時間點，例如「丙午年、丁酉月、辛卯日、壬辰時」。</dd></div>
+        <div id="term-jie"><dt>節（十二節）</dt><dd>一年裡 12 個換月的時間點，例如立春、驚蟄、清明。八字的月份是在「節」的那一刻換，不是在每月 1 號換。</dd></div>
+        <div id="term-lichun"><dt>立春</dt><dd>十二節的第一個，也是八字「換年」的時刻，所以立春同時換年柱和月柱。</dd></div>
+        <div id="term-longitude"><dt>太陽黃經</dt><dd>太陽在一年循環裡走到哪個位置，用 0° 到 360° 表示。每走 15° 就是一個節氣。</dd></div>
+        <div id="term-recurrence"><dt>重遇</dt><dd>兩個（或多個）各自在輪的循環，同時回到和起點一樣的位置。</dd></div>
+        <div id="term-discrete"><dt>離散候選</dt><dd>只用整數曆法（公曆的閏年規則、60 年、60 日）算出來「看起來會重複」的年數。還沒用真實天文檢查，所以叫候選。</dd></div>
+        <div id="term-proxy"><dt>公曆代理</dt><dd>用公曆日期來近似「季節位置」。公曆很好算，但它不是真正的節氣時刻，所以只能當代理，最後要用天文驗證。</dd></div>
+        <div id="term-phase"><dt>相位／序位</dt><dd>在一個循環裡走到第幾格。例如「年序 0」代表年柱回到和起點相同的那一組干支。</dd></div>
+        <div id="term-delta"><dt>Δ（相隔年數）</dt><dd>比較時間和基準時間相差多少年。Δ = 0 就是同一天，不算重複。</dd></div>
+        <div id="term-tt-ut1"><dt>TT／UT1</dt><dd>兩種天文時間標準。TT 是均勻流動的時間，UT1 跟著地球自轉走。地球自轉會慢慢變慢，所以幾千年後兩者會差很多，這會影響日柱和時柱能不能算準。</dd></div>
+      </dl>
+    </section>
+
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>

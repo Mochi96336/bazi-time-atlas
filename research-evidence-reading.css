@@ -131,3 +131,29 @@
   font-size: var(--type-subsection);
   color: var(--research-text-secondary);
 }
+
+/* Repair D3: plain-language glossary at the end of Research. */
+.research-glossary {
+  max-width: var(--research-width-narrative, 860px);
+  margin: var(--space-16, 64px) 0 var(--space-12, 48px);
+  padding-top: var(--space-8, 32px);
+  border-top: 1px solid var(--research-line-strong);
+}
+.research-glossary h2 { margin: 0; font-size: var(--type-section); color: var(--research-text-primary); }
+.research-glossary-lead { margin: var(--space-2, 8px) 0 var(--space-6, 24px); color: var(--research-text-secondary); font-size: var(--type-body); }
+.research-glossary dl { margin: 0; display: grid; gap: var(--space-4, 16px); }
+.research-glossary dl > div { scroll-margin-top: 140px; }
+.research-glossary dt { color: var(--research-text-primary); font-size: var(--type-body); font-weight: 700; }
+.research-glossary dd { margin: var(--space-1, 4px) 0 0; color: var(--research-text-secondary); font-size: var(--type-compact); line-height: 1.75; }
+.research-glossary-link { margin: var(--space-2, 8px) 0 0; font-size: var(--type-meta); }
+.research-glossary-link a {
+  display: inline-flex; align-items: center; min-height: 44px;
+  color: var(--research-current); text-decoration: underline; text-underline-offset: 3px;
+}
+.research-term {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--research-current);
+  text-underline-offset: 3px;
+}
+.research-term:hover { color: var(--research-text-primary); }

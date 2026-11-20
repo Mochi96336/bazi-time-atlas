@@ -232,10 +232,15 @@
         Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
       );
       probe.dataset.recurrenceDerivationGrammar = derivationThesis?.dataset.diagramGrammar ?? "missing";
+      // Repair D1/D2: 01 now opens with its plain-language conclusion; that
+      // conclusion must start in the first mobile viewport, and the derivation
+      // thesis must still precede the date explorer.
+      const plainConclusionRect = recurrenceDoc.querySelector('[data-plain-conclusion="01"]')?.getBoundingClientRect();
       probe.dataset.recurrenceDerivationThesisStartsInFirstViewport = String(Boolean(
+        plainConclusionRect &&
+        plainConclusionRect.top >= 0 &&
+        plainConclusionRect.top < viewportHeight &&
         derivationThesisRect &&
-        derivationThesisRect.top >= 0 &&
-        derivationThesisRect.top < viewportHeight &&
         originalStripRect &&
         derivationThesisRect.bottom <= originalStripRect.top
       ));

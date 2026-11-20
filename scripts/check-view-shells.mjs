@@ -100,7 +100,7 @@ requireEqual(attr(probe, "data-recurrence-derivation-grammar"), "condition-ladde
 requireEqual(attr(probe, "data-recurrence-local-year-day-visible"), "true", "The first local Year+Day recurrence must be visible and identified in the derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
-requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research 01 derivation thesis must start in the first mobile viewport before the date explorer", url);
+requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research 01 plain conclusion must start in the first mobile viewport and the derivation thesis must precede the date explorer", url);
 requireEqual(attr(probe, "data-recurrence-year-day-single-owner"), "true", "Single-date Year/Day evidence must keep one owner without duplicating the zero-year baseline", url);
 requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
@@ -169,7 +169,9 @@ if (
 // The large fan is now optional verification evidence. The default mobile flow
 // should pay only for one compact disclosure rail; expanded fan geometry is
 // audited by the dedicated Year-Day production check.
-if (!Number.isFinite(phaseFanHeight) || phaseFanHeight < 38 || phaseFanHeight > 48) {
+// Repair C1: the 12 px Research type floor adds a couple of pixels to the
+// collapsed rail; it must still stay one compact row.
+if (!Number.isFinite(phaseFanHeight) || phaseFanHeight < 38 || phaseFanHeight > 56) {
   throw new Error(`Research phase-fan verification rail escaped its compact range (${phaseFanHeight}px): ${url}`);
 }
 if (
@@ -200,7 +202,8 @@ if (!Number.isFinite(astronomyTransitionBottom) || !Number.isFinite(astronomyTas
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
 requireEqual(attr(probe, "data-sex-color-scheme"), "dark", "legacy Ganzhi mobile redirect left the Atlas dark instrument color scheme", url);
 requireEqual(attr(probe, "data-sex-desktop-color-scheme"), "dark", "bare legacy Sexagenary redirect left the Atlas dark instrument color scheme", url);
-if (!/^#?131915$/i.test(attr(probe, "data-birth-paper") ?? "")) {
+// Repair C2: Birth shares the site field tokens (--site-field-raised).
+if (!/^#?0e121a$/i.test(attr(probe, "data-birth-paper") ?? "")) {
   throw new Error(`Birth paper token drifted from the instrument shell (${attr(probe, "data-birth-paper")}): ${url}`);
 }
 

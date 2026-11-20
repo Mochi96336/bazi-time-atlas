@@ -2257,3 +2257,14 @@
     animation:none;
   }
 }
+
+/* Repair C1: with 12 px labels the three-column mobile row leaves the Δ
+   slider under 170 px. Give the slider its own full-width row; the title
+   (with Play) and 其他時間 share the first row. */
+@media(max-width:480px) {
+  .discrete-derivation > header {
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"title controls" "slider slider";
+    row-gap:6px;
+  }
+}
