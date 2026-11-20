@@ -21,7 +21,7 @@ test("Home Art H0 gives page and edge surfaces one reference-field authority", (
   }
   assert.doesNotMatch(mobile, /#111512/);
   assert.match(mobile, /#mobile-instant-input[\s\S]*?border-bottom:\s*1px solid var\(--hairline\);[\s\S]*?background:\s*transparent;/);
-  assert.match(classification, /background:\s*color-mix\(in srgb, var\(--field\) 84%, transparent\);/);
+  assert.match(classification, /color-mix\(in srgb, var\(--field\) 96%, transparent\)/);
 });
 
 test("fixed identities have a readability authority distinct from ring material bodies", () => {

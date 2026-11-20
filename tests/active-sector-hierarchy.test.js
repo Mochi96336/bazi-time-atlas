@@ -17,11 +17,11 @@ test("graphite active sectors remain subordinate to the Selected Instant datum",
 test("classification keeps independent categorical sector authority", () => {
   assert.match(
     classification,
-    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element="木"\][^\{]*\{[^}]*var\(--five-wood\) 34%/
+    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element="木"\][^\{]*\{[^}]*--stem-color:\s*var\(--five-wood\)/
   );
   assert.match(
     classification,
-    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\.is-active\s*\{[^}]*stroke-width:\s*2\.2;[^}]*filter:\s*brightness\(1\.2\);/
+    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element\]\.is-active\s*\{[^}]*stroke:\s*var\(--branch-color\);[^}]*stroke-width:\s*2\.2;/
   );
   assert.doesNotMatch(
     radial,

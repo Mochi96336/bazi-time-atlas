@@ -1,8 +1,8 @@
 {
   "analysis-first-screen-polish.css": {
     "important": 0,
-    "hexColors": 14,
-    "smallFonts": 34
+    "hexColors": 11,
+    "smallFonts": 24
   },
   "analysis-first-screen.css": {
     "important": 0,
@@ -52,7 +52,7 @@
   "classification-overlay.css": {
     "important": 0,
     "hexColors": 16,
-    "smallFonts": 9
+    "smallFonts": 3
   },
   "cross-view.css": {
     "important": 0,
@@ -62,7 +62,7 @@
   "desktop-tools-workspace.css": {
     "important": 5,
     "hexColors": 7,
-    "smallFonts": 10
+    "smallFonts": 7
   },
   "discrete-phase.css": {
     "important": 2,

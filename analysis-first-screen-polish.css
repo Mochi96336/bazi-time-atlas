@@ -112,63 +112,6 @@
     opacity: .72;
   }
 
-  /* Classification stays part of the instrument face. Its edge is etched and
-     its surface recessed; there is still no floating-card shadow or radius. */
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
-    top: 72px;
-    right: clamp(18px, 2vw, 32px);
-    width: min(270px, calc(100% - 36px));
-    border: 0;
-    border-left: 1px solid var(--m2-etched-dark-soft);
-    border-radius: 0;
-    padding: 4px 0 4px 10px;
-    background: var(--m2-recessed-rail-gradient);
-    backdrop-filter: none;
-    box-shadow: var(--m2-recessed-side-shadow);
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row + .classification-row {
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top-color: var(--m2-etched-dark-soft);
-    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header {
-    gap: 5px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header span {
-    color: #838788;
-    font-size: 6.5px;
-    font-weight: 740;
-    letter-spacing: .055em;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header small {
-    color: #64696a;
-    font-size: 5.5px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-keys {
-    gap: 3px;
-    margin-top: 3px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-keys i {
-    min-width: 15px;
-    width: 15px;
-    height: 15px;
-    border-radius: 2px;
-    font-size: 6px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-current {
-    margin-top: 3px;
-    color: #737879;
-    font-size: 6.5px;
-    line-height: 1.25;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-warning {
-    margin-top: 4px;
-    color: color-mix(in srgb, var(--solar) 48%, #777c7d);
-    font-size: 6px;
-    line-height: 1.25;
-    opacity: .72;
-  }
 }
 
 /* Tools is an overlay workspace over the same instrument, so opening it must
@@ -248,28 +191,6 @@
     line-height: 1.35;
   }
 
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
-    top: 80px;
-    width: min(300px, calc(100% - 40px));
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header span {
-    font-size: 7.5px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-row header small {
-    font-size: 6.5px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-keys i {
-    min-width: 17px;
-    width: 17px;
-    height: 17px;
-    font-size: 7px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-current {
-    font-size: 7.5px;
-  }
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-warning {
-    font-size: 7px;
-  }
 
   #kinetic-instrument[data-analysis-open="true"] .instrument-readout {
     bottom: 20px;
@@ -332,8 +253,7 @@
     font-size: 10px;
   }
 
-  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods,
-  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] .classification-overlay-legend {
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
     top: 86px;
   }
 

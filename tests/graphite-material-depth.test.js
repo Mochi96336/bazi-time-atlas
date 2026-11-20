@@ -48,10 +48,6 @@ test("desktop Analysis consumes recessed rails and etched edges without floating
     analysisPolish,
     /@media \(min-width: 821px\)[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\] \.atlas-visible-ten-gods\s*\{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*var\(--m2-recessed-rail-gradient\);[\s\S]*?box-shadow:\s*var\(--m2-recessed-rail-shadow\);[\s\S]*?backdrop-filter:\s*none;/
   );
-  assert.match(
-    analysisPolish,
-    /\.classification-overlay-legend\s*\{[\s\S]*?border-left:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?background:\s*var\(--m2-recessed-rail-gradient\);[\s\S]*?box-shadow:\s*var\(--m2-recessed-side-shadow\);/
-  );
 });
 
 test("solar-time Analysis uses etched M2 structure without becoming another card", () => {
