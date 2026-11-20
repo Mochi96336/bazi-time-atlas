@@ -89,6 +89,9 @@
   .deep-time-badge strong { font-size:12px; }
 }
 @media (max-width:480px) {
+  /* The shell is only 10px from the screen edge. Inset this text-heavy
+     evidence section without shrinking type, changing cards or moving 01/03. */
+  .near-search-panel { padding-inline:10px; }
   .near-search-head { grid-template-columns:1fr 1fr; gap:10px; }
   .near-stat:last-child { grid-column:1 / -1; }
   .near-search-body { gap:8px; }
