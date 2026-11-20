@@ -46,9 +46,7 @@ import {
   INTRO_SWEEP_DURATION_MS,
   INTRO_SWEEP_SPAN_MS,
   INTRO_SWEEP_STORAGE_KEY,
-  SCALE_PREVIEW_DURATION_MS,
   introSweepInstant,
-  scalePreviewSpanMs,
   shouldRunIntroSweep
 } from "./interaction/intro-sweep.js";
 import {
@@ -603,7 +601,6 @@ function bindControls() {
       state.anchorMs = state.selectedMs;
       setSliderForScale();
       updateWheel();
-      runScalePreviewSweep(state.scale);
     });
   });
   slider.addEventListener("input", () => {
@@ -651,7 +648,7 @@ function setFollowingNow(following) {
 
 function tickLiveClock() {
   if (!liveClock.following) return;
-  if (instrument.dataset.introSweep === "running" || instrument.dataset.scaleSweep === "running") return;
+  if (instrument.dataset.introSweep === "running") return;
   if (state.selectedMs !== liveClock.lastMs) { setFollowingNow(false); return; }
   if (document.visibilityState === "hidden") return;
   const nowMs = Math.floor(Date.now() / 1000) * 1000;
@@ -682,9 +679,7 @@ function markIntroSeen() {
 
 // Repair B1: one-time opening time-lapse; never writes the URL and ends on the
 // exact landing instant. Any pointer, key or wheel input skips to the end.
-// Repair B1/E1: one time-lapse engine shared by the opening sweep and the
-// scale-preview sweep. It never writes the URL, ends on the exact starting
-// instant, skips on any pointer/key/wheel input and yields to any other writer.
+// It also yields to any other writer.
 function runTimeSweep({ statusKey, spanMs, durationMs, onSettled = () => {} }) {
   const endMs = state.selectedMs;
   let startTime = null;
@@ -762,20 +757,6 @@ function runIntroSweep() {
     spanMs:INTRO_SWEEP_SPAN_MS,
     durationMs:INTRO_SWEEP_DURATION_MS,
     onSettled:markIntroSeen
-  });
-}
-
-// Repair E1: choosing a scale previews its window — the last day, half-year
-// or 30 years replay in ~1.4 s and land back on the selected instant — so the
-// reader sees which rings move at that scale.
-function runScalePreviewSweep(scale) {
-  if (prefersReducedMotion() || state.playing) return;
-  if (window.self !== window.top) return; // embedded pages never animate
-  if (instrument.dataset.introSweep === "running" || instrument.dataset.scaleSweep === "running") return;
-  runTimeSweep({
-    statusKey:"scaleSweep",
-    spanMs:scalePreviewSpanMs(scale),
-    durationMs:SCALE_PREVIEW_DURATION_MS
   });
 }
 

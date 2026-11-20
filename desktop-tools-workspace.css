@@ -46,6 +46,10 @@
     border-left: 1px solid var(--m2-etched-dark-soft);
     box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
   }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child,
+  #kinetic-instrument[data-analysis-open="true"] #play-button {
+    display: none !important;
+  }
 
   /* Layer visibility and relative reference frames are engine/research aids,
      not desktop product tasks. Keep their DOM/runtime ownership intact, but

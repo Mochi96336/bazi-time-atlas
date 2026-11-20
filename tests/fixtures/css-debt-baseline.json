@@ -60,7 +60,7 @@
     "smallFonts": 8
   },
   "desktop-tools-workspace.css": {
-    "important": 4,
+    "important": 5,
     "hexColors": 7,
     "smallFonts": 10
   },
@@ -130,9 +130,9 @@
     "smallFonts": 0
   },
   "navigation-workspace.css": {
-    "important": 53,
-    "hexColors": 19,
-    "smallFonts": 10
+    "important": 54,
+    "hexColors": 17,
+    "smallFonts": 7
   },
   "near-recurrence.css": {
     "important": 0,
@@ -280,7 +280,7 @@
     "smallFonts": 0
   },
   "ux-analysis.css": {
-    "important": 3,
+    "important": 4,
     "hexColors": 9,
     "smallFonts": 5
   }

@@ -7,10 +7,10 @@ const legendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url),
 const navigationCss = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
-test("mobile Tools keeps scale presets reachable and retires layer toggles", () => {
-  assert.doesNotMatch(
+test("mobile Tools retires dashboard-era presets, transport and layer toggles", () => {
+  assert.match(
     analysisCss,
-    /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar > \.toolbar-group:first-child,[\s\S]{0,120}#play-button\s*\{\s*display:\s*none\s*!important;/
+    /@media \(max-width: 480px\)[\s\S]*?#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar > \.toolbar-group:first-child,[\s\S]*?#play-button\s*\{\s*display:\s*none\s*!important;/
   );
   assert.match(
     legendCss,

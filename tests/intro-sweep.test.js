@@ -48,21 +48,8 @@ test("atlas controller wires the sweep without URL writes and with input skip", 
 test("live clock follows only plain top-level 'now' and yields to any other writer", () => {
   const source = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
   const tick = source.slice(source.indexOf("function tickLiveClock()"), source.indexOf("function installLiveClock()"));
-  assert.match(tick, /scaleSweep === "running"\) return;\s*if \(state\.selectedMs !== liveClock\.lastMs\) \{ setFollowingNow\(false\); return; \}/);
+  assert.match(tick, /introSweep === "running"\) return;\s*if \(state\.selectedMs !== liveClock\.lastMs\) \{ setFollowingNow\(false\); return; \}/);
   assert.doesNotMatch(tick, /history\.replaceState/);
   assert.match(source, /const plainNow = !embedded && !Number\.isFinite\(parseAtlasSearch\(location\.search\)\.instantMs\)/);
   assert.match(source, /setFollowingNow\(source === "now" \|\| source === "mobile-now"\);/);
-});
-
-test("scale preview replays each scale's own window and shares the sweep engine", async () => {
-  const { scalePreviewSpanMs, SCALE_PREVIEW_DURATION_MS } = await import("../src/interaction/intro-sweep.js");
-  assert.equal(scalePreviewSpanMs("day"), 86_400_000);
-  assert.equal(scalePreviewSpanMs("year"), 183 * 86_400_000);
-  assert.ok(scalePreviewSpanMs("cycle") > 29 * 365 * 86_400_000);
-  assert.ok(SCALE_PREVIEW_DURATION_MS <= 2000);
-  const source = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
-  assert.match(source, /runScalePreviewSweep\(state\.scale\);/);
-  assert.match(source, /function runScalePreviewSweep\(scale\) \{\s*if \(prefersReducedMotion\(\) \|\| state\.playing\) return;/);
-  const engine = source.slice(source.indexOf("function runTimeSweep("), source.indexOf("function prefersReducedMotion()"));
-  assert.doesNotMatch(engine, /history\.replaceState/);
 });

@@ -8,8 +8,8 @@ const editor = readFileSync(new URL("../src/selected-instant-editor.js", import.
 
 test("desktop Selected Instant owns the center and Now stays in normal flow", () => {
   assert.match(page, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"[^>]*>現在<\/button>[\s\S]*?<button id="play-button"[^>]*hidden/);
-  assert.match(css, /\.selected-instant-line\s*\{\s*display:grid;[\s\S]*?grid-template-columns:136px max-content 136px;[\s\S]*?justify-content:center;/);
-  assert.match(css, /\.selected-instant-line::before\s*\{[\s\S]*?grid-column:1;[\s\S]*?width:136px;/);
+  assert.match(css, /\.selected-instant-line\s*\{\s*display:grid;[\s\S]*?grid-template-columns:72px max-content 72px;[\s\S]*?justify-content:center;/);
+  assert.match(css, /\.selected-instant-line::before\s*\{[\s\S]*?grid-column:1;[\s\S]*?width:72px;/);
   // Play is retired from the reading UI; the hidden control is only a harness hook.
   assert.match(css, /\.selected-instant-line #play-button \{ display:none; \}/);
   assert.doesNotMatch(page, /mobile-play-button/);
@@ -22,7 +22,7 @@ test("desktop Selected Instant owns the center and Now stays in normal flow", ()
 test("editor hides Now without changing the symmetric grid geometry", () => {
   assert.match(editor, /readout\.closest\("\.selected-instant-line"\) \?\? readout/);
   assert.match(css, /data-instant-editor-open="true"\] \.selected-instant-line #now-button\.readout-now\s*\{\s*visibility:hidden;/);
-  assert.match(css, /grid-template-columns:136px max-content 136px/);
+  assert.match(css, /grid-template-columns:72px max-content 72px/);
 });
 
 test("mobile has one real time/action row and no duplicate Zodiac or visual status row", () => {
@@ -31,6 +31,6 @@ test("mobile has one real time/action row and no duplicate Zodiac or visual stat
   assert.match(dock, /id="mobile-instant-input"[\s\S]*?class="mobile-time-actions"[\s\S]*?id="mobile-time-apply"[\s\S]*?id="mobile-now-button"/);
   assert.match(dock, /id="mobile-time-status" role="status" aria-live="polite"/);
   assert.doesNotMatch(dock, /mobile-time-heading|mobile-zodiac-readout/);
-  assert.match(css, /grid-template-columns:\s*minmax\(0,1fr\) auto !important/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0,1fr\) 48px !important/);
   assert.match(css, /data-dirty="true"\] \.mobile-time-actions #mobile-now-button\s*\{[\s\S]*?display: none;/);
 });

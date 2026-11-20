@@ -151,7 +151,8 @@
    for Analysis and research tooling, but remove them from the normal reading
    path together with transport/classification chrome. */
 #kinetic-instrument:not([data-analysis-open="true"]) .scale-button,
-#kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button {
+#kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button,
+#kinetic-instrument:not([data-analysis-open="true"]) #play-button {
   display: none;
 }
 

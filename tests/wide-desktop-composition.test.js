@@ -115,7 +115,7 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(browserGate, /evidenceGridWidth < 240/);
   assert.match(browserGate, /evidenceInfoMinFont < 9/);
   assert.ok(browserGate.includes("Math.abs((closeTop + closeBottom) / 2 - topbarCenter) > 2"));
-  assert.match(browserGate, /scaleVisible !== 3/);
+  assert.match(browserGate, /scaleVisible !== 0/);
   assert.match(browserGate, /ringToggleVisible !== 0/);
   assert.match(browserGate, /hourVisibleLabels !== 60 \|\| dayVisibleLabels !== 60/);
   assert.match(visualCapture, /annual-wide-2047x1038\.png/);

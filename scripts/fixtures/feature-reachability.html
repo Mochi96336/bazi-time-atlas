@@ -67,18 +67,10 @@
       // Tools open.
       doc.querySelector("#analysis-toggle")?.click();
       await wait(500);
-      check("scale-48h", ".scale-button[data-scale=\"day\"]");
-      check("scale-1y", ".scale-button[data-scale=\"year\"]");
-      check("scale-60y", ".scale-button[data-scale=\"cycle\"]");
       check("classification", "#classification-overlay-button");
       check("solar-time", "#solar-time-tool-button");
       check("find-time", "#inverse-time-search-button");
       check("tools-close", "#analysis-close");
-
-      // A scale preset must actually change the active scale.
-      doc.querySelector(".scale-button[data-scale=\"cycle\"]")?.click();
-      await wait(300);
-      results["scale-switches"] = doc.querySelector(".scale-button[data-scale=\"cycle\"]")?.classList.contains("active") ? "ok" : "no-effect";
 
       const failures = Object.entries(results).filter(([, value]) => value !== "ok");
       for (const [name, value] of Object.entries(results)) probe.dataset[`f${name.replace(/-/g, "")}`] = value;

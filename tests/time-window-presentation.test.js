@@ -12,8 +12,8 @@ test("ordinary observation-window lenses do not grow a duplicate visible heading
   );
 });
 
-test("mobile Tools keeps observation-window presets in the product rail", () => {
-  assert.doesNotMatch(
+test("mobile Tools removes observation-window and transport chrome from the product rail", () => {
+  assert.match(
     analysisCss,
     /#kinetic-instrument\[data-analysis-open="true"\] \.instrument-toolbar > \.toolbar-group:first-child,[\s\S]*?#play-button\s*\{\s*display:\s*none\s*!important;/
   );
