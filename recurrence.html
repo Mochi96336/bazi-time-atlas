@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="./research-time-state.css">
   <link rel="stylesheet" href="./research-entry.css">
   <link rel="stylesheet" href="./research-evidence-reading.css">
+  <link rel="stylesheet" href="./research-drift-accumulation.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -430,6 +431,15 @@
             aria-label="十二個八字節界相對零天重合基準的提前量；全部提前約十至十四天"></svg>
         </section>
 
+        <figure id="research-drift-accumulation" class="research-drift-accumulation" aria-labelledby="research-drift-accumulation-title">
+          <figcaption>
+            <strong id="research-drift-accumulation-title">偏移是慢慢累積出來的</strong>
+            <span id="research-drift-accumulation-sentence">立春的時刻，和「同一個公曆日期」比，隨著年數拉長慢慢錯開。</span>
+          </figcaption>
+          <svg id="research-drift-accumulation-svg" viewBox="0 0 720 300" role="img" aria-labelledby="research-drift-accumulation-title research-drift-accumulation-sentence"></svg>
+          <p class="research-drift-accumulation-note">只有這四個年份有真實天文資料；點之間的虛線只是幫助閱讀，不代表中間年份的實際數值。</p>
+        </figure>
+
         <div class="seasonal-drift-orbit-panel seasonal-drift-orbit-explainer">
           <div class="seasonal-drift-orbit-head">
             <div>
@@ -573,6 +583,7 @@
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
   <script type="module" src="./src/research-seasonal-drift-evidence-view.js"></script>
+  <script type="module" src="./src/research-drift-accumulation-view.js"></script>
   <script type="module" src="./src/research-absolute-boundary-consequence-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>

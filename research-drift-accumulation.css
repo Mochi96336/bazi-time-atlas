@@ -1,0 +1,56 @@
+/* Repair D5: Li Chun drift accumulation chart (Research 02). */
+@layer components {
+  .research-drift-accumulation {
+    max-width: var(--research-width-narrative);
+    margin: var(--space-12) 0 var(--space-8);
+  }
+  .research-drift-accumulation figcaption { display: grid; gap: var(--space-2); }
+  .research-drift-accumulation figcaption strong {
+    color: var(--research-text-primary);
+    font-size: clamp(1.25rem, 2vw, 1.375rem);
+    font-weight: 700;
+  }
+  .research-drift-accumulation figcaption span {
+    color: var(--research-text-secondary);
+    font-size: var(--type-body);
+    line-height: 1.7;
+  }
+  .research-drift-accumulation svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: var(--space-4);
+    font-family: inherit;
+  }
+  .rda-grid { stroke: var(--research-line-subtle); }
+  .rda-zero { stroke: var(--research-text-secondary); stroke-width: 1.5; }
+  .rda-y-label, .rda-y-title {
+    fill: var(--research-text-muted);
+    font-size: 14px;
+    text-anchor: end;
+    dominant-baseline: middle;
+  }
+  .rda-x-label { fill: var(--research-text-muted); font-size: 14px; text-anchor: middle; }
+  .rda-link {
+    fill: none;
+    stroke: var(--research-candidate);
+    stroke-width: 2;
+    stroke-dasharray: 5 6;
+    opacity: .7;
+  }
+  .rda-point circle { fill: var(--research-bg-page); stroke: var(--research-candidate); stroke-width: 2.5; }
+  .rda-point:first-child circle { stroke: var(--research-text-secondary); }
+  .rda-point.is-final circle { fill: var(--research-candidate); }
+  .rda-value { fill: var(--research-text-primary); font-size: 15px; font-weight: 700; }
+  .rda-source { fill: var(--research-text-muted); font-size: 13px; }
+  .research-drift-accumulation-note {
+    margin: var(--space-2) 0 0;
+    color: var(--research-text-muted);
+    font-size: var(--type-meta);
+    line-height: 1.6;
+  }
+  @media (max-width: 480px) {
+    .rda-value { font-size: 15px; }
+    .rda-source, .rda-x-label, .rda-y-label, .rda-y-title { font-size: 14px; }
+  }
+}
