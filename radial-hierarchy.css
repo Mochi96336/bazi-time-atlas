@@ -79,6 +79,8 @@
    doubled text. The read-head anchor stays on the datum, but its glyphs start
    at that anchor instead of being bisected by the cursor stroke. */
 .cycle-label.is-active-shadowed { visibility: hidden; }
+/* Repair B4: a resting label the read-head label would overlap. */
+.cycle-label.is-active-crowded { visibility: hidden; }
 .active-cycle-label {
   text-anchor: start;
   dominant-baseline: middle;
@@ -89,24 +91,25 @@
   stroke-linejoin: round;
   letter-spacing: .02em;
 }
+/* Repair B4: active read-heads render >= 14 CSS px at 1440 (SVG scale ~0.98). */
 #hour-track .active-cycle-label {
-  fill: #c7cbca;
-  font-size: 9px;
+  fill: #dfe2e1;
+  font-size: 14.5px;
   font-weight: 760;
 }
 #day-track .active-cycle-label {
-  fill: #d7dad8;
-  font-size: 9.5px;
+  fill: #e4e7e5;
+  font-size: 15px;
   font-weight: 780;
 }
 #month-track .active-cycle-label {
   fill: #eceeed;
-  font-size: 10.5px;
+  font-size: 15.5px;
   font-weight: 820;
 }
 #year-track .active-cycle-label {
   fill: #f2f3f2;
-  font-size: 11.5px;
+  font-size: 16.5px;
   font-weight: 860;
 }
 
@@ -354,6 +357,12 @@
   fill: color-mix(in srgb, var(--solar) 68%, var(--ink));
   font-weight: 760;
 }
+/* Repair B4: the selected solar term reads at datum size, not context size. */
+#solar-track .term-label.active-cycle-label {
+  fill: color-mix(in srgb, var(--solar) 40%, var(--ink));
+  font-size: 14.5px;
+  font-weight: 760;
+}
 
 #zodiac-track {
   pointer-events: none;
@@ -380,7 +389,7 @@
    a brighter surface, and keep Solar/Selected Instant above this label. */
 #kinetic-instrument:not([data-classification-overlay="on"]) #zodiac-track .active-cycle-label {
   fill: color-mix(in srgb, var(--zodiac) 42%, var(--ink));
-  font-size: 11.25px;
+  font-size: 14.5px;
   font-weight: 780;
 }
 
@@ -480,8 +489,11 @@
   #month-track .cycle-label { font-size: 9px; }
   #year-track .cycle-label { font-size: 10px; }
 
-  #hour-track .active-cycle-label { font-size: 8.5px; }
-  #day-track .active-cycle-label { font-size: 9px; }
-  #month-track .active-cycle-label { font-size: 10px; }
-  #year-track .active-cycle-label { font-size: 11px; }
+  /* Repair B4: >= 13 CSS px on phones (SVG scale ~0.86). */
+  #hour-track .active-cycle-label { font-size: 15.5px; }
+  #day-track .active-cycle-label { font-size: 15.5px; }
+  #month-track .active-cycle-label { font-size: 16px; }
+  #year-track .active-cycle-label { font-size: 17px; }
+  #solar-track .term-label.active-cycle-label { font-size: 15.5px; }
+  #kinetic-instrument:not([data-classification-overlay="on"]) #zodiac-track .active-cycle-label { font-size: 15.5px; }
 }

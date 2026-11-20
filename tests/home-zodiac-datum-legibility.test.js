@@ -8,7 +8,7 @@ const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import
 
 test("selected Zodiac datum uses an ink floor rather than inheriting muted context", () => {
   assert.match(radial, /#zodiac-track \.zodiac-label\s*\{[^}]*var\(--zodiac\) 57%, var\(--muted\)[^}]*font-size:\s*10\.5px;/s);
-  assert.match(radial, /#kinetic-instrument:not\(\[data-classification-overlay="on"\]\) #zodiac-track \.active-cycle-label\s*\{[^}]*var\(--zodiac\) 42%, var\(--ink\)[^}]*font-size:\s*11\.25px;[^}]*font-weight:\s*780;/s);
+  assert.match(radial, /#kinetic-instrument:not\(\[data-classification-overlay="on"\]\) #zodiac-track \.active-cycle-label\s*\{[^}]*var\(--zodiac\) 42%, var\(--ink\)[^}]*font-size:\s*14\.5px;[^}]*font-weight:\s*780;/s);
   assert.match(renderer, /class:\s*"zodiac-label active-cycle-label active-annual-label"/);
 });
 

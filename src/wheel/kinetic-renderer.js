@@ -29,10 +29,16 @@ import { createWheelMaterialPrototype } from "./material-prototype.js";
 const MOTION_TRACE_TTL_MS = 420;
 const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
 
+// Repair B4: SVG-unit gap between the gold read-head line and the active
+// label, so the line no longer strikes through the first glyph.
+const READ_HEAD_LABEL_GAP = 6;
+
 export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns }) {
   const cycleSectors = new Map();
   const cycleStaticLabels = new Map();
   const activeCycleLabels = new Map();
+  const crowdedCycleLabels = new Map();
+  const activeLabelFontCache = new WeakMap();
   const activeCycleIndices = new Map();
   const lastActiveCycleIndex = new Map();
   const termSectorNodes = [];
@@ -230,6 +236,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const activeLabel = el("text", {
       class: "active-cycle-label",
       "data-active-cycle-ring": id,
+      dx: READ_HEAD_LABEL_GAP,
       "aria-hidden": "true",
       visibility: "hidden"
     }, group);
@@ -265,6 +272,14 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     activeCycleLabels.set(id, activeLabel);
   }
 
+  function activeLabelFontUnits(node) {
+    const cached = activeLabelFontCache.get(node);
+    if (cached) return cached;
+    const size = parseFloat(getComputedStyle(node).fontSize) || 12;
+    activeLabelFontCache.set(node, size);
+    return size;
+  }
+
   function updateActiveCycleLabel(id, activeIndex, modelRotationDegrees) {
     const node = activeCycleLabels.get(id);
     if (!node) return;
@@ -274,6 +289,11 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     const indexChanged = previousIndex !== activeIndex;
     if (Number.isInteger(previousIndex) && indexChanged) {
       staticLabels?.get(previousIndex)?.classList.remove("is-active-shadowed");
+    }
+    const crowded = crowdedCycleLabels.get(id);
+    if (crowded) {
+      crowded.classList.remove("is-active-crowded");
+      crowdedCycleLabels.delete(id);
     }
 
     if (!Number.isInteger(activeIndex) || activeIndex < 0 || activeIndex >= sexagenary.length) {
@@ -311,6 +331,22 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       node.textContent = label;
       staticLabels?.get(activeIndex)?.classList.add("is-active-shadowed");
       lastActiveCycleIndex.set(id, activeIndex);
+    }
+    // Repair B4: the read-head label starts at the datum and runs toward the
+    // next sector. When it would reach that sector's resting label, hide the
+    // resting label instead of letting the two glyph pairs collide.
+    const nextIndex = (activeIndex + 1) % sexagenary.length;
+    const radius = (model.innerRadius + model.outerRadius) / 2;
+    const gapDegrees = (((nextIndex * 6 + 3) - coordinate) % 360 + 360) % 360;
+    const gapUnits = gapDegrees * Math.PI / 180 * radius;
+    const fontUnits = activeLabelFontUnits(node);
+    const needed = READ_HEAD_LABEL_GAP + label.length * fontUnits * 1.05 + fontUnits * 1.2;
+    if (gapUnits < needed) {
+      const nextLabel = staticLabels?.get(nextIndex);
+      if (nextLabel) {
+        nextLabel.classList.add("is-active-crowded");
+        crowdedCycleLabels.set(id, nextLabel);
+      }
     }
   }
 
@@ -404,6 +440,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     activeAnnualLabels.set("term", el("text", {
       class: "term-label active-cycle-label active-annual-label",
       "data-active-annual-kind": "term",
+      dx: READ_HEAD_LABEL_GAP,
       "aria-hidden": "true",
       visibility: "hidden"
     }, solarTrack));
@@ -442,6 +479,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     activeAnnualLabels.set("zodiac", el("text", {
       class: "zodiac-label active-cycle-label active-annual-label",
       "data-active-annual-kind": "zodiac",
+      dx: READ_HEAD_LABEL_GAP,
       "aria-hidden": "true",
       visibility: "hidden"
     }, zodiacTrack));
