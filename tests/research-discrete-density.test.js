@@ -384,11 +384,15 @@ test("first-screen research milestones reuse the canonical delta state and date-
   const entry=recurrenceHtml.indexOf('class="research-entry"');
   const outline=recurrenceHtml.indexOf('class="research-outline"');
   const time=recurrenceHtml.indexOf('id="research-time-state"');
-  assert.ok(entry > 0 && entry < outline && outline < time,
-    "first-screen comparison precedes the outline and shared time card");
+  // Repair D2: the milestone comparison lives inside 01, after its plain
+  // conclusion, so the page opens with the question rather than a dashboard.
+  const discrete=recurrenceHtml.indexOf('id="research-discrete"');
+  const conclusion=recurrenceHtml.indexOf('data-plain-conclusion="01"');
+  assert.ok(outline > 0 && outline < time && time < discrete && discrete < conclusion && conclusion < entry,
+    "outline and shared time card precede 01; the milestones follow 01's plain conclusion");
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
-  assert.doesNotMatch(recurrenceHtml.slice(entry,outline),/\+1,980/);
+  assert.doesNotMatch(recurrenceHtml.slice(entry,recurrenceHtml.indexOf("</div>",recurrenceHtml.indexOf('id="research-entry-selection"'))),/\+1,980/);
   assert.match(recurrenceHtml,/href="\.\/research-entry\.css"/);
   assert.match(recurrenceView,/function syncResearchEntry\(state, localYears\)/);
   assert.match(recurrenceView,/findFirstLocalYearSequenceDayRecurrence\(currentBase\)/);

@@ -258,3 +258,19 @@
   .research-task-head h2 { font-size:16px; }
   .research-task-relation { font-size:12px; }
 }
+
+/* Repair D1: each section opens with one plain-language conclusion for
+   readers without astronomy background. It is body text, not a caption. */
+.research-task > .research-plain-conclusion {
+  max-width: var(--research-width-narrative, 860px);
+  margin: var(--space-3, 12px) 0 var(--space-6, 24px);
+  padding-left: var(--space-4, 16px);
+  border-left: 2px solid var(--research-candidate);
+  color: var(--research-text-primary);
+  font-size: var(--type-subsection, 1.1875rem);
+  font-weight: 500;
+  line-height: 1.7;
+}
+@media (max-width: 480px) {
+  .research-task > .research-plain-conclusion { font-size: 1.0625rem; padding-left: var(--space-3, 12px); }
+}
