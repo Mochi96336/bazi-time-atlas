@@ -621,7 +621,8 @@ function runIntroSweep() {
     search:location.search,
     reducedMotion,
     seen:readIntroSeen(),
-    hidden:document.visibilityState === "hidden"
+    hidden:document.visibilityState === "hidden",
+    embedded:window.self !== window.top
   })) {
     instrument.dataset.introSweep = "skipped";
     return;

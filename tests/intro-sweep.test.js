@@ -32,6 +32,7 @@ test("intro sweep only runs on a plain first landing without reduced motion", ()
   assert.equal(shouldRunIntroSweep({ search:"", reducedMotion:true }), false);
   assert.equal(shouldRunIntroSweep({ search:"", seen:true }), false);
   assert.equal(shouldRunIntroSweep({ search:"", hidden:true }), false);
+  assert.equal(shouldRunIntroSweep({ search:"", embedded:true }), false);
 });
 
 test("atlas controller wires the sweep without URL writes and with input skip", () => {

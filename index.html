@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="./ganzhi-inspector.css">
   <link rel="stylesheet" href="./instrument-first.css">
   <link rel="stylesheet" href="./navigation-workspace.css">
+  <link rel="stylesheet" href="./atlas-guide.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -27,6 +28,7 @@
           <a class="active" href="./" aria-current="page">時間圖譜</a>
           <a class="research-link" data-nav-role="research" href="./recurrence.html" aria-label="研究：回歸與深時間驗證">研究</a>
         </nav>
+        <button id="atlas-guide-button" class="atlas-guide-button" type="button" aria-haspopup="dialog" aria-controls="atlas-guide">怎麼讀</button>
         <div class="topbar-tool-slot" aria-label="工具">
           <button id="analysis-toggle" class="analysis-toggle" type="button" aria-expanded="false" aria-controls="kinetic-instrument" title="顯示分析工具">工具</button>
           <button id="analysis-close" class="analysis-close" type="button" hidden>完成</button>
@@ -177,6 +179,7 @@
         <g id="cursor-layer"></g>
       </svg>
 
+      <div id="atlas-drag-hint" class="atlas-drag-hint" hidden>拖曳任一圈，移動時間</div>
       <div class="instrument-readout" aria-live="polite">
         <div class="readout-kicker">選定時間</div>
         <div class="selected-instant-line">
@@ -292,7 +295,61 @@
     </details>
   </div>
 
+
+  <dialog id="atlas-guide" class="atlas-guide" aria-labelledby="atlas-guide-title">
+    <form method="dialog" class="atlas-guide-inner">
+      <header>
+        <h2 id="atlas-guide-title">怎麼讀這個圓盤</h2>
+        <button class="atlas-guide-x" value="close" aria-label="關閉說明">✕</button>
+      </header>
+      <p class="atlas-guide-lead">每一圈是一種時間單位。中間那條<b class="atlas-guide-gold">金線</b>是你選的那一刻，金線穿過的格子，就是那一刻的干支。</p>
+
+      <figure class="atlas-guide-fan" aria-label="五圈由內到外：時、日、太陽、月、年">
+        <svg viewBox="0 0 520 300" role="img" aria-hidden="true">
+          <g fill="none" stroke-linecap="butt">
+            <path d="M160 250 A100 100 0 0 1 360 250" stroke="#2c3238" stroke-width="24"/>
+            <path d="M132 250 A128 128 0 0 1 388 250" stroke="#2f353c" stroke-width="24"/>
+            <path d="M104 250 A156 156 0 0 1 416 250" stroke="#5a4934" stroke-width="24"/>
+            <path d="M76 250 A184 184 0 0 1 444 250" stroke="#353c44" stroke-width="24"/>
+            <path d="M48 250 A212 212 0 0 1 472 250" stroke="#3b424a" stroke-width="24"/>
+          </g>
+          <line x1="260" y1="10" x2="260" y2="250" stroke="#e4d9ad" stroke-width="2.5"/>
+          <path d="M252 4 L268 4 L260 17 Z" fill="#e4d9ad"/>
+          <g class="atlas-guide-fan-labels" text-anchor="middle">
+            <text x="160" y="274" font-size="18" fill="#e8ecea">時</text>
+            <text x="132" y="274" font-size="18" fill="#e8ecea">日</text>
+            <text x="104" y="274" font-size="15" fill="#f0dcb4">太陽</text>
+            <text x="76" y="274" font-size="18" fill="#e8ecea">月</text>
+            <text x="48" y="274" font-size="18" fill="#e8ecea">年</text>
+          </g>
+          <g font-size="16" fill="#aab3b0" text-anchor="middle">
+            <text x="130" y="296">外圈轉得慢 → 內圈轉得快</text>
+          </g>
+        </svg>
+      </figure>
+
+      <section class="atlas-guide-ruler" aria-labelledby="atlas-guide-ruler-title">
+        <h3 id="atlas-guide-ruler-title">每一圈轉一整圈要多久</h3>
+        <ol>
+          <li style="--log:.70"><span class="ring">時</span><span class="bar"><i></i></span><span class="len">5 天</span><small>每 2 小時換一格，60 格</small></li>
+          <li style="--log:1.78"><span class="ring">日</span><span class="bar"><i></i></span><span class="len">60 天</span><small>每天換一格，60 格</small></li>
+          <li style="--log:2.56" class="solar"><span class="ring">太陽</span><span class="bar"><i></i></span><span class="len">1 年</span><small>太陽繞完一年，分 24 節氣</small></li>
+          <li style="--log:3.26"><span class="ring">月</span><span class="bar"><i></i></span><span class="len">5 年</span><small>每個「節」換一格，60 格</small></li>
+          <li style="--log:4.34"><span class="ring">年</span><span class="bar"><i></i></span><span class="len">60 年</span><small>每年立春換一格，60 格</small></li>
+        </ol>
+        <p class="atlas-guide-axis" aria-hidden="true"><span style="left:0">1 天</span><span style="left:58%">1 年</span><span style="left:98.6%">60 年</span></p>
+      </section>
+
+      <ul class="atlas-guide-tips">
+        <li><b>拖曳任一圈</b>：時間跟著移動，其他圈一起轉。</li>
+        <li><b>播放</b>：讓時間往前走，看哪一圈先換格。</li>
+        <li><b>工具</b>：切換 48 小時／一年／60 年，或找出某個干支組合的時間。</li>
+      </ul>
+      <footer><button class="atlas-guide-ok" value="close">知道了</button></footer>
+    </form>
+  </dialog>
   <script type="module" src="./src/kinetic-atlas.js"></script>
+  <script type="module" src="./src/atlas-guide.js"></script>
   <script type="module" src="./src/ganzhi-inspector.js"></script>
   <script type="module" src="./src/scale-emphasis-view.js"></script>
   <script type="module" src="./src/classification-overlay-view.js"></script>

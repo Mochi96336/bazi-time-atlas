@@ -22,8 +22,9 @@ export function introSweepInstant({ endMs, elapsedMs, spanMs = INTRO_SWEEP_SPAN_
 
 // Only a plain landing (no deep link, no analysis state) on a viewer who has
 // not seen the sweep and has not asked for reduced motion gets the time-lapse.
-export function shouldRunIntroSweep({ search = "", reducedMotion = false, seen = false, hidden = false }) {
-  if (reducedMotion || seen || hidden) return false;
+// Embedded pages (iframes, test harnesses) never animate.
+export function shouldRunIntroSweep({ search = "", reducedMotion = false, seen = false, hidden = false, embedded = false }) {
+  if (reducedMotion || seen || hidden || embedded) return false;
   const params = new URLSearchParams(search);
   return [...params.keys()].length === 0;
 }
