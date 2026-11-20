@@ -567,6 +567,17 @@ function bindControls() {
     updateWheel();
   });
   playButton.addEventListener("click", () => playbackController?.toggle());
+  // Repair A1: the mobile dock mirrors the canonical #play-button state.
+  const mobilePlayButton = document.querySelector("#mobile-play-button");
+  if (mobilePlayButton) {
+    mobilePlayButton.addEventListener("click", () => playbackController?.toggle());
+    const mirrorPlayState = () => {
+      mobilePlayButton.setAttribute("aria-pressed", playButton.getAttribute("aria-pressed") ?? "false");
+      mobilePlayButton.textContent = playButton.textContent;
+    };
+    new MutationObserver(mirrorPlayState).observe(playButton, { attributes:true, attributeFilter:["aria-pressed"], childList:true, characterData:true, subtree:true });
+    mirrorPlayState();
+  }
   nowButton.addEventListener("click", () => {
     setSelectedInstant(Date.now(), "now");
   });

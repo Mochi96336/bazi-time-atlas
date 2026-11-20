@@ -52,7 +52,6 @@
         </div>
         <div class="toolbar-group">
           <button id="classification-overlay-button" class="control-button" type="button" aria-pressed="false" aria-controls="classification-overlay-legend" title="並列查看干支五行與黃道四元素／模式；不建立兩套系統的等價關係">分類</button>
-          <button id="play-button" class="control-button primary" type="button" aria-pressed="false">播放</button>
         </div>
       </div>
 
@@ -183,6 +182,7 @@
         <div class="selected-instant-line">
           <div id="instant-readout">—</div>
           <button id="now-button" class="readout-now" type="button" aria-label="將選定時間回到現在" title="回到現在">現在</button>
+          <button id="play-button" class="readout-play" type="button" aria-pressed="false" title="播放：讓時間往前走">播放</button>
         </div>
         <div class="readout-meta">
           <span>太陽黃經 <strong id="solar-readout">—</strong></span>
@@ -204,6 +204,7 @@
       </label>
       <div class="mobile-time-actions">
         <button id="mobile-time-apply" type="button">套用</button>
+        <button id="mobile-play-button" type="button" aria-pressed="false" aria-label="播放：讓時間往前走">播放</button>
         <button id="mobile-now-button" type="button" aria-label="將選定時間回到現在">現在</button>
       </div>
       <output id="mobile-time-status" role="status" aria-live="polite" aria-atomic="true">UTC+08:00 · 秒級</output>

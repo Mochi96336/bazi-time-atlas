@@ -211,10 +211,6 @@
     justify-content: flex-end;
     align-items: center;
   }
-  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child,
-  #kinetic-instrument[data-analysis-open="true"] #play-button {
-    display: none !important;
-  }
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child {
     margin: 0 0 0 auto;
     gap: 4px;
