@@ -43,7 +43,7 @@ for (const viewport of ["desktop", "mobile"]) {
   const error = attr(probe, "data-error");
   const failures = attr(probe, "data-failures");
   const checked = Number(attr(probe, "data-checked"));
-  if (attr(probe, "data-ready") !== "true" || error || !(checked >= 12) || failures) {
+  if (attr(probe, "data-ready") !== "true" || error || !(checked >= 11) || failures) {
     failed = true;
     console.error(`[reachability] ${viewport} FAILED · checked=${checked} · error=${error ?? "-"} · failures=${failures || "-"}`);
   } else {

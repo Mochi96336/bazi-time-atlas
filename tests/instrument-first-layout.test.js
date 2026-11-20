@@ -104,7 +104,7 @@ test("ordinary reading keeps long-form notes and provenance footer out of the ma
   );
 });
 
-test("ordinary reading hides observation-window presets but keeps playback reachable", () => {
+test("ordinary reading hides observation-window presets in the closed reading state", () => {
   assert.match(
     css,
     /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.scale-button,[\s\S]*?#classification-overlay-button\s*\{\s*display:\s*none;/

@@ -16,7 +16,7 @@ test("desktop Tools installs the edge-workspace layer last", () => {
 
 test("desktop Tools keeps scale presets reachable but removes layer and reference-frame chrome", () => {
   assert.match(css, /@media \(min-width: 821px\)/);
-  // Repair A1: scale presets and playback must stay reachable (see repair-plan.md).
+  // Repair A1: scale presets must stay reachable (see repair-plan.md).
   assert.doesNotMatch(css, /\.instrument-toolbar > \.toolbar-group:first-child,[\s\S]{0,120}#play-button[\s\S]{0,60}display: none !important;/);
   assert.match(css, /\.ring-legend \{\s*display: none !important;/);
 });

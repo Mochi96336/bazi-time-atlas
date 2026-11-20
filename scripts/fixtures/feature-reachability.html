@@ -60,7 +60,6 @@
       const check = (name, selector) => { results[name] = reachable(doc, win, selector); };
 
       // Ordinary (closed) reading state.
-      check("play", mobile ? "#mobile-play-button" : "#play-button");
       check("now", mobile ? "#mobile-now-button" : "#now-button");
       check("tools", "#analysis-toggle");
       check("research", ".site-nav a[data-nav-role=\"research\"]");

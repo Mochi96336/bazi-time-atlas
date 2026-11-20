@@ -180,8 +180,8 @@ if (Math.abs((closeTop + closeBottom) / 2 - topbarCenter) > 2 || closeRight < wi
 
 // Repair A1: scale presets and the readout Play stay reachable in Tools;
 // only the retired ring-layer toggles remain hidden.
-if (scaleVisible !== 3 || requireAttr(probe, "data-play-display", page.url) === "none" || ringToggleVisible !== 0) {
-  throw new Error(`wide desktop: scale/play missing or retired layer chrome resurfaced (scale=${scaleVisible}, play=${requireAttr(probe, "data-play-display", page.url)}, ringToggles=${ringToggleVisible}): ${page.url}`);
+if (scaleVisible !== 3 || requireAttr(probe, "data-play-display", page.url) !== "none" || ringToggleVisible !== 0) {
+  throw new Error(`wide desktop: scale missing, retired Play resurfaced, or retired layer chrome resurfaced (scale=${scaleVisible}, play=${requireAttr(probe, "data-play-display", page.url)}, ringToggles=${ringToggleVisible}): ${page.url}`);
 }
 for (const name of ["state-strip", "notes", "sources"]) {
   if (requireAttr(probe, `data-${name}-display`, page.url) !== "none") {

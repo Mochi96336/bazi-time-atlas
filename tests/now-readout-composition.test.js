@@ -7,10 +7,12 @@ const css = readFileSync(new URL("../navigation-workspace.css", import.meta.url)
 const editor = readFileSync(new URL("../src/selected-instant-editor.js", import.meta.url), "utf8");
 
 test("desktop Selected Instant owns the center and Now stays in normal flow", () => {
-  assert.match(page, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"[^>]*>現在<\/button>\s*<button id="play-button"/);
+  assert.match(page, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"[^>]*>現在<\/button>[\s\S]*?<button id="play-button"[^>]*hidden/);
   assert.match(css, /\.selected-instant-line\s*\{\s*display:grid;[\s\S]*?grid-template-columns:136px max-content 136px;[\s\S]*?justify-content:center;/);
   assert.match(css, /\.selected-instant-line::before\s*\{[\s\S]*?grid-column:1;[\s\S]*?width:136px;/);
-  assert.match(css, /#play-button\.readout-play\s*\{\s*grid-column:3; grid-row:1; justify-self:end;/);
+  // Play is retired from the reading UI; the hidden control is only a harness hook.
+  assert.match(css, /\.selected-instant-line #play-button \{ display:none; \}/);
+  assert.doesNotMatch(page, /mobile-play-button/);
   assert.match(css, /#instant-readout\s*\{[\s\S]*?grid-column:2;/);
   assert.match(css, /#now-button\.readout-now\s*\{[\s\S]*?grid-column:3;[\s\S]*?position:static;[\s\S]*?transform:none;/);
   assert.doesNotMatch(css, /left:calc\(100% \+/);
@@ -26,7 +28,7 @@ test("editor hides Now without changing the symmetric grid geometry", () => {
 test("mobile has one real time/action row and no duplicate Zodiac or visual status row", () => {
   const dock = page.match(/<section id="mobile-time-dock"[\s\S]*?<\/section>/)?.[0];
   assert.ok(dock);
-  assert.match(dock, /id="mobile-instant-input"[\s\S]*?class="mobile-time-actions"[\s\S]*?id="mobile-time-apply"[\s\S]*?id="mobile-play-button"[\s\S]*?id="mobile-now-button"/);
+  assert.match(dock, /id="mobile-instant-input"[\s\S]*?class="mobile-time-actions"[\s\S]*?id="mobile-time-apply"[\s\S]*?id="mobile-now-button"/);
   assert.match(dock, /id="mobile-time-status" role="status" aria-live="polite"/);
   assert.doesNotMatch(dock, /mobile-time-heading|mobile-zodiac-readout/);
   assert.match(css, /grid-template-columns:\s*minmax\(0,1fr\) auto !important/);

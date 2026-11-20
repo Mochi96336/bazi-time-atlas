@@ -108,32 +108,8 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 #kinetic-instrument .instrument-readout #now-button.readout-now:focus-visible { color:#efe1b7; }
 #kinetic-instrument[data-inverse-time-search="active"] .instrument-readout #now-button.readout-now { display:none; }
 
-/* Repair A1: playback is a primary, always-reachable action beside Now.
-   It stays typographic (no pill) so the minimal home keeps one quiet row. */
-#kinetic-instrument .instrument-readout #play-button.readout-play {
-  display:inline-flex; align-items:center; justify-content:center;
-  min-width:56px; min-height:44px; margin:0; padding:0 8px;
-  border:0; border-radius:0; background:transparent;
-  color:#b9b29e; font-size:12px; font-weight:620; letter-spacing:.03em;
-  cursor:pointer; pointer-events:auto;
-}
-@media (min-width:481px) {
-  #kinetic-instrument .instrument-readout .selected-instant-line #play-button.readout-play {
-    grid-column:3; grid-row:1; justify-self:end;
-  }
-  #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now { grid-row:1; }
-}
-@media (max-width:480px) {
-  #kinetic-instrument .instrument-readout #play-button.readout-play { display:none; }
-}
-#kinetic-instrument .instrument-readout #play-button.readout-play::before {
-  content:"▶"; margin-right:5px; font-size:9px;
-}
-#kinetic-instrument .instrument-readout #play-button.readout-play[aria-pressed="true"]::before { content:"❚❚"; letter-spacing:-1px; }
-#kinetic-instrument .instrument-readout #play-button.readout-play:hover,
-#kinetic-instrument .instrument-readout #play-button.readout-play:focus-visible,
-#kinetic-instrument .instrument-readout #play-button.readout-play[aria-pressed="true"] { color:#efe1b7; }
-#kinetic-instrument[data-inverse-time-search="active"] .instrument-readout #play-button.readout-play { display:none; }
+/* Play is retired from the reading UI (#play-button stays hidden as a harness hook). */
+#kinetic-instrument .instrument-readout .selected-instant-line #play-button { display:none; }
 #mobile-now-button { display:none; }
 
 @media (min-width:481px) {
@@ -257,7 +233,6 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
     column-gap:4px;
   }
   #kinetic-instrument .instrument-readout .selected-instant-line::before { width:100px; }
-  #kinetic-instrument .instrument-readout .selected-instant-line #play-button.readout-play { min-width:48px; padding:0 2px; }
   #kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now {
     min-width:44px;
     min-height:32px;
@@ -314,18 +289,7 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   }
 }
 
-/* Repair A1 (mobile): Play sits beside Now in the dock and mirrors #play-button. */
-#mobile-play-button { display:none; }
 @media (max-width:480px) {
-  .mobile-time-dock .mobile-time-actions #mobile-play-button {
-    display:inline-flex; justify-content:center; align-items:center;
-    min-width:52px; min-height:44px; padding:0 4px;
-    border:0; border-radius:0; background:transparent;
-    color:#d1c3a0; font-size:12px; font-weight:690; cursor:pointer;
-  }
-  .mobile-time-dock .mobile-time-actions #mobile-play-button::before { content:"▶"; margin-right:4px; font-size:9px; }
-  .mobile-time-dock .mobile-time-actions #mobile-play-button[aria-pressed="true"]::before { content:"❚❚"; letter-spacing:-1px; }
-  .mobile-time-dock .mobile-time-actions #mobile-play-button[aria-pressed="true"] { color:#f1dfb1; }
   /* Repair A1: scale presets share the typographic Tools rail treatment. */
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button {
     min-height:42px; padding:0 5px; border:0; border-radius:0;
@@ -335,9 +299,6 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
     color:#eef0ee; background:transparent; box-shadow:inset 0 -1px rgba(235,238,236,.6);
   }
   #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child { gap:0; }
-}
-@media (max-width:480px) {
-  .mobile-time-dock[data-dirty="true"] .mobile-time-actions #mobile-play-button { display:none; }
 }
 
 /* Repair A2/B6: Research is visually secondary through weight and tone, while
