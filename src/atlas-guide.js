@@ -1,8 +1,6 @@
-// Repair B2/B3: the opt-in "怎麼讀" dialog and the one-time drag hint. The
-// home page keeps no permanent explanatory text; both pieces appear only when
-// asked for (guide) or on first use (hint).
-const GUIDE_BUTTON = document.querySelector("#atlas-guide-button");
-const GUIDE = document.querySelector("#atlas-guide");
+// Repair B3: the one-time drag hint. The home page keeps no permanent
+// explanatory text; the hint appears only on first use. (The B2 "怎麼讀"
+// dialog was removed after review on 2026-11-21.)
 const HINT = document.querySelector("#atlas-drag-hint");
 const INSTRUMENT = document.querySelector("#kinetic-instrument");
 const WHEEL = document.querySelector("#kinetic-wheel");
@@ -13,23 +11,6 @@ function readFlag(key) {
 }
 function writeFlag(key) {
   try { localStorage.setItem(key, "1"); } catch { /* storage unavailable */ }
-}
-
-if (GUIDE_BUTTON && GUIDE) {
-  GUIDE_BUTTON.setAttribute("aria-expanded", "false");
-  GUIDE_BUTTON.addEventListener("click", () => {
-    if (typeof GUIDE.showModal === "function") GUIDE.showModal();
-    else GUIDE.setAttribute("open", "");
-    GUIDE_BUTTON.setAttribute("aria-expanded", "true");
-  });
-  GUIDE.addEventListener("close", () => {
-    GUIDE_BUTTON.setAttribute("aria-expanded", "false");
-    GUIDE_BUTTON.focus();
-  });
-  // Clicking the backdrop (the dialog element itself) closes the guide.
-  GUIDE.addEventListener("click", event => {
-    if (event.target === GUIDE) GUIDE.close();
-  });
 }
 
 function hideHint(remember) {

@@ -22,7 +22,7 @@ test("classification keeps independent categorical sector authority", () => {
   );
   assert.match(
     classification,
-    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element\]\.is-active\s*\{[^}]*stroke:\s*var\(--branch-color\);[^}]*stroke-width:\s*2\.2;/
+    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element\]\.is-active\s*\{[^}]*stroke:\s*var\(--branch-color\);[^}]*stroke-width:\s*2\.4;/
   );
   assert.doesNotMatch(
     radial,

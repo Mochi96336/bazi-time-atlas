@@ -33,10 +33,13 @@ test("legend text keeps the 12px floor on desktop and an 11px annotation floor o
   for (const size of fontSizes(mobile)) assert.ok(size >= 11, `mobile legend font-size ${size}px`);
 });
 
-test("only the read-head sectors carry strong classification colour", () => {
-  assert.match(css, /--classification-rest-fill:\s*16%;/);
-  assert.match(css, /--classification-active-fill:\s*46%;/);
-  assert.match(css, /\.cycle-sector\[data-stem-element\]\s*\{\s*fill:\s*color-mix\(in srgb, var\(--stem-color\) var\(--classification-rest-fill\), transparent\);/);
+test("only the read-head sectors are coloured; every other sector keeps graphite and colours its glyphs", () => {
+  assert.doesNotMatch(css, /--classification-rest-fill/);
+  assert.doesNotMatch(css, /\.cycle-sector\[data-stem-element\]\s*\{/);
+  assert.doesNotMatch(css, /\.zodiac-sector\[data-zodiac-element\]\s*\{/);
+  assert.match(css, /--classification-active-fill:\s*42%;/);
+  assert.match(css, /\.cycle-label:is\(\[data-cycle-label\^="甲"\],\[data-cycle-label\^="乙"\]\) \{ fill: var\(--five-wood\); \}/);
+  assert.match(css, /\.zodiac-label\[data-zodiac-element="風"\] \{ fill: var\(--z-air\); \}/);
   assert.match(css, /\.cycle-sector\[data-stem-element\]\.is-active\s*\{\s*fill:\s*color-mix\(in srgb, var\(--stem-color\) var\(--classification-active-fill\), transparent\);/);
   assert.match(css, /\.zodiac-sector\[data-zodiac-element\]\.is-active\s*\{[^}]*stroke-opacity:\s*1;/);
 });

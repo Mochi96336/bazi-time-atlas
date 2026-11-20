@@ -34,6 +34,6 @@ test("fixed identities have a readability authority distinct from ring material 
 
 test("Classification owns Zodiac outline structure independently from resting material color", () => {
   assert.match(classification, /--classification-zodiac-outline:\s*#8f999d;/);
-  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector \{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
+  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\[data-zodiac-element\]\.is-active \{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
   assert.doesNotMatch(classification, /data-classification-overlay="on"\] \.zodiac-sector \{[\s\S]*?stroke:[^;]*var\(--zodiac\)/);
 });
