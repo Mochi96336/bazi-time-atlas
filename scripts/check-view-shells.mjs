@@ -200,7 +200,8 @@ if (
     ", zeroStep=" + zeroDeltaStepHeight + ", shiftToolbarH=" + shiftToolbarHeight + "): " + url
   );
 }
-if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
+// Research redesign R5: every disclosure row shares one 48px touch target.
+if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 44 || sexagenaryDetailsHeight > 56) {
   throw new Error(`60-day supporting evidence must collapse to one compact rail by default (${sexagenaryDetailsHeight}px): ${url}`);
 }
 if (!Number.isFinite(astronomyTransitionBottom) || !Number.isFinite(astronomyTaskTop) || astronomyTaskTop <= astronomyTransitionBottom) {

@@ -46,7 +46,7 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?差 10–14 天/);
   assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?年月 ✓ 日時 ？/);
   assert.match(html, /八字多久會重複一次？/);
-  assert.match(html, /class="lede research-answer">目前找不到四柱完整重複的週期。/);
+  assert.match(html, /class="lede research-answer">目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期。/);
   assert.doesNotMatch(html, /research-alignment-map/);
   assert.doesNotMatch(html, /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊/);
   assert.match(html, /id="research-spine-discrete">曆法上三個循環全部對上<\/small>/);

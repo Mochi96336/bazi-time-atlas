@@ -30,7 +30,7 @@
     text-anchor: end;
     dominant-baseline: middle;
   }
-  .rda-x-label { fill: var(--research-text-muted); font-size: 14px; text-anchor: middle; }
+  .rda-x-label { fill: var(--research-text-muted); font-size: 14px; }
   .rda-link {
     fill: none;
     stroke: var(--research-candidate);

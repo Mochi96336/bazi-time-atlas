@@ -64,7 +64,7 @@ const evidence = sectionById(probe.dom, "research-evidence");
 
 for (const expected of [
   "八字多久會重複一次？",
-  "目前找不到四柱完整重複的週期",
+  "完整重複的週期",
   "粗略週期從哪裡來？",
   "八字的節界回來了嗎？",
   "對八字意味著什麼？",

@@ -62,7 +62,7 @@ test("Research 01 has concise proof guidance and optional intermediate checks in
 test("Research 01 prioritizes readable evidence instead of truncating milestone reasoning",()=>{
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
-  assert.match(html,/目前找不到四柱完整重複的週期/);
+  assert.match(html,/目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期/);
   assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
   assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
   assert.match(css,/\.research-outline small \{\s*font-size:12px;/);
