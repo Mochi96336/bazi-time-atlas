@@ -210,7 +210,11 @@ if (root) {
   }
 
   function syncStickyPresentation() {
-    const top = Number.parseFloat(getComputedStyle(root).top) || 0;
+    // Research redesign R2: the card now lives inside 01's "try it" tools and
+    // is not sticky; only a sticky card can be "stuck".
+    const style = getComputedStyle(root);
+    if (style.position !== "sticky") { root.dataset.stuck = "false"; return; }
+    const top = Number.parseFloat(style.top) || 0;
     const rect = root.getBoundingClientRect();
     root.dataset.stuck = String(window.scrollY > 0 && rect.top <= top + 1);
   }

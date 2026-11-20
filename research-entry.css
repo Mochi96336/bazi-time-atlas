@@ -172,8 +172,4 @@
   line-height:1.4;
 }
 
-/* Repair D6: inside 01 the condition ladder's +1,980 / +24,000 steps are the
-   same actions as these milestone buttons. Keep one set on the reading path;
-   the entry stays in the DOM for deep-link and harness hooks. */
-.research-task .research-entry { display: none; }
 }

@@ -53,12 +53,16 @@ test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower
   const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
   const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
   const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
-  assert.ok(thesisStart>=0 && stepsStart>thesisStart && stripStart>stepsStart,
-    "the existing milestone derivation must lead before the date explorer");
+  // Research redesign R2: the phase fan is 01's figure; the number ladder,
+  // date strip and Δ controls are optional tools behind one disclosure.
+  const toolsStart=recurrenceHtml.indexOf('id="research-discrete-tools"');
+  assert.ok(instrumentStart>0 && toolsStart>instrumentStart && thesisStart>toolsStart &&
+    stepsStart>thesisStart && stripStart>stepsStart,
+    "the fan leads; the derivation ladder opens the tools before the date explorer");
   assert.ok(selectedStart>stripStart && trackStart>selectedStart,
     "selected date must stay inside the original year-strip header");
-  assert.ok(comparisonStart>trackStart && instrumentStart>comparisonStart && derivationStart>instrumentStart,
-    "date evidence and the fan must remain the verification path before lower Δ controls");
+  assert.ok(comparisonStart>trackStart && derivationStart>comparisonStart,
+    "date evidence stays before the lower Δ controls");
   const derivationMarkup=recurrenceHtml.slice(derivationStart);
   assert.ok(derivationMarkup.includes('id="delta-slider"') &&
     derivationMarkup.includes('id="research-controls"') &&
@@ -354,14 +358,14 @@ test("reading order explains the global candidate before date/fan verification a
   const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
-  assert.ok(thesisStart >= 0 && stripStart > thesisStart && comparisonStart > stripStart &&
-    stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
+  assert.ok(stateStart >= 0 && thesisStart > stateStart && stripStart > thesisStart && comparisonStart > stripStart &&
+    derivationStart > comparisonStart && cycleStart > derivationStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
   assert.match(recurrenceHtml, /data-diagram-grammar="condition-ladder"/);
-  assert.match(recurrenceHtml, /推導關係：<\/strong>LCM\(1,200, 8,000\) = 24,000/);
-  assert.match(recurrenceHtml, /局部重遇不是拿來找倍數，而是指出「年＋日已回來，還缺季節位置」/);
+  assert.match(recurrenceHtml, /取 1,200 和 8,000 的最小公倍數，就是 24,000 年/);
+  assert.match(recurrenceHtml, /1,980 年左右年序和日序會先回來，但公曆還差 20 年/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
@@ -377,19 +381,22 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.deepEqual(local.phases,{yearSequence:0,gregorian:380,day:0});
   assert.deepEqual(global.phases,{yearSequence:0,gregorian:0,day:0});
   assert.match(recurrenceView,/signedShortestPhase\(localState\.phases\.gregorian,400\)/);
-  assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
 test("first-screen research milestones reuse the canonical delta state and date-specific local result", () => {
   const entry=recurrenceHtml.indexOf('class="research-entry"');
-  const outline=recurrenceHtml.indexOf('class="research-outline"');
+  const outline=recurrenceHtml.indexOf('class="research-outline');
   const time=recurrenceHtml.indexOf('id="research-time-state"');
+  const fan=recurrenceHtml.indexOf('id="recurrence-instrument"');
   // Repair D2: the milestone comparison lives inside 01, after its plain
   // conclusion, so the page opens with the question rather than a dashboard.
   const discrete=recurrenceHtml.indexOf('id="research-discrete"');
   const conclusion=recurrenceHtml.indexOf('data-plain-conclusion="01"');
-  assert.ok(outline > 0 && outline < time && time < discrete && discrete < conclusion && conclusion < entry,
-    "outline and shared time card precede 01; the milestones follow 01's plain conclusion");
+  // Research redesign R1/R2: the answer route map precedes 01; the milestone
+  // toggles drive the fan right after 01's conclusion; the shared time card
+  // is an optional tool after the fan.
+  assert.ok(outline > 0 && outline < discrete && discrete < conclusion && conclusion < entry && entry < fan && fan < time,
+    "route map, 01 conclusion, milestone toggles, fan, then the optional time card");
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
   assert.doesNotMatch(recurrenceHtml.slice(entry,recurrenceHtml.indexOf("</div>",recurrenceHtml.indexOf('id="research-entry-selection"'))),/\+1,980/);
@@ -447,7 +454,7 @@ test("Research 01 primary proof stays visible while 400/1200/8000 supporting che
   assert.match(recurrenceView,/else derivationSteps\.appendChild\(button\)/);
   assert.match(story,/\.research-structural-milestone-grid \{\s*display:grid;/);
   assert.match(story,/\.research-structural-milestones > summary:focus-visible/);
-  assert.match(recurrenceHtml,/要查看 \+400／\+1,200／\+8,000 的中間證據/);
+  assert.match(recurrenceHtml,/看 \+400／\+1,200／\+8,000 的中間驗算/);
   assert.doesNotMatch(recurrenceHtml,/依序點上方 \+400、\+8,000、\+24,000/);
 });
 

@@ -44,8 +44,13 @@
         doc.getElementById("research-evidence")?.scrollIntoView({block:"start"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
-        if(!(conclusion.getBoundingClientRect().top<determinacy.getBoundingClientRect().top))
-          throw new Error("Reference frame comparison must appear before pillars");
+        // Research redesign R4: the verdict is the figure; the reference-frame
+        // explanation follows it inside "#research-evidence-why".
+        const why=doc.getElementById("research-evidence-why");
+        if(!why||!why.contains(conclusion)||!(determinacy.compareDocumentPosition(why)&Node.DOCUMENT_POSITION_FOLLOWING))
+          throw new Error("Reference frame explanation must follow the pillar verdict");
+        why.open=true;
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         const timeState=doc?.getElementById("research-time-state");
         const timeKicker=doc?.getElementById("research-time-kicker");
         if(timeState?.dataset.context!=="evidence"||timeKicker?.textContent.trim()!=="03 · 四柱判定／同一太陽黃經"){

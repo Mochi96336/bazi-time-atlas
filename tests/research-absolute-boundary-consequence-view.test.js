@@ -11,12 +11,13 @@ const [html,view,model,spine,fourPillarView,css]=await Promise.all([
   readFile(new URL("../research-absolute-boundary-consequence.css",import.meta.url),"utf8")
 ]);
 
-test("Research 03 explains the two reference frames before the fixed +24k pillar verdict",()=>{
+test("Research 03 explains the two reference frames right after the fixed +24k pillar verdict",()=>{
   const conclusionScript=html.indexOf("research-absolute-boundary-consequence-view.js");
   const determinacyScript=html.indexOf("four-pillar-determinacy-view.js");
   assert.ok(conclusionScript>=0&&determinacyScript>conclusionScript);
   assert.match(html,/class="determinacy-verdict"[\s\S]*固定 \+24,000 公曆年[\s\S]*模型內：並非固定時間下的精確節界回歸/);
-  assert.match(view,/determinacy\.insertAdjacentElement\("beforebegin",panel\)/);
+  assert.ok(html.indexOf('id="four-pillar-determinacy"')<html.indexOf('id="research-evidence-why"'));
+  assert.match(view,/if\(why\)why\.append\(panel\)/);
   assert.match(view,/publishFixedEvidence\(\)/);
   assert.match(view,/absoluteBoundaryReferenceJie="displaced"/);
   assert.match(view,/為什麼「年／月可回同柱」與「24,000 不是完整週期」能同時成立/);
@@ -43,7 +44,7 @@ test("fixed Research 03 pillar cards follow the shared selected seasonal state",
 });
 
 test("Research outline ends in the recurrence conclusion rather than repeating the 02 evidence",()=>{
-  for(const copy of ["24,000 離散候選","TT 提前 10–14 d","24,000 ≠ 完整週期"]){
+  for(const copy of ["曆法上三個循環全部對上","但真正的節氣沒有回來","所以 24,000 年不是四柱的週期"]){
     assert.ok(spine.includes(copy),`missing fixed-spine copy: ${copy}`);
   }
   assert.doesNotMatch(spine,/12 \/ 12 節界位移/);

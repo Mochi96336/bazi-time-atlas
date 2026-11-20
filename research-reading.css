@@ -1,0 +1,332 @@
+/* Research redesign (docs/research-redesign.md): one sentence, one figure,
+   one "go deeper" per section, with negative space between them.
+   Loaded last on recurrence.html so it settles the reading layout without
+   !important; it lives in the same `page` layer as the legacy files. */
+@layer page {
+
+/* ---------- R1 opening: question, answer, route map ---------- */
+
+.research-question-intro {
+  display: block;
+  padding-bottom: 8px;
+}
+.research-question-intro .research-question-copy { max-width: 760px; }
+.research-question-intro h1 { margin-bottom: 18px; }
+.research-question-intro .research-answer {
+  max-width: 36em;
+  margin: 0;
+  color: var(--research-text-primary, #eef2f1);
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.75;
+}
+.research-question-intro .research-question-next {
+  display: block;
+  margin: 14px 0 0;
+  color: var(--research-text-secondary, #b9c2c0);
+  font-size: 14px;
+}
+.research-question-intro .research-glossary-link { margin-top: 6px; }
+
+.research-outline.research-answer-map {
+  position: relative;
+  width: 100%;
+  max-width: 1080px;
+  margin: 40px 0 0;
+  padding: 0;
+  border: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  counter-reset: none;
+}
+/* the route: one hairline running through the three answers */
+.research-outline.research-answer-map::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 6px;
+  height: 1px;
+  background: linear-gradient(to right, #6fb6c8 0%, #c59563 50%, #86a1ba 100%);
+  opacity: .5;
+}
+.research-outline.research-answer-map a {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "index" "title" "outcome";
+  row-gap: 6px;
+  padding: 22px 0 0;
+  color: inherit;
+}
+.research-outline.research-answer-map a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--research-field, #0a0d13);
+  border: 2px solid var(--research-task-accent);
+}
+.research-outline.research-answer-map a::after { display: none; }
+.research-outline.research-answer-map a:nth-child(1) { --research-task-accent: #6fb6c8; }
+.research-outline.research-answer-map span {
+  color: var(--research-text-muted, #8a9492);
+  font-size: 12px;
+  letter-spacing: .12em;
+}
+.research-outline.research-answer-map strong {
+  color: var(--research-text-primary, #eef2f1);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
+}
+.research-outline.research-answer-map small {
+  overflow: visible;
+  color: var(--research-text-secondary, #b9c2c0);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: normal;
+}
+.research-outline.research-answer-map a:hover strong,
+.research-outline.research-answer-map a:focus-visible strong { color: #fff; }
+
+/* ---------- Section rhythm ---------- */
+
+.research-task { margin-top: 128px; }
+.research-task-primary { margin-top: 112px; }
+.research-plain-conclusion { margin-bottom: 28px; }
+
+/* ---------- R2 01: toggles → phase fan → how to read → mechanism ---------- */
+
+#research-discrete .research-entry {
+  display: block;
+  margin: 0 0 12px;
+}
+#research-discrete .research-entry-label {
+  margin: 0 0 8px;
+  color: var(--research-text-secondary, #b9c2c0);
+  font-size: 13px;
+}
+#research-discrete .research-entry-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  border: 0;
+}
+#research-discrete .research-entry-choice {
+  min-height: 44px;
+  flex: 0 1 auto;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: "years label";
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 16px;
+  border: 1px solid var(--research-line, rgba(224,234,238,.18));
+  border-radius: 999px;
+  background: transparent;
+}
+#research-discrete .research-entry-choice + .research-entry-choice { padding-left: 16px; border-left: 1px solid var(--research-line, rgba(224,234,238,.18)); }
+#research-discrete .research-entry-choice > strong { grid-area: years; font-size: 17px; }
+#research-discrete .research-entry-choice > span { grid-area: label; color: var(--research-text-secondary, #b9c2c0); font-size: 13px; }
+#research-discrete .research-entry-choice > small { display: none; }
+#research-discrete .research-entry-choice[aria-pressed="true"] {
+  border-color: currentColor;
+  background: rgba(137,172,184,.08);
+}
+#research-discrete .research-entry-selection {
+  margin: 8px 0 0;
+  color: var(--research-text-muted, #8a9492);
+  font-size: 13px;
+}
+
+#research-discrete .recurrence-instrument { margin-top: 18px; }
+.research-figure-howto {
+  max-width: 46em;
+  margin: 12px 0 0;
+  color: var(--research-text-secondary, #b9c2c0);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#research-discrete .research-discrete-mechanism {
+  max-width: 46em;
+  margin: 48px 0 0;
+  padding: 0 0 0 18px;
+  border-left: 2px solid rgba(111,182,200,.45);
+}
+#research-discrete .research-discrete-mechanism p {
+  margin: 0;
+  color: var(--research-text-primary, #eef2f1);
+  font-size: 15px;
+  line-height: 1.8;
+}
+#research-discrete .research-discrete-mechanism p + p { margin-top: 12px; }
+#research-discrete .research-discrete-mechanism strong { display: block; margin-bottom: 4px; font-size: 15px; }
+
+/* "Try it yourself": every 01 tool behind one disclosure */
+.research-discrete-tools,
+.research-chart-method,
+.research-extension {
+  margin: 48px 0 0;
+  border-top: 1px solid var(--research-line-soft, rgba(224,234,238,.08));
+  border-bottom: 1px solid var(--research-line-soft, rgba(224,234,238,.08));
+}
+.research-discrete-tools > summary,
+.research-chart-method > summary,
+.research-extension > summary {
+  min-height: 52px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.research-discrete-tools > summary::-webkit-details-marker,
+.research-chart-method > summary::-webkit-details-marker,
+.research-extension > summary::-webkit-details-marker { display: none; }
+.research-discrete-tools > summary::after,
+.research-chart-method > summary::after,
+.research-extension > summary::after {
+  content: "+";
+  margin-left: auto;
+  color: var(--research-text-muted, #8a9492);
+  font-size: 18px;
+}
+.research-discrete-tools[open] > summary::after,
+.research-chart-method[open] > summary::after,
+.research-extension[open] > summary::after { content: "−"; }
+.research-discrete-tools > summary span,
+.research-extension > summary span { color: var(--research-text-primary, #eef2f1); font-size: 15px; font-weight: 650; }
+.research-discrete-tools > summary small,
+.research-extension > summary small { color: var(--research-text-muted, #8a9492); font-size: 13px; }
+.research-discrete-tools-body { display: grid; gap: 28px; padding: 8px 0 28px; }
+
+/* the shared research-time card is a tool now: in place, never sticky */
+.research-discrete-tools .research-time-state {
+  position: static;
+  margin: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* ---------- R3 02: conclusion → lollipop → how to read → accumulation ---------- */
+
+#research-astronomy .research-case-transition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--research-text-muted, #8a9492);
+  font-size: 13px;
+}
+#research-astronomy .research-case-transition strong { color: var(--research-text-secondary, #b9c2c0); font-size: 13px; }
+/* the section heading already asks the question; keep the h3 for assistive tech */
+#research-astronomy .seasonal-drift-evidence-head {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+/* "12 / 12 all earlier" repeats the plain conclusion; the cursor readout stays */
+#research-astronomy .seasonal-drift-stat.verdict { display: none; }
+#research-astronomy .seasonal-drift-summary { grid-template-columns: minmax(0, 1fr); border: 0; }
+.research-chart-method { margin-top: 20px; }
+.research-chart-method > summary { min-height: 44px; padding: 10px 0; color: var(--research-text-secondary, #b9c2c0); font-size: 14px; }
+.research-chart-method p { max-width: 46em; margin: 0 0 12px; color: var(--research-text-secondary, #b9c2c0); font-size: 13px; line-height: 1.7; }
+#research-astronomy .research-drift-accumulation { margin-top: 64px; }
+#research-astronomy .seasonal-drift-evidence-note { margin-top: 40px; }
+.research-extension { margin-top: 48px; }
+.research-extension > .near-search-panel { margin-top: 4px; padding-bottom: 20px; }
+
+/* ---------- R4 03: one verdict figure, grouped by cause ---------- */
+
+/* the banner and scope header repeat the plain conclusion; the model caveat stays */
+#research-evidence .determinacy-verdict { margin: 0 0 18px; padding: 0; border: 0; background: none; }
+#research-evidence .determinacy-verdict strong,
+#research-evidence .determinacy-verdict small { display: none; }
+#research-evidence .determinacy-verdict span { color: var(--research-text-muted, #8a9492); font-size: 13px; letter-spacing: 0; }
+#research-evidence .determinacy-head { display: none; }
+
+#research-evidence .determinacy-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 0;
+  row-gap: 10px;
+}
+#research-evidence .determinacy-grid::before,
+#research-evidence .determinacy-grid::after {
+  grid-column: span 2;
+  padding: 0 0 8px;
+  border-bottom: 2px solid;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+#research-evidence .determinacy-grid::before {
+  content: "只看太陽走到哪 → 算得出來";
+  order: 0;
+  color: var(--research-candidate, #d6b26f);
+}
+#research-evidence .determinacy-grid::after {
+  content: "還要知道地球轉到哪一刻 → 算不準";
+  order: 1;
+  margin-left: 16px;
+  color: var(--research-text-secondary, #b9c2c0);
+}
+#research-evidence .determinacy-card { order: 2; }
+#research-evidence .determinacy-card[data-determinacy-pillar="day"] { margin-left: 16px; }
+#research-evidence .determinacy-foot { margin-top: 18px; color: var(--research-text-muted, #8a9492); font-size: 12px; }
+#research-evidence .determinacy-panel > .research-figure-howto { margin-top: 18px; }
+#research-evidence-why > .absolute-boundary-consequence { margin-top: 8px; }
+
+@media (max-width: 820px) {
+  #research-evidence .determinacy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #research-evidence .determinacy-grid::before,
+  #research-evidence .determinacy-grid::after { grid-column: 1 / -1; margin-left: 0; }
+  #research-evidence .determinacy-card[data-determinacy-pillar="year"] { order: 1; }
+  #research-evidence .determinacy-card[data-determinacy-pillar="month"] { order: 2; }
+  #research-evidence .determinacy-grid::after { order: 3; margin-top: 14px; }
+  #research-evidence .determinacy-card[data-determinacy-pillar="day"] { order: 4; margin-left: 0; }
+  #research-evidence .determinacy-card[data-determinacy-pillar="hour"] { order: 5; }
+}
+
+@media (max-width: 480px) {
+  .research-question-intro .research-answer { font-size: 17px; }
+  .research-outline.research-answer-map {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    margin-top: 32px;
+    padding-left: 26px;
+  }
+  .research-outline.research-answer-map::before {
+    left: 6px;
+    right: auto;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(to bottom, #6fb6c8 0%, #c59563 50%, #86a1ba 100%);
+  }
+  .research-outline.research-answer-map a { padding: 0; row-gap: 3px; }
+  .research-outline.research-answer-map a::before { left: -26px; top: 2px; }
+  .research-outline.research-answer-map strong { font-size: 20px; }
+  .research-task { margin-top: 88px; }
+  .research-task-primary { margin-top: 72px; }
+  #research-discrete .research-entry-choice { padding: 8px 12px; }
+  #research-discrete .research-entry-choice > strong { font-size: 15px; }
+  #research-discrete .research-discrete-mechanism { margin-top: 36px; padding-left: 14px; }
+  #research-discrete .research-discrete-mechanism p { font-size: 14px; }
+  .research-discrete-tools > summary { flex-wrap: wrap; gap: 4px 12px; }
+}
+}

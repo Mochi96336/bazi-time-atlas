@@ -34,8 +34,12 @@ function ensurePanel(){
     '<p class="absolute-boundary-note"><strong>日／時仍是「未能判定」：</strong>節界未重現可以否定整套固定精確週期，但不能直接偷換成「每個相隔 24,000 年的四柱一定不同」。深時間民用日、日界與地方時證據仍不足。</p>'
   ].join("");
 
-  // Comparison reference frames must be read before the pillar verdict they qualify.
-  determinacy.insertAdjacentElement("beforebegin",panel);
+  // Research redesign R4: the pillar verdict is the 03 figure; the two
+  // reference frames explain it on demand, inside "why this is not a
+  // contradiction" right after the verdict.
+  const why=document.querySelector("#research-evidence-why");
+  if(why)why.append(panel);
+  else determinacy.insertAdjacentElement("afterend",panel);
   return panel;
 }
 

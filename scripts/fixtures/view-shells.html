@@ -108,6 +108,12 @@
       }
 
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
+      // Research redesign R2: the year strip is a 01 tool behind the
+      // default-closed "try it" disclosure; audit its owners with it open.
+      const discreteTools = recurrenceDoc.getElementById("research-discrete-tools");
+      if (!("recurrenceDiscreteToolsClosedOnEntry" in probe.dataset)) probe.dataset.recurrenceDiscreteToolsClosedOnEntry = String(Boolean(discreteTools && !discreteTools.open));
+      if (discreteTools) discreteTools.open = true;
+      recurrenceDoc.documentElement.getBoundingClientRect();
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
       const recurrenceComparison = recurrenceDoc.querySelector("#research-cycle-comparison");
       const recurrenceYearCard = recurrenceDoc.querySelector(".research-cycles-card");
@@ -186,7 +192,9 @@
       const baseEditorSummaryRect = baseEditorSummary?.getBoundingClientRect();
       const baseDateInputRect = baseDateInput?.getBoundingClientRect();
       const modelBoundarySummaryRect = modelBoundarySummary?.getBoundingClientRect();
-      const derivationRect = derivation?.getBoundingClientRect();
+      // Research redesign R2: the Δ derivation can sit inside 01's closed
+      // "try it" disclosure; then the disclosure is what the reader sees.
+      const derivationRect = (derivation?.closest("details:not([open])") ?? derivation)?.getBoundingClientRect();
       const zeroDeltaStepRect = zeroDeltaStep?.getBoundingClientRect();
       if (baseEditor)baseEditor.open=false;
       if (compactControls)compactControls.open=false;
@@ -259,8 +267,11 @@
         targetRow.checkVisibility() &&
         !originalYearStrip.contains(zeroDeltaStep)
       ));
+      // Research redesign R2: the fan is 01's figure; the Year/Day comparison
+      // rail is a tool after it.
       probe.dataset.recurrenceComparisonBeforeFan = String(Boolean(
-        comparisonRect && recurrenceRect && comparisonRect.bottom <= recurrenceRect.top
+        recurrenceComparison && recurrenceInstrument &&
+        (recurrenceInstrument.compareDocumentPosition(recurrenceComparison) & Node.DOCUMENT_POSITION_FOLLOWING)
       ));
       probe.dataset.recurrenceInstrumentTop = String(Math.round(recurrenceRect?.top ?? -1));
       probe.dataset.recurrenceInstrumentHeight = String(Math.round(recurrenceRect?.height ?? -1));
@@ -310,7 +321,9 @@
         !originalYearStrip.contains(compactControls) &&
         originalYearStrip.contains(selectedDateInput) &&
         controlsClosedOnEntry &&
-        phaseFanPanel.nextElementSibling === derivation
+        // Research redesign R2: Δ controls live in 01's "try it" tools after the fan.
+        Boolean(recurrenceDoc.getElementById("research-discrete-tools")?.contains(derivation)) &&
+        Boolean(phaseFanPanel.compareDocumentPosition(derivation) & Node.DOCUMENT_POSITION_FOLLOWING)
       ));
       probe.dataset.recurrenceDeltaRailOwnsZero = String(Boolean(
         zeroDeltaStep &&

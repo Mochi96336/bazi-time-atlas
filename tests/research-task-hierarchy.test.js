@@ -39,22 +39,19 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.ok(astronomyStart > discreteStart);
   assert.ok(evidenceStart > astronomyStart);
   assert.doesNotMatch(html, /class="research-task-nav"/);
-  assert.match(html, /class="research-outline"[^>]*aria-label="研究項目"/);
-  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?粗略週期/);
-  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?天文偏移/);
-  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?八字後果/);
-  assert.match(html, />粗略週期</);
-  assert.match(html, />天文偏移</);
-  assert.match(html, />八字後果</);
+  // Research redesign R1: the outline is an answer route map — each step is
+  // the result of its section, not a topic label.
+  assert.match(html, /class="research-outline research-answer-map"[^>]*aria-label="研究項目：三步答案"/);
+  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?24,000 年/);
+  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?差 10–14 天/);
+  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?年月 ✓ 日時 ？/);
   assert.match(html, /八字多久會重複一次？/);
-  assert.match(html, /四柱都落在六十甲子序列上/);
-  assert.match(html, /data-alignment="year-month"[\s\S]*同一節令下固定對齊/);
-  assert.match(html, /data-alignment="day-hour"[\s\S]*同一時辰下固定對齊/);
-  assert.match(html, /年柱 × 日柱/);
+  assert.match(html, /class="lede research-answer">目前找不到四柱完整重複的週期。/);
+  assert.doesNotMatch(html, /research-alignment-map/);
   assert.doesNotMatch(html, /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊/);
-  assert.match(html, /id="research-spine-discrete">24,000 離散候選<\/small>/);
-  assert.match(html, /id="research-spine-astronomy">TT 提前 10–14 d<\/small>/);
-  assert.match(html, /id="research-spine-evidence">24,000 ≠ 完整週期<\/small>/);
+  assert.match(html, /id="research-spine-discrete">曆法上三個循環全部對上<\/small>/);
+  assert.match(html, /id="research-spine-astronomy">但真正的節氣沒有回來<\/small>/);
+  assert.match(html, /id="research-spine-evidence">所以 24,000 年不是四柱的週期<\/small>/);
   assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 12 節界校驗<\/span>/);
   assert.match(html, /class="research-task-relation">12 \/ 12 節界位移 → 四柱可判範圍<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
@@ -63,7 +60,7 @@ test("Research keeps three ordered evidence owners without task-card navigation"
 
 test("Research narrative spine summarizes the fixed argument rather than the current delta sandbox", () => {
   assert.match(html, /research-narrative-spine-view\.js/);
-  for (const copy of ["24,000 離散候選", "TT 提前 10–14 d", "24,000 ≠ 完整週期"]) {
+  for (const copy of ["曆法上三個循環全部對上", "但真正的節氣沒有回來", "所以 24,000 年不是四柱的週期"]) {
     assert.ok(spineJs.includes(copy), `missing fixed-spine outcome: ${copy}`);
   }
   assert.doesNotMatch(spineJs, /instrument\.dataset|boolDataset|fourPillarResolvedCount|astronomyValidity/);
@@ -77,7 +74,7 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
-  assert.match(discrete, /01 先建立離散候選；02 再檢查真正的十二節界。/);
+  assert.match(discrete, /id="research-discrete-tools" class="research-discrete-tools"/);
   assert.match(discrete, /id="research-discrete-title">粗略週期從哪裡來？/);
   assert.match(discrete, /id="research-year-strip-title">年度時間條/);
   assert.match(discrete, /id="research-year-full-cycle"/);
@@ -87,10 +84,11 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-cycle-comparison"/);
   assert.ok(discrete.indexOf('id="research-discrete-thesis"') < discrete.indexOf('id="research-year-strip"'));
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
-  assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('id="recurrence-instrument"'));
-  assert.match(discrete, /id="recurrence-instrument"/);
+  // Research redesign R2: the fan is the figure and precedes the tools.
+  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('id="research-discrete-tools"'));
+  assert.ok(discrete.indexOf('id="research-discrete-tools"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
-  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('class="discrete-derivation"'));
+  assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('class="discrete-derivation"'));
   assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
   assert.doesNotMatch(discrete, /class="astronomy-panel"/);

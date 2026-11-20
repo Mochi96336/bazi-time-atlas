@@ -64,6 +64,14 @@ iframe.addEventListener("load",async()=>{
   const phaseFanDetails=d.getElementById("discrete-phase-fan-details");
   check(phaseFanDetails && phaseFanDetails.contains(instrument) && !phaseFanDetails.open,
     "R1 large phase fan must keep the original instrument behind its default-closed verification disclosure");
+  // Research redesign R2: the year strip, its comparison rail and the Δ
+  // controls are 01 tools behind one within-chapter "try it" disclosure
+  // (default closed). Open it to audit the original modules.
+  const tools=d.getElementById("research-discrete-tools");
+  check(tools && !tools.open && tools.contains(d.getElementById("research-year-strip")),
+    "01 tools must keep the original year strip behind a default-closed in-chapter disclosure");
+  tools.open=true;
+  await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
   const ids=["research-discrete","research-cycle-comparison",
     "research-year-strip","research-astronomy",
     "research-evidence","four-pillar-determinacy"];

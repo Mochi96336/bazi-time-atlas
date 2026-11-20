@@ -64,19 +64,15 @@ const evidence = sectionById(probe.dom, "research-evidence");
 
 for (const expected of [
   "八字多久會重複一次？",
-  "四柱都落在六十甲子序列上",
-  "同一節令下固定對齊",
-  "同一時辰下固定對齊",
-  "年柱 × 日柱",
+  "目前找不到四柱完整重複的週期",
   "粗略週期從哪裡來？",
   "八字的節界回來了嗎？",
   "對八字意味著什麼？",
   "固定 24,000 年候選 → 12 節界校驗",
   "12 / 12 節界位移 → 四柱可判範圍",
-  "，不直接等同完整四柱週期",
-  "24,000 離散候選",
-  "TT 提前 10–14 d",
-  "24,000 ≠ 完整週期"
+  "曆法上三個循環全部對上",
+  "但真正的節氣沒有回來",
+  "所以 24,000 年不是四柱的週期"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
@@ -85,9 +81,9 @@ for (const expected of [
 
 const identityProbe = dump("recurrence.html?delta=0");
 for (const expected of [
-  "24,000 離散候選",
-  "TT 提前 10–14 d",
-  "24,000 ≠ 完整週期",
+  "曆法上三個循環全部對上",
+  "但真正的節氣沒有回來",
+  "所以 24,000 年不是四柱的週期",
   "主線案例 · 固定 2026 → 26026",
   "12 / 12",
   "全部提前",
@@ -109,9 +105,12 @@ const stepsIndex = discrete.indexOf('id="discrete-derivation-steps"');
 const stripIndex = discrete.indexOf('id="research-year-strip"');
 const fanIndex = discrete.indexOf('id="recurrence-instrument"');
 const explorerIndex = discrete.indexOf('class="discrete-derivation"');
-if (!(thesisIndex >= 0 && solarOriginIndex > thesisIndex && stepsIndex > solarOriginIndex &&
-      stripIndex > stepsIndex && fanIndex > stripIndex && explorerIndex > fanIndex)) {
-  throw new Error(`Research 01 must explain solar-origin context and local→global closure before date/fan/Δ exploration: ${probe.url}`);
+// Research redesign R2: the phase fan is 01's figure; the solar-origin note,
+// local→global ladder, year strip and Δ explorer follow it as tools.
+const toolsIndex = discrete.indexOf('id="research-discrete-tools"');
+if (!(fanIndex >= 0 && toolsIndex > fanIndex && thesisIndex > toolsIndex && solarOriginIndex > thesisIndex &&
+      stepsIndex > solarOriginIndex && stripIndex > stepsIndex && explorerIndex > stripIndex)) {
+  throw new Error(`Research 01 must lead with the fan, then explain solar-origin context and local→global closure before date/Δ exploration: ${probe.url}`);
 }
 if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="recurrence-readout research-current-state"') || !discrete.includes('id="research-year-strip"') || !discrete.includes('id="research-sexagenary-cycle"')) {
   throw new Error(`discrete task lost instrument, compact current state, year strip, or 60-day cycle: ${probe.url}`);
@@ -325,11 +324,17 @@ for (const stale of [
 
 const stickyTimeProbe = dump("recurrence.html?delta=24000#research-astronomy");
 const stickyTimeTag = stickyTimeProbe.dom.match(/<section[^>]*id="research-time-state"[^>]*>/)?.[0] ?? "";
-if (!stickyTimeTag.includes('data-stuck="true"')) {
-  throw new Error(`shared Research time state did not condense after anchor-scroll sticky activation: ${stickyTimeProbe.url}`);
+// Research redesign R2: the shared time card is a 01 tool, not a sticky bar
+// over 02/03; it still follows the seasonal owner while 02 is read.
+if (stickyTimeTag.includes('data-stuck="true"')) {
+  throw new Error(`Research time state must no longer stick over 02/03: ${stickyTimeProbe.url}`);
+}
+const toolsTag = detailsById(stickyTimeProbe.dom, "research-discrete-tools");
+if (!toolsTag || !toolsTag.includes('id="research-time-state"')) {
+  throw new Error(`Research time state must live inside 01's "try it" tools: ${stickyTimeProbe.url}`);
 }
 if (!stickyTimeTag.includes('data-owner="seasonal"')) {
-  throw new Error(`sticky Research time state did not switch to the seasonal owner while reading 02: ${stickyTimeProbe.url}`);
+  throw new Error(`Research time state did not switch to the seasonal owner while reading 02: ${stickyTimeProbe.url}`);
 }
 if ((stickyTimeProbe.dom.match(/id="research-time-state"/g) ?? []).length !== 1) {
   throw new Error(`Research time state must remain one shared DOM owner while sticky: ${stickyTimeProbe.url}`);

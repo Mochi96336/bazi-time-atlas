@@ -139,11 +139,6 @@
     "hexColors": 25,
     "smallFonts": 0
   },
-  "pillar-proof-flow.css": {
-    "important": 0,
-    "hexColors": 0,
-    "smallFonts": 0
-  },
   "pillar-relations.css": {
     "important": 0,
     "hexColors": 25,
@@ -222,6 +217,11 @@
   "research-foundations.css": {
     "important": 0,
     "hexColors": 11,
+    "smallFonts": 0
+  },
+  "research-reading.css": {
+    "important": 0,
+    "hexColors": 9,
     "smallFonts": 0
   },
   "research-seasonal-drift-evidence.css": {

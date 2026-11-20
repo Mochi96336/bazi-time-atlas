@@ -50,18 +50,19 @@ test("Research 01 has concise proof guidance and optional intermediate checks in
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   assert.match(html,/每圈的 0 只代表該循環序位回到起點/);
   assert.match(html,/正負數是最短相位差，不是節氣提前天數/);
-  assert.match(html,/要查看 \+400／\+1,200／\+8,000 的中間證據/);
-  assert.match(html,/天文節界留到 02/);
-  const css=readFileSync(new URL("../research-discrete-density.css",import.meta.url),"utf8");
-  assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] > header p,[\s\S]*?#research-discrete \.research-discrete-explorer-intro \{\s*font-size: 12px;/);
+  assert.match(html,/看 \+400／\+1,200／\+8,000 的中間驗算/);
+  assert.match(html,/真正的<a class="research-term" href="#term-jie">十二節<\/a>到 02 再驗/);
+  // Research redesign R2: one reading line under the fan replaces the
+  // thesis-header and explorer-intro paragraphs.
+  assert.match(html,/<p class="research-figure-howto">讀法：外圈公曆 400 年結構、中圈 60 年序、內圈 60 日序。/);
+  assert.doesNotMatch(html,/class="research-discrete-explorer-intro"/);
   assert.doesNotMatch(html,/class="research-reading-card"|id="research-reading-wizard"/);
 });
 
 test("Research 01 prioritizes readable evidence instead of truncating milestone reasoning",()=>{
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
-  assert.match(html,/01 先建立離散候選；02 再檢查真正的十二節界/);
-  assert.match(html,/離散候選<\/a>，不直接等同完整四柱週期/);
+  assert.match(html,/目前找不到四柱完整重複的週期/);
   assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
   assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
   assert.match(css,/\.research-outline small \{\s*font-size:12px;/);
