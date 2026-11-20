@@ -254,6 +254,11 @@
     "hexColors": 3,
     "smallFonts": 0
   },
+  "ring-identity.css": {
+    "important": 0,
+    "hexColors": 4,
+    "smallFonts": 0
+  },
   "scale-emphasis.css": {
     "important": 2,
     "hexColors": 0,

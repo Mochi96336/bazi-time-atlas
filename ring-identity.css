@@ -1,0 +1,12 @@
+/* Repair B7 (variant B from prototypes/atlas-ring-identity-lab.html): each
+   time ring keeps the graphite material, but its resting veil carries one
+   distinct, low-chroma cool hue so Hour / Day / Month / Year separate at a
+   glance. Warm amber stays reserved for the Solar band. Classification mode
+   keeps its own element colours. Remove this file to return to all-graphite. */
+@layer page {
+#kinetic-instrument { --hour:#6f86a8; --day:#5f958c; --month:#8f84b0; --year:#a4afc2; }
+#kinetic-instrument:not([data-classification-overlay="on"]) #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 22%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #day-track .day-sector { fill: color-mix(in srgb, var(--day) 22%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #month-track .month-sector { fill: color-mix(in srgb, var(--month) 20%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #year-track .year-sector { fill: color-mix(in srgb, var(--year) 18%, transparent); }
+}

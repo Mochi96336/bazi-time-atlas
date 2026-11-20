@@ -6,6 +6,7 @@
   min-width:44px; min-height:44px; margin:0; padding:0 6px;
   border:0; background:transparent; color:#a3aba8;
   font:inherit; font-size:12px; font-weight:620; letter-spacing:.03em;
+  white-space:nowrap; flex:none;
   cursor:pointer;
 }
 .atlas-guide-button:hover, .atlas-guide-button:focus-visible { color:#eef1ef; }
