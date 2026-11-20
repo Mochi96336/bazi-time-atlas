@@ -145,5 +145,7 @@ An absolute seasonal epoch alone is still insufficient to prove deep-time Day/Ho
 - [`docs/architecture-contracts.md`](docs/architecture-contracts.md) — normative cross-cutting architecture and authority contracts.
 - [`docs/camera-ownership.md`](docs/camera-ownership.md) — current camera/world ownership contract.
 - [`docs/kinetic-atlas-plan.md`](docs/kinetic-atlas-plan.md) — historical redesign plan retained for design rationale; superseded details are not normative.
+- [`docs/repair-plan.md`](docs/repair-plan.md) — readability / UX repair plan (home stays minimal, readers without astronomy background) and its execution log.
+- [`docs/usability-test-protocol.md`](docs/usability-test-protocol.md) — five-person usability test used to decide the plan's open design questions.
 
 When documentation and implementation disagree, reconcile the responsible current document with production behavior and regression evidence rather than allowing an older statement to become a competing authority.
