@@ -518,8 +518,15 @@
         </div>
         <p class="near-search-scope">只比較 Berger 1978 快速近似模型下的季節形狀殘差，候選為 +24,000 年的整數倍；這不是完整節界回歸，也不是獨立驗證的深時間天文預測。</p>
         <div class="near-search-body">
-          <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
-          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名"></div>
+          <figure class="near-chart-figure">
+            <div class="near-chart-meta">
+              <strong>十二節最大形狀殘差 <span>· 小時</span></strong>
+              <small>越靠近 0，越接近基準年的季節形狀</small>
+            </div>
+            <svg id="near-recurrence-chart" viewBox="0 0 1000 220" role="group" aria-label="41 個離散候選的形狀殘差；縱軸小時，橫軸距基準年的千年數；各點可選取"></svg>
+            <figcaption>橫軸：距基準的 Δ 年數（千年） · 每點相隔 24,000 年</figcaption>
+          </figure>
+          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名，可選取帶入 Δ"></div>
         </div>
       </section>
     </section>
