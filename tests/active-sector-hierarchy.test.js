@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const radial = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const radial = cssSource("radial-hierarchy.css");
+const classification = cssSource("classification-overlay.css");
 
 test("graphite active sectors remain subordinate to the Selected Instant datum", () => {
   assert.match(radial, /data-classification-overlay="on"\]\) #hour-track \.cycle-sector\.is-active,[\s\S]*?#day-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 20%/);

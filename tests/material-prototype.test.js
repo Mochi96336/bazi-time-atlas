@@ -18,6 +18,7 @@ import {
   zodiacMaterialGeometry
 } from "../src/wheel/material-prototype.js";
 import { ringModel } from "../src/wheel/ring-model.js";
+import { cssSource } from "./helpers/css-source.js";
 
 test("roughness is the production default while explicit invalid modes fail closed to SVG", () => {
   assert.equal(resolveMaterialMode(""), MATERIAL_MODES.ROUGHNESS);
@@ -150,7 +151,7 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
     readFile(new URL("../instrument-first.css", import.meta.url), "utf8"),
     readFile(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8"),
     readFile(new URL("../src/wheel/material-prototype.js", import.meta.url), "utf8"),
-    readFile(new URL("../radial-hierarchy.css", import.meta.url), "utf8")
+    Promise.resolve(cssSource("radial-hierarchy.css"))
   ]);
 
   assert.match(html, /<canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"><\/canvas>/);

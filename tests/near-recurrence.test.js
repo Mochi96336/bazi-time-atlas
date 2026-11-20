@@ -6,6 +6,7 @@ import {
   futureExactDiscreteAstronomyCandidates,
   rankExactDiscreteAstronomyCandidates
 } from "../src/recurrence/near-recurrence.js";
+import { cssSource } from "./helpers/css-source.js";
 
 test("future search only evaluates 24,000-year exact-discrete closures", () => {
   const candidates = futureExactDiscreteAstronomyCandidates(2026);
@@ -43,7 +44,7 @@ test("long-horizon visualization keeps hour axes, responsive coordinates and a s
   const [markup, view, css, suites] = await Promise.all([
     readFile(new URL("../recurrence.html",import.meta.url),"utf8"),
     readFile(new URL("../src/near-recurrence-view.js",import.meta.url),"utf8"),
-    readFile(new URL("../near-recurrence.css",import.meta.url),"utf8"),
+    Promise.resolve(cssSource("near-recurrence.css")),
     readFile(new URL("../scripts/visual-ci-suites.mjs",import.meta.url),"utf8")
   ]);
   assert.match(markup,/class="near-chart-figure"/);

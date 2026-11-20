@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const hierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const atlas = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
-const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const hierarchy = cssSource("radial-hierarchy.css");
+const atlas = cssSource("kinetic-atlas.css");
+const boundaries = cssSource("kinetic-boundaries.css");
+const classification = cssSource("classification-overlay.css");
 
 const TEMPORAL_TOKEN_DEFINITION = /--(?:hour|day|month|year|solar|zodiac)\s*:/g;
 

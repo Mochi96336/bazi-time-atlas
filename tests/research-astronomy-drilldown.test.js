@@ -1,12 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [view, css, residualView, residualCss, html] = await Promise.all([
   readFile(new URL("../src/research-astronomy-drilldown-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
   readFile(new URL("../src/astronomical-residuals-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("astronomical-residuals.css")),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8")
 ]);
 

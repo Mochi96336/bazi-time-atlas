@@ -1,16 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource, linkPosition } from "./helpers/css-source.js";
 
 const [css,html] = await Promise.all([
-  readFile(new URL("../research-foundations.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-foundations.css")),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8")
 ]);
 
 test("Research visual foundations load before presentation styles", () => {
-  const foundation = html.indexOf('href="./research-foundations.css"');
-  const tasks = html.indexOf('href="./research-tasks.css"');
-  const calibration = html.indexOf('href="./research-color-calibration.css"');
+  const foundation = linkPosition(html, "research-foundations.css");
+  const tasks = linkPosition(html, "research-tasks.css");
+  const calibration = linkPosition(html, "research-color-calibration.css");
 
   assert.ok(foundation > 0, "Research foundation stylesheet must be linked");
   assert.ok(tasks > foundation, "task presentation must load after foundations");

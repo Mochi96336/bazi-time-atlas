@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
+import { cssSource, MERGED_STYLESHEETS } from "./helpers/css-source.js";
 
 const root = new URL("../", import.meta.url);
-const css = readFileSync(new URL("classification-overlay.css", root), "utf8");
+const css = cssSource("classification-overlay.css");
 const mobile = css.slice(css.indexOf("@media (max-width: 480px)"));
 const desktop = css.slice(0, css.indexOf("@media (min-width: 481px)"));
 
@@ -12,10 +13,16 @@ function fontSizes(source) {
 }
 
 test("classification-overlay.css is the only owner of the legend", () => {
-  for (const file of readdirSync(root).filter(name => name.endsWith(".css") && name !== "classification-overlay.css")) {
+  // E5: merged stylesheets are checked per original section.
+  const merged = new Set(Object.keys(MERGED_STYLESHEETS));
+  const sources = [
+    ...readdirSync(root).filter(name => name.endsWith(".css") && !merged.has(name)),
+    ...Object.values(MERGED_STYLESHEETS).flat()
+  ].filter(name => name !== "classification-overlay.css");
+  for (const file of sources) {
     // Find Time may hide the legend while it owns the instrument; that is
     // mode behaviour, not legend styling.
-    const source = readFileSync(new URL(file, root), "utf8")
+    const source = cssSource(file)
       .replace(/#kinetic-instrument\[data-inverse-time-search="active"\] \.classification-overlay-legend,?/g, "");
     assert.doesNotMatch(source, /\.classification-(overlay-legend|row|keys|current|warning)\b/, `${file} restyles the classification legend`);
   }

@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html,consequenceView,consequenceCss,determinacyView,determinacyCss]=await Promise.all([
   readFile(new URL("../recurrence.html",import.meta.url),"utf8"),
   readFile(new URL("../src/research-absolute-boundary-consequence-view.js",import.meta.url),"utf8"),
-  readFile(new URL("../research-absolute-boundary-consequence.css",import.meta.url),"utf8"),
+  Promise.resolve(cssSource("research-absolute-boundary-consequence.css")),
   readFile(new URL("../src/four-pillar-determinacy-view.js",import.meta.url),"utf8"),
-  readFile(new URL("../four-pillar-determinacy.css",import.meta.url),"utf8")
+  Promise.resolve(cssSource("four-pillar-determinacy.css"))
 ]);
 
 test("Research 03 production uses selected pillar + reference-frame hierarchy",()=>{
@@ -37,8 +38,8 @@ test("Research 03 production does not redraw Research 02 evidence",()=>{
 });
 
 test("Research 02/03 explanations retain explicit reference frames and visual hierarchy",async()=>{
-  const css=await readFile(new URL("../research-evidence-reading.css",import.meta.url),"utf8");
-  assert.match(html,/href="\.\/research-evidence-reading\.css"/);
+  const css=await Promise.resolve(cssSource("research-evidence-reading.css"));
+  assert.match(html,/href="\.\/research-sections\.css"/);
   assert.match(html,/以固定公曆年差後的 TT 到達時間差為零線/);
   assert.match(html,/同一太陽黃經下年／月可依條件回同柱/);
   assert.match(html,/日／時仍未能判定/);
@@ -48,9 +49,9 @@ test("Research 02/03 explanations retain explicit reference frames and visual hi
 });
 
 test("Research 01–03 composition uses readable adjacent verdicts instead of tall empty cells",async()=>{
-  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const css=await Promise.resolve(cssSource("research-story-hierarchy.css"));
   const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
-  assert.match(html,/href="\.\/research-story-hierarchy\.css"/);
+  assert.match(html,/href="\.\/research-sections\.css"/);
   assert.match(html,/02 → 03 · 證據的後果/);
   assert.match(css,/\.determinacy-card \{\s*min-height:0;/);
   assert.match(css,/\.determinacy-card \.determinacy-status \{\s*margin-top:10px;\s*padding-top:0;/);
@@ -71,7 +72,7 @@ test("Research 03 leads with the pillar verdict and explains both reference fram
 });
 
 test("Research 01 stops repeating its mobile path; Research 03 mobile evidence uses one readable column",async()=>{
-  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const css=await Promise.resolve(cssSource("research-story-hierarchy.css"));
   const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
   assert.match(css,/#research-discrete > \.research-discrete-scope \{ display:none; \}/);
   assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] \.research-condition-route \{\s*display:none;/);

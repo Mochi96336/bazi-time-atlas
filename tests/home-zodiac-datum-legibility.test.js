@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const radial = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const scale = readFileSync(new URL("../scale-emphasis.css", import.meta.url), "utf8");
+const radial = cssSource("radial-hierarchy.css");
+const scale = cssSource("scale-emphasis.css");
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
 
 test("selected Zodiac datum uses an ink floor rather than inheriting muted context", () => {

@@ -1,0 +1,849 @@
+/* Repair E5: Atlas chrome around the wheel: analysis mode, main actions, mobile time dock and legend, Ganzhi inspector.
+   Merged in the exact <link> order of index.html; each section keeps its
+   own cascade layer block. Edit here — the source files no longer exist. */
+
+/* ==== ux-analysis.css ==== */
+/* ==== main-action-hierarchy.css (was @import from ux-analysis.css) ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+/* Main atlas action hierarchy.
+   Reading and selecting the Selected Instant is the primary task. Playback only
+   animates that same instant, so it must not visually outrank the instrument. */
+#play-button.primary {
+  color: #9da69f;
+  background: rgba(15, 19, 16, .72);
+  border-color: var(--hairline);
+  min-width: 62px;
+}
+
+#play-button.primary:hover {
+  color: var(--ink);
+  border-color: rgba(238, 242, 237, .25);
+}
+
+/* Running playback still needs a clear state, but not the page's cursor-yellow
+   primary treatment. */
+#play-button.primary[aria-pressed="true"] {
+  color: #dce2dd;
+  background: rgba(199, 217, 205, .09);
+  border-color: rgba(199, 217, 205, .28);
+}
+
+@media (max-width: 480px) {
+  #play-button.primary { min-width: 48px; }
+}
+}
+
+/* ==== ux-analysis.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+/* Progressive disclosure for analysis-only controls.
+   The default atlas is a time-reading instrument. Compare, classification,
+   layer visibility and relative reference frames become available only while
+   Analysis is explicitly open. Domain state and wheel semantics are unchanged. */
+
+.analysis-toggle,
+.analysis-close {
+  position: absolute;
+  z-index: 6;
+  top: 58px;
+  min-height: 25px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #909596;
+  background: rgba(15,17,18,.54);
+  font-size: 8px;
+  font-weight: 720;
+  letter-spacing: .04em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* The author-level inline-flex rule above must never override HTML's hidden
+   state. Analysis entry and exit are mutually exclusive controls. */
+.analysis-toggle[hidden],
+.analysis-close[hidden] {
+  display: none !important;
+}
+.analysis-toggle { right: 16px; }
+.analysis-close {
+  left: 16px;
+  color: #c8cccb;
+  border-color: rgba(200,204,203,.18);
+  background: rgba(200,204,203,.055);
+}
+.analysis-toggle:hover,
+.analysis-toggle:focus-visible,
+.analysis-close:hover,
+.analysis-close:focus-visible {
+  color: var(--ink);
+  border-color: rgba(236,239,239,.24);
+  background: rgba(255,255,255,.04);
+}
+.analysis-toggle:focus-visible,
+.analysis-close:focus-visible {
+  outline: 2px solid var(--cursor);
+  outline-offset: 3px;
+}
+
+/* Keep the existing toolbar geometry stable for regression fixtures while the
+   default user-facing view hides analysis-only actions. Reference-frame UI can
+   leave layout entirely because no primary reading depends on its footprint. */
+#kinetic-instrument:not([data-analysis-open="true"]) #compare-rings-button,
+#kinetic-instrument:not([data-analysis-open="true"]) #classification-overlay-button {
+  visibility: hidden;
+  pointer-events: none;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) #reset-rings-button,
+#kinetic-instrument:not([data-analysis-open="true"]) #solar-time-tool-button,
+#kinetic-instrument:not([data-analysis-open="true"]) .reference-frame-control {
+  display: none !important;
+}
+
+/* In the reading view the existing legend DOM becomes five fixed identity
+   labels laid directly over the radial stack. Active values already live on
+   the Selected Instant read-head, so dots and duplicated values disappear.
+   Analysis reuses the same DOM as the full layer-control legend. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend {
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
+  position: absolute;
+  display: block;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  pointer-events: none;
+  cursor: default;
+  /* Desktop positions follow a -117deg spoke through each ring midpoint; the
+     label angle follows the local tangent instead of an arbitrary HUD slant. */
+  transform: rotate(-27deg);
+  transform-origin: left center;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row i,
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row strong {
+  display: none;
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span {
+  display: inline-block;
+  font-size: 0;
+  line-height: 1;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 7px rgba(0,0,0,.94);
+  opacity: .96;
+}
+/* Keep fixed identities purely typographic. Extra leaders read like stray
+   sector ticks and can visually concatenate with moving Ganzhi labels. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+  /* Moving sector labels can cross this fixed spoke. A tight dark halo keeps
+     the identity legible without adding a chip, leader, or card surface. */
+  text-shadow: 0 0 3px var(--field), 0 1px 7px rgba(0,0,0,.94);
+}
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 20.3%; top: 32.0%; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 24.1%; top: 46.7%; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 27.9%; top: 61.9%; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 31.7%; top: 76.6%; }
+/* The innermost identity uses the outer edge of the Hour band on desktop so
+   it remains inside the ring without sitting underneath the centered timestamp. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 33.4%; top: 83.4%; }
+/* Fixed identities preserve ring hue without reusing the dark material body
+   as text. Readability tokens are derived from each semantic material channel
+   plus the shared ink floor; no chip, leader, box, or glow is introduced. */
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span { color: var(--identity-year, var(--year, #90989d)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span { color: var(--identity-month, var(--month, #777f84)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: var(--identity-solar, var(--solar, #ac906e)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span { color: var(--identity-day, var(--day, #646c71)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span { color: var(--identity-hour, var(--hour, #555d62)); }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-year span::after { content: "年"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-month span::after { content: "月"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span::after { content: "太陽"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-day span::after { content: "日"; }
+#kinetic-instrument:not([data-analysis-open="true"]) .ring-hour span::after { content: "時"; }
+
+#kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+  pointer-events: auto;
+}
+
+/* Relative reference frames remain an engine/research capability, but they are
+   no longer a product control in Tools. Keep the DOM installed so browser and
+   correctness fixtures can drive it directly without exposing it to users. */
+#kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+  display: none !important;
+}
+
+/* The five-cell strip repeats active state already represented at the datum.
+   Retire it from ordinary reading; Analysis can still expose the diagnostic
+   summary without creating a second owner for Selected Instant. */
+#kinetic-instrument:not([data-analysis-open="true"]) ~ .state-strip {
+  display: none;
+}
+#kinetic-instrument[data-analysis-open="true"] ~ .state-strip {
+  display: grid;
+}
+
+/* Analysis is a temporary lens over the same Selected Instant, not a second
+   product state. The mild edge cue makes mode entry visible without changing
+   time geometry or any domain calculation. */
+#kinetic-instrument[data-analysis-open="true"] {
+  border-color: rgba(200,204,203,.22);
+  box-shadow: 0 34px 100px rgba(0,0,0,.28), inset 0 0 0 1px rgba(200,204,203,.035);
+}
+/* Free Compare must never look like ordinary time scrubbing. */
+#kinetic-instrument[data-compare-mode="true"] #ring-compare-status {
+  font-weight: 780;
+  letter-spacing: .035em;
+}
+
+/* Compact framing uses a -110deg spoke so the same midpoint rule stays inside
+   the narrower camera instead of drifting into the outer empty field. */
+@media (min-width: 481px) and (max-width: 820px) {
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
+    transform: rotate(-20deg);
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 14.5%; top: 26.8%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 19.0%; top: 42.4%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 23.7%; top: 58.4%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 28.1%; top: 73.8%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 30.2%; top: 81.0%; }
+}
+
+@media (max-width: 480px) {
+  .analysis-toggle,
+  .analysis-close {
+    top: 10px;
+    min-height: 32px;
+    padding-inline: 8px;
+    font-size: 9px;
+    line-height: 1;
+  }
+  .analysis-toggle { right: 9px; }
+  .analysis-close { left: 9px; }
+
+  /* Mobile mode entry/exit belongs to the first action row. Keep the visual
+     chrome quiet, while the pseudo-element preserves a comfortable touch halo. */
+  .analysis-toggle::before,
+  .analysis-close::before {
+    content: "";
+    position: absolute;
+    inset: -8px -6px;
+  }
+
+  /* Mobile Tools follows the same product hierarchy as desktop: scale-window
+     presets and transport are research/debug capability, not first-screen tasks.
+     Keep only Find Time / Classification / Solar Time / Now in the primary rail. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    inset: 10px 9px auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child,
+  #kinetic-instrument[data-analysis-open="true"] #play-button {
+    display: none !important;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child {
+    margin: 0 0 0 auto;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:last-child .control-button {
+    min-height: 42px;
+    border: 0;
+    border-radius: 0;
+    padding: 0 7px;
+    color: #8f9493;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    font-size: 10px;
+    line-height: 1;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button.active,
+  #kinetic-instrument[data-analysis-open="true"] #solar-time-tool-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #inverse-time-search-button[aria-pressed="true"] {
+    color: #e0e3e1;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: inset 0 -1px rgba(235,238,236,.44);
+  }
+  #kinetic-instrument[data-analysis-open="true"] #now-button {
+    margin-left: 0;
+  }
+
+  /* The datum line already identifies the shared instant. Tools/Find Time must
+     not paint a second SELECTED INSTANT caption through their task chrome. */
+  #kinetic-instrument[data-analysis-open="true"] #cursor-layer .cursor-note {
+    display: none;
+  }
+
+  /* Portrait positions follow the visible radial stack, while Tools exposes
+     only product-relevant observation controls through mobile-legend.css.
+     Moving sector values occupy each band's midpoint, so fixed identities sit
+     deeper toward the inner edge of each band instead of competing there. */
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
+    transform: rotate(-9deg);
+    margin: 26px 0 0 4px;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
+    font-size: 10px;
+    letter-spacing: .08em;
+  }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-year { left: 3%; top: 19%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-month { left: 7%; top: 37%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 12%; top: 54%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 18%; top: 69%; }
+  #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 25%; top: 82%; }
+}
+}
+
+/* ==== mobile-time.css ==== */
+/* ==== mobile-legend.css (was @import from mobile-time.css) ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+/* Mobile Tools keeps only product-level actions visible. Ring layer toggles
+   and relative reference-frame controls remain in DOM/runtime ownership for
+   regression and research, but are not user-facing chrome. */
+@media (max-width: 480px) {
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle],
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    display: none !important;
+  }
+
+  /* With the observation row retired, Done returns to the primary action row.
+     Reserve its width in the toolbar so it never overlaps Now / Find Time. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    right: 56px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 10px;
+    left: auto;
+    right: 9px;
+    min-height: 42px;
+    padding-inline: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
+    top: 48px;
+  }
+}
+}
+
+/* ==== mobile-time.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+.mobile-time-dock { display: none; }
+
+@media (max-width: 480px) {
+  .kinetic-shell {
+    grid-template-rows: auto auto auto auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kinetic-shell::-webkit-scrollbar { display: none; }
+
+  .instrument-shell {
+    height: calc(100dvh - 112px);
+    min-height: 620px;
+  }
+
+  /* Ordinary reading uses the editable exact-time dock as its single textual
+     precision surface. Analysis keeps the full diagnostic instrument readout. */
+  #kinetic-instrument:not([data-analysis-open="true"]) .instrument-readout {
+    display: none;
+  }
+
+  /* One physical rail in idle and dirty modes; status is announced, not a
+     second visual row. Analysis still keeps its instrument diagnostic HUD. */
+  .mobile-time-dock {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 48px;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 0;
+    margin-top: 9px;
+    padding: 8px 2px 4px;
+    border: 0;
+    border-top: 1px solid var(--hairline);
+    border-radius: 0;
+    background: transparent;
+  }
+  .mobile-time-field {
+    grid-column: 1;
+    min-width: 0;
+    display: block;
+  }
+  .mobile-time-field span,
+  .mobile-time-dock #mobile-time-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  #mobile-instant-input {
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+    min-height: 42px;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    border-radius: 0;
+    padding: 6px 3px;
+    color: var(--ink);
+    background: transparent;
+    color-scheme: dark;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  #mobile-instant-input[aria-invalid="true"] {
+    border-bottom-color: var(--danger);
+  }
+  .mobile-time-actions {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+  .mobile-time-actions #mobile-time-apply,
+  .mobile-time-actions #mobile-now-button {
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    min-height: 42px;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    border-radius: 0;
+    color: var(--cursor);
+    background: transparent;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+  .mobile-time-dock[data-dirty="false"] #mobile-time-apply,
+  .mobile-time-dock[data-dirty="true"] #mobile-now-button {
+    display: none;
+  }
+
+  /* The original desktop timeline remains intentionally absent on phones.
+     The dedicated mobile dock owns exact entry while the disk keeps the first
+     viewport. Additional explanatory panels stay collapsed. */
+  .timeline-dock,
+  .state-strip,
+  .atlas-notes,
+  .sources-panel { display: none; }
+}
+}
+
+/* ==== ganzhi-inspector.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+#ganzhi-inspector[hidden] { display: none !important; }
+
+.state-cell-reference {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  padding: 10px 4px 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.state-cell-reference:hover,
+.state-cell-reference:focus-visible,
+.state-cell-reference[aria-expanded="true"] { border-top-color: #828889; outline: none; }
+.state-cell-reference:hover strong,
+.state-cell-reference:focus-visible strong,
+.state-cell-reference[aria-expanded="true"] strong { color: #f0f2f1; }
+
+.ganzhi-inspector {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 45;
+  width: min(370px, calc(100vw - 48px));
+  max-height: min(72vh, 620px);
+  overflow: auto;
+  border: 1px solid var(--m2-raised-border);
+  border-radius: 14px;
+  background: var(--m2-raised-surface);
+  background-image: var(--m2-raised-gradient);
+  box-shadow: var(--m2-raised-shadow);
+  color: #dce0df;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.ganzhi-inspector-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px 10px;
+  background: var(--m2-raised-surface);
+  border-bottom: 1px solid var(--m2-etched-dark);
+  box-shadow: inset 0 -1px 0 var(--m2-etched-light);
+}
+.ganzhi-inspector-head span {
+  color: #818687;
+  font-size: 10px;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.ganzhi-inspector-close {
+  appearance: none;
+  border: 0;
+  padding: 4px 0;
+  background: transparent;
+  color: #8a9090;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ganzhi-inspector-close:hover,
+.ganzhi-inspector-close:focus-visible { color: #eef1f0; outline: none; }
+
+.ganzhi-inspector-pillar-switcher[hidden] { display: none !important; }
+.ganzhi-inspector-pillar-switcher {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 10px 16px 0;
+  border-bottom: 1px solid var(--m2-etched-dark);
+  box-shadow: inset 0 -1px 0 var(--m2-etched-light-soft);
+}
+.ganzhi-inspector-pillar-switch {
+  appearance: none;
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 5px 4px 7px;
+  background: transparent;
+  color: #747a7b;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ganzhi-inspector-pillar-switch span,
+.ganzhi-inspector-pillar-switch strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ganzhi-inspector-pillar-switch span {
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+.ganzhi-inspector-pillar-switch strong {
+  margin-top: 2px;
+  color: #a0a6a6;
+  font-size: 11px;
+  font-weight: 720;
+}
+.ganzhi-inspector-pillar-switch:hover,
+.ganzhi-inspector-pillar-switch:focus-visible,
+.ganzhi-inspector-pillar-switch.active {
+  border-bottom-color: #8e9596;
+  color: #dadddc;
+  outline: none;
+}
+.ganzhi-inspector-pillar-switch:hover strong,
+.ganzhi-inspector-pillar-switch:focus-visible strong,
+.ganzhi-inspector-pillar-switch.active strong {
+  color: #eef1f0;
+}
+
+.ganzhi-inspector-identity {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 4px 12px;
+  padding: 16px;
+}
+.ganzhi-inspector-identity small {
+  grid-column: 1 / -1;
+  color: #7a8081;
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+.ganzhi-inspector-identity strong {
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: .06em;
+}
+.ganzhi-inspector-identity b {
+  color: #9da2a2;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ganzhi-inspector-parts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+.ganzhi-inspector-parts section {
+  min-width: 0;
+  border-top: 1px solid var(--m2-etched-dark);
+  padding-top: 10px;
+  box-shadow: inset 0 1px 0 var(--m2-etched-light);
+}
+.ganzhi-inspector-parts span {
+  display: block;
+  color: #787e7f;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.ganzhi-inspector-parts strong {
+  display: block;
+  margin-top: 4px;
+  color: #e7eae9;
+  font-size: 24px;
+}
+.ganzhi-inspector-parts small {
+  display: block;
+  margin-top: 2px;
+  color: #9da2a2;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.ganzhi-inspector-neighbors {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--m2-etched-dark);
+  border-bottom: 1px solid var(--m2-etched-dark);
+  box-shadow:
+    inset 0 1px 0 var(--m2-etched-light),
+    inset 0 -1px 0 var(--m2-etched-light-soft);
+  color: #808687;
+  font-size: 11px;
+}
+.ganzhi-inspector-neighbors strong { color: #e0e3e2; font-size: 13px; }
+.ganzhi-inspector-neighbors span:last-child { text-align: right; }
+
+.ganzhi-inspector details { padding: 0 16px 16px; }
+.ganzhi-inspector summary {
+  color: #919697;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ganzhi-inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 10px;
+}
+.ganzhi-inspector-grid > span {
+  min-width: 0;
+  border: 1px solid #293031;
+  border-radius: 5px;
+  padding: 5px 2px;
+  text-align: center;
+}
+.ganzhi-inspector-grid small,
+.ganzhi-inspector-grid strong { display: block; }
+.ganzhi-inspector-grid small { color: #656b6c; font-size: 7px; }
+.ganzhi-inspector-grid strong { margin-top: 1px; color: #959a9a; font-size: 9px; }
+.ganzhi-inspector-grid > span.active {
+  border-color: #8a9091;
+  background: rgba(157, 162, 163, .09);
+}
+.ganzhi-inspector-grid > span.active small,
+.ganzhi-inspector-grid > span.active strong { color: #eef1f0; }
+
+.ganzhi-inspector[data-mode="pillar"] > .ganzhi-inspector-neighbors,
+.ganzhi-inspector[data-mode="pillar"] > details { display: none; }
+.ganzhi-structure[hidden] { display: none !important; }
+.ganzhi-structure {
+  border-top: 1px solid var(--m2-etched-dark);
+  padding: 0 16px 16px;
+  box-shadow: inset 0 1px 0 var(--m2-etched-light);
+}
+.ganzhi-structure-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 10px 0 12px;
+}
+.ganzhi-structure-tab {
+  appearance: none;
+  border: 0;
+  border-bottom: 1px solid #2e3334;
+  padding: 7px 4px;
+  background: transparent;
+  color: #7a8081;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ganzhi-structure-tab:hover,
+.ganzhi-structure-tab:focus-visible,
+.ganzhi-structure-tab.active {
+  border-bottom-color: #8e9596;
+  color: #eef1f0;
+  outline: none;
+}
+.ganzhi-structure-panel[hidden] { display: none !important; }
+.ganzhi-structure-panel {
+  display: grid;
+  gap: 12px;
+}
+.ganzhi-structure-day-master {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ganzhi-structure-day-master small,
+.ganzhi-structure-hidden > small,
+.ganzhi-relation-family > small {
+  color: #787e7f;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.ganzhi-structure-day-master strong { font-size: 13px; }
+.ganzhi-structure-pillar-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.ganzhi-structure-pillar {
+  min-width: 0;
+  border-top: 1px solid #2e3334;
+  padding-top: 7px;
+}
+.ganzhi-structure-pillar[data-selected="true"] { border-top-color: #a1a7a8; }
+.ganzhi-structure-pillar small,
+.ganzhi-structure-pillar strong { display: block; }
+.ganzhi-structure-pillar small { color: #727879; font-size: 8px; }
+.ganzhi-structure-pillar strong { margin-top: 2px; font-size: 12px; }
+/* Hidden stems are compact data tokens, not controls. Keep the role / stem /
+   Ten-God tuple typographic so dense structure inspection does not become a
+   field of pill-shaped UI chrome. */
+.ganzhi-structure-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+}
+.ganzhi-structure-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 0;
+  color: #b0b5b5;
+  font-size: 9px;
+}
+.ganzhi-structure-chip i { color: #6b7172; font-style: normal; font-size: 8px; }
+.ganzhi-structure-chip b { color: #e2e5e4; }
+.ganzhi-structure-chip strong { font-size: 9px; }
+.ganzhi-ten-god-list { display: grid; gap: 8px; }
+.ganzhi-ten-god-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 2px 8px;
+  align-items: baseline;
+  border-top: 1px solid #2d3233;
+  padding-top: 7px;
+}
+.ganzhi-ten-god-row > small { color: #727879; font-size: 8px; }
+.ganzhi-ten-god-row > b { font-size: 11px; }
+.ganzhi-ten-god-row > strong { justify-self: end; font-size: 11px; }
+.ganzhi-ten-god-row > span { grid-column: 1 / -1; color: #828889; font-size: 9px; }
+.ganzhi-ten-god-row .ganzhi-structure-hidden { grid-column: 1 / -1; }
+.ganzhi-ten-god-derivation { padding: 0 !important; }
+.ganzhi-ten-god-map { display: grid; gap: 4px; margin-top: 8px; }
+.ganzhi-ten-god-map-row {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 8px;
+  color: #959a9a;
+  font-size: 9px;
+}
+.ganzhi-ten-god-map-row small { color: #73797a; }
+.ganzhi-relation-family { display: grid; gap: 6px; }
+.ganzhi-relation-list { display: grid; gap: 4px; }
+.ganzhi-relation-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  border-top: 1px solid #2b3031;
+  padding-top: 6px;
+  font-size: 10px;
+}
+.ganzhi-relation-item strong { color: #dde1e0; }
+.ganzhi-relation-item span { color: #8a9090; }
+.ganzhi-relation-empty,
+.ganzhi-structure-wait { color: #7b8182; font-size: 10px; }
+
+@media (max-width: 640px) {
+  .ganzhi-inspector {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    max-height: 68vh;
+    border-radius: 12px;
+  }
+  .ganzhi-inspector-head { padding: 6px 14px; }
+  .ganzhi-inspector-close {
+    min-height: 36px;
+    padding: 0 4px;
+  }
+  .ganzhi-inspector-pillar-switcher { margin: 8px 14px 0; }
+  .ganzhi-inspector-pillar-switch {
+    min-height: 38px;
+    padding-inline: 3px;
+  }
+  .ganzhi-inspector-pillar-switch span,
+  .ganzhi-structure-pillar small,
+  .ganzhi-structure-chip i,
+  .ganzhi-ten-god-row > small {
+    font-size: 9px;
+  }
+  .ganzhi-inspector-identity { padding: 14px; }
+  .ganzhi-inspector-parts { padding: 0 14px 10px; }
+  .ganzhi-inspector-neighbors { margin: 0 14px 12px; }
+  .ganzhi-inspector > details { padding: 0 14px 14px; }
+  .ganzhi-structure { padding: 0 14px 14px; }
+  .ganzhi-structure-tab {
+    min-height: 38px;
+    padding-block: 8px;
+  }
+}
+}

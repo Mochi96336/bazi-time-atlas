@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource, linkPosition } from "./helpers/css-source.js";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const css = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 
 test("instrument-first reset is loaded last among homepage styles", () => {
-  const reset = html.indexOf('href="./instrument-first.css"');
-  const inspector = html.indexOf('href="./ganzhi-inspector.css"');
+  const reset = linkPosition(html, "instrument-first.css");
+  const inspector = linkPosition(html, "ganzhi-inspector.css");
   assert.ok(reset > inspector && inspector >= 0);
 });
 
@@ -87,7 +88,7 @@ test("mobile ordinary reading keeps exact-time chrome flat with M2 etched rails"
 });
 
 test("mobile exact-time rail has no duplicate visual metadata row", () => {
-  const mobileCss = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
+  const mobileCss = cssSource("mobile-time.css");
   assert.doesNotMatch(html, /class="mobile-time-heading"|id="mobile-zodiac-readout"/);
   assert.match(html, /id="mobile-time-status" role="status" aria-live="polite"/);
   assert.match(

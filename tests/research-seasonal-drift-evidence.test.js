@@ -2,12 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { SEASONAL_DRIFT_26026_RESEARCH as evidence } from "../src/research/seasonal-drift-26026-research-data.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html, view, data, css] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../src/research-seasonal-drift-evidence-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research/seasonal-drift-26026-research-data.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-seasonal-drift-evidence.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("research-seasonal-drift-evidence.css"))
 ]);
 
 test("Research 02 keeps the fixed +24k story visible before the delta sandbox", () => {

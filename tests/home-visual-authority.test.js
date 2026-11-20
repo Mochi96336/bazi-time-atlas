@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const atlas = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const analysis = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
+const atlas = cssSource("kinetic-atlas.css");
+const analysis = cssSource("ux-analysis.css");
 const tools = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
 const inverse = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
-const mobile = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
-const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const mobile = cssSource("mobile-time.css");
+const classification = cssSource("classification-overlay.css");
 
 test("Home Art H0 gives page and edge surfaces one reference-field authority", () => {
   assert.match(atlas, /--field:\s*#0a0d13;/);

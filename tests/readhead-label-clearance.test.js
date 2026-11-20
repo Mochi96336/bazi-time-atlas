@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
+const css = cssSource("radial-hierarchy.css");
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
 
 test("active read-head glyphs start at the exact datum anchor instead of straddling it", () => {

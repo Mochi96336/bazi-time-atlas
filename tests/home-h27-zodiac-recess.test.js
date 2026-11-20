@@ -2,12 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {RADII,WHEEL_CENTER} from "../src/wheel/ring-model.js";
+import { cssSource } from "./helpers/css-source.js";
 const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
-const style=readFileSync(new URL("../radial-hierarchy.css",import.meta.url),"utf8");
+const style=cssSource("radial-hierarchy.css");
 const renderer=readFileSync(new URL("../src/wheel/kinetic-renderer.js",import.meta.url),"utf8");
-const theme=readFileSync(new URL("../kinetic-atlas.css",import.meta.url),"utf8");
+const theme=cssSource("kinetic-atlas.css");
 const shader=readFileSync(new URL("../src/wheel/material-prototype.js",import.meta.url),"utf8");
-const classification=readFileSync(new URL("../classification-overlay.css",import.meta.url),"utf8");
+const classification=cssSource("classification-overlay.css");
 test("H2.7 C3 uses the native-probed canonical 840–900 one-annual-coordinate band",()=>{
   assert.equal(RADII.solarTermOuter,840);
   assert.equal(RADII.solarOuter,900);

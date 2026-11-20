@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [
   view,
@@ -23,7 +24,7 @@ const [
   readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
   readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8"),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("recurrence.css")),
   readFile(new URL("../src/recurrence-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
@@ -31,7 +32,7 @@ const [
   readFile(new URL("../src/recurrence/seasonal-boundary-authority.js", import.meta.url), "utf8"),
   readFile(new URL("../src/recurrence/seasonal-civil-projection.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("research-sexagenary-cycle.css"))
 ]);
 
 test("discrete presentation removes duplicate top scope copy", () => {
@@ -83,7 +84,7 @@ test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower
   assert.ok(recurrenceHtml.slice(derivationStart,controlsStart).includes('id="delta-slider"'));
   for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons"])
     assert.ok(recurrenceHtml.slice(controlsStart).includes(`id="${id}"`));
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(layout,/\.research-task-primary \.research-year-strip\s*\{[\s\S]*?width:100%;max-width:none/);
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
   assert.match(layout,/\.research-delta-public-slider\s*\{[\s\S]*?grid-area:slider/);
@@ -141,7 +142,7 @@ test("R11 Other time controls remain useful without duplicating the public miles
 
 test("default single-date readout and responsive fan preserve paired comparisons",async()=>{
   const compare=await readFile(new URL("../src/research-cycle-comparison-view.js",import.meta.url),"utf8");
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(recurrenceHtml,/id="research-cycles-target-label"/);
   assert.match(compare,/deltaYears === 0/);
   assert.match(compare,/selectedTargetInstantBound !== "true"/);
@@ -187,7 +188,7 @@ test("year-day local recurrence is promoted into the visible derivation rail",()
 });
 
 test("R7 compresses the fan header space without removing its legend",async()=>{
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(445px,32vw,465px\)/);
   assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-90px/);
   assert.match(layout,/recurrence-legend[\s\S]*?display:flex/);
@@ -330,7 +331,7 @@ test("60-day cycle remains supporting evidence behind one flat drilldown", () =>
 });
 
 test("60-day wheel shortcut stays on one line and opens its disclosure", async () => {
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(recurrenceHtml,/class="research-cycle-inline-lookup"[^>]*href="#discrete-sexagenary-details">六十日轉盤 ↗<\/a>/);
   assert.match(layout,/\.research-cycle-inline-lookup\s*\{[\s\S]*?display:inline-flex;[\s\S]*?white-space:nowrap;/);
   assert.match(view,/target === details \|\| target === cycle/);
@@ -400,7 +401,7 @@ test("first-screen research milestones reuse the canonical delta state and date-
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
   assert.doesNotMatch(recurrenceHtml.slice(entry,recurrenceHtml.indexOf("</div>",recurrenceHtml.indexOf('id="research-entry-selection"'))),/\+1,980/);
-  assert.match(recurrenceHtml,/href="\.\/research-entry\.css"/);
+  assert.match(recurrenceHtml,/href="\.\/research-sections\.css"/);
   assert.match(recurrenceView,/function syncResearchEntry\(state, localYears\)/);
   assert.match(recurrenceView,/findFirstLocalYearSequenceDayRecurrence\(currentBase\)/);
   assert.match(recurrenceView,/researchEntryLocal\.dataset\.deltaYears = String\(localYears\)/);
@@ -447,7 +448,7 @@ test("milestone zero arrival is event-scoped; no continuous ring or phase animat
 });
 
 test("Research 01 primary proof stays visible while 400/1200/8000 supporting checks are an accessible disclosure",async()=>{
-  const story=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const story=await Promise.resolve(cssSource("research-story-hierarchy.css"));
   assert.match(recurrenceView,/structuralDetails\.id = "research-structural-milestones"/);
   assert.match(recurrenceView,/structuralDetails\.open = wasStructuralOpen \|\| \[400,1200,8000\]\.includes\(currentDelta\)/);
   assert.match(recurrenceView,/if \(isStructural\) structuralGrid\.appendChild\(button\)/);

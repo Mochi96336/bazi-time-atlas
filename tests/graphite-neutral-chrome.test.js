@@ -1,14 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
-const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
+const boundaries = cssSource("kinetic-boundaries.css");
+const inspector = cssSource("ganzhi-inspector.css");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
 const instrumentFirst = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
 const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const analysisFirst = readFileSync(new URL("../analysis-first-screen.css", import.meta.url), "utf8");
-const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
+const palette = cssSource("kinetic-atlas.css");
 
 function rejectLegacy(source, legacyValues) {
   for (const legacy of legacyValues) {

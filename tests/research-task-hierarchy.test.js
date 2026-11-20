@@ -1,14 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource, isLinked } from "./helpers/css-source.js";
 
 const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, discreteJs, astronomyCss, residualCss, recurrenceCss, spineJs] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
-  readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
-  readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-tasks.css")),
+  Promise.resolve(cssSource("research-sexagenary-cycle.css")),
   readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
-  readFile(new URL("../near-recurrence.css", import.meta.url), "utf8"),
-  readFile(new URL("../four-pillar-determinacy.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("near-recurrence.css")),
+  Promise.resolve(cssSource("four-pillar-determinacy.css")),
   readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8"),
   readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8"),
@@ -16,8 +17,8 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
-  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("astronomical-residuals.css")),
+  Promise.resolve(cssSource("recurrence.css")),
   readFile(new URL("../src/research-narrative-spine-view.js", import.meta.url), "utf8")
 ]);
 
@@ -113,7 +114,7 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.match(cycleJs, /earthlyBranches\.forEach/);
   assert.match(cycleJs, /research-cycle-center-value.*item\.ordinal/s);
   assert.match(html, /六十日序[\s\S]*10 天干 · 12 地支配對/);
-  assert.match(html, /research-sexagenary-cycle\.css/);
+  assert.ok(isLinked(html, "research-sexagenary-cycle.css"));
   assert.match(html, /research-sexagenary-cycle\.js/);
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);
 });
@@ -225,7 +226,7 @@ test("mobile Research primary interactions meet the same tap-target floor as dis
 });
 test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-safe Jie selection",async()=>{
   const js=await readFile(new URL("../src/research-seasonal-drift-evidence-view.js",import.meta.url),"utf8");
-  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const css=await Promise.resolve(cssSource("research-story-hierarchy.css"));
   assert.match(astronomy,/id="research-case-transition"/);
   assert.match(astronomy,/01 的選取不會改寫節界證據/);
   assert.match(astronomy,/class="research-model-scope"/);

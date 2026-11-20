@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { cssSource } from "./helpers/css-source.js";
 
 const html = readFileSync(new URL("../recurrence.html", import.meta.url), "utf8");
-const css = readFileSync(new URL("../research-reading.css", import.meta.url), "utf8");
+const css = cssSource("research-reading.css");
 const glossaryJs = readFileSync(new URL("../src/research-glossary-inline.js", import.meta.url), "utf8");
 
 function sectionOf(id) {

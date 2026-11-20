@@ -1,15 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
 const material = readFileSync(new URL("../graphite-m2-material.css", import.meta.url), "utf8");
-const inspector = readFileSync(new URL("../ganzhi-inspector.css", import.meta.url), "utf8");
+const inspector = cssSource("ganzhi-inspector.css");
 const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
 const analysisPolish = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
 const solarAnalysis = readFileSync(new URL("../atlas-solar-time-analysis.css", import.meta.url), "utf8");
-const radialHierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
+const radialHierarchy = cssSource("radial-hierarchy.css");
 const instrument = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
-const palette = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
+const palette = cssSource("kinetic-atlas.css");
 const atlasHtml = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
 
@@ -28,7 +29,8 @@ test("Graphite M2 exposes one semantic material hierarchy", () => {
 });
 
 test("Graphite M2 reserves raised depth for the floating inspector", () => {
-  assert.match(inspector, /^@import "\.\/graphite-m2-material\.css";/);
+  // E5: merged chrome drops the earlier import; instrument-first.css imports the material last.
+  assert.match(readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8"), /^@import "\.\/graphite-m2-material\.css";/);
   assert.match(
     inspector,
     /\.ganzhi-inspector \{[\s\S]*?border:\s*1px solid var\(--m2-raised-border\);[\s\S]*?background:\s*var\(--m2-raised-surface\);[\s\S]*?background-image:\s*var\(--m2-raised-gradient\);[\s\S]*?box-shadow:\s*var\(--m2-raised-shadow\);[\s\S]*?backdrop-filter:\s*none;/
@@ -73,7 +75,7 @@ test("solar-time Analysis uses etched M2 structure without becoming another card
 });
 
 test("wheel structure uses etched M2 edges without beveling temporal sectors", () => {
-  assert.match(radialHierarchy, /^@import "\.\/graphite-m2-material\.css";/);
+  assert.doesNotMatch(radialHierarchy, /@import/);
   assert.match(
     radialHierarchy,
     /#hour-track \.ring-tick\.major,[\s\S]*?#year-track \.ring-tick\.major \{[\s\S]*?stroke:\s*rgba\(0,0,0,\.50\);[\s\S]*?filter:\s*drop-shadow\(0 \.75px 0 rgba\(236,239,239,\.040\)\);/

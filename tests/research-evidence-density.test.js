@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [evidenceCss, clockCss] = await Promise.all([
-  readFile(new URL("../four-pillar-determinacy.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("four-pillar-determinacy.css")),
   readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8")
 ]);
 

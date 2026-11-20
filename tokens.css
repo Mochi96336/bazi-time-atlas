@@ -1,5 +1,6 @@
 /* Repair C1/C2: site-wide design tokens shared by Atlas, Research and Birth.
-   Page foundations (kinetic-atlas.css, research-foundations.css, legacy-dark.css)
+   Page foundations (the kinetic-atlas.css section of atlas-wheel.css, the
+   research-foundations.css section of research-layout.css, legacy-dark.css)
    map their role names onto these values instead of inventing neighbouring
    blacks, golds or type sizes. Load this file before any page stylesheet. */
 /* Repair C4: cascade layer order for new and migrated stylesheets. Legacy

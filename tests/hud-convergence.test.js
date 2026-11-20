@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
-const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const mobileLegendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
+const analysisCss = cssSource("ux-analysis.css");
+const atlasCss = cssSource("kinetic-atlas.css");
+const mobileLegendCss = cssSource("mobile-legend.css");
 
 test("small inner-ring identities keep a dedicated legibility floor without altering material color", () => {
   assert.ok(atlasCss.includes("--identity-hour: color-mix(in srgb, var(--hour) 50%, var(--ink))"));

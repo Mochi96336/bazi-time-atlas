@@ -6,6 +6,7 @@ import {
   findFirstLocalYearSequenceDayRecurrence
 } from "../src/recurrence/gregorian-cycle.js";
 import { explainDiscreteResult } from "../src/recurrence/discrete-reading.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const base={year:2026,month:9,day:13};
 const local=findFirstLocalYearSequenceDayRecurrence(base)?.deltaYears;
@@ -61,7 +62,7 @@ test("Research 01 has concise proof guidance and optional intermediate checks in
 
 test("Research 01 prioritizes readable evidence instead of truncating milestone reasoning",()=>{
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
-  const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
+  const css=cssSource("research-entry.css");
   assert.match(html,/目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期/);
   assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
   assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
@@ -71,7 +72,7 @@ test("Research 01 prioritizes readable evidence instead of truncating milestone 
 
 test("structural year cards show the comparison verdict on mobile, not a hidden tooltip",()=>{
   const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
-  const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
+  const css=cssSource("research-entry.css");
   assert.match(view,/function derivationBrief\(state\)/);
   assert.match(view,/const isStructural = !isLocalYearDay && \[400, 1200, 8000\]\.includes\(deltaYears\)/);
   assert.match(view,/isStructural \? derivationBrief\(state\) : derivationMeaning\(deltaYears, localYears\)/);

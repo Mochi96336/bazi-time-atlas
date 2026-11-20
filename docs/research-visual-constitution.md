@@ -713,7 +713,7 @@ Do not restyle the whole page at once.
 
 ### Phase A — foundations only
 
-The canonical Research token vocabulary lives in `research-foundations.css`. It is intentionally token-only: component selectors, layout ownership and diagram geometry belong to later prototype/implementation layers.
+The canonical Research token vocabulary lives in the `research-foundations.css` section of `research-layout.css` (merged in exact cascade order by repair E5). It is intentionally token-only: component selectors, layout ownership and diagram geometry belong to later prototype/implementation layers.
 
 Create Research-specific tokens for:
 

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html,view,model,spine,fourPillarView,css]=await Promise.all([
   readFile(new URL("../recurrence.html",import.meta.url),"utf8"),
@@ -8,7 +9,7 @@ const [html,view,model,spine,fourPillarView,css]=await Promise.all([
   readFile(new URL("../src/research/seasonal-absolute-boundary-consequence.js",import.meta.url),"utf8"),
   readFile(new URL("../src/research-narrative-spine-view.js",import.meta.url),"utf8"),
   readFile(new URL("../src/four-pillar-determinacy-view.js",import.meta.url),"utf8"),
-  readFile(new URL("../research-absolute-boundary-consequence.css",import.meta.url),"utf8")
+  Promise.resolve(cssSource("research-absolute-boundary-consequence.css"))
 ]);
 
 test("Research 03 explains the two reference frames right after the fixed +24k pillar verdict",()=>{

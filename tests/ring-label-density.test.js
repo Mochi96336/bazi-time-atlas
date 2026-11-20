@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
-const hierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
+const hierarchy = cssSource("radial-hierarchy.css");
 
 test("every sexagenary sector owns a static identity label", () => {
   assert.match(renderer, /sexagenary\.forEach\(\(label, index\) => \{[\s\S]*?const text = el\("text", \{[\s\S]*?data-cycle-index[\s\S]*?staticLabels\.set\(index, text\);/);
