@@ -60,3 +60,16 @@
     outline-offset: 2px;
   }
 }
+
+/* Repair E4: same-origin page changes (Atlas ↔ Research ↔ Birth) cross-fade
+   while the shared top bar stays put. Browsers without cross-document view
+   transitions ignore this; reduced motion opts out. */
+@view-transition { navigation: auto; }
+.kinetic-topbar,
+.recurrence-topbar,
+.topbar { view-transition-name: site-topbar; }
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 260ms; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
