@@ -43,8 +43,12 @@ import { createFreeCompareController } from "./interaction/free-compare-controll
 import { applyLinkedRingDragInto } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
 import {
+  INTRO_SWEEP_DURATION_MS,
+  INTRO_SWEEP_SPAN_MS,
   INTRO_SWEEP_STORAGE_KEY,
+  SCALE_PREVIEW_DURATION_MS,
   introSweepInstant,
+  scalePreviewSpanMs,
   shouldRunIntroSweep
 } from "./interaction/intro-sweep.js";
 import {
@@ -564,6 +568,7 @@ function bindControls() {
       state.anchorMs = state.selectedMs;
       setSliderForScale();
       updateWheel();
+      runScalePreviewSweep(state.scale);
     });
   });
   slider.addEventListener("input", () => {
@@ -621,7 +626,7 @@ function setFollowingNow(following) {
 
 function tickLiveClock() {
   if (!liveClock.following) return;
-  if (instrument.dataset.introSweep === "running") return;
+  if (instrument.dataset.introSweep === "running" || instrument.dataset.scaleSweep === "running") return;
   if (state.selectedMs !== liveClock.lastMs) { setFollowingNow(false); return; }
   if (document.visibilityState === "hidden") return;
   const nowMs = Math.floor(Date.now() / 1000) * 1000;
@@ -652,11 +657,74 @@ function markIntroSeen() {
 
 // Repair B1: one-time opening time-lapse; never writes the URL and ends on the
 // exact landing instant. Any pointer, key or wheel input skips to the end.
+// Repair B1/E1: one time-lapse engine shared by the opening sweep and the
+// scale-preview sweep. It never writes the URL, ends on the exact starting
+// instant, skips on any pointer/key/wheel input and yields to any other writer.
+function runTimeSweep({ statusKey, spanMs, durationMs, onSettled = () => {} }) {
+  const endMs = state.selectedMs;
+  let startTime = null;
+  let frame = 0;
+  let lastWritten = null;
+  const detach = () => {
+    cancelAnimationFrame(frame);
+    removeEventListener("pointerdown", finish, true);
+    removeEventListener("keydown", finish, true);
+    removeEventListener("wheel", finish, true);
+  };
+  // Another writer (Play, Now, a command, a drag) took over: stop animating and
+  // leave its instant in place.
+  const yieldToOtherWriter = () => {
+    detach();
+    instrument.dataset[statusKey] = "done";
+    onSettled();
+  };
+  function finish() {
+    detach();
+    if (instrument.dataset[statusKey] !== "running") return;
+    state.selectedMs = endMs;
+    updateWheel();
+    instrument.dataset[statusKey] = "done";
+    onSettled();
+  }
+  addEventListener("pointerdown", finish, true);
+  addEventListener("keydown", finish, true);
+  addEventListener("wheel", finish, { capture:true, passive:true });
+  instrument.dataset[statusKey] = "running";
+  // Elapsed time accumulates per painted frame with a 120 ms cap, so a long
+  // first-load task (shader compile, font load) pauses the sweep instead of
+  // skipping most of it. Slow devices still finish: wall-clock time past
+  // 8 s ends the sweep.
+  let elapsed = 0;
+  let firstFrame = null;
+  const step = () => {
+    if (instrument.dataset[statusKey] !== "running") return;
+    if (state.selectedMs !== lastWritten) { yieldToOtherWriter(); return; }
+    const now = performance.now();
+    if (firstFrame === null) firstFrame = now;
+    if (startTime !== null) elapsed += Math.min(120, Math.max(0, now - startTime));
+    startTime = now;
+    if (now - firstFrame > 8000) { finish(); return; }
+    const { instantMs, done } = introSweepInstant({ endMs, elapsedMs:elapsed, spanMs, durationMs });
+    if (done) { finish(); return; }
+    state.selectedMs = instantMs;
+    lastWritten = instantMs;
+    updateWheel();
+    frame = requestAnimationFrame(step);
+  };
+  state.selectedMs = introSweepInstant({ endMs, elapsedMs:0, spanMs, durationMs }).instantMs;
+  lastWritten = state.selectedMs;
+  updateWheel();
+  frame = requestAnimationFrame(step);
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
 function runIntroSweep() {
-  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   if (!shouldRunIntroSweep({
     search:location.search,
-    reducedMotion,
+    reducedMotion:prefersReducedMotion(),
     seen:readIntroSeen(),
     hidden:document.visibilityState === "hidden",
     embedded:window.self !== window.top
@@ -664,60 +732,26 @@ function runIntroSweep() {
     instrument.dataset.introSweep = "skipped";
     return;
   }
-  const endMs = state.selectedMs;
-  let startTime = null;
-  let frame = 0;
-  let lastWritten = null;
-  // Another writer (Play, Now, a command, a drag) took over: stop animating and
-  // leave its instant in place.
-  const yieldToOtherWriter = () => {
-    cancelAnimationFrame(frame);
-    removeEventListener("pointerdown", finish, true);
-    removeEventListener("keydown", finish, true);
-    removeEventListener("wheel", finish, true);
-    instrument.dataset.introSweep = "done";
-    markIntroSeen();
-  };
-  const finish = () => {
-    cancelAnimationFrame(frame);
-    removeEventListener("pointerdown", finish, true);
-    removeEventListener("keydown", finish, true);
-    removeEventListener("wheel", finish, true);
-    if (instrument.dataset.introSweep !== "running") return;
-    state.selectedMs = endMs;
-    updateWheel();
-    instrument.dataset.introSweep = "done";
-    markIntroSeen();
-  };
-  addEventListener("pointerdown", finish, true);
-  addEventListener("keydown", finish, true);
-  addEventListener("wheel", finish, { capture:true, passive:true });
-  instrument.dataset.introSweep = "running";
-  // Elapsed time accumulates per painted frame with a 120 ms cap, so a long
-  // first-load task (shader compile, font load) pauses the sweep instead of
-  // skipping most of it.
-  // Slow devices still finish: wall-clock time past 8 s ends the sweep.
-  let elapsed = 0;
-  let firstFrame = null;
-  const step = () => {
-    if (instrument.dataset.introSweep !== "running") return;
-    if (state.selectedMs !== lastWritten) { yieldToOtherWriter(); return; }
-    const now = performance.now();
-    if (firstFrame === null) firstFrame = now;
-    if (startTime !== null) elapsed += Math.min(120, Math.max(0, now - startTime));
-    startTime = now;
-    if (now - firstFrame > 8000) { finish(); return; }
-    const { instantMs, done } = introSweepInstant({ endMs, elapsedMs:elapsed });
-    if (done) { finish(); return; }
-    state.selectedMs = instantMs;
-    lastWritten = instantMs;
-    updateWheel();
-    frame = requestAnimationFrame(step);
-  };
-  state.selectedMs = introSweepInstant({ endMs, elapsedMs:0 }).instantMs;
-  lastWritten = state.selectedMs;
-  updateWheel();
-  frame = requestAnimationFrame(step);
+  runTimeSweep({
+    statusKey:"introSweep",
+    spanMs:INTRO_SWEEP_SPAN_MS,
+    durationMs:INTRO_SWEEP_DURATION_MS,
+    onSettled:markIntroSeen
+  });
+}
+
+// Repair E1: choosing a scale previews its window — the last day, half-year
+// or 30 years replay in ~1.4 s and land back on the selected instant — so the
+// reader sees which rings move at that scale.
+function runScalePreviewSweep(scale) {
+  if (prefersReducedMotion() || state.playing) return;
+  if (window.self !== window.top) return; // embedded pages never animate
+  if (instrument.dataset.introSweep === "running" || instrument.dataset.scaleSweep === "running") return;
+  runTimeSweep({
+    statusKey:"scaleSweep",
+    spanMs:scalePreviewSpanMs(scale),
+    durationMs:SCALE_PREVIEW_DURATION_MS
+  });
 }
 
 function initialize() {

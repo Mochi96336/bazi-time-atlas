@@ -1,3 +1,5 @@
+import { kineticScaleConfig } from "./kinetic-playback.js";
+
 // Repair B1: opening time-lapse. On a plain first visit the Atlas fast-forwards
 // from five days ago to the landing instant: the Hour ring turns once while the
 // outer rings barely move, showing "each layer runs at its own rate" without
@@ -7,6 +9,14 @@
 export const INTRO_SWEEP_SPAN_MS = 5 * 86_400_000; // one full Hour-ring turn
 export const INTRO_SWEEP_DURATION_MS = 3600;
 export const INTRO_SWEEP_STORAGE_KEY = "bta:intro-sweep-seen";
+
+// Repair E1: a scale preview replays that scale's own window (the slider span:
+// one day, ~half a year or ~30 years) quickly enough to read as feedback.
+export const SCALE_PREVIEW_DURATION_MS = 1400;
+
+export function scalePreviewSpanMs(scale) {
+  return kineticScaleConfig(scale).spanDays * 86_400_000;
+}
 
 export function easeInOutCubic(t) {
   const x = Math.min(1, Math.max(0, t));
