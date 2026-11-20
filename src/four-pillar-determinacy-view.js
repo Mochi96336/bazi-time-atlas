@@ -69,7 +69,17 @@ function renderCard(name,{ pillarName=null, status, reason, resolved=false }) {
   const statusNode=card.querySelector(".determinacy-status");
   const summary=card.querySelector("p");
   const label=STATUS_LABELS[status] ?? status;
-  if(statusNode) statusNode.textContent=pillarName ? `${pillarName} · ${label}` : label;
+  // Repair A4: the answer (ganzhi or "?") is the largest mark; the pillar
+  // name is only a label and the verdict reads as its caption.
+  if(statusNode){
+    const answer=document.createElement("strong");
+    answer.className="determinacy-answer";
+    answer.textContent=resolved && pillarName ? pillarName : "？";
+    const verdict=document.createElement("span");
+    verdict.className="determinacy-verdict-label";
+    verdict.textContent=label;
+    statusNode.replaceChildren(answer,verdict);
+  }
   if(summary) summary.textContent=reason;
 }
 

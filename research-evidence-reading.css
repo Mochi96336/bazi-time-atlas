@@ -70,13 +70,15 @@
 #research-evidence .determinacy-panel .determinacy-card header span {
   font-size:10px;
 }
+#research-evidence .determinacy-panel .determinacy-card { padding-right:20px; }
+#research-evidence .determinacy-panel .determinacy-card + .determinacy-card { padding-left:16px; }
 #research-evidence .determinacy-panel .determinacy-card .determinacy-status {
-  font-size:12px;
+  font-size:15px;
   line-height:1.4;
 }
 #research-evidence .determinacy-panel .determinacy-card p {
   color:#b0bec4;
-  font-size:11.5px;
+  font-size:13px;
   line-height:1.5;
 }
 #research-evidence .determinacy-panel .determinacy-foot {
@@ -101,4 +103,9 @@
   #research-astronomy .seasonal-drift-orbit-head > div > strong { font-size:12px; }
   #research-evidence .determinacy-panel .determinacy-verdict small { font-size:12px; }
   #research-evidence .determinacy-panel .determinacy-card p { font-size:11.5px; }
+}
+@media (max-width:480px) {
+  #research-evidence .determinacy-panel .determinacy-card { padding-right:12px; }
+  #research-evidence .determinacy-panel .determinacy-card:nth-child(odd) { padding-left:0; }
+  #research-evidence .determinacy-panel .determinacy-card:nth-child(even) { padding-left:12px; }
 }

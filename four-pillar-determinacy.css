@@ -251,7 +251,7 @@
   padding:var(--research-space-5);
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
+  justify-content:flex-start;
   border-top:var(--research-diagram-line-active) solid var(--research-diagram-context);
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"] {
@@ -263,19 +263,36 @@
   color:var(--research-text-muted);
   font-size:var(--research-type-meta);
 }
+.determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span { display:none; }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong {
   display:block;
-  margin-top:var(--research-space-3);
-  color:var(--research-text-primary);
-  font-size:clamp(2rem,3vw,3.3rem);
-  line-height:1;
+  color:var(--research-text-secondary);
+  font-size:15px;
+  font-weight:650;
+  line-height:1.2;
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status {
-  margin-top:auto;
-  padding-top:var(--research-space-5);
+  margin-top:var(--research-space-3);
   color:var(--research-text-secondary);
   font-size:var(--research-type-compact);
   font-weight:var(--research-weight-emphasis);
+}
+/* Repair A4: answer first, verdict second, explanation last. */
+.determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-answer {
+  display:block;
+  color:var(--research-text-primary);
+  font-size:clamp(2.25rem,3.4vw,3.4rem);
+  font-weight:700;
+  line-height:1.05;
+  letter-spacing:.02em;
+}
+.determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="false"] .determinacy-answer {
+  color:var(--research-text-muted);
+}
+.determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-verdict-label {
+  display:block;
+  margin-top:var(--research-space-2);
+  font-size:15px;
 }
 .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card[data-resolved="true"] .determinacy-status {
   color:var(--research-candidate);
@@ -299,10 +316,10 @@
 @media(max-width:480px){
   .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card { min-height:178px; padding:var(--research-space-3); }
-  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header span { display:block; font-size:8px; }
-  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong { margin-top:var(--research-space-2); font-size:2rem; }
-  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-status { padding-top:var(--research-space-3); font-size:11px; }
-  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p { font-size:8.5px; }
+  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card header strong { font-size:14px; }
+  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-answer { font-size:2.25rem; }
+  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card .determinacy-verdict-label { font-size:14px; }
+  .determinacy-panel[data-diagram-grammar="pillar-verdict"] .determinacy-card p { font-size:13px; }
 }
 
 
