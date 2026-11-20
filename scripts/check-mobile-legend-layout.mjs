@@ -257,11 +257,13 @@ function validateAnalysis(run, probe) {
   }
 
   if (
-    requireAttr(probe, "data-scale-visible", "analysis", run.url) !== "0"
+    // Repair A1: the three scale presets are reachable in mobile Tools; the
+    // readout #play-button stays hidden because the dock owns mobile playback.
+    requireAttr(probe, "data-scale-visible", "analysis", run.url) !== "3"
     || requireAttr(probe, "data-play-visible", "analysis", run.url) !== "false"
     || requireAttr(probe, "data-ring-toggle-visible", "analysis", run.url) !== "0"
   ) {
-    throw new Error("analysis: retired mobile dashboard controls resurfaced: " + run.url);
+    throw new Error("analysis: scale presets missing or retired layer controls resurfaced: " + run.url);
   }
 
   for (const name of ["find-time", "classification", "solar-time"]) {
@@ -324,7 +326,7 @@ function validateAnalysis(run, probe) {
 
   console.log(
     "[mobile-legend] PASS Tools product rail; readable >=40px actions=find-time/classification/solar-time/now/done, " +
-    "Four Pillars=" + fourPillars.height.toFixed(1) + "px one-row rail, reference-frame hidden, retired scale/play/layers hidden: " + run.url
+    "Four Pillars=" + fourPillars.height.toFixed(1) + "px one-row rail, reference-frame hidden, scale presets reachable, readout play/layers hidden: " + run.url
   );
 }
 

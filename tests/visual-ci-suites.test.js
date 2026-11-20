@@ -33,7 +33,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
-  assert.equal(scripts.length, 55, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, and Research production evidence");
+  assert.equal(scripts.length, 56, "keep the full browser + screenshot checks, including seasonal Research, Research diagram labs, and Research production evidence");
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }

@@ -178,8 +178,10 @@ if (Math.abs((closeTop + closeBottom) / 2 - topbarCenter) > 2 || closeRight < wi
   throw new Error(`wide desktop: Done is not fixed in the same global header as Research (header=${topbarTop}-${topbarBottom}, close=${closeTop}-${closeBottom}@${closeRight}): ${page.url}`);
 }
 
-if (scaleVisible !== 0 || requireAttr(probe, "data-play-display", page.url) !== "none" || ringToggleVisible !== 0) {
-  throw new Error(`wide desktop: retired desktop Tools chrome resurfaced (scale=${scaleVisible}, play=${requireAttr(probe, "data-play-display", page.url)}, ringToggles=${ringToggleVisible}): ${page.url}`);
+// Repair A1: scale presets and the readout Play stay reachable in Tools;
+// only the retired ring-layer toggles remain hidden.
+if (scaleVisible !== 3 || requireAttr(probe, "data-play-display", page.url) === "none" || ringToggleVisible !== 0) {
+  throw new Error(`wide desktop: scale/play missing or retired layer chrome resurfaced (scale=${scaleVisible}, play=${requireAttr(probe, "data-play-display", page.url)}, ringToggles=${ringToggleVisible}): ${page.url}`);
 }
 for (const name of ["state-strip", "notes", "sources"]) {
   if (requireAttr(probe, `data-${name}-display`, page.url) !== "none") {

@@ -25,7 +25,7 @@
 /* Legacy Birth CSS has a higher-specificity 9px mobile override. Keep primary
    navigation visibly stronger than its Research destination at all widths. */
 body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
-  font-size:12px !important;
+  font-size:13px !important;
 }
 
 .kinetic-topbar .site-nav a[aria-current="page"],
@@ -39,7 +39,8 @@ body:has(.birth-shell) .topbar .site-nav a:not(.research-link) {
 .kinetic-topbar .site-nav a.research-link[data-nav-role="research"],
 .recurrence-topbar .site-nav a.research-link[data-nav-role="research"],
 .topbar .site-nav a.research-link[data-nav-role="research"] {
-  font-size:10.5px; font-weight:620; color:#929b98; opacity:.87;
+  font-size:12px; font-weight:620; color:#a3aba8; opacity:.92;
+  min-width:44px; justify-content:center;
 }
 .kinetic-topbar .site-nav a.research-link::before,
 .recurrence-topbar .site-nav a.research-link::before { display:none; }
@@ -161,12 +162,12 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
   .kinetic-topbar, .recurrence-topbar { justify-content:space-between !important; gap:8px; }
   .kinetic-topbar .topbar-actions { gap:11px; margin:0; width:100%; }
   .kinetic-topbar .site-nav, .recurrence-topbar .site-nav { gap:14px; margin-right:auto; }
-  .kinetic-topbar .site-nav a[aria-current="page"] { display:inline-flex; font-size:12px !important; }
+  .kinetic-topbar .site-nav a[aria-current="page"] { display:inline-flex; font-size:13px !important; }
   .kinetic-topbar .site-nav a, .recurrence-topbar .site-nav a {
-    min-height:42px; font-size:12px;
+    min-height:42px; font-size:13px;
   }
   .kinetic-topbar .site-nav a.research-link[data-nav-role="research"],
-  .recurrence-topbar .site-nav a.research-link[data-nav-role="research"] { font-size:10.5px; }
+  .recurrence-topbar .site-nav a.research-link[data-nav-role="research"] { font-size:12px; min-width:44px; }
   .kinetic-topbar .topbar-tool-slot { flex-basis:55px; min-height:42px; padding-left:8px; }
   .kinetic-topbar .topbar-tool-slot .analysis-toggle,
   .kinetic-topbar .topbar-tool-slot .analysis-close { min-height:42px; font-size:11px; }
@@ -338,3 +339,7 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 @media (max-width:480px) {
   .mobile-time-dock[data-dirty="true"] .mobile-time-actions #mobile-play-button { display:none; }
 }
+
+/* Repair A2/B6: Research is visually secondary through weight and tone, while
+   every nav label stays >=12px; primary destinations sit one step above. */
+.site-nav a:not(.research-link) { font-size:13px !important; }

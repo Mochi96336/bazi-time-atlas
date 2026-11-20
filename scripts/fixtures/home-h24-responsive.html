@@ -90,8 +90,12 @@
     proof.dataset.nowBounds = [n.left,n.right,n.top,n.bottom].map(x=>x.toFixed(2)).join(",");
     proof.dataset.nowVisible = String(visible(win,now) && !visible(win,apply));
     proof.dataset.sameRow = String(sameRow(input,now));
+    // Repair A1: mobile Play sits between the input and Now; the first action
+    // (Play when shown, otherwise Now) must hug the input, and Now must fit.
+    const playButton = doc.querySelector("#mobile-play-button");
+    const firstAction = playButton && visible(win, playButton) ? bounds(playButton) : n;
     proof.dataset.nowFits = String(n.width>=42 && n.height>=42 &&
-      n.left>=a.right+2 && n.left-a.right<=16 && n.right<=Math.min(width,d.right)+1);
+      firstAction.left>=a.right+2 && firstAction.left-a.right<=16 && n.right<=Math.min(width,d.right)+1);
     proof.dataset.noOverlap = String(n.left>=a.right+2 && noExtraRow(dock));
     proof.dataset.notClipped = String(a.left>=Math.max(0,d.left)-1 &&
       n.right<=Math.min(width,d.right)+1 && input.scrollWidth<=input.clientWidth+1);
