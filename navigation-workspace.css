@@ -343,3 +343,32 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 /* Repair A2/B6: Research is visually secondary through weight and tone, while
    every nav label stays >=12px; primary destinations sit one step above. */
 .site-nav a:not(.research-link) { font-size:13px !important; }
+
+/* Repair B6: one explicit touch-target floor for every Atlas control. The
+   glyphs stay typographic and quiet; only the hit area reaches 44 CSS px and
+   labels reach 12 px. (Consolidated into tokens/@layer in C4.) */
+.kinetic-topbar .site-nav a,
+.recurrence-topbar .site-nav a,
+.topbar .site-nav a,
+.kinetic-topbar .topbar-tool-slot .analysis-toggle,
+.kinetic-topbar .topbar-tool-slot .analysis-close,
+#kinetic-instrument .instrument-readout #now-button.readout-now,
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button,
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button {
+  min-width:44px !important;
+  min-height:44px !important;
+  box-sizing:border-box;
+  font-size:12px !important;
+}
+.kinetic-topbar .site-nav a:not(.research-link),
+.recurrence-topbar .site-nav a:not(.research-link),
+.topbar .site-nav a:not(.research-link) { font-size:13px !important; }
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button,
+#kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button {
+  padding-inline:6px !important;
+}
+#kinetic-instrument .instrument-readout .selected-instant-line #now-button.readout-now { min-width:56px !important; }
+@media (max-width:480px) {
+  .mobile-time-dock .mobile-time-actions #mobile-now-button,
+  .mobile-time-dock .mobile-time-actions #mobile-time-apply { min-height:44px !important; min-width:44px !important; font-size:12px !important; }
+}

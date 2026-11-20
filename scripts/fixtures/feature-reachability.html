@@ -31,7 +31,7 @@
     frame.src = target.href;
 
     const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
-    const MIN_TARGET = 24; // WCAG 2.2 target-size minimum (CSS px)
+    const MIN_TARGET = 44; // Repair B6: 44 CSS px touch target (WCAG 2.5.5 AAA)
 
     function reachable(doc, win, selector) {
       const el = doc.querySelector(selector);
