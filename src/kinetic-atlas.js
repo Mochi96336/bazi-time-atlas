@@ -43,6 +43,11 @@ import { createFreeCompareController } from "./interaction/free-compare-controll
 import { applyLinkedRingDragInto } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
 import {
+  INTRO_SWEEP_STORAGE_KEY,
+  introSweepInstant,
+  shouldRunIntroSweep
+} from "./interaction/intro-sweep.js";
+import {
   SELECTED_INSTANT_COMMAND,
   selectedInstantFromCommandDetail
 } from "./interaction/selected-instant-command.js";
@@ -600,6 +605,69 @@ function bindControls() {
   });
 }
 
+function readIntroSeen() {
+  try { return localStorage.getItem(INTRO_SWEEP_STORAGE_KEY) === "1"; } catch { return false; }
+}
+
+function markIntroSeen() {
+  try { localStorage.setItem(INTRO_SWEEP_STORAGE_KEY, "1"); } catch { /* storage unavailable */ }
+}
+
+// Repair B1: one-time opening time-lapse; never writes the URL and ends on the
+// exact landing instant. Any pointer, key or wheel input skips to the end.
+function runIntroSweep() {
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  if (!shouldRunIntroSweep({
+    search:location.search,
+    reducedMotion,
+    seen:readIntroSeen(),
+    hidden:document.visibilityState === "hidden"
+  })) {
+    instrument.dataset.introSweep = "skipped";
+    return;
+  }
+  const endMs = state.selectedMs;
+  let startTime = null;
+  let frame = 0;
+  const finish = () => {
+    cancelAnimationFrame(frame);
+    removeEventListener("pointerdown", finish, true);
+    removeEventListener("keydown", finish, true);
+    removeEventListener("wheel", finish, true);
+    if (instrument.dataset.introSweep !== "running") return;
+    state.selectedMs = endMs;
+    updateWheel();
+    instrument.dataset.introSweep = "done";
+    markIntroSeen();
+  };
+  addEventListener("pointerdown", finish, true);
+  addEventListener("keydown", finish, true);
+  addEventListener("wheel", finish, { capture:true, passive:true });
+  instrument.dataset.introSweep = "running";
+  // Elapsed time accumulates per painted frame with a 120 ms cap, so a long
+  // first-load task (shader compile, font load) pauses the sweep instead of
+  // skipping most of it.
+  // Slow devices still finish: wall-clock time past 8 s ends the sweep.
+  let elapsed = 0;
+  let firstFrame = null;
+  const step = () => {
+    if (instrument.dataset.introSweep !== "running") return;
+    const now = performance.now();
+    if (firstFrame === null) firstFrame = now;
+    if (startTime !== null) elapsed += Math.min(120, Math.max(0, now - startTime));
+    startTime = now;
+    if (now - firstFrame > 8000) { finish(); return; }
+    const { instantMs, done } = introSweepInstant({ endMs, elapsedMs:elapsed });
+    if (done) { finish(); return; }
+    state.selectedMs = instantMs;
+    updateWheel();
+    frame = requestAnimationFrame(step);
+  };
+  state.selectedMs = introSweepInstant({ endMs, elapsedMs:0 }).instantMs;
+  updateWheel();
+  frame = requestAnimationFrame(step);
+}
+
 function initialize() {
   assertWheelModel();
   renderer.renderStatic();
@@ -618,6 +686,7 @@ function initialize() {
     wheelOuterRadius:RADII.outer,
     getSourceAngularVelocityDegPerSec:() => yearOrbitalVelocity.current()
   });
+  runIntroSweep();
 }
 
 initialize();
