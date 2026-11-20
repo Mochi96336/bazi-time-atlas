@@ -223,7 +223,7 @@ test("mobile Research primary interactions meet the same tap-target floor as dis
     recurrenceCss,
     /@media \(max-width:480px\)[\s\S]*\.base-date input\s*\{[^}]*min-height:42px;[\s\S]*\.delta-dock input\[type="number"\]\s*\{\s*min-height:42px;\s*\}[\s\S]*\.candidate-buttons button\s*\{\s*min-height:42px;[\s\S]*\.delta-slider-wrap input\s*\{\s*min-height:32px;\s*\}[\s\S]*\.model-boundary summary\s*\{\s*min-height:42px;/
   );
-  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:42px;\s*\}/);
+  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:44px;\s*\}/);
 });
 test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-safe Jie selection",async()=>{
   const js=await readFile(new URL("../src/research-seasonal-drift-evidence-view.js",import.meta.url),"utf8");
