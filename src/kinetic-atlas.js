@@ -416,6 +416,7 @@ function setSelectedInstant(instantMs, source = "command") {
   instrument.dataset.lastSelectedInstantSource = source;
   const href = selectedInstantUrl(location.href, instantMs, state.timeContext);
   if (href) history.replaceState(history.state, "", href);
+  setFollowingNow(source === "now" || source === "mobile-now");
   return true;
 }
 
@@ -605,6 +606,42 @@ function bindControls() {
   });
 }
 
+// Repair B5: while the Atlas shows "now", the selected instant follows the
+// wall clock once per second. Any other writer (drag, playback, input, deep
+// link, commands) changes selectedMs away from the last followed value, which
+// ends following without each path needing to know about the clock. "現在"
+// re-enters following. Ticks never write the URL.
+const liveClock = { following:false, lastMs:null, timer:0 };
+
+function setFollowingNow(following) {
+  liveClock.following = following;
+  liveClock.lastMs = following ? state.selectedMs : null;
+  instrument.dataset.followingNow = String(following);
+}
+
+function tickLiveClock() {
+  if (!liveClock.following) return;
+  if (instrument.dataset.introSweep === "running") return;
+  if (state.selectedMs !== liveClock.lastMs) { setFollowingNow(false); return; }
+  if (document.visibilityState === "hidden") return;
+  const nowMs = Math.floor(Date.now() / 1000) * 1000;
+  if (nowMs <= state.selectedMs) return;
+  state.selectedMs = nowMs;
+  state.anchorMs = nowMs;
+  liveClock.lastMs = nowMs;
+  setSliderForScale();
+  updateWheel();
+}
+
+function installLiveClock() {
+  // Embedded pages (iframes, browser harnesses) keep a frozen instant.
+  const embedded = window.self !== window.top;
+  const plainNow = !embedded && !Number.isFinite(parseAtlasSearch(location.search).instantMs) && !state.legacyProjection;
+  setFollowingNow(plainNow);
+  clearInterval(liveClock.timer);
+  liveClock.timer = setInterval(tickLiveClock, 1000);
+}
+
 function readIntroSeen() {
   try { return localStorage.getItem(INTRO_SWEEP_STORAGE_KEY) === "1"; } catch { return false; }
 }
@@ -630,6 +667,17 @@ function runIntroSweep() {
   const endMs = state.selectedMs;
   let startTime = null;
   let frame = 0;
+  let lastWritten = null;
+  // Another writer (Play, Now, a command, a drag) took over: stop animating and
+  // leave its instant in place.
+  const yieldToOtherWriter = () => {
+    cancelAnimationFrame(frame);
+    removeEventListener("pointerdown", finish, true);
+    removeEventListener("keydown", finish, true);
+    removeEventListener("wheel", finish, true);
+    instrument.dataset.introSweep = "done";
+    markIntroSeen();
+  };
   const finish = () => {
     cancelAnimationFrame(frame);
     removeEventListener("pointerdown", finish, true);
@@ -653,6 +701,7 @@ function runIntroSweep() {
   let firstFrame = null;
   const step = () => {
     if (instrument.dataset.introSweep !== "running") return;
+    if (state.selectedMs !== lastWritten) { yieldToOtherWriter(); return; }
     const now = performance.now();
     if (firstFrame === null) firstFrame = now;
     if (startTime !== null) elapsed += Math.min(120, Math.max(0, now - startTime));
@@ -661,10 +710,12 @@ function runIntroSweep() {
     const { instantMs, done } = introSweepInstant({ endMs, elapsedMs:elapsed });
     if (done) { finish(); return; }
     state.selectedMs = instantMs;
+    lastWritten = instantMs;
     updateWheel();
     frame = requestAnimationFrame(step);
   };
   state.selectedMs = introSweepInstant({ endMs, elapsedMs:0 }).instantMs;
+  lastWritten = state.selectedMs;
   updateWheel();
   frame = requestAnimationFrame(step);
 }
@@ -687,6 +738,7 @@ function initialize() {
     wheelOuterRadius:RADII.outer,
     getSourceAngularVelocityDegPerSec:() => yearOrbitalVelocity.current()
   });
+  installLiveClock();
   runIntroSweep();
 }
 

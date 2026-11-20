@@ -44,3 +44,12 @@ test("atlas controller wires the sweep without URL writes and with input skip", 
   assert.match(body, /addEventListener\("keydown", finish, true\)/);
   assert.match(source, /runIntroSweep\(\);\n\}\n\ninitialize\(\);/);
 });
+
+test("live clock follows only plain top-level 'now' and yields to any other writer", () => {
+  const source = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
+  const tick = source.slice(source.indexOf("function tickLiveClock()"), source.indexOf("function installLiveClock()"));
+  assert.match(tick, /introSweep === "running"\) return;\s*if \(state\.selectedMs !== liveClock\.lastMs\) \{ setFollowingNow\(false\); return; \}/);
+  assert.doesNotMatch(tick, /history\.replaceState/);
+  assert.match(source, /const plainNow = !embedded && !Number\.isFinite\(parseAtlasSearch\(location\.search\)\.instantMs\)/);
+  assert.match(source, /setFollowingNow\(source === "now" \|\| source === "mobile-now"\);/);
+});
