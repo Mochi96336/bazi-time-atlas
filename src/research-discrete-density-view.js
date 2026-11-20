@@ -140,7 +140,7 @@ function ensurePhaseFanPanel() {
 
     const header = document.createElement("header");
     header.innerHTML = `<div class="phase-fan-preview-heading">
-        <h3 id="phase-fan-title" class="phase-fan-preview-title">三圈離散相位</h3>
+        <h3 id="phase-fan-title" class="phase-fan-preview-title">離散相位扇</h3>
         <small id="phase-fan-preview-context">等候相位</small>
       </div>
       <div class="phase-fan-preview" role="group" aria-label="由外到內的三個週期與相位偏移">
