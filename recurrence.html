@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="./research-entry.css">
   <link rel="stylesheet" href="./research-evidence-reading.css">
   <link rel="stylesheet" href="./research-drift-accumulation.css">
+  <link rel="stylesheet" href="./pillar-proof-flow.css">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -554,6 +555,28 @@
         <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
       </section>
 
+      <figure id="pillar-proof-flow" class="pillar-proof-flow" aria-labelledby="pillar-proof-flow-title">
+        <figcaption id="pillar-proof-flow-title">為什麼年柱、月柱能判定，日柱、時柱不行？</figcaption>
+        <ol class="ppf-branches">
+          <li class="ppf-branch" data-branch="sun">
+            <div class="ppf-step"><b>只需要知道太陽走到哪</b><small>年柱看立春、月柱看「節」，兩者都由太陽位置決定。</small></div>
+            <div class="ppf-arrow" aria-hidden="true">→</div>
+            <div class="ppf-results">
+              <span class="ppf-result" data-pillar="year" data-resolved="pending"><em>年柱</em><strong>—</strong></span>
+              <span class="ppf-result" data-pillar="month" data-resolved="pending"><em>月柱</em><strong>—</strong></span>
+            </div>
+          </li>
+          <li class="ppf-branch" data-branch="clock">
+            <div class="ppf-step"><b>還需要知道「當地幾點」</b><small>日柱看換日、時柱看兩小時一格；要先知道地球轉到哪。24,000 年後地球自轉的不確定性約 ±7 天，所以算不準。</small></div>
+            <div class="ppf-arrow" aria-hidden="true">→</div>
+            <div class="ppf-results">
+              <span class="ppf-result" data-pillar="day" data-resolved="pending"><em>日柱</em><strong>—</strong></span>
+              <span class="ppf-result" data-pillar="hour" data-resolved="pending"><em>時柱</em><strong>—</strong></span>
+            </div>
+          </li>
+        </ol>
+      </figure>
+
       <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian/TT reference lattice 的 10–14 天位移與節界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區，以及由民用時刻定義的完整四柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
     </section>
 
@@ -586,6 +609,7 @@
   <script type="module" src="./src/research-drift-accumulation-view.js"></script>
   <script type="module" src="./src/research-absolute-boundary-consequence-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
+  <script type="module" src="./src/pillar-proof-flow-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>
   <script type="module" src="./src/research-narrative-spine-view.js"></script>
   <script type="module" src="./src/research-time-state-view.js"></script>
