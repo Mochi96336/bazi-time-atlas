@@ -196,23 +196,23 @@ test("section chrome stays flat and compact on phone", () => {
 test("mobile Research outcomes keep a readable interaction floor without inflating hidden evidence", () => {
   assert.match(
     discreteCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-discrete-drilldown > summary\s*\{[\s\S]*min-height:\s*42px;[\s\S]*padding:\s*8px 1px;[\s\S]*\.research-discrete-drilldown > summary strong\s*\{[\s\S]*font-size:\s*8\.5px;/
+    /@media \(max-width:480px\)[\s\S]*\.research-discrete-drilldown > summary\s*\{[\s\S]*min-height:\s*42px;[\s\S]*padding:\s*8px 1px;[\s\S]*\.research-discrete-drilldown > summary strong\s*\{[\s\S]*font-size:\s*12px;/
   );
   assert.match(
     astronomyCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-astronomy-rms-rail > span\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.research-astronomy-drilldown > summary\s*\{\s*min-height:\s*42px;\s*font-size:\s*9px;\s*\}/
+    /@media \(max-width:480px\)[\s\S]*\.research-astronomy-rms-rail > span\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.research-astronomy-drilldown > summary\s*\{\s*min-height:\s*42px;\s*font-size:\s*12px;\s*\}/
   );
   assert.match(
     evidenceCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*8\.5px;/
+    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*12px;/
   );
   assert.match(
     determinacyCss,
-    /@media \(max-width:480px\)[\s\S]*\.determinacy-card p\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.determinacy-foot\s*\{\s*font-size:\s*9px;\s*\}/
+    /@media \(max-width:480px\)[\s\S]*\.determinacy-card p\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.determinacy-foot\s*\{\s*font-size:\s*12px;\s*\}/
   );
   assert.match(
     residualCss,
-    /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*8\.5px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*8\.5px;\s*\}/
+    /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*12px;\s*\}/
   );
 });
 

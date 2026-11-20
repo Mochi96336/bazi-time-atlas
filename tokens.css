@@ -1,0 +1,53 @@
+/* Repair C1/C2: site-wide design tokens shared by Atlas, Research and Birth.
+   Page foundations (kinetic-atlas.css, research-foundations.css, legacy-dark.css)
+   map their role names onto these values instead of inventing neighbouring
+   blacks, golds or type sizes. Load this file before any page stylesheet. */
+:root {
+  /* Field: the one page background (Home Art H2.5 B2 authority). */
+  --site-field: #0a0d13;
+  --site-field-raised: #0e121a;
+  --site-layer-1: #0f151b;
+  --site-layer-2: #151d24;
+
+  /* Text */
+  --site-ink: #eef2f1;
+  --site-ink-secondary: #b9c2c0;
+  --site-ink-muted: #8a9492;
+
+  /* Lines */
+  --site-line-subtle: rgba(224, 234, 238, .08);
+  --site-line-strong: rgba(224, 234, 238, .18);
+
+  /* Accents */
+  --site-gold: #e4d9ad;          /* selected instant / read-head */
+  --site-current: #7ec8d8;       /* current / selected state (Research) */
+  --site-candidate: #d6b26f;     /* candidate / conclusion (Research) */
+  --site-focus: #e4d9ad;
+
+  /* Type scale: seven steps, 12 px floor for anything meaningful. */
+  --type-display: clamp(2.25rem, 4vw, 3rem);
+  --type-section: clamp(1.5rem, 2.4vw, 1.875rem);
+  --type-subsection: 1.1875rem;  /* 19 */
+  --type-body: 1rem;             /* 16 */
+  --type-compact: .875rem;       /* 14 */
+  --type-meta: .8125rem;         /* 13 */
+  --type-annotation: .75rem;     /* 12: plot labels, axis ticks */
+
+  /* Spacing: 4/8 rhythm */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  --font-sans: "Noto Sans TC", "Noto Sans CJK TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+
+:where(button, a, input, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--site-focus);
+  outline-offset: 2px;
+}

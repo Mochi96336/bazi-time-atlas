@@ -20,7 +20,7 @@
 .research-astronomy-rms-rail > span {
   margin:0;
   color:#7f8a82;
-  font-size:9px;
+  font-size:12px;
   font-weight:650;
   letter-spacing:.02em;
   text-transform:none;
@@ -45,7 +45,7 @@
 .astronomy-panel .astronomy-phase-card > span {
   margin:0;
   color:#7f8a82;
-  font-size:9px;
+  font-size:12px;
   font-weight:650;
   letter-spacing:.02em;
   text-transform:none;
@@ -53,7 +53,7 @@
 .astronomy-panel .astronomy-phase-card > strong {
   margin:0;
   color:#9ca8a0;
-  font-size:11px;
+  font-size:12px;
   font-weight:650;
   text-align:right;
 }
@@ -61,7 +61,7 @@
   grid-column:1 / -1;
   margin:0;
   color:#6f7973;
-  font-size:8px;
+  font-size:12px;
   line-height:1.45;
 }
 
@@ -81,7 +81,7 @@
   min-height:34px;
   padding:0 2px;
   color:#7a857e;
-  font-size:9px;
+  font-size:12px;
   line-height:1.35;
   cursor:pointer;
   list-style:none;
@@ -106,11 +106,11 @@
   padding:9px 2px 4px;
 }
 .astronomy-detail-meta > div { min-width:0; }
-.astronomy-detail-meta span { display:block; color:#68736b; font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
-.astronomy-detail-meta strong { display:block; margin-top:3px; color:#a89f92; font-size:11px; }
-.astronomy-detail-meta small { display:block; margin-top:3px; color:#6d7870; font-size:8px; line-height:1.45; }
+.astronomy-detail-meta span { display:block; color:#68736b; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+.astronomy-detail-meta strong { display:block; margin-top:3px; color:#a89f92; font-size:12px; }
+.astronomy-detail-meta small { display:block; margin-top:3px; color:#6d7870; font-size:12px; line-height:1.45; }
 .astronomy-detail-meta #astronomy-max-residual { color:#b6aca0; font-size:12px; }
-.astronomy-detail-meta #astronomy-orbit-readout { color:#8f988f; font-size:9px; line-height:1.5; }
+.astronomy-detail-meta #astronomy-orbit-readout { color:#8f988f; font-size:12px; line-height:1.5; }
 #astronomy-residual-detail .astronomy-term-grid { margin:7px 0 11px; }
 
 .month-boundary-copy h3 { margin-bottom:0; font-size:14px; }
@@ -122,7 +122,7 @@
   margin:8px 2px 0;
   max-width:760px;
   color:#727d75;
-  font-size:8px;
+  font-size:12px;
   line-height:1.62;
 }
 #month-boundary-detail .pillar-impact-strip {
@@ -150,10 +150,10 @@
 
 @media (max-width:480px) {
   .astronomy-panel { padding:6px 0 7px; }
-  .research-astronomy-rms-rail > span { font-size:9px; }
+  .research-astronomy-rms-rail > span { font-size:12px; }
   .research-astronomy-rms-rail #astronomy-rms-residual { font-size:12px; }
-  .research-astronomy-drilldown > summary { min-height:42px; font-size:9px; }
+  .research-astronomy-drilldown > summary { min-height:42px; font-size:12px; }
   .astronomy-detail-meta { padding-top:7px; }
-  #month-boundary-detail > p { font-size:7.5px; }
+  #month-boundary-detail > p { font-size:12px; }
   #near-recurrence-detail .near-search-body { padding-bottom:8px; }
 }

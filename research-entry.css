@@ -7,7 +7,7 @@
 .research-entry-label {
   margin:0 0 7px;
   color:#91a0a6;
-  font-size:10px;
+  font-size:12px;
   line-height:1.45;
 }
 .research-entry-choices {
@@ -40,7 +40,7 @@
 }
 .research-entry-choice > span {
   color:#aab7ba;
-  font-size:10px;
+  font-size:12px;
   line-height:1.4;
 }
 .research-entry-choice > strong {
@@ -53,7 +53,7 @@
 }
 .research-entry-choice > small {
   color:#96a6ae;
-  font-size:10px;
+  font-size:12px;
   line-height:1.45;
 }
 .research-entry-global > strong { color:#e0bf86; }
@@ -78,18 +78,18 @@
   min-height:1.4em;
   margin:8px 0 0;
   color:#a2b0b5;
-  font-size:10.5px;
+  font-size:12px;
   line-height:1.5;
 }
 @media (max-width:480px) {
   .research-entry { margin-top:10px; }
-  .research-entry-label { font-size:10px; }
+  .research-entry-label { font-size:12px; }
   .research-entry-choice { min-height:72px; padding:8px 8px 9px 0; }
   .research-entry-choice + .research-entry-choice { padding-left:10px; }
-  .research-entry-choice > span { font-size:10px; }
+  .research-entry-choice > span { font-size:12px; }
   .research-entry-choice > strong { font-size:18px; }
-  .research-entry-choice > small { font-size:10px; }
-  .research-entry-selection { margin-top:7px; font-size:10px; }
+  .research-entry-choice > small { font-size:12px; }
+  .research-entry-selection { margin-top:7px; font-size:12px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .research-entry-choice { transition:none; }
@@ -105,35 +105,35 @@
 .research-question-next strong { font-size:12px; }
 .research-entry-label,
 .research-entry-selection {
-  font-size:11.5px;
+  font-size:12px;
   line-height:1.5;
 }
 .research-entry-choice > span,
 .research-entry-choice > small {
-  font-size:11px;
+  font-size:12px;
   line-height:1.4;
 }
 .research-outline small {
-  font-size:9px;
+  font-size:12px;
   line-height:1.12;
 }
 #research-discrete .research-discrete-scope {
   color:#a7b5b9;
-  font-size:11.5px;
+  font-size:12px;
   line-height:1.55;
 }
 #research-discrete .research-discrete-thesis .discrete-derivation-step > small {
   overflow:visible;
   white-space:normal;
   text-overflow:clip;
-  font-size:11px;
+  font-size:12px;
   line-height:1.45;
 }
 #research-discrete .research-discrete-thesis .discrete-derivation-step > strong {
   line-height:1.22;
 }
 #research-discrete .research-discrete-thesis .discrete-derivation-phases small {
-  font-size:10px;
+  font-size:12px;
   line-height:1.3;
 }
 #research-discrete .research-discrete-thesis .discrete-derivation-phases em {
@@ -141,19 +141,19 @@
 }
 #research-discrete .research-discrete-thesis .discrete-derivation-rule {
   color:#a4b2b7;
-  font-size:11.5px;
+  font-size:12px;
   line-height:1.55;
 }
 #research-discrete .research-solar-origin > small {
-  font-size:11px;
+  font-size:12px;
   line-height:1.5;
 }
 @media (max-width:480px) {
   .research-entry-choice > span,
-  .research-entry-choice > small { font-size:11px; }
-  .research-entry-selection { font-size:11.5px; }
+  .research-entry-choice > small { font-size:12px; }
+  .research-entry-selection { font-size:12px; }
   #research-discrete .research-discrete-thesis .discrete-derivation-step > small {
-    font-size:11px;
+    font-size:12px;
   }
 }
 
@@ -166,6 +166,6 @@
   display:block;
   margin-top:6px;
   color:#a9b8bf;
-  font-size:11px;
+  font-size:12px;
   line-height:1.4;
 }

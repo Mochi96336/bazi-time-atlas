@@ -3,8 +3,9 @@
 body:has(.birth-shell),
 body:has(.sexagenary-shell) {
   color-scheme: dark;
-  --bg: #0e1210;
-  --paper: #131915;
+  /* Repair C2: Birth shares the site field instead of a green-black. */
+  --bg: var(--site-field, #0a0d13);
+  --paper: var(--site-field-raised, #0e121a);
   --ink: #eef2ed;
   --muted: #929b94;
   --hairline: rgba(238,242,237,.12);
@@ -17,8 +18,8 @@ body:has(.sexagenary-shell) {
   --water: #7898a6;
   --radius: 24px;
   background:
-    radial-gradient(circle at 50% -18%, rgba(126,157,139,.12), transparent 37rem),
-    linear-gradient(180deg, #111613 0%, #0e1210 68%, #0b0e0c 100%);
+    radial-gradient(circle at 50% -18%, rgba(121,145,173,.044), transparent 30rem),
+    linear-gradient(180deg, #0e141d 0%, var(--site-field, #0a0d13) 68%, #080a10 100%);
 }
 
 body:has(.birth-shell) .site-shell,

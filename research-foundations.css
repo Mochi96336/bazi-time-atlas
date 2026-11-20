@@ -4,9 +4,9 @@
    colors, type sizes or spacing values ad hoc. */
 :root {
   /* Neutral surfaces */
-  --research-bg-page: #0a0e12;
-  --research-bg-layer-1: #0f151b;
-  --research-bg-layer-2: #151d24;
+  --research-bg-page: var(--site-field, #0a0d13);
+  --research-bg-layer-1: var(--site-layer-1, #0f151b);
+  --research-bg-layer-2: var(--site-layer-2, #151d24);
 
   /* Text */
   --research-text-primary: #eef2f2;
@@ -39,10 +39,11 @@
   --research-type-display: clamp(2.5rem, 4vw, 3rem);
   --research-type-section: clamp(1.625rem, 2.4vw, 1.875rem);
   --research-type-subsection: 1.125rem;
-  --research-type-body: .9375rem;
-  --research-type-compact: .875rem;
-  --research-type-meta: .75rem;
-  --research-type-plot: .6875rem;
+  --research-type-body: var(--type-body, 1rem);
+  --research-type-compact: var(--type-compact, .875rem);
+  /* Repair C1: 13 px meta and 12 px plot floors (were 12 / 11). */
+  --research-type-meta: var(--type-meta, .8125rem);
+  --research-type-plot: var(--type-annotation, .75rem);
 
   --research-leading-display: 1.05;
   --research-leading-section: 1.15;

@@ -62,9 +62,9 @@ test("Research 01 prioritizes readable evidence instead of truncating milestone 
   const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
   assert.match(html,/01 先建立離散候選；02 再檢查真正的十二節界/);
   assert.match(html,/只先算離散候選，不直接等同完整四柱週期/);
-  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:11px;/);
-  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:10px;/);
-  assert.match(css,/\.research-outline small \{\s*font-size:9px;/);
+  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
+  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
+  assert.match(css,/\.research-outline small \{\s*font-size:12px;/);
   assert.doesNotMatch(html,/research-reading-card|research-reading-wizard/);
 });
 

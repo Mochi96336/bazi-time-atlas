@@ -11,7 +11,7 @@
 }
 .absolute-boundary-head .eyebrow {
   color:#72879a;
-  font-size:8px;
+  font-size:12px;
   font-weight:760;
   letter-spacing:.08em;
 }
@@ -27,14 +27,14 @@
   margin:0;
   max-width:840px;
   color:#7d8982;
-  font-size:9px;
+  font-size:12px;
   line-height:1.65;
 }
 
 .absolute-boundary-note {
   margin:9px 2px 0;
   color:#6f7b74;
-  font-size:8px;
+  font-size:12px;
   line-height:1.6;
 }
 .absolute-boundary-note strong {
@@ -45,8 +45,8 @@
 @media (max-width:480px) {
   .absolute-boundary-consequence { padding:12px 0 13px; }
   .absolute-boundary-head h3 { font-size:17px; }
-  .absolute-boundary-head p { font-size:9px; }
-  .absolute-boundary-note { font-size:8.5px; }
+  .absolute-boundary-head p { font-size:12px; }
+  .absolute-boundary-note { font-size:12px; }
 }
 
 /* Research 03 selected grammar — compact reference-frame fork before the pillar verdict band */
@@ -131,6 +131,6 @@
   .research-alignment-fork { gap:var(--research-space-2); }
   .research-alignment-fork article { padding:var(--research-space-3); }
   .research-alignment-fork strong { font-size:var(--research-type-compact); line-height:var(--research-leading-compact); }
-  .research-alignment-fork small { font-size:8.5px; }
+  .research-alignment-fork small { font-size:12px; }
 }
 

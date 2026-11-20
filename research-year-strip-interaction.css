@@ -36,15 +36,15 @@
 .research-year-scrub:disabled{cursor:not-allowed;pointer-events:none}
 .research-year-scrub-hint{
   display:block;margin:0 16px 6px;
-  font-size:10.5px;line-height:1.5;color:#9eada4;
+  font-size:12px;line-height:1.5;color:#9eada4;
 }
 .research-year-scrub-feedback{
   display:block;min-height:17px;margin:0 16px 5px;
-  font-size:11px;line-height:1.55;color:#d8b884;
+  font-size:12px;line-height:1.55;color:#d8b884;
 }
 .research-year-scrub-feedback[hidden]{display:none}
 @media(max-width:480px){
  .research-year-scrub-hint,.research-year-scrub-feedback{
-  font-size:10.5px;margin-left:8px;margin-right:8px;
+  font-size:12px;margin-left:8px;margin-right:8px;
  }
 }

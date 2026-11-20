@@ -21,7 +21,7 @@
   max-width: 520px;
   margin: 0;
   color: #748078;
-  font-size: 10px;
+  font-size:12px;
   line-height: 1.55;
   text-align: right;
 }
@@ -38,7 +38,7 @@
   gap: 7px;
   margin-bottom: -2px;
   color: #67726b;
-  font-size: 9px;
+  font-size:12px;
   letter-spacing: .02em;
 }
 .research-cycle-key strong { color: #9ca69f; font-weight: 700; }
@@ -58,7 +58,7 @@
 }
 .research-cycle-guide-label {
   fill: #626d66;
-  font-size: 10px;
+  font-size:12px;
   font-weight: 700;
   letter-spacing: .08em;
   text-anchor: middle;
@@ -90,7 +90,7 @@
 .research-cycle-dot.active { fill: var(--cursor); }
 .research-cycle-index {
   fill: #626c65;
-  font-size: 8px;
+  font-size:12px;
   font-weight: 650;
   text-anchor: middle;
   dominant-baseline: middle;
@@ -106,7 +106,7 @@
 }
 .research-cycle-center-kicker {
   fill: #68736c;
-  font-size: 11px;
+  font-size:12px;
   font-weight: 720;
   text-anchor: middle;
 }
@@ -119,7 +119,7 @@
 }
 .research-cycle-center-note {
   fill: #78837b;
-  font-size: 10px;
+  font-size:12px;
   font-weight: 620;
   text-anchor: middle;
 }
@@ -141,7 +141,7 @@
   line-height: 1;
   letter-spacing: .04em;
 }
-.research-cycle-ordinal { color: #68736c; font-size: 10px; font-variant-numeric: tabular-nums; }
+.research-cycle-ordinal { color: #68736c; font-size:12px; font-variant-numeric: tabular-nums; }
 .research-cycle-phases { margin-top: 18px; border-top: 1px solid var(--hairline); }
 .research-cycle-phase {
   display: grid;
@@ -151,10 +151,10 @@
   padding: 11px 0;
   border-bottom: 1px solid var(--hairline);
 }
-.research-cycle-phase > span { color: #667169; font-size: 9px; letter-spacing: .06em; }
+.research-cycle-phase > span { color: #667169; font-size:12px; letter-spacing: .06em; }
 .research-cycle-phase strong { color: #dce2dd; font-size: 20px; }
-.research-cycle-phase small { margin-left: 6px; color: #78837b; font-size: 10px; }
-.research-cycle-phase em { color: #68736c; font-size: 9px; font-style: normal; font-variant-numeric: tabular-nums; }
+.research-cycle-phase small { margin-left: 6px; color: #78837b; font-size:12px; }
+.research-cycle-phase em { color: #68736c; font-size:12px; font-style: normal; font-variant-numeric: tabular-nums; }
 @media (max-width: 900px) {
   .research-cycle-layout { grid-template-columns: 1fr; gap: 8px; }
   .research-cycle-inspector { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--hairline); }
@@ -162,8 +162,8 @@
 @media (max-width: 480px) {
   .research-cycle { margin-top: 20px; padding-top: 16px; }
   .research-cycle-head { display: block; margin-bottom: 4px; }
-  .research-cycle-head p { margin-top: 5px; text-align: left; font-size: 8.5px; }
-  .research-cycle-key { justify-content: flex-start; padding-left: 4px; font-size: 8px; }
+  .research-cycle-head p { margin-top: 5px; text-align: left; font-size:12px; }
+  .research-cycle-key { justify-content: flex-start; padding-left: 4px; font-size:12px; }
   #research-sexagenary-wheel { width: calc(100% + 10px); margin-left: -5px; }
   .research-cycle-node-label { font-size: 15px; }
   .research-cycle-index { display: none; }

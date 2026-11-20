@@ -12,7 +12,7 @@
 }
 .seasonal-drift-evidence-copy .eyebrow {
   color:#708079;
-  font-size:8px;
+  font-size:12px;
   font-weight:760;
   letter-spacing:.08em;
 }
@@ -28,7 +28,7 @@
   margin:0;
   max-width:800px;
   color:#7d8981;
-  font-size:9px;
+  font-size:12px;
   line-height:1.6;
 }
 .seasonal-drift-evidence-copy p strong { color:#b4bdb7; font-weight:650; }
@@ -51,7 +51,7 @@
   color:#7d8982;
   background:transparent;
   font:inherit;
-  font-size:8px;
+  font-size:12px;
   cursor:pointer;
 }
 .seasonal-drift-controls button:hover,
@@ -70,7 +70,7 @@
   min-height:24px;
   padding:0 7px;
   border:1px solid rgba(238,242,237,.08);
-  font-size:7.5px;
+  font-size:12px;
 }
 #seasonal-drift-orbit-scale[aria-pressed="false"] { color:#9aa69f; }
 
@@ -95,7 +95,7 @@
 .seasonal-drift-stat > span {
   display:block;
   color:#68756d;
-  font-size:7.5px;
+  font-size:12px;
   letter-spacing:.08em;
   text-transform:uppercase;
 }
@@ -110,7 +110,7 @@
   display:block;
   margin-top:2px;
   color:#6d7971;
-  font-size:8px;
+  font-size:12px;
   line-height:1.45;
 }
 .seasonal-drift-stat.verdict {
@@ -149,12 +149,12 @@
 .seasonal-drift-decomposition > summary::-webkit-details-marker { display:none; }
 .seasonal-drift-decomposition > summary span {
   color:#9ba69f;
-  font-size:9px;
+  font-size:12px;
   font-weight:680;
 }
 .seasonal-drift-decomposition > summary strong {
   color:#69766e;
-  font-size:8px;
+  font-size:12px;
   font-weight:560;
   text-align:right;
 }
@@ -171,7 +171,7 @@
   margin:0 0 8px;
   max-width:860px;
   color:#6f7b73;
-  font-size:8.5px;
+  font-size:12px;
   line-height:1.6;
 }
 .seasonal-drift-decomposition-note {
@@ -179,7 +179,7 @@
   margin:-2px 0 8px;
   max-width:900px;
   color:#626f67;
-  font-size:7.5px;
+  font-size:12px;
   line-height:1.55;
 }
 .seasonal-drift-decomposition-body .seasonal-drift-controls {
@@ -226,13 +226,13 @@
 .seasonal-drift-orbit-head small {
   display:block;
   color:#69766e;
-  font-size:8px;
+  font-size:12px;
 }
 .seasonal-drift-orbit-head strong {
   display:block;
   margin-top:2px;
   color:#b9c3bd;
-  font-size:10px;
+  font-size:12px;
   font-weight:650;
 }
 .seasonal-drift-orbit-head b { color:#98a69d; font-weight:650; }
@@ -262,7 +262,7 @@
 .seasonal-drift-grid { stroke:rgba(238,242,237,.05); stroke-width:1; }
 .seasonal-drift-zero { stroke:rgba(238,242,237,.2); stroke-width:1.25; }
 .seasonal-drift-axis-tick { stroke:rgba(238,242,237,.13); stroke-width:1; }
-.seasonal-drift-axis-label { fill:#66736b; font-size:9px; }
+.seasonal-drift-axis-label { fill:#66736b; font-size:12px; }
 .seasonal-drift-term-axis { fill:#7b8880; font-weight:650; }
 .seasonal-drift-curve-path {
   fill:none;
@@ -297,17 +297,17 @@
 }
 .seasonal-drift-gap-label {
   fill:#c99f72;
-  font-size:9px;
+  font-size:12px;
   font-weight:650;
 }
 .seasonal-drift-zero-caption {
   fill:#8a968e;
-  font-size:9px;
+  font-size:12px;
   font-weight:650;
 }
 .seasonal-drift-cursor-line { stroke:rgba(232,223,207,.32); stroke-width:1; stroke-dasharray:3 4; }
 .seasonal-drift-cursor-dot { fill:#101512; stroke:#ead7b9; stroke-width:2; }
-.seasonal-drift-cursor-label { fill:#dec3a0; font-size:9px; font-weight:700; }
+.seasonal-drift-cursor-label { fill:#dec3a0; font-size:12px; font-weight:700; }
 .seasonal-drift-hit { fill:transparent; cursor:ew-resize; }
 
 .seasonal-orbit-reference {
@@ -337,12 +337,12 @@
 }
 .seasonal-orbit-bazi-label {
   fill:#68766d;
-  font-size:8px;
+  font-size:12px;
   font-weight:600;
 }
 .seasonal-orbit-bazi-label.is-selected {
   fill:#e1c39e;
-  font-size:9px;
+  font-size:12px;
   font-weight:760;
 }
 .seasonal-orbit-path { fill:none; stroke-width:2; vector-effect:non-scaling-stroke; }
@@ -353,7 +353,7 @@
 .seasonal-orbit-point { vector-effect:non-scaling-stroke; }
 .seasonal-orbit-point-base { fill:#101512; stroke:#93a7ad; stroke-width:2; }
 .seasonal-orbit-point-target { fill:#101512; stroke:#e1ad76; stroke-width:2.2; }
-.seasonal-orbit-point-label { fill:#dec3a0; font-size:9px; font-weight:700; }
+.seasonal-orbit-point-label { fill:#dec3a0; font-size:12px; font-weight:700; }
 .seasonal-orbit-hit { fill:transparent; cursor:grab; touch-action:none; }
 .seasonal-orbit-hit:active { cursor:grabbing; }
 
@@ -367,7 +367,7 @@
 .seasonal-drift-scrub-row > span {
   flex:0 0 auto;
   color:#68756d;
-  font-size:8px;
+  font-size:12px;
 }
 #seasonal-drift-scrub {
   width:100%;
@@ -379,7 +379,7 @@
   padding-top:8px;
   border-top:1px solid rgba(238,242,237,.05);
   color:#6c7870;
-  font-size:8px;
+  font-size:12px;
   line-height:1.55;
 }
 .seasonal-drift-evidence-note strong { color:#8f9b94; font-weight:650; }
@@ -403,13 +403,13 @@
 .secondary-astronomy-tools > summary::-webkit-details-marker { display:none; }
 .secondary-astronomy-tools > summary span {
   color:#7f8c84;
-  font-size:8.5px;
+  font-size:12px;
   font-weight:700;
   letter-spacing:.04em;
 }
 .secondary-astronomy-tools > summary strong {
   color:#68756d;
-  font-size:8px;
+  font-size:12px;
   font-weight:500;
   text-align:right;
 }
@@ -433,8 +433,8 @@
 @media (max-width:680px) {
   .seasonal-drift-evidence { padding:12px 0 13px; }
   .seasonal-drift-evidence-head { grid-template-columns:1fr; gap:9px; }
-  .seasonal-drift-evidence-copy .eyebrow { font-size:8.5px; }
-  .seasonal-drift-evidence-copy p { font-size:9.5px; }
+  .seasonal-drift-evidence-copy .eyebrow { font-size:12px; }
+  .seasonal-drift-evidence-copy p { font-size:12px; }
   .seasonal-drift-controls {
     width:max-content;
     max-width:100%;
@@ -454,7 +454,7 @@
     white-space:normal;
     line-height:1.2;
     min-height:32px;
-    font-size:8.5px;
+    font-size:12px;
   }
   .seasonal-drift-summary {
     grid-template-columns:1fr;
@@ -466,14 +466,14 @@
   .seasonal-drift-stat.verdict {
     padding-left:5px;
   }
-  .seasonal-drift-stat > span { font-size:8px; }
-  .seasonal-drift-stat small { font-size:8.5px; }
+  .seasonal-drift-stat > span { font-size:12px; }
+  .seasonal-drift-stat small { font-size:12px; }
   #seasonal-drift-curve { min-height:205px; }
   .seasonal-drift-axis-label { font-size:18px; }
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:17px; }
   .seasonal-drift-orbit-point-label { font-size:15px; }
-  .seasonal-orbit-bazi-label { font-size:11px; }
+  .seasonal-orbit-bazi-label { font-size:12px; }
   .seasonal-orbit-bazi-label.is-selected { font-size:12px; }
   .secondary-astronomy-tools > summary {
     min-height:42px;
@@ -483,7 +483,7 @@
   .secondary-astronomy-tools > summary strong {
     grid-column:1 / -1;
     text-align:left;
-    font-size:8.5px;
+    font-size:12px;
   }
 }
 
@@ -505,13 +505,13 @@
   .seasonal-drift-gap-label,
   .seasonal-drift-cursor-label { font-size:19px; }
   .seasonal-drift-orbit-head { min-height:48px; }
-  .seasonal-orbit-bazi-label { font-size:11.5px; }
+  .seasonal-orbit-bazi-label { font-size:12px; }
   .seasonal-orbit-bazi-label.is-selected { font-size:12.5px; }
   .seasonal-drift-orbit-head span,
-  .seasonal-drift-orbit-head small { font-size:8.5px; }
-  .seasonal-drift-orbit-head strong { font-size:10.5px; }
+  .seasonal-drift-orbit-head small { font-size:12px; }
+  .seasonal-drift-orbit-head strong { font-size:12px; }
   .seasonal-drift-orbit-tools { gap:5px; }
-  #seasonal-drift-orbit-scale { font-size:7.5px; padding:0 5px; }
+  #seasonal-drift-orbit-scale { font-size:12px; padding:0 5px; }
 }
 
 /* Research 02 selected grammar — zero-line proof → orbit explanation → deep decomposition */
@@ -583,7 +583,7 @@
 .seasonal-proof-zero { stroke:var(--research-focus); stroke-width:1.5; }
 .seasonal-proof-axis,.seasonal-proof-label,.seasonal-proof-value {
   fill:var(--research-text-muted);
-  font-size:11px;
+  font-size:12px;
 }
 .seasonal-proof-label { font-weight:var(--research-weight-emphasis); }
 .seasonal-proof-value { fill:var(--research-text-secondary); font-weight:var(--research-weight-emphasis); }
@@ -625,7 +625,7 @@
 }
 .seasonal-orbit-time-label {
   fill:var(--research-text-muted);
-  font-size:9px;
+  font-size:12px;
   font-weight:var(--research-weight-emphasis);
 }
 .seasonal-orbit-time-group.is-selected .seasonal-orbit-time-target,
@@ -670,7 +670,7 @@
   .seasonal-drift-orbit-explainer { margin-top:var(--research-space-6); padding-top:var(--research-space-3); }
   .seasonal-drift-orbit-explainer .seasonal-drift-orbit-head { min-height:0; }
   .seasonal-drift-orbit-explainer #seasonal-drift-orbit { width:100%; min-height:300px; }
-  .seasonal-orbit-explainer-note { font-size:8.5px; }
+  .seasonal-orbit-explainer-note { font-size:12px; }
 }
 @media (max-width:480px) {
   .seasonal-drift-evidence[data-diagram-grammar="zero-line-proof"] { padding-top:var(--research-space-3); }
