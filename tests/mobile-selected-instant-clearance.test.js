@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { cssSource } from "./helpers/css-source.js";
 
 const mobileCss = cssSource("mobile-time.css");
-const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const instrumentCss = cssSource("instrument-first.css");
 
 function mobile480Block(source) {
   const marker = "@media (max-width: 480px)";

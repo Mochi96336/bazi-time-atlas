@@ -115,11 +115,14 @@ function installTenGodDerivation() {
 }
 
 function installPillarRelations() {
-  const stylesheet = document.createElement("link");
-  stylesheet.rel = "stylesheet";
-  stylesheet.href = "./pillar-relations.css";
-  stylesheet.dataset.pillarRelationsStyles = "1";
-  document.head.append(stylesheet);
+  // Repair E5: birth-panels.css is a static link carrying this marker.
+  if (!document.querySelector("link[data-pillar-relations-styles]")) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "./pillar-relations.css";
+    stylesheet.dataset.pillarRelationsStyles = "1";
+    document.head.append(stylesheet);
+  }
 
   pillarRelationsPanel = document.createElement("details");
   pillarRelationsPanel.id = "pillar-relations-panel";

@@ -9,10 +9,12 @@ const ROOT = new URL("../../", import.meta.url);
 
 export const MERGED_STYLESHEETS = Object.freeze({
   "atlas-wheel.css": ["kinetic-atlas.css", "kinetic-boundaries.css", "discrete-phase.css", "radial-hierarchy.css", "scale-emphasis.css", "classification-overlay.css"],
-  "atlas-chrome.css": ["ux-analysis.css", "main-action-hierarchy.css", "mobile-time.css", "mobile-legend.css", "ganzhi-inspector.css"],
+  "atlas-chrome.css": ["ux-analysis.css", "main-action-hierarchy.css", "mobile-time.css", "mobile-legend.css", "ganzhi-inspector.css", "instrument-first.css"],
+  "atlas-tools.css": ["atlas-guide.css", "ring-identity.css", "time-context-control.css", "analysis-first-screen.css", "atlas-solar-time-analysis.css", "inverse-time-search.css", "atlas-visible-ten-gods.css", "analysis-first-screen-polish.css", "analysis-tools-rail.css", "desktop-tools-workspace.css", "graphite-m2-material.css", "selected-instant-editor.css"],
   "research-layout.css": ["recurrence.css", "research-foundations.css", "research-tasks.css", "research-sexagenary-cycle.css", "astronomical-residuals.css", "four-pillar-determinacy.css", "near-recurrence.css", "research-cycle-comparison.css", "research-year-strip-interaction.css", "research-compact-surface.css"],
-  "research-sections.css": ["research-color-calibration.css", "research-seasonal-drift-evidence.css", "research-absolute-boundary-consequence.css", "research-time-state.css", "research-entry.css", "research-evidence-reading.css", "research-drift-accumulation.css", "research-story-hierarchy.css", "research-reading.css"],
-  "birth.css": ["birth.css", "birth-advanced.css", "cross-view.css", "ten-gods.css"]
+  "research-sections.css": ["research-color-calibration.css", "research-seasonal-drift-evidence.css", "research-absolute-boundary-consequence.css", "research-time-state.css", "research-entry.css", "research-evidence-reading.css", "research-drift-accumulation.css", "research-story-hierarchy.css", "research-reading.css", "research-evidence-drilldown.css", "research-astronomy-drilldown.css", "research-discrete-density.css", "recurrence-target-clock.css"],
+  "birth.css": ["birth.css", "birth-advanced.css", "cross-view.css", "ten-gods.css"],
+  "birth-panels.css": ["pillar-relations.css", "relation-models.css", "mean-solar-time.css", "branch-punishments.css"]
 });
 
 const SOURCE_TO_MERGED = Object.freeze(Object.fromEntries(

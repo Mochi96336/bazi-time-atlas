@@ -5,7 +5,7 @@ import { cssSource } from "./helpers/css-source.js";
 
 const [evidenceCss, clockCss] = await Promise.all([
   Promise.resolve(cssSource("four-pillar-determinacy.css")),
-  readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("recurrence-target-clock.css"))
 ]);
 
 test("inactive target-clock research controls do not reserve a full form", () => {

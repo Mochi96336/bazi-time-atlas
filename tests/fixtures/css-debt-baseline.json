@@ -1,118 +1,38 @@
 {
-  "analysis-first-screen-polish.css": {
-    "important": 0,
-    "hexColors": 11,
-    "smallFonts": 24
-  },
-  "analysis-first-screen.css": {
-    "important": 0,
-    "hexColors": 8,
-    "smallFonts": 12
-  },
-  "analysis-tools-rail.css": {
-    "important": 0,
-    "hexColors": 0,
-    "smallFonts": 0
-  },
   "atlas-chrome.css": {
     "important": 10,
-    "hexColors": 43,
-    "smallFonts": 30
+    "hexColors": 46,
+    "smallFonts": 37
   },
-  "atlas-guide.css": {
-    "important": 0,
-    "hexColors": 13,
-    "smallFonts": 0
-  },
-  "atlas-solar-time-analysis.css": {
-    "important": 2,
-    "hexColors": 0,
-    "smallFonts": 15
-  },
-  "atlas-visible-ten-gods.css": {
-    "important": 1,
-    "hexColors": 10,
-    "smallFonts": 11
+  "atlas-tools.css": {
+    "important": 17,
+    "hexColors": 72,
+    "smallFonts": 91
   },
   "atlas-wheel.css": {
     "important": 10,
     "hexColors": 95,
     "smallFonts": 54
   },
+  "birth-panels.css": {
+    "important": 0,
+    "hexColors": 50,
+    "smallFonts": 96
+  },
   "birth.css": {
     "important": 0,
     "hexColors": 49,
     "smallFonts": 72
-  },
-  "branch-punishments.css": {
-    "important": 0,
-    "hexColors": 10,
-    "smallFonts": 16
-  },
-  "desktop-tools-workspace.css": {
-    "important": 5,
-    "hexColors": 7,
-    "smallFonts": 7
-  },
-  "graphite-m2-material.css": {
-    "important": 0,
-    "hexColors": 1,
-    "smallFonts": 0
-  },
-  "instrument-first.css": {
-    "important": 0,
-    "hexColors": 3,
-    "smallFonts": 7
-  },
-  "inverse-time-search.css": {
-    "important": 7,
-    "hexColors": 8,
-    "smallFonts": 14
   },
   "legacy-dark.css": {
     "important": 0,
     "hexColors": 64,
     "smallFonts": 5
   },
-  "mean-solar-time.css": {
-    "important": 0,
-    "hexColors": 16,
-    "smallFonts": 36
-  },
   "navigation-workspace.css": {
     "important": 54,
     "hexColors": 17,
     "smallFonts": 7
-  },
-  "pillar-relations.css": {
-    "important": 0,
-    "hexColors": 25,
-    "smallFonts": 32
-  },
-  "recurrence-target-clock.css": {
-    "important": 0,
-    "hexColors": 13,
-    "smallFonts": 11
-  },
-  "relation-models.css": {
-    "important": 0,
-    "hexColors": 10,
-    "smallFonts": 12
-  },
-  "research-astronomy-drilldown.css": {
-    "important": 0,
-    "hexColors": 13,
-    "smallFonts": 0
-  },
-  "research-discrete-density.css": {
-    "important": 12,
-    "hexColors": 100,
-    "smallFonts": 0
-  },
-  "research-evidence-drilldown.css": {
-    "important": 0,
-    "hexColors": 4,
-    "smallFonts": 0
   },
   "research-layout.css": {
     "important": 43,
@@ -120,19 +40,9 @@
     "smallFonts": 0
   },
   "research-sections.css": {
-    "important": 4,
-    "hexColors": 277,
+    "important": 16,
+    "hexColors": 396,
     "smallFonts": 0
-  },
-  "ring-identity.css": {
-    "important": 0,
-    "hexColors": 4,
-    "smallFonts": 0
-  },
-  "selected-instant-editor.css": {
-    "important": 2,
-    "hexColors": 7,
-    "smallFonts": 5
   },
   "site-nav.css": {
     "important": 0,

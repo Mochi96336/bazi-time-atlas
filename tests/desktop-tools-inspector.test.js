@@ -5,9 +5,9 @@ import { cssSource } from "./helpers/css-source.js";
 
 const visible = readFileSync(new URL("../src/atlas-visible-ten-gods.js", import.meta.url), "utf8");
 const inspector = readFileSync(new URL("../src/ganzhi-inspector.js", import.meta.url), "utf8");
-const workspace = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
+const workspace = cssSource("desktop-tools-workspace.css");
 const inspectorCss = cssSource("ganzhi-inspector.css");
-const visibleCss = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
+const visibleCss = cssSource("atlas-visible-ten-gods.css");
 
 test("desktop Four Pillars summary opens the existing structure inspector", () => {
   assert.match(visible, /document\.createElement\("button"\)/);

@@ -148,7 +148,7 @@ test("material sampling sign is the inverse of SVG y-down ring rotation", () => 
 test("canvas stays pointer-inert and renderer owns the only runtime pose bridge", async () => {
   const [html, css, renderer, material, radial] = await Promise.all([
     readFile(new URL("../index.html", import.meta.url), "utf8"),
-    readFile(new URL("../instrument-first.css", import.meta.url), "utf8"),
+    Promise.resolve(cssSource("instrument-first.css")),
     readFile(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8"),
     readFile(new URL("../src/wheel/material-prototype.js", import.meta.url), "utf8"),
     Promise.resolve(cssSource("radial-hierarchy.css"))

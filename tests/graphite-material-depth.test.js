@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { cssSource } from "./helpers/css-source.js";
 
-const material = readFileSync(new URL("../graphite-m2-material.css", import.meta.url), "utf8");
+const material = cssSource("graphite-m2-material.css");
 const inspector = cssSource("ganzhi-inspector.css");
-const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
-const analysisPolish = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
-const solarAnalysis = readFileSync(new URL("../atlas-solar-time-analysis.css", import.meta.url), "utf8");
+const visibleTenGods = cssSource("atlas-visible-ten-gods.css");
+const analysisPolish = cssSource("analysis-first-screen-polish.css");
+const solarAnalysis = cssSource("atlas-solar-time-analysis.css");
 const radialHierarchy = cssSource("radial-hierarchy.css");
-const instrument = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const instrument = cssSource("instrument-first.css");
 const palette = cssSource("kinetic-atlas.css");
 const atlasHtml = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
@@ -29,8 +29,11 @@ test("Graphite M2 exposes one semantic material hierarchy", () => {
 });
 
 test("Graphite M2 reserves raised depth for the floating inspector", () => {
-  // E5: merged chrome drops the earlier import; instrument-first.css imports the material last.
-  assert.match(readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8"), /^@import "\.\/graphite-m2-material\.css";/);
+  // E5: every former @import of the material collapses to one inlined copy
+  // in atlas-tools.css at its last import position (before the editor).
+  const tools = readFileSync(new URL("../atlas-tools.css", import.meta.url), "utf8");
+  assert.equal((tools.match(/==== graphite-m2-material\.css \(was @import from selected-instant-editor\.css\) ====/g) ?? []).length, 1);
+  assert.doesNotMatch(cssSource("instrument-first.css"), /@import/);
   assert.match(
     inspector,
     /\.ganzhi-inspector \{[\s\S]*?border:\s*1px solid var\(--m2-raised-border\);[\s\S]*?background:\s*var\(--m2-raised-surface\);[\s\S]*?background-image:\s*var\(--m2-raised-gradient\);[\s\S]*?box-shadow:\s*var\(--m2-raised-shadow\);[\s\S]*?backdrop-filter:\s*none;/
@@ -53,7 +56,7 @@ test("desktop Analysis consumes recessed rails and etched edges without floating
 });
 
 test("solar-time Analysis uses etched M2 structure without becoming another card", () => {
-  assert.match(solarAnalysis, /^@import "\.\/graphite-m2-material\.css";/);
+  assert.ok(cssSource("graphite-m2-material.css").includes("--m2-"), "E5: the M2 material is inlined once into atlas-tools.css at its last import position");
   assert.match(
     solarAnalysis,
     /\.atlas-solar-time-analysis \{[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-bottom:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?box-shadow:[\s\S]*?inset 0 1px 0 var\(--m2-etched-light-soft\),[\s\S]*?inset 0 -1px 0 var\(--m2-etched-light-soft\);/

@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
+const css = cssSource("desktop-tools-workspace.css");
 const analysis = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
 
 test("desktop Tools installs the edge-workspace layer last", () => {

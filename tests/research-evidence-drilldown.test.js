@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [hostView, drilldownView, css] = await Promise.all([
   readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("research-evidence-drilldown.css"))
 ]);
 
 test("four-pillar evidence loads the presentation-only drilldown layer", () => {

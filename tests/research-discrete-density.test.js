@@ -20,7 +20,7 @@ const [
   cycleCss
 ] = await Promise.all([
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-discrete-density.css")),
   readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
   readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8"),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),

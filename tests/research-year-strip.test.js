@@ -10,6 +10,7 @@ import {
   TARGET_INSTANT_BASIS,
   targetInstantBinding
 } from "../src/recurrence/target-instant-binding.js";
+import { cssSource } from "./helpers/css-source.js";
 
 test("year strip no longer treats the legacy civil solar-term helper as its authority", async () => {
   assert.equal(RESEARCH_YEAR_STRIP_CONTRACT.directLegacyCivilSolarTermAuthority, false);
@@ -59,7 +60,7 @@ test("ORIGINAL strip: on date-only Li Chun, actual Year remains unresolved but D
 
 test("R1 in-place layout contract keeps the existing strip and existing Research",async()=>{
   const html=await readFile(new URL("../recurrence.html",import.meta.url),"utf8");
-  const css=await readFile(new URL("../research-discrete-density.css",import.meta.url),"utf8");
+  const css=await Promise.resolve(cssSource("research-discrete-density.css"));
   assert.match(html,/id="research-year-strip"/);
   assert.match(html,/id="research-year-full-cycle"/);
   assert.match(html,/id="research-year-selected-day"/);

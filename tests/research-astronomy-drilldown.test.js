@@ -5,7 +5,7 @@ import { cssSource } from "./helpers/css-source.js";
 
 const [view, css, residualView, residualCss, html] = await Promise.all([
   readFile(new URL("../src/research-astronomy-drilldown-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-astronomy-drilldown.css")),
   readFile(new URL("../src/astronomical-residuals-view.js", import.meta.url), "utf8"),
   Promise.resolve(cssSource("astronomical-residuals.css")),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8")

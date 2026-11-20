@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { cssSource, linkPosition } from "./helpers/css-source.js";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-const css = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const css = cssSource("instrument-first.css");
 
 test("instrument-first reset is loaded last among homepage styles", () => {
   const reset = linkPosition(html, "instrument-first.css");
@@ -63,7 +63,7 @@ test("mobile reading view removes hero/card chrome without stealing shell scroll
 });
 
 test("mobile ordinary reading keeps exact-time chrome flat with M2 etched rails", () => {
-  assert.match(css, /^@import "\.\/graphite-m2-material\.css";/);
+  assert.ok(cssSource("graphite-m2-material.css").includes("--m2-"), "E5: the M2 material is inlined once into atlas-tools.css at its last import position");
   assert.match(
     css,
     /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) ~ \.mobile-time-dock\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid var\(--m2-etched-dark-soft\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*inset 0 1px 0 var\(--m2-etched-light-soft\);/

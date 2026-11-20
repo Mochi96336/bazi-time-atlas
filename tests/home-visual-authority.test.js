@@ -5,8 +5,8 @@ import { cssSource } from "./helpers/css-source.js";
 
 const atlas = cssSource("kinetic-atlas.css");
 const analysis = cssSource("ux-analysis.css");
-const tools = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
-const inverse = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
+const tools = cssSource("desktop-tools-workspace.css");
+const inverse = cssSource("inverse-time-search.css");
 const mobile = cssSource("mobile-time.css");
 const classification = cssSource("classification-overlay.css");
 

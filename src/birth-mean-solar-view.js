@@ -111,11 +111,14 @@ function renderSensitivity(result) {
 function install() {
   if (!form || !utcOffsetInput || !timeGroup || !timeBasisNote || !pillarSummary) return false;
 
-  const stylesheet = document.createElement("link");
-  stylesheet.rel = "stylesheet";
-  stylesheet.href = "./mean-solar-time.css";
-  stylesheet.dataset.meanSolarStyles = "1";
-  document.head.append(stylesheet);
+  // Repair E5: birth-panels.css is a static link carrying this marker.
+  if (!document.querySelector("link[data-mean-solar-styles]")) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "./mean-solar-time.css";
+    stylesheet.dataset.meanSolarStyles = "1";
+    document.head.append(stylesheet);
+  }
 
   const basisTitle = timeBasisNote.querySelector("strong");
   const basisCopy = timeBasisNote.querySelector("span");

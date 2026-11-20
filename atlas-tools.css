@@ -1,0 +1,2011 @@
+/* Repair E5: Atlas overlays and tools — the guide, ring identity, time context,
+   Analysis first screen, Solar Time, Find Time, Visible Ten Gods, tools rail,
+   desktop workspace and selected-instant editor. Merged in the exact order the
+   page used to load them (static links, then JS-appended sheets). */
+
+/* ==== atlas-guide.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+/* Repair B2/B3: opt-in "怎麼讀" guide and the one-time drag hint.
+   The home page stays minimal: both are hidden until asked for or first use. */
+.atlas-guide-button {
+  min-width:44px; min-height:44px; margin:0; padding:0 6px;
+  border:0; background:transparent; color:#a3aba8;
+  font:inherit; font-size:12px; font-weight:620; letter-spacing:.03em;
+  white-space:nowrap; flex:none;
+  cursor:pointer;
+}
+.atlas-guide-button:hover, .atlas-guide-button:focus-visible { color:#eef1ef; }
+.atlas-guide-button:focus-visible,
+.atlas-guide button:focus-visible { outline:2px solid #e4d9ad; outline-offset:2px; }
+body:has(#kinetic-instrument[data-analysis-open="true"]) .atlas-guide-button { display:none; }
+
+.atlas-guide {
+  width:min(560px, calc(100vw - 32px)); max-height:calc(100dvh - 32px);
+  margin:auto; padding:0; border:1px solid rgba(228,217,173,.22); border-radius:14px;
+  background:#0f141b; color:#e8ecea; box-shadow:0 24px 80px rgba(0,0,0,.55);
+  overflow:auto;
+}
+.atlas-guide::backdrop { background:rgba(4,6,10,.62); backdrop-filter:blur(2px); }
+.atlas-guide-inner { padding:22px 24px 20px; }
+.atlas-guide header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.atlas-guide h2 { margin:0; font-size:20px; font-weight:700; }
+.atlas-guide h3 { margin:0 0 10px; font-size:15px; font-weight:650; color:#d5dbd8; }
+.atlas-guide-x {
+  min-width:44px; min-height:44px; border:0; background:transparent;
+  color:#a3aba8; font-size:16px; cursor:pointer;
+}
+.atlas-guide-lead { margin:10px 0 0; font-size:15px; line-height:1.7; color:#cfd6d3; }
+.atlas-guide-gold { color:#e4d9ad; font-weight:700; }
+.atlas-guide-fan { margin:14px 0 4px; }
+.atlas-guide-fan svg { display:block; width:100%; height:auto; font-family:inherit; }
+.atlas-guide-fan-labels text { font-weight:700; paint-order:stroke; stroke:#0f141b; stroke-width:3px; }
+
+.atlas-guide-ruler { margin-top:14px; }
+.atlas-guide-ruler ol { list-style:none; margin:0; padding:0; display:grid; gap:9px; }
+.atlas-guide-ruler li {
+  display:grid; grid-template-columns:40px 1fr 52px; grid-template-rows:auto auto;
+  column-gap:10px; align-items:center;
+}
+.atlas-guide-ruler .ring { font-size:15px; font-weight:700; color:#e8ecea; }
+.atlas-guide-ruler .bar { height:10px; border-radius:5px; background:rgba(235,238,236,.06); overflow:hidden; }
+.atlas-guide-ruler .bar i {
+  display:block; height:100%; width:calc(var(--log) / 4.4 * 100%);
+  border-radius:5px; background:#8f9b99;
+}
+.atlas-guide-ruler li.solar .bar i { background:#c7a873; }
+.atlas-guide-ruler .len { font-size:14px; font-weight:650; text-align:right; color:#e8ecea; font-variant-numeric:tabular-nums; }
+.atlas-guide-ruler small { grid-column:2 / 4; font-size:13px; color:#9aa3a1; }
+.atlas-guide-axis {
+  position:relative; height:16px; margin:6px 62px 0 50px;
+  font-size:12px; color:#7f8886;
+}
+.atlas-guide-axis span { position:absolute; top:0; transform:translateX(-50%); white-space:nowrap; }
+.atlas-guide-axis span:first-child { transform:none; }
+.atlas-guide-tips { margin:16px 0 0; padding-left:18px; display:grid; gap:6px; font-size:14px; line-height:1.6; color:#cfd6d3; }
+.atlas-guide-tips b { color:#eef1ef; }
+.atlas-guide footer { display:flex; justify-content:flex-end; margin-top:16px; }
+.atlas-guide-ok {
+  min-height:44px; padding:0 20px; border:1px solid rgba(228,217,173,.4); border-radius:22px;
+  background:transparent; color:#efe1b7; font:inherit; font-size:14px; font-weight:650; cursor:pointer;
+}
+.atlas-guide-ok:hover { background:rgba(228,217,173,.08); }
+
+.atlas-drag-hint {
+  position:absolute; z-index:6; left:50%; bottom:92px; transform:translateX(-50%);
+  padding:8px 14px; border-radius:18px;
+  background:rgba(12,16,22,.78); border:1px solid rgba(228,217,173,.28);
+  color:#efe7cc; font-size:13px; font-weight:620; letter-spacing:.03em; white-space:nowrap;
+  pointer-events:none; opacity:0; transition:opacity .5s ease;
+}
+.atlas-drag-hint[data-visible="true"] { opacity:1; }
+.atlas-drag-hint[hidden] { display:none; }
+@media (max-width:480px) {
+  .atlas-guide-inner { padding:18px 16px 16px; }
+  .atlas-guide-button { padding:0 4px; }
+  .atlas-drag-hint { bottom:auto; top:44%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-drag-hint { transition:none; }
+}
+}
+
+/* ==== ring-identity.css ==== */
+/* Repair B7 (variant B from prototypes/atlas-ring-identity-lab.html): each
+   time ring keeps the graphite material, but its resting veil carries one
+   distinct, low-chroma cool hue so Hour / Day / Month / Year separate at a
+   glance. Warm amber stays reserved for the Solar band. Classification mode
+   keeps its own element colours. Remove this file to return to all-graphite. */
+@layer page {
+#kinetic-instrument { --hour:#6f86a8; --day:#5f958c; --month:#8f84b0; --year:#a4afc2; }
+#kinetic-instrument:not([data-classification-overlay="on"]) #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 22%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #day-track .day-sector { fill: color-mix(in srgb, var(--day) 22%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #month-track .month-sector { fill: color-mix(in srgb, var(--month) 20%, transparent); }
+#kinetic-instrument:not([data-classification-overlay="on"]) #year-track .year-sector { fill: color-mix(in srgb, var(--year) 18%, transparent); }
+}
+
+/* ==== time-context-control.css ==== */
+/* Was injected by src/time-context-control.js at start-up. */
+@layer page {
+#time-context-trigger {
+  all: unset;
+  display: inline;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  text-decoration: underline;
+  text-decoration-color: rgba(220,226,221,.28);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+#time-context-trigger:hover { text-decoration-color: rgba(220,226,221,.64); }
+#time-context-trigger:focus-visible {
+  outline: 1px solid rgba(244,230,183,.72);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.time-context-popover {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 58px;
+  transform: translateX(-50%);
+  width: min(286px, calc(100% - 28px));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid rgba(238,242,237,.14);
+  border-radius: 13px;
+  background: rgba(12,16,13,.96);
+  box-shadow: 0 14px 34px rgba(0,0,0,.34);
+  pointer-events: auto;
+  text-align: left;
+}
+.time-context-popover[hidden] { display: none; }
+.time-context-popover label {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  color: #768078;
+  font-size: 8px;
+  letter-spacing: .05em;
+}
+.time-context-popover input,
+.time-context-popover select {
+  min-width: 0;
+  width: 100%;
+  height: 32px;
+  box-sizing: border-box;
+  border: 1px solid rgba(238,242,237,.14);
+  border-radius: 8px;
+  padding: 0 7px;
+  color: #dce2dd;
+  background: #111512;
+  color-scheme: dark;
+  font: inherit;
+  font-size: 10px;
+}
+.time-context-popover button {
+  height: 32px;
+  border: 1px solid rgba(244,230,183,.58);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #171b18;
+  background: #e7dbb6;
+  font-size: 9px;
+  font-weight: 780;
+  cursor: pointer;
+}
+@media (max-width: 480px) {
+  .time-context-popover {
+    bottom: 56px;
+    width: min(272px, calc(100% - 22px));
+    grid-template-columns: .8fr 1.2fr auto;
+    gap: 6px;
+    padding: 8px;
+  }
+  .time-context-popover input,
+  .time-context-popover select,
+  .time-context-popover button { height: 30px; }
+}
+  }
+
+/* ==== analysis-first-screen.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+/* Desktop Analysis is a lens over the same radial instrument, not a second
+   dashboard around it. Keep all capabilities reachable while flattening the
+   persistent chrome that competes with the wheel. Mobile keeps its dedicated
+   structured Analysis layout. */
+@media (min-width: 821px) {
+  #kinetic-instrument[data-analysis-open="true"] {
+    box-shadow: none;
+  }
+
+  /* Keep one action row: observation-window controls on the left, secondary
+     analysis/time actions on the right. Remove pill/card styling so the row
+     reads as instrument chrome rather than another toolbar surface. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    align-items: center;
+    gap: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group {
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .control-button,
+  #kinetic-instrument[data-analysis-open="true"] .scale-button {
+    min-height: 28px;
+    border: 0;
+    border-radius: 0;
+    padding: 0 7px;
+    color: #85898a;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .control-button:hover,
+  #kinetic-instrument[data-analysis-open="true"] .scale-button:hover {
+    color: var(--ink);
+    border-color: transparent;
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .scale-button.active,
+  #kinetic-instrument[data-analysis-open="true"] #compare-rings-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #solar-time-tool-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #play-button[aria-pressed="true"] {
+    color: #e2e4e3;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: inset 0 -1px rgba(235,238,236,.48);
+  }
+  #kinetic-instrument[data-analysis-open="true"] #play-button.primary {
+    min-width: auto;
+  }
+
+  /* The old Analysis legend was a dense debug panel pinned over the upper-left
+     wheel. Turn it into one flat secondary rail below the primary controls.
+     Active values already live at the read-head; this rail only owns layer
+     visibility and reference-frame selection. */
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    left: clamp(14px, 2vw, 32px);
+    right: clamp(104px, 8vw, 138px);
+    top: 45px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 7px 12px;
+    flex-wrap: wrap;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    order: 0;
+    gap: 5px;
+    padding: 0;
+    color: #767b7c;
+    font-size: 7px;
+    letter-spacing: .06em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control::before {
+    content: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 22px;
+    border: 0;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 0 16px 0 4px;
+    color: #aeb2b2;
+    background: transparent;
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+    backdrop-filter: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle] {
+    display: inline-flex;
+    grid-template-columns: none;
+    align-items: center;
+    gap: 4px;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle]:hover,
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-ring-toggle]:focus-visible {
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row i {
+    width: 4px;
+    height: 4px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    color: #85898a;
+    font-size: 8px;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row strong {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-reference-active="true"] {
+    background: transparent;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row[data-reference-active="true"] span {
+    color: color-mix(in srgb, var(--cursor) 58%, var(--muted));
+  }
+
+  /* "完成分析" belongs to the same quiet second rail. */
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 45px;
+    left: auto;
+    right: clamp(14px, 2vw, 32px);
+    min-height: 22px;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    color: #8c9091;
+    background: transparent;
+    box-shadow: none;
+    font-size: 8px;
+  }
+
+  /* The datum is already the ivory line plus exact timestamp. Do not add a
+     third persistent SELECTED INSTANT caption above the wheel in Analysis. */
+  #kinetic-instrument[data-analysis-open="true"] #cursor-layer .cursor-note {
+    display: none;
+  }
+
+  /* Analysis keeps precise scrubbing, but the horizontal timeline must remain
+     subordinate to the radial instrument instead of becoming a second chart. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
+    width: min(1180px, calc(100% - 64px));
+    margin: 8px auto 0;
+    grid-template-columns: minmax(160px, 200px) 1fr auto;
+    gap: 10px;
+    border: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 7px 0 0;
+    background: transparent;
+    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
+    opacity: .64;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock:hover,
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock:focus-within {
+    opacity: .92;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field {
+    gap: 2px;
+    color: #6f7475;
+    font-size: 7px;
+    letter-spacing: .04em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .instant-field input {
+    border: 0;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 5px 3px;
+    background: transparent;
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-wrap {
+    gap: 2px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .boundary-rail-wrap {
+    min-height: 18px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .boundary-marker i {
+    font-size: 6px;
+    opacity: .52;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .slider-scale,
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .boundary-mode {
+    font-size: 7px;
+    opacity: .48;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status {
+    font-size: 7px;
+    opacity: .52;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status span {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock .timeline-status strong {
+    font-size: 9px;
+  }
+
+  /* Five diagnostic cards repeat the read-head. Preserve their inspector entry
+     points but collapse them into one typographic summary line. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip {
+    width: min(1180px, calc(100% - 64px));
+    margin: 9px auto 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 7px 22px;
+    flex-wrap: wrap;
+    padding: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    border: 0;
+    border-top: 0;
+    padding: 0;
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell span {
+    display: inline;
+    color: #676c6d;
+    font-size: 7px;
+    letter-spacing: .05em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell strong {
+    display: inline;
+    margin: 0;
+    color: #bfc3c2;
+    font-size: 11px;
+    font-weight: 700;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell small {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell-reference:hover,
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell-reference:focus-visible,
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip .state-cell-reference[aria-expanded="true"] {
+    border-top-color: transparent;
+  }
+
+  /* Long-form instruction remains reachable by scrolling, but it no longer
+     visually attaches itself to the first-screen instrument stack. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .atlas-notes {
+    margin-top: 52px;
+    opacity: .56;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ .sources-panel {
+    opacity: .48;
+  }
+}
+}
+
+/* ==== atlas-solar-time-analysis.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+.atlas-solar-time-analysis[hidden] { display: none !important; }
+
+.atlas-solar-time-analysis {
+  width: min(1120px, calc(100% - 36px));
+  margin: 14px auto 4px;
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  border-bottom: 1px solid var(--m2-etched-dark-soft);
+  padding: 13px 0 14px;
+  color: var(--muted);
+  box-shadow:
+    inset 0 1px 0 var(--m2-etched-light-soft),
+    inset 0 -1px 0 var(--m2-etched-light-soft);
+}
+
+.atlas-solar-analysis-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 260px);
+  gap: 18px;
+  align-items: end;
+}
+.atlas-solar-analysis-head > div {
+  display: grid;
+  gap: 3px;
+}
+.atlas-solar-analysis-head > div > small {
+  color: var(--faint);
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+.atlas-solar-analysis-head > div > strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+.atlas-solar-analysis-head > div > span {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.atlas-solar-longitude-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+.atlas-solar-longitude-field input {
+  min-width: 0;
+  height: 30px;
+  border: 0;
+  border-bottom: 1px solid var(--m2-etched-dark-soft);
+  border-radius: 0;
+  padding: 0 3px;
+  background: transparent;
+  box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+  color: var(--ink);
+  color-scheme: dark;
+  font: inherit;
+  font-size: 11px;
+}
+.atlas-solar-longitude-field input:focus {
+  outline: 0;
+  border-bottom-color: color-mix(in srgb, var(--solar) 72%, var(--ink));
+}
+.atlas-solar-longitude-field input[aria-invalid="true"] {
+  border-bottom-color: color-mix(in srgb, var(--danger) 82%, transparent);
+}
+.atlas-solar-longitude-field small {
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.atlas-solar-analysis-empty {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.atlas-solar-analysis-result {
+  display: grid;
+  gap: 11px;
+  margin-top: 13px;
+}
+.atlas-solar-analysis-result[hidden] { display: none !important; }
+
+.atlas-solar-corrections {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  padding-top: 8px;
+  box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
+}
+.atlas-solar-corrections span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.atlas-solar-corrections b {
+  color: color-mix(in srgb, var(--ink) 84%, var(--muted));
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.atlas-solar-verdict {
+  display: grid;
+  gap: 3px;
+}
+.atlas-solar-verdict > span {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.atlas-solar-verdict > strong {
+  color: color-mix(in srgb, var(--ink) 84%, var(--muted));
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 720;
+}
+.atlas-solar-time-analysis[data-time-basis-sensitive="1"] .atlas-solar-verdict > strong {
+  color: color-mix(in srgb, var(--solar) 72%, var(--ink));
+}
+.atlas-solar-calculation-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+.atlas-solar-calculation-head span {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.atlas-solar-calculation-head small {
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.atlas-solar-basis-rows {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.atlas-solar-basis-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: baseline;
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  padding-top: 7px;
+  box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
+}
+.atlas-solar-basis-row > span {
+  display: grid;
+  gap: 2px;
+  color: color-mix(in srgb, var(--ink) 66%, var(--muted));
+  font-size: 11px;
+}
+.atlas-solar-basis-row > span small {
+  color: var(--faint);
+  font-size: 9px;
+}
+.atlas-solar-basis-row b {
+  color: color-mix(in srgb, var(--ink) 78%, var(--muted));
+  font-size: 11px;
+  font-weight: 690;
+}
+.atlas-solar-basis-row b[data-changed="1"] {
+  color: color-mix(in srgb, var(--solar) 72%, var(--ink));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.atlas-solar-analysis-meta {
+  color: var(--faint);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .atlas-solar-time-analysis {
+    width: calc(100% - 24px);
+    margin-top: 10px;
+    padding-block: 11px 12px;
+  }
+  .atlas-solar-analysis-head {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .atlas-solar-longitude-field {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .atlas-solar-corrections,
+  .atlas-solar-basis-rows {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .atlas-solar-basis-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}
+}
+
+/* ==== inverse-time-search.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+/* Wheel-native inverse search. There is no form panel: the wheel itself is the
+   query surface and this layer only presents mode/status/result chrome. */
+
+#kinetic-instrument:not([data-analysis-open="true"]) #inverse-time-search-button {
+  display: none !important;
+}
+
+#inverse-time-search-button {
+  padding-inline: 8px;
+  color: #8b9290;
+  border-color: transparent;
+  background: transparent;
+  backdrop-filter: none;
+}
+#inverse-time-search-button:hover,
+#inverse-time-search-button:focus-visible {
+  color: var(--ink);
+  border-color: rgba(236,239,239,.16);
+  background: rgba(255,255,255,.025);
+}
+#inverse-time-search-button[aria-pressed="true"] {
+  color: var(--cursor);
+  border-bottom-color: color-mix(in srgb, var(--cursor) 42%, transparent);
+}
+
+.inverse-time-search-readout {
+  position: absolute;
+  z-index: 7;
+  top: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(620px, calc(100% - 32px));
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px 10px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  border-bottom: 1px solid var(--m2-etched-light-soft);
+  color: #858d89;
+  background: var(--m2-recessed-surface);
+  background-image: var(--m2-recessed-rail-gradient);
+  box-shadow: var(--m2-recessed-rail-shadow);
+  backdrop-filter: none;
+}
+.inverse-time-search-readout[hidden] { display: none !important; }
+.inverse-time-search-readout strong {
+  grid-column: 1;
+  grid-row: 1;
+  color: #d8ddda;
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: .035em;
+  white-space: nowrap;
+}
+.inverse-time-search-constraints {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.inverse-time-search-constraints[hidden] { display: none !important; }
+.inverse-time-search-constraint {
+  min-height: 22px;
+  border: 0;
+  border-bottom: 1px solid rgba(236,239,239,.13);
+  border-radius: 0;
+  padding: 0 3px;
+  color: #afb5b2;
+  background: transparent;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 720;
+}
+.inverse-time-search-constraint:hover,
+.inverse-time-search-constraint:focus-visible {
+  color: #e0e3e1;
+  border-bottom-color: color-mix(in srgb, var(--cursor) 34%, transparent);
+  outline: none;
+}
+.inverse-time-search-readout span {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  min-width: 0;
+  color: #747c78;
+  font-size: 8px;
+  line-height: 1.45;
+}
+.inverse-time-search-readout button[data-inverse-wheel-apply] {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
+  min-height: 26px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--cursor) 38%, transparent);
+  border-radius: 0;
+  padding: 0 4px;
+  color: var(--cursor);
+  background: transparent;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 760;
+}
+.inverse-time-search-readout button[hidden] { display: none !important; }
+
+/* The retired Free Compare controls remain available to regression fixtures and
+   as the drag engine underneath find-time, but never become duplicate product UI. */
+#kinetic-instrument[data-inverse-time-search="active"] #ring-compare-status,
+#kinetic-instrument[data-inverse-time-search="active"] #reset-rings-button {
+  display: none !important;
+}
+
+/* Find-time constrains only the four sexagenary clocks. Solar / zodiac remain a
+   dim contextual backdrop and pointerdown is rejected by the controller. */
+#kinetic-instrument[data-inverse-time-search="active"] #solar-track,
+#kinetic-instrument[data-inverse-time-search="active"] #zodiac-track {
+  opacity: .38;
+}
+#kinetic-instrument[data-inverse-time-search="active"] #year-track,
+#kinetic-instrument[data-inverse-time-search="active"] #month-track,
+#kinetic-instrument[data-inverse-time-search="active"] #day-track,
+#kinetic-instrument[data-inverse-time-search="active"] #hour-track {
+  cursor: grab;
+}
+
+/* Find Time is a task, not another Tools dashboard. Once active, the wheel and
+   its single mode-exit own the surface at every viewport. */
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar {
+  justify-content: flex-end;
+}
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:first-child,
+#kinetic-instrument[data-inverse-time-search="active"] #classification-overlay-button,
+#kinetic-instrument[data-inverse-time-search="active"] #solar-time-tool-button,
+#kinetic-instrument[data-inverse-time-search="active"] #now-button,
+#kinetic-instrument[data-inverse-time-search="active"] #play-button,
+#kinetic-instrument[data-inverse-time-search="active"] .ring-legend,
+#kinetic-instrument[data-inverse-time-search="active"] .classification-overlay-legend,
+#kinetic-instrument[data-inverse-time-search="active"] .atlas-visible-ten-gods,
+#kinetic-instrument[data-inverse-time-search="active"] .analysis-close {
+  display: none !important;
+}
+#kinetic-instrument[data-inverse-time-search="active"] ~ .mobile-time-dock,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .timeline-dock,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .atlas-solar-time-analysis,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .state-strip,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .atlas-notes,
+#kinetic-instrument[data-inverse-time-search="active"] ~ .sources-panel {
+  display: none !important;
+}
+#kinetic-instrument[data-inverse-time-search="active"] .instrument-toolbar > .toolbar-group:last-child {
+  margin-left: auto;
+}
+#kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
+  top: 54px;
+}
+
+
+@media (min-width: 481px) {
+  /* Find Time is an active desktop tool, not footnote chrome. Keep the same
+     narrow task rail while enforcing a readable information hierarchy. */
+  #kinetic-instrument[data-inverse-time-search="active"] #inverse-time-search-button {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .inverse-time-search-readout {
+    gap: 6px 10px;
+    padding-block: 9px;
+  }
+  .inverse-time-search-readout strong {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .inverse-time-search-constraints {
+    gap: 5px;
+  }
+  .inverse-time-search-constraint {
+    min-height: 24px;
+    padding-inline: 5px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .inverse-time-search-readout span {
+    color: #929a96;
+    font-size: 10px;
+    line-height: 1.55;
+  }
+  .inverse-time-search-readout:has(button[data-inverse-wheel-apply]:not([hidden])) span {
+    color: #b8bfbb;
+  }
+  .inverse-time-search-readout button[data-inverse-wheel-apply] {
+    min-height: 28px;
+    padding-inline: 6px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+}
+
+@media (min-width: 821px) {
+  /* Desktop has real edge space: keep Find Time as a wheel-native task, but
+     put its status/result rail on the left edge instead of competing with the
+     center datum. Mobile keeps the compact centered task rail below. */
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
+    position: fixed;
+    top: 84px;
+    left: 0;
+    transform: none;
+    width: 340px;
+    max-width: 340px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 10px;
+    padding: 14px 58px 16px 18px;
+    border: 0;
+    background: linear-gradient(to right,
+      color-mix(in srgb, var(--field) 97%, transparent) 0%,
+      color-mix(in srgb, var(--field) 90%, transparent) 70%,
+      transparent 100%);
+    background-image: none;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout strong {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-constraints {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout span {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    max-width: 250px;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout button[data-inverse-wheel-apply] {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .inverse-time-search-readout {
+    top: 111px;
+    width: calc(100% - 20px);
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 10px;
+    padding: 9px 10px;
+  }
+  .inverse-time-search-readout strong {
+    grid-column: 1;
+    grid-row: 1;
+    white-space: normal;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .inverse-time-search-constraints {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    gap: 4px 6px;
+  }
+  .inverse-time-search-constraint {
+    min-height: 30px;
+    padding-inline: 5px;
+    font-size: 9.5px;
+    line-height: 1.25;
+  }
+  .inverse-time-search-readout span {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    font-size: 9.5px;
+    line-height: 1.5;
+  }
+  .inverse-time-search-readout button[data-inverse-wheel-apply] {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 32px;
+    padding-inline: 6px;
+    font-size: 9.5px;
+    line-height: 1.25;
+  }
+
+  #kinetic-instrument[data-inverse-time-search="active"] #inverse-time-search-button {
+    min-height: 40px;
+    padding-inline: 8px;
+    font-size: 10.5px;
+    line-height: 1.25;
+  }
+  #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
+    top: 58px;
+  }
+}
+}
+
+/* ==== atlas-visible-ten-gods.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+/* Analysis-only visible-stem projection. This panel owns no time state and is
+   completely absent from the normal visual/accessibility flow. */
+.atlas-visible-ten-gods[hidden] {
+  display: none !important;
+}
+.atlas-visible-ten-gods {
+  margin: 0 18px 16px;
+  border: 1px solid var(--m2-recessed-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--m2-recessed-surface);
+  background-image: var(--m2-recessed-gradient);
+  box-shadow: var(--m2-recessed-shadow);
+}
+.atlas-visible-ten-gods-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+.atlas-visible-ten-gods-head > div {
+  display: grid;
+  gap: 2px;
+}
+.atlas-visible-ten-gods-head small {
+  color: #787e7f;
+  font-size: 7px;
+  letter-spacing: .12em;
+}
+.atlas-visible-ten-gods-head strong {
+  color: #d9dddc;
+  font-size: 11px;
+}
+.atlas-visible-ten-gods-master {
+  color: #cbd0cf;
+  font-size: 10px;
+  font-weight: 760;
+}
+.atlas-visible-ten-gods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--m2-etched-dark-soft);
+  border-bottom: 1px solid var(--m2-etched-dark-soft);
+  box-shadow:
+    inset 0 1px 0 var(--m2-etched-light-soft),
+    inset 0 -1px 0 var(--m2-etched-light-soft);
+}
+.atlas-visible-ten-gods-cell {
+  appearance: none;
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 3px 7px;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 20px 8px 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.atlas-visible-ten-gods-cell::after {
+  content: "›";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  color: #8d9392;
+  opacity: 0;
+  transform: translateX(-2px);
+  transition: opacity 120ms ease, transform 120ms ease;
+  pointer-events: none;
+}
+.atlas-visible-ten-gods-cell:hover,
+.atlas-visible-ten-gods-cell:focus-visible {
+  background: rgba(255,255,255,.018);
+  outline: none;
+}
+.atlas-visible-ten-gods-cell:hover::after,
+.atlas-visible-ten-gods-cell:focus-visible::after {
+  opacity: .72;
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-visible-ten-gods-cell::after { transition: none; }
+}
+.atlas-visible-ten-gods-cell + .atlas-visible-ten-gods-cell {
+  border-left: 1px solid rgba(236,239,239,.065);
+}
+.atlas-visible-ten-gods-cell span {
+  color: #7a7f80;
+  font-size: 8px;
+}
+.atlas-visible-ten-gods-cell strong {
+  justify-self: end;
+  color: #e2e5e4;
+  font-size: 13px;
+}
+.atlas-visible-ten-gods-cell small {
+  grid-column: 1 / -1;
+  color: #adb2b2;
+  font-size: 9px;
+  font-weight: 700;
+}
+.atlas-visible-ten-gods-note {
+  margin: 8px 0 0;
+  color: #737879;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  /* Mobile Tools already has a primary action row. Keep Four Pillars available
+     as an inspector launcher without stacking a second 2×2 dashboard over the
+     wheel. The rail sits below the actions and keeps all four pillars in one
+     touchable row. */
+  .atlas-visible-ten-gods {
+    position: absolute;
+    z-index: 5;
+    top: 58px;
+    left: 9px;
+    right: 9px;
+    width: auto;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 5px 0 6px;
+    background: transparent;
+    box-shadow:
+      inset 0 1px 0 var(--m2-etched-light-soft),
+      inset 0 -1px 0 var(--m2-etched-light-soft);
+  }
+  .atlas-visible-ten-gods-head {
+    align-items: baseline;
+    margin: 0 6px 4px;
+  }
+  .atlas-visible-ten-gods-head small {
+    display: none;
+  }
+  .atlas-visible-ten-gods-head strong {
+    color: #989e9d;
+    font-size: 9px;
+  }
+  .atlas-visible-ten-gods-master {
+    color: #c3c7c6;
+    font-size: 9px;
+  }
+  .atlas-visible-ten-gods-grid {
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 0;
+    box-shadow: none;
+  }
+  .atlas-visible-ten-gods-cell {
+    width: 100%;
+    min-height: 42px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: center;
+    gap: 2px;
+    border: 0;
+    padding: 4px 3px;
+    text-align: center;
+  }
+  .atlas-visible-ten-gods-cell + .atlas-visible-ten-gods-cell,
+  .atlas-visible-ten-gods-cell:nth-child(3),
+  .atlas-visible-ten-gods-cell:nth-child(4) {
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    border-top: 0;
+  }
+  .atlas-visible-ten-gods-cell::after {
+    display: none;
+  }
+  .atlas-visible-ten-gods-cell span {
+    font-size: 8px;
+    line-height: 1;
+  }
+  .atlas-visible-ten-gods-cell strong {
+    justify-self: center;
+    font-size: 11px;
+    line-height: 1;
+  }
+  .atlas-visible-ten-gods-cell small {
+    grid-column: auto;
+    font-size: 8px;
+    line-height: 1;
+  }
+  .atlas-visible-ten-gods-note {
+    display: none;
+  }
+}
+}
+
+/* ==== analysis-first-screen-polish.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+/* Second-pass desktop Analysis polish. This sheet is intentionally installed
+   after the visible-ten-gods sheet so the remaining informational panels can be
+   integrated into the instrument surface without changing their data ownership
+   or compact/mobile layouts. */
+@media (min-width: 821px) {
+  /* Evidence remains a rail, not a floating card. The shallow inset treatment
+     makes it read as a machined recess in the instrument face. */
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    position: absolute;
+    z-index: 6;
+    top: 72px;
+    left: clamp(18px, 2vw, 32px);
+    right: clamp(310px, 24vw, 360px);
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-bottom: 1px solid var(--m2-etched-light-soft);
+    border-radius: 0;
+    padding: 5px 0 0;
+    background: var(--m2-recessed-rail-gradient);
+    box-shadow: var(--m2-recessed-rail-shadow);
+    backdrop-filter: none;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(180px, 30ch);
+    align-items: center;
+    gap: 8px 14px;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head > div {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head small {
+    display: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
+    color: #777c7d;
+    font-size: 6.5px;
+    font-weight: 720;
+    letter-spacing: .055em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
+    color: #a5a9a8;
+    font-size: 7px;
+    font-weight: 720;
+    letter-spacing: .035em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-grid {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(58px, 1fr));
+    gap: 0;
+    border: 0;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    gap: 2px 4px;
+    border: 0;
+    padding: 0 8px;
+    background: transparent;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:not(:first-child) {
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
+    color: #666b6c;
+    font-size: 6px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
+    margin: 0;
+    color: #c1c4c3;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 730;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
+    margin: 0;
+    color: #7b8081;
+    font-size: 6.5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-note {
+    margin: 0;
+    max-width: none;
+    color: #666b6c;
+    font-size: 6px;
+    line-height: 1.25;
+    letter-spacing: .01em;
+    opacity: .72;
+  }
+
+}
+
+/* Tools is an overlay workspace over the same instrument, so opening it must
+   not shorten the desktop canvas or create a dead footer band. Use the same
+   viewport ownership as ordinary reading; the read-head safety comes from its
+   internal bottom inset, not from removing height from the instrument. */
+@media (min-width: 821px) {
+  #kinetic-instrument[data-analysis-open="true"] {
+    height: max(720px, calc(100dvh - 64px));
+  }
+}
+
+@media (min-width: 1100px) {
+  #kinetic-instrument[data-analysis-open="true"] {
+    height: max(760px, calc(100dvh - 64px));
+  }
+}
+
+/* Wide desktop is not a request to inflate every instrument detail. Keep the
+   controls compact, but do not cap the instrument itself by width: the old
+   44vw ceiling created an obvious dead strip beneath Tools on ultrawide views. */
+@media (min-width: 1600px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button,
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button {
+    min-height: 30px;
+    padding-inline: 8px;
+    font-size: 10px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    right: auto;
+    max-width: 960px;
+    gap: 8px 14px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    font-size: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 24px;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    min-height: 24px;
+    font-size: 9px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    top: 80px;
+    right: clamp(340px, 22vw, 420px);
+    padding-top: 6px;
+    gap: 10px 16px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
+    font-size: 8px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
+    font-size: 8.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell {
+    gap: 3px 5px;
+    padding-inline: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
+    font-size: 7.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
+    font-size: 10.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
+    font-size: 7.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-note {
+    font-size: 7px;
+    line-height: 1.35;
+  }
+
+
+  #kinetic-instrument[data-analysis-open="true"] .instrument-readout {
+    bottom: 20px;
+  }
+}
+
+@media (min-width: 1800px) and (min-aspect-ratio: 17/9) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-readout {
+    bottom: 26px;
+  }
+}
+
+/* On wide monitors the two Analysis chrome rows should read as one instrument
+   hierarchy, not as scattered debug captions. Raise type and neutral contrast
+   without adding pills, cards or new controls. The fast inner clocks receive a
+   modest context lift only while Analysis is open; annual priority and the
+   Selected-Instant read-head remain stronger. */
+@media (min-width: 1600px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group {
+    gap: 5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .control-button,
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button {
+    min-height: 32px;
+    padding-inline: 9px;
+    color: #989d9d;
+    font-size: 11px;
+    letter-spacing: .015em;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar .scale-button.active,
+  #kinetic-instrument[data-analysis-open="true"] #compare-rings-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #classification-overlay-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #solar-time-tool-button[aria-pressed="true"],
+  #kinetic-instrument[data-analysis-open="true"] #play-button[aria-pressed="true"] {
+    color: #e5e7e6;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    top: 46px;
+    max-width: 1040px;
+    gap: 10px 18px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control {
+    color: #8f9494;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .reference-frame-control select {
+    min-height: 26px;
+    color: #bcc0bf;
+    font-size: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend-row span {
+    color: #999e9e;
+    font-size: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 46px;
+    min-height: 26px;
+    color: #9da1a2;
+    font-size: 10px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    top: 86px;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="year"] #day-track {
+    --scale-context-opacity: .72;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="year"] #hour-track {
+    --scale-context-opacity: .68;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="cycle"] #day-track {
+    --scale-context-opacity: .68;
+  }
+  #kinetic-instrument[data-analysis-open="true"][data-scale-window="cycle"] #hour-track {
+    --scale-context-opacity: .64;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] #hour-track .cycle-label:not(.active-cycle-label) {
+    fill: rgba(196,202,201,.46);
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #hour-track .cycle-label.major:not(.active-cycle-label) {
+    fill: rgba(196,202,201,.60);
+  }
+  #kinetic-instrument[data-analysis-open="true"] #day-track .cycle-label:not(.active-cycle-label) {
+    fill: rgba(207,212,210,.52);
+    font-size: 9.5px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] #day-track .cycle-label.major:not(.active-cycle-label) {
+    fill: rgba(207,212,210,.66);
+  }
+}
+}
+
+/* ==== analysis-tools-rail.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+/* Final wide-desktop Tools rail convergence.
+   Presentation only: keep the existing toolbar, layer/reference controls and
+   completion control as separate semantic owners, but give them one shared
+   instrument header geometry instead of three floating caption groups. */
+@media (min-width: 1600px) {
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar,
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    left: clamp(18px, 2vw, 32px);
+    right: clamp(18px, 2vw, 32px);
+    width: auto;
+    max-width: none;
+  }
+
+  /* Primary scale/actions rail. The single etched baseline visually connects
+     the left observation-window group to the right tool/time actions without
+     introducing a panel, pill container or new label. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    top: 8px;
+    min-height: 36px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+  }
+
+  /* Secondary reference/layer rail uses the same insets and reserves its far
+     right edge for the existing Done action. It therefore reads as one row even
+     though the controls retain their existing DOM and interaction ownership. */
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    top: 48px;
+    min-height: 30px;
+    padding: 0 64px 4px 0;
+    flex-wrap: nowrap;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    top: 50px;
+    right: clamp(18px, 2vw, 32px);
+    min-height: 26px;
+    padding: 0 0 0 12px;
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
+  }
+}
+}
+
+/* ==== desktop-tools-workspace.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+/* Desktop Tools is an edge-assist workspace over the same instrument.
+   Opening Tools must not create a second document below the wheel: controls
+   live at the edges, the wheel remains the visual authority, and existing
+   semantic components keep their current data/lifecycle ownership. */
+@media (min-width: 821px) {
+  body:has(#kinetic-instrument[data-analysis-open="true"]) .kinetic-topbar {
+    position: relative;
+    z-index: 30;
+    justify-content: flex-start;
+    gap: 18px;
+    padding-right: 280px;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+  }
+  body:has(#kinetic-instrument[data-analysis-open="true"]) .kinetic-topbar .site-nav {
+    display: flex;
+    margin: 0;
+  }
+
+  /* Observation-window presets and transport are implementation/research aids,
+     not primary Tools actions. Keep them in the DOM for existing runtime/tests
+     while removing them from the product surface. */
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar {
+    position: fixed;
+    z-index: 31;
+    top: 12px;
+    right: 18px;
+    left: auto;
+    width: auto;
+    max-width: calc(100vw - 220px);
+    min-height: 32px;
+    justify-content: flex-end;
+    padding: 0 62px 0 0;
+    border: 0;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .analysis-close {
+    position: fixed;
+    z-index: 32;
+    top: 12px;
+    right: 18px;
+    min-height: 32px;
+    padding: 0 0 0 12px;
+    border-left: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .instrument-toolbar > .toolbar-group:first-child,
+  #kinetic-instrument[data-analysis-open="true"] #play-button {
+    display: none !important;
+  }
+
+  /* Layer visibility and relative reference frames are engine/research aids,
+     not desktop product tasks. Keep their DOM/runtime ownership intact, but
+     remove the legacy legend shell entirely from visible Tools chrome. */
+  #kinetic-instrument[data-analysis-open="true"] .ring-legend {
+    display: none !important;
+  }
+
+  /* Selected Instant now edits where it is read: at the central read-head.
+     Keep the legacy timeline DOM/runtime intact for ordinary reading and
+     regression ownership, but do not duplicate exact-time controls in Tools. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .timeline-dock {
+    display: none !important;
+  }
+
+  /* Solar-time comparison is an input/measurement tool, so it lives on the
+     left edge instead of extending the page below the instrument. The dark
+     backing fades toward the wheel rather than forming another card. */
+  .atlas-solar-time-analysis {
+    position: fixed;
+    z-index: 9;
+    top: 84px;
+    bottom: 16px;
+    left: 0;
+    width: 340px;
+    max-height: calc(100dvh - 100px);
+    margin: 0;
+    overflow: auto;
+    border: 0;
+    padding: 14px 58px 18px 18px;
+    background: linear-gradient(to right,
+      color-mix(in srgb, var(--field) 97%, transparent) 0%,
+      color-mix(in srgb, var(--field) 90%, transparent) 70%,
+      transparent 100%);
+    box-shadow: none;
+    scrollbar-width: thin;
+  }
+  .atlas-solar-analysis-head {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .atlas-solar-longitude-field {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .atlas-solar-longitude-field small {
+    grid-column: 2;
+  }
+  .atlas-solar-corrections,
+  .atlas-solar-basis-rows {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .atlas-solar-basis-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .atlas-solar-verdict {
+    padding-top: 2px;
+  }
+  .atlas-solar-verdict > strong {
+    max-width: 260px;
+  }
+  .atlas-solar-calculation-head {
+    margin-top: 5px;
+    padding-top: 8px;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
+  }
+  .atlas-solar-corrections {
+    border-top: 0;
+    padding-top: 0;
+    box-shadow: none;
+  }
+
+  /* Before a longitude is bound, Solar Time is only a prompt—not a full
+     inspector. Keep the title and input reachable, but collapse the idle copy
+     so opening Tools does not fill the left edge with explanation. */
+  .atlas-solar-time-analysis[data-longitude-bound="false"] {
+    bottom: auto;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 10px;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-head {
+    gap: 6px;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-head > div > small {
+    display: none;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-head > div > span {
+    max-width: 260px;
+    color: #727878;
+    font-size: 9px;
+    line-height: 1.4;
+  }
+  .atlas-solar-time-analysis[data-longitude-bound="false"] .atlas-solar-analysis-empty {
+    max-width: 260px;
+    margin-top: 7px;
+    color: #696f6f;
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  /* Classification is a viewing lens, not a second right-side inspector.
+     While active, it replaces Solar Time in the same left-edge tool zone so
+     the Four Pillars rail on the right remains unobstructed. */
+  #kinetic-instrument[data-analysis-open="true"][data-classification-overlay="on"] ~ .atlas-solar-time-analysis {
+    display: none !important;
+  }
+
+
+  /* Existing visible-stem output becomes the first right-edge inspector.
+     It remains a projection of Selected Instant; it does not gain time
+     authority or become a modal card. */
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods {
+    position: absolute;
+    z-index: 8;
+    top: 92px;
+    right: 0;
+    left: auto;
+    width: clamp(320px, 22vw, 370px);
+    margin: 0;
+    display: block;
+    border: 0;
+    border-radius: 0;
+    padding: 16px 18px 18px 56px;
+    background: linear-gradient(to left,
+      color-mix(in srgb, var(--field) 96%, transparent) 0%,
+      color-mix(in srgb, var(--field) 88%, transparent) 70%,
+      transparent 100%);
+    box-shadow: none;
+    pointer-events: auto;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head {
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-head strong {
+    color: #9ca2a1;
+    font-size: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-master {
+    color: #c3c7c6;
+    font-size: 10px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-grid {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:nth-child(4) {
+    border-top: 1px solid var(--m2-etched-dark-soft);
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-note {
+    display: none;
+  }
+
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell {
+    appearance: none;
+    width: 100%;
+    min-height: 42px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 8px;
+    border: 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 8px 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell span {
+    color: #858b8a;
+    font-size: 9px;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell strong {
+    justify-self: end;
+    color: #d9dcdb;
+    font-size: 13px;
+    line-height: 1;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell small {
+    grid-column: 1 / -1;
+    color: #989e9d;
+    font-size: 9px;
+    line-height: 1.25;
+  }
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:hover,
+  #kinetic-instrument[data-analysis-open="true"] .atlas-visible-ten-gods-cell:focus-visible {
+    background: rgba(236,239,239,.025);
+    outline: none;
+  }
+
+  /* A detailed Ganzhi request replaces the summary in the same right-edge
+     authority zone. The inspector remains non-modal and fades into the wheel. */
+  #kinetic-instrument[data-analysis-open="true"][data-ganzhi-inspector-open="true"] .atlas-visible-ten-gods {
+    visibility: hidden;
+    pointer-events: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector {
+    top: 92px;
+    right: 0;
+    bottom: 16px;
+    left: auto;
+    width: 380px;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    padding-left: 38px;
+    background: linear-gradient(to left,
+      color-mix(in srgb, var(--field) 98%, transparent) 0%,
+      color-mix(in srgb, var(--field) 92%, transparent) 72%,
+      transparent 100%);
+    background-image: none;
+    box-shadow: none;
+  }
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector .ganzhi-inspector-head {
+    background: color-mix(in srgb, var(--field) 90%, transparent);
+  }
+
+  /* Four Pillars is the persistent evidence rail in Tools, so its labels must
+     remain readable without zooming. Keep the dense structure but enforce a
+     9px informational floor in the current-pillar inspector. */
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-inspector-pillar-switch span,
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-structure-pillar small,
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-structure-chip i,
+  #kinetic-instrument[data-analysis-open="true"] ~ #ganzhi-inspector[data-mode="pillar"] .ganzhi-ten-god-row > small {
+    font-size: 9px;
+  }
+
+  /* These rows duplicate the wheel/read-head or long-form documentation. They
+     must not reappear merely because Tools is open. */
+  #kinetic-instrument[data-analysis-open="true"] ~ .state-strip,
+  #kinetic-instrument[data-analysis-open="true"] ~ .atlas-notes,
+  #kinetic-instrument[data-analysis-open="true"] ~ .sources-panel {
+    display: none !important;
+  }
+}
+}
+
+/* ==== selected-instant-editor.css ==== */
+/* ==== graphite-m2-material.css (was @import from selected-instant-editor.css) ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+:root {
+  /* Graphite M2 material primitives. One virtual light source comes from above:
+     raised surfaces catch the upper edge and cast outward; recessed surfaces
+     darken the upper lip and catch a faint lower reflection; etched separators
+     are always a dark cut paired with a restrained reflected edge. */
+  --m2-base-surface: transparent;
+  --m2-base-shadow: none;
+
+  --m2-raised-surface: #121415;
+  --m2-raised-border: rgba(236,239,239,.13);
+  --m2-raised-gradient:
+    linear-gradient(180deg,
+      rgba(255,255,255,.032) 0%,
+      rgba(255,255,255,.010) 22%,
+      rgba(255,255,255,0) 48%,
+      rgba(0,0,0,.10) 100%);
+  --m2-raised-shadow:
+    0 30px 76px rgba(0,0,0,.42),
+    0 4px 16px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(236,239,239,.055),
+    inset 0 -1px 0 rgba(0,0,0,.42);
+
+  --m2-recessed-surface: rgba(9,11,12,.62);
+  --m2-recessed-border: rgba(236,239,239,.075);
+  --m2-recessed-gradient:
+    linear-gradient(180deg,
+      rgba(0,0,0,.14) 0%,
+      rgba(0,0,0,.045) 38%,
+      rgba(255,255,255,.008) 100%);
+  --m2-recessed-shadow:
+    inset 0 2px 5px rgba(0,0,0,.34),
+    inset 0 -1px 0 rgba(236,239,239,.028);
+  --m2-recessed-rail-gradient:
+    linear-gradient(180deg,
+      rgba(0,0,0,.12) 0%,
+      rgba(0,0,0,.035) 52%,
+      rgba(255,255,255,.006) 100%);
+  --m2-recessed-rail-shadow:
+    inset 0 2px 4px rgba(0,0,0,.30),
+    inset 0 -1px 0 rgba(236,239,239,.022);
+  --m2-recessed-side-shadow:
+    inset 2px 0 4px rgba(0,0,0,.26),
+    inset -1px 0 0 rgba(236,239,239,.018);
+
+  --m2-etched-dark: rgba(0,0,0,.62);
+  --m2-etched-dark-soft: rgba(0,0,0,.52);
+  --m2-etched-light: rgba(236,239,239,.03);
+  --m2-etched-light-soft: rgba(236,239,239,.022);
+}
+}
+/* ==== selected-instant-editor.css ==== */
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
+
+.selected-instant-editor[hidden] { display: none !important; }
+
+@media (min-width: 821px) {
+  #kinetic-instrument:not([data-inverse-time-search="active"])
+    .instrument-readout[data-instant-editor-available="true"] {
+    pointer-events: auto;
+  }
+
+  .instrument-readout[data-instant-editor-available="true"] #instant-readout {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+    padding-inline: 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  .instrument-readout[data-instant-editor-available="true"] #instant-readout::after {
+    content: "✎";
+    position: absolute;
+    top: 50%;
+    right: -2px;
+    color: #888f8c;
+    font-size: 9px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translate(0, -50%);
+    transition: opacity 120ms ease, transform 120ms ease;
+  }
+  .instrument-readout[data-instant-editor-available="true"] #instant-readout:hover::after,
+  .instrument-readout[data-instant-editor-available="true"] #instant-readout:focus-visible::after,
+  .instrument-readout[data-instant-editor-open="true"] #instant-readout::after {
+    opacity: .58;
+    transform: translate(2px, -50%);
+  }
+  .instrument-readout[data-instant-editor-available="true"] #instant-readout:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--cursor) 38%, transparent);
+    text-underline-offset: 4px;
+  }
+
+  .selected-instant-editor {
+    width: min(500px, calc(100% - 28px));
+    margin: 7px auto 1px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 4px 12px;
+    padding: 7px 0 0;
+    border-top: 1px solid var(--m2-etched-dark-soft);
+    box-shadow: inset 0 1px 0 var(--m2-etched-light-soft);
+    text-align: left;
+  }
+  .selected-instant-editor-field {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .selected-instant-editor-field span,
+  .selected-instant-editor > small {
+    color: #767d7a;
+    font-size: 9px;
+    letter-spacing: .04em;
+  }
+  .selected-instant-editor-field input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px solid var(--m2-etched-dark-soft);
+    border-radius: 0;
+    padding: 5px 2px;
+    color: #d9ddda;
+    background: transparent;
+    box-shadow: 0 1px 0 var(--m2-etched-light-soft);
+    font: inherit;
+    font-size: 11px;
+    outline: none;
+  }
+  .selected-instant-editor-field input:focus-visible {
+    border-bottom-color: color-mix(in srgb, var(--cursor) 42%, transparent);
+  }
+  .selected-instant-editor > small {
+    grid-column: 1;
+    line-height: 1.3;
+  }
+  .selected-instant-editor-status {
+    grid-column: 1;
+    min-height: 1.3em;
+    color: #777e7b;
+    font-size: 9px;
+  }
+  .selected-instant-editor-status[data-state="error"] {
+    color: #b99177;
+  }
+  .selected-instant-editor-actions {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    align-self: center;
+    display: flex;
+    gap: 10px;
+  }
+  .selected-instant-editor-actions button {
+    min-height: 28px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    padding: 0 3px;
+    color: #858c89;
+    background: transparent;
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .selected-instant-editor-actions button:hover,
+  .selected-instant-editor-actions button:focus-visible {
+    color: #e5e8e6;
+    border-bottom-color: rgba(236,239,239,.18);
+    outline: none;
+  }
+  .selected-instant-editor-actions [data-selected-instant-editor-apply] {
+    color: var(--cursor);
+    border-bottom-color: color-mix(in srgb, var(--cursor) 36%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .instrument-readout[data-instant-editor-available="true"] #instant-readout::after {
+      transition: none;
+    }
+  }
+}
+
+@media (max-width: 820px) {
+  .selected-instant-editor { display: none !important; }
+}
+}

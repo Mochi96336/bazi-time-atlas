@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
+const css = cssSource("analysis-first-screen-polish.css");
 const analysisMode = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
 
 test("desktop Analysis installs the final polish after visible-ten-gods ownership", () => {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
-import { cssSource, MERGED_STYLESHEETS } from "./helpers/css-source.js";
+import { MERGED_STYLESHEETS, cssSource } from "./helpers/css-source.js";
 
 const root = new URL("../", import.meta.url);
 const css = cssSource("classification-overlay.css");

@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { cssSource, linkPosition } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../ring-identity.css", import.meta.url), "utf8");
+const css = cssSource("ring-identity.css");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 test("B7: each time ring carries one low-chroma cool identity hue; Solar keeps amber", () => {
@@ -15,5 +16,5 @@ test("B7: each time ring carries one low-chroma cool identity hue; Solar keeps a
 });
 
 test("B7 stylesheet loads after the radial hierarchy it refines", () => {
-  assert.ok(html.indexOf('href="./ring-identity.css"') > html.indexOf('href="./radial-hierarchy.css"'));
+  assert.ok(linkPosition(html, "ring-identity.css") > linkPosition(html, "radial-hierarchy.css"));
 });

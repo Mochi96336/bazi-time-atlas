@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
 const view = readFileSync(new URL("../src/atlas-solar-time-analysis.js", import.meta.url), "utf8");
-const css = readFileSync(new URL("../atlas-solar-time-analysis.css", import.meta.url), "utf8");
-const workspace = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
+const css = cssSource("atlas-solar-time-analysis.css");
+const workspace = cssSource("desktop-tools-workspace.css");
 
 test("Solar Time presents pillar result before comparison rows and correction math", () => {
   const verdict = view.indexOf('class="atlas-solar-verdict"');

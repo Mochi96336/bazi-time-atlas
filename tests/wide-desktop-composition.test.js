@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const polish = readFileSync(new URL("../analysis-first-screen-polish.css", import.meta.url), "utf8");
-const toolsRail = readFileSync(new URL("../analysis-tools-rail.css", import.meta.url), "utf8");
+const polish = cssSource("analysis-first-screen-polish.css");
+const toolsRail = cssSource("analysis-tools-rail.css");
 const analysisMode = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const fixture = readFileSync(new URL("../scripts/fixtures/wide-desktop-2047.html", import.meta.url), "utf8");

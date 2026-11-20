@@ -5,10 +5,10 @@ import { cssSource } from "./helpers/css-source.js";
 
 const boundaries = cssSource("kinetic-boundaries.css");
 const inspector = cssSource("ganzhi-inspector.css");
-const visibleTenGods = readFileSync(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
-const instrumentFirst = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const visibleTenGods = cssSource("atlas-visible-ten-gods.css");
+const instrumentFirst = cssSource("instrument-first.css");
 const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
-const analysisFirst = readFileSync(new URL("../analysis-first-screen.css", import.meta.url), "utf8");
+const analysisFirst = cssSource("analysis-first-screen.css");
 const palette = cssSource("kinetic-atlas.css");
 
 function rejectLegacy(source, legacyValues) {

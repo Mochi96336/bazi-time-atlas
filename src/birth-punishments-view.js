@@ -62,11 +62,14 @@ let empty;
 function install() {
   if (!form || !panel || !footnote) return false;
 
-  const stylesheet = document.createElement("link");
-  stylesheet.rel = "stylesheet";
-  stylesheet.href = "./branch-punishments.css";
-  stylesheet.dataset.branchPunishmentStyles = "1";
-  document.head.append(stylesheet);
+  // Repair E5: birth-panels.css is a static link carrying this marker.
+  if (!document.querySelector("link[data-branch-punishment-styles]")) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "./branch-punishments.css";
+    stylesheet.dataset.branchPunishmentStyles = "1";
+    document.head.append(stylesheet);
+  }
 
   const summaryTitle = panel.querySelector(".pillar-relations-summary-copy strong");
   if (summaryTitle) summaryTitle.textContent = "四柱表面關係 · 合 / 沖 / 害 / 刑";

@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
 const editor = readFileSync(new URL("../src/selected-instant-editor.js", import.meta.url), "utf8");
-const editorCss = readFileSync(new URL("../selected-instant-editor.css", import.meta.url), "utf8");
+const editorCss = cssSource("selected-instant-editor.css");
 const analysis = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
-const workspace = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
+const workspace = cssSource("desktop-tools-workspace.css");
 
 test("desktop ordinary reading and Tools edit Selected Instant at the authoritative read-head", () => {
   assert.match(editor, /querySelector\("#instant-readout"\)/);
