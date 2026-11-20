@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .astronomy-panel {
   grid-template-columns:minmax(0,1fr);
   gap:0;
@@ -156,4 +158,5 @@
   .astronomy-detail-meta { padding-top:7px; }
   #month-boundary-detail > p { font-size:12px; }
   #near-recurrence-detail .near-search-body { padding-bottom:8px; }
+}
 }

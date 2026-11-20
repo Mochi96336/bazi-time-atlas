@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 :root {
   /* Graphite M2 material primitives. One virtual light source comes from above:
      raised surfaces catch the upper edge and cast outward; recessed surfaces
@@ -46,4 +48,5 @@
   --m2-etched-dark-soft: rgba(0,0,0,.52);
   --m2-etched-light: rgba(236,239,239,.03);
   --m2-etched-light-soft: rgba(236,239,239,.022);
+}
 }

@@ -1,4 +1,6 @@
 @import url("./mobile-legend.css");
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 .mobile-time-dock { display: none; }
 
@@ -109,4 +111,5 @@
   .state-strip,
   .atlas-notes,
   .sources-panel { display: none; }
+}
 }

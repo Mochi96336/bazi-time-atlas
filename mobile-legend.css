@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Mobile Tools keeps only product-level actions visible. Ring layer toggles
    and relative reference-frame controls remain in DOM/runtime ownership for
    regression and research, but are not user-facing chrome. */
@@ -22,4 +24,5 @@
   #kinetic-instrument[data-analysis-open="true"] #ring-compare-status {
     top: 48px;
   }
+}
 }

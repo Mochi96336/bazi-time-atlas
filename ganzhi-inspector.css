@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 #ganzhi-inspector[hidden] { display: none !important; }
 
@@ -386,4 +388,5 @@
     min-height: 38px;
     padding-block: 8px;
   }
+}
 }

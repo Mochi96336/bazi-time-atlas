@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 :root {
   color-scheme: dark;
   /* Home Art H0: the page/reference field is a material authority of its own.
@@ -385,4 +387,5 @@ body.legacy-projection .legacy-note { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 }

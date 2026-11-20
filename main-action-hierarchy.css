@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Main atlas action hierarchy.
    Reading and selecting the Selected Instant is the primary task. Playback only
    animates that same instant, so it must not visually outrank the instrument. */
@@ -23,4 +25,5 @@
 
 @media (max-width: 480px) {
   #play-button.primary { min-width: 48px; }
+}
 }

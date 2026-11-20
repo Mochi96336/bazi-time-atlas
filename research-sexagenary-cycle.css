@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .research-cycle {
   margin-top: 26px;
   padding-top: 20px;
@@ -169,4 +171,5 @@
   .research-cycle-index { display: none; }
   .research-cycle-center-value { font-size: 30px; }
   .research-cycle-inspector h4 { font-size: 36px; }
+}
 }

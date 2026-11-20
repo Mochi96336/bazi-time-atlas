@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Wheel-native inverse search. There is no form panel: the wheel itself is the
    query surface and this layer only presents mode/status/result chrome. */
@@ -291,4 +293,5 @@
   #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
     top: 58px;
   }
+}
 }

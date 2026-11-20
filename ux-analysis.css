@@ -1,4 +1,6 @@
 @import "./main-action-hierarchy.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Progressive disclosure for analysis-only controls.
    The default atlas is a time-reading instrument. Compare, classification,
@@ -267,4 +269,5 @@
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar { left: 12%; top: 54%; }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-day { left: 18%; top: 69%; }
   #kinetic-instrument:not([data-analysis-open="true"]) .ring-hour { left: 25%; top: 82%; }
+}
 }

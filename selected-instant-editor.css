@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 .selected-instant-editor[hidden] { display: none !important; }
 
@@ -133,4 +135,5 @@
 
 @media (max-width: 820px) {
   .selected-instant-editor { display: none !important; }
+}
 }

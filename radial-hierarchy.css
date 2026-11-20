@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Radial hierarchy: short cycles inside, long cycles outside.
    This sheet changes presentation only. Ring geometry, motion and boundary
@@ -507,4 +509,5 @@
 .active-cycle-label.is-crossing { animation: read-head-crossing 700ms ease-out; }
 @media (prefers-reduced-motion: reduce) {
   .active-cycle-label.is-crossing { animation: none; }
+}
 }

@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .relation-model-overview {
   margin: 0 14px 12px;
   padding: 10px;
@@ -177,4 +179,5 @@
     font-size: 6.5px;
     white-space: nowrap;
   }
+}
 }

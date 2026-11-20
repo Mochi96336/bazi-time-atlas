@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Research 01: compact entry choices are navigation into the ONE existing
    delta controller. Keep the full derivation and phase fan as deeper evidence. */
 .research-entry {
@@ -174,3 +176,4 @@
    same actions as these milestone buttons. Keep one set on the reading path;
    the entry stays in the DOM for deep-link and harness hooks. */
 .research-task .research-entry { display: none; }
+}

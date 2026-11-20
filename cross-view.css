@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .pillar-summary [role="link"] {
   outline: none;
   transition: background 130ms ease, box-shadow 130ms ease;
@@ -190,4 +192,5 @@
   .five-tigers-readout > strong { font-size: 16px; }
   .month-stem-label { font-size: 14px; }
   .month-stem-label.active { font-size: 18px; }
+}
 }

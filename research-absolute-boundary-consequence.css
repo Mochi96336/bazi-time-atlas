@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .absolute-boundary-consequence {
   margin-top:8px;
   padding:14px 0 15px;
@@ -133,4 +135,4 @@
   .research-alignment-fork strong { font-size:var(--research-type-compact); line-height:var(--research-leading-compact); }
   .research-alignment-fork small { font-size:12px; }
 }
-
+}

@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Research color calibration R1
    Color/material only. Layout, ownership, typography, geometry and data semantics
    remain in their existing stylesheets. The page should read as a deep graphite
@@ -585,4 +587,5 @@ body {
   .research-task-primary .recurrence-readout.research-current-state > p {
     color: #a1afb6;
   }
+}
 }

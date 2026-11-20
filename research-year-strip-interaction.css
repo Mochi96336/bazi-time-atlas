@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* R2 — one accessible gesture overlay on the ORIGINAL year strip.
    The existing marker remains the only visible playhead; the transparent
    native input only captures pointer/keyboard intent and never owns a date. */
@@ -47,4 +49,5 @@
  .research-year-scrub-hint,.research-year-scrub-feedback{
   font-size:12px;margin-left:8px;margin-right:8px;
  }
+}
 }

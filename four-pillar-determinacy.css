@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .determinacy-panel {
   margin-top:14px;
   padding:12px 0 14px;
@@ -350,4 +352,5 @@
     gap:var(--research-space-1);
     margin-bottom:var(--research-space-3);
   }
+}
 }

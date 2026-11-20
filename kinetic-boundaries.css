@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .boundary-meta {
   margin-top: 8px;
   display: flex;
@@ -312,4 +314,5 @@
   .state-strip,
   .atlas-notes,
   .sources-panel { display: none; }
+}
 }

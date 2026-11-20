@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .birth-input-intro {
   margin: -5px 0 1px;
   color: var(--muted);
@@ -87,4 +89,5 @@
   }
   #birth-advanced-summary { font-size: 8px; }
   .birth-advanced-body { padding: 11px 10px 10px; }
+}
 }

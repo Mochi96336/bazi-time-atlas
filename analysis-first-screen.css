@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Desktop Analysis is a lens over the same radial instrument, not a second
    dashboard around it. Keep all capabilities reachable while flattening the
@@ -264,4 +266,5 @@
   #kinetic-instrument[data-analysis-open="true"] ~ .sources-panel {
     opacity: .48;
   }
+}
 }

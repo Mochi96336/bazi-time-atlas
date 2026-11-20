@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .pillar-relations-panel {
   margin-top: 10px;
   border: 1px solid var(--hairline);
@@ -295,4 +297,5 @@
   .pillar-group-member span { font-size: 6.8px; }
   .pillar-group-empty { font-size: 7.5px; }
   .pillar-relations-footnote { padding: 8px 11px 10px; font-size: 7.5px; }
+}
 }

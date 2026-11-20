@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Desktop Tools is an edge-assist workspace over the same instrument.
    Opening Tools must not create a second document below the wheel: controls
@@ -337,4 +339,5 @@
   #kinetic-instrument[data-analysis-open="true"] ~ .sources-panel {
     display: none !important;
   }
+}
 }

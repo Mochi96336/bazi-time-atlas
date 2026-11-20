@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Research 01: the dated 60-year and 60-day cycles lead; astronomy remains a separate layer. */
 .delta-dock {
   grid-template-areas: "base base base" "number presets presets" "slider slider global";
@@ -126,4 +128,5 @@
 @media (max-width:360px) {
   .research-cycles-grid { grid-template-columns:1fr; }
   .research-cycles-identities strong { font-size:25px; }
+}
 }

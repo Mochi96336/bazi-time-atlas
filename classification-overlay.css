@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Optional classification comparison. The two systems are rendered in separate
    visual grammars and are never presented as equivalent element sets. */
 :root {
@@ -151,4 +153,5 @@
     font-size:7px;
     line-height:1.35;
   }
+}
 }

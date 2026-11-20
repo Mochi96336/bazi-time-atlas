@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 :root {
   color-scheme: dark;
   --bg: #0d1110;
@@ -211,4 +213,4 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   font-size:29px;stroke-width:4px;
  }
 }
-
+}

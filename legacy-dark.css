@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Consolidate Birth and Sexagenary into the same dark instrument family as the kinetic atlas. */
 
 body:has(.birth-shell),
@@ -433,4 +435,5 @@ body:has(.sexagenary-shell) .lede { color: #9ba49e; }
   .sexagenary-shell .cycle-inspector,
   .sexagenary-shell .cycle-explainer { display: none; }
   .sexagenary-shell .cycle-phase-note { color: #727d76; }
+}
 }

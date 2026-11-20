@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Navigation F1: page navigation, temporary Tools and the selected-time Now
    command are separate owners. Keep this final layer above old capsule/HUD CSS.
    No wheel, material, or calendar rule belongs in this file. */
@@ -322,4 +324,5 @@ body:has(#kinetic-instrument[data-inverse-time-search="active"])
 @media (max-width:480px) {
   .mobile-time-dock .mobile-time-actions #mobile-now-button,
   .mobile-time-dock .mobile-time-actions #mobile-time-apply { min-height:44px !important; min-width:44px !important; font-size:12px !important; }
+}
 }

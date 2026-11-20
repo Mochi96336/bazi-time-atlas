@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .target-instant-controls {
   margin: 10px 0 12px;
   padding: 10px 0 11px;
@@ -174,4 +176,5 @@
   .target-instant-fields { grid-template-columns: 1fr; }
   #target-instant-status { grid-column: auto; }
   .eot-clearance-facts { grid-template-columns: 1fr; }
+}
 }

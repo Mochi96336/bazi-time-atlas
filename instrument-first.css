@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Phase 1: make the atlas read as one instrument, not a dashboard card.
    This layer is deliberately presentation-only: wheel geometry, time semantics,
@@ -315,4 +317,5 @@
   .instrument-shell {
     height: max(760px, calc(100dvh - 64px));
   }
+}
 }

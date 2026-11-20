@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .state-phase-progress,
 .state-phase-bead,
 .state-boundary-gate,
@@ -78,4 +80,5 @@
   .state-phase-bead { r: 3.2px; }
   .state-boundary-gate { stroke-width: 1.7; }
   .state-boundary-gate.is-shared { stroke-width: 2.5; }
+}
 }

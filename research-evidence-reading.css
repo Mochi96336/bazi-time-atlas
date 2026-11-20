@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Research 02/03 reading quality. Scoped typography only: keep the same
    absolute seasonal data, zero-line graph, four-pillar matrix, and colors.
    No additional result cards or alternate research-time controls. */
@@ -157,3 +159,4 @@
   text-underline-offset: 3px;
 }
 .research-term:hover { color: var(--research-text-primary); }
+}

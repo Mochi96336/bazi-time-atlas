@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Repair B2/B3: opt-in "怎麼讀" guide and the one-time drag hint.
    The home page stays minimal: both are hidden until asked for or first use. */
 .atlas-guide-button {
@@ -78,4 +80,5 @@ body:has(#kinetic-instrument[data-analysis-open="true"]) .atlas-guide-button { d
 }
 @media (prefers-reduced-motion: reduce) {
   .atlas-drag-hint { transition:none; }
+}
 }

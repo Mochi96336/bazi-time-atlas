@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .ten-gods-panel {
   margin-top: 20px;
   border: 1px solid var(--hairline);
@@ -212,4 +214,5 @@
   .ten-god-chip b { font-size: 10px; }
   .ten-god-chip strong { font-size: 6.8px; }
   .ten-gods-footnote { padding: 8px 11px 10px; font-size: 7.5px; }
+}
 }

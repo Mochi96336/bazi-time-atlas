@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .seasonal-drift-evidence {
   margin-top:8px;
   padding:14px 0 16px;
@@ -679,4 +681,5 @@
   }
   .seasonal-boundary-proof { margin-top:var(--research-space-4); }
   #seasonal-boundary-proof-svg { min-height:410px; }
+}
 }

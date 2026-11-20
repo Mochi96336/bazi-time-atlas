@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .research-evidence-support,
 .research-evidence-drilldown {
   margin-top: 8px;
@@ -86,4 +88,5 @@
   .research-evidence-support[open] > .epoch-audit-panel {
     padding-top: 8px;
   }
+}
 }

@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 .atlas-solar-time-analysis[hidden] { display: none !important; }
 
@@ -205,4 +207,5 @@
   .atlas-solar-basis-row {
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
+}
 }

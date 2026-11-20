@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Time-window presets change reading priority only. They never hide a layer,
    alter geometry, or attenuate the whole rotating track. Scale emphasis is
    owned by mark roles so Selected-Instant evidence keeps its native contrast. */
@@ -244,4 +246,5 @@
   :is(.cycle-sector, .term-sector, .zodiac-sector, .ring-tick, .term-mark,
       .cycle-label, .term-label, .zodiac-label) {
   transition: none !important;
+}
 }

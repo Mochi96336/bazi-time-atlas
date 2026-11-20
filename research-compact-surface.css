@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Single-surface Research: one original Year band, inline base/target identities.
    This is presentation only; the recurrence view remains the sole date owner. */
 .research-controls-compact {
@@ -1456,4 +1458,5 @@
     font-size:12px;
     line-height: 1.45;
   }
+}
 }

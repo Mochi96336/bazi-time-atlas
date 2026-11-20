@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Research visual foundations
    Semantic tokens only. This file must not own component layout or geometry.
    Research presentation styles consume these roles; they do not invent new
@@ -73,4 +75,5 @@
   /* Reading and diagram widths */
   --research-width-narrative: 860px;
   --research-width-visual: 1280px;
+}
 }

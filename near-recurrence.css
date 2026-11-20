@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .near-search-panel {
   margin-top:18px;
   border-top:1px solid var(--hairline);
@@ -81,4 +83,5 @@
   .near-stat:last-child { grid-column:1 / -1; }
   .near-search-body { gap:8px; }
   .near-ranking-row { min-height:42px; }
+}
 }

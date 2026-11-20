@@ -1,4 +1,6 @@
 @import "./graphite-m2-material.css";
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 
 /* Final wide-desktop Tools rail convergence.
    Presentation only: keep the existing toolbar, layer/reference controls and
@@ -44,4 +46,5 @@
     border-left: 1px solid var(--m2-etched-dark-soft);
     box-shadow: inset 1px 0 0 var(--m2-etched-light-soft);
   }
+}
 }

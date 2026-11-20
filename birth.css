@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .birth-shell { width: min(1380px, 100%); }
 .birth-hero { max-width: 760px; margin-bottom: 18px; }
 .birth-layout {
@@ -294,4 +296,5 @@
   .pillar-result > small { font-size: 7.5px; max-width: 100px; }
   .birth-convention-strip { grid-template-columns: repeat(2, 1fr); }
   .birth-convention-strip div:last-child { grid-column: 1 / -1; }
+}
 }

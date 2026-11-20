@@ -63,7 +63,8 @@ test("Research foundation type and width floors match the visual constitution", 
 });
 
 test("Research foundations stay token-only and do not own component geometry", () => {
-  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g,"");
+  // Repair C4: the file is wrapped in `@layer page { … }`; inspect its contents.
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g,"").replace(/^\s*@layer page \{([\s\S]*)\}\s*$/,"$1");
   const selectors = [...withoutComments.matchAll(/(^|\})\s*([^@{}][^{}]*)\{/g)]
     .map(match => match[2].trim())
     .filter(Boolean);

@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 /* Second-pass desktop Analysis polish. This sheet is intentionally installed
    after the visible-ten-gods sheet so the remaining informational panels can be
    integrated into the instrument surface without changing their data ownership
@@ -362,4 +364,5 @@
   #kinetic-instrument[data-analysis-open="true"] #day-track .cycle-label.major:not(.active-cycle-label) {
     fill: rgba(207,212,210,.66);
   }
+}
 }

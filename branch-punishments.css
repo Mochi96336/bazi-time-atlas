@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .pillar-punishments-band {
   margin: 0 14px 13px;
   padding-top: 11px;
@@ -121,4 +123,5 @@
   .self-flow { flex-wrap: wrap; justify-content: flex-start; }
   .pillar-punishments-empty { font-size: 7.5px; }
   .pillar-punishments-note { font-size: 7px; }
+}
 }

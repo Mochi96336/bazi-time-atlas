@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 .research-question-intro {
   display:grid;
   grid-template-columns:minmax(0,1.12fr) minmax(360px,.88fr);
@@ -273,4 +275,5 @@
 }
 @media (max-width: 480px) {
   .research-task > .research-plain-conclusion { font-size: 1.0625rem; padding-left: var(--space-3, 12px); }
+}
 }
