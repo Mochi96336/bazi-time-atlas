@@ -110,7 +110,7 @@
       </div>
 
       <canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"></canvas>
-      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="由內向外依時間尺度排列的時、日、太陽年度座標、月、年扇形時間圓盤">
+      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" tabindex="0" aria-describedby="atlas-keyboard-help" aria-label="由內向外依時間尺度排列的時、日、太陽年度座標、月、年扇形時間圓盤">
         <defs aria-hidden="true">
           <linearGradient id="m2-hour-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
           <linearGradient id="m2-day-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
@@ -182,6 +182,8 @@
       </svg>
 
       <div id="atlas-drag-hint" class="atlas-drag-hint" hidden>拖曳任一圈，移動時間</div>
+      <p id="atlas-keyboard-help" class="visually-hidden">鍵盤：左右鍵前後移動一個時辰，加 Shift 移動一天，Home 回到現在。</p>
+      <p id="atlas-pillars-live" class="visually-hidden" aria-live="polite" aria-atomic="true"></p>
       <div class="instrument-readout" aria-live="polite">
         <div class="readout-kicker">選定時間</div>
         <div class="selected-instant-line">

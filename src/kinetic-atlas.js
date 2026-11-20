@@ -383,6 +383,7 @@ function updateWheel() {
   renderAllRingPoses();
   updateReadout(currentDisplay);
   compareController?.update();
+  schedulePillarAnnouncement();
 }
 
 function setSliderForScale() {
@@ -559,6 +560,40 @@ function installRingDrag() {
   compareController?.update();
 }
 
+// Repair E6: keyboard stepping on the focused wheel. ←/→ move one 時辰 (2 h),
+// Shift+←/→ one day, Home returns to now. Uses the canonical command path.
+const KEY_STEP_MS = Object.freeze({ hour:2 * 3_600_000, day:DAY_MS });
+
+function handleWheelKeydown(event) {
+  if (event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.key === "Home") {
+    event.preventDefault();
+    setSelectedInstant(Date.now(), "now");
+    return;
+  }
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  const direction = event.key === "ArrowRight" ? 1 : -1;
+  const step = event.shiftKey ? KEY_STEP_MS.day : KEY_STEP_MS.hour;
+  setSelectedInstant(state.selectedMs + direction * step, "keyboard");
+}
+
+// Repair E6: announce the four pillars after they settle, not every frame.
+let pillarAnnounceTimer = 0;
+let lastPillarAnnouncement = "";
+function schedulePillarAnnouncement() {
+  const live = document.querySelector("#atlas-pillars-live");
+  if (!live) return;
+  clearTimeout(pillarAnnounceTimer);
+  pillarAnnounceTimer = setTimeout(() => {
+    const read = id => document.querySelector(`#${id}`)?.textContent?.trim() || "—";
+    const text = `年柱${read("state-year")}，月柱${read("state-month")}，日柱${read("state-day")}，時柱${read("state-hour")}`;
+    if (text === lastPillarAnnouncement) return;
+    lastPillarAnnouncement = text;
+    live.textContent = text;
+  }, 700);
+}
+
 function bindControls() {
   scaleButtons.forEach(button => {
     button.addEventListener("click", () => {
@@ -592,6 +627,7 @@ function bindControls() {
   nowButton.addEventListener("click", () => {
     setSelectedInstant(Date.now(), "now");
   });
+  svg.addEventListener("keydown", handleWheelKeydown);
   instantInput.addEventListener("change", () => {
     const instant = instantFromAtlasLocalInput(instantInput.value, state.timeContext);
     if (instant === null || !Number.isFinite(instant)) return;
