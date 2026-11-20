@@ -116,5 +116,18 @@ if(!deepTools||/\sopen(?:\s|=|>)/.test(deepTools)||
    !deep.dom.includes('id="near-recurrence-chart"')){
   throw Error("long-horizon chart must stay visible outside the closed delta sandbox: "+deep.url);
 }
+requireTokens(deep,[
+  'data-near-chart-y-unit="hours"',
+  'data-near-chart-candidate-count="41"',
+  'class="near-grid-line"',
+  'class="near-axis-label near-y-label"',
+  '十二節最大形狀殘差',
+  '橫軸：距基準的 Δ 年數（千年）',
+  '最接近基準的 6 組',
+  'data-phase-preview="gregorian"',
+  '外圈 · 公曆 400 年',
+  '中圈 · 年序 60 年',
+  '內圈 · 日序 60 日'
+],"readable phase legend and long-horizon hour/Δ axes");
 
 console.log("[seasonal-drift-evidence] PASS fixed +24k story stays visible across delta sandbox states");
