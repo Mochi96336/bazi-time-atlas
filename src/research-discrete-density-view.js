@@ -35,7 +35,6 @@ function hashTargetsPhaseFan(details, instrument) {
 
 function revealPhaseFanHash(details, instrument) {
   if (!details || !instrument || !hashTargetsPhaseFan(details, instrument)) return;
-  details.open = true;
   requestAnimationFrame(() => {
     const id = decodeURIComponent(location.hash.slice(1));
     document.getElementById(id)?.scrollIntoView({ block:"start" });
@@ -71,6 +70,10 @@ function updatePhaseFanPreview(details, instrument) {
     element.dataset.phaseState = !available ? "unknown" : zero ? "zero" : "shifted";
     const value = element.querySelector("em");
     if (value) value.textContent = !available ? "—" : Number(raw) > 0 ? `+${raw}` : String(raw).replace("-", "−");
+    const state = element.querySelector(".phase-fan-phase-state");
+    if (state) state.textContent = !available ? "尚無資料" : zero
+      ? (Number(selected) === 0 ? "基準零位" : "回到零位")
+      : "尚未歸零";
     if (arrival && zero) {
       arrived.push(key);
       if (!reduceMotion && value?.animate) {
@@ -121,32 +124,38 @@ function bindPhaseFanPreview(details, instrument) {
   updatePhaseFanPreview(details, instrument);
 }
 
-function ensurePhaseFanDrilldown() {
+// The 3-cycle instrument is primary Research 01 evidence, never a disclosure.
+// Preserve the historical anchor id for existing deep links.
+function ensurePhaseFanPanel() {
   const instrument = researchDiscrete?.querySelector("#recurrence-instrument");
   if (!instrument) return null;
 
-  let details = instrument.closest("#discrete-phase-fan-details");
-  if (!details) {
-    details = document.createElement("details");
-    details.id = "discrete-phase-fan-details";
-    details.className = "research-discrete-drilldown research-phase-fan-drilldown";
-    details.dataset.researchDrilldown = "discrete-phase-fan";
+  let panel = instrument.closest("#discrete-phase-fan-details");
+  if (!panel) {
+    panel = document.createElement("section");
+    panel.id = "discrete-phase-fan-details";
+    panel.className = "research-phase-fan-panel";
+    panel.dataset.researchPrimaryFigure = "discrete-phase-fan";
+    panel.setAttribute("aria-labelledby", "phase-fan-title");
 
-    const summary = document.createElement("summary");
-    summary.innerHTML = `<span class="phase-fan-preview-title">離散相位扇<small id="phase-fan-preview-context">等候相位</small></span>
-      <strong class="phase-fan-preview">
-        <span data-phase-preview="gregorian">公曆 <em>—</em></span>
-        <span data-phase-preview="year">年序 <em>—</em></span>
-        <span data-phase-preview="day">日序 <em>—</em></span>
-      </strong>`;
+    const header = document.createElement("header");
+    header.innerHTML = `<div class="phase-fan-preview-heading">
+        <h3 id="phase-fan-title" class="phase-fan-preview-title">離散相位扇</h3>
+        <small id="phase-fan-preview-context">等候相位</small>
+      </div>
+      <div class="phase-fan-preview" role="group" aria-label="由外到內的三個週期與相位偏移">
+        <span data-phase-preview="gregorian"><span class="phase-fan-track">外圈 · 公曆 400 年</span><em>—</em><small class="phase-fan-phase-state">—</small></span>
+        <span data-phase-preview="year"><span class="phase-fan-track">中圈 · 年序 60 年</span><em>—</em><small class="phase-fan-phase-state">—</small></span>
+        <span data-phase-preview="day"><span class="phase-fan-track">內圈 · 日序 60 日</span><em>—</em><small class="phase-fan-phase-state">—</small></span>
+      </div>`;
 
-    instrument.insertAdjacentElement("beforebegin", details);
-    details.append(summary, instrument);
+    instrument.insertAdjacentElement("beforebegin", panel);
+    panel.append(header, instrument);
   }
 
-  bindPhaseFanPreview(details, instrument);
-  revealPhaseFanHash(details, instrument);
-  return details;
+  bindPhaseFanPreview(panel, instrument);
+  revealPhaseFanHash(panel, instrument);
+  return panel;
 }
 
 function hashTargetsCycle(details, cycle) {
@@ -198,7 +207,7 @@ function ensureSexagenaryDrilldown() {
 
   // Keep the large 60-pair diagram as supporting evidence after the
   // explorer. The reading spine is now:
-  // derivation thesis → date/year verification → optional phase fan → Δ explorer
+  // derivation thesis → date/year verification → visible primary phase fan → Δ explorer
   // → optional 60-pair source.
   const derivation = researchDiscrete?.querySelector(".discrete-derivation");
   const transition = researchDiscrete?.querySelector(".discrete-to-astronomy");
@@ -217,7 +226,7 @@ function syncDiscretePresentation() {
   if (!researchDiscrete) return;
   removeDuplicateScopeNote();
   consolidateGlobalPeriod();
-  ensurePhaseFanDrilldown();
+  ensurePhaseFanPanel();
   ensureSexagenaryDrilldown();
 }
 

@@ -136,7 +136,7 @@
   },
   "near-recurrence.css": {
     "important": 0,
-    "hexColors": 19,
+    "hexColors": 25,
     "smallFonts": 0
   },
   "pillar-proof-flow.css": {
@@ -196,7 +196,7 @@
   },
   "research-discrete-density.css": {
     "important": 12,
-    "hexColors": 96,
+    "hexColors": 100,
     "smallFonts": 0
   },
   "research-drift-accumulation.css": {
@@ -232,6 +232,11 @@
   "research-sexagenary-cycle.css": {
     "important": 0,
     "hexColors": 18,
+    "smallFonts": 0
+  },
+  "research-story-hierarchy.css": {
+    "important": 0,
+    "hexColors": 23,
     "smallFonts": 0
   },
   "research-tasks.css": {

@@ -46,12 +46,12 @@ test("invalid leap-date comparison never infers a day-phase recurrence",()=>{
   assert.match(copy,/日序無法比較/);
 });
 
-test("existing Research reading path uses concrete examples without adding new cards",()=>{
+test("Research 01 has concise proof guidance and optional intermediate checks instead of duplicate prose",()=>{
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   assert.match(html,/每圈的 0 只代表該循環序位回到起點/);
-  assert.match(html,/正負數是相對起點的最短位移，不是節氣提前或延後的天數/);
-  assert.match(html,/依序點上方 \+400、\+8,000、\+24,000 年的里程碑/);
-  assert.match(html,/三圈都為 0，也還要繼續 02 驗證節界/);
+  assert.match(html,/正負數是最短相位差，不是節氣提前天數/);
+  assert.match(html,/要查看 \+400／\+1,200／\+8,000 的中間證據/);
+  assert.match(html,/天文節界留到 02/);
   const css=readFileSync(new URL("../research-discrete-density.css",import.meta.url),"utf8");
   assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] > header p,[\s\S]*?#research-discrete \.research-discrete-explorer-intro \{\s*font-size: 12px;/);
   assert.doesNotMatch(html,/class="research-reading-card"|id="research-reading-wizard"/);

@@ -666,7 +666,16 @@ function derivationBrief(state) {
 
 function renderDerivation(states, localYears) {
   if (!derivationSteps) return;
+  const wasStructuralOpen = derivationSteps.querySelector("#research-structural-milestones")?.open === true;
   derivationSteps.replaceChildren();
+  const structuralDetails = document.createElement("details");
+  structuralDetails.id = "research-structural-milestones";
+  structuralDetails.className = "research-structural-milestones";
+  structuralDetails.open = wasStructuralOpen || [400,1200,8000].includes(currentDelta);
+  structuralDetails.innerHTML = '<summary><span>補充驗算 · +400 / +1,200 / +8,000 年</span><small>比較哪些序位已歸零、哪些仍偏離</small></summary>';
+  const structuralGrid = document.createElement("div");
+  structuralGrid.className = "research-structural-milestone-grid";
+  structuralDetails.appendChild(structuralGrid);
   if (discreteRouteLocal) {
     discreteRouteLocal.textContent = Number.isInteger(localYears)
       ? `+${localYears.toLocaleString("en-US")}`
@@ -690,7 +699,7 @@ function renderDerivation(states, localYears) {
       bridge.className = "discrete-derivation-bridge";
       bridge.dataset.fromDeltaYears = String(localYears);
       bridge.dataset.toDeltaYears = String(GLOBAL_GREGORIAN_YEAR_SEQUENCE_DAY_PERIOD);
-      bridge.innerHTML = `<span>還缺：太陽年中的季節位置</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>不是找 ${localYears.toLocaleString("en-US")} 的倍數；而是把判定收緊到季節位置代理也回基準</small>`;
+      bridge.innerHTML = `<span>還缺：太陽年中的季節位置</span><strong>公曆 ${formatSigned(gregorianSigned)} → 0</strong><small>不是在局部重遇後再補 20 年：那會使年／日序偏離；必須找三項於同一 Δ 同時歸零。不是找 ${localYears.toLocaleString("en-US")} 的倍數；而是把判定收緊到季節位置代理也回基準</small>`;
       derivationSteps.appendChild(bridge);
     }
 
@@ -709,8 +718,10 @@ function renderDerivation(states, localYears) {
     const explanatoryCopy = isStructural ? derivationBrief(state) : derivationMeaning(deltaYears, localYears);
     button.innerHTML = `<strong>${deltaYears === 0 ? "0 年" : `+${deltaYears.toLocaleString("en-US")} 年`}</strong><span class="discrete-derivation-phases">${derivationPhase("公曆", state.closed.gregorian, state.phases.gregorian, 400)}${derivationPhase("年序", state.closed.yearSequence, state.phases.yearSequence, 60)}${derivationPhase("日序", state.closed.day, state.phases.day, 60)}</span><small>${explanatoryCopy}</small>`;
     button.addEventListener("click", () => setDelta(deltaYears, { source:"derivation" }));
-    derivationSteps.appendChild(button);
+    if (isStructural) structuralGrid.appendChild(button);
+    else derivationSteps.appendChild(button);
   }
+  if (structuralGrid.childElementCount) derivationSteps.appendChild(structuralDetails);
 }
 
 function rebuildCandidates() {
@@ -821,6 +832,12 @@ function renderState() {
   const localYears = findFirstLocalYearSequenceDayRecurrence(currentBase)?.deltaYears ?? null;
   setText("closure-summary", stateMeaning(state, localYears));
   syncResearchEntry(state, localYears);
+  // The supporting candidates are normally folded, but selecting one from
+  // the shared Delta control must reveal the evidence it is highlighting.
+  if ([400,1200,8000].includes(currentDelta)) {
+    const structuralDetails = document.querySelector("#research-structural-milestones");
+    if (structuralDetails) structuralDetails.open = true;
+  }
 
   instrument.dataset.baseDate = formatDate(currentBase);
   instrument.dataset.targetDate = state.targetValid ? formatDate(state.targetDate) : "invalid";
@@ -1033,19 +1050,9 @@ function bindControls() {
   });
   mobileFanMedia.addEventListener?.("change", syncFanViewport);
   if(r16PolishOptIn){
-    // Refresh labels if viewport width changes, or if the R16 panel is
-    // re-expanded. Collision computations never change marker angles.
+    // The primary R16 fan is never collapsed. Keep label collision
+    // reflow tied to viewport changes without observing disclosures.
     window.addEventListener("resize",scheduleR16LabelReflow);
-    const disclosureObserver=new MutationObserver(records=>{
-      if(records.some(record=>
-        record.target.id==="discrete-phase-fan-details"&&record.target.open
-      )){
-        scheduleR16LabelReflow();
-      }
-    });
-    disclosureObserver.observe(document.body,{
-      subtree:true,attributes:true,attributeFilter:["open"]
-    });
   }
 }
 

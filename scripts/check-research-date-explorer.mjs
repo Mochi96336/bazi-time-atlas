@@ -66,7 +66,7 @@ if(
 console.log("[research-r3] PASS old mode=dates link migrates compare→original date owner, no second UI");
 
 // True native geometry + R1/R2 authority/gesture guards.
-for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?preciseBoundary=before","?preciseBoundary=after","?width=320","?width=768","?desktop=1","?deep=1","?precise=1","?selector=1","?selector=1&deep=1"]){
+for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?preciseBoundary=before","?preciseBoundary=after","?width=320","?width=480","?width=481","?width=660","?width=768","?desktop=1","?deep=1","?precise=1","?selector=1","?selector=1&deep=1"]){
   let proof=dump("scripts/fixtures/research-original-r0-390.html"+suffix,15000);
   let tag=opening(proof.dom,"probe","output");
   if(attr(tag,"data-ready")!=="true"){
@@ -86,4 +86,4 @@ for(const suffix of ["?bare=1","?interactive=1","?boundary=1","?preciseBoundary=
     attr(tag,"data-duplicate-story")!=="absent"
   ) throw Error("Original-strip proof failed "+suffix+": "+(attr(tag,"data-error")??proof.url));
 }
-console.log("[research-r3] PASS 320/390/768/1440 original strip, Li Chun ambiguity, drag guards and deep-delta ownership");
+console.log("[research-r3] PASS 320/390/480/481/660/768/1440 original strip, Li Chun ambiguity, drag guards and deep-delta ownership");

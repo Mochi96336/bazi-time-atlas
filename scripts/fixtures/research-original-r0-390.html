@@ -11,7 +11,7 @@ const query=new URLSearchParams(location.search);
 const desktop=query.get("desktop")==="1";
 const requestedWidth=Number(query.get("width"));
 const width=desktop?1440:
-  ([320,390,768].includes(requestedWidth)?requestedWidth:390);
+  ([320,390,480,481,660,768].includes(requestedWidth)?requestedWidth:390);
 const bare=query.get("bare")==="1";
 const boundary=query.get("boundary")==="1";
 const interactive=query.get("interactive")==="1";
@@ -179,8 +179,13 @@ iframe.addEventListener("load",async()=>{
   const globalStep=derivationSteps?.querySelector('[data-milestone="global-discrete"]');
   const localToGlobalBridge=derivationSteps?.querySelector(".discrete-derivation-bridge");
   const milestoneSteps=[...(derivationSteps?.querySelectorAll(".discrete-derivation-step")??[])];
+  const structuralDetails=derivationSteps?.querySelector("#research-structural-milestones");
+  const structuralSteps=[...(structuralDetails?.querySelectorAll(".discrete-derivation-step")??[])];
   check(milestoneSteps.length===6 &&
-    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,400,1200,8000,1980,24000" &&
+    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,1980,24000,400,1200,8000" &&
+    structuralDetails && !structuralDetails.open &&
+    structuralSteps.map(step=>step.dataset.deltaYears).join(",")==="400,1200,8000" &&
+    structuralDetails.querySelector("summary")?.textContent.includes("補充驗算") &&
     zeroStep && zeroStep.textContent.includes("0 年") &&
     localStep && localStep.dataset.deltaYears==="1980" &&
     localStep.textContent.includes("首次重遇") &&

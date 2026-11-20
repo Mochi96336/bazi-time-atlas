@@ -79,7 +79,7 @@ for (const delta of [0,400,1980,24000]) {
   for (const expected of [
     "年／月可回同柱 · 日／時未能判定",
     "立春 · 315°",
-    "≠ 完整「時間 → 八字」精確週期"
+    "模型內：並非固定時間下的精確節界回歸"
   ]) {
     if (!fixed.dom.includes(expected)) {
       throw new Error(`fixed +24k selected-crossing conclusion missing "${expected}" at Δ=${delta}: ${fixed.url}`);

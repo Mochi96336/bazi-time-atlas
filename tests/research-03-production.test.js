@@ -39,10 +39,62 @@ test("Research 03 production does not redraw Research 02 evidence",()=>{
 test("Research 02/03 explanations retain explicit reference frames and visual hierarchy",async()=>{
   const css=await readFile(new URL("../research-evidence-reading.css",import.meta.url),"utf8");
   assert.match(html,/href="\.\/research-evidence-reading\.css"/);
-  assert.match(html,/把 0 天定義成真正重合/);
-  assert.match(html,/同一太陽黃經下年／月可回同柱/);
-  assert.match(html,/仍不足以判定日／時/);
+  assert.match(html,/以固定公曆年差後的 TT 到達時間差為零線/);
+  assert.match(html,/同一太陽黃經下年／月可依條件回同柱/);
+  assert.match(html,/日／時仍未能判定/);
   assert.match(css,/#research-astronomy \.seasonal-drift-summary \.seasonal-drift-stat small/);
   assert.match(css,/#research-evidence \.determinacy-panel \.determinacy-card p/);
   assert.doesNotMatch(css,/linear-gradient|radial-gradient|rotate\(/);
+});
+
+test("Research 01–03 composition uses readable adjacent verdicts instead of tall empty cells",async()=>{
+  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
+  assert.match(html,/href="\.\/research-story-hierarchy\.css"/);
+  assert.match(html,/02 → 03 · 證據的後果/);
+  assert.match(css,/\.determinacy-card \{\s*min-height:0;/);
+  assert.match(css,/\.determinacy-card \.determinacy-status \{\s*margin-top:10px;\s*padding-top:0;/);
+  assert.match(css,/\.discrete-derivation-step\[data-milestone="structural"\] \{\s*min-height:0;/);
+  assert.match(fixture,/cardHeight>205\|\|statusGap>32/);
+  assert.doesNotMatch(css,/linear-gradient|radial-gradient|box-shadow/);
+});
+
+test("Research 03 states both reference frames before the four-pillar verdict",async()=>{
+  const view=await readFile(new URL("../src/research-absolute-boundary-consequence-view.js",import.meta.url),"utf8");
+  const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
+  assert.match(view,/determinacy\.insertAdjacentElement\("beforebegin",panel\)/);
+  assert.doesNotMatch(view,/determinacy\.insertAdjacentElement\("afterend",panel\)/);
+  assert.match(fixture,/Reference frame comparison must appear before pillars/);
+  assert.match(view,/日／時仍是「未能判定」/);
+});
+
+test("Research 01 stops repeating its mobile path; Research 03 mobile evidence uses one readable column",async()=>{
+  const css=await readFile(new URL("../research-story-hierarchy.css",import.meta.url),"utf8");
+  const fixture=await readFile(new URL("../scripts/fixtures/research-03-production-visual.html",import.meta.url),"utf8");
+  assert.match(css,/#research-discrete > \.research-discrete-scope \{ display:none; \}/);
+  assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] \.research-condition-route \{\s*display:none;/);
+  assert.match(css,/#research-evidence \.research-alignment-fork \{\s*grid-template-columns:minmax\(0,1fr\);/);
+  assert.match(css,/#research-evidence \.determinacy-panel\[data-diagram-grammar="pillar-verdict"\] \.determinacy-grid \{\s*grid-template-columns:minmax\(0,1fr\);/);
+  assert.match(css,/#research-evidence \.research-alignment-fork small \{[\s\S]*?font-size:13px;/);
+  assert.match(fixture,/Research 03 mobile reasons are unreadable or cramped/);
+});
+
+test("Research conclusions state the TT time baseline and deep-time validation boundary at the point of claim",async()=>{
+  const html=await readFile(new URL("../recurrence.html",import.meta.url),"utf8");
+  const view=await readFile(new URL("../src/research-absolute-boundary-consequence-view.js",import.meta.url),"utf8");
+  const visual02=await readFile(new URL("../scripts/fixtures/research-02-production-visual.html",import.meta.url),"utf8");
+  const check02=await readFile(new URL("../scripts/visual-check-research-02-production.mjs",import.meta.url),"utf8");
+  const check03=await readFile(new URL("../scripts/visual-check-research-03-production.mjs",import.meta.url),"utf8");
+  assert.match(html,/TT\(26026, λ\) − TT\(2026, λ\) − 8,765,820 日/);
+  assert.match(html,/為什麼要 8,000 年/);
+  assert.match(html,/尚未獨立驗證 26026 年框架/);
+  assert.match(html,/模型內：並非固定時間下的精確節界回歸/);
+  assert.match(view,/targetYearFrameIndependentlyValidated="false"/);
+  assert.match(view,/尚未獨立驗證目標年框架/);
+  assert.match(visual02,/selectJie\(45,"立夏"\)/);
+  assert.match(visual02,/selectJie\(315,"立春"\)/);
+  for(const width of [320,390,480,481,660,1440]){
+    assert.match(check02,new RegExp('width:'+width+'(?:,|})'));
+    assert.match(check03,new RegExp('width:'+width+'(?:,|})'));
+  }
 });

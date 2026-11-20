@@ -2,15 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [view, css, residualView, residualCss] = await Promise.all([
+const [view, css, residualView, residualCss, html] = await Promise.all([
   readFile(new URL("../src/research-astronomy-drilldown-view.js", import.meta.url), "utf8"),
   readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
   readFile(new URL("../src/astronomical-residuals-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8")
+  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
+  readFile(new URL("../recurrence.html", import.meta.url), "utf8")
 ]);
 
-test("astronomy progressive disclosure keeps three closed native drilldowns", () => {
-  for (const id of ["astronomy-residual-detail", "month-boundary-detail", "near-recurrence-detail"]) {
+test("astronomy progressive disclosure is reserved for supporting residual and boundary data", () => {
+  for (const id of ["astronomy-residual-detail", "month-boundary-detail"]) {
     assert.match(view, new RegExp(`makeDetails\\(\\"${id}\\"`));
   }
   assert.doesNotMatch(view, /\.open\s*=|setAttribute\(\s*["']open["']/);
@@ -52,10 +53,13 @@ test("month-boundary outcome keeps a visible mechanism diagram without duplicati
   assert.match(residualCss, /\.boundary-shift-window\s*\{[\s\S]*background:/);
 });
 
-test("near recurrence summary remains visible while chart and ranking body drill down", () => {
-  assert.match(view, /panel\?\.querySelector\("\.near-search-body"\)/);
-  assert.match(view, /detail\.appendChild\(body\)/);
-  assert.doesNotMatch(view, /near-search-head.*appendChild/s);
+test("long-horizon recurrence chart and ranking are primary visible Research 02 content", () => {
+  assert.match(html, /<section id="near-recurrence-detail" class="near-search-panel"/);
+  assert.match(html, /<strong>長時間回歸搜尋<\/strong>/);
+  assert.match(html, /class="near-search-scope"/);
+  assert.match(html, /id="near-recurrence-chart"/);
+  assert.match(html, /id="near-recurrence-ranking"/);
+  assert.doesNotMatch(view, /installNearRecurrenceDetail|makeDetails\("near-recurrence-detail"/);
 });
 
 test("drilldowns and RMS headline render as flat rails rather than new cards", () => {
