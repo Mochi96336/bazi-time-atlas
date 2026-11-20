@@ -36,7 +36,7 @@
 
     <section class="atlas-intro">
       <div class="atlas-intro-copy">
-        <div class="eyebrow">One instant · multiple clocks</div>
+        <div class="eyebrow">同一瞬間 · 多個時鐘</div>
         <h1>同一個時間，<br>每一層跑得不一樣。</h1>
         <p class="lede">把時、日、太陽年度座標、月與年依時間尺度由內向外接成一台儀器。越內圈越快、越外圈越慢；節氣與熱帶黃道共用同一個太陽黃經年度座標，不再假裝是兩個獨立時鐘。</p>
       </div>
@@ -178,7 +178,7 @@
       </svg>
 
       <div class="instrument-readout" aria-live="polite">
-        <div class="readout-kicker">Selected instant</div>
+        <div class="readout-kicker">選定時間</div>
         <div class="selected-instant-line">
           <div id="instant-readout">—</div>
           <button id="now-button" class="readout-now" type="button" aria-label="將選定時間回到現在" title="回到現在">現在</button>
@@ -226,16 +226,16 @@
     </section>
 
     <section class="state-strip" aria-label="目前狀態摘要">
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="year" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Year pillar</span><strong id="state-year">—</strong><small>立春切換</small></button>
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="month" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Month pillar</span><strong id="state-month">—</strong><small>十二節切換</small></button>
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="day" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Day pillar</span><strong id="state-day">—</strong><small>60 日序列</small></button>
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="hour" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Hour pillar</span><strong id="state-hour">—</strong><small>2 小時一格</small></button>
-      <div class="state-cell"><span>Solar / Zodiac</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="year" aria-controls="ganzhi-inspector" aria-expanded="false"><span>年柱</span><strong id="state-year">—</strong><small>立春切換</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="month" aria-controls="ganzhi-inspector" aria-expanded="false"><span>月柱</span><strong id="state-month">—</strong><small>十二節切換</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="day" aria-controls="ganzhi-inspector" aria-expanded="false"><span>日柱</span><strong id="state-day">—</strong><small>60 日序列</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="hour" aria-controls="ganzhi-inspector" aria-expanded="false"><span>時柱</span><strong id="state-hour">—</strong><small>2 小時一格</small></button>
+      <div class="state-cell"><span>節氣／星座</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
     </section>
 
     <aside id="ganzhi-inspector" class="ganzhi-inspector" hidden role="dialog" aria-modal="false" aria-labelledby="ganzhi-inspector-title" data-open="false" data-ready="false">
       <header class="ganzhi-inspector-head">
-        <span>六十甲子 reference</span>
+        <span>六十甲子對照</span>
         <button id="ganzhi-inspector-close" class="ganzhi-inspector-close" type="button" aria-label="關閉六十甲子參考">關閉</button>
       </header>
       <div class="ganzhi-inspector-identity">
@@ -260,12 +260,12 @@
 
     <section class="atlas-notes">
       <div>
-        <div class="eyebrow">How to read it</div>
+        <div class="eyebrow">怎麼讀</div>
         <h2>半徑就是尺度：越外圈，時間越大。</h2>
         <p>時柱 60 格約五天一圈，日柱 60 格是六十天；中間的年度座標以太陽黃經連續走完一年，內列標 24 節氣、外列標 12 個熱帶黃道區段。再往外是約五年才走完 60 格的月柱，最外層則是 60 年一圈的年柱。五個時間層仍由同一 Selected Instant 驅動，但不再用歷史實作順序排列。</p>
       </div>
       <div>
-        <div class="eyebrow">Scale focus</div>
+        <div class="eyebrow">觀察尺度</div>
         <ul>
           <li><strong>48 小時</strong>：時柱／日柱前景化，觀察高速離散跳格。</li>
           <li><strong>一年</strong>：年度黃經／月柱前景化，觀察節界如何驅動月柱。</li>
@@ -287,7 +287,7 @@
     <h2 id="detail-title">—</h2>
     <div id="legacy-five-tigers" class="five-tigers-readout"></div>
     <details id="hidden-stems-panel" data-hidden-branch="">
-      <summary>Legacy hidden stems projection</summary>
+      <summary>藏干（舊版投影）</summary>
       <div id="legacy-hidden-list"></div>
     </details>
   </div>

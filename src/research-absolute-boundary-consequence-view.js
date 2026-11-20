@@ -22,7 +22,7 @@ function ensurePanel(){
       '<div>',
         '<div class="eyebrow">研究結論 · 01 → 02 → 03</div>',
         '<h3>為什麼「年／月可回同柱」與「24,000 不是完整週期」能同時成立？</h3>',
-        '<p>因為兩句話對齊的基準不同：一條固定太陽位置，一條固定公曆時間。把 reference frame 分開後，結論並不矛盾。</p>',
+        '<p>因為兩句話對齊的基準不同：一條固定太陽位置，一條固定公曆時間。把兩種對齊基準分開後，結論並不矛盾。</p>',
       '</div>',
     '</header>',
     '<div class="research-fork-source"><span>同一 +24,000 年離散候選</span></div>',

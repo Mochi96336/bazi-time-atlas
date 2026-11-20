@@ -366,7 +366,7 @@ function ensureEpochAuditPanel() {
     <div class="epoch-audit-head">
       <div>
         <div class="eyebrow">Absolute seasonal epoch · source audit</div>
-        <h2>有 seasonal crossings，不代表 target instant 已綁定。</h2>
+        <h2>知道節氣時刻，不等於知道當天的精確時間。</h2>
         <p>這裡只稽核 source/provider 能否提供 absolute seasonal anchors。direct-event runtime 的 canonical crossings 與 recurrence 的 typed target-instant reference basis 是不同能力；後者必須由 target-instant contract 明示，不從 anchors 推定。</p>
       </div>
       <div class="epoch-audit-summary">

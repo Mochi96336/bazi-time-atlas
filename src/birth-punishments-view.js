@@ -78,7 +78,7 @@ function install() {
   band.id = "pillar-punishments-band";
   const head = node("div", "pillar-punishments-head");
   head.append(
-    node("small", null, "PUNISHMENT STRUCTURE"),
+    node("small", null, "刑的結構"),
     node("span", null, "方向 / 互刑 / 自刑")
   );
   body = node("div", "pillar-punishments-body");

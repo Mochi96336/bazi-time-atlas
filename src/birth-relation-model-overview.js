@@ -61,7 +61,7 @@ function install() {
 
   const head = node("div", "relation-model-overview-head");
   head.append(
-    node("small", null, "RELATION TOPOLOGY"),
+    node("small", null, "關係結構"),
     node("span", null, "先看結構，再看名稱")
   );
 

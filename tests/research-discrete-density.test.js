@@ -241,7 +241,7 @@ test("year strip owns the visible 1/1, Li Chun, selected date, year end, and nex
   assert.match(recurrenceHtml, /id="research-year-base-title">選定日 · —年<\/strong>/);
   assert.match(recurrenceHtml, />12\/31</);
   assert.match(recurrenceHtml, /id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1\+8 固定時差/);
-  assert.match(recurrenceHtml, /id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析/);
+  assert.match(recurrenceHtml, /id="research-year-li-chun-unavailable-copy">節氣的天文時刻尚未解析/);
   assert.match(recurrenceHtml, /id="research-year-next-date"/);
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
   assert.match(recurrenceHtml, /aria-label="選定日到下一年同月同日"/);

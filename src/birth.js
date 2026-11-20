@@ -129,7 +129,7 @@ function installPillarRelations() {
   const summary = document.createElement("summary");
   const summaryCopy = node("span", "pillar-relations-summary-copy");
   summaryCopy.append(
-    node("small", null, "VISIBLE PILLARS · PAIRS + COMPLETE GROUPS"),
+    node("small", null, "四柱表面 · 兩兩關係＋完整組合"),
     node("strong", null, "四柱表面關係 · 五合 / 六合 / 六沖 / 三合 / 三會")
   );
   pillarRelationsCount = node("span", "pillar-relations-count", "0 對 · 0 組");
@@ -155,7 +155,7 @@ function installPillarRelations() {
   const groupsBand = node("section", "pillar-groups-band");
   const groupsHead = node("div", "pillar-groups-head");
   groupsHead.append(
-    node("small", null, "FULL 3-BRANCH SET"),
+    node("small", null, "完整三支組"),
     node("span", null, "完整三支才顯示")
   );
   pillarGroupsBody = node("div", "pillar-groups-body");
@@ -306,7 +306,7 @@ function renderTenGodDerivation(dayMaster) {
   const heading = node("header", "ten-gods-derivation-head");
   const copy = node("div", null);
   copy.append(
-    node("small", null, "WHY THIS NAME"),
+    node("small", null, "為什麼這樣命名"),
     node("strong", null, `${dayMaster}日主 · ${dayMeta.yinYang}${dayMeta.element}`),
     node("span", null, "先決定五行方向，再用陰陽同異把每組拆成兩個名稱。")
   );
@@ -450,7 +450,7 @@ function renderCompleteBranchGroups(groups) {
       member.append(
         node("b", null, support.value),
         node("span", null, support.pillars.map(key => `${shortPillarLabels[key]}支`).join(" / ")),
-        node("small", null, "member")
+        node("small", null, "成員")
       );
       members.append(member);
     }

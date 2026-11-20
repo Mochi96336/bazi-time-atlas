@@ -154,7 +154,7 @@ function install() {
   preview.setAttribute("aria-label", "地方太陽時與柱位敏感度比較");
   preview.innerHTML = `
     <div class="mean-solar-preview-copy">
-      <small>SOLAR TIME BASIS</small>
+      <small>太陽時基準</small>
       <strong>地方太陽時比較</strong>
       <span>平太陽時 = 經度校正；視太陽時再加均時差。</span>
     </div>
