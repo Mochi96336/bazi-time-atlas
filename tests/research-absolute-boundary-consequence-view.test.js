@@ -21,7 +21,7 @@ test("Research 03 explains the two reference frames right after the fixed +24k p
   assert.match(view,/if\(why\)why\.append\(panel\)/);
   assert.match(view,/publishFixedEvidence\(\)/);
   assert.match(view,/absoluteBoundaryReferenceJie="displaced"/);
-  assert.match(view,/為什麼「年／月可回同柱」與「24,000 不是完整週期」能同時成立/);
+  assert.match(view,/年柱、月柱一樣，為什麼還不算週期？/);
   assert.match(model,/deltaYears:DATA\.targetYear-DATA\.baseYear/);
 });
 
@@ -29,8 +29,8 @@ test("Research 03 does not redraw the twelve-Jie evidence already owned by 02",(
   assert.doesNotMatch(view,/absolute-boundary-strip|absolute-boundary-buttons|renderStrip|svgEl\(/);
   assert.doesNotMatch(view,/查看 12 節詳細數值|boundary-window union/);
   assert.doesNotMatch(css,/absolute-boundary-strip|absolute-boundary-buttons|absolute-boundary-window/);
-  assert.match(view,/12 \/ 12 節界提前/);
-  assert.match(view,/證據已在 02 顯示，不在 03 重畫/);
+  assert.match(view,/十二個節都提早/);
+  assert.match(view,/（02 的圖；/);
 });
 
 test("fixed Research 03 pillar cards follow the shared selected seasonal state",()=>{
@@ -53,12 +53,11 @@ test("Research outline ends in the recurrence conclusion rather than repeating t
 });
 
 test("Research 03 states the distinction without repeating the same verdict twice",()=>{
-  assert.match(view,/對齊同一太陽黃經/);
-  assert.match(view,/年／月可回到同柱/);
-  assert.match(view,/固定推進 24,000 公曆年/);
-  assert.match(view,/日／時仍是「未能判定」/);
-  assert.match(view,/不能直接偷換成/);
-  assert.match(view,/不能直接偷換成「每個相隔 24,000 年的四柱一定不同」/);
+  assert.match(view,/比「太陽走到同一個位置」/);
+  assert.match(view,/年柱、月柱可以一樣/);
+  assert.match(view,/比「日曆上的同一天」/);
+  assert.match(view,/日柱、時柱是「不知道」，不是「一定不同」/);
+  assert.match(view,/不能反過來說 24,000 年後的四柱一定不一樣/);
   assert.doesNotMatch(view,/absolute-boundary-verdict|回答研究題目|24,000 ≠ 整套映射精確週期/);
   assert.doesNotMatch(css,/\.absolute-boundary-verdict/);
   assert.match(css,/\.research-alignment-fork/);

@@ -44,9 +44,11 @@
         root.scrollIntoView({block:"start"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
-        const bodyPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".seasonal-drift-evidence-copy p")).fontSize);
-        const statPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".seasonal-drift-stat.verdict small")).fontSize);
-        const boundaryPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".seasonal-boundary-proof-head p")).fontSize);
+        // Review 2026-11-21: the visible reading lines are the open "why"
+        // explanation, the model note and the zero-line "how to read" line.
+        const bodyPx=Number.parseFloat(win.getComputedStyle(doc.querySelector("#seasonal-drift-orbit-details .seasonal-drift-orbit-head p")).fontSize);
+        const statPx=Number.parseFloat(win.getComputedStyle(doc.querySelector(".research-model-scope")).fontSize);
+        const boundaryPx=Number.parseFloat(win.getComputedStyle(doc.querySelector('[data-figure-howto="02"]')).fontSize);
         if(bodyPx<12.5||statPx<11||boundaryPx<12)
           throw new Error(`Research 02 evidence prose is too small: lede ${bodyPx}px, statistic ${statPx}px, zero-line note ${boundaryPx}px`);
         const heading=doc.querySelector("#research-astronomy > .research-task-head");
@@ -56,14 +58,14 @@
         const transition=doc.querySelector("#research-case-transition");
         const modelScope=doc.querySelector(".research-model-scope");
         const boundarySelect=doc.querySelector("#seasonal-boundary-select");
-        if(!orbitDetails||orbitDetails.open||
-          !transition?.textContent.includes("01 的選取不會改寫節界證據")||
+        if(!orbitDetails||orbitDetails.tagName!=="DIV"||
+          !transition?.textContent.includes("比較的是 2026 年和 24,000 年後的 26026 年")||
           !modelScope?.textContent.includes("獨立驗證")||
           boundarySelect?.options.length!==13)
-          throw new Error("Research 02 missing fixed-case boundary, model caveat, closed orbit, or 12 native Jie options");
+          throw new Error("Research 02 missing fixed-case boundary, model caveat, open orbit explanation, or 12 native Jie options");
         const verdict=doc.querySelector(".seasonal-drift-evidence-note");
-        if(!(verdict.compareDocumentPosition(orbitDetails)&Node.DOCUMENT_POSITION_FOLLOWING))
-          throw new Error("Research 02 result must precede optional orbit");
+        if(!(orbitDetails.compareDocumentPosition(verdict)&Node.DOCUMENT_POSITION_FOLLOWING))
+          throw new Error("Research 02 explains why (orbit) before the consequence that leads to 03");
         // Real interaction contract: native Jie selection updates the
         // shared solar cursor, the visible 02 time strip and the 03 pillar
         // evidence. A static count of <option> elements does not prove this.

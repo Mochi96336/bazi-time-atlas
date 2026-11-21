@@ -366,7 +366,8 @@ test("reading order explains the global candidate before date/fan verification a
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
   assert.match(recurrenceHtml, /data-diagram-grammar="condition-ladder"/);
   assert.match(recurrenceHtml, /取 1,200 和 8,000 的最小公倍數，就是 24,000 年/);
-  assert.match(recurrenceHtml, /1,980 年左右年序和日序會先回來，但公曆還差 20 年/);
+  assert.match(recurrenceHtml, /兩個條件第一次同時成立是 1,980 年後/);
+  assert.match(recurrenceHtml, /1,980 不是 400 的倍數，所以季節位置還沒回來/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
@@ -393,11 +394,13 @@ test("first-screen research milestones reuse the canonical delta state and date-
   // conclusion, so the page opens with the question rather than a dashboard.
   const discrete=recurrenceHtml.indexOf('id="research-discrete"');
   const conclusion=recurrenceHtml.indexOf('data-plain-conclusion="01"');
-  // Research redesign R1/R2: the answer route map precedes 01; the milestone
-  // toggles drive the fan right after 01's conclusion; the shared time card
-  // is an optional tool after the fan.
-  assert.ok(outline > 0 && outline < discrete && discrete < conclusion && conclusion < entry && entry < fan && fan < time,
-    "route map, 01 conclusion, milestone toggles, fan, then the optional time card");
+  // Review 2026-11-21: 01 reads with the three-dial figure; the phase fan
+  // and its milestone buttons (attached right under it) live in the lab.
+  const dials=recurrenceHtml.indexOf('id="research-cycle-dials"');
+  const lab=recurrenceHtml.indexOf('id="research-lab"');
+  assert.ok(outline > 0 && outline < discrete && discrete < conclusion && conclusion < dials && dials < lab &&
+    lab < fan && fan < entry && entry < time,
+    "route map, 01 conclusion, the dials; then in the lab: fan, its milestone buttons, the time card");
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
   assert.doesNotMatch(recurrenceHtml.slice(entry,recurrenceHtml.indexOf("</div>",recurrenceHtml.indexOf('id="research-entry-selection"'))),/\+1,980/);
@@ -455,7 +458,7 @@ test("Research 01 primary proof stays visible while 400/1200/8000 supporting che
   assert.match(recurrenceView,/else derivationSteps\.appendChild\(button\)/);
   assert.match(story,/\.research-structural-milestone-grid \{\s*display:grid;/);
   assert.match(story,/\.research-structural-milestones > summary:focus-visible/);
-  assert.match(recurrenceHtml,/看 \+400／\+1,200／\+8,000 的中間驗算/);
+  assert.match(recurrenceHtml,/<div id="research-discrete-tools" class="research-discrete-tools">/);
   assert.doesNotMatch(recurrenceHtml,/依序點上方 \+400、\+8,000、\+24,000/);
 });
 
@@ -471,8 +474,8 @@ test("Research 01 proves 8,000 days closure and the 24,000 LCM without confusing
   assert.equal(lcm(400,60),1200);
   assert.equal(400*20,8000);
   assert.equal(lcm(1200,8000),24000);
-  assert.match(recurrenceHtml,/class="research-discrete-proof-equation"/);
-  assert.match(recurrenceHtml,/146,097 日/);
-  assert.match(recurrenceHtml,/20 × 57 = 1,140/);
+  assert.match(recurrenceHtml,/class="research-discrete-mechanism"/);
+  assert.match(recurrenceHtml,/400 年共有 146,097 天，除以 60 餘 57，要累積 20 個 400 年/);
+  assert.match(recurrenceHtml,/也就是 60 和 400 的最小公倍數/);
   assert.match(recurrenceView,/不是在局部重遇後再補 20 年/);
 });

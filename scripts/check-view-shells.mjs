@@ -100,8 +100,8 @@ requireEqual(attr(probe, "data-recurrence-derivation-grammar"), "condition-ladde
 requireEqual(attr(probe, "data-recurrence-local-year-day-visible"), "true", "The first local Year+Day recurrence must be visible and identified in the derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
-requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research 01 plain conclusion must start in the first mobile viewport and the derivation thesis must precede the date explorer", url);
-requireEqual(attr(probe, "data-recurrence-discrete-tools-closed-on-entry"), "true", "Research 01 tools must stay behind a default-closed disclosure", url);
+requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research answer must start in the first mobile viewport and the derivation thesis must precede the date explorer", url);
+requireEqual(attr(probe, "data-recurrence-discrete-tools-open-in-lab"), "true", "Research tools must be open inside the lab, not behind a disclosure", url);
 requireEqual(attr(probe, "data-recurrence-year-day-single-owner"), "true", "Single-date Year/Day evidence must keep one owner without duplicating the zero-year baseline", url);
 requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the primary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
@@ -113,10 +113,9 @@ requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical rec
 requireEqual(attr(probe, "data-recurrence-duplicate-candidates-hidden"), "true", "Other time must not visibly repeat the public recurrence candidates", url);
 requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Other time toolbar must remain one physical row while open", url);
 requireEqual(attr(probe, "data-recurrence-question-text"), "八字多久會重複一次？", "Research question changed", url);
-// Research redesign R1: the opening answers in one sentence and a three-step
-// route map replaces the alignment table.
+// The opening answers in one sentence, then a to-scale overview; no alignment table.
 requireEqual(attr(probe, "data-recurrence-alignment-count"), "0", "Research opening must not bring back the alignment table", url);
-requireEqual(attr(probe, "data-recurrence-next-text"), "下面分三步說明，每一步一張圖。", "Research inference line changed", url);
+requireEqual(attr(probe, "data-recurrence-next-text"), "橫線是時間，按比例畫：1,980 年只是 24,000 年的一小段。", "Research overview caption changed", url);
 requireEqual(attr(probe, "data-recurrence-spine-discrete"), "曆法上三個循環全部對上", "Research discrete spine lost fixed main-story state", url);
 requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "但真正的節氣沒有回來", "Research astronomy spine lost fixed main-story state", url);
 requireEqual(attr(probe, "data-recurrence-spine-evidence"), "所以 24,000 年不是四柱的週期", "Research evidence spine lost fixed main-story state", url);

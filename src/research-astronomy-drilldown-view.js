@@ -1,4 +1,5 @@
-const task = document.querySelector("#research-astronomy");
+// Review 2026-11-21: the other-Δ astronomy panel lives in the lab.
+const task = document.querySelector("#research-lab") ?? document.querySelector("#research-astronomy");
 
 function ensureStyles() {
   if (document.querySelector("link[data-research-astronomy-drilldown-styles]")) return;

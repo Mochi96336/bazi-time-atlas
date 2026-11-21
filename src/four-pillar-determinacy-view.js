@@ -83,6 +83,19 @@ function renderCard(name,{ pillarName=null, status, reason, resolved=false }) {
   if(summary) summary.textContent=reason;
 }
 
+// Review 2026-11-21: the 03 verdict is read by novices; the technical reason
+// stays in the shared research state (lab time card), the card says it plainly.
+const PLAIN_REASONS=Object.freeze({
+  resolved:Object.freeze({
+    year:"看太陽在立春前還是後，加上 60 年一輪，就算得出來。",
+    month:"看太陽走到哪一個節，就知道是哪個月。"
+  }),
+  unresolved:Object.freeze({
+    day:"要知道地球轉了幾圈才知道是哪一天；24,000 年後誤差有好幾天。",
+    hour:"要知道地球轉到哪一刻，而且得先知道是哪一天。"
+  })
+});
+
 function writeInstrumentStatus(states,resolvedCount){
   instrument.dataset.fourPillarYearStatus=states.year.status;
   instrument.dataset.fourPillarMonthStatus=states.month.status;
@@ -105,7 +118,7 @@ function renderSharedSeasonal(state){
     renderCard(name,{
       pillarName:pillar.name,
       status:pillar.status,
-      reason:pillar.reason,
+      reason:(resolved?PLAIN_REASONS.resolved:PLAIN_REASONS.unresolved)[name]??pillar.reason,
       resolved
     });
   }

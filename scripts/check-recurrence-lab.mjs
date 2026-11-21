@@ -118,7 +118,7 @@ function expectReaderMeaning(dom, fragments, label, url) {
 
 function expectDiscreteComprehension(dom, url) {
   if (!dom.includes("每圈的 0 只代表該循環序位回到起點") ||
-      !dom.includes("看 +400／+1,200／+8,000 的中間驗算")) {
+      !dom.includes('data-cycle-milestone="8000"')) {
     throw new Error(`Research 01 must instruct readers how to interpret 0 and compare concrete milestones: ${url}`);
   }
   if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 與基準同相位 · 左右為距 0 的最短循環位移")) {

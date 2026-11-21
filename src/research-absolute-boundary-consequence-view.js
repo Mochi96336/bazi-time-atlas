@@ -21,17 +21,16 @@ function ensurePanel(){
   panel.innerHTML=[
     '<header class="absolute-boundary-head research-conclusion-head">',
       '<div>',
-        '<div class="eyebrow">研究結論 · 01 → 02 → 03</div>',
-        '<h3>為什麼「年／月可回同柱」與「24,000 不是完整週期」能同時成立？</h3>',
-        '<p>在尚未獨立驗證目標年框架的研究模型內，兩句話使用不同基準：一條固定太陽黃經，一條固定公曆時間；年／月的條件性同柱不代表完整四柱的普遍精確週期。</p>',
+        '<h3>年柱、月柱一樣，為什麼還不算週期？</h3>',
+        '<p>因為「一樣」和「週期」比的是兩件不同的事。</p>',
       '</div>',
     '</header>',
-    '<div class="research-fork-source"><span>同一 +24,000 年離散候選</span></div>',
+    
     '<div class="research-alignment-fork">',
-      '<article data-alignment-claim="solar"><span>對齊同一太陽黃經</span><strong>年／月可回到同柱</strong><small>同一太陽黃經位置與 60 年序閉合時，年／月柱才可依規則回同柱；這不是固定公曆時刻重現。</small></article>',
-      '<article data-alignment-claim="calendar"><span>固定推進 24,000 公曆年</span><strong>本模型內：節界到達時間未重現</strong><small>12 / 12 節界提前 '+CONSEQUENCE.minBoundaryDays.toFixed(3)+'–'+CONSEQUENCE.maxBoundaryDays.toFixed(3)+' 天；證據已在 02 顯示，不在 03 重畫。</small></article>',
+      '<article data-alignment-claim="solar"><span>比「太陽走到同一個位置」</span><strong>年柱、月柱可以一樣</strong><small>等太陽走到同一個位置再比，年柱和月柱會回到同一組干支。但那一刻已經不是日曆上的同一天。</small></article>',
+      '<article data-alignment-claim="calendar"><span>比「日曆上的同一天」</span><strong>節氣沒有回到原位</strong><small>固定往後 24,000 個公曆年，十二個節都提早 '+CONSEQUENCE.minBoundaryDays.toFixed(1)+'–'+CONSEQUENCE.maxBoundaryDays.toFixed(1)+' 天（02 的圖；深時間模型推算，26026 年框架尚未獨立驗證）。週期要的是這一種：同一天、同一刻，四柱全部一樣。</small></article>',
     '</div>',
-    '<p class="absolute-boundary-note"><strong>日／時仍是「未能判定」：</strong>節界未重現可以否定整套固定精確週期，但不能直接偷換成「每個相隔 24,000 年的四柱一定不同」。深時間民用日、日界與地方時證據仍不足。</p>'
+    '<p class="absolute-boundary-note"><strong>日柱、時柱是「不知道」，不是「一定不同」。</strong>上面的誤差圖只說明它們算不準，不能反過來說 24,000 年後的四柱一定不一樣。</p>'
   ].join("");
 
   // Research redesign R4: the pillar verdict is the 03 figure; the two

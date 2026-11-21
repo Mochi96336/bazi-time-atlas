@@ -51,11 +51,10 @@ test("Research 01 has concise proof guidance and optional intermediate checks in
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   assert.match(html,/每圈的 0 只代表該循環序位回到起點/);
   assert.match(html,/正負數是最短相位差，不是節氣提前天數/);
-  assert.match(html,/看 \+400／\+1,200／\+8,000 的中間驗算/);
   assert.match(html,/真正的<a class="research-term" href="#term-jie">十二節<\/a>到 02 再驗/);
   // Research redesign R2: one reading line under the fan replaces the
   // thesis-header and explorer-intro paragraphs.
-  assert.match(html,/<p class="research-figure-howto">讀法：外圈公曆 400 年結構、中圈 60 年序、內圈 60 日序。/);
+  assert.match(html,/<p class="research-figure-howto">怎麼看：外圈公曆 400 年結構、中圈 60 年序、內圈 60 日序。/);
   assert.doesNotMatch(html,/class="research-discrete-explorer-intro"/);
   assert.doesNotMatch(html,/class="research-reading-card"|id="research-reading-wizard"/);
 });
@@ -64,8 +63,8 @@ test("Research 01 prioritizes readable evidence instead of truncating milestone 
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   const css=cssSource("research-entry.css");
   assert.match(html,/目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期/);
-  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
-  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
+  assert.match(css,/#research-lab \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
+  assert.match(css,/#research-lab \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
   assert.match(css,/\.research-outline small \{\s*font-size:12px;/);
   assert.doesNotMatch(html,/research-reading-card|research-reading-wizard/);
 });

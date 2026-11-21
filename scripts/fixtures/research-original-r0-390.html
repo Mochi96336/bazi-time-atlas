@@ -68,8 +68,9 @@ iframe.addEventListener("load",async()=>{
   // controls are 01 tools behind one within-chapter "try it" disclosure
   // (default closed). Open it to audit the original modules.
   const tools=d.getElementById("research-discrete-tools");
-  check(tools && !tools.open && tools.contains(d.getElementById("research-year-strip")),
-    "01 tools must keep the original year strip behind a default-closed in-chapter disclosure");
+  // Review 2026-11-21: the tools are open in the lab after the three steps.
+  check(tools && tools.tagName==="DIV" && tools.closest("#research-lab") && tools.contains(d.getElementById("research-year-strip")),
+    "lab tools must keep the original year strip open inside the lab");
   tools.open=true;
   await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
   const ids=["research-discrete","research-cycle-comparison",
@@ -230,9 +231,10 @@ iframe.addEventListener("load",async()=>{
     "R11 Other time must be one 44–52px toolbar with duplicate candidates hidden");
   compactControls.open=false;
   check(sexagenaryDetails && derivation && astronomyTransition &&
-    derivation.getBoundingClientRect().bottom<=astronomyTransition.getBoundingClientRect().top &&
-    astronomyTransition.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top,
-    "R9 60 Ganzhi source must move behind the primary next-step transition");
+    astronomyTransition.getBoundingClientRect().bottom<=derivation.getBoundingClientRect().top &&
+    derivation.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top &&
+    sexagenaryDetails.closest("#research-lab"),
+    "R9 60 Ganzhi source must follow the derivation inside the lab, after 01's next-step transition");
     const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),

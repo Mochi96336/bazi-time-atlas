@@ -115,6 +115,17 @@ try{
     await sleep(70);
   }
   assert.ok(original,"original Year strip did not initialize");
+  // The strip lives deep in the page (the lab follows the three reading
+  // steps); bring it into the touch viewport before dispatching real touches.
+  if(original.rect.y>300){
+    await send("Runtime.evaluate",{expression:`(()=>{
+      const f=document.getElementById("stage"),d=f?.contentDocument;
+      d?.getElementById("research-year-scrub")?.scrollIntoView({block:"center"});
+      return true;
+    })()`,returnByValue:true});
+    await sleep(250);
+    original=await inspect();
+  }
   assert.equal(original.viewport,390,"must target a real 390px iframe");
   assert.ok(original.rect.h>=40 && original.rect.w>260,
     "original bar has no reliable native touch hit area: "+JSON.stringify(original));

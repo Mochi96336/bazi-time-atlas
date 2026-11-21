@@ -7,6 +7,7 @@ import {
 const root = document.querySelector("#research-time-state");
 const instrument = document.querySelector("#recurrence-instrument");
 const discreteSection = document.querySelector("#research-discrete");
+const labSection = document.querySelector("#research-lab");
 const astronomySection = document.querySelector("#research-astronomy");
 const evidenceSection = document.querySelector("#research-evidence");
 const seasonalRoot = document.querySelector("#seasonal-drift-evidence");
@@ -168,7 +169,7 @@ if (root) {
     };
     if (contains(evidenceSection)) return "evidence";
     if (contains(astronomySection)) return "astronomy";
-    if (contains(discreteSection)) return "discrete";
+    if (contains(discreteSection) || contains(labSection)) return "discrete";
     return null;
   }
 

@@ -106,7 +106,7 @@ test("Research presentation layers do not reintroduce prototype English copy", (
   assert.match(timeState, /地球自轉／民用時間資料/);
   assert.doesNotMatch(timeState, /2026 crossing|TT crossing|Earth-rotation \/ civil-time bridge/);
 
-  assert.match(absoluteView, /研究結論 · 01 → 02 → 03/);
+  assert.match(absoluteView, /年柱、月柱一樣，為什麼還不算週期？/);
   assert.doesNotMatch(absoluteView, /Research conclusion/);
 });
 

@@ -1823,29 +1823,29 @@ body {
   font-size:12px;
   line-height:1.55;
 }
-#research-discrete .research-discrete-thesis .discrete-derivation-step > small {
+#research-lab .research-discrete-thesis .discrete-derivation-step > small {
   overflow:visible;
   white-space:normal;
   text-overflow:clip;
   font-size:12px;
   line-height:1.45;
 }
-#research-discrete .research-discrete-thesis .discrete-derivation-step > strong {
+#research-lab .research-discrete-thesis .discrete-derivation-step > strong {
   line-height:1.22;
 }
-#research-discrete .research-discrete-thesis .discrete-derivation-phases small {
+#research-lab .research-discrete-thesis .discrete-derivation-phases small {
   font-size:12px;
   line-height:1.3;
 }
-#research-discrete .research-discrete-thesis .discrete-derivation-phases em {
+#research-lab .research-discrete-thesis .discrete-derivation-phases em {
   font-size:12px;
 }
-#research-discrete .research-discrete-thesis .discrete-derivation-rule {
+#research-lab .research-discrete-thesis .discrete-derivation-rule {
   color:#a4b2b7;
   font-size:12px;
   line-height:1.55;
 }
-#research-discrete .research-solar-origin > small {
+#research-lab .research-solar-origin > small {
   font-size:12px;
   line-height:1.5;
 }
@@ -1853,17 +1853,17 @@ body {
   .research-entry-choice > span,
   .research-entry-choice > small { font-size:12px; }
   .research-entry-selection { font-size:12px; }
-  #research-discrete .research-discrete-thesis .discrete-derivation-step > small {
+  #research-lab .research-discrete-thesis .discrete-derivation-step > small {
     font-size:12px;
   }
 }
 
 /* Structural milestones are secondary, but their verdict must remain visible
    without hover on phones. Full provenance stays in each button's title. */
-#research-discrete .research-discrete-thesis .discrete-derivation-step[data-milestone="structural"] {
+#research-lab .research-discrete-thesis .discrete-derivation-step[data-milestone="structural"] {
   opacity:.90;
 }
-#research-discrete .research-discrete-thesis .discrete-derivation-step[data-milestone="structural"] > small {
+#research-lab .research-discrete-thesis .discrete-derivation-step[data-milestone="structural"] > small {
   display:block;
   margin-top:6px;
   color:#a9b8bf;
@@ -2122,30 +2122,30 @@ body {
 
 /* 01: the two main milestones remain the proof. The intermediate checks are
    legible compact supporting evidence, not three weak 86px empty panels. */
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
   min-height:148px;
   padding:16px 18px;
 }
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
   font-size:clamp(30px,3.25vw,43px);
   line-height:1.08;
 }
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
   min-height:148px;
 }
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
   min-height:0;
   padding:10px 1px 8px;
   opacity:1;
 }
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > strong {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > strong {
   font-size:17px;
   color:#c0cdd2;
   line-height:1.22;
 }
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > small {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] > small {
   display:block;
   margin-top:5px;
   color:#aebdc2;
@@ -2206,24 +2206,24 @@ body {
 }
 
 @media(max-width:820px) {
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
     min-height:0;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
     min-height:0;
   }
 }
 @media(max-width:480px) {
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence,
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure {
     padding:13px 14px;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-local-recurrence > strong,
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step.is-global-closure > strong {
     font-size:clamp(27px,7vw,32px);
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-step[data-milestone="structural"] {
     min-height:0;
     padding:10px 0;
   }
@@ -2324,7 +2324,7 @@ body {
    the state, buttons, data, or original year/day controls. */
 #research-discrete > .research-discrete-scope { display:none; }
 @media(max-width:820px) {
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-condition-route {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-condition-route {
     display:none;
   }
 }
@@ -2414,7 +2414,7 @@ body {
 /* Research 01 narrative hierarchy: +local and +24,000 are the always-visible
    comparison. Intermediate calendar checks remain interactive, but are
    supplemental evidence in the SAME state and DOM. */
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-structural-milestones {
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-structural-milestones {
   grid-column:1 / -1;
   grid-row:2;
   min-width:0;
@@ -2422,7 +2422,7 @@ body {
   border-top:1px solid var(--research-line-subtle);
   border-bottom:1px solid var(--research-line-subtle);
 }
-#research-discrete .research-structural-milestones > summary {
+#research-lab .research-structural-milestones > summary {
   cursor:pointer;
   min-height:44px;
   padding:10px 8px;
@@ -2434,30 +2434,30 @@ body {
   font-size:12.5px;
   line-height:1.45;
 }
-#research-discrete .research-structural-milestones > summary small {
+#research-lab .research-structural-milestones > summary small {
   margin-left:auto;
   color:#9aaeb5;
   font-size:12px;
   line-height:1.5;
 }
-#research-discrete .research-structural-milestones > summary:focus-visible {
+#research-lab .research-structural-milestones > summary:focus-visible {
   outline:2px solid #c5d5d9;
   outline-offset:2px;
 }
-#research-discrete .research-structural-milestone-grid {
+#research-lab .research-structural-milestone-grid {
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:12px;
   padding:5px 7px 12px;
 }
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"]
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"]
 .research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"] {
   grid-column:auto;
   grid-row:auto;
   min-height:0;
   padding:10px 9px;
 }
-#research-discrete .research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"]:focus-visible {
+#research-lab .research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"]:focus-visible {
   outline:2px solid #c5d5d9;
   outline-offset:2px;
 }
@@ -2465,11 +2465,11 @@ body {
 /* A causal transition, not a 150px visual spacer. The +local→+24k bridge
    stays the SAME generated state and its exact signed phase is preserved. */
 @media(max-width:820px) {
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-structural-milestones {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-structural-milestones {
     grid-column:1 / -1;
     grid-row:4;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge {
     display:grid;
     grid-template-columns:22px minmax(0,1fr);
     gap:2px 10px;
@@ -2479,10 +2479,10 @@ body {
     padding:12px 10px;
     text-align:left;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge::before {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge::before {
     display:none;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge::after {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge::after {
     grid-column:1;
     grid-row:1 / span 3;
     content:"↓";
@@ -2491,54 +2491,54 @@ body {
     font-size:17px;
     line-height:1.2;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > span {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > span {
     grid-column:2;
     grid-row:1;
     font-size:12px;
     line-height:1.45;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > strong {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > strong {
     grid-column:2;
     grid-row:2;
     font-size:16px;
     line-height:1.35;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > small {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .discrete-derivation-bridge > small {
     grid-column:2;
     grid-row:3;
     font-size:12px;
     line-height:1.5;
   }
-  #research-discrete .research-structural-milestone-grid {
+  #research-lab .research-structural-milestone-grid {
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
 @media(max-width:480px) {
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin {
     margin:10px 0 12px;
     padding:9px 0;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin > small {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin > small {
     display:none;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin > strong {
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] .research-solar-origin > strong {
     font-size:12.5px;
     line-height:1.4;
   }
-  #research-discrete .research-structural-milestones > summary {
+  #research-lab .research-structural-milestones > summary {
     padding:10px 5px;
     font-size:12.5px;
   }
-  #research-discrete .research-structural-milestones > summary small {
+  #research-lab .research-structural-milestones > summary small {
     margin-left:0;
     font-size:12px;
   }
-  #research-discrete .research-structural-milestone-grid {
+  #research-lab .research-structural-milestone-grid {
     grid-template-columns:1fr;
     gap:0;
     padding:0 4px 10px;
   }
-  #research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"]
+  #research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"]
   .research-structural-milestone-grid .discrete-derivation-step[data-milestone="structural"] {
     padding:9px 6px;
     border-bottom:1px solid var(--research-line-subtle);
@@ -2572,7 +2572,7 @@ body {
 }
 /* Date-only chooser selects the target and preserves Delta by recalculating
    its baseline. Its explanation must not be interpreted as another control. */
-#research-discrete .research-year-head .research-target-date-help {
+#research-lab .research-year-head .research-target-date-help {
   display:block;
   grid-column:1 / -1;
   max-width:84ch;
@@ -2615,7 +2615,7 @@ body {
     margin:12px 0 5px;
     padding:9px 10px;
   }
-  #research-discrete .research-year-head .research-target-date-help {
+  #research-lab .research-year-head .research-target-date-help {
     font-size:12px;
     line-height:1.6;
   }
@@ -2732,22 +2732,22 @@ body {
 
 /* ---------- R2 01: toggles → phase fan → how to read → mechanism ---------- */
 
-#research-discrete .research-entry {
+#research-lab .research-entry {
   display: block;
   margin: 0 0 12px;
 }
-#research-discrete .research-entry-label {
+#research-lab .research-entry-label {
   margin: 0 0 8px;
   color: var(--research-text-secondary);
   font-size: 13px;
 }
-#research-discrete .research-entry-choices {
+#research-lab .research-entry-choices {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   border: 0;
 }
-#research-discrete .research-entry-choice {
+#research-lab .research-entry-choice {
   min-height: 44px;
   flex: 0 1 auto;
   display: grid;
@@ -2760,21 +2760,21 @@ body {
   border-radius: 999px;
   background: transparent;
 }
-#research-discrete .research-entry-choice + .research-entry-choice { padding-left: 16px; border-left: 1px solid var(--research-line-strong); }
-#research-discrete .research-entry-choice > strong { grid-area: years; font-size: 17px; }
-#research-discrete .research-entry-choice > span { grid-area: label; color: var(--research-text-secondary); font-size: 13px; }
-#research-discrete .research-entry-choice > small { display: none; }
-#research-discrete .research-entry-choice[aria-pressed="true"] {
+#research-lab .research-entry-choice + .research-entry-choice { padding-left: 16px; border-left: 1px solid var(--research-line-strong); }
+#research-lab .research-entry-choice > strong { grid-area: years; font-size: 17px; }
+#research-lab .research-entry-choice > span { grid-area: label; color: var(--research-text-secondary); font-size: 13px; }
+#research-lab .research-entry-choice > small { display: none; }
+#research-lab .research-entry-choice[aria-pressed="true"] {
   border-color: currentColor;
   background: rgba(137,172,184,.08);
 }
-#research-discrete .research-entry-selection {
+#research-lab .research-entry-selection {
   margin: 8px 0 0;
   color: var(--research-text-muted);
   font-size: 13px;
 }
 
-#research-discrete .recurrence-instrument { margin-top: 18px; }
+#research-lab .recurrence-instrument { margin-top: 18px; }
 .research-figure-howto {
   max-width: 46em;
   margin: 12px 0 0;
@@ -3039,8 +3039,8 @@ body {
   .research-outline.research-answer-map strong { font-size: 20px; }
   .research-task { margin-top: 88px; }
   .research-task-primary { margin-top: 72px; }
-  #research-discrete .research-entry-choice { padding: 8px 12px; }
-  #research-discrete .research-entry-choice > strong { font-size: 15px; }
+  #research-lab .research-entry-choice { padding: 8px 12px; }
+  #research-lab .research-entry-choice > strong { font-size: 15px; }
   #research-discrete .research-discrete-mechanism { margin-top: 36px; padding-left: 14px; }
   #research-discrete .research-discrete-mechanism p { font-size: 14px; }
   .research-discrete-tools > summary { flex-wrap: wrap; gap: 4px 12px; }
@@ -5475,7 +5475,7 @@ body {
 /* Reader-first Research 01: the two existing proof instructions must be
    legible in actual CSS px, even with the compact mobile research layout.
    No added panels, fan geometry, palette or hierarchy changes. */
-#research-discrete .research-discrete-thesis[data-diagram-grammar="condition-ladder"] > header p,
+#research-lab .research-discrete-thesis[data-diagram-grammar="condition-ladder"] > header p,
 #research-discrete .research-discrete-explorer-intro {
   font-size: 12px;
   line-height: 1.5;
@@ -5775,5 +5775,415 @@ body {
   .target-instant-fields { grid-template-columns: 1fr; }
   #target-instant-status { grid-column: auto; }
   .eot-clearance-facts { grid-template-columns: 1fr; }
+}
+}
+
+/* ==== research-reading-v2.css ==== */
+/* Review 2026-11-21: reading first. Every step is question → one-sentence
+   answer → a large figure with its controls attached → how to read it → the
+   explanation, left open. Tools live in the lab at the end. Negative space
+   comes from fewer elements and generous spacing, not from collapsing text.
+   Last section of the last stylesheet, so it settles the layout. */
+@layer page {
+
+.recurrence-shell {
+  width: min(1180px, 100%);
+  --rv2-measure: 38em;
+  --rv2-section-gap: 200px;
+  --rv2-block-gap: 72px;
+  --rv2-body: 17px;
+  --rv2-ok: var(--closed, #91c7ad);
+  --rv2-miss: var(--open, #b77f75);
+}
+
+/* ---------- opening ---------- */
+
+.recurrence-shell .research-question-intro { padding-bottom: 0; }
+.recurrence-shell .research-question-intro h1 {
+  margin: 0 0 28px;
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -.01em;
+}
+.recurrence-shell .research-question-intro .research-answer {
+  max-width: var(--rv2-measure);
+  font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+  font-weight: 600;
+  line-height: 1.6;
+}
+.recurrence-shell .research-answer-detail {
+  max-width: var(--rv2-measure);
+  margin: 14px 0 0;
+  color: var(--research-text-secondary);
+  font-size: var(--rv2-body);
+  line-height: 1.85;
+}
+.recurrence-shell .research-question-intro .research-glossary-link { margin-top: 18px; font-size: 14px; }
+
+.research-overview {
+  max-width: 1080px;
+  margin: 88px 0 0;
+  padding: 0;
+}
+.research-overview-axis {
+  position: relative;
+  height: 156px;
+  margin: 0 8px;
+}
+.research-overview-axis::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 78px;
+  height: 2px;
+  background: linear-gradient(to right, var(--research-line-strong), color-mix(in srgb, var(--research-candidate) 70%, transparent));
+}
+.research-overview-stop {
+  position: absolute;
+  left: var(--x);
+  top: 0;
+  display: grid;
+  gap: 4px;
+  transform: translateX(-7px);
+}
+.research-overview-stop::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 72px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--research-text-secondary);
+  background: var(--research-bg-page);
+}
+.research-overview-stop strong { color: var(--research-text-primary); font-size: 18px; font-weight: 700; white-space: nowrap; }
+.research-overview-stop small { color: var(--research-text-secondary); font-size: 14px; line-height: 1.5; white-space: nowrap; }
+.research-overview-stop em { color: var(--rv2-miss); font-size: 14px; font-style: normal; line-height: 1.5; white-space: nowrap; }
+/* "now" sits under the line, the first meeting above it, 24,000 under it at the right edge */
+.research-overview-stop[data-stop="now"] { top: 100px; }
+.research-overview-stop[data-stop="local"] { top: 6px; }
+.research-overview-stop[data-stop="local"]::before { top: 66px; border-color: var(--research-current); }
+.research-overview-stop[data-stop="global"] { top: 100px; left: auto; right: 0; transform: translateX(7px); text-align: right; }
+.research-overview-stop[data-stop="global"]::before { left: auto; right: 0; top: -28px; border-color: var(--research-candidate); background: var(--research-candidate); }
+.research-overview-stop[data-stop="now"]::before { top: -28px; }
+.research-overview figcaption {
+  margin: 44px 0 0;
+  color: var(--research-text-muted);
+  font-size: 14px;
+}
+
+/* the chapter links: quiet, a table of contents rather than a second answer */
+.recurrence-shell .research-outline.research-answer-map {
+  margin-top: 96px;
+  padding-top: 28px;
+  border-top: 1px solid var(--research-line-subtle);
+}
+.recurrence-shell .research-outline.research-answer-map::before { display: none; }
+.recurrence-shell .research-outline.research-answer-map a { padding-top: 0; }
+.recurrence-shell .research-outline.research-answer-map a::before { display: none; }
+.recurrence-shell .research-outline.research-answer-map strong { font-size: 17px; }
+
+/* ---------- section rhythm ---------- */
+
+/* sections are separated by space, not by tinted bands */
+.recurrence-shell .research-task { background: none; }
+
+.recurrence-shell .research-task,
+.recurrence-shell .research-task-primary {
+  scroll-margin-top: 24px;
+  margin-top: var(--rv2-section-gap);
+  padding-top: 0;
+  border-top: 0;
+}
+.recurrence-shell .research-task > .research-task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin: 0 0 28px;
+}
+.recurrence-shell .research-task > .research-task-head .research-task-index {
+  color: var(--research-text-muted);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+#research-discrete .research-task-head h2,
+#research-astronomy .research-task-head h2,
+#research-evidence .research-task-head h2,
+#research-lab .research-task-head h2 {
+  margin: 0;
+  color: var(--research-text-primary);
+  font-size: clamp(1.75rem, 3.2vw, 2.375rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+.recurrence-shell .research-task-relation { display: none; }
+
+.recurrence-shell .research-task > .research-plain-conclusion {
+  max-width: var(--rv2-measure);
+  margin: 0 0 var(--rv2-block-gap);
+  padding: 0;
+  border: 0;
+  color: var(--research-text-primary);
+  font-size: clamp(1.1875rem, 1.9vw, 1.375rem);
+  font-weight: 500;
+  line-height: 1.75;
+}
+.recurrence-shell .research-figure-howto {
+  max-width: var(--rv2-measure);
+  margin: 20px 0 0;
+  color: var(--research-text-secondary);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.recurrence-shell .research-figure-howto b { color: var(--research-text-primary); }
+
+/* ---------- 01 · three cycle dials ---------- */
+
+.research-cycle-dials { margin: 0; padding: 0; }
+.research-cycle-dials figcaption { display: grid; gap: 6px; margin-bottom: 36px; }
+.research-cycle-dials figcaption strong { color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+.research-cycle-dials figcaption span { color: var(--research-text-secondary); font-size: 15px; }
+.cycle-dials-stage {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  justify-content: start;
+  gap: 48px;
+}
+.cycle-dial { display: grid; justify-items: center; gap: 14px; text-align: center; }
+.cycle-dial svg { width: 100%; max-width: 200px; height: auto; overflow: visible; }
+.cycle-dial-track { fill: none; stroke: var(--research-line-strong); stroke-width: 10; }
+.cycle-dial-tick { stroke: var(--research-line-strong); stroke-width: 1; }
+.cycle-dial-gap { fill: none; stroke: var(--rv2-miss); stroke-width: 10; stroke-linecap: round; }
+.cycle-dial-start { stroke: var(--research-text-primary); stroke-width: 3; stroke-linecap: round; }
+.cycle-dial-hand { stroke: var(--research-text-muted); stroke-width: 1.5; }
+.cycle-dial-hub { fill: var(--research-text-muted); }
+.cycle-dial-dot { fill: var(--dial-color); stroke: var(--research-bg-page); stroke-width: 3; }
+.cycle-dial[data-dial="year"] { --dial-color: var(--year, #c5a96f); }
+.cycle-dial[data-dial="day"] { --dial-color: var(--day, #78aabd); }
+.cycle-dial[data-dial="gregorian"] { --dial-color: var(--research-text-secondary); }
+.cycle-dial[data-aligned="true"] .cycle-dial-track { stroke: color-mix(in srgb, var(--rv2-ok) 55%, transparent); }
+.cycle-dial-label { display: grid; gap: 2px; }
+.cycle-dial-label strong { color: var(--dial-color); font-size: 20px; font-weight: 700; }
+.cycle-dial-label small { color: var(--research-text-muted); font-size: 13px; }
+.cycle-dial-status { margin-top: 6px; color: var(--rv2-miss); font-size: 16px; font-weight: 650; }
+.cycle-dial[data-aligned="true"] .cycle-dial-status { color: var(--rv2-ok); }
+
+.cycle-dials-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 36px;
+}
+.cycle-dials-choices button {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--research-line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--research-text-secondary);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+.cycle-dials-choices button:hover { color: var(--research-text-primary); border-color: var(--research-text-muted); }
+.cycle-dials-choices button[aria-pressed="true"] {
+  border-color: var(--research-candidate);
+  background: color-mix(in srgb, var(--research-candidate) 14%, transparent);
+  color: var(--research-text-primary);
+}
+.cycle-dials-choices button:focus-visible { outline: 2px solid var(--research-focus); outline-offset: 2px; }
+.cycle-dials-sentence {
+  max-width: var(--rv2-measure);
+  min-height: 3.6em;
+  margin: 20px 0 0;
+  color: var(--research-text-primary);
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+#research-discrete .research-discrete-mechanism {
+  max-width: var(--rv2-measure);
+  margin: var(--rv2-block-gap) 0 0;
+  padding: 0;
+  border: 0;
+}
+#research-discrete .research-discrete-mechanism p {
+  margin: 0;
+  color: var(--research-text-secondary);
+  font-size: var(--rv2-body);
+  line-height: 1.9;
+}
+#research-discrete .research-discrete-mechanism p + p { margin-top: 28px; }
+#research-discrete .research-discrete-mechanism strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--research-text-primary);
+  font-size: 18px;
+  font-weight: 700;
+}
+.recurrence-shell .discrete-to-astronomy {
+  max-width: var(--rv2-measure);
+  margin: var(--rv2-block-gap) 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--research-text-muted);
+  font-size: 16px;
+}
+
+/* ---------- 02 ---------- */
+
+#research-astronomy .research-case-transition {
+  display: block;
+  margin: calc(var(--rv2-block-gap) * -1 + 20px) 0 var(--rv2-block-gap);
+  color: var(--research-text-muted);
+  font-size: 15px;
+}
+#research-astronomy .seasonal-drift-summary { margin-bottom: 24px; }
+#research-astronomy .research-model-scope {
+  max-width: var(--rv2-measure);
+  margin: 14px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--research-text-muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+#research-astronomy .research-drift-accumulation { margin-top: 120px; }
+#research-astronomy .research-drift-accumulation figcaption strong { font-size: 20px; }
+#research-astronomy .research-drift-accumulation figcaption span { font-size: 16px; line-height: 1.75; }
+
+#seasonal-drift-orbit-details.research-why-figure {
+  margin: 120px 0 0;
+  padding: 0;
+  border: 0;
+}
+#seasonal-drift-orbit-details .seasonal-drift-orbit-panel { margin: 0; padding: 0; border: 0; background: none; }
+#seasonal-drift-orbit-details .seasonal-drift-orbit-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: start; }
+#seasonal-drift-orbit-details .seasonal-drift-orbit-head strong { display: block; color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+#seasonal-drift-orbit-details .seasonal-drift-orbit-head p {
+  max-width: var(--rv2-measure);
+  margin: 10px 0 0;
+  color: var(--research-text-secondary);
+  font-size: 16px;
+  line-height: 1.8;
+}
+#seasonal-drift-orbit-details .seasonal-drift-orbit-head small { display: block; margin-top: 8px; color: var(--research-text-muted); font-size: 14px; }
+#seasonal-drift-orbit-details .seasonal-orbit-explainer-note {
+  max-width: var(--rv2-measure);
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--research-text-muted);
+  font-size: 14px;
+}
+#research-astronomy .seasonal-drift-evidence-note {
+  max-width: var(--rv2-measure);
+  margin: var(--rv2-block-gap) 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--research-text-primary);
+  font-size: 18px;
+  line-height: 1.75;
+}
+#research-astronomy #seasonal-drift-decomposition { margin-top: var(--rv2-block-gap); }
+#research-astronomy .research-extension { margin-top: 0; }
+
+/* ---------- 03 · Earth-rotation uncertainty ---------- */
+
+.research-rotation-uncertainty { margin: 0 0 120px; padding: 0; }
+.research-rotation-uncertainty figcaption { display: grid; gap: 8px; max-width: var(--rv2-measure); margin-bottom: 28px; }
+.research-rotation-uncertainty figcaption strong { color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+.research-rotation-uncertainty figcaption span { color: var(--research-text-secondary); font-size: 16px; line-height: 1.75; }
+.research-rotation-uncertainty svg { display: block; width: 100%; max-width: 860px; height: auto; overflow: visible; }
+.rotation-zone-hour { fill: color-mix(in srgb, var(--research-candidate) 7%, transparent); }
+.rotation-zone-day { fill: color-mix(in srgb, var(--rv2-miss) 10%, transparent); }
+.rotation-grid { stroke: var(--research-line-subtle); stroke-width: 1; }
+.rotation-grid.strong { stroke: var(--research-line-strong); stroke-dasharray: 4 4; }
+.rotation-axis { fill: var(--research-text-muted); font-size: 13px; }
+.rotation-axis.strong { fill: var(--research-text-secondary); font-weight: 650; }
+.rotation-area { fill: color-mix(in srgb, var(--research-evidence, #86a1ba) 14%, transparent); }
+.rotation-curve { fill: none; stroke: var(--research-evidence, #86a1ba); stroke-width: 2.5; }
+.rotation-mark { fill: var(--research-bg-page); stroke: var(--research-text-primary); stroke-width: 2; }
+.rotation-end { fill: var(--rv2-miss); }
+.rotation-mark-label { fill: var(--research-text-primary); font-size: 14px; font-weight: 600; paint-order: stroke; stroke: var(--research-bg-page); stroke-width: 4px; }
+.rotation-mark-label.strong { fill: var(--rv2-miss); font-size: 15px; }
+
+#research-evidence .determinacy-verdict { margin-bottom: 24px; }
+.research-evidence-why { max-width: 860px; margin: var(--rv2-block-gap) 0 0; }
+.research-evidence-why h3 { margin: 0 0 16px; color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+#research-evidence > .model-boundary { margin-top: var(--rv2-block-gap); }
+#research-evidence > .model-boundary > summary { width: 100%; }
+
+/* the verdict cards carry the answer; the model caveats live in "模型邊界與來源" */
+#research-evidence .determinacy-foot { display: none; }
+/* the cursor readout repeats what the selected stem already labels */
+#research-astronomy .seasonal-drift-summary { display: none; }
+/* one quiet rule above the chart, one figure title */
+#research-astronomy .seasonal-drift-evidence { border-top: 0; padding-top: 0; }
+#research-astronomy .seasonal-boundary-proof { border-top: 0; padding-top: 0; }
+#research-astronomy .seasonal-boundary-proof-head strong { display: block; color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+#research-astronomy .seasonal-boundary-proof-head span { display: block; margin-top: 6px; color: var(--research-text-secondary); font-size: 15px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+.research-evidence-why .absolute-boundary-head h3 { margin: 0 0 8px; color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+.research-evidence-why .absolute-boundary-head p { margin: 0 0 20px; color: var(--research-text-secondary); font-size: 16px; }
+.research-evidence-why .absolute-boundary-note { margin-top: 20px; color: var(--research-text-secondary); font-size: 15px; line-height: 1.8; }
+
+/* ---------- lab ---------- */
+
+.research-lab-lede {
+  max-width: var(--rv2-measure);
+  margin: 0 0 var(--rv2-block-gap);
+  color: var(--research-text-secondary);
+  font-size: var(--rv2-body);
+  line-height: 1.8;
+}
+#research-lab .recurrence-instrument { margin-top: 0; }
+/* the milestone buttons sit right under the fan they drive */
+#research-lab .recurrence-instrument + .research-entry { margin: 24px 0 0; }
+#research-lab .research-entry-label { font-size: 15px; }
+#research-lab .research-discrete-tools { margin-top: var(--rv2-block-gap); border: 0; }
+#research-lab .research-discrete-tools-body { gap: 64px; padding: 0; }
+#research-lab .research-cycle { margin-top: var(--rv2-block-gap); }
+#research-lab #secondary-astronomy-tools { margin-top: 0; }
+#research-lab .research-lab-evidence { margin-top: var(--rv2-block-gap); }
+
+/* ---------- glossary ---------- */
+
+.recurrence-shell .research-glossary { margin-top: var(--rv2-section-gap); }
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 820px) {
+  .recurrence-shell { --rv2-section-gap: 144px; --rv2-block-gap: 56px; }
+  .cycle-dials-stage { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+}
+@media (max-width: 560px) {
+  .recurrence-shell { --rv2-section-gap: 120px; --rv2-block-gap: 48px; --rv2-body: 16px; }
+  .research-overview { margin-top: 56px; }
+  .research-overview-axis { height: auto; margin: 0; padding-left: 28px; display: grid; gap: 28px; }
+  .research-overview-axis::before { left: 6px; right: auto; top: 8px; bottom: 8px; width: 2px; height: auto; background: linear-gradient(to bottom, var(--research-line-strong), color-mix(in srgb, var(--research-candidate) 70%, transparent)); }
+  .research-overview-stop,
+  .research-overview-stop[data-stop] { position: relative; left: auto; right: auto; top: auto; transform: none; text-align: left; }
+  .research-overview-stop::before,
+  .research-overview-stop[data-stop]::before { left: -28px; right: auto; top: 4px; }
+  .research-overview-stop small,
+  .research-overview-stop em { white-space: normal; }
+  .research-overview figcaption { margin-top: 24px; }
+  .cycle-dials-stage { gap: 10px; }
+  .cycle-dial-label strong { font-size: 17px; }
+  .cycle-dial-label small { font-size: 12px; }
+  .cycle-dial-status { font-size: 14px; }
+  .cycle-dials-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cycle-dials-choices button { padding: 0 12px; }
+  .cycle-dials-sentence { font-size: 17px; }
+  #seasonal-drift-orbit-details .seasonal-drift-orbit-head { grid-template-columns: minmax(0, 1fr); }
+  .rotation-axis { font-size: 12px; }
+  .rotation-mark-label { font-size: 12px; }
+  .rotation-mark-label.strong { font-size: 13px; }
 }
 }

@@ -111,7 +111,7 @@
       // Research redesign R2: the year strip is a 01 tool behind the
       // default-closed "try it" disclosure; audit its owners with it open.
       const discreteTools = recurrenceDoc.getElementById("research-discrete-tools");
-      if (!("recurrenceDiscreteToolsClosedOnEntry" in probe.dataset)) probe.dataset.recurrenceDiscreteToolsClosedOnEntry = String(Boolean(discreteTools && !discreteTools.open));
+      if (!("recurrenceDiscreteToolsOpenInLab" in probe.dataset)) probe.dataset.recurrenceDiscreteToolsOpenInLab = String(Boolean(discreteTools && discreteTools.tagName === "DIV" && discreteTools.closest("#research-lab")));
       if (discreteTools) discreteTools.open = true;
       recurrenceDoc.documentElement.getBoundingClientRect();
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
@@ -139,7 +139,7 @@
       const recurrenceQuestion = recurrenceDoc.querySelector(".recurrence-intro h1");
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
       const recurrenceAlignmentRows = [...recurrenceDoc.querySelectorAll(".research-alignment-row")];
-      const recurrenceNext = recurrenceDoc.querySelector(".research-question-next");
+      const recurrenceNext = recurrenceDoc.querySelector("#research-overview-caption");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
       const phaseFanPanel = recurrenceDoc.querySelector("#discrete-phase-fan-details");
       const sexagenaryDetails = recurrenceDoc.querySelector("#discrete-sexagenary-details");
@@ -247,10 +247,10 @@
         Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
       );
       probe.dataset.recurrenceDerivationGrammar = derivationThesis?.dataset.diagramGrammar ?? "missing";
-      // Repair D1/D2: 01 now opens with its plain-language conclusion; that
-      // conclusion must start in the first mobile viewport, and the derivation
+      // Review 2026-11-21: the page answers first — the one-sentence answer
+      // must start in the first mobile viewport; in the lab the derivation
       // thesis must still precede the date explorer.
-      const plainConclusionRect = recurrenceDoc.querySelector('[data-plain-conclusion="01"]')?.getBoundingClientRect();
+      const plainConclusionRect = recurrenceDoc.querySelector(".research-question-intro .research-answer")?.getBoundingClientRect();
       probe.dataset.recurrenceDerivationThesisStartsInFirstViewport = String(Boolean(
         plainConclusionRect &&
         plainConclusionRect.top >= 0 &&

@@ -1,4 +1,6 @@
-const researchDiscrete = document.querySelector("#research-discrete");
+// Review 2026-11-21: the discrete tools (fan, year strip, derivation, 60-pair
+// wheel) live in the lab after the three reading steps.
+const researchDiscrete = document.querySelector("#research-lab") ?? document.querySelector("#research-discrete");
 
 function ensureStyles() {
   if (document.querySelector("link[data-research-discrete-density-styles]")) return;

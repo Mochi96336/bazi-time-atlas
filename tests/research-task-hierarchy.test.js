@@ -28,6 +28,9 @@ const evidenceStart = html.indexOf('id="research-evidence"');
 const discrete = html.slice(discreteStart, astronomyStart);
 const astronomy = html.slice(astronomyStart, evidenceStart);
 const evidence = html.slice(evidenceStart);
+// Review 2026-11-21: the discrete tools and the other-Δ sandbox live in the lab.
+const labStart = html.indexOf('id="research-lab"');
+const lab = html.slice(labStart, html.indexOf('id="research-glossary"'));
 
 test("Research keeps three ordered evidence owners without task-card navigation", () => {
   // #500 navigation is an intentional LAST cascade layer. Moving the same
@@ -67,7 +70,13 @@ test("Research narrative spine summarizes the fixed argument rather than the cur
   assert.doesNotMatch(spineJs, /instrument\.dataset|boolDataset|fourPillarResolvedCount|astronomyValidity/);
 });
 
-test("discrete task owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
+test("the lab owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
+  const reading01 = html.slice(discreteStart, astronomyStart);
+  assert.match(reading01, /id="research-discrete-title">粗略週期從哪裡來？/);
+  assert.match(reading01, /下一步：真正的節氣也回到原位了嗎？/);
+  assert.match(reading01, /id="research-cycle-dials"/);
+  assert.doesNotMatch(reading01, /id="recurrence-instrument"|id="research-discrete-tools"/);
+  const discrete = lab;
   assert.match(discrete, /id="recurrence-instrument"/);
   assert.match(discrete, /class="recurrence-readout research-current-state"/);
   assert.match(discrete, /id="research-discrete-thesis"/);
@@ -76,23 +85,22 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
   assert.match(discrete, /id="research-discrete-tools" class="research-discrete-tools"/);
-  assert.match(discrete, /id="research-discrete-title">粗略週期從哪裡來？/);
   assert.match(discrete, /id="research-year-strip-title">年度時間條/);
   assert.match(discrete, /id="research-year-full-cycle"/);
   assert.match(discrete, /id="research-year-selected-day"/);
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
-  assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
   assert.match(discrete, /id="research-cycle-comparison"/);
   assert.ok(discrete.indexOf('id="research-discrete-thesis"') < discrete.indexOf('id="research-year-strip"'));
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
-  // Research redesign R2: the fan is the figure and precedes the tools.
+  // The fan leads the lab and precedes the tools.
   assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('id="research-discrete-tools"'));
   assert.ok(discrete.indexOf('id="research-discrete-tools"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
   assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('class="discrete-derivation"'));
   assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
-  assert.doesNotMatch(discrete, /class="astronomy-panel"/);
+  // the lab's other-Δ sandbox follows all of the discrete tools
+  assert.ok(discrete.indexOf('class="astronomy-panel"') > discrete.indexOf('id="research-sexagenary-cycle"'));
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
 
@@ -121,11 +129,12 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
 
 test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {
   assert.match(astronomy, /id="research-astronomy-title">八字的節界回來了嗎？/);
-  assert.match(astronomy, /class="astronomy-panel"/);
-  assert.match(astronomy, /季節形狀 · 春分歸零/);
-  assert.match(astronomy, /季節相位 · 公曆框架/);
-  assert.match(astronomy, /春分相對公曆的絕對位移另算/);
-  assert.match(astronomy, /id="astronomy-term-grid"/);
+  assert.match(lab, /class="astronomy-panel"/);
+  assert.match(lab, /季節形狀 · 春分歸零/);
+  assert.match(lab, /季節相位 · 公曆框架/);
+  assert.match(lab, /春分相對公曆的絕對位移另算/);
+  assert.match(lab, /id="astronomy-term-grid"/);
+  assert.doesNotMatch(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /class="near-search-panel"/);
   assert.match(astronomy, /<strong>長時間回歸搜尋<\/strong>/);
   assert.doesNotMatch(astronomy, /離散全閉合後，哪次天文形狀最接近？|只評估 24,000 年整數倍/);
@@ -228,12 +237,13 @@ test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-s
   const js=await readFile(new URL("../src/research-seasonal-drift-evidence-view.js",import.meta.url),"utf8");
   const css=await Promise.resolve(cssSource("research-story-hierarchy.css"));
   assert.match(astronomy,/id="research-case-transition"/);
-  assert.match(astronomy,/01 的選取不會改寫節界證據/);
+  assert.match(astronomy,/比較的是 2026 年和 24,000 年後的 26026 年/);
   assert.match(astronomy,/class="research-model-scope"/);
-  assert.match(astronomy,/尚未獨立驗證 26026 年框架/);
+  assert.match(astronomy,/26026 年的框架還沒有獨立驗證/);
   assert.match(astronomy,/id="seasonal-drift-orbit-details"/);
-  assert.ok(astronomy.indexOf('class="seasonal-drift-evidence-note"') <
-    astronomy.indexOf('id="seasonal-drift-orbit-details"'));
+  // the "why" orbit figure is read before the consequence sentence that leads to 03
+  assert.ok(astronomy.indexOf('id="seasonal-drift-orbit-details"') <
+    astronomy.indexOf('class="seasonal-drift-evidence-note"'));
   assert.match(astronomy,/id="seasonal-boundary-select"/);
   assert.match(js,/boundarySelect\.addEventListener\("change"/);
   assert.match(js,/event\.target instanceof HTMLSelectElement/);

@@ -101,9 +101,9 @@ const global = expectState(24000, {
 }, "24000-year exact discrete closure");
 
 for (const expected of [
-  "對齊同一太陽黃經",
-  "固定推進 24,000 公曆年",
-  "不能直接偷換成「每個相隔 24,000 年的四柱一定不同」",
+  "比「太陽走到同一個位置」",
+  "固定往後 24,000 個公曆年",
+  "不能反過來說 24,000 年後的四柱一定不一樣",
   "日／時仍不能由帶不確定性的深時間 UT1／地方鐘面唯一決定"
 ]) {
   if (!global.dom.includes(expected)) {
