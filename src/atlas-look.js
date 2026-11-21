@@ -78,6 +78,58 @@ function engraveTicks(wheel) {
   }
 }
 
+// v5.2 brass finish — what separates machined brass from brown paint:
+//   - turned (circular-grain) metal shows its highlight as a narrow band
+//     pointing at the light, not as a soft blob; inside that band the grain
+//     itself is visible as fine concentric lines;
+//   - a crisp chamfer catches the light along both edges, strongest on the lit
+//     side and dying out toward the needle.
+// The light is fixed in spirit, but each camera crops a different run of the
+// fan; place the band about a quarter in from the left of what is visible.
+const BRASS_STREAK = Object.freeze([
+  { query: "(max-width: 480px)", angle: -101, half: 120 },
+  { query: "(max-width: 820px)", angle: -110, half: 135 },
+  { query: "all", angle: -121, half: 150 }
+]);
+
+function brassFinish(layer, defs) {
+  const r0 = RADII.dayOuter;
+  const r1 = RADII.solarTermOuter;
+  const mid = (r0 + r1) / 2;
+  const streak = el("linearGradient", { id: "look-brass-streak", gradientUnits: "userSpaceOnUse" }, defs);
+  const aim = () => {
+    const { angle, half } = BRASS_STREAK.find(item => matchMedia(item.query).matches);
+    const at = polar(mid, angle);
+    const rad = (angle * Math.PI) / 180;
+    const t = { x: -Math.sin(rad), y: Math.cos(rad) };
+    streak.setAttribute("x1", (at.x - t.x * half).toFixed(2));
+    streak.setAttribute("y1", (at.y - t.y * half).toFixed(2));
+    streak.setAttribute("x2", (at.x + t.x * half).toFixed(2));
+    streak.setAttribute("y2", (at.y + t.y * half).toFixed(2));
+  };
+  aim();
+  for (const { query } of BRASS_STREAK.slice(0, -1)) matchMedia(query).addEventListener("change", aim);
+  for (const [offset, opacity] of [[0, 0], [.22, .025], [.38, .08], [.47, .17], [.5, .2], [.53, .17], [.62, .08], [.78, .025], [1, 0]]) {
+    el("stop", { offset, "stop-color": "#f4cf7c", "stop-opacity": opacity }, streak);
+  }
+  // Grain: concentric hairlines of uneven strength, seen only where light falls.
+  const grain = el("mask", { id: "look-brass-grain", maskUnits: "userSpaceOnUse", x: -700, y: 0, width: 2600, height: 1400 }, defs);
+  el("rect", { x: -700, y: 0, width: 2600, height: 1400, fill: "#fff", "fill-opacity": .5 }, grain);
+  let seed = 7;
+  const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const arcAt = r => { const a = polar(r, FAN.start); const b = polar(r, FAN.end); return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`; };
+  for (let r = r0 + 1.5; r < r1; r += 1.9 + random() * 1.4) {
+    el("path", { d: arcAt(r), fill: "none", stroke: "#fff", "stroke-opacity": (.25 + random() * .75).toFixed(2), "stroke-width": (.6 + random() * .9).toFixed(2) }, grain);
+  }
+  el("path", { d: annulus(r0, r1, FAN.start, FAN.end), class: "look-brass-streak", fill: "url(#look-brass-streak)", mask: "url(#look-brass-grain)" }, layer);
+  // Chamfers: light from the upper left, fading toward the right.
+  const edge = el("linearGradient", { id: "look-brass-edge", gradientUnits: "userSpaceOnUse", x1: -450, y1: 500, x2: 1500, y2: 900 }, defs);
+  for (const [offset, opacity] of [[0, .5], [.3, .32], [.5, .12], [.75, .05], [1, .03]]) {
+    el("stop", { offset, "stop-color": "#f2dba3", "stop-opacity": opacity }, edge);
+  }
+  for (const r of [r0 + 1.2, r1 - 1]) el("path", { d: arcAt(r), class: "look-brass-chamfer", stroke: "url(#look-brass-edge)" }, layer);
+}
+
 // Stacked discs: a soft shadow just inside each ring edge, and a gentle
 // darkening toward the fan's far ends. No rim lights, no spotlight (v1 review).
 function shading(wheel) {
@@ -101,18 +153,19 @@ function shading(wheel) {
   // run, like brushed metal; it fades out long before the needle.
   const sheenAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -128);
   const sheen = el("radialGradient", { id: "look-brass-sheen", gradientUnits: "userSpaceOnUse", cx: sheenAt.x, cy: sheenAt.y, r: 520 }, defs);
-  for (const [offset, opacity] of [[0, 0.15], [0.4, 0.06], [1, 0]]) {
+  for (const [offset, opacity] of [[0, 0.12], [0.4, 0.05], [1, 0]]) {
     el("stop", { offset, "stop-color": "#f7ebb9", "stop-opacity": opacity }, sheen);
   }
   el("path", { d: annulus(RADII.dayOuter, RADII.solarTermOuter, FAN.start, FAN.end), class: "look-brass-sheen", fill: "url(#look-brass-sheen)" }, layer);
   // Colour follows value (painters' rule): the lit run of the brass leans yellow,
   // its shadow side leans red-orange. A warm-brown bounce only on the shadow side.
-  const bounceAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -55);
+  const bounceAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -66);
   const bounce = el("radialGradient", { id: "look-brass-bounce", gradientUnits: "userSpaceOnUse", cx: bounceAt.x, cy: bounceAt.y, r: 900 }, defs);
   for (const [offset, opacity] of [[0, 0.3], [0.55, 0.14], [1, 0]]) {
     el("stop", { offset, "stop-color": "#9c7444", "stop-opacity": opacity }, bounce);
   }
   el("path", { d: annulus(RADII.dayOuter, RADII.solarTermOuter, FAN.start, FAN.end), class: "look-brass-bounce", fill: "url(#look-brass-bounce)" }, layer);
+  brassFinish(layer, defs);
   const arc = r => { const a = polar(r, FAN.start); const b = polar(r, FAN.end); return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`; };
   for (const r of [RADII.hourOuter, RADII.dayOuter, RADII.solarOuter, RADII.monthOuter, RADII.yearOuter]) {
     el("path", { d: arc(r - 7), class: "look-rim-shadow" }, layer);

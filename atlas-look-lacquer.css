@@ -50,13 +50,15 @@
 :root[data-look="lacquer"] #kinetic-wheel .term-sector,
 :root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: transparent; stroke: none; }
 :root[data-look="lacquer"] .look-brass-sheen { mix-blend-mode: normal; }
+/* v5.2: a turned-metal highlight band and edge chamfers (src/atlas-look.js) */
+:root[data-look="lacquer"] .look-brass-chamfer { fill: none; stroke-width: 1.1; }
 
 /* now: a lighter step of the same lacquer; the current term catches the light */
 :root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .10); }
 :root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .12); }
 :root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .15); }
 :root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .17); }
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(236, 204, 140, .08); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: transparent; stroke: none; }
 
 /* engraving: low-contrast hairlines */
 :root[data-look="lacquer"] #kinetic-wheel .guide-arc { stroke: rgba(206, 212, 216, .10); stroke-width: .9; }
