@@ -3,7 +3,8 @@
 //
 // Direction (from the reader review and the user's own art direction):
 //   - one material for every ring: dark lacquer with incised hairlines;
-//   - brightness is scarce: only the strip under the needle is lit, warm = now;
+//   - a luminance ladder with every level present (v2): ground, ring bodies,
+//     hairlines, resting labels, then the four pillars; warm = now;
 //   - the four pillars read down the needle in a serif face, everything else recedes;
 //   - fine engraved ticks give close-up detail without adding visual weight.
 // Presentation only: it reads the renderer's existing ring groups and never
@@ -77,16 +78,11 @@ function engraveTicks(wheel) {
   }
 }
 
-function lightAndGrain(wheel) {
+// Stacked discs: a soft shadow just inside each ring edge, and a gentle
+// darkening toward the fan's far ends. No rim lights, no spotlight (v1 review).
+function shading(wheel) {
   if (wheel.querySelector("#look-light-layer")) return;
   const defs = wheel.querySelector("defs") ?? el("defs", {}, wheel);
-  const x0 = polar(RADII.outer, -90 - 7).x;
-  const x1 = polar(RADII.outer, -90 + 7).x;
-  const light = el("linearGradient", { id: "look-now-light", gradientUnits: "userSpaceOnUse", x1: x0, y1: 0, x2: x1, y2: 0 }, defs);
-  for (const [offset, opacity] of [[0, 0], [0.3, 0.025], [0.44, 0.09], [0.5, 0.15], [0.56, 0.09], [0.7, 0.025], [1, 0]]) {
-    el("stop", { offset, "stop-color": "#f1d9a0", "stop-opacity": opacity }, light);
-  }
-  // Cold memory falloff: rings darken toward the fan edges.
   const shade = el("radialGradient", {
     id: "look-edge-shade", gradientUnits: "userSpaceOnUse",
     cx: WHEEL_CENTER.x, cy: WHEEL_CENTER.y - RADII.outer, r: RADII.outer * 1.05
@@ -94,22 +90,12 @@ function lightAndGrain(wheel) {
   for (const [offset, opacity] of [[0, 0], [0.55, 0.18], [1, 0.62]]) {
     el("stop", { offset, "stop-color": "#06080c", "stop-opacity": opacity }, shade);
   }
-  const grain = el("filter", { id: "look-grain", x: 0, y: 0, width: 1, height: 1 }, defs);
-  el("feTurbulence", { type: "fractalNoise", baseFrequency: "0.9 0.75", numOctaves: 2, seed: 7, result: "noise" }, grain);
-  el("feColorMatrix", { type: "saturate", values: 0 }, grain);
-
   const layer = el("g", { id: "look-light-layer", class: "look-light-layer", "aria-hidden": "true" });
-  const band = annulus(RADII.inner, RADII.outer, FAN.start, FAN.end);
-  el("path", { d: band, class: "look-edge-shade", fill: "url(#look-edge-shade)" }, layer);
-  el("path", { d: band, class: "look-grain", filter: "url(#look-grain)" }, layer);
-  // stacked discs: each ring edge gets a hairline rim light and a soft shadow
-  // falling onto the ring inside it.
+  el("path", { d: annulus(RADII.inner, RADII.outer, FAN.start, FAN.end), class: "look-edge-shade", fill: "url(#look-edge-shade)" }, layer);
   const arc = r => { const a = polar(r, FAN.start); const b = polar(r, FAN.end); return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`; };
   for (const r of [RADII.hourOuter, RADII.dayOuter, RADII.solarOuter, RADII.monthOuter, RADII.yearOuter]) {
     el("path", { d: arc(r - 7), class: "look-rim-shadow" }, layer);
-    el("path", { d: arc(r), class: "look-rim-light" }, layer);
   }
-  el("path", { d: annulus(RADII.inner, RADII.outer, -90 - 16, -90 + 16), class: "look-now-light", fill: "url(#look-now-light)" }, layer);
   const cursor = wheel.querySelector("#cursor-layer");
   cursor.parentNode.insertBefore(layer, cursor);
 }
@@ -129,7 +115,7 @@ function install() {
       return;
     }
     engraveTicks(wheel);
-    lightAndGrain(wheel);
+    shading(wheel);
     wheel.dataset.look = "lacquer";
   };
   ready();
