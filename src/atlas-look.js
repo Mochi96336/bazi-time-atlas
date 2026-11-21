@@ -83,15 +83,20 @@ function engraveTicks(wheel) {
 function shading(wheel) {
   if (wheel.querySelector("#look-light-layer")) return;
   const defs = wheel.querySelector("defs") ?? el("defs", {}, wheel);
-  const shade = el("radialGradient", {
-    id: "look-edge-shade", gradientUnits: "userSpaceOnUse",
-    cx: WHEEL_CENTER.x, cy: WHEEL_CENTER.y - RADII.outer, r: RADII.outer * 1.05
-  }, defs);
-  for (const [offset, opacity] of [[0, 0], [0.55, 0.18], [1, 0.62]]) {
-    el("stop", { offset, "stop-color": "#06080c", "stop-opacity": opacity }, shade);
+  // v3: one soft light from the upper left, falling off toward the lower right,
+  // so the disc has a lit side and a shadow side instead of an even grey.
+  const light = el("radialGradient", { id: "look-key-light", gradientUnits: "userSpaceOnUse", cx: 120, cy: 260, r: 1250 }, defs);
+  for (const [offset, color, opacity] of [[0, "#d4e0f0", 0.075], [0.45, "#c8d6ea", 0.03], [1, "#c8d6ea", 0]]) {
+    el("stop", { offset, "stop-color": color, "stop-opacity": opacity }, light);
+  }
+  const shade = el("radialGradient", { id: "look-key-shade", gradientUnits: "userSpaceOnUse", cx: 1330, cy: 980, r: 1150 }, defs);
+  for (const [offset, opacity] of [[0, 0.5], [0.55, 0.2], [1, 0]]) {
+    el("stop", { offset, "stop-color": "#04060a", "stop-opacity": opacity }, shade);
   }
   const layer = el("g", { id: "look-light-layer", class: "look-light-layer", "aria-hidden": "true" });
-  el("path", { d: annulus(RADII.inner, RADII.outer, FAN.start, FAN.end), class: "look-edge-shade", fill: "url(#look-edge-shade)" }, layer);
+  const disc = annulus(RADII.inner, RADII.outer, FAN.start, FAN.end);
+  el("path", { d: disc, class: "look-key-shade", fill: "url(#look-key-shade)" }, layer);
+  el("path", { d: disc, class: "look-key-light", fill: "url(#look-key-light)" }, layer);
   const arc = r => { const a = polar(r, FAN.start); const b = polar(r, FAN.end); return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`; };
   for (const r of [RADII.hourOuter, RADII.dayOuter, RADII.solarOuter, RADII.monthOuter, RADII.yearOuter]) {
     el("path", { d: arc(r - 7), class: "look-rim-shadow" }, layer);

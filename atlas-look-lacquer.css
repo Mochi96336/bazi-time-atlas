@@ -1,4 +1,4 @@
-/* Home look prototype "lacquer" v2 (2026-11-21). Loaded only with ?look=lacquer
+/* Home look prototype "lacquer" v3 (2026-11-21). Loaded only with ?look=lacquer
    by src/atlas-look.js. Unlayered on purpose so it sits above @layer page while
    the direction is compared; a production version would fold into atlas-wheel.css.
 
@@ -7,14 +7,17 @@
    v2 keeps every level of the ladder and narrows the gaps (relative luminance):
      ground 0.004 · ring bodies 0.02–0.03 · hairlines 0.05–0.08
      resting 干支 0.12–0.18 · the four pillars 0.35–0.45
-   Each emphasis uses one device only. */
+   Each emphasis uses one device only.
+   v3 review of v2 ("死氣沉沉"): v2 was neutral grey with no light direction and
+   a compressed top. v3 adds colour temperature (cool bodies, warm only for now),
+   one soft key light from the upper left, and lets the pillars reach warm white. */
 
 :root[data-look="lacquer"] {
   --lq-ink: #07090d;
-  --lq-silver: rgba(206, 212, 216, .44);
-  --lq-silver-dim: rgba(206, 212, 216, .30);
-  --lq-ivory: #d9d3c4;
-  --lq-now: #e6d3a3;
+  --lq-silver: rgba(200, 214, 230, .46);
+  --lq-silver-dim: rgba(200, 214, 230, .31);
+  --lq-ivory: #f4ead3;
+  --lq-now: #efd59c;
   --lq-serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
 }
 
@@ -30,19 +33,19 @@
 :root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector,
 :root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector,
 :root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector {
-  fill: rgba(150, 160, 168, .05);
+  fill: rgba(110, 140, 180, .07);
   stroke: none;
   opacity: 1;
 }
 /* even the ring values out: the material lights the outer rings more than the
    inner ones, so the outer two get a dark veil and the inner two a light one */
-:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector { fill: rgba(7, 9, 13, .08); }
-:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector { fill: rgba(150, 160, 168, .08); }
-:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector { fill: rgba(150, 160, 168, .14); }
-:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector { fill: rgba(150, 160, 168, .16); }
+:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector { fill: rgba(40, 62, 96, .10); }
+:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector { fill: rgba(110, 140, 180, .09); }
+:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector { fill: rgba(120, 148, 186, .14); }
+:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector { fill: rgba(120, 148, 186, .16); }
 /* the brass band was the brightest large area: bring it to the ring level */
 :root[data-look="lacquer"] #kinetic-wheel .term-sector,
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: rgba(12, 16, 24, .40); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: rgba(16, 18, 24, .52); stroke: none; }
 :root[data-look="lacquer"] #kinetic-wheel .zodiac-sector { fill: transparent; stroke: rgba(206, 212, 216, .06); }
 
 /* now: the cell under the needle is one step lighter and slightly warm — nothing more */
@@ -50,14 +53,14 @@
 :root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector.is-active,
 :root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active,
 :root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active {
-  fill: rgba(238, 226, 194, .095);
+  fill: rgba(250, 204, 132, .15);
   stroke: none;
 }
 /* the material lights outer rings more, so the lit column is balanced per ring */
-:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active { fill: rgba(238, 226, 194, .075); }
-:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(238, 226, 194, .14); }
-:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(238, 226, 194, .16); }
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(12, 16, 24, .2); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active { fill: rgba(250, 204, 132, .14); }
+:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(250, 204, 132, .2); }
+:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(250, 204, 132, .22); }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(60, 44, 26, .34); stroke: none; }
 :root[data-look="lacquer"] #kinetic-wheel .zodiac-sector.is-active { fill: rgba(230, 211, 163, .04); stroke: rgba(206, 212, 216, .06); }
 
 /* engraving: low-contrast hairlines */
@@ -71,7 +74,8 @@
 
 /* light layer: soft stacking shadows only — no white rims, no spotlight */
 :root[data-look="lacquer"] .look-light-layer { pointer-events: none; }
-:root[data-look="lacquer"] .look-edge-shade { mix-blend-mode: multiply; opacity: .55; }
+:root[data-look="lacquer"] .look-key-shade { mix-blend-mode: multiply; }
+:root[data-look="lacquer"] .look-key-light { mix-blend-mode: screen; }
 :root[data-look="lacquer"] .look-rim-shadow { fill: none; stroke: rgba(0, 0, 0, .16); stroke-width: 12; }
 
 /* type: serif throughout the wheel, engraved silver at rest */
@@ -106,7 +110,7 @@
 }
 
 /* needle: one fine warm line; the small cap is the only gold */
-:root[data-look="lacquer"] #kinetic-wheel .cursor-line { stroke: var(--lq-now); stroke-width: 1.1; opacity: .7; filter: none; }
+:root[data-look="lacquer"] #kinetic-wheel .cursor-line { stroke: var(--lq-now); stroke-width: 1.2; opacity: .9; filter: drop-shadow(0 0 5px rgba(239, 213, 156, .28)); }
 :root[data-look="lacquer"] #kinetic-wheel .cursor-halo { display: none; }
 :root[data-look="lacquer"] #kinetic-wheel .cursor-cap { fill: var(--lq-now); }
 
