@@ -110,6 +110,8 @@ function examine(){
  const clearance=6;
  const overlaps=(a,b)=>{
   const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+  // text the phone layout does not render cannot collide
+  if((A.width===0&&A.height===0)||(B.width===0&&B.height===0))return false;
   return A.left<B.right+clearance&&A.right+clearance>B.left&&
     A.top<B.bottom+clearance&&A.bottom+clearance>B.top;
  };
@@ -123,8 +125,10 @@ function examine(){
  }).join("|");
  probe.dataset.r16LabelNameOverlap=String(activePhaseLabels.some(el=>namesOnFan.some(n=>overlaps(el,n))));
  probe.dataset.r16PhaseLabelOverlap=String(activePhaseLabels.some((el,i)=>activePhaseLabels.slice(0,i).some(other=>overlaps(el,other))));
+ // Labels the phone layout does not render (display:none) cannot be clipped.
  probe.dataset.clipActiveLabels=String(activePhaseLabels.some(el=>{
   const rc=el.getBoundingClientRect(),svg=wheel.getBoundingClientRect();
+  if(rc.width===0&&rc.height===0)return false;
   return rc.left<svg.left-2||rc.right>svg.right+2||rc.top<svg.top-2||rc.bottom>svg.bottom+2;
  }));
  probe.dataset.wheelBox=[box.x,box.y,box.width,box.height].map(x=>Math.round(x)).join(",");
@@ -157,6 +161,7 @@ async function runR16ReflowProof(checkSeamTopology){
   const dynamic=labels();
   const collide=(a,b)=>{
    const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+   if((A.width===0&&A.height===0)||(B.width===0&&B.height===0))return false;
    return A.left<B.right+6&&A.right+6>B.left&&A.top<B.bottom+6&&A.bottom+6>B.top;
   };
   return !dynamic.some((label,i)=>

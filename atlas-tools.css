@@ -811,7 +811,9 @@
      center datum. Mobile keeps the compact centered task rail below. */
   #kinetic-instrument[data-inverse-time-search="active"] .inverse-time-search-readout {
     position: fixed;
-    top: 84px;
+    /* below the wheel's top edge (63px at 1440×900) with a 24px+ gap, so
+       the rail reads as part of the instrument rather than the top bar */
+    top: 92px;
     left: 0;
     transform: none;
     width: 340px;

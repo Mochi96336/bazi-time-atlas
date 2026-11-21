@@ -349,7 +349,7 @@ test("60-day wheel is the selector: direct sector click, pointer scrub, and keyb
   assert.match(cycleView, /setPointerCapture/);
   assert.match(cycleView, /event\.key === "ArrowLeft"/);
   assert.match(cycleView, /event\.key === "ArrowRight"/);
-  assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*none;/);
+  assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*pan-y;/);
 });
 
 test("reading order explains the global candidate before date/fan verification and lower delta controls", () => {

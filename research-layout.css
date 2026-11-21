@@ -636,7 +636,9 @@ h1 { margin:8px 0 10px; font-size:clamp(38px,5.2vw,74px); line-height:.95; lette
   height: auto;
   margin: 0 auto;
   overflow: visible;
-  touch-action: none;
+  /* vertical swipes keep scrolling the page on phones; taps and sideways
+     drags still select a position */
+  touch-action: pan-y;
 }
 .research-cycle-guide {
   fill: none;

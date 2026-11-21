@@ -87,12 +87,12 @@ function renderCard(name,{ pillarName=null, status, reason, resolved=false }) {
 // stays in the shared research state (lab time card), the card says it plainly.
 const PLAIN_REASONS=Object.freeze({
   resolved:Object.freeze({
-    year:"看太陽在立春前還是後，加上 60 年一輪，就算得出來。",
-    month:"看太陽走到哪一個節，就知道是哪個月。"
+    year:"看太陽在立春前或後，加上 60 年一輪。",
+    month:"看太陽走到哪一個節。"
   }),
   unresolved:Object.freeze({
-    day:"要知道地球轉了幾圈才知道是哪一天；24,000 年後誤差有好幾天。",
-    hour:"要知道地球轉到哪一刻，而且得先知道是哪一天。"
+    day:"要知道地球轉了幾圈；24,000 年後誤差好幾天。",
+    hour:"要知道轉到哪一刻，還得先知道是哪天。"
   })
 });
 

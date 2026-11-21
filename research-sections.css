@@ -5885,6 +5885,78 @@ body {
 .recurrence-shell .research-outline.research-answer-map a::before { display: none; }
 .recurrence-shell .research-outline.research-answer-map strong { font-size: 17px; }
 
+/* ---------- opening · how a BaZi chart is made ---------- */
+
+.research-bazi-primer { margin: 88px 0 0; padding: 0; }
+.research-bazi-primer figcaption { display: grid; gap: 6px; margin-bottom: 28px; }
+.research-bazi-primer figcaption strong { color: var(--research-text-primary); font-size: 20px; font-weight: 700; }
+.research-bazi-primer figcaption span { color: var(--research-text-secondary); font-size: 15px; }
+.bazi-primer-grid {
+  display: grid;
+  grid-template-columns: 44px repeat(4, minmax(0, 1fr));
+  gap: 0 14px;
+  align-items: start;
+}
+.bazi-primer-rows { display: grid; grid-template-rows: 22px 72px 72px; color: var(--research-text-muted); font-size: 13px; }
+.bazi-primer-rows span:first-child { grid-row: 2; align-self: center; }
+.bazi-primer-rows span:last-child { grid-row: 3; align-self: center; }
+.bazi-primer-pillar { display: grid; justify-items: center; text-align: center; }
+.bazi-primer-pillar > b { height: 22px; color: var(--research-text-secondary); font-size: 14px; font-weight: 650; }
+.bazi-primer-pillar > strong {
+  display: grid;
+  grid-template-rows: 72px 72px;
+  width: 100%;
+  max-width: 132px;
+  border: 1px solid var(--research-line-strong);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.bazi-primer-pillar > strong i {
+  display: grid;
+  place-items: center;
+  color: var(--research-text-primary);
+  font-size: 34px;
+  font-style: normal;
+  font-weight: 700;
+}
+.bazi-primer-pillar > strong i + i { border-top: 1px solid var(--research-line-subtle); }
+.bazi-primer-pillar[data-pillar="year"] > strong { border-color: color-mix(in srgb, var(--year, #c5a96f) 70%, transparent); }
+.bazi-primer-pillar[data-pillar="day"] > strong { border-color: color-mix(in srgb, var(--day, #78aabd) 70%, transparent); }
+.bazi-primer-pillar[data-pillar="year"] > b { color: var(--year, #c5a96f); }
+.bazi-primer-pillar[data-pillar="day"] > b { color: var(--day, #78aabd); }
+.bazi-primer-pillar p { margin: 14px 0 0; color: var(--research-text-secondary); font-size: 14px; line-height: 1.6; }
+.bazi-primer-pillar small { margin-top: 4px; color: var(--research-text-muted); font-size: 13px; }
+.bazi-primer-sum,
+.bazi-primer-question {
+  max-width: var(--rv2-measure);
+  margin: 28px 0 0;
+  color: var(--research-text-secondary);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.bazi-primer-sum b { color: var(--research-text-primary); }
+.bazi-primer-question { margin-top: 12px; color: var(--research-text-primary); font-size: 17px; }
+
+/* ---------- centred reading column (review 2026-11-21) ---------- */
+
+/* The opening and the three reading steps sit in one centred column; their
+   figures centre inside it. The lab keeps the full width its tools need. */
+.recurrence-shell > .research-question-intro,
+.recurrence-shell > .research-answer-map,
+#research-discrete,
+#research-astronomy,
+#research-evidence,
+.recurrence-shell > .research-glossary {
+  width: min(860px, 100%);
+  margin-inline: auto;
+}
+.cycle-dials-stage { justify-content: center; }
+.cycle-dials-choices { justify-content: center; }
+.cycle-dials-sentence { margin-inline: auto; text-align: center; }
+.research-rotation-uncertainty svg { margin-inline: auto; }
+#research-astronomy .research-drift-accumulation svg { display: block; margin-inline: auto; }
+#seasonal-drift-orbit-details svg { display: block; margin-inline: auto; }
+
 /* ---------- section rhythm ---------- */
 
 /* sections are separated by space, not by tinted bands */
@@ -6163,6 +6235,13 @@ body {
   .cycle-dials-stage { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 }
 @media (max-width: 560px) {
+  .research-bazi-primer { margin-top: 56px; }
+  .bazi-primer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 8px; }
+  .bazi-primer-rows { display: none; }
+  .bazi-primer-pillar > strong { grid-template-rows: 56px 56px; }
+  .bazi-primer-pillar > strong i { font-size: 26px; }
+  .bazi-primer-pillar p { font-size: 13px; }
+  .bazi-primer-pillar small { font-size: 12px; }
   .recurrence-shell { --rv2-section-gap: 120px; --rv2-block-gap: 48px; --rv2-body: 16px; }
   .research-overview { margin-top: 56px; }
   .research-overview-axis { height: auto; margin: 0; padding-left: 28px; display: grid; gap: 28px; }

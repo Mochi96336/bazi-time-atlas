@@ -251,16 +251,19 @@ function avoidR16MobileNameCollisions() {
     a.top<b.bottom+clearance&&a.bottom+clearance>b.top;
   // Fixed ring names do not change within a phase update. Share these
   // measured rectangles across all three moving labels.
-  const fixedBounds=names.map(measure);
+  // Text the phone layout does not render (display:none) has no bounds and
+  // cannot collide.
+  const rendered=rect=>rect.width>0||rect.height>0;
+  const fixedBounds=names.map(measure).filter(rendered);
   const positioned=[];
   for(const label of labels){
     // Earlier moving labels can change; the original ring-name rectangles
     // cannot. Evaluate candidate SVG translations without layout reads.
-    const rivals=[...fixedBounds,...positioned.map(measure)];
+    const rivals=[...fixedBounds,...positioned.map(measure).filter(rendered)];
     const x=Number(label.getAttribute("x")),y=Number(label.getAttribute("y"));
     const originalSize=Number.parseFloat(getComputedStyle(label).fontSize);
     const initial=measure(label);
-    if(rivals.every(rect=>!adjacent(initial,rect))){
+    if(!rendered(initial)||rivals.every(rect=>!adjacent(initial,rect))){
       positioned.push(label);continue;
     }
     const matrix=label.getScreenCTM();
