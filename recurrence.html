@@ -83,18 +83,18 @@
       </header>
       <p class="research-plain-conclusion" data-plain-conclusion="01">年柱和日柱大約 1,980 年後會一起回到同樣的<a class="research-term" href="#term-ganzhi">干支</a>（確切年數依日期而定）；但要連「季節位置」也一起對上，得等到 24,000 年。這個數字只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>。</p>
 
-      <figure id="research-cycle-dials" class="research-cycle-dials" data-default-years="1980" aria-labelledby="cycle-dials-title">
-        <figcaption><strong id="cycle-dials-title">三個循環，什麼時候一起回到起點？</strong><span>從 2026 年 9 月 13 日出發，按下面的年數看看。公曆代表季節位置。</span></figcaption>
-        <div class="cycle-dials-stage"></div>
-        <div class="cycle-dials-choices" role="group" aria-label="選擇經過的年數">
+      <figure id="research-cycle-fan" class="research-cycle-fan" data-default-years="1980" aria-labelledby="cycle-fan-title">
+        <figcaption><strong id="cycle-fan-title">三圈什麼時候一起回到起點？</strong><span>從 2026 年 9 月 13 日出發，按下面的年數看看。</span></figcaption>
+        <div class="cycle-fan-choices" role="group" aria-label="選擇經過的年數">
           <button type="button" data-cycle-milestone="1200" aria-pressed="false"><strong>1,200 年</strong></button>
           <button type="button" data-cycle-milestone="1980" aria-pressed="false"><strong>1,980 年</strong></button>
           <button type="button" data-cycle-milestone="8000" aria-pressed="false"><strong>8,000 年</strong></button>
           <button type="button" data-cycle-milestone="24000" aria-pressed="false"><strong>24,000 年</strong></button>
         </div>
-        <p id="cycle-dials-sentence" class="cycle-dials-sentence" aria-live="polite">—</p>
+        <div class="cycle-fan-stage"></div>
+        <p id="cycle-fan-sentence" class="cycle-fan-sentence" aria-live="polite">—</p>
       </figure>
-      <p class="research-figure-howto" data-figure-howto="01">怎麼看：每個圓圈是一個循環，頂端的短線是起點，圓點是經過那麼多年後走到的位置。圓點回到短線上，就是那個循環「回來了」；紅色弧線是還差多少。</p>
+      <p class="research-figure-howto" data-figure-howto="01">怎麼看：和首頁的圓盤一樣，中間的金色指針不動，三圈在它底下轉。指針下那一格就是經過那麼多年後走到的位置；金框那一格是起點。金框回到指針下，那一圈就「回來了」；紅色弧線是還差多少。每一圈的格子大小不同，單位寫在圖下。公曆圈代表季節位置。</p>
 
       <div class="research-discrete-mechanism">
         <p><strong>為什麼是 1,980 年？</strong>年柱 60 年一輪，所以經過的年數只要是 60 的倍數，年柱就回來。日柱 60 天一輪，要經過的天數剛好是 60 的倍數才行。從 2026 年 9 月 13 日算，兩個條件第一次同時成立是 1,980 年後（換一個起始日期，這個數字會不同）。</p>
@@ -303,7 +303,60 @@
         <div><div class="eyebrow">實驗台</div><h2 id="research-lab-title">自己動手算</h2></div>
       </header>
       <p class="research-lab-lede">上面三段用到的數字，都可以在這裡自己驗算：換起始日期、拖動年數，看三個循環各走到哪裡。</p>
+      <figure id="research-lab-fan" class="research-lab-fan" aria-labelledby="lab-fan-title">
+        <figcaption><strong id="lab-fan-title">換一個起點，三圈怎麼走？</strong><span>選起始日期和經過的年數，或直接按下面「一起回來」的年數。比較的都是同月同日。</span></figcaption>
+        <div class="lab-fan-controls">
+          <label class="lab-fan-field"><span>起始日期</span><input id="lab-fan-start" type="date" value="2026-09-13" min="0001-01-01" max="9999-12-31"></label>
+          <label class="lab-fan-field lab-fan-years-field"><span>經過</span><input id="lab-fan-years" type="number" inputmode="numeric" min="0" max="24000" step="1" value="0"><span>年</span></label>
+          <input id="lab-fan-slider" class="lab-fan-slider" type="range" min="0" max="24000" step="1" value="0" aria-label="經過的年數，0 到 24,000">
+          <div class="lab-fan-jumps" role="group" aria-label="直接跳到一起回來的年數">
+            <button type="button" data-lab-jump="next" data-lab-years="1980" aria-pressed="false"><small>年柱＋日柱</small><strong id="lab-fan-next-years">1,980 年</strong></button>
+            <button type="button" data-lab-jump="1200" data-lab-years="1200" aria-pressed="false"><small>年柱＋公曆</small><strong>1,200 年</strong></button>
+            <button type="button" data-lab-jump="8000" data-lab-years="8000" aria-pressed="false"><small>日柱＋公曆</small><strong>8,000 年</strong></button>
+            <button type="button" data-lab-jump="24000" data-lab-years="24000" aria-pressed="false"><small>三個一起</small><strong>24,000 年</strong></button>
+          </div>
+        </div>
+        <div class="cycle-fan-stage"></div>
+        <p id="lab-fan-sentence" class="cycle-fan-sentence" aria-live="polite">—</p>
+        <p class="lab-fan-note">年柱以立春約在 2 月 4 日估算；起始日期剛好在 2 月 3–5 日時，年柱可能差一位。</p>
+      </figure>
 
+      <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
+        <header class="research-cycle-head">
+          <div><div class="eyebrow">六十日干支</div><h3 id="research-cycle-heading">六十日干支循環</h3></div>
+          <p>10 天干與 12 地支同步逐日前進，60 日後第一次回到原配對。</p>
+        </header>
+        <div class="research-cycle-layout">
+          <div class="research-cycle-stage">
+            <div class="research-cycle-key" aria-hidden="true"><strong>六十日序</strong><i>由</i><strong>10 天干 · 12 地支配對</strong></div>
+            <svg id="research-sexagenary-wheel" viewBox="0 0 640 640" role="img" aria-label="六十日干支循環第 1 位甲子">
+              <g data-research-cycle-group="guides"></g>
+              <g data-research-cycle-group="stems"></g>
+              <g data-research-cycle-group="branches"></g>
+              <g data-research-cycle-group="cycle"></g>
+              <g data-research-cycle-group="selection"></g>
+              <circle cx="320" cy="320" r="82" class="research-cycle-center"></circle>
+              <text id="research-cycle-center-kicker" x="320" y="290" class="research-cycle-center-kicker">甲子</text>
+              <text id="research-cycle-center-value" x="320" y="334" class="research-cycle-center-value">01 / 60</text>
+              <text id="research-cycle-center-note" x="320" y="365" class="research-cycle-center-note">天干 甲 · 1/10　地支 子 · 1/12</text>
+            </svg>
+          </div>
+          <aside class="research-cycle-inspector" aria-live="polite">
+            <div class="eyebrow">目前日序</div>
+            <div class="research-cycle-inspector-head"><h4 id="research-cycle-title">甲子</h4><span id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</span></div>
+            <div class="research-cycle-phases">
+              <div class="research-cycle-phase"><span>天干</span><div><strong id="research-cycle-stem">甲</strong><small id="research-cycle-stem-meta">陽 · 木</small></div><em id="research-cycle-stem-index">1 / 10</em></div>
+              <div class="research-cycle-phase"><span>地支</span><div><strong id="research-cycle-branch">子</strong><small id="research-cycle-branch-meta">陽 · 水</small></div><em id="research-cycle-branch-index">1 / 12</em></div>
+            </div>
+            <p id="research-cycle-binding" class="research-cycle-binding">跟隨比較日期 · 目前日干支</p>
+            <button id="research-cycle-return" type="button" class="research-cycle-return" hidden>回到比較日</button>
+          </aside>
+        </div>
+      </section>
+
+      <details id="research-lab-tools" class="research-lab-tools">
+        <summary><strong>研究者工具</strong><span>原始相位扇、年度時間條、逐步推導，以及日柱、時柱和天文來源的完整證據</span></summary>
+        <div class="research-lab-tools-body">
       <section id="recurrence-instrument" class="recurrence-instrument" aria-label="三個離散週期相對基準零點的相位比較">
         <div class="research-fan-graphic">
           <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 與基準同相位 · 左右為距 0 的最短循環位移</span></div>
@@ -562,38 +615,6 @@
         </div>
       </div>
 
-      <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
-        <header class="research-cycle-head">
-          <div><div class="eyebrow">六十日干支</div><h3 id="research-cycle-heading">六十日干支循環</h3></div>
-          <p>10 天干與 12 地支同步逐日前進，60 日後第一次回到原配對。</p>
-        </header>
-        <div class="research-cycle-layout">
-          <div class="research-cycle-stage">
-            <div class="research-cycle-key" aria-hidden="true"><strong>六十日序</strong><i>由</i><strong>10 天干 · 12 地支配對</strong></div>
-            <svg id="research-sexagenary-wheel" viewBox="0 0 640 640" role="img" aria-label="六十日干支循環第 1 位甲子">
-              <g data-research-cycle-group="guides"></g>
-              <g data-research-cycle-group="stems"></g>
-              <g data-research-cycle-group="branches"></g>
-              <g data-research-cycle-group="cycle"></g>
-              <g data-research-cycle-group="selection"></g>
-              <circle cx="320" cy="320" r="82" class="research-cycle-center"></circle>
-              <text id="research-cycle-center-kicker" x="320" y="290" class="research-cycle-center-kicker">甲子</text>
-              <text id="research-cycle-center-value" x="320" y="334" class="research-cycle-center-value">01 / 60</text>
-              <text id="research-cycle-center-note" x="320" y="365" class="research-cycle-center-note">天干 甲 · 1/10　地支 子 · 1/12</text>
-            </svg>
-          </div>
-          <aside class="research-cycle-inspector" aria-live="polite">
-            <div class="eyebrow">目前日序</div>
-            <div class="research-cycle-inspector-head"><h4 id="research-cycle-title">甲子</h4><span id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</span></div>
-            <div class="research-cycle-phases">
-              <div class="research-cycle-phase"><span>天干</span><div><strong id="research-cycle-stem">甲</strong><small id="research-cycle-stem-meta">陽 · 木</small></div><em id="research-cycle-stem-index">1 / 10</em></div>
-              <div class="research-cycle-phase"><span>地支</span><div><strong id="research-cycle-branch">子</strong><small id="research-cycle-branch-meta">陽 · 水</small></div><em id="research-cycle-branch-index">1 / 12</em></div>
-            </div>
-            <p id="research-cycle-binding" class="research-cycle-binding">跟隨比較日期 · 目前日干支</p>
-            <button id="research-cycle-return" type="button" class="research-cycle-return" hidden>回到比較日</button>
-          </aside>
-        </div>
-      </section>
 
       <div id="research-lab-evidence" class="research-lab-evidence" aria-label="日柱、時柱與天文來源的完整證據"></div>
 
@@ -607,6 +628,8 @@
       </section>
       <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
+      </details>
+        </div>
       </details>
     </section>
 

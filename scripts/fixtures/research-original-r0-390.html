@@ -72,6 +72,10 @@ iframe.addEventListener("load",async()=>{
   check(tools && tools.tagName==="DIV" && tools.closest("#research-lab") && tools.contains(d.getElementById("research-year-strip")),
     "lab tools must keep the original year strip open inside the lab");
   tools.open=true;
+  // Review 2026-11-21 (fan everywhere): the original tools sit behind 研究者工具.
+  const labTools=d.getElementById("research-lab-tools");
+  check(labTools&&labTools.tagName==="DETAILS"&&labTools.contains(tools),"original tools must live in the researcher-tools disclosure");
+  labTools.open=true;
   await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
   const ids=["research-discrete","research-cycle-comparison",
     "research-year-strip","research-astronomy",
@@ -232,9 +236,12 @@ iframe.addEventListener("load",async()=>{
   compactControls.open=false;
   check(sexagenaryDetails && derivation && astronomyTransition &&
     astronomyTransition.getBoundingClientRect().bottom<=derivation.getBoundingClientRect().top &&
-    derivation.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top &&
+    // Review 2026-11-21: the 60-pair wheel follows the lab's cycle fan and
+    // precedes the researcher tools that hold the derivation.
+    d.getElementById("research-lab-fan").getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top &&
+    sexagenaryDetails.getBoundingClientRect().bottom<=labTools.getBoundingClientRect().top &&
     sexagenaryDetails.closest("#research-lab"),
-    "R9 60 Ganzhi source must follow the derivation inside the lab, after 01's next-step transition");
+    "R9 60 Ganzhi source must follow the lab cycle fan, before the researcher tools");
     const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),

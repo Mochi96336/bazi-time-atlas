@@ -74,7 +74,7 @@ test("the lab owns one current-state rail, the year strip, derivation, and struc
   const reading01 = html.slice(discreteStart, astronomyStart);
   assert.match(reading01, /id="research-discrete-title">粗略週期從哪裡來？/);
   assert.match(reading01, /下一步：真正的節氣也回到原位了嗎？/);
-  assert.match(reading01, /id="research-cycle-dials"/);
+  assert.match(reading01, /id="research-cycle-fan"/);
   assert.doesNotMatch(reading01, /id="recurrence-instrument"|id="research-discrete-tools"/);
   const discrete = lab;
   assert.match(discrete, /id="recurrence-instrument"/);
@@ -97,10 +97,12 @@ test("the lab owns one current-state rail, the year strip, derivation, and struc
   assert.ok(discrete.indexOf('id="research-discrete-tools"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
   assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('class="discrete-derivation"'));
-  assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
+  // the 60-pair wheel reads before the researcher tools
+  assert.ok(discrete.indexOf('id="research-sexagenary-cycle"') < discrete.indexOf('id="research-lab-tools"'));
+  assert.ok(discrete.indexOf('id="research-lab-tools"') < discrete.indexOf('id="recurrence-instrument"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
   // the lab's other-Δ sandbox follows all of the discrete tools
-  assert.ok(discrete.indexOf('class="astronomy-panel"') > discrete.indexOf('id="research-sexagenary-cycle"'));
+  assert.ok(discrete.indexOf('class="astronomy-panel"') > discrete.indexOf('class="discrete-derivation"'));
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
 

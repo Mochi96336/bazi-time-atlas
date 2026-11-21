@@ -359,8 +359,10 @@ test("reading order explains the global candidate before date/fan verification a
   const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
+  // Review 2026-11-21 (fan everywhere): the 60-pair wheel reads right after the
+  // lab's cycle fan; the original fan and its tools follow in 研究者工具.
   assert.ok(stateStart >= 0 && thesisStart > stateStart && stripStart > thesisStart && comparisonStart > stripStart &&
-    derivationStart > comparisonStart && cycleStart > derivationStart);
+    derivationStart > comparisonStart && cycleStart > 0 && cycleStart < stateStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
@@ -394,13 +396,13 @@ test("first-screen research milestones reuse the canonical delta state and date-
   // conclusion, so the page opens with the question rather than a dashboard.
   const discrete=recurrenceHtml.indexOf('id="research-discrete"');
   const conclusion=recurrenceHtml.indexOf('data-plain-conclusion="01"');
-  // Review 2026-11-21: 01 reads with the three-dial figure; the phase fan
-  // and its milestone buttons (attached right under it) live in the lab.
-  const dials=recurrenceHtml.indexOf('id="research-cycle-dials"');
+  // Review 2026-11-21: 01 reads with the cycle fan; the original phase fan
+  // and its milestone buttons (attached right under it) live in the lab tools.
+  const dials=recurrenceHtml.indexOf('id="research-cycle-fan"');
   const lab=recurrenceHtml.indexOf('id="research-lab"');
   assert.ok(outline > 0 && outline < discrete && discrete < conclusion && conclusion < dials && dials < lab &&
     lab < fan && fan < entry && entry < time,
-    "route map, 01 conclusion, the dials; then in the lab: fan, its milestone buttons, the time card");
+    "route map, 01 conclusion, the cycle fan; then in the lab: original fan, its milestone buttons, the time card");
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
   assert.doesNotMatch(recurrenceHtml.slice(entry,recurrenceHtml.indexOf("</div>",recurrenceHtml.indexOf('id="research-entry-selection"'))),/\+1,980/);

@@ -335,7 +335,7 @@ if (stickyTimeTag.includes('data-stuck="true"')) {
   throw new Error(`Research time state must no longer stick over 02/03: ${stickyTimeProbe.url}`);
 }
 const toolsStart = stickyTimeProbe.dom.indexOf('id="research-discrete-tools"');
-const toolsEnd = stickyTimeProbe.dom.indexOf('id="research-sexagenary-cycle"', toolsStart);
+const toolsEnd = stickyTimeProbe.dom.indexOf('id="research-lab-evidence"', toolsStart);
 const timeAt = stickyTimeProbe.dom.indexOf('id="research-time-state"');
 if (!(toolsStart >= 0 && timeAt > toolsStart && timeAt < toolsEnd) ||
     !stickyTimeProbe.dom.includes('<div id="research-discrete-tools" class="research-discrete-tools">')) {

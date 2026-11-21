@@ -113,6 +113,14 @@
       const discreteTools = recurrenceDoc.getElementById("research-discrete-tools");
       if (!("recurrenceDiscreteToolsOpenInLab" in probe.dataset)) probe.dataset.recurrenceDiscreteToolsOpenInLab = String(Boolean(discreteTools && discreteTools.tagName === "DIV" && discreteTools.closest("#research-lab")));
       if (discreteTools) discreteTools.open = true;
+      // Review 2026-11-21 (fan everywhere): the reading fans are #research-cycle-fan
+      // (01) and #research-lab-fan; the original fan and its tools sit in the
+      // closed "研究者工具" disclosure. Record that, then open it to audit the tools.
+      const labTools = recurrenceDoc.getElementById("research-lab-tools");
+      const readingFans = ["#research-cycle-fan", "#research-lab-fan"].map(selector => recurrenceDoc.querySelector(selector));
+      if (!("recurrenceReadingFansVisible" in probe.dataset)) probe.dataset.recurrenceReadingFansVisible = String(readingFans.every(fan => fan && !fan.closest("details") && fan.querySelector(".cycle-fan-svg")?.getBoundingClientRect().height > 200));
+      if (!("recurrenceLabToolsClosed" in probe.dataset)) probe.dataset.recurrenceLabToolsClosed = String(Boolean(labTools && labTools.tagName === "DETAILS" && !labTools.open));
+      if (labTools) labTools.open = true;
       recurrenceDoc.documentElement.getBoundingClientRect();
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
       const recurrenceComparison = recurrenceDoc.querySelector("#research-cycle-comparison");
@@ -228,9 +236,11 @@
       probe.dataset.recurrencePhaseFanPanelWidth = String(Math.round(phaseFanPanelRect?.width ?? -1));
       probe.dataset.recurrenceSexagenaryDetailsOpen = String(Boolean(sexagenaryDetails?.open));
       probe.dataset.recurrenceSexagenaryDetailsHeight = String(Math.round(sexagenaryDetailsRect?.height ?? -1));
+      const labFanRect = recurrenceDoc.querySelector("#research-lab-fan")?.getBoundingClientRect();
+      const labToolsRect = recurrenceDoc.querySelector("#research-lab-tools")?.getBoundingClientRect();
       probe.dataset.recurrenceSexagenaryAfterDerivation = String(Boolean(
-        derivationRect && sexagenaryDetailsRect &&
-        derivationRect.bottom <= sexagenaryDetailsRect.top
+        labFanRect && sexagenaryDetailsRect && labToolsRect &&
+        labFanRect.bottom <= sexagenaryDetailsRect.top && sexagenaryDetailsRect.bottom <= labToolsRect.top
       ));
       probe.dataset.recurrenceAstronomyTransitionBottom = String(Math.round(astronomyTransitionRect?.bottom ?? -1));
       probe.dataset.recurrenceAstronomyTaskTop = String(Math.round(astronomyTaskHeadRect?.top ?? -1));

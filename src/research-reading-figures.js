@@ -1,6 +1,10 @@
 // Research reading figures (review 2026-11-21): one figure per step.
-//   01 · three cycle dials — which of the three counters are back at the start
-//        after 1,200 / 1,980 / 8,000 / 24,000 years.
+//   01 · cycle fan — the home page's vocabulary: a fixed gold needle marks the
+//        start, and three rings (年柱 · 公曆 · 日柱) turn underneath it. After N
+//        years the cell under the needle is where each cycle has got to; the
+//        gold-outlined start cell shows how far it still is from coming back.
+//        Each ring counts in its own unit (1 cell = 1 year / 10 years / 1 day).
+//   lab · the same fan with a start date, any number of years, and shortcuts.
 //   03 · Earth-rotation uncertainty — how wide the 1σ ΔT range grows against
 //        one double-hour and one day.
 // Pure presentation: the arithmetic is integer calendar maths and the ΔT
@@ -8,8 +12,13 @@
 import { futureDeltaTOneSigmaSeconds } from "./astronomy/deep-time-earth-rotation.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
-const BASE = Object.freeze({ year: 2026, month: 9, day: 13 });
+export const BASE = Object.freeze({ year: 2026, month: 9, day: 13 });
+const BASE_DAY_INDEX = 26; // 2026-09-13 is 庚寅
+const STEMS = "甲乙丙丁戊己庚辛壬癸";
+const BRANCHES = "子丑寅卯辰巳午未申酉戌亥";
 const reduceMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+const mod = (value, period) => ((value % period) + period) % period;
+const fmt = value => value.toLocaleString("en-US");
 
 function el(name, attrs = {}, parent) {
   const node = document.createElementNS(SVG_NS, name);
@@ -18,7 +27,7 @@ function el(name, attrs = {}, parent) {
   return node;
 }
 
-/** Days from 0000-03-01-style epoch (proleptic Gregorian). */
+/** Julian day number of a proleptic Gregorian date. */
 export function dayNumber(year, month, day) {
   const a = Math.floor((14 - month) / 12);
   const y = year + 4800 - a;
@@ -26,134 +35,379 @@ export function dayNumber(year, month, day) {
   return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
 }
 
+const isLeap = year => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+export const sexagenaryName = index => STEMS[mod(index, 10)] + BRANCHES[mod(index, 12)];
+
+/** Year pillar index (甲子 = 0). The year turns at 立春, taken here as 4 February. */
+export function yearPillarIndex({ year, month, day }) {
+  const pillarYear = month < 2 || (month === 2 && day < 4) ? year - 1 : year;
+  return mod(pillarYear - 4, 60);
+}
+
+/** Day pillar index (甲子 = 0), anchored on 2026-09-13 = 庚寅. */
+export function dayPillarIndex({ year, month, day }) {
+  return mod(dayNumber(year, month, day) - dayNumber(BASE.year, BASE.month, BASE.day) + BASE_DAY_INDEX, 60);
+}
+
+/** The same month and day `years` later (29 February falls back to the 28th). */
+export function laterDate(start, years) {
+  const year = start.year + years;
+  const day = start.month === 2 && start.day === 29 && !isLeap(year) ? 28 : start.day;
+  return Object.freeze({ year, month: start.month, day });
+}
+
 const shortest = (value, period) => {
-  const r = ((value % period) + period) % period;
+  const r = mod(value, period);
   return r > period / 2 ? r - period : r;
 };
 
-/** Phase of each counter after `years`, measured from BASE on the same month/day. */
-export function cyclePhases(years) {
-  const days = dayNumber(BASE.year + years, BASE.month, BASE.day) - dayNumber(BASE.year, BASE.month, BASE.day);
+/** Where each counter stands after `years`, measured from `start` on the same month/day. */
+export function cyclePhases(years, start = BASE) {
+  const target = laterDate(start, years);
+  const days = dayNumber(target.year, target.month, target.day) - dayNumber(start.year, start.month, start.day);
   return Object.freeze({
     years,
     days,
-    year: Object.freeze({ offset: shortest(years, 60), period: 60, unit: "年" }),
-    day: Object.freeze({ offset: shortest(days, 60), period: 60, unit: "天" }),
-    gregorian: Object.freeze({ offset: shortest(years, 400), period: 400, unit: "年" })
+    start,
+    target,
+    year: Object.freeze({ offset: shortest(years, 60), period: 60, unit: "年", from: yearPillarIndex(start), to: yearPillarIndex(target) }),
+    day: Object.freeze({ offset: shortest(days, 60), period: 60, unit: "天", from: dayPillarIndex(start), to: dayPillarIndex(target) }),
+    gregorian: Object.freeze({ offset: shortest(years, 400), period: 400, unit: "年", from: 0, to: mod(years, 400) })
   });
+}
+
+/** First positive number of years after which the year and day pillars are both back. */
+export function nextYearDayReturn(start = BASE) {
+  for (let years = 60; years <= 24000; years += 60) {
+    if (cyclePhases(years, start).day.offset === 0) return years;
+  }
+  return 24000;
 }
 
 export const CYCLE_MILESTONES = Object.freeze([1200, 1980, 8000, 24000]);
 
-const DIALS = Object.freeze([
-  { key: "year", name: "年柱", note: "60 年一輪" },
-  { key: "day", name: "日柱", note: "60 天一輪" },
-  { key: "gregorian", name: "公曆", note: "400 年一輪" }
+const RINGS = Object.freeze([
+  { key: "year", name: "年柱", note: "60 年一圈 · 1 格＝1 年", cells: 60 },
+  { key: "gregorian", name: "公曆", note: "400 年一圈 · 1 格＝10 年", cells: 40 },
+  { key: "day", name: "日柱", note: "60 天一圈 · 1 格＝1 天", cells: 60 }
 ]);
 
+function gapText(phase) {
+  const amount = `${Math.abs(phase.offset)} ${phase.unit}`;
+  return phase.offset < 0 ? `還差 ${amount}` : `多走了 ${amount}`;
+}
+
 export function milestoneSentence(phases) {
-  const aligned = DIALS.filter(dial => phases[dial.key].offset === 0).map(dial => dial.name);
-  const missing = DIALS.filter(dial => phases[dial.key].offset !== 0);
-  const years = phases.years.toLocaleString("en-US");
-  if (!missing.length) return `${years} 年後：三個都回到起點。這就是曆法上的 24,000 年。`;
-  const gap = missing.map(dial => `${dial.name}還差 ${Math.abs(phases[dial.key].offset)} ${phases[dial.key].unit}`).join("、");
+  const aligned = RINGS.filter(ring => phases[ring.key].offset === 0).map(ring => ring.name);
+  const missing = RINGS.filter(ring => phases[ring.key].offset !== 0);
+  const years = fmt(phases.years);
+  if (phases.years === 0) return "還沒出發：三圈都停在起點。";
+  if (!missing.length) return `${years} 年後：三個都回到起點。`;
+  const gap = missing.map(ring => `${ring.name}${gapText(phases[ring.key])}`).join("、");
+  if (!aligned.length) return `${years} 年後：三個都不在起點，${gap}。`;
   return `${years} 年後：${aligned.join("、")}回到起點，但${gap}。`;
 }
 
-function polar(cx, cy, r, turn) {
-  const angle = turn * Math.PI * 2 - Math.PI / 2;
-  return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+const formatDate = ({ year, month, day }) => `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+/* ---------- the fan ---------- */
+
+// 0° is straight up, clockwise positive (the home wheel's convention).
+function polar(cx, cy, r, degrees) {
+  const a = (degrees * Math.PI) / 180;
+  return [cx + r * Math.sin(a), cy - r * Math.cos(a)];
 }
 
-function arcPath(cx, cy, r, fromTurn, toTurn) {
-  if (Math.abs(toTurn - fromTurn) < 1e-6) return "";
-  const [x0, y0] = polar(cx, cy, r, fromTurn);
-  const [x1, y1] = polar(cx, cy, r, toTurn);
-  const large = Math.abs(toTurn - fromTurn) > 0.5 ? 1 : 0;
-  const sweep = toTurn > fromTurn ? 1 : 0;
-  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+function sectorPath(cx, cy, r0, r1, a0, a1) {
+  const large = a1 - a0 > 180 ? 1 : 0;
+  const p = (r, a) => polar(cx, cy, r, a).map(v => v.toFixed(2)).join(" ");
+  return `M ${p(r1, a0)} A ${r1} ${r1} 0 ${large} 1 ${p(r1, a1)} L ${p(r0, a1)} A ${r0} ${r0} 0 ${large} 0 ${p(r0, a0)} Z`;
 }
 
-function installCycleDials() {
-  const root = document.querySelector("#research-cycle-dials");
-  if (!root) return;
-  const stage = root.querySelector(".cycle-dials-stage");
-  const sentence = root.querySelector("#cycle-dials-sentence");
-  const buttons = [...root.querySelectorAll("[data-cycle-milestone]")];
-  const dials = new Map();
+function arcPath(cx, cy, r, a0, a1) {
+  if (Math.abs(a1 - a0) < 0.01) return "";
+  const [from, to] = a0 < a1 ? [a0, a1] : [a1, a0];
+  const p = a => polar(cx, cy, r, a).map(v => v.toFixed(2)).join(" ");
+  return `M ${p(from)} A ${r} ${r} 0 ${to - from > 180 ? 1 : 0} 1 ${p(to)}`;
+}
 
-  for (const dial of DIALS) {
-    const cell = document.createElement("div");
-    cell.className = "cycle-dial";
-    cell.dataset.dial = dial.key;
-    const svg = el("svg", { viewBox: "0 0 160 160", "aria-hidden": "true" });
-    el("circle", { class: "cycle-dial-track", cx: 80, cy: 80, r: 62 }, svg);
-    for (let i = 0; i < 12; i += 1) {
-      const [x0, y0] = polar(80, 80, 56, i / 12);
-      const [x1, y1] = polar(80, 80, 62, i / 12);
-      el("line", { class: "cycle-dial-tick", x1: x0, y1: y0, x2: x1, y2: y1 }, svg);
-    }
-    const gap = el("path", { class: "cycle-dial-gap" }, svg);
-    const [sx, sy] = polar(80, 80, 62, 0);
-    el("line", { class: "cycle-dial-start", x1: sx, y1: sy - 9, x2: sx, y2: sy + 9 }, svg);
-    const hand = el("line", { class: "cycle-dial-hand", x1: 80, y1: 80, x2: 80, y2: 18 }, svg);
-    const dot = el("circle", { class: "cycle-dial-dot", cx: 80, cy: 18, r: 7 }, svg);
-    el("circle", { class: "cycle-dial-hub", cx: 80, cy: 80, r: 4 }, svg);
-    const label = document.createElement("div");
-    label.className = "cycle-dial-label";
-    label.innerHTML = `<strong>${dial.name}</strong><small>${dial.note}</small><b class="cycle-dial-status">—</b>`;
-    cell.append(svg, label);
-    stage.append(cell);
-    dials.set(dial.key, { cell, gap, hand, dot, status: label.querySelector(".cycle-dial-status"), turn: 0 });
+const VISIBLE_DEGREES = 125; // how far round each side of the needle the fan shows
+
+/**
+ * Builds a cycle fan inside `host`. Returns `show(phases, { animate })`.
+ * The rings turn under a fixed needle exactly like the home wheel.
+ */
+export function createCycleFan(host) {
+  host.classList.add("cycle-fan");
+  const svg = el("svg", { class: "cycle-fan-svg", role: "img" });
+  const rows = document.createElement("div");
+  rows.className = "cycle-fan-rows";
+  const rowViews = new Map();
+  for (const ring of RINGS) {
+    const row = document.createElement("div");
+    row.className = "cycle-fan-row";
+    row.dataset.ring = ring.key;
+    row.innerHTML = `<span class="cycle-fan-name"><i aria-hidden="true"></i><strong>${ring.name}</strong><small>${ring.note}</small></span><span class="cycle-fan-pair">—</span><b class="cycle-fan-status">—</b>`;
+    rows.append(row);
+    rowViews.set(ring.key, { row, pair: row.querySelector(".cycle-fan-pair"), status: row.querySelector(".cycle-fan-status") });
   }
+  host.append(svg, rows);
 
+  let layout = null;
+  let current = null;
+  const shown = new Map(RINGS.map(ring => [ring.key, 0]));
   let frame = 0;
-  function draw(key, turn) {
-    const dial = dials.get(key);
-    dial.turn = turn;
-    const [x, y] = polar(80, 80, 62, turn);
-    dial.hand.setAttribute("x2", x.toFixed(2));
-    dial.hand.setAttribute("y2", y.toFixed(2));
-    dial.dot.setAttribute("cx", x.toFixed(2));
-    dial.dot.setAttribute("cy", y.toFixed(2));
-    dial.gap.setAttribute("d", arcPath(80, 80, 62, Math.min(0, turn), Math.max(0, turn)));
+
+  function build() {
+    const width = Math.max(300, Math.round(host.getBoundingClientRect().width || 860));
+    const narrow = width < 560;
+    const R = Math.min(width / 2 - (narrow ? 4 : 16), 340);
+    const top = narrow ? 22 : 30;
+    const cx = width / 2;
+    const cy = top + R;
+    const height = Math.round(cy + R * Math.cos(((180 - VISIBLE_DEGREES) * Math.PI) / 180) + 6);
+    const bands = narrow
+      ? { year: [R * 0.76, R], gregorian: [R * 0.63, R * 0.73], day: [R * 0.37, R * 0.6] }
+      : { year: [R * 0.8, R], gregorian: [R * 0.69, R * 0.77], day: [R * 0.47, R * 0.66] };
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    const defs = el("defs", {}, svg);
+    const fadeId = `cycle-fan-fade-${Math.random().toString(36).slice(2, 8)}`;
+    const gradient = el("linearGradient", { id: fadeId, x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el("stop", { offset: (cy / height).toFixed(3), "stop-color": "#fff", "stop-opacity": 1 }, gradient);
+    el("stop", { offset: 1, "stop-color": "#fff", "stop-opacity": 0 }, gradient);
+    const mask = el("mask", { id: `${fadeId}-m` }, defs);
+    el("rect", { x: 0, y: 0, width, height, fill: `url(#${fadeId})` }, mask);
+    const body = el("g", { mask: `url(#${fadeId}-m)` }, svg);
+    // labels sit above the needle (with a halo), cells below it — as on the home wheel
+    const needleLayer = el("g", { class: "cycle-fan-needle-layer" }, svg);
+    const labelBody = el("g", { mask: `url(#${fadeId}-m)` }, svg);
+
+    const rings = new Map();
+    for (const ring of RINGS) {
+      const [r0, r1] = bands[ring.key];
+      const step = 360 / ring.cells;
+      const group = el("g", { class: "cycle-fan-ring", "data-ring": ring.key }, body);
+      const labels = el("g", { class: "cycle-fan-ring cycle-fan-ring-labels", "data-ring": ring.key }, labelBody);
+      const cells = [];
+      for (let i = 0; i < ring.cells; i += 1) {
+        const centre = i * step;
+        const cell = el("path", { class: "cycle-fan-cell", d: sectorPath(cx, cy, r0, r1, centre - step / 2, centre + step / 2) }, group);
+        let label = null;
+        const gregorianLabel = ring.key === "gregorian" && i % 10 === 0;
+        if (ring.key !== "gregorian" || gregorianLabel) {
+          // luopan style: stem above branch along the radius, one glyph wide
+          const mid = (r0 + r1) / 2;
+          label = el("g", { class: "cycle-fan-label", "data-mid": mid.toFixed(2) }, labels);
+          const pitch = ring.key === "gregorian" ? 0 : narrow ? 7 : 8;
+          const glyphs = ring.key === "gregorian" ? [0] : [-pitch, pitch];
+          for (const dy of glyphs) el("text", { x: cx.toFixed(2), y: (cy - mid + dy).toFixed(2) }, label);
+        }
+        cells.push({ cell, label, centre });
+      }
+      rings.set(ring.key, { group, labels, cells, step, r0, r1, gap: el("path", { class: "cycle-fan-gap", "data-ring": ring.key }, body) });
+    }
+
+    // the needle: fixed, like the home wheel's cursor
+    const needleTop = cy - R - (narrow ? 14 : 20);
+    el("line", { class: "cycle-fan-needle", x1: cx, x2: cx, y1: needleTop + 6, y2: cy - bands.day[0] }, needleLayer);
+    el("path", { class: "cycle-fan-needle-head", d: `M ${cx - 6} ${needleTop - 4} L ${cx + 6} ${needleTop - 4} L ${cx} ${needleTop + 7} Z` }, needleLayer);
+
+    const centre = el("g", { class: "cycle-fan-centre" }, svg);
+    const years = el("text", { class: "cycle-fan-years", x: cx, y: cy - (narrow ? R * 0.06 : R * 0.2) }, centre);
+    const dates = el("text", { class: "cycle-fan-dates", x: cx, y: cy - R * 0.2 + 30 }, centre);
+    host.dataset.narrow = String(narrow);
+    layout = { width, narrow, cx, cy, R, rings, years, dates };
   }
 
-  function select(years, { animate = true } = {}) {
-    const phases = cyclePhases(years);
+  function paintRing(key, offset) {
+    const ring = layout.rings.get(key);
+    const spec = RINGS.find(item => item.key === key);
+    const unitsPerCell = key === "gregorian" ? 10 : 1;
+    const rotation = (-offset / unitsPerCell) * ring.step;
+    const turn = `rotate(${rotation.toFixed(3)} ${layout.cx.toFixed(2)} ${layout.cy.toFixed(2)})`;
+    ring.group.setAttribute("transform", turn);
+    ring.labels.setAttribute("transform", turn);
+    for (const { label, centre } of ring.cells) {
+      if (!label) continue;
+      const absolute = mod(centre + rotation, 360);
+      const hidden = absolute > VISIBLE_DEGREES + 6 && absolute < 360 - VISIBLE_DEGREES - 6;
+      label.style.visibility = hidden ? "hidden" : "";
+      // minor labels fade away from the needle so the reading stays near it
+      const distance = Math.min(absolute, 360 - absolute);
+      const [near, span, floor] = layout.narrow ? [30, 40, 0] : [55, 70, 0.2];
+      const key = label.classList.contains("is-minor");
+      label.style.opacity = !key || distance <= near ? "" : String(Math.max(floor, 1 - (distance - near) / span).toFixed(2));
+      const flip = absolute > 90 && absolute < 270;
+      const pivotY = (layout.cy - Number(label.dataset.mid)).toFixed(2);
+      label.setAttribute("transform", `rotate(${centre.toFixed(2)} ${layout.cx.toFixed(2)} ${layout.cy.toFixed(2)})${flip ? ` rotate(180 ${layout.cx.toFixed(2)} ${pivotY})` : ""}`);
+    }
+    const radius = ring.r1 - (spec.key === "gregorian" ? 0 : 3);
+    ring.gap.setAttribute("d", arcPath(layout.cx, layout.cy, radius, Math.max(-179, Math.min(179, rotation)), 0));
+  }
+
+  function label(phases) {
+    for (const ring of RINGS) {
+      const view = layout.rings.get(ring.key);
+      const phase = phases[ring.key];
+      const startCell = ring.key === "gregorian" ? 0 : phase.from;
+      const targetCell = ring.key === "gregorian" ? Math.round(phase.to / 10) % 40 : phase.to;
+      view.cells.forEach(({ cell, label: text }, i) => {
+        // 60-pair rings: cell i is 干支 i placed relative to the start's 干支
+        cell.classList.toggle("is-start", i === startCell);
+        cell.classList.toggle("is-target", i === targetCell);
+        if (!text) return;
+        text.classList.toggle("is-start", i === startCell);
+        text.classList.toggle("is-target", i === targetCell);
+        text.classList.toggle("is-minor", i !== startCell && i !== targetCell);
+        const glyphs = text.querySelectorAll("text");
+        if (ring.key === "gregorian") glyphs[0].textContent = i === 0 ? "起點" : `+${i * 10}`;
+        else {
+          const name = sexagenaryName(i);
+          glyphs[0].textContent = name[0];
+          glyphs[1].textContent = name[1];
+        }
+      });
+      if (ring.key !== "gregorian") {
+        // place 干支 i so that the start's 干支 sits at angle 0 before rotating
+        view.cells.forEach(({ cell, label: text }, i) => {
+          const centre = mod(i - phase.from, ring.cells) * view.step;
+          cell.setAttribute("d", sectorPath(layout.cx, layout.cy, view.r0, view.r1, centre - view.step / 2, centre + view.step / 2));
+          view.cells[i].centre = centre;
+        });
+      }
+      const row = rowViews.get(ring.key);
+      row.row.dataset.aligned = String(phase.offset === 0);
+      row.pair.textContent = ring.key === "gregorian"
+        ? `${phases.start.year} → ${phases.target.year}`
+        : `${sexagenaryName(phase.from)} → ${sexagenaryName(phase.to)}`;
+      row.status.textContent = phase.offset === 0 ? "✓ 回到起點" : gapText(phase);
+    }
+    layout.years.textContent = phases.years === 0 ? "起點" : `+${fmt(phases.years)} 年`;
+    layout.dates.textContent = `${formatDate(phases.start)} → ${formatDate(phases.target)}`;
+    svg.setAttribute("aria-label", milestoneSentence(phases));
+    host.dataset.years = String(phases.years);
+    host.dataset.aligned = RINGS.filter(ring => phases[ring.key].offset === 0).map(ring => ring.key).join(" ");
+  }
+
+  function show(phases, { animate = true } = {}) {
+    current = phases;
     cancelAnimationFrame(frame);
-    const targets = DIALS.map(dial => [dial.key, phases[dial.key].offset / phases[dial.key].period]);
-    for (const dial of DIALS) {
-      const { offset, unit } = phases[dial.key];
-      const view = dials.get(dial.key);
-      view.cell.dataset.aligned = String(offset === 0);
-      view.status.textContent = offset === 0 ? "✓ 回到起點" : `差 ${Math.abs(offset)} ${unit}`;
-    }
-    for (const button of buttons) {
-      button.setAttribute("aria-pressed", String(Number(button.dataset.cycleMilestone) === years));
-    }
-    sentence.textContent = milestoneSentence(phases);
-    root.dataset.years = String(years);
+    label(phases);
+    const targets = RINGS.map(ring => [ring.key, phases[ring.key].offset]);
     if (!animate || reduceMotion()) {
-      for (const [key, turn] of targets) draw(key, turn);
+      for (const [key, offset] of targets) { shown.set(key, offset); paintRing(key, offset); }
       return;
     }
-    const from = new Map(targets.map(([key]) => [key, dials.get(key).turn]));
+    const from = new Map(shown);
     const start = performance.now();
-    const duration = 650;
     const step = now => {
-      const t = Math.min(1, (now - start) / duration);
+      const t = Math.min(1, (now - start) / 650);
       const eased = 1 - (1 - t) ** 3;
-      for (const [key, turn] of targets) draw(key, from.get(key) + (turn - from.get(key)) * eased);
+      for (const [key, offset] of targets) {
+        const value = from.get(key) + (offset - from.get(key)) * eased;
+        shown.set(key, value);
+        paintRing(key, value);
+      }
       if (t < 1) frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
   }
 
-  for (const button of buttons) {
-    button.addEventListener("click", () => select(Number(button.dataset.cycleMilestone)));
-  }
+  build();
+  let lastWidth = layout.width;
+  let pending = 0;
+  new ResizeObserver(() => {
+    cancelAnimationFrame(pending);
+    pending = requestAnimationFrame(() => {
+      const width = Math.max(300, Math.round(host.getBoundingClientRect().width || 860));
+      if (width === lastWidth || !current) return;
+      lastWidth = width;
+      build();
+      label(current);
+      for (const ring of RINGS) paintRing(ring.key, shown.get(ring.key));
+    });
+  }).observe(host);
+  return { show };
+}
+
+/* ---------- 01 · fixed start, four milestones ---------- */
+
+function installCycleFan() {
+  const root = document.querySelector("#research-cycle-fan");
+  if (!root) return;
+  const fan = createCycleFan(root.querySelector(".cycle-fan-stage"));
+  const sentence = root.querySelector("#cycle-fan-sentence");
+  const buttons = [...root.querySelectorAll("[data-cycle-milestone]")];
+  const select = (years, options) => {
+    const phases = cyclePhases(years);
+    fan.show(phases, options);
+    sentence.textContent = milestoneSentence(phases);
+    for (const button of buttons) button.setAttribute("aria-pressed", String(Number(button.dataset.cycleMilestone) === years));
+    root.dataset.years = String(years);
+  };
+  for (const button of buttons) button.addEventListener("click", () => select(Number(button.dataset.cycleMilestone)));
   select(Number(root.dataset.defaultYears ?? 1980), { animate: false });
+  root.dataset.ready = "true";
+}
+
+/* ---------- lab · any start date, any number of years ---------- */
+
+const MAX_LAB_YEARS = 24000;
+
+function parseDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? "");
+  if (!match) return null;
+  const [year, month, day] = match.slice(1).map(Number);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return Object.freeze({ year, month, day });
+}
+
+function installLabFan() {
+  const root = document.querySelector("#research-lab-fan");
+  if (!root) return;
+  const fan = createCycleFan(root.querySelector(".cycle-fan-stage"));
+  const dateInput = root.querySelector("#lab-fan-start");
+  const yearsInput = root.querySelector("#lab-fan-years");
+  const slider = root.querySelector("#lab-fan-slider");
+  const sentence = root.querySelector("#lab-fan-sentence");
+  const nextButton = root.querySelector("[data-lab-jump='next']");
+  const nextLabel = root.querySelector("#lab-fan-next-years");
+  const jumps = [...root.querySelectorAll("[data-lab-jump]")];
+  let start = BASE;
+  let years = 0;
+  let nextYears = nextYearDayReturn(start);
+
+  const update = ({ animate = true } = {}) => {
+    const phases = cyclePhases(years, start);
+    fan.show(phases, { animate });
+    sentence.textContent = milestoneSentence(phases);
+    yearsInput.value = String(years);
+    slider.value = String(years);
+    nextLabel.textContent = `${fmt(nextYears)} 年`;
+    nextButton.dataset.labYears = String(nextYears);
+    for (const button of jumps) button.setAttribute("aria-pressed", String(Number(button.dataset.labYears) === years));
+    root.dataset.years = String(years);
+  };
+  const setYears = (value, options) => {
+    const parsed = Math.round(Number(value));
+    years = Number.isFinite(parsed) ? Math.max(0, Math.min(MAX_LAB_YEARS, parsed)) : 0;
+    update(options);
+  };
+
+  dateInput.value = formatDate(start);
+  dateInput.addEventListener("change", () => {
+    const parsed = parseDate(dateInput.value);
+    if (!parsed) { dateInput.value = formatDate(start); return; }
+    start = parsed;
+    nextYears = nextYearDayReturn(start);
+    update();
+  });
+  yearsInput.addEventListener("change", () => setYears(yearsInput.value));
+  slider.addEventListener("input", () => setYears(slider.value, { animate: false }));
+  for (const button of jumps) button.addEventListener("click", () => setYears(button.dataset.labYears));
+  update({ animate: false });
   root.dataset.ready = "true";
 }
 
@@ -268,8 +522,23 @@ function relocateEvidenceSupport() {
   new MutationObserver(move).observe(source, { childList: true, subtree: true });
 }
 
+/* A link into the researcher tools (e.g. #recurrence-instrument) opens them. */
+function openLabToolsForHash() {
+  const tools = document.querySelector("#research-lab-tools");
+  if (!tools || !location.hash) return;
+  let target = null;
+  try { target = document.querySelector(decodeURIComponent(location.hash)); } catch { return; }
+  if (target && tools.contains(target) && target !== tools && !tools.open) {
+    tools.open = true;
+    requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+  }
+}
+
 if (typeof document !== "undefined") {
-  installCycleDials();
+  openLabToolsForHash();
+  window.addEventListener("hashchange", openLabToolsForHash);
+  installCycleFan();
+  installLabFan();
   installRotationUncertainty();
   relocateEvidenceSupport();
 }

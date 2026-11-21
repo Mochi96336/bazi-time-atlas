@@ -211,9 +211,14 @@ function ensureSexagenaryDrilldown() {
   // explorer. The reading spine is now:
   // derivation thesis → date/year verification → visible primary phase fan → Δ explorer
   // → optional 60-pair source.
+  // Review 2026-11-21: in the lab the wheel follows the cycle fan whose rings
+  // carry the same 60 names, ahead of the researcher tools.
+  const labFan = researchDiscrete?.querySelector("#research-lab-fan");
   const derivation = researchDiscrete?.querySelector(".discrete-derivation");
   const transition = researchDiscrete?.querySelector(".discrete-to-astronomy");
-  if (transition && details.previousElementSibling !== transition) {
+  if (labFan) {
+    if (details.previousElementSibling !== labFan) labFan.insertAdjacentElement("afterend", details);
+  } else if (transition && details.previousElementSibling !== transition) {
     transition.insertAdjacentElement("afterend", details);
   } else if (!transition && derivation && details.previousElementSibling !== derivation) {
     derivation.insertAdjacentElement("afterend", details);

@@ -89,9 +89,11 @@ requireEqual(attr(probe, "data-recurrence-lede-hidden"), "false", "Research ques
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
-requireEqual(attr(probe, "data-recurrence-phase-fan-primary-visible"), "true", "Primary three-cycle fan must remain visible outside a disclosure", url);
+requireEqual(attr(probe, "data-recurrence-reading-fans-visible"), "true", "01 and lab cycle fans must be drawn outside any disclosure", url);
+requireEqual(attr(probe, "data-recurrence-lab-tools-closed"), "true", "The original phase fan and its tools belong in the closed researcher-tools disclosure", url);
+requireEqual(attr(probe, "data-recurrence-phase-fan-primary-visible"), "true", "Original three-cycle fan must stay complete (not a nested disclosure) once researcher tools are open", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
-requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the primary delta derivation, not between fan and controls", url);
+requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the lab's cycle fan and before the researcher tools", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
