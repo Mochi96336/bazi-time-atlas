@@ -1,4 +1,4 @@
-/* Home look prototype "lacquer" v3 (2026-11-21). Loaded only with ?look=lacquer
+/* Home look prototype "lacquer" v4 (2026-11-21). Loaded only with ?look=lacquer
    by src/atlas-look.js. Unlayered on purpose so it sits above @layer page while
    the direction is compared; a production version would fold into atlas-wheel.css.
 
@@ -12,56 +12,50 @@
    a compressed top. v3 adds colour temperature (cool bodies, warm only for now),
    one soft key light from the upper left, and lets the pillars reach warm white. */
 
+/* v4 review of v3 ("沒那麼死，但變醜"): isolating variants showed the amber
+   cells were the cause — warm translucent fill over cool blue mixes into a
+   muddy khaki and reads as a selection highlight. v4 rules for colour:
+     - the material is fully desaturated, then ONE low-chroma ink blue-grey
+       hue tints every surface; layers differ by value only;
+     - warmth belongs to light, never to surfaces: the pillar type and the needle;
+     - "now" cells are one value step lighter in the same cool hue. */
+
 :root[data-look="lacquer"] {
   --lq-ink: #07090d;
-  --lq-silver: rgba(200, 214, 230, .46);
-  --lq-silver-dim: rgba(200, 214, 230, .31);
-  --lq-ivory: #f4ead3;
-  --lq-now: #efd59c;
+  --lq-tint: 118, 132, 150;   /* the one surface hue: ink blue-grey, low chroma */
+  --lq-deep: 10, 13, 19;      /* the same hue, dark */
+  --lq-band: 16, 22, 32;      /* the same hue for the annual groove: deeper but still blue */
+  --lq-silver: rgba(204, 212, 222, .46);
+  --lq-silver-dim: rgba(204, 212, 222, .30);
+  --lq-ivory: #f1e8d4;
+  --lq-now: #e9d4a4;
   --lq-serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
 }
 
-/* one material, kept and unified: the existing surface (roughness field, beds,
-   reflections) stays, its per-ring hues and the brass are pulled to one quiet tone */
-:root[data-look="lacquer"] #material-wheel-layer { filter: saturate(.22) brightness(.86) contrast(.78); }
-:root[data-look="lacquer"] #material-base-layer { filter: saturate(.2); }
-:root[data-look="lacquer"] #material-reflection-layer { filter: saturate(.2); opacity: .55; }
+/* one material: the existing surface relief stays, all of its colour goes */
+:root[data-look="lacquer"] #material-wheel-layer { filter: saturate(0) brightness(.88) contrast(.8); }
+:root[data-look="lacquer"] #material-base-layer,
+:root[data-look="lacquer"] #material-reflection-layer { filter: saturate(0); }
+:root[data-look="lacquer"] #material-reflection-layer { opacity: .5; }
 
-/* sector tint: a thin, even veil over the material instead of four ring colours */
-:root[data-look="lacquer"] #kinetic-wheel .cycle-sector,
-:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector,
-:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector,
-:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector,
-:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector {
-  fill: rgba(110, 140, 180, .07);
-  stroke: none;
-  opacity: 1;
-}
-/* even the ring values out: the material lights the outer rings more than the
-   inner ones, so the outer two get a dark veil and the inner two a light one */
-:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector { fill: rgba(40, 62, 96, .10); }
-:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector { fill: rgba(110, 140, 180, .09); }
-:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector { fill: rgba(120, 148, 186, .14); }
-:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector { fill: rgba(120, 148, 186, .16); }
-/* the brass band was the brightest large area: bring it to the ring level */
+/* surfaces: one hue, value steps only */
+:root[data-look="lacquer"] #kinetic-wheel .cycle-sector { stroke: none; opacity: 1; }
+:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector { fill: rgba(var(--lq-tint), .07); }
+:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector { fill: rgba(var(--lq-tint), .10); }
+:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector { fill: rgba(var(--lq-tint), .15); }
+:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector { fill: rgba(var(--lq-tint), .17); }
+/* the annual band sits one step deeper, same hue — a groove, not a brass strip */
 :root[data-look="lacquer"] #kinetic-wheel .term-sector,
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: rgba(16, 18, 24, .52); stroke: none; }
-:root[data-look="lacquer"] #kinetic-wheel .zodiac-sector { fill: transparent; stroke: rgba(206, 212, 216, .06); }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: rgba(var(--lq-band), .55); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel .zodiac-sector { fill: rgba(var(--lq-band), .3); stroke: rgba(204, 212, 222, .05); }
 
-/* now: the cell under the needle is one step lighter and slightly warm — nothing more */
-:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active,
-:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector.is-active,
-:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active,
-:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active {
-  fill: rgba(250, 204, 132, .15);
-  stroke: none;
-}
-/* the material lights outer rings more, so the lit column is balanced per ring */
-:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active { fill: rgba(250, 204, 132, .14); }
-:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(250, 204, 132, .2); }
-:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(250, 204, 132, .22); }
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(60, 44, 26, .34); stroke: none; }
-:root[data-look="lacquer"] #kinetic-wheel .zodiac-sector.is-active { fill: rgba(230, 211, 163, .04); stroke: rgba(206, 212, 216, .06); }
+/* now: one value step lighter, same cool hue (balanced per ring) */
+:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active { fill: rgba(var(--lq-tint), .2); }
+:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector.is-active { fill: rgba(var(--lq-tint), .23); }
+:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(var(--lq-tint), .3); }
+:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(var(--lq-tint), .32); }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(40, 54, 74, .36); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel .zodiac-sector.is-active { fill: rgba(40, 54, 74, .3); stroke: rgba(204, 212, 222, .05); }
 
 /* engraving: low-contrast hairlines */
 :root[data-look="lacquer"] #kinetic-wheel .guide-arc { stroke: rgba(206, 212, 216, .10); stroke-width: .9; }
@@ -74,8 +68,8 @@
 
 /* light layer: soft stacking shadows only — no white rims, no spotlight */
 :root[data-look="lacquer"] .look-light-layer { pointer-events: none; }
-:root[data-look="lacquer"] .look-key-shade { mix-blend-mode: multiply; }
-:root[data-look="lacquer"] .look-key-light { mix-blend-mode: screen; }
+:root[data-look="lacquer"] .look-key-shade { mix-blend-mode: multiply; opacity: .8; }
+:root[data-look="lacquer"] .look-key-light { display: none; }
 :root[data-look="lacquer"] .look-rim-shadow { fill: none; stroke: rgba(0, 0, 0, .16); stroke-width: 12; }
 
 /* type: serif throughout the wheel, engraved silver at rest */
