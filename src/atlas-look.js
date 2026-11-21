@@ -97,6 +97,14 @@ function shading(wheel) {
   const disc = annulus(RADII.inner, RADII.outer, FAN.start, FAN.end);
   el("path", { d: disc, class: "look-key-shade", fill: "url(#look-key-shade)" }, layer);
   el("path", { d: disc, class: "look-key-light", fill: "url(#look-key-light)" }, layer);
+  // v5: brass sheen — the annual band catches the key light on its upper-left
+  // run, like brushed metal; it fades out long before the needle.
+  const sheenAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -128);
+  const sheen = el("radialGradient", { id: "look-brass-sheen", gradientUnits: "userSpaceOnUse", cx: sheenAt.x, cy: sheenAt.y, r: 520 }, defs);
+  for (const [offset, opacity] of [[0, 0.11], [0.4, 0.045], [1, 0]]) {
+    el("stop", { offset, "stop-color": "#f2d9a4", "stop-opacity": opacity }, sheen);
+  }
+  el("path", { d: annulus(RADII.dayOuter, RADII.solarTermOuter, FAN.start, FAN.end), class: "look-brass-sheen", fill: "url(#look-brass-sheen)" }, layer);
   const arc = r => { const a = polar(r, FAN.start); const b = polar(r, FAN.end); return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`; };
   for (const r of [RADII.hourOuter, RADII.dayOuter, RADII.solarOuter, RADII.monthOuter, RADII.yearOuter]) {
     el("path", { d: arc(r - 7), class: "look-rim-shadow" }, layer);
