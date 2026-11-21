@@ -21,13 +21,6 @@ export const CAMERA_FRAME_BY_MODE = Object.freeze({
   mobile: Object.freeze({ heightRatio:.72, topMargin:100 })
 });
 
-// A presentation prototype (src/atlas-look.js, ?look=…) may reframe each mode
-// while it is compared against the production camera. Null restores the default.
-let frameOverride = null;
-export function setCameraFrameOverride(frames) {
-  frameOverride = frames ? Object.freeze({ ...frames }) : null;
-}
-
 export function cameraModeForWidth(viewportWidth) {
   if (!Number.isFinite(viewportWidth) || viewportWidth <= 0) throw new RangeError("viewportWidth must be positive and finite");
   if (viewportWidth <= CAMERA_BREAKPOINTS.mobileMax) return "mobile";
@@ -62,7 +55,7 @@ export function responsiveInstrumentCamera({
   viewportAspect = DEFAULT_VIEWPORT.width / DEFAULT_VIEWPORT.height
 }) {
   const mode = cameraModeForWidth(viewportWidth);
-  const frame = frameOverride?.[mode] ?? CAMERA_FRAME_BY_MODE[mode];
+  const frame = CAMERA_FRAME_BY_MODE[mode];
   const viewBox = radialInstrumentViewBox({ center, outerRadius, viewportAspect, frame });
   const originGap = center.y - (viewBox.y + viewBox.height);
   const originGapRatio = originGap / outerRadius;
