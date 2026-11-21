@@ -46,9 +46,9 @@
 
 /* brass: the WebGL body is the brass; dim it as a whole so its oxidation and
    scratches survive (the ring overlays in the same canvas are near-invisible) */
-:root[data-look="lacquer"] #material-wheel-layer { filter: brightness(.44) saturate(.8); }
+:root[data-look="lacquer"] #material-wheel-layer { filter: brightness(.4) saturate(2.9); }
 :root[data-look="lacquer"] #kinetic-wheel .term-sector,
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: rgba(176, 146, 104, .07); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: transparent; stroke: none; }
 :root[data-look="lacquer"] .look-brass-sheen { mix-blend-mode: normal; }
 
 /* now: a lighter step of the same lacquer; the current term catches the light */
@@ -56,7 +56,7 @@
 :root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .12); }
 :root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .15); }
 :root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .17); }
-:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(236, 204, 140, .13); stroke: none; }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: rgba(236, 204, 140, .08); stroke: none; }
 
 /* engraving: low-contrast hairlines */
 :root[data-look="lacquer"] #kinetic-wheel .guide-arc { stroke: rgba(206, 212, 216, .10); stroke-width: .9; }

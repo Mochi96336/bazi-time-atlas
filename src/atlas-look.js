@@ -101,10 +101,18 @@ function shading(wheel) {
   // run, like brushed metal; it fades out long before the needle.
   const sheenAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -128);
   const sheen = el("radialGradient", { id: "look-brass-sheen", gradientUnits: "userSpaceOnUse", cx: sheenAt.x, cy: sheenAt.y, r: 520 }, defs);
-  for (const [offset, opacity] of [[0, 0.11], [0.4, 0.045], [1, 0]]) {
-    el("stop", { offset, "stop-color": "#f2d9a4", "stop-opacity": opacity }, sheen);
+  for (const [offset, opacity] of [[0, 0.15], [0.4, 0.06], [1, 0]]) {
+    el("stop", { offset, "stop-color": "#f7ebb9", "stop-opacity": opacity }, sheen);
   }
   el("path", { d: annulus(RADII.dayOuter, RADII.solarTermOuter, FAN.start, FAN.end), class: "look-brass-sheen", fill: "url(#look-brass-sheen)" }, layer);
+  // Colour follows value (painters' rule): the lit run of the brass leans yellow,
+  // its shadow side leans red-orange. A warm-brown bounce only on the shadow side.
+  const bounceAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -55);
+  const bounce = el("radialGradient", { id: "look-brass-bounce", gradientUnits: "userSpaceOnUse", cx: bounceAt.x, cy: bounceAt.y, r: 900 }, defs);
+  for (const [offset, opacity] of [[0, 0.3], [0.55, 0.14], [1, 0]]) {
+    el("stop", { offset, "stop-color": "#9c7444", "stop-opacity": opacity }, bounce);
+  }
+  el("path", { d: annulus(RADII.dayOuter, RADII.solarTermOuter, FAN.start, FAN.end), class: "look-brass-bounce", fill: "url(#look-brass-bounce)" }, layer);
   const arc = r => { const a = polar(r, FAN.start); const b = polar(r, FAN.end); return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`; };
   for (const r of [RADII.hourOuter, RADII.dayOuter, RADII.solarOuter, RADII.monthOuter, RADII.yearOuter]) {
     el("path", { d: arc(r - 7), class: "look-rim-shadow" }, layer);
