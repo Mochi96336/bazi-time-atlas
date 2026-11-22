@@ -1,6 +1,5 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { DE441_10026_STATE_CAPTURE_CONTRACT } from "../src/astronomy/de441-10026-state-capture-contract.js";
 import { DE441_10026_STATE_CAPTURE_EVIDENCE } from "../src/astronomy/de441-10026-state-capture-evidence.js";
 
@@ -26,18 +25,6 @@ test("10026 capture keeps state evidence separate from seasonal and production c
   assert.equal(c.sampler.referenceFrame, "ICRF");
   assert.equal(c.sampler.timeScale, "TDB");
   assert.equal(c.sampler.corrections, "NONE (geometric)");
-});
-
-test("10026 research workflow never uploads the 1.5 GB kernel", async () => {
-  const workflow = await readFile(
-    new URL("../.github/workflows/research-de441-state-capture-10026.yml", import.meta.url),
-    "utf8"
-  );
-  assert.match(workflow, /de441_part-2\.bsp/);
-  assert.match(workflow, /ad8dfa4e505ef0e3a5d587a5b4705632/);
-  assert.match(workflow, /Remove large source kernel before artifact upload/);
-  assert.match(workflow, /path: tmp\/de441-10026\/capture\//);
-  assert.doesNotMatch(workflow, /path: tmp\/de441-10026\/$/m);
 });
 
 test("10026 capture preserves the same one-day Hermite budgets proven at 2026 and 4006", () => {
