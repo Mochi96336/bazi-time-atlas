@@ -57,7 +57,7 @@
    a light tan SVG strip and swapping to brown when WebGL becomes ready.
    No new gradient, texture, animation, or page-level overlay is introduced. */
 :root[data-look="lacquer"] #kinetic-instrument:not([data-material-prototype="roughness"]) .m2-solar-brass-bed {
-  filter: brightness(.85) saturate(1.7);
+  filter: brightness(.55) saturate(2.4);
 }
 :root[data-look="lacquer"] #kinetic-instrument:not([data-material-prototype="roughness"]) .m2-solar-brass-response {
   opacity: .012;
