@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   # The former single capture job spent ~8 minutes running everything serially.
-  # Keep all browser checks, but isolate seven independent suites on parallel
+  # Keep all browser checks, but isolate eight independent suites on parallel
   # runners. Fail-fast is disabled so one flaky check does not hide other evidence.
   verify:
     name: verify (${{ matrix.suite }})
@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [shader, home, research, capture-pages, capture-interactions, capture-material, capture-responsive]
+        suite: [shader, home, research, capture-pages, capture-research, capture-interactions, capture-material, capture-responsive]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
