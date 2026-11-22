@@ -52,8 +52,18 @@
 /* outlines stay off unless the 五行 overlay draws the read-head's branch outline */
 :root[data-look="lacquer"] #kinetic-instrument:not([data-classification-overlay="on"]) #kinetic-wheel .cycle-sector { stroke: none; }
 
-/* brass: the WebGL body is the brass; dim it as a whole so its oxidation and
-   scratches survive (the ring overlays in the same canvas are near-invisible) */
+/* Brass first paint: the SVG material bed is already rendered before the
+   deferred roughness shader. Match its dark, warm value rather than showing
+   a light tan SVG strip and swapping to brown when WebGL becomes ready.
+   No new gradient, texture, animation, or page-level overlay is introduced. */
+:root[data-look="lacquer"] #kinetic-instrument:not([data-material-prototype="roughness"]) .m2-solar-brass-bed {
+  filter: brightness(.85) saturate(1.7);
+}
+:root[data-look="lacquer"] #kinetic-instrument:not([data-material-prototype="roughness"]) .m2-solar-brass-response {
+  opacity: .012;
+}
+/* After the first real GPU draw, the existing WebGL material remains the
+   authority; its oxidation and scratches still use the original settings. */
 :root[data-look="lacquer"] #material-wheel-layer { filter: brightness(.62) saturate(1.6); }
 :root[data-look="lacquer"] #kinetic-wheel .term-sector,
 :root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: transparent; stroke: none; }
