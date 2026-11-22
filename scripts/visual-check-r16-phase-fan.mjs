@@ -135,7 +135,9 @@ for(const s of scenes){
   // P1 changes ONLY existing non-zero phase label size. At the true 24k
   // three-way closure there are no active labels, so identical pixels are
   // the CORRECT result, not evidence of a missed capture.
-  if(!isFullClosure){
+  // Phones (<=480px) do not render the fan's SVG text at all (labels would
+  // be ~5px), so P1 has nothing to change there; identical pixels are correct.
+  if(!isFullClosure&&s.width>480){
    check(!png.equals(before),name+" visible nonzero labels unchanged: invalid A/B capture");
   }
  }else{

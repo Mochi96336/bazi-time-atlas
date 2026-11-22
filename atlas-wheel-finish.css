@@ -1,0 +1,140 @@
+/* Home wheel finish "lacquer" (2026-11). index.html sets <html data-look="lacquer">;
+   src/wheel-finish.js adds the SVG detail (engraved ticks, brass highlight,
+   stacking shadows). Unlayered on purpose so it sits above @layer page.
+   ?look=classic removes the root attribute and shows the previous finish.
+
+   Luminance ladder (relative luminance, measured at 1440×900):
+     ground 0.004 · ring bodies 0.02–0.03 · brass band ~0.033 · hairlines 0.05–0.08
+     resting 干支 0.12–0.18 · the four pillars 0.35–0.45
+   Each emphasis uses one device only.
+
+   Colour comes from the material's own knobs, never from veils laid on top:
+     - the four lacquer rings keep their SVG light→dark surface gradients (the
+       light direction) and WebGL micro relief; only their colour token becomes
+       one ink blue-grey (OKLCH H≈253, C≈0.016), per-ring strength evens values;
+     - the solar band is brass, the sun's material: the WebGL body dimmed as a
+       whole, with chroma about twice the lacquer's and hue shifting with value
+       (lit ≈78°, shadow ≈66°), a turned-metal highlight band and edge chamfers;
+     - gold appears only as material (brass) and light (needle, cap); the four
+       "now" cells are a lighter step of the lacquer, never painted gold. */
+
+/* Wheel serif: Noto Serif TC (SIL OFL 1.1, assets/fonts/OFL-NotoSerifTC.txt),
+   subset to the glyphs the wheel draws (干支, 節氣, 星座, ring names) and to
+   weights 500–600: one 23 KB file. Rebuild with scripts/subset-wheel-serif.py. */
+@font-face {
+  font-family: "Atlas Wheel Serif";
+  src: url("./assets/fonts/noto-serif-tc-wheel.woff2") format("woff2");
+  font-weight: 500 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root[data-look="lacquer"] {
+  --lq-ink: #07090d;
+  --lq-lacquer: #7f8c9c;      /* ink blue-grey: the lacquer colour */
+  --lq-silver: rgba(204, 212, 222, .46);
+  --lq-silver-dim: rgba(204, 212, 222, .30);
+  --lq-ivory: #f1e8d4;
+  --lq-now: #e9cf95;
+  --lq-serif: "Atlas Wheel Serif", "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
+}
+
+/* lacquer: recolour the existing directional surface gradients, no veils */
+:root[data-look="lacquer"] #m2-hour-surface { --m2-ring-color: var(--lq-lacquer); --m2-light-alpha: .30; --m2-mid-alpha: .17; --m2-dark-alpha: .08; }
+:root[data-look="lacquer"] #m2-day-surface { --m2-ring-color: var(--lq-lacquer); --m2-light-alpha: .26; --m2-mid-alpha: .145; --m2-dark-alpha: .068; }
+:root[data-look="lacquer"] #m2-month-surface { --m2-ring-color: var(--lq-lacquer); --m2-light-alpha: .18; --m2-mid-alpha: .095; --m2-dark-alpha: .044; }
+:root[data-look="lacquer"] #m2-year-surface { --m2-ring-color: var(--lq-lacquer); --m2-light-alpha: .15; --m2-mid-alpha: .08; --m2-dark-alpha: .055; }
+:root[data-look="lacquer"] #kinetic-wheel .cycle-sector,
+:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector,
+:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector,
+:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector,
+:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector { fill: transparent; }
+/* outlines stay off unless the 五行 overlay draws the read-head's branch outline */
+:root[data-look="lacquer"] #kinetic-instrument:not([data-classification-overlay="on"]) #kinetic-wheel .cycle-sector { stroke: none; }
+
+/* brass: the WebGL body is the brass; dim it as a whole so its oxidation and
+   scratches survive (the ring overlays in the same canvas are near-invisible) */
+:root[data-look="lacquer"] #material-wheel-layer { filter: brightness(.4) saturate(2.9); }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector,
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: transparent; stroke: none; }
+:root[data-look="lacquer"] .look-brass-sheen { mix-blend-mode: normal; }
+/* turned-metal highlight band and edge chamfers are drawn by src/wheel-finish.js */
+:root[data-look="lacquer"] .look-brass-chamfer { fill: none; stroke-width: 1.1; }
+
+/* now: a lighter step of the same lacquer; the current term catches the light */
+:root[data-look="lacquer"] #kinetic-wheel #year-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .10); }
+:root[data-look="lacquer"] #kinetic-wheel #month-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .12); }
+:root[data-look="lacquer"] #kinetic-wheel #day-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .15); }
+:root[data-look="lacquer"] #kinetic-wheel #hour-track .cycle-sector.is-active { fill: rgba(150, 164, 182, .17); }
+:root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: transparent; stroke: none; }
+
+/* engraving: low-contrast hairlines */
+:root[data-look="lacquer"] #kinetic-wheel .guide-arc { stroke: rgba(206, 212, 216, .10); stroke-width: .9; }
+:root[data-look="lacquer"] #kinetic-wheel .ring-tick { stroke: rgba(206, 212, 216, .16); stroke-width: .8; }
+:root[data-look="lacquer"] #kinetic-wheel .ring-tick.major { stroke: rgba(206, 212, 216, .26); stroke-width: .9; }
+:root[data-look="lacquer"] #kinetic-wheel path.look-fine-ticks { fill: none; stroke: rgba(206, 212, 216, .12); stroke-width: .7; }
+:root[data-look="lacquer"] #kinetic-wheel path.look-degree-ticks.major { stroke: rgba(206, 212, 216, .2); stroke-width: .8; }
+:root[data-look="lacquer"] #kinetic-wheel .term-mark { stroke: rgba(206, 212, 216, .12); stroke-width: .8; }
+:root[data-look="lacquer"] #kinetic-wheel .term-mark.jie { stroke: rgba(206, 212, 216, .24); stroke-width: .9; }
+
+/* light layer: soft stacking shadows only — no white rims, no spotlight */
+:root[data-look="lacquer"] .look-light-layer { pointer-events: none; }
+:root[data-look="lacquer"] .look-key-shade { mix-blend-mode: multiply; opacity: .22; }
+:root[data-look="lacquer"] .look-rim-shadow { fill: none; stroke: rgba(0, 0, 0, .16); stroke-width: 12; }
+
+/* type: serif throughout the wheel, engraved silver at rest */
+:root[data-look="lacquer"] #kinetic-wheel .cycle-label,
+:root[data-look="lacquer"] #kinetic-wheel .term-label,
+:root[data-look="lacquer"] #kinetic-wheel .zodiac-label {
+  font-family: var(--lq-serif);
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+/* silver only while the 五行 classification overlay is off; with it on, the
+   overlay's element colours own the label fill */
+:root[data-look="lacquer"] #kinetic-instrument:not([data-classification-overlay="on"]) #kinetic-wheel :is(.cycle-label, .term-label, .zodiac-label) { fill: var(--lq-silver-dim); }
+:root[data-look="lacquer"] #kinetic-instrument:not([data-classification-overlay="on"]) #kinetic-wheel .cycle-label.major { fill: var(--lq-silver); }
+
+/* the reading column: brighter only — no bold, no gold, no heavy halo */
+:root[data-look="lacquer"] #kinetic-wheel .active-cycle-label {
+  font-family: var(--lq-serif);
+  font-size: 20px;
+  font-weight: 600;
+  fill: var(--lq-ivory);
+  letter-spacing: .1em;
+  paint-order: stroke;
+  stroke: rgba(7, 9, 13, .45);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+:root[data-look="lacquer"] #kinetic-wheel .active-annual-label {
+  font-family: var(--lq-serif);
+  font-size: 14px;
+  font-weight: 500;
+  fill: rgba(206, 212, 216, .52);
+  letter-spacing: .08em;
+}
+
+/* needle: one fine warm line; the small cap is the only gold */
+:root[data-look="lacquer"] #kinetic-wheel .cursor-line { stroke: var(--lq-now); stroke-width: 1.2; opacity: .9; filter: drop-shadow(0 0 5px rgba(239, 213, 156, .28)); }
+:root[data-look="lacquer"] #kinetic-wheel .cursor-halo { display: none; }
+:root[data-look="lacquer"] #kinetic-wheel .cursor-cap { fill: var(--lq-now); }
+
+/* the time readout: quieter, tabular */
+:root[data-look="lacquer"] #instant-readout {
+  color: rgba(228, 226, 220, .78);
+  font-weight: 300;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* fixed ring identities (年 月 太陽 日 時): silver serif */
+:root[data-look="lacquer"] #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span,
+:root[data-look="lacquer"] #kinetic-instrument:not([data-analysis-open="true"]) .ring-solar span { color: rgba(206, 212, 216, .42); }
+:root[data-look="lacquer"] #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row span::after {
+  font-family: var(--lq-serif);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-shadow: 0 0 4px var(--lq-ink);
+}

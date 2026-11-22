@@ -1,11 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html, uxCss, actionCss] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
-  readFile(new URL("../ux-analysis.css", import.meta.url), "utf8"),
-  readFile(new URL("../main-action-hierarchy.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("ux-analysis.css")),
+  Promise.resolve(cssSource("main-action-hierarchy.css"))
 ]);
 
 test("playback remains the same lifecycle control while the UX layer owns its hierarchy", () => {
@@ -14,9 +16,12 @@ test("playback remains the same lifecycle control while the UX layer owns its hi
     /id="play-button"[^>]*aria-pressed="false"[^>]*>播放<\/button>/,
     "playback controller must keep its canonical #play-button and aria-pressed lifecycle"
   );
-  assert.match(
-    uxCss,
-    /^@import\s+["']\.\/main-action-hierarchy\.css["'];/,
+  // E5: the former @import is inlined at the same cascade position, at the
+  // start of the UX section of the merged chrome stylesheet.
+  const chrome = readFileSync(new URL("../atlas-chrome.css", import.meta.url), "utf8");
+  assert.ok(
+    chrome.indexOf("/* ==== main-action-hierarchy.css (was @import from ux-analysis.css) ==== */") > chrome.indexOf("/* ==== ux-analysis.css ==== */") &&
+    chrome.indexOf("/* ==== main-action-hierarchy.css (was @import from ux-analysis.css) ==== */") < chrome.lastIndexOf("/* ==== ux-analysis.css ==== */"),
     "main action hierarchy must load through the late UX stylesheet so it can override base toolbar presentation"
   );
 });

@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
+const css = cssSource("inverse-time-search.css");
 const navigation = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const view = readFileSync(new URL("../src/inverse-time-search-view.js", import.meta.url), "utf8");
 
@@ -13,7 +14,7 @@ test("find-time has no detached form panel or range picker", () => {
 });
 
 test("the wheel-native result is one compact recessed M2 instrument readout", () => {
-  assert.match(css, /^@import "\.\/graphite-m2-material\.css";/);
+  assert.ok(cssSource("graphite-m2-material.css").includes("--m2-"), "E5: the M2 material is inlined once into atlas-tools.css at its last import position");
   assert.match(
     css,
     /\.inverse-time-search-readout\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?width:\s*min\(620px, calc\(100% - 32px\)\);[\s\S]*?grid-template-columns:/
@@ -82,7 +83,7 @@ test("find-time owns one task surface instead of inheriting Tools chrome", () =>
   );
   assert.match(
     css,
-    /@media \(min-width: 821px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?top:\s*84px;[\s\S]*?left:\s*0;[\s\S]*?transform:\s*none;[\s\S]*?width:\s*340px;/
+    /@media \(min-width: 821px\) \{[\s\S]*?data-inverse-time-search="active"\] \.inverse-time-search-readout\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?top:\s*92px;[\s\S]*?left:\s*0;[\s\S]*?transform:\s*none;[\s\S]*?width:\s*340px;/
   );
 });
 

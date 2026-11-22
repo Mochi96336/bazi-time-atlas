@@ -1,23 +1,24 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource, isLinked } from "./helpers/css-source.js";
 
 const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, discreteJs, astronomyCss, residualCss, recurrenceCss, spineJs] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
-  readFile(new URL("../research-tasks.css", import.meta.url), "utf8"),
-  readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-tasks.css")),
+  Promise.resolve(cssSource("research-sexagenary-cycle.css")),
   readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
-  readFile(new URL("../near-recurrence.css", import.meta.url), "utf8"),
-  readFile(new URL("../four-pillar-determinacy.css", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence-target-clock.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("near-recurrence.css")),
+  Promise.resolve(cssSource("four-pillar-determinacy.css")),
+  Promise.resolve(cssSource("recurrence-target-clock.css")),
   readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-evidence-drilldown-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-evidence-drilldown.css", import.meta.url), "utf8"),
-  readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-evidence-drilldown.css")),
+  Promise.resolve(cssSource("research-discrete-density.css")),
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-astronomy-drilldown.css", import.meta.url), "utf8"),
-  readFile(new URL("../astronomical-residuals.css", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-astronomy-drilldown.css")),
+  Promise.resolve(cssSource("astronomical-residuals.css")),
+  Promise.resolve(cssSource("recurrence.css")),
   readFile(new URL("../src/research-narrative-spine-view.js", import.meta.url), "utf8")
 ]);
 
@@ -27,6 +28,9 @@ const evidenceStart = html.indexOf('id="research-evidence"');
 const discrete = html.slice(discreteStart, astronomyStart);
 const astronomy = html.slice(astronomyStart, evidenceStart);
 const evidence = html.slice(evidenceStart);
+// Review 2026-11-21: the discrete tools and the other-Δ sandbox live in the lab.
+const labStart = html.indexOf('id="research-lab"');
+const lab = html.slice(labStart, html.indexOf('id="research-glossary"'));
 
 test("Research keeps three ordered evidence owners without task-card navigation", () => {
   // #500 navigation is an intentional LAST cascade layer. Moving the same
@@ -39,22 +43,19 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.ok(astronomyStart > discreteStart);
   assert.ok(evidenceStart > astronomyStart);
   assert.doesNotMatch(html, /class="research-task-nav"/);
-  assert.match(html, /class="research-outline"[^>]*aria-label="研究項目"/);
-  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?粗略週期/);
-  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?天文偏移/);
-  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?八字後果/);
-  assert.match(html, />粗略週期</);
-  assert.match(html, />天文偏移</);
-  assert.match(html, />八字後果</);
+  // Research redesign R1: the outline is an answer route map — each step is
+  // the result of its section, not a topic label.
+  assert.match(html, /class="research-outline research-answer-map"[^>]*aria-label="研究項目：三步答案"/);
+  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?24,000 年/);
+  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?差 10–14 天/);
+  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?年月 ✓ 日時 ？/);
   assert.match(html, /八字多久會重複一次？/);
-  assert.match(html, /四柱都落在六十甲子序列上/);
-  assert.match(html, /data-alignment="year-month"[\s\S]*同一節令下固定對齊/);
-  assert.match(html, /data-alignment="day-hour"[\s\S]*同一時辰下固定對齊/);
-  assert.match(html, /年柱 × 日柱/);
+  assert.match(html, /class="lede research-answer">目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期。/);
+  assert.doesNotMatch(html, /research-alignment-map/);
   assert.doesNotMatch(html, /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊/);
-  assert.match(html, /id="research-spine-discrete">24,000 離散候選<\/small>/);
-  assert.match(html, /id="research-spine-astronomy">TT 提前 10–14 d<\/small>/);
-  assert.match(html, /id="research-spine-evidence">24,000 ≠ 完整週期<\/small>/);
+  assert.match(html, /id="research-spine-discrete">曆法上三個循環全部對上<\/small>/);
+  assert.match(html, /id="research-spine-astronomy">但真正的節氣沒有回來<\/small>/);
+  assert.match(html, /id="research-spine-evidence">所以 24,000 年不是四柱的週期<\/small>/);
   assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 12 節界校驗<\/span>/);
   assert.match(html, /class="research-task-relation">12 \/ 12 節界位移 → 四柱可判範圍<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
@@ -63,13 +64,19 @@ test("Research keeps three ordered evidence owners without task-card navigation"
 
 test("Research narrative spine summarizes the fixed argument rather than the current delta sandbox", () => {
   assert.match(html, /research-narrative-spine-view\.js/);
-  for (const copy of ["24,000 離散候選", "TT 提前 10–14 d", "24,000 ≠ 完整週期"]) {
+  for (const copy of ["曆法上三個循環全部對上", "但真正的節氣沒有回來", "所以 24,000 年不是四柱的週期"]) {
     assert.ok(spineJs.includes(copy), `missing fixed-spine outcome: ${copy}`);
   }
   assert.doesNotMatch(spineJs, /instrument\.dataset|boolDataset|fourPillarResolvedCount|astronomyValidity/);
 });
 
-test("discrete task owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
+test("the lab owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
+  const reading01 = html.slice(discreteStart, astronomyStart);
+  assert.match(reading01, /id="research-discrete-title">粗略週期從哪裡來？/);
+  assert.match(reading01, /下一步：真正的節氣也回到原位了嗎？/);
+  assert.match(reading01, /id="research-cycle-fan"/);
+  assert.doesNotMatch(reading01, /id="recurrence-instrument"|id="research-discrete-tools"/);
+  const discrete = lab;
   assert.match(discrete, /id="recurrence-instrument"/);
   assert.match(discrete, /class="recurrence-readout research-current-state"/);
   assert.match(discrete, /id="research-discrete-thesis"/);
@@ -77,32 +84,36 @@ test("discrete task owns one current-state rail, the year strip, derivation, and
   assert.match(discrete, /id="research-sexagenary-cycle"/);
   assert.match(discrete, /id="research-sexagenary-wheel"/);
   assert.match(discrete, /class="discrete-derivation"/);
-  assert.match(discrete, /01 先建立離散候選；02 再檢查真正的十二節界。/);
-  assert.match(discrete, /id="research-discrete-title">粗略週期從哪裡來？/);
+  assert.match(discrete, /id="research-discrete-tools" class="research-discrete-tools"/);
   assert.match(discrete, /id="research-year-strip-title">年度時間條/);
   assert.match(discrete, /id="research-year-full-cycle"/);
   assert.match(discrete, /id="research-year-selected-day"/);
   assert.match(discrete, /立春天文事件 · 顯示基準 UT1\+8 固定時差/);
-  assert.match(discrete, /下一步：立春與十二節邊界也回到同一位置嗎？/);
   assert.match(discrete, /id="research-cycle-comparison"/);
   assert.ok(discrete.indexOf('id="research-discrete-thesis"') < discrete.indexOf('id="research-year-strip"'));
   assert.ok(discrete.indexOf('id="research-year-strip"') < discrete.indexOf('id="research-cycle-comparison"'));
-  assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('id="recurrence-instrument"'));
-  assert.match(discrete, /id="recurrence-instrument"/);
+  // The fan leads the lab and precedes the tools.
+  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('id="research-discrete-tools"'));
+  assert.ok(discrete.indexOf('id="research-discrete-tools"') < discrete.indexOf('id="research-cycle-comparison"'));
   assert.doesNotMatch(discrete,/research-cycles-card|同一日期，兩個六十循環/);
-  assert.ok(discrete.indexOf('id="recurrence-instrument"') < discrete.indexOf('class="discrete-derivation"'));
-  assert.ok(discrete.indexOf('class="discrete-derivation"') < discrete.indexOf('id="research-sexagenary-cycle"'));
+  assert.ok(discrete.indexOf('id="research-cycle-comparison"') < discrete.indexOf('class="discrete-derivation"'));
+  // the 60-pair wheel reads before the researcher tools
+  assert.ok(discrete.indexOf('id="research-sexagenary-cycle"') < discrete.indexOf('id="research-lab-tools"'));
+  assert.ok(discrete.indexOf('id="research-lab-tools"') < discrete.indexOf('id="recurrence-instrument"'));
   assert.doesNotMatch(discrete, /class="closure-grid"|class="milestone-table"|id="milestone-rows"/);
-  assert.doesNotMatch(discrete, /class="astronomy-panel"/);
+  // the lab's other-Δ sandbox follows all of the discrete tools
+  assert.ok(discrete.indexOf('class="astronomy-panel"') > discrete.indexOf('class="discrete-derivation"'));
   assert.doesNotMatch(discrete, /id="four-pillar-determinacy"/);
 });
 
-test("Research 01 keeps the large phase fan as optional verification while Delta stays primary", () => {
+test("Research 01 keeps the three-cycle phase fan permanently visible", () => {
   assert.match(discreteJs, /id = "discrete-phase-fan-details"/);
-  assert.match(discreteJs, /research-phase-fan-drilldown/);
+  assert.match(discreteJs, /research-phase-fan-panel/);
+  assert.match(discreteJs, /document\.createElement\("section"\)/);
+  assert.doesNotMatch(discreteJs, /document\.createElement\("details"\);\s*details\.id = "discrete-phase-fan-details"/);
   assert.match(discreteJs, /離散相位扇/);
   assert.match(discreteJs, /revealPhaseFanHash/);
-  assert.match(discreteCss, /\.research-phase-fan-drilldown/);
+  assert.match(discreteCss, /\.research-phase-fan-panel > header/);
   assert.doesNotMatch(html, /<details[^>]*id="discrete-phase-fan-details"/);
 });
 
@@ -113,20 +124,21 @@ test("restored 60-day chart keeps the old wide-chart to narrow-readout proportio
   assert.match(cycleJs, /earthlyBranches\.forEach/);
   assert.match(cycleJs, /research-cycle-center-value.*item\.ordinal/s);
   assert.match(html, /六十日序[\s\S]*10 天干 · 12 地支配對/);
-  assert.match(html, /research-sexagenary-cycle\.css/);
+  assert.ok(isLinked(html, "research-sexagenary-cycle.css"));
   assert.match(html, /research-sexagenary-cycle\.js/);
   assert.doesNotMatch(html, /id="sexagenary-wheel"/);
 });
 
 test("astronomy task answers where the +24k candidate fails and keeps the sandbox terse", () => {
   assert.match(astronomy, /id="research-astronomy-title">八字的節界回來了嗎？/);
-  assert.match(astronomy, /class="astronomy-panel"/);
-  assert.match(astronomy, /季節形狀 · 春分歸零/);
-  assert.match(astronomy, /季節相位 · 公曆框架/);
-  assert.match(astronomy, /春分相對公曆的絕對位移另算/);
-  assert.match(astronomy, /id="astronomy-term-grid"/);
+  assert.match(lab, /class="astronomy-panel"/);
+  assert.match(lab, /季節形狀 · 春分歸零/);
+  assert.match(lab, /季節相位 · 公曆框架/);
+  assert.match(lab, /春分相對公曆的絕對位移另算/);
+  assert.match(lab, /id="astronomy-term-grid"/);
+  assert.doesNotMatch(astronomy, /class="astronomy-panel"/);
   assert.match(astronomy, /class="near-search-panel"/);
-  assert.match(astronomy, /<strong>近回歸排名<\/strong>/);
+  assert.match(astronomy, /<strong>長時間回歸搜尋<\/strong>/);
   assert.doesNotMatch(astronomy, /離散全閉合後，哪次天文形狀最接近？|只評估 24,000 年整數倍/);
   assert.match(nearCss, /\.near-search-copy\s*\{[\s\S]*display:flex/);
   assert.doesNotMatch(nearCss, /near-search-copy h2|near-search-copy p/);
@@ -196,23 +208,23 @@ test("section chrome stays flat and compact on phone", () => {
 test("mobile Research outcomes keep a readable interaction floor without inflating hidden evidence", () => {
   assert.match(
     discreteCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-discrete-drilldown > summary\s*\{[\s\S]*min-height:\s*42px;[\s\S]*padding:\s*8px 1px;[\s\S]*\.research-discrete-drilldown > summary strong\s*\{[\s\S]*font-size:\s*8\.5px;/
+    /@media \(max-width:480px\)[\s\S]*\.research-discrete-drilldown > summary\s*\{[\s\S]*min-height:\s*42px;[\s\S]*padding:\s*8px 1px;[\s\S]*\.research-discrete-drilldown > summary strong\s*\{[\s\S]*font-size:\s*12px;/
   );
   assert.match(
     astronomyCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-astronomy-rms-rail > span\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.research-astronomy-drilldown > summary\s*\{\s*min-height:\s*42px;\s*font-size:\s*9px;\s*\}/
+    /@media \(max-width:480px\)[\s\S]*\.research-astronomy-rms-rail > span\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.research-astronomy-drilldown > summary\s*\{\s*min-height:\s*42px;\s*font-size:\s*12px;\s*\}/
   );
   assert.match(
     evidenceCss,
-    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*8\.5px;/
+    /@media \(max-width:480px\)[\s\S]*\.research-evidence-support > summary,[\s\S]*min-height:\s*42px;[\s\S]*\.research-evidence-support > summary strong,[\s\S]*font-size:\s*12px;/
   );
   assert.match(
     determinacyCss,
-    /@media \(max-width:480px\)[\s\S]*\.determinacy-card p\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.determinacy-foot\s*\{\s*font-size:\s*9px;\s*\}/
+    /@media \(max-width:480px\)[\s\S]*\.determinacy-card p\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.determinacy-foot\s*\{\s*font-size:\s*12px;\s*\}/
   );
   assert.match(
     residualCss,
-    /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*9px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*8\.5px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*8\.5px;\s*\}/
+    /@media \(max-width:480px\)[\s\S]*\.month-boundary-stat small\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.pillar-impact-item small\s*\{\s*font-size:\s*12px;\s*\}[\s\S]*\.full-pillar-attribution\s*\{\s*font-size:\s*12px;\s*\}/
   );
 });
 
@@ -221,5 +233,21 @@ test("mobile Research primary interactions meet the same tap-target floor as dis
     recurrenceCss,
     /@media \(max-width:480px\)[\s\S]*\.base-date input\s*\{[^}]*min-height:42px;[\s\S]*\.delta-dock input\[type="number"\]\s*\{\s*min-height:42px;\s*\}[\s\S]*\.candidate-buttons button\s*\{\s*min-height:42px;[\s\S]*\.delta-slider-wrap input\s*\{\s*min-height:32px;\s*\}[\s\S]*\.model-boundary summary\s*\{\s*min-height:42px;/
   );
-  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:42px;\s*\}/);
+  assert.match(nearCss, /@media \(max-width:480px\)[\s\S]*\.near-ranking-row\s*\{\s*min-height:44px;\s*\}/);
+});
+test("Research 02 fixed-case proof is separated from 01 delta and has keyboard-safe Jie selection",async()=>{
+  const js=await readFile(new URL("../src/research-seasonal-drift-evidence-view.js",import.meta.url),"utf8");
+  const css=await Promise.resolve(cssSource("research-story-hierarchy.css"));
+  assert.match(astronomy,/id="research-case-transition"/);
+  assert.match(astronomy,/比較的是 2026 年和 24,000 年後的 26026 年/);
+  assert.match(astronomy,/class="research-model-scope"/);
+  assert.match(astronomy,/26026 年的框架還沒有獨立驗證/);
+  assert.match(astronomy,/id="seasonal-drift-orbit-details"/);
+  // the "why" orbit figure is read before the consequence sentence that leads to 03
+  assert.ok(astronomy.indexOf('id="seasonal-drift-orbit-details"') <
+    astronomy.indexOf('class="seasonal-drift-evidence-note"'));
+  assert.match(astronomy,/id="seasonal-boundary-select"/);
+  assert.match(js,/boundarySelect\.addEventListener\("change"/);
+  assert.match(js,/event\.target instanceof HTMLSelectElement/);
+  assert.match(css,/\.research-case-transition/);
 });

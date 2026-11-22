@@ -12,6 +12,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "check-mean-solar-preview.mjs",
     "check-birth-advanced.mjs",
     "check-view-shells.mjs",
+    "check-feature-reachability.mjs",
     "check-kinetic-boundaries.mjs",
     "check-kinetic-composition.mjs",
     "check-mobile-legend-layout.mjs",
@@ -50,6 +51,7 @@ export const VISUAL_CI_SUITES = Object.freeze({
     "visual-check-research-01-diagram-lab.mjs",
     "visual-check-research-02-diagram-lab.mjs",
     "visual-check-research-02-production.mjs",
+    "visual-check-near-recurrence-production.mjs",
     "visual-check-research-03-diagram-lab.mjs",
     "visual-check-research-03-production.mjs"
   ],

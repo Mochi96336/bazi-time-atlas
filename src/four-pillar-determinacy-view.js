@@ -69,9 +69,32 @@ function renderCard(name,{ pillarName=null, status, reason, resolved=false }) {
   const statusNode=card.querySelector(".determinacy-status");
   const summary=card.querySelector("p");
   const label=STATUS_LABELS[status] ?? status;
-  if(statusNode) statusNode.textContent=pillarName ? `${pillarName} · ${label}` : label;
+  // Repair A4: the answer (ganzhi or "?") is the largest mark; the pillar
+  // name is only a label and the verdict reads as its caption.
+  if(statusNode){
+    const answer=document.createElement("strong");
+    answer.className="determinacy-answer";
+    answer.textContent=resolved && pillarName ? pillarName : "？";
+    const verdict=document.createElement("span");
+    verdict.className="determinacy-verdict-label";
+    verdict.textContent=label;
+    statusNode.replaceChildren(answer,verdict);
+  }
   if(summary) summary.textContent=reason;
 }
+
+// Review 2026-11-21: the 03 verdict is read by novices; the technical reason
+// stays in the shared research state (lab time card), the card says it plainly.
+const PLAIN_REASONS=Object.freeze({
+  resolved:Object.freeze({
+    year:"看太陽在立春前或後，加上 60 年一輪。",
+    month:"看太陽走到哪一個節。"
+  }),
+  unresolved:Object.freeze({
+    day:"要知道地球轉了幾圈；24,000 年後誤差好幾天。",
+    hour:"要知道轉到哪一刻，還得先知道是哪天。"
+  })
+});
 
 function writeInstrumentStatus(states,resolvedCount){
   instrument.dataset.fourPillarYearStatus=states.year.status;
@@ -95,7 +118,7 @@ function renderSharedSeasonal(state){
     renderCard(name,{
       pillarName:pillar.name,
       status:pillar.status,
-      reason:pillar.reason,
+      reason:(resolved?PLAIN_REASONS.resolved:PLAIN_REASONS.unresolved)[name]??pillar.reason,
       resolved
     });
   }

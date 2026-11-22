@@ -6,10 +6,11 @@ import {
   inverseWheelConstraints,
   inverseWheelPillarForOffset
 } from "../src/inverse-time-search-view.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const view = readFileSync(new URL("../src/inverse-time-search-view.js", import.meta.url), "utf8");
 const analysis = readFileSync(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
-const css = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
+const css = cssSource("inverse-time-search.css");
 const referenceControls = readFileSync(new URL("../src/reference-frame-controls.js", import.meta.url), "utf8");
 
 test("find-time is wheel-native instead of a second form UI", () => {

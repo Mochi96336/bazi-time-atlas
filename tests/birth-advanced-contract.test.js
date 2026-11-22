@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html, css, script] = await Promise.all([
   readFile(new URL("../birth.html", import.meta.url), "utf8"),
-  readFile(new URL("../birth-advanced.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("birth-advanced.css")),
   readFile(new URL("../src/birth-advanced-mode.js", import.meta.url), "utf8")
 ]);
 

@@ -44,6 +44,13 @@
         doc.getElementById("research-evidence")?.scrollIntoView({block:"start"});
         await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         await wait(120);
+        // Research redesign R4: the verdict is the figure; the reference-frame
+        // explanation follows it inside "#research-evidence-why".
+        const why=doc.getElementById("research-evidence-why");
+        if(!why||!why.contains(conclusion)||!(determinacy.compareDocumentPosition(why)&Node.DOCUMENT_POSITION_FOLLOWING))
+          throw new Error("Reference frame explanation must follow the pillar verdict");
+        why.open=true;
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
         const timeState=doc?.getElementById("research-time-state");
         const timeKicker=doc?.getElementById("research-time-kicker");
         if(timeState?.dataset.context!=="evidence"||timeKicker?.textContent.trim()!=="03 · 四柱判定／同一太陽黃經"){
@@ -57,6 +64,35 @@
         const heading=doc.querySelector("#research-evidence > .research-task-head");
         if(heading && heading.scrollWidth>heading.clientWidth+2)
           throw new Error("Research 03 heading overflows its viewport");
+        const firstCard=doc.querySelector(".determinacy-card");
+        const cardHeader=firstCard?.querySelector("header");
+        const cardStatus=firstCard?.querySelector(".determinacy-status");
+        const cardHeight=firstCard?.getBoundingClientRect().height??0;
+        const statusGap=(cardStatus?.getBoundingClientRect().top??0)-(cardHeader?.getBoundingClientRect().bottom??0);
+        if(cardHeight>205||statusGap>32)
+          throw new Error(`Research 03 still has decorative blank cards: card=${cardHeight}px, gap=${statusGap}px`);
+        // Mobile: screenshot readiness also proves meaningful reader-sized
+        // text and a full-width reference-frame / pillar evidence hierarchy.
+        if(width<=390){
+          const fork=doc.querySelector(".research-alignment-fork");
+          const forkReason=doc.querySelector(".research-alignment-fork small");
+          const forkNote=doc.querySelector(".absolute-boundary-note");
+          const grid=doc.querySelector(".determinacy-grid");
+          const forkReasonPx=Number.parseFloat(win.getComputedStyle(forkReason).fontSize);
+          const forkNotePx=Number.parseFloat(win.getComputedStyle(forkNote).fontSize);
+          const reasonPx=Number.parseFloat(win.getComputedStyle(firstCard.querySelector("p")).fontSize);
+          const forkColumns=win.getComputedStyle(fork).gridTemplateColumns.split(" ").length;
+          const pillarColumns=win.getComputedStyle(grid).gridTemplateColumns.split(" ").length;
+          if(forkReasonPx<12.5||forkNotePx<12.5||reasonPx<12.5||
+             forkColumns!==1||pillarColumns!==1)
+            throw new Error(`Research 03 mobile reasons are unreadable or cramped: fork=${forkReasonPx}px, note=${forkNotePx}px, reason=${reasonPx}px, columns=${forkColumns}/${pillarColumns}`);
+          if(fork.scrollWidth>fork.clientWidth+2||grid.scrollWidth>grid.clientWidth+2)
+            throw new Error("Research 03 mobile evidence columns overflow");
+          probe.dataset.compositionMobileForkPx=String(forkReasonPx);
+          probe.dataset.compositionMobilePillarPx=String(reasonPx);
+        }
+        probe.dataset.compositionCardHeight=String(Math.round(cardHeight));
+        probe.dataset.compositionStatusGap=String(Math.round(statusGap));
         probe.dataset.readingVerdictPx=String(verdictPx);
         probe.dataset.readingCardPx=String(cardPx);
         probe.dataset.readingFootPx=String(footPx);

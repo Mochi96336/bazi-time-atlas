@@ -1,14 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const radial = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const scale = readFileSync(new URL("../scale-emphasis.css", import.meta.url), "utf8");
+const radial = cssSource("radial-hierarchy.css");
+const scale = cssSource("scale-emphasis.css");
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
 
 test("selected Zodiac datum uses an ink floor rather than inheriting muted context", () => {
   assert.match(radial, /#zodiac-track \.zodiac-label\s*\{[^}]*var\(--zodiac\) 57%, var\(--muted\)[^}]*font-size:\s*10\.5px;/s);
-  assert.match(radial, /#kinetic-instrument:not\(\[data-classification-overlay="on"\]\) #zodiac-track \.active-cycle-label\s*\{[^}]*var\(--zodiac\) 42%, var\(--ink\)[^}]*font-size:\s*11\.25px;[^}]*font-weight:\s*780;/s);
+  assert.match(radial, /#kinetic-instrument:not\(\[data-classification-overlay="on"\]\) #zodiac-track \.active-cycle-label\s*\{[^}]*var\(--zodiac\) 42%, var\(--ink\)[^}]*font-size:\s*14\.5px;[^}]*font-weight:\s*780;/s);
   assert.match(renderer, /class:\s*"zodiac-label active-cycle-label active-annual-label"/);
 });
 

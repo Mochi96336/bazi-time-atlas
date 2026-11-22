@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const layoutCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
+const css = cssSource("radial-hierarchy.css");
+const layoutCss = cssSource("mobile-legend.css");
 
 function mobile480Block(source) {
   const marker = "@media (max-width: 480px)";

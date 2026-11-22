@@ -48,6 +48,12 @@ function annotateZodiacSectors() {
     node.dataset.zodiacModality = classification.modality;
     annotated += 1;
   }
+  // Static Zodiac labels are rendered in sign order; they carry the element so
+  // the lens can colour the glyphs instead of tinting every sector.
+  const labels = wheel?.querySelectorAll("#zodiac-track .zodiac-label:not(.active-cycle-label)") ?? [];
+  labels.forEach((label, index) => {
+    label.dataset.zodiacElement = zodiacClassification(index).element;
+  });
   return annotated;
 }
 

@@ -1,12 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
 const renderer = readFileSync(new URL("../src/wheel/kinetic-renderer.js", import.meta.url), "utf8");
-const hierarchy = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const atlas = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const boundaries = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
-const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const hierarchy = cssSource("radial-hierarchy.css");
+const atlas = cssSource("kinetic-atlas.css");
+const boundaries = cssSource("kinetic-boundaries.css");
+const classification = cssSource("classification-overlay.css");
 
 test("wheel sectors tile their coordinates without artificial angular gutters", () => {
   assert.match(renderer, /const start = index \* 6;\s*\n\s*const end = \(index \+ 1\) \* 6;/);
@@ -60,7 +61,7 @@ test("selected-instant interval surfaces stay borderless until interaction or cl
   // Dense categorical borders remain opt-in and own their stroke explicitly.
   assert.match(classification, /data-classification-overlay="on"\] \.cycle-sector\[data-branch-element=/);
   assert.match(classification, /--classification-zodiac-outline:\s*#[0-9a-f]{6};/i);
-  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\s*\{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
+  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\[data-zodiac-element\]\.is-active \{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
   assert.doesNotMatch(classification, /data-classification-overlay="on"\] \.zodiac-sector\s*\{[\s\S]*?stroke:[^;]*var\(--zodiac\)/);
   assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\[data-zodiac-modality=/);
 });

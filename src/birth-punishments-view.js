@@ -62,11 +62,14 @@ let empty;
 function install() {
   if (!form || !panel || !footnote) return false;
 
-  const stylesheet = document.createElement("link");
-  stylesheet.rel = "stylesheet";
-  stylesheet.href = "./branch-punishments.css";
-  stylesheet.dataset.branchPunishmentStyles = "1";
-  document.head.append(stylesheet);
+  // Repair E5: birth-panels.css is a static link carrying this marker.
+  if (!document.querySelector("link[data-branch-punishment-styles]")) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "./branch-punishments.css";
+    stylesheet.dataset.branchPunishmentStyles = "1";
+    document.head.append(stylesheet);
+  }
 
   const summaryTitle = panel.querySelector(".pillar-relations-summary-copy strong");
   if (summaryTitle) summaryTitle.textContent = "四柱表面關係 · 合 / 沖 / 害 / 刑";
@@ -78,7 +81,7 @@ function install() {
   band.id = "pillar-punishments-band";
   const head = node("div", "pillar-punishments-head");
   head.append(
-    node("small", null, "PUNISHMENT STRUCTURE"),
+    node("small", null, "刑的結構"),
     node("span", null, "方向 / 互刑 / 自刑")
   );
   body = node("div", "pillar-punishments-body");

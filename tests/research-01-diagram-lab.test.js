@@ -12,7 +12,7 @@ const [html,css,js,productionHtml] = await Promise.all([
 test("Research 01 diagram lab stays outside production navigation", () => {
   assert.doesNotMatch(productionHtml,/research-01-diagram-lab/);
   assert.match(html,/meta name="robots" content="noindex,nofollow"/);
-  assert.match(html,/\.\.\/research-foundations\.css/);
+  assert.match(html,/\.\.\/research-layout\.css/);
 });
 
 test("Research 01 lab exposes exactly three independent diagram directions", () => {

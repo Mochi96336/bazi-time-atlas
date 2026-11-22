@@ -6,8 +6,15 @@ import {captureReadyProof} from "./chromium-ready-proof.mjs";
 
 const baseURL=process.env.BASE_URL??"http://127.0.0.1:4173/";
 const outputDir=path.resolve("tmp/visual-check");
-const viewports=[{key:"1440x900",width:1440,height:900},{key:"390x844",width:390,height:844}];
-const required=["data-ready=\"true\"","data-grammar=\"zero-line-proof\"","data-proof-ready=\"true\""];
+const viewports=[
+  {key:"320x700",width:320,height:700},
+  {key:"390x844",width:390,height:844},
+  {key:"480x850",width:480,height:850},
+  {key:"481x850",width:481,height:850},
+  {key:"660x850",width:660,height:850},
+  {key:"1440x900",width:1440,height:900}
+];
+const required=["data-ready=\"true\"","data-grammar=\"zero-line-proof\"","data-proof-ready=\"true\"","data-native-selection-checked=\"true\""];
 await mkdir(outputDir,{recursive:true});
 const captures=[];
 for(const viewport of viewports){

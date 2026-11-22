@@ -74,7 +74,7 @@ function createPanel() {
   header.className = "atlas-visible-ten-gods-head";
   const copy = document.createElement("div");
   const kicker = document.createElement("small");
-  kicker.textContent = "FOUR PILLARS · VISIBLE STEMS";
+  kicker.textContent = "四柱 · 明干十神";
   const title = document.createElement("strong");
   title.textContent = "四柱分析 · 明干十神";
   copy.append(kicker, title);

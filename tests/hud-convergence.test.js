@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
-const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const mobileLegendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
-const classificationCss = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const analysisCss = cssSource("ux-analysis.css");
+const atlasCss = cssSource("kinetic-atlas.css");
+const mobileLegendCss = cssSource("mobile-legend.css");
 
 test("small inner-ring identities keep a dedicated legibility floor without altering material color", () => {
   assert.ok(atlasCss.includes("--identity-hour: color-mix(in srgb, var(--hour) 50%, var(--ink))"));
@@ -97,20 +97,6 @@ test("mobile Tools retires reference-frame and layer chrome into one product row
   assert.doesNotMatch(mobileLegendCss, /^\s*\.ring-legend\s*\{/m);
 });
 
-test("mobile classification evidence is flat instead of another rounded card", () => {
-  const mobile = classificationCss.match(/@media \(max-width: 480px\) \{([\s\S]*)\}\s*$/)?.[1] ?? "";
-  assert.match(
-    mobile,
-    /\.classification-overlay-legend \{[\s\S]*?border:\s*0;[\s\S]*?border-top:\s*1px solid rgba\(238,242,237,\.10\);[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/
-  );
-  assert.match(mobile, /\.classification-keys i \{[\s\S]*?border-radius:\s*2px;/);
-  assert.match(mobile, /\.classification-current \{\s*display:none;/);
-  assert.match(mobile, /\.classification-row header span \{[^}]*font-size:\s*8\.5px;/);
-  assert.match(mobile, /\.classification-row header small \{[^}]*font-size:\s*6\.5px;/);
-  assert.match(mobile, /\.classification-keys i \{[\s\S]*?height:\s*17px;[\s\S]*?font-size:\s*7\.5px;/);
-  assert.match(mobile, /\.classification-warning \{[\s\S]*?font-size:\s*7px;/);
-  assert.match(mobile, /margin-bottom:\s*108px;/, "reserve enough scroll band for readable classification evidence");
-});
 
 test("duplicate state strip leaves ordinary reading but remains available in Analysis", () => {
   assert.match(

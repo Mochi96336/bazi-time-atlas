@@ -58,25 +58,24 @@ function detailsById(dom, id) {
 }
 
 const probe = dump("recurrence.html?delta=24000&targetClock=fixed-zone&targetTime=12%3A00%3A00&ut1Offset=8&dayBoundary=zi-initial-next-day&clockBasis=local-mean-solar&lon=121.5");
-const discrete = sectionById(probe.dom, "research-discrete");
-const astronomy = sectionById(probe.dom, "research-astronomy");
-const evidence = sectionById(probe.dom, "research-evidence");
+// Review 2026-11-21: the discrete tools, the other-Δ sandbox and the day/hour
+// evidence support live in the lab after the three reading steps.
+const lab = sectionById(probe.dom, "research-lab");
+const discrete = lab;
+const astronomy = sectionById(probe.dom, "research-astronomy") + lab;
+const evidence = sectionById(probe.dom, "research-evidence") + lab;
 
 for (const expected of [
   "八字多久會重複一次？",
-  "四柱都落在六十甲子序列上",
-  "同一節令下固定對齊",
-  "同一時辰下固定對齊",
-  "年柱 × 日柱",
+  "完整重複的週期",
   "粗略週期從哪裡來？",
   "八字的節界回來了嗎？",
   "對八字意味著什麼？",
   "固定 24,000 年候選 → 12 節界校驗",
   "12 / 12 節界位移 → 四柱可判範圍",
-  "只先算離散候選，不直接等同完整四柱週期",
-  "24,000 離散候選",
-  "TT 提前 10–14 d",
-  "24,000 ≠ 完整週期"
+  "曆法上三個循環全部對上",
+  "但真正的節氣沒有回來",
+  "所以 24,000 年不是四柱的週期"
 ]) {
   if (!probe.dom.includes(expected)) {
     throw new Error(`Research narrative spine missing "${expected}": ${probe.url}`);
@@ -85,13 +84,13 @@ for (const expected of [
 
 const identityProbe = dump("recurrence.html?delta=0");
 for (const expected of [
-  "24,000 離散候選",
-  "TT 提前 10–14 d",
-  "24,000 ≠ 完整週期",
+  "曆法上三個循環全部對上",
+  "但真正的節氣沒有回來",
+  "所以 24,000 年不是四柱的週期",
   "主線案例 · 固定 2026 → 26026",
   "12 / 12",
   "全部提前",
-  "0 天 = 完全重合"
+  "0 天＝回到原位"
 ]) {
   if (!identityProbe.dom.includes(expected)) {
     throw new Error(`Research fixed main story missing at default delta=0 "${expected}": ${identityProbe.url}`);
@@ -109,9 +108,12 @@ const stepsIndex = discrete.indexOf('id="discrete-derivation-steps"');
 const stripIndex = discrete.indexOf('id="research-year-strip"');
 const fanIndex = discrete.indexOf('id="recurrence-instrument"');
 const explorerIndex = discrete.indexOf('class="discrete-derivation"');
-if (!(thesisIndex >= 0 && solarOriginIndex > thesisIndex && stepsIndex > solarOriginIndex &&
-      stripIndex > stepsIndex && fanIndex > stripIndex && explorerIndex > fanIndex)) {
-  throw new Error(`Research 01 must explain solar-origin context and local→global closure before date/fan/Δ exploration: ${probe.url}`);
+// The phase fan leads the lab; the solar-origin note, local→global ladder,
+// year strip and Δ explorer follow it as open tools.
+const toolsIndex = discrete.indexOf('id="research-discrete-tools"');
+if (!(fanIndex >= 0 && toolsIndex > fanIndex && thesisIndex > toolsIndex && solarOriginIndex > thesisIndex &&
+      stepsIndex > solarOriginIndex && stripIndex > stepsIndex && explorerIndex > stripIndex)) {
+  throw new Error(`The lab must lead with the fan, then explain solar-origin context and local→global closure before date/Δ exploration: ${probe.url}`);
 }
 if (!discrete.includes('id="recurrence-instrument"') || !discrete.includes('class="recurrence-readout research-current-state"') || !discrete.includes('id="research-year-strip"') || !discrete.includes('id="research-sexagenary-cycle"')) {
   throw new Error(`discrete task lost instrument, compact current state, year strip, or 60-day cycle: ${probe.url}`);
@@ -202,17 +204,17 @@ if (/^<details[^>]*\sopen(?:\s|=|>)/.test(epochSupport)) {
 
 const defaultEvidenceProbe = dump("recurrence.html?delta=24000");
 const defaultEvidence = sectionById(defaultEvidenceProbe.dom, "research-evidence");
-const phaseFanDetail = detailsById(defaultEvidenceProbe.dom, "discrete-phase-fan-details");
-if (!phaseFanDetail || !phaseFanDetail.includes('id="recurrence-instrument"')) {
-  throw new Error(`Research 01 phase fan did not move behind its verification disclosure: ${defaultEvidenceProbe.url}`);
-}
-if (/^<details[^>]*\sopen(?:\s|=|>)/.test(phaseFanDetail)) {
-  throw new Error(`Research 01 phase fan must stay closed by default: ${defaultEvidenceProbe.url}`);
+const phaseFanPanel = sectionById(defaultEvidenceProbe.dom, "discrete-phase-fan-details");
+if (!phaseFanPanel || !phaseFanPanel.includes('data-research-primary-figure="discrete-phase-fan"') ||
+    !phaseFanPanel.includes('id="recurrence-instrument"') ||
+    !phaseFanPanel.includes('id="phase-fan-title"') ||
+    phaseFanPanel.includes("<summary")) {
+  throw new Error(`Research 01 must show the three-cycle phase fan as primary, non-collapsible evidence: ${defaultEvidenceProbe.url}`);
 }
 const phaseFanDeepLink = dump("recurrence.html?delta=24000#recurrence-instrument");
-const phaseFanDeepLinkDetail = detailsById(phaseFanDeepLink.dom, "discrete-phase-fan-details");
-if (!phaseFanDeepLinkDetail || !/^<details[^>]*\sopen(?:\s|=|>)/.test(phaseFanDeepLinkDetail) || !phaseFanDeepLinkDetail.includes('id="recurrence-instrument"')) {
-  throw new Error(`direct phase-fan hash did not auto-open verification evidence: ${phaseFanDeepLink.url}`);
+const phaseFanDeepLinkPanel = sectionById(phaseFanDeepLink.dom, "discrete-phase-fan-details");
+if (!phaseFanDeepLinkPanel || !phaseFanDeepLinkPanel.includes('id="recurrence-instrument"')) {
+  throw new Error(`direct phase-fan hash lost its visible instrument: ${phaseFanDeepLink.url}`);
 }
 
 const defaultProofSupport = detailsById(defaultEvidenceProbe.dom, "proof-chain-support-details");
@@ -223,10 +225,12 @@ if (!defaultProofSupport || !defaultEpochSupport) {
 if (/^<details[^>]*\sopen(?:\s|=|>)/.test(defaultProofSupport) || /^<details[^>]*\sopen(?:\s|=|>)/.test(defaultEpochSupport)) {
   throw new Error(`supporting evidence must remain closed by default: ${defaultEvidenceProbe.url}`);
 }
+const defaultLab = sectionById(defaultEvidenceProbe.dom, "research-lab");
 const determinacyIndex = defaultEvidence.indexOf('id="four-pillar-determinacy"');
-const proofSupportIndex = defaultEvidence.indexOf('id="proof-chain-support-details"');
-const epochSupportIndex = defaultEvidence.indexOf('id="epoch-audit-support-details"');
-if (!(determinacyIndex >= 0 && proofSupportIndex > determinacyIndex && epochSupportIndex > proofSupportIndex)) {
+const proofSupportIndex = defaultLab.indexOf('id="proof-chain-support-details"');
+const epochSupportIndex = defaultLab.indexOf('id="epoch-audit-support-details"');
+if (!(determinacyIndex >= 0 && proofSupportIndex >= 0 && epochSupportIndex > proofSupportIndex &&
+      !defaultEvidence.includes('id="proof-chain-support-details"'))) {
   throw new Error(`evidence outcome/support ordering regressed: ${defaultEvidenceProbe.url}`);
 }
 if (probe.dom.includes('class="research-task-nav"') || /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊|先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/.test(probe.dom)) {
@@ -237,7 +241,7 @@ for (const expected of [
   "共同追蹤：太陽年",
   "十二節／八字月序",
   "缺季節位置",
-  "局部重遇不是拿來找倍數",
+  "要三個一起回來，取 1,200 和 8,000 的最小公倍數",
   "用 Δ 驗算",
   "LCM(1,200, 8,000) = 24,000",
   "其他時間",
@@ -245,7 +249,7 @@ for (const expected of [
   "60 年序",
   "60 日序",
   "季節形狀 RMS",
-  "0 天 = 完全重合",
+  "0 天＝回到原位",
   "四柱可判範圍",
   "固定 +24,000 · 同一太陽黃經",
   "年／月可回同柱 · 日／時未能判定",
@@ -254,7 +258,7 @@ for (const expected of [
   "年序／日序",
   "離散推導",
   "節界校驗",
-  "研究結論 · 01 → 02 → 03",
+  "年柱、月柱一樣，為什麼還不算週期？",
   "固定推進 24,000 個公曆年"
 ]) {
   if (!probe.dom.includes(expected)) {
@@ -325,11 +329,20 @@ for (const stale of [
 
 const stickyTimeProbe = dump("recurrence.html?delta=24000#research-astronomy");
 const stickyTimeTag = stickyTimeProbe.dom.match(/<section[^>]*id="research-time-state"[^>]*>/)?.[0] ?? "";
-if (!stickyTimeTag.includes('data-stuck="true"')) {
-  throw new Error(`shared Research time state did not condense after anchor-scroll sticky activation: ${stickyTimeProbe.url}`);
+// Research redesign R2: the shared time card is a 01 tool, not a sticky bar
+// over 02/03; it still follows the seasonal owner while 02 is read.
+if (stickyTimeTag.includes('data-stuck="true"')) {
+  throw new Error(`Research time state must no longer stick over 02/03: ${stickyTimeProbe.url}`);
+}
+const toolsStart = stickyTimeProbe.dom.indexOf('id="research-discrete-tools"');
+const toolsEnd = stickyTimeProbe.dom.indexOf('id="research-lab-evidence"', toolsStart);
+const timeAt = stickyTimeProbe.dom.indexOf('id="research-time-state"');
+if (!(toolsStart >= 0 && timeAt > toolsStart && timeAt < toolsEnd) ||
+    !stickyTimeProbe.dom.includes('<div id="research-discrete-tools" class="research-discrete-tools">')) {
+  throw new Error(`Research time state must live inside the lab's open tools: ${stickyTimeProbe.url}`);
 }
 if (!stickyTimeTag.includes('data-owner="seasonal"')) {
-  throw new Error(`sticky Research time state did not switch to the seasonal owner while reading 02: ${stickyTimeProbe.url}`);
+  throw new Error(`Research time state did not switch to the seasonal owner while reading 02: ${stickyTimeProbe.url}`);
 }
 if ((stickyTimeProbe.dom.match(/id="research-time-state"/g) ?? []).length !== 1) {
   throw new Error(`Research time state must remain one shared DOM owner while sticky: ${stickyTimeProbe.url}`);

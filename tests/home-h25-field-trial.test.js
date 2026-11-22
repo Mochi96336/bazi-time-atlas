@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const atlas=readFileSync(new URL("../kinetic-atlas.css",import.meta.url),"utf8");
+const atlas=cssSource("kinetic-atlas.css");
 const shader=readFileSync(new URL("../src/wheel/material-prototype.js",import.meta.url),"utf8");
 const h24=readFileSync(new URL("../scripts/fixtures/home-h24-responsive.html",import.meta.url),"utf8");
-const classification=readFileSync(new URL("../classification-overlay.css",import.meta.url),"utf8");
+const classification=cssSource("classification-overlay.css");
 
 test("H2.5 B2 reference field is one restrained pair with a bounded ambient gradient", () => {
   assert.match(atlas,/--field:\s*#0a0d13;/);

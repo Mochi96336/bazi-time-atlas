@@ -115,6 +115,22 @@ try{
     await sleep(70);
   }
   assert.ok(original,"original Year strip did not initialize");
+  // The strip lives deep in the page, inside the collapsed lab-tools drawer
+  // that follows the three reading steps. Open the drawer the way a reader
+  // does (its summary), then bring the strip into the touch viewport before
+  // dispatching real touches; a closed <details> is not hit-testable.
+  if(original.rect.y>300){
+    await send("Runtime.evaluate",{expression:`(()=>{
+      const f=document.getElementById("stage"),d=f?.contentDocument;
+      const scrub=d?.getElementById("research-year-scrub");
+      for(let n=scrub?.closest("details:not([open])");n;n=n.parentElement?.closest("details:not([open])"))
+        n.querySelector(":scope > summary")?.click();
+      scrub?.scrollIntoView({block:"center"});
+      return true;
+    })()`,returnByValue:true});
+    await sleep(250);
+    original=await inspect();
+  }
   assert.equal(original.viewport,390,"must target a real 390px iframe");
   assert.ok(original.rect.h>=40 && original.rect.w>260,
     "original bar has no reliable native touch hit area: "+JSON.stringify(original));

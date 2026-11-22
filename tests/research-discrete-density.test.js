@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [
   view,
@@ -19,11 +20,11 @@ const [
   cycleCss
 ] = await Promise.all([
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-discrete-density.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-discrete-density.css")),
   readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
   readFile(new URL("../scripts/check-recurrence-lab.mjs", import.meta.url), "utf8"),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
-  readFile(new URL("../recurrence.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("recurrence.css")),
   readFile(new URL("../src/recurrence-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-year-strip-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/day-hour-proof-chain-view.js", import.meta.url), "utf8"),
@@ -31,7 +32,7 @@ const [
   readFile(new URL("../src/recurrence/seasonal-boundary-authority.js", import.meta.url), "utf8"),
   readFile(new URL("../src/recurrence/seasonal-civil-projection.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research-sexagenary-cycle.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-sexagenary-cycle.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("research-sexagenary-cycle.css"))
 ]);
 
 test("discrete presentation removes duplicate top scope copy", () => {
@@ -53,12 +54,16 @@ test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower
   const dockStart=recurrenceHtml.indexOf('<section class="delta-dock"');
   const baseStart=recurrenceHtml.indexOf('class="base-date research-base-date"');
   const candidatesStart=recurrenceHtml.indexOf('id="candidate-buttons"');
-  assert.ok(thesisStart>=0 && stepsStart>thesisStart && stripStart>stepsStart,
-    "the existing milestone derivation must lead before the date explorer");
+  // Research redesign R2: the phase fan is 01's figure; the number ladder,
+  // date strip and Δ controls are optional tools behind one disclosure.
+  const toolsStart=recurrenceHtml.indexOf('id="research-discrete-tools"');
+  assert.ok(instrumentStart>0 && toolsStart>instrumentStart && thesisStart>toolsStart &&
+    stepsStart>thesisStart && stripStart>stepsStart,
+    "the fan leads; the derivation ladder opens the tools before the date explorer");
   assert.ok(selectedStart>stripStart && trackStart>selectedStart,
     "selected date must stay inside the original year-strip header");
-  assert.ok(comparisonStart>trackStart && instrumentStart>comparisonStart && derivationStart>instrumentStart,
-    "date evidence and the fan must remain the verification path before lower Δ controls");
+  assert.ok(comparisonStart>trackStart && derivationStart>comparisonStart,
+    "date evidence stays before the lower Δ controls");
   const derivationMarkup=recurrenceHtml.slice(derivationStart);
   assert.ok(derivationMarkup.includes('id="delta-slider"') &&
     derivationMarkup.includes('id="research-controls"') &&
@@ -79,7 +84,7 @@ test("derivation thesis leads; date/fan verify it; Δ controls stay in the lower
   assert.ok(recurrenceHtml.slice(derivationStart,controlsStart).includes('id="delta-slider"'));
   for(const id of ["base-year","base-month","base-day","delta-number","candidate-buttons"])
     assert.ok(recurrenceHtml.slice(controlsStart).includes(`id="${id}"`));
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(layout,/\.research-task-primary \.research-year-strip\s*\{[\s\S]*?width:100%;max-width:none/);
   assert.match(layout,/\.research-year-head \.research-date-picker\s*\{[\s\S]*?display:flex/);
   assert.match(layout,/\.research-delta-public-slider\s*\{[\s\S]*?grid-area:slider/);
@@ -137,7 +142,7 @@ test("R11 Other time controls remain useful without duplicating the public miles
 
 test("default single-date readout and responsive fan preserve paired comparisons",async()=>{
   const compare=await readFile(new URL("../src/research-cycle-comparison-view.js",import.meta.url),"utf8");
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(recurrenceHtml,/id="research-cycles-target-label"/);
   assert.match(compare,/deltaYears === 0/);
   assert.match(compare,/selectedTargetInstantBound !== "true"/);
@@ -183,7 +188,7 @@ test("year-day local recurrence is promoted into the visible derivation rail",()
 });
 
 test("R7 compresses the fan header space without removing its legend",async()=>{
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(layout,/@media\(min-width:821px\)[\s\S]*?research-fan-graphic[\s\S]*?height:clamp\(445px,32vw,465px\)/);
   assert.match(layout,/@media\(min-width:821px\)[\s\S]*?#recurrence-wheel[\s\S]*?top:-90px/);
   assert.match(layout,/recurrence-legend[\s\S]*?display:flex/);
@@ -241,7 +246,7 @@ test("year strip owns the visible 1/1, Li Chun, selected date, year end, and nex
   assert.match(recurrenceHtml, /id="research-year-base-title">選定日 · —年<\/strong>/);
   assert.match(recurrenceHtml, />12\/31</);
   assert.match(recurrenceHtml, /id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1\+8 固定時差/);
-  assert.match(recurrenceHtml, /id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析/);
+  assert.match(recurrenceHtml, /id="research-year-li-chun-unavailable-copy">節氣的天文時刻尚未解析/);
   assert.match(recurrenceHtml, /id="research-year-next-date"/);
   assert.match(recurrenceHtml, /id="research-year-elapsed-days"/);
   assert.match(recurrenceHtml, /aria-label="選定日到下一年同月同日"/);
@@ -326,7 +331,7 @@ test("60-day cycle remains supporting evidence behind one flat drilldown", () =>
 });
 
 test("60-day wheel shortcut stays on one line and opens its disclosure", async () => {
-  const layout=await readFile(new URL("../research-compact-surface.css",import.meta.url),"utf8");
+  const layout=await Promise.resolve(cssSource("research-compact-surface.css"));
   assert.match(recurrenceHtml,/class="research-cycle-inline-lookup"[^>]*href="#discrete-sexagenary-details">六十日轉盤 ↗<\/a>/);
   assert.match(layout,/\.research-cycle-inline-lookup\s*\{[\s\S]*?display:inline-flex;[\s\S]*?white-space:nowrap;/);
   assert.match(view,/target === details \|\| target === cycle/);
@@ -344,7 +349,7 @@ test("60-day wheel is the selector: direct sector click, pointer scrub, and keyb
   assert.match(cycleView, /setPointerCapture/);
   assert.match(cycleView, /event\.key === "ArrowLeft"/);
   assert.match(cycleView, /event\.key === "ArrowRight"/);
-  assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*none;/);
+  assert.match(cycleCss, /#research-sexagenary-wheel\s*\{[\s\S]*?touch-action:\s*pan-y;/);
 });
 
 test("reading order explains the global candidate before date/fan verification and lower delta controls", () => {
@@ -354,14 +359,17 @@ test("reading order explains the global candidate before date/fan verification a
   const stripStart = recurrenceHtml.indexOf('id="research-year-strip"');
   const cycleStart = recurrenceHtml.indexOf('id="research-sexagenary-cycle"');
   const derivationStart = recurrenceHtml.indexOf('class="discrete-derivation"');
-  assert.ok(thesisStart >= 0 && stripStart > thesisStart && comparisonStart > stripStart &&
-    stateStart > comparisonStart && derivationStart > stateStart && cycleStart > derivationStart);
+  // Review 2026-11-21 (fan everywhere): the 60-pair wheel reads right after the
+  // lab's cycle fan; the original fan and its tools follow in 研究者工具.
+  assert.ok(stateStart >= 0 && thesisStart > stateStart && stripStart > thesisStart && comparisonStart > stripStart &&
+    derivationStart > comparisonStart && cycleStart > 0 && cycleStart < stateStart);
   assert.doesNotMatch(recurrenceHtml,/class="research-cycles-card/);
   assert.match(recurrenceHtml,/id="research-year-jiazi-ticks"/);
   assert.match(recurrenceView, /LCM\(1,200, 8,000\) = 24,000；三個離散曆法相位全歸零/);
   assert.match(recurrenceHtml, /data-diagram-grammar="condition-ladder"/);
-  assert.match(recurrenceHtml, /推導關係：<\/strong>LCM\(1,200, 8,000\) = 24,000/);
-  assert.match(recurrenceHtml, /局部重遇不是拿來找倍數，而是指出「年＋日已回來，還缺季節位置」/);
+  assert.match(recurrenceHtml, /取 1,200 和 8,000 的最小公倍數，就是 24,000 年/);
+  assert.match(recurrenceHtml, /兩個條件第一次同時成立是 1,980 年後/);
+  assert.match(recurrenceHtml, /1,980 不是 400 的倍數，所以季節位置還沒回來/);
   assert.ok(recurrenceHtml.includes('class="phase-gauge-caption"') && recurrenceHtml.includes("0 = 與基準同相位"));
 });
 
@@ -377,19 +385,28 @@ test("default 2026-09-13 story visibly escalates from +1980 local recurrence to 
   assert.deepEqual(local.phases,{yearSequence:0,gregorian:380,day:0});
   assert.deepEqual(global.phases,{yearSequence:0,gregorian:0,day:0});
   assert.match(recurrenceView,/signedShortestPhase\(localState\.phases\.gregorian,400\)/);
-  assert.match(recurrenceHtml,/01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真/);
   assert.match(css,/@media \(max-width:820px\)[\s\S]*?data-diagram-grammar="condition-ladder"[\s\S]*?\.discrete-derivation-bridge::after[\s\S]*?content:"↓"/);
 });
 test("first-screen research milestones reuse the canonical delta state and date-specific local result", () => {
   const entry=recurrenceHtml.indexOf('class="research-entry"');
-  const outline=recurrenceHtml.indexOf('class="research-outline"');
+  const outline=recurrenceHtml.indexOf('class="research-outline');
   const time=recurrenceHtml.indexOf('id="research-time-state"');
-  assert.ok(entry > 0 && entry < outline && outline < time,
-    "first-screen comparison precedes the outline and shared time card");
+  const fan=recurrenceHtml.indexOf('id="recurrence-instrument"');
+  // Repair D2: the milestone comparison lives inside 01, after its plain
+  // conclusion, so the page opens with the question rather than a dashboard.
+  const discrete=recurrenceHtml.indexOf('id="research-discrete"');
+  const conclusion=recurrenceHtml.indexOf('data-plain-conclusion="01"');
+  // Review 2026-11-21: 01 reads with the cycle fan; the original phase fan
+  // and its milestone buttons (attached right under it) live in the lab tools.
+  const dials=recurrenceHtml.indexOf('id="research-cycle-fan"');
+  const lab=recurrenceHtml.indexOf('id="research-lab"');
+  assert.ok(outline > 0 && outline < discrete && discrete < conclusion && conclusion < dials && dials < lab &&
+    lab < fan && fan < entry && entry < time,
+    "route map, 01 conclusion, the cycle fan; then in the lab: original fan, its milestone buttons, the time card");
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);
-  assert.doesNotMatch(recurrenceHtml.slice(entry,outline),/\+1,980/);
-  assert.match(recurrenceHtml,/href="\.\/research-entry\.css"/);
+  assert.doesNotMatch(recurrenceHtml.slice(entry,recurrenceHtml.indexOf("</div>",recurrenceHtml.indexOf('id="research-entry-selection"'))),/\+1,980/);
+  assert.match(recurrenceHtml,/href="\.\/research-sections\.css"/);
   assert.match(recurrenceView,/function syncResearchEntry\(state, localYears\)/);
   assert.match(recurrenceView,/findFirstLocalYearSequenceDayRecurrence\(currentBase\)/);
   assert.match(recurrenceView,/researchEntryLocal\.dataset\.deltaYears = String\(localYears\)/);
@@ -400,7 +417,7 @@ test("first-screen research milestones reuse the canonical delta state and date-
   assert.match(recurrenceView,/!state\.targetValid/);
 });
 
-test("R16 disclosure previews only the canonical signed phase state before opening", () => {
+test("R16 primary panel previews the canonical signed phase above the visible fan", () => {
   assert.match(view, /function updatePhaseFanPreview\(details, instrument\)/);
   assert.match(view, /instrument\.dataset\.gregorianPhaseSigned/);
   assert.match(view, /instrument\.dataset\.yearSequencePhaseSigned/);
@@ -413,7 +430,11 @@ test("R16 disclosure previews only the canonical signed phase state before openi
   assert.match(view, /基準 · 非重遇/);
   assert.match(view, /離散候選 · 待驗節界/);
   assert.match(view, /observer\.observe\(instrument/);
-  assert.match(css, /\.research-phase-fan-drilldown > summary \.phase-fan-preview/);
+  assert.match(css, /\.research-phase-fan-panel \.phase-fan-preview/);
+  assert.match(view, /外圈 · 公曆 400 年/);
+  assert.match(view, /中圈 · 年序 60 年/);
+  assert.match(view, /內圈 · 日序 60 日/);
+  assert.match(view, /回到零位/);
   assert.doesNotMatch(view, /function updatePhaseFanPreview[\s\S]*?function bindPhaseFanPreview\([\s\S]*?recurrenceState\(/);
 });
 
@@ -426,7 +447,37 @@ test("milestone zero arrival is event-scoped; no continuous ring or phase animat
   assert.match(view, /selected !== details\.dataset\.phasePreviewLastDelta/);
   assert.match(view, /prefers-reduced-motion: reduce/);
   assert.match(view, /value\.animate\(/);
-  assert.match(css, /\.research-phase-fan-drilldown\[open\] \.return-marker-zero-node\.is-arriving/);
+  assert.match(css, /\.research-phase-fan-panel \.return-marker-zero-node\.is-arriving/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(css.slice(css.indexOf("@keyframes research-r16-zero-arrival")), /rotate\(|translate\(|linear infinite/);
+});
+
+test("Research 01 primary proof stays visible while 400/1200/8000 supporting checks are an accessible disclosure",async()=>{
+  const story=await Promise.resolve(cssSource("research-story-hierarchy.css"));
+  assert.match(recurrenceView,/structuralDetails\.id = "research-structural-milestones"/);
+  assert.match(recurrenceView,/structuralDetails\.open = wasStructuralOpen \|\| \[400,1200,8000\]\.includes\(currentDelta\)/);
+  assert.match(recurrenceView,/if \(isStructural\) structuralGrid\.appendChild\(button\)/);
+  assert.match(recurrenceView,/else derivationSteps\.appendChild\(button\)/);
+  assert.match(story,/\.research-structural-milestone-grid \{\s*display:grid;/);
+  assert.match(story,/\.research-structural-milestones > summary:focus-visible/);
+  assert.match(recurrenceHtml,/<div id="research-discrete-tools" class="research-discrete-tools">/);
+  assert.doesNotMatch(recurrenceHtml,/依序點上方 \+400、\+8,000、\+24,000/);
+});
+
+test("Research 01 proves 8,000 days closure and the 24,000 LCM without confusing local offset",()=>{
+  const gregorian400=146097;
+  const dayRemainder=gregorian400%60;
+  assert.equal(dayRemainder,57);
+  for(let cycles=1;cycles<20;cycles++)
+    assert.notEqual((cycles*dayRemainder)%60,0);
+  assert.equal((20*dayRemainder)%60,0);
+  const gcd=(a,b)=>b?gcd(b,a%b):a;
+  const lcm=(a,b)=>a/gcd(a,b)*b;
+  assert.equal(lcm(400,60),1200);
+  assert.equal(400*20,8000);
+  assert.equal(lcm(1200,8000),24000);
+  assert.match(recurrenceHtml,/class="research-discrete-mechanism"/);
+  assert.match(recurrenceHtml,/400 年共有 146,097 天，除以 60 餘 57，要累積 20 個 400 年/);
+  assert.match(recurrenceHtml,/也就是 60 和 400 的最小公倍數/);
+  assert.match(recurrenceView,/不是在局部重遇後再補 20 年/);
 });

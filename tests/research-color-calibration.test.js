@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { cssSource, linkPosition } from "./helpers/css-source.js";
 
 const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
-const css=readFileSync(new URL("../research-color-calibration.css",import.meta.url),"utf8");
+const css=cssSource("research-color-calibration.css");
 
 test("Research color calibration is the final page-specific visual layer",()=>{
-  const navigation=html.indexOf('href="./navigation-workspace.css"');
-  const calibration=html.indexOf('href="./research-color-calibration.css"');
+  const navigation=linkPosition(html,"navigation-workspace.css");
+  const calibration=linkPosition(html,"research-color-calibration.css");
   assert.ok(navigation>=0 && calibration>navigation);
 });
 

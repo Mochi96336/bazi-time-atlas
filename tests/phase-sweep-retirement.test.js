@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../discrete-phase.css", import.meta.url), "utf8");
+const css = cssSource("discrete-phase.css");
 
 test("continuous tracks retire the old intra-tooth arc and bead without hiding boundary gates", () => {
   assert.match(

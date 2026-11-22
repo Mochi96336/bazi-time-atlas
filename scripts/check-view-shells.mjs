@@ -89,9 +89,11 @@ requireEqual(attr(probe, "data-recurrence-lede-hidden"), "false", "Research ques
 requireEqual(attr(probe, "data-recurrence-scope-hidden"), "true", "Recurrence mobile model scope note must stay out of the first-screen instrument flow", url);
 requireEqual(attr(probe, "data-recurrence-outline-visible"), "true", "Recurrence mobile lost its compact three-part research outline", url);
 requireEqual(attr(probe, "data-recurrence-outline-count"), "3", "Recurrence research outline must expose exactly three existing task owners", url);
-requireEqual(attr(probe, "data-recurrence-phase-fan-details-open"), "false", "Phase-fan verification evidence must stay closed by default", url);
+requireEqual(attr(probe, "data-recurrence-reading-fans-visible"), "true", "01 and lab cycle fans must be drawn outside any disclosure", url);
+requireEqual(attr(probe, "data-recurrence-lab-tools-closed"), "true", "The original phase fan and its tools belong in the closed researcher-tools disclosure", url);
+requireEqual(attr(probe, "data-recurrence-phase-fan-primary-visible"), "true", "Original three-cycle fan must stay complete (not a nested disclosure) once researcher tools are open", url);
 requireEqual(attr(probe, "data-recurrence-sexagenary-details-open"), "false", "60-day supporting evidence must stay closed by default", url);
-requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the primary delta derivation, not between fan and controls", url);
+requireEqual(attr(probe, "data-recurrence-sexagenary-after-derivation"), "true", "60 Ganzhi source must sit after the lab's cycle fan and before the researcher tools", url);
 requireEqual(attr(probe, "data-recurrence-task-nav-visible"), "false", "Retired Research task-card navigation returned", url);
 requireEqual(attr(probe, "data-recurrence-task-head-before-instrument"), "true", "Recurrence mobile must introduce section 01 before the instrument", url);
 requireEqual(attr(probe, "data-recurrence-delta-controls-after-instrument"), "true", "Recurrence Δ settings must leave the year-strip header and live with the lower derivation rail", url);
@@ -100,9 +102,10 @@ requireEqual(attr(probe, "data-recurrence-derivation-grammar"), "condition-ladde
 requireEqual(attr(probe, "data-recurrence-local-year-day-visible"), "true", "The first local Year+Day recurrence must be visible and identified in the derivation rail", url);
 requireEqual(attr(probe, "data-recurrence-primary-comparison-ready"), "true", "Primary named Year/Day comparison did not initialize", url);
 requireEqual(attr(probe, "data-recurrence-no-giant-cards"), "true", "Two giant Year/Day cards must be absent; base/target must live inline on the original Year bar", url);
-requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research 01 derivation thesis must start in the first mobile viewport before the date explorer", url);
+requireEqual(attr(probe, "data-recurrence-derivation-thesis-starts-in-first-viewport"), "true", "Research answer must start in the first mobile viewport and the derivation thesis must precede the date explorer", url);
+requireEqual(attr(probe, "data-recurrence-discrete-tools-open-in-lab"), "true", "Research tools must be open inside the lab, not behind a disclosure", url);
 requireEqual(attr(probe, "data-recurrence-year-day-single-owner"), "true", "Single-date Year/Day evidence must keep one owner without duplicating the zero-year baseline", url);
-requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the secondary phase instrument", url);
+requireEqual(attr(probe, "data-recurrence-comparison-before-fan"), "true", "Named Year/Day comparison must precede the primary phase instrument", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-delta-dock"), "true", "Recurrence candidates must share the time-displacement owner", url);
 requireEqual(attr(probe, "data-recurrence-candidate-in-toolbar"), "false", "Recurrence candidates leaked back into the instrument toolbar", url);
 requireEqual(attr(probe, "data-recurrence-delta-number-in-dock"), "true", "Recurrence numeric displacement control left the unified dock", url);
@@ -112,12 +115,12 @@ requireEqual(attr(probe, "data-recurrence-candidate-count"), "6", "Canonical rec
 requireEqual(attr(probe, "data-recurrence-duplicate-candidates-hidden"), "true", "Other time must not visibly repeat the public recurrence candidates", url);
 requireEqual(attr(probe, "data-recurrence-shift-toolbar-one-row"), "true", "Other time toolbar must remain one physical row while open", url);
 requireEqual(attr(probe, "data-recurrence-question-text"), "八字多久會重複一次？", "Research question changed", url);
-requireEqual(attr(probe, "data-recurrence-alignment-count"), "2", "Research header must keep exactly two compact alignment relations", url);
-requireEqual(attr(probe, "data-recurrence-alignment-text"), "年柱60 同一節令下固定對齊 月柱60|日柱60 同一時辰下固定對齊 時柱60", "Research alignment explanation changed", url);
-requireEqual(attr(probe, "data-recurrence-next-text"), "所以先找年柱 × 日柱何時重遇；+24,000 年只先算離散候選，不直接等同完整四柱週期。", "Research inference line changed", url);
-requireEqual(attr(probe, "data-recurrence-spine-discrete"), "24,000 離散候選", "Research discrete spine lost fixed main-story state", url);
-requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "TT 提前 10–14 d", "Research astronomy spine lost fixed main-story state", url);
-requireEqual(attr(probe, "data-recurrence-spine-evidence"), "24,000 ≠ 完整週期", "Research evidence spine lost fixed main-story state", url);
+// The opening answers in one sentence, then a to-scale overview; no alignment table.
+requireEqual(attr(probe, "data-recurrence-alignment-count"), "0", "Research opening must not bring back the alignment table", url);
+requireEqual(attr(probe, "data-recurrence-next-text"), "橫線是時間，按比例畫：1,980 年只是 24,000 年的一小段。", "Research overview caption changed", url);
+requireEqual(attr(probe, "data-recurrence-spine-discrete"), "曆法上三個循環全部對上", "Research discrete spine lost fixed main-story state", url);
+requireEqual(attr(probe, "data-recurrence-spine-astronomy"), "但真正的節氣沒有回來", "Research astronomy spine lost fixed main-story state", url);
+requireEqual(attr(probe, "data-recurrence-spine-evidence"), "所以 24,000 年不是四柱的週期", "Research evidence spine lost fixed main-story state", url);
 
 for (const [label, dataName, minHeight] of [
   ["research outline link", "data-recurrence-outline-link-height", 42],
@@ -142,8 +145,10 @@ const outlineBottom = Number(attr(probe, "data-recurrence-outline-bottom"));
 const outlineHeight = Number(attr(probe, "data-recurrence-outline-height"));
 const taskHeadTop = Number(attr(probe, "data-recurrence-task-head-top"));
 const taskHeadBottom = Number(attr(probe, "data-recurrence-task-head-bottom"));
-const phaseFanTop = Number(attr(probe, "data-recurrence-phase-fan-details-top"));
-const phaseFanHeight = Number(attr(probe, "data-recurrence-phase-fan-details-height"));
+const phaseFanTop = Number(attr(probe, "data-recurrence-phase-fan-panel-top"));
+const phaseFanHeight = Number(attr(probe, "data-recurrence-phase-fan-panel-height"));
+const phaseFanWidth = Number(attr(probe, "data-recurrence-phase-fan-panel-width"));
+const instrumentHeight = Number(attr(probe, "data-recurrence-instrument-height"));
 const comparisonTop = Number(attr(probe, "data-recurrence-primary-comparison-top"));
 const comparisonBottom = Number(attr(probe, "data-recurrence-primary-comparison-bottom"));
 const sexagenaryDetailsHeight = Number(attr(probe, "data-recurrence-sexagenary-details-height"));
@@ -157,20 +162,26 @@ const shiftToolbarHeight = Number(attr(probe, "data-recurrence-shift-toolbar-hei
 if (
   ![outlineTop, outlineBottom, outlineHeight, taskHeadTop, taskHeadBottom, comparisonTop, comparisonBottom, phaseFanTop, derivationTop].every(Number.isFinite)
   || !(outlineTop < outlineBottom && outlineBottom <= taskHeadTop && taskHeadTop < taskHeadBottom
-    && taskHeadBottom < comparisonTop && comparisonTop < comparisonBottom
-    && comparisonBottom <= phaseFanTop && phaseFanTop < derivationTop)
-  || outlineHeight > 46
+    // Research redesign R2: the fan is 01's figure; the named Year/Day
+    // comparison and Δ rail follow it inside the opened "try it" tools.
+    && taskHeadBottom < phaseFanTop && phaseFanTop < comparisonTop
+    && comparisonTop < comparisonBottom && comparisonBottom <= derivationTop)
+  || outlineHeight > 280
 ) {
   throw new Error(
     `Recurrence mobile outline must stay compact and preserve the 01 reading order ` +
     `(outline=${outlineTop}..${outlineBottom}/h${outlineHeight}, task=${taskHeadTop}..${taskHeadBottom}, namedCycle=${comparisonTop}..${comparisonBottom}, phaseFanRail=${phaseFanTop}, deltaRail=${derivationTop}): ${url}`
   );
 }
-// The large fan is now optional verification evidence. The default mobile flow
-// should pay only for one compact disclosure rail; expanded fan geometry is
-// audited by the dedicated Year-Day production check.
-if (!Number.isFinite(phaseFanHeight) || phaseFanHeight < 38 || phaseFanHeight > 48) {
-  throw new Error(`Research phase-fan verification rail escaped its compact range (${phaseFanHeight}px): ${url}`);
+// The primary phase fan must occupy actual layout space instead of being a
+// hidden disclosure. Preserve its complete diagram and ensure it fits 390px.
+if (
+  !Number.isFinite(phaseFanHeight) || !Number.isFinite(instrumentHeight) ||
+  !Number.isFinite(phaseFanWidth) || instrumentHeight <= 0 ||
+  phaseFanHeight < instrumentHeight || phaseFanWidth < 300 || phaseFanWidth > 390 ||
+  !(phaseFanTop + phaseFanHeight <= derivationTop)
+) {
+  throw new Error(`Research primary phase fan must remain fully laid out before Δ controls (fan=${phaseFanWidth}x${phaseFanHeight}, instrument=${instrumentHeight}, next=${derivationTop}): ${url}`);
 }
 if (
   !Number.isFinite(deltaSettingsHeight)
@@ -190,7 +201,8 @@ if (
     ", zeroStep=" + zeroDeltaStepHeight + ", shiftToolbarH=" + shiftToolbarHeight + "): " + url
   );
 }
-if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 30 || sexagenaryDetailsHeight > 44) {
+// Research redesign R5: every disclosure row shares one 48px touch target.
+if (!Number.isFinite(sexagenaryDetailsHeight) || sexagenaryDetailsHeight < 44 || sexagenaryDetailsHeight > 56) {
   throw new Error(`60-day supporting evidence must collapse to one compact rail by default (${sexagenaryDetailsHeight}px): ${url}`);
 }
 if (!Number.isFinite(astronomyTransitionBottom) || !Number.isFinite(astronomyTaskTop) || astronomyTaskTop <= astronomyTransitionBottom) {
@@ -200,7 +212,8 @@ if (!Number.isFinite(astronomyTransitionBottom) || !Number.isFinite(astronomyTas
 requireEqual(attr(probe, "data-birth-color-scheme"), "dark", "Birth left the dark instrument color scheme", url);
 requireEqual(attr(probe, "data-sex-color-scheme"), "dark", "legacy Ganzhi mobile redirect left the Atlas dark instrument color scheme", url);
 requireEqual(attr(probe, "data-sex-desktop-color-scheme"), "dark", "bare legacy Sexagenary redirect left the Atlas dark instrument color scheme", url);
-if (!/^#?131915$/i.test(attr(probe, "data-birth-paper") ?? "")) {
+// Repair C2: Birth shares the site field tokens (--site-field-raised).
+if (!/^#?0e121a$/i.test(attr(probe, "data-birth-paper") ?? "")) {
   throw new Error(`Birth paper token drifted from the instrument shell (${attr(probe, "data-birth-paper")}): ${url}`);
 }
 

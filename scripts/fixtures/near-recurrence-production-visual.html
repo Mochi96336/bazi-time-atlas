@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Long-horizon Research 02 actual-page visual proof</title>
+  <style>
+    html,body{margin:0;overflow:hidden;background:#0a0e12}
+    #stage{display:block;border:0;background:#0a0e12}
+    #probe{display:none}
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Long-horizon research at its real viewport width"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    const params=new URLSearchParams(location.search);
+    const width=Math.max(320,Math.min(1800,Number(params.get("width"))||390));
+    const height=Math.max(600,Math.min(1600,Number(params.get("height"))||900));
+    const frame=document.querySelector("#stage");
+    const probe=document.querySelector("#probe");
+    // Chromium enforces a 500px outer-window minimum; the measured frame
+    // still has the exact 320/390/1440px CSS layout.
+    document.documentElement.style.width=Math.max(500,width)+"px";
+    document.body.style.width=Math.max(500,width)+"px";
+    frame.style.width=width+"px";
+    frame.style.height=height+"px";
+    const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    frame.addEventListener("load",async()=>{
+      try {
+        const doc=frame.contentDocument;
+        const win=frame.contentWindow;
+        let chart, panel, dots;
+        for(let i=0;i<180;i++){
+          chart=doc?.getElementById("near-recurrence-chart");
+          panel=doc?.getElementById("near-recurrence-detail");
+          dots=chart?.querySelectorAll(".near-dot")||[];
+          if(chart?.dataset.nearChartCandidateCount==="41" && dots.length===41 &&
+            doc?.querySelector('.research-phase-fan-panel .phase-fan-preview > [data-phase-preview="day"] .phase-fan-phase-state')?.textContent!=="—")break;
+          await wait(40);
+        }
+        if(!panel||!chart||chart.dataset.nearChartCandidateCount!=="41"||dots.length!==41)
+          throw Error("Long-time chart did not finish rendering all 41 candidates");
+        const rows=[...doc.querySelectorAll("#near-recurrence-ranking .near-ranking-row")];
+        const yLabels=[...chart.querySelectorAll(".near-y-label")];
+        const xLabels=[...chart.querySelectorAll(".near-x-label")];
+        const zero=yLabels.find(label=>label.textContent==="0");
+        if(yLabels.length!==5||xLabels.length!==5||!zero ||
+          !(Number(zero.getAttribute("y"))>Number(yLabels.at(-1).getAttribute("y"))) ||
+          rows.length!==6)
+          throw Error("Rank rows or readable Y=0 and +Δ axes are missing");
+        if(chart.dataset.nearChartYUnit!=="hours")
+          throw Error("Y-axis must be explicitly measured in hours");
+        const axisPx=Number.parseFloat(win.getComputedStyle(yLabels[0]).fontSize);
+        const maxRowHeight=Math.min(...rows.map(row=>row.getBoundingClientRect().height));
+        const realWidth=chart.getBoundingClientRect().width;
+        const intrinsicWidth=chart.viewBox.baseVal.width;
+        const chartKey=doc.querySelector(".near-chart-meta strong")?.textContent||"";
+        const panelLeft=panel.getBoundingClientRect().left;
+        const headingLeft=panel.querySelector(".near-search-copy")?.getBoundingClientRect().left??panelLeft;
+        const readingInset=headingLeft-panelLeft;
+        if(width<=480 && (readingInset<9.5 || readingInset>11))
+          throw Error("Mobile near-search text needs a 10px inset from its existing panel edge: "+
+            JSON.stringify({width,panelLeft,headingLeft,readingInset}));
+        if(axisPx<10.5 || maxRowHeight<44 || Math.abs(realWidth-intrinsicWidth)>2 ||
+          panel.scrollWidth>panel.clientWidth+2 ||
+          !chartKey.includes("小時") || !chartKey.includes("最大形狀殘差"))
+          throw Error("Chart reading size, 44px ranking rows or responsive width failed: "+
+            JSON.stringify({axisPx,maxRowHeight,realWidth,intrinsicWidth,scrollWidth:panel.scrollWidth,clientWidth:panel.clientWidth,chartKey}));
+        const fan=doc.getElementById("discrete-phase-fan-details");
+        if(fan?.tagName!=="SECTION" || !fan.querySelector('[data-phase-preview="gregorian"]') ||
+          !fan.querySelector('[data-phase-preview="year"]') ||
+          !fan.querySelector('[data-phase-preview="day"]'))
+          throw Error("Primary 3-cycle fan lost its visible ring key");
+        const panelTop=panel.getBoundingClientRect().top+win.scrollY;
+        win.scrollTo({top:Math.max(0,panelTop-75),behavior:"instant"});
+        await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+        await wait(120);
+        probe.dataset.readingInset=String(readingInset);
+        probe.dataset.axisPx=String(axisPx);
+        probe.dataset.rankingTouchHeight=String(maxRowHeight);
+        probe.dataset.chartWidth=String(realWidth);
+        probe.dataset.intrinsicWidth=String(intrinsicWidth);
+        probe.dataset.candidateCount=String(dots.length);
+        probe.dataset.renderedWidth=String(win.innerWidth);
+        probe.dataset.chartIsVisible=String(chart.getBoundingClientRect().top<height);
+        probe.dataset.ready="true";
+      }catch(e){probe.dataset.ready="error";probe.dataset.error=String(e);}
+    });
+    frame.src=new URL("../../recurrence.html?date=2026-09-13&delta=24000",location.href).href;
+  </script>
+</body>
+</html>

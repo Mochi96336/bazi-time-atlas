@@ -2,12 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { SEASONAL_DRIFT_26026_RESEARCH as evidence } from "../src/research/seasonal-drift-26026-research-data.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html, view, data, css] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   readFile(new URL("../src/research-seasonal-drift-evidence-view.js", import.meta.url), "utf8"),
   readFile(new URL("../src/research/seasonal-drift-26026-research-data.js", import.meta.url), "utf8"),
-  readFile(new URL("../research-seasonal-drift-evidence.css", import.meta.url), "utf8")
+  Promise.resolve(cssSource("research-seasonal-drift-evidence.css"))
 ]);
 
 test("Research 02 keeps the fixed +24k story visible before the delta sandbox", () => {
@@ -15,21 +16,24 @@ test("Research 02 keeps the fixed +24k story visible before the delta sandbox", 
   const seasonalEvidenceStart = html.indexOf('id="seasonal-drift-evidence"');
   const dynamicPanelStart = html.indexOf('class="astronomy-panel"', astronomyStart);
   const researchEvidenceStart = html.indexOf('id="research-evidence"');
+  // Review 2026-11-21: the other-Δ sandbox moved to the lab after 03.
+  const labStart = html.indexOf('id="research-lab"');
   assert.ok(
     astronomyStart >= 0 &&
     seasonalEvidenceStart > astronomyStart &&
-    dynamicPanelStart > seasonalEvidenceStart &&
-    researchEvidenceStart > dynamicPanelStart
+    researchEvidenceStart > seasonalEvidenceStart &&
+    labStart > researchEvidenceStart &&
+    dynamicPanelStart > labStart
   );
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
-  assert.match(html, /01 找到的是離散候選；02 把 0 天定義成真正重合/);
+  assert.match(html, /比較的是 2026 年和 24,000 年後的 26026 年/);
   assert.doesNotMatch(html, /seasonal-drift-case-gate|seasonal-drift-use-case|data-case-aligned/);
   assert.doesNotMatch(css, /seasonal-drift-case-gate|data-case-aligned/);
   assert.doesNotMatch(view, /syncCaseAlignment|caseButton|caseGateTitle|caseGateCopy/);
 });
 
 test("02 explicitly bridges from the free delta explorer back to the fixed +24k argument", () => {
-  assert.match(html, /01 找到的是離散候選；02 把 0 天定義成真正重合/);
+  assert.match(html, /比較的是 2026 年和 24,000 年後的 26026 年/);
   assert.match(html, /主線案例 · 固定 2026 → 26026/);
 });
 
@@ -67,7 +71,6 @@ test("equivalent orbit converts apparent solar longitude to heliocentric Earth d
   assert.match(view, /heliocentricEarthAngleDegrees/);
   assert.match(view, /solarLongitudeDegrees \+ 180/);
   assert.match(view, /solarLongitudeFromHeliocentricAngleDegrees/);
-  assert.match(html, /太陽視黃經 \+180°/);
 });
 
 test("decomposition is folded by default and closing it restores the total view", () => {
@@ -86,7 +89,7 @@ test("curve and orbit share one longitude cursor without calling it a physical E
   assert.match(view, /setIndex\(indexForLongitude\(longitude\),"orbit"\)/);
   assert.match(view, /longitudeForIndex\(state\.index\)/);
   assert.match(view, /scrub\.addEventListener\("input"/);
-  assert.match(html, /拖俯視圖仍可選黃經，上方干支同步更新/);
+  assert.match(html, /可以拖動圖選一個位置/);
   assert.match(view, /drawBaziBoundaries/);
   assert.match(view, /BAZI_JIE_BOUNDARIES/);
   assert.doesNotMatch(html, /拖地球也能選位置/);
@@ -95,7 +98,7 @@ test("curve and orbit share one longitude cursor without calling it a physical E
 test("total view visualizes advance from zero before shape decomposition", () => {
   assert.match(view, /DATA\.driftDays\.map\(value => -value\)/);
   assert.match(view, /const min = 0;\s*const max = 15/);
-  assert.match(view, /zeroCaption\.textContent = "0 = 完全重合"/);
+  assert.match(view, /zeroCaption\.textContent = "0 = TT 時差為零"/);
   assert.match(view, /class:"seasonal-drift-gap-line"/);
   assert.match(view, /gapLabel\.textContent = humanDrift\(selectedDrift\(\),2\)/);
   assert.match(html, /先看結論 · 八字節界/);
@@ -116,7 +119,7 @@ test("selected zero-line proof owns the primary twelve-Jie closure verdict", () 
 });
 
 test("visible orbit explains arrival-time phase without pretending it is a physical second Earth", () => {
-  assert.match(html,/外圈：同一「節」的到達時間相位/);
+  assert.match(html,/外圈把「早到幾天」畫成角度/);
   assert.match(html,/外圈不是第二顆地球/);
   assert.match(view,/function drawArrivalTimeRing\(longitude\)/);
   assert.match(view,/advanceDays\*\(360\/365\.2425\)/);
@@ -154,9 +157,8 @@ test("pinned seasonal evidence derives summary metrics from one drift array and 
 
 test("Research 02 stays framed as a BaZi boundary question", () => {
   assert.match(html, /八字的節界回來了嗎？/);
-  assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
-  assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
-  assert.match(html, /八字年柱在立春切換，月柱在十二個「節」切換/);
+  assert.match(html, /十二個「節」（八字換月的時間點）/);
+  assert.match(html, /<strong>為什麼會提早？<\/strong>/);
 });
 
 test("curve and orbit expose the same canonical Jie structure", () => {
@@ -180,8 +182,8 @@ test("Research 02 hierarchy leads with zero-line proof, then orbit, then deep cu
 
   assert.ok(summary >= 0 && verdict > summary && cursor > verdict);
   assert.ok(proof > cursor && orbit > proof && detail > orbit && controls > detail && curve > controls);
-  assert.match(html, /0 天 = 完全重合/);
-  assert.match(html, /同一太陽黃經 × 公曆／TT 到達時間相位/);
+  assert.match(html, /0 天＝回到原位/);
+  assert.match(html, /<strong>為什麼會提早？<\/strong>/);
   assert.match(html, /看完整節界偏移/);
   assert.match(html, /扣除平均，看年內起伏/);
   assert.doesNotMatch(

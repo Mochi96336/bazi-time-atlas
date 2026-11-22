@@ -1,3 +1,5 @@
+/* Repair C4: legacy page styles live in the `page` cascade layer (order set in tokens.css). */
+@layer page {
 :root {
   color-scheme: light;
   --bg: #f5f4ef;
@@ -152,4 +154,5 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 4.2vw, 58px); line-height: 1; le
   .footer-note { margin: 26px 2px 0; }
   .sources-panel { margin: 16px 2px 0; padding-top: 12px; }
   .source-grid { grid-template-columns: 1fr; gap: 16px; }
+}
 }

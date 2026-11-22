@@ -1,22 +1,19 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-look="lacquer">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="把年、月、日、時干支、節氣與熱帶黃道放進同一個可拖動的多速時間圓盤。">
   <title>BaZi Time Atlas · Kinetic Atlas</title>
+  <link rel="stylesheet" href="./vendor/fonts/noto-sans-tc/noto-sans-tc.css">
+  <link rel="preload" href="./assets/fonts/noto-serif-tc-wheel.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./tokens.css">
   <link rel="stylesheet" href="./site-nav.css">
-  <link rel="stylesheet" href="./kinetic-atlas.css">
-  <link rel="stylesheet" href="./kinetic-boundaries.css">
-  <link rel="stylesheet" href="./discrete-phase.css">
-  <link rel="stylesheet" href="./radial-hierarchy.css">
-  <link rel="stylesheet" href="./scale-emphasis.css">
-  <link rel="stylesheet" href="./classification-overlay.css">
-  <link rel="stylesheet" href="./ux-analysis.css">
-  <link rel="stylesheet" href="./mobile-time.css">
-  <link rel="stylesheet" href="./ganzhi-inspector.css">
-  <link rel="stylesheet" href="./instrument-first.css">
+  <link rel="stylesheet" href="./atlas-wheel.css">
+  <link rel="stylesheet" href="./atlas-chrome.css">
   <link rel="stylesheet" href="./navigation-workspace.css">
+  <link rel="stylesheet" href="./atlas-tools.css" id="time-context-control-style" data-analysis-first-screen="1" data-atlas-solar-time-analysis="1" data-inverse-time-search="1" data-atlas-visible-ten-gods-styles="1" data-analysis-first-screen-polish="1" data-analysis-tools-rail="1" data-desktop-tools-workspace="1" data-selected-instant-editor="1">
+  <link rel="stylesheet" href="./atlas-wheel-finish.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -36,7 +33,7 @@
 
     <section class="atlas-intro">
       <div class="atlas-intro-copy">
-        <div class="eyebrow">One instant · multiple clocks</div>
+        <div class="eyebrow">同一瞬間 · 多個時鐘</div>
         <h1>同一個時間，<br>每一層跑得不一樣。</h1>
         <p class="lede">把時、日、太陽年度座標、月與年依時間尺度由內向外接成一台儀器。越內圈越快、越外圈越慢；節氣與熱帶黃道共用同一個太陽黃經年度座標，不再假裝是兩個獨立時鐘。</p>
       </div>
@@ -52,7 +49,6 @@
         </div>
         <div class="toolbar-group">
           <button id="classification-overlay-button" class="control-button" type="button" aria-pressed="false" aria-controls="classification-overlay-legend" title="並列查看干支五行與黃道四元素／模式；不建立兩套系統的等價關係">分類</button>
-          <button id="play-button" class="control-button primary" type="button" aria-pressed="false">播放</button>
         </div>
       </div>
 
@@ -66,12 +62,12 @@
 
       <aside id="classification-overlay-legend" class="classification-overlay-legend" hidden aria-label="分類對照圖例">
         <div class="classification-row">
-          <header><span>干支五行</span><small>底色＝天干 · 邊線＝地支</small></header>
+          <header><span>干支五行</span><small>字色＝天干 · 框線＝地支</small></header>
           <div class="classification-keys" data-five-elements aria-hidden="true"></div>
           <strong id="classification-bazi-current" class="classification-current">—</strong>
         </div>
         <div class="classification-row">
-          <header><span>黃道分類</span><small>底色＝四元素 · 邊線＝模式</small></header>
+          <header><span>黃道分類</span><small>字色＝四元素 · 框線＝模式</small></header>
           <div class="classification-keys" data-zodiac-elements aria-hidden="true"></div>
           <div class="classification-keys" data-zodiac-modalities aria-hidden="true"></div>
           <strong id="classification-zodiac-current" class="classification-current">—</strong>
@@ -107,7 +103,7 @@
       </div>
 
       <canvas id="material-wheel-layer" class="material-wheel-layer" aria-hidden="true"></canvas>
-      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" aria-label="由內向外依時間尺度排列的時、日、太陽年度座標、月、年扇形時間圓盤">
+      <svg id="kinetic-wheel" viewBox="0 0 1200 760" role="img" tabindex="0" aria-describedby="atlas-keyboard-help" aria-label="由內向外依時間尺度排列的時、日、太陽年度座標、月、年扇形時間圓盤">
         <defs aria-hidden="true">
           <linearGradient id="m2-hour-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
           <linearGradient id="m2-day-surface" class="m2-ring-gradient m2-resting-gradient" gradientUnits="userSpaceOnUse" x1="240" y1="360" x2="1080" y2="1180"><stop offset="0" class="m2-light"></stop><stop offset=".48" class="m2-mid"></stop><stop offset="1" class="m2-dark"></stop></linearGradient>
@@ -178,11 +174,16 @@
         <g id="cursor-layer"></g>
       </svg>
 
+      <div id="atlas-drag-hint" class="atlas-drag-hint" hidden>拖曳任一圈，移動時間</div>
+      <p id="atlas-keyboard-help" class="visually-hidden">鍵盤：左右鍵前後移動一個時辰，加 Shift 移動一天，Home 回到現在。</p>
+      <p id="atlas-pillars-live" class="visually-hidden" aria-live="polite" aria-atomic="true"></p>
       <div class="instrument-readout" aria-live="polite">
-        <div class="readout-kicker">Selected instant</div>
+        <div class="readout-kicker">選定時間</div>
         <div class="selected-instant-line">
           <div id="instant-readout">—</div>
           <button id="now-button" class="readout-now" type="button" aria-label="將選定時間回到現在" title="回到現在">現在</button>
+          <!-- Play is retired from the reading UI; the hidden control remains only as a harness hook for animation diagnostics. -->
+          <button id="play-button" type="button" aria-pressed="false" hidden tabindex="-1">播放</button>
         </div>
         <div class="readout-meta">
           <span>太陽黃經 <strong id="solar-readout">—</strong></span>
@@ -225,16 +226,16 @@
     </section>
 
     <section class="state-strip" aria-label="目前狀態摘要">
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="year" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Year pillar</span><strong id="state-year">—</strong><small>立春切換</small></button>
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="month" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Month pillar</span><strong id="state-month">—</strong><small>十二節切換</small></button>
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="day" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Day pillar</span><strong id="state-day">—</strong><small>60 日序列</small></button>
-      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="hour" aria-controls="ganzhi-inspector" aria-expanded="false"><span>Hour pillar</span><strong id="state-hour">—</strong><small>2 小時一格</small></button>
-      <div class="state-cell"><span>Solar / Zodiac</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="year" aria-controls="ganzhi-inspector" aria-expanded="false"><span>年柱</span><strong id="state-year">—</strong><small>立春切換</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="month" aria-controls="ganzhi-inspector" aria-expanded="false"><span>月柱</span><strong id="state-month">—</strong><small>十二節切換</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="day" aria-controls="ganzhi-inspector" aria-expanded="false"><span>日柱</span><strong id="state-day">—</strong><small>60 日序列</small></button>
+      <button type="button" class="state-cell state-cell-reference" data-ganzhi-reference="hour" aria-controls="ganzhi-inspector" aria-expanded="false"><span>時柱</span><strong id="state-hour">—</strong><small>2 小時一格</small></button>
+      <div class="state-cell"><span>節氣／星座</span><strong id="state-zodiac">—</strong><small id="state-term">—</small></div>
     </section>
 
     <aside id="ganzhi-inspector" class="ganzhi-inspector" hidden role="dialog" aria-modal="false" aria-labelledby="ganzhi-inspector-title" data-open="false" data-ready="false">
       <header class="ganzhi-inspector-head">
-        <span>六十甲子 reference</span>
+        <span>六十甲子對照</span>
         <button id="ganzhi-inspector-close" class="ganzhi-inspector-close" type="button" aria-label="關閉六十甲子參考">關閉</button>
       </header>
       <div class="ganzhi-inspector-identity">
@@ -259,12 +260,12 @@
 
     <section class="atlas-notes">
       <div>
-        <div class="eyebrow">How to read it</div>
+        <div class="eyebrow">怎麼讀</div>
         <h2>半徑就是尺度：越外圈，時間越大。</h2>
         <p>時柱 60 格約五天一圈，日柱 60 格是六十天；中間的年度座標以太陽黃經連續走完一年，內列標 24 節氣、外列標 12 個熱帶黃道區段。再往外是約五年才走完 60 格的月柱，最外層則是 60 年一圈的年柱。五個時間層仍由同一 Selected Instant 驅動，但不再用歷史實作順序排列。</p>
       </div>
       <div>
-        <div class="eyebrow">Scale focus</div>
+        <div class="eyebrow">觀察尺度</div>
         <ul>
           <li><strong>48 小時</strong>：時柱／日柱前景化，觀察高速離散跳格。</li>
           <li><strong>一年</strong>：年度黃經／月柱前景化，觀察節界如何驅動月柱。</li>
@@ -286,12 +287,14 @@
     <h2 id="detail-title">—</h2>
     <div id="legacy-five-tigers" class="five-tigers-readout"></div>
     <details id="hidden-stems-panel" data-hidden-branch="">
-      <summary>Legacy hidden stems projection</summary>
+      <summary>藏干（舊版投影）</summary>
       <div id="legacy-hidden-list"></div>
     </details>
   </div>
 
+
   <script type="module" src="./src/kinetic-atlas.js"></script>
+  <script type="module" src="./src/atlas-guide.js"></script>
   <script type="module" src="./src/ganzhi-inspector.js"></script>
   <script type="module" src="./src/scale-emphasis-view.js"></script>
   <script type="module" src="./src/classification-overlay-view.js"></script>
@@ -299,5 +302,6 @@
   <script type="module" src="./src/legacy-annual-compat.js"></script>
   <script type="module" src="./src/analysis-mode.js"></script>
   <script type="module" src="./src/mobile-time-control.js"></script>
+  <script type="module" src="./src/wheel-finish.js"></script>
 </body>
 </html>

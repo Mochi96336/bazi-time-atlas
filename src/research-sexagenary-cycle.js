@@ -8,7 +8,11 @@ const svg = typeof document === "undefined" ? null : document.querySelector("#re
 
 export function cycleIndexFromLocalPoint(x, y, cx = 320, cy = 320) {
   if (![x, y, cx, cy].every(Number.isFinite)) throw new RangeError("cycle point coordinates must be finite");
-  const angle = (Math.atan2(y - cy, x - cx) * 180 / Math.PI + 360) % 360;
+  // Same convention as polar() in geometry.js, which draws the wheel:
+  // 0° is straight up (甲子) and angles grow clockwise. atan2 measures from
+  // the +x axis, so add 90°. (The missing +90° used to select 15 positions
+  // away from the sector the reader pressed.)
+  const angle = (Math.atan2(y - cy, x - cx) * 180 / Math.PI + 90 + 360) % 360;
   return wrapCycleIndex(Math.floor((angle + 3) / 6));
 }
 

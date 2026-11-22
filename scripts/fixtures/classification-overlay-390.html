@@ -53,10 +53,15 @@
         const zodiacNodes = [...doc.querySelectorAll("#zodiac-track .zodiac-sector[data-zodiac-index]")];
         const jiaZi = doc.querySelector('#day-track .cycle-sector[data-cycle-index="0"]');
         const aries = doc.querySelector('#zodiac-track .zodiac-sector[data-zodiac-index="0"]');
+        // Review 2026-11-21: resting sectors keep graphite; the lens colours the
+        // glyphs and gives the read-head sector the branch outline.
+        const jiaZiLabel = doc.querySelector('#day-track .cycle-label[data-cycle-label^="甲"]');
+        const activeDay = doc.querySelector('#day-track .cycle-sector.is-active');
+        const ariesLabel = doc.querySelector('#zodiac-track .zodiac-label:not(.active-cycle-label)');
         const gemini = doc.querySelector('#zodiac-track .zodiac-sector[data-zodiac-index="2"]');
         const baziCurrent = doc.querySelector("#classification-bazi-current");
         const zodiacCurrent = doc.querySelector("#classification-zodiac-current");
-        if (!jiaZi || !aries || !gemini || !baziCurrent || !zodiacCurrent) return;
+        if (!jiaZi || !aries || !gemini || !jiaZiLabel || !activeDay || !ariesLabel || !baziCurrent || !zodiacCurrent) return;
 
         const selectedBefore = instrument.dataset.selectedInstantMs;
         probe.dataset.innerWidth = String(win.innerWidth);
@@ -71,9 +76,9 @@
         probe.dataset.ariesModality = aries.dataset.zodiacModality ?? "";
         probe.dataset.geminiElement = gemini.dataset.zodiacElement ?? "";
         probe.dataset.geminiModality = gemini.dataset.zodiacModality ?? "";
-        probe.dataset.jiaZiFillBefore = win.getComputedStyle(jiaZi).fill;
-        probe.dataset.jiaZiStrokeBefore = win.getComputedStyle(jiaZi).stroke;
-        probe.dataset.ariesFillBefore = win.getComputedStyle(aries).fill;
+        probe.dataset.jiaZiFillBefore = win.getComputedStyle(jiaZiLabel).fill;
+        probe.dataset.jiaZiStrokeBefore = win.getComputedStyle(activeDay).stroke;
+        probe.dataset.ariesFillBefore = win.getComputedStyle(ariesLabel).fill;
 
         button.click();
         settle(() => {
@@ -96,9 +101,9 @@
           probe.dataset.onBaziCurrentHidden = String(hidden(win, baziCurrent));
           probe.dataset.onZodiacCurrentHidden = String(hidden(win, zodiacCurrent));
           probe.dataset.selectedOn = instrument.dataset.selectedInstantMs ?? "";
-          probe.dataset.jiaZiFillOn = win.getComputedStyle(jiaZi).fill;
-          probe.dataset.jiaZiStrokeOn = win.getComputedStyle(jiaZi).stroke;
-          probe.dataset.ariesFillOn = win.getComputedStyle(aries).fill;
+          probe.dataset.jiaZiFillOn = win.getComputedStyle(jiaZiLabel).fill;
+          probe.dataset.jiaZiStrokeOn = win.getComputedStyle(activeDay).stroke;
+          probe.dataset.ariesFillOn = win.getComputedStyle(ariesLabel).fill;
           probe.dataset.geminiDashOn = win.getComputedStyle(gemini).strokeDasharray;
           probe.dataset.baziCurrent = baziCurrent.textContent?.trim() ?? "";
           probe.dataset.zodiacCurrent = zodiacCurrent.textContent?.trim() ?? "";

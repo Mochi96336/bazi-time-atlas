@@ -36,9 +36,10 @@ import {
   snappedOffset
 } from "../src/wheel/ring-state.js";
 import { ringAtWorldPoint } from "../src/wheel/ring-drag-controller.js";
+import { cssSource } from "./helpers/css-source.js";
 
-const atlasCss = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const boundaryCss = readFileSync(new URL("../kinetic-boundaries.css", import.meta.url), "utf8");
+const atlasCss = cssSource("kinetic-atlas.css");
+const boundaryCss = cssSource("kinetic-boundaries.css");
 
 test("five primary rings encode temporal scale through radius with balanced presentation thickness", () => {
   assert.equal(assertWheelModel(), true);

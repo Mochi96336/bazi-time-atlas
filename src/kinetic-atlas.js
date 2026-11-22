@@ -43,6 +43,13 @@ import { createFreeCompareController } from "./interaction/free-compare-controll
 import { applyLinkedRingDragInto } from "./interaction/linked-ring-scrub.js";
 import { createKineticPlaybackController } from "./interaction/kinetic-playback-controller.js";
 import {
+  INTRO_SWEEP_DURATION_MS,
+  INTRO_SWEEP_SPAN_MS,
+  INTRO_SWEEP_STORAGE_KEY,
+  introSweepInstant,
+  shouldRunIntroSweep
+} from "./interaction/intro-sweep.js";
+import {
   SELECTED_INSTANT_COMMAND,
   selectedInstantFromCommandDetail
 } from "./interaction/selected-instant-command.js";
@@ -374,6 +381,7 @@ function updateWheel() {
   renderAllRingPoses();
   updateReadout(currentDisplay);
   compareController?.update();
+  schedulePillarAnnouncement();
 }
 
 function setSliderForScale() {
@@ -411,6 +419,7 @@ function setSelectedInstant(instantMs, source = "command") {
   instrument.dataset.lastSelectedInstantSource = source;
   const href = selectedInstantUrl(location.href, instantMs, state.timeContext);
   if (href) history.replaceState(history.state, "", href);
+  setFollowingNow(source === "now" || source === "mobile-now");
   return true;
 }
 
@@ -549,6 +558,40 @@ function installRingDrag() {
   compareController?.update();
 }
 
+// Repair E6: keyboard stepping on the focused wheel. ←/→ move one 時辰 (2 h),
+// Shift+←/→ one day, Home returns to now. Uses the canonical command path.
+const KEY_STEP_MS = Object.freeze({ hour:2 * 3_600_000, day:DAY_MS });
+
+function handleWheelKeydown(event) {
+  if (event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.key === "Home") {
+    event.preventDefault();
+    setSelectedInstant(Date.now(), "now");
+    return;
+  }
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  const direction = event.key === "ArrowRight" ? 1 : -1;
+  const step = event.shiftKey ? KEY_STEP_MS.day : KEY_STEP_MS.hour;
+  setSelectedInstant(state.selectedMs + direction * step, "keyboard");
+}
+
+// Repair E6: announce the four pillars after they settle, not every frame.
+let pillarAnnounceTimer = 0;
+let lastPillarAnnouncement = "";
+function schedulePillarAnnouncement() {
+  const live = document.querySelector("#atlas-pillars-live");
+  if (!live) return;
+  clearTimeout(pillarAnnounceTimer);
+  pillarAnnounceTimer = setTimeout(() => {
+    const read = id => document.querySelector(`#${id}`)?.textContent?.trim() || "—";
+    const text = `年柱${read("state-year")}，月柱${read("state-month")}，日柱${read("state-day")}，時柱${read("state-hour")}`;
+    if (text === lastPillarAnnouncement) return;
+    lastPillarAnnouncement = text;
+    live.textContent = text;
+  }, 700);
+}
+
 function bindControls() {
   scaleButtons.forEach(button => {
     button.addEventListener("click", () => {
@@ -570,6 +613,7 @@ function bindControls() {
   nowButton.addEventListener("click", () => {
     setSelectedInstant(Date.now(), "now");
   });
+  svg.addEventListener("keydown", handleWheelKeydown);
   instantInput.addEventListener("change", () => {
     const instant = instantFromAtlasLocalInput(instantInput.value, state.timeContext);
     if (instant === null || !Number.isFinite(instant)) return;
@@ -586,6 +630,133 @@ function bindControls() {
     if (timeContext === null) return;
     const source = typeof event.detail?.source === "string" ? event.detail.source : "command";
     setTimeContext(timeContext, source);
+  });
+}
+
+// Repair B5: while the Atlas shows "now", the selected instant follows the
+// wall clock once per second. Any other writer (drag, playback, input, deep
+// link, commands) changes selectedMs away from the last followed value, which
+// ends following without each path needing to know about the clock. "現在"
+// re-enters following. Ticks never write the URL.
+const liveClock = { following:false, lastMs:null, timer:0 };
+
+function setFollowingNow(following) {
+  liveClock.following = following;
+  liveClock.lastMs = following ? state.selectedMs : null;
+  instrument.dataset.followingNow = String(following);
+}
+
+function tickLiveClock() {
+  if (!liveClock.following) return;
+  if (instrument.dataset.introSweep === "running") return;
+  if (state.selectedMs !== liveClock.lastMs) { setFollowingNow(false); return; }
+  if (document.visibilityState === "hidden") return;
+  const nowMs = Math.floor(Date.now() / 1000) * 1000;
+  if (nowMs <= state.selectedMs) return;
+  state.selectedMs = nowMs;
+  state.anchorMs = nowMs;
+  liveClock.lastMs = nowMs;
+  setSliderForScale();
+  updateWheel();
+}
+
+function installLiveClock() {
+  // Embedded pages (iframes, browser harnesses) keep a frozen instant.
+  const embedded = window.self !== window.top;
+  const plainNow = !embedded && !Number.isFinite(parseAtlasSearch(location.search).instantMs) && !state.legacyProjection;
+  setFollowingNow(plainNow);
+  clearInterval(liveClock.timer);
+  liveClock.timer = setInterval(tickLiveClock, 1000);
+}
+
+function readIntroSeen() {
+  try { return localStorage.getItem(INTRO_SWEEP_STORAGE_KEY) === "1"; } catch { return false; }
+}
+
+function markIntroSeen() {
+  try { localStorage.setItem(INTRO_SWEEP_STORAGE_KEY, "1"); } catch { /* storage unavailable */ }
+}
+
+// Repair B1: one-time opening time-lapse; never writes the URL and ends on the
+// exact landing instant. Any pointer, key or wheel input skips to the end.
+// It also yields to any other writer.
+function runTimeSweep({ statusKey, spanMs, durationMs, onSettled = () => {} }) {
+  const endMs = state.selectedMs;
+  let startTime = null;
+  let frame = 0;
+  let lastWritten = null;
+  const detach = () => {
+    cancelAnimationFrame(frame);
+    removeEventListener("pointerdown", finish, true);
+    removeEventListener("keydown", finish, true);
+    removeEventListener("wheel", finish, true);
+  };
+  // Another writer (Play, Now, a command, a drag) took over: stop animating and
+  // leave its instant in place.
+  const yieldToOtherWriter = () => {
+    detach();
+    instrument.dataset[statusKey] = "done";
+    onSettled();
+  };
+  function finish() {
+    detach();
+    if (instrument.dataset[statusKey] !== "running") return;
+    state.selectedMs = endMs;
+    updateWheel();
+    instrument.dataset[statusKey] = "done";
+    onSettled();
+  }
+  addEventListener("pointerdown", finish, true);
+  addEventListener("keydown", finish, true);
+  addEventListener("wheel", finish, { capture:true, passive:true });
+  instrument.dataset[statusKey] = "running";
+  // Elapsed time accumulates per painted frame with a 120 ms cap, so a long
+  // first-load task (shader compile, font load) pauses the sweep instead of
+  // skipping most of it. Slow devices still finish: wall-clock time past
+  // 8 s ends the sweep.
+  let elapsed = 0;
+  let firstFrame = null;
+  const step = () => {
+    if (instrument.dataset[statusKey] !== "running") return;
+    if (state.selectedMs !== lastWritten) { yieldToOtherWriter(); return; }
+    const now = performance.now();
+    if (firstFrame === null) firstFrame = now;
+    if (startTime !== null) elapsed += Math.min(120, Math.max(0, now - startTime));
+    startTime = now;
+    if (now - firstFrame > 8000) { finish(); return; }
+    const { instantMs, done } = introSweepInstant({ endMs, elapsedMs:elapsed, spanMs, durationMs });
+    if (done) { finish(); return; }
+    state.selectedMs = instantMs;
+    lastWritten = instantMs;
+    updateWheel();
+    frame = requestAnimationFrame(step);
+  };
+  state.selectedMs = introSweepInstant({ endMs, elapsedMs:0, spanMs, durationMs }).instantMs;
+  lastWritten = state.selectedMs;
+  updateWheel();
+  frame = requestAnimationFrame(step);
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+function runIntroSweep() {
+  if (!shouldRunIntroSweep({
+    search:location.search,
+    reducedMotion:prefersReducedMotion(),
+    seen:readIntroSeen(),
+    hidden:document.visibilityState === "hidden",
+    embedded:window.self !== window.top
+  })) {
+    instrument.dataset.introSweep = "skipped";
+    return;
+  }
+  runTimeSweep({
+    statusKey:"introSweep",
+    spanMs:INTRO_SWEEP_SPAN_MS,
+    durationMs:INTRO_SWEEP_DURATION_MS,
+    onSettled:markIntroSeen
   });
 }
 
@@ -607,6 +778,8 @@ function initialize() {
     wheelOuterRadius:RADII.outer,
     getSourceAngularVelocityDegPerSec:() => yearOrbitalVelocity.current()
   });
+  installLiveClock();
+  runIntroSweep();
 }
 
 initialize();

@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
-const legendCss = readFileSync(new URL("../mobile-legend.css", import.meta.url), "utf8");
+const analysisCss = cssSource("ux-analysis.css");
+const legendCss = cssSource("mobile-legend.css");
 const navigationCss = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 

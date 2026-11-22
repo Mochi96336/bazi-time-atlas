@@ -12,6 +12,7 @@ import {
   orbitalViewportGeometry,
   stepOrbitalVelocityDegPerSec
 } from "../src/orbital-background.js";
+import { cssSource } from "./helpers/css-source.js";
 
 test("orbital target idles below the quiet threshold and preserves fling direction", () => {
   assert.equal(orbitalTargetVelocityDegPerSec(0), 0.42);
@@ -84,7 +85,7 @@ test("B1.2 kinetic energy makes a hard fling substantially thicker and brighter"
 
 test("B1 stays decorative and consumes only rendered year-ring velocity", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-  const css = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
+  const css = cssSource("kinetic-atlas.css");
   const drag = readFileSync(new URL("../src/wheel/ring-drag-controller.js", import.meta.url), "utf8");
   const atlas = readFileSync(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8");
 

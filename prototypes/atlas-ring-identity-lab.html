@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ring Identity Lab</title>
+  <style>
+    :root { color-scheme:dark; }
+    html, body { margin:0; background:#090b10; color:#e8ecea;
+      font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif; }
+    .lab-bar { display:flex; gap:12px; align-items:center; padding:10px 16px; font-size:13px; }
+    .lab-bar strong { font-size:14px; }
+    .lab-bar a { color:#cfd6d3; min-height:44px; display:inline-flex; align-items:center; padding:0 10px;
+      border:1px solid rgba(255,255,255,.12); border-radius:22px; text-decoration:none; }
+    .lab-bar a[aria-current="true"] { border-color:#e4d9ad; color:#efe1b7; }
+    .lab-bar p { margin:0 0 0 auto; color:#8f9997; }
+    iframe { display:block; border:0; margin:0 auto; }
+  </style>
+</head>
+<body>
+  <!-- Repair B7 prototype only: compares ring identity color treatments on the
+       real Atlas without touching production CSS. Not linked from navigation. -->
+  <nav class="lab-bar" aria-label="方案">
+    <strong>環的識別色</strong>
+    <a data-variant="a" href="?variant=a">A 現況石墨</a>
+    <a data-variant="b" href="?variant=b">B 每環低彩度色相</a>
+    <a data-variant="c" href="?variant=c">C 石墨＋彩色標籤</a>
+    <p>同一瞬間 2026-09-14 07:43:42 · 只比較顏色，不改幾何</p>
+  </nav>
+  <iframe id="stage" title="Atlas ring identity variant"></iframe>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const variant = params.get("variant") ?? "a";
+    const width = Number(params.get("w") ?? 1440);
+    const height = Number(params.get("h") ?? 900);
+    const stage = document.querySelector("#stage");
+    stage.style.width = width + "px";
+    stage.style.height = height + "px";
+    for (const link of document.querySelectorAll("[data-variant]")) {
+      const url = new URL(link.href);
+      url.searchParams.set("w", width);
+      url.searchParams.set("h", height);
+      link.href = url.href;
+      if (link.dataset.variant === variant) link.setAttribute("aria-current", "true");
+    }
+
+    const VARIANTS = {
+      a: "",
+      // B: each ring keeps graphite material but its veil carries a distinct,
+      // low-chroma cool hue; warm amber stays reserved for the Solar band.
+      b: `
+        #kinetic-instrument { --hour:#6f86a8; --day:#5f958c; --month:#8f84b0; --year:#a4afc2; }
+        #kinetic-instrument:not([data-classification-overlay="on"]) #hour-track .hour-sector { fill: color-mix(in srgb, var(--hour) 22%, transparent); }
+        #kinetic-instrument:not([data-classification-overlay="on"]) #day-track .day-sector { fill: color-mix(in srgb, var(--day) 22%, transparent); }
+        #kinetic-instrument:not([data-classification-overlay="on"]) #month-track .month-sector { fill: color-mix(in srgb, var(--month) 20%, transparent); }
+        #kinetic-instrument:not([data-classification-overlay="on"]) #year-track .year-sector { fill: color-mix(in srgb, var(--year) 18%, transparent); }
+      `,
+      // C: surfaces unchanged; identity is carried by tinted resting labels and
+      // ring-name labels only.
+      c: `
+        #hour-track .cycle-label:not(.active-cycle-label) { fill:#9fb3d1 !important; }
+        #day-track .cycle-label:not(.active-cycle-label) { fill:#93c2b9 !important; }
+        #month-track .cycle-label:not(.active-cycle-label) { fill:#bdb3dc !important; }
+        #year-track .cycle-label:not(.active-cycle-label) { fill:#c9d2e2 !important; }
+      `
+    };
+
+    const target = new URL("../", location.href);
+    target.search = "?instant=2026-09-13T23%3A43%3A42.000Z";
+    stage.src = target.href;
+    stage.addEventListener("load", () => {
+      const style = stage.contentDocument.createElement("style");
+      style.dataset.labVariant = variant;
+      style.textContent = VARIANTS[variant] ?? "";
+      stage.contentDocument.head.append(style);
+    });
+  </script>
+</body>
+</html>

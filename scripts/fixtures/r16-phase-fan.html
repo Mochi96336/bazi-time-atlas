@@ -110,6 +110,8 @@ function examine(){
  const clearance=6;
  const overlaps=(a,b)=>{
   const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+  // text the phone layout does not render cannot collide
+  if((A.width===0&&A.height===0)||(B.width===0&&B.height===0))return false;
   return A.left<B.right+clearance&&A.right+clearance>B.left&&
     A.top<B.bottom+clearance&&A.bottom+clearance>B.top;
  };
@@ -123,8 +125,10 @@ function examine(){
  }).join("|");
  probe.dataset.r16LabelNameOverlap=String(activePhaseLabels.some(el=>namesOnFan.some(n=>overlaps(el,n))));
  probe.dataset.r16PhaseLabelOverlap=String(activePhaseLabels.some((el,i)=>activePhaseLabels.slice(0,i).some(other=>overlaps(el,other))));
+ // Labels the phone layout does not render (display:none) cannot be clipped.
  probe.dataset.clipActiveLabels=String(activePhaseLabels.some(el=>{
   const rc=el.getBoundingClientRect(),svg=wheel.getBoundingClientRect();
+  if(rc.width===0&&rc.height===0)return false;
   return rc.left<svg.left-2||rc.right>svg.right+2||rc.top<svg.top-2||rc.bottom>svg.bottom+2;
  }));
  probe.dataset.wheelBox=[box.x,box.y,box.width,box.height].map(x=>Math.round(x)).join(",");
@@ -146,9 +150,10 @@ async function runR16ReflowProof(checkSeamTopology){
  const stage=s=>{probe.dataset.r16ReflowStage=s;};
  stage("initial");
  const win=frame.contentWindow,doc=frame.contentDocument;
- const details=doc.querySelector("#discrete-phase-fan-details");
+ const panel=doc.querySelector("#discrete-phase-fan-details");
  const wheel=doc.querySelector("#recurrence-wheel");
- if(!polish||!details?.open)throw Error("original fan accordion not open");
+ if(!polish||panel?.tagName!=="SECTION"||!panel.getClientRects().length)
+  throw Error("primary phase fan must be directly visible without disclosure");
  const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  const labels=()=>[...wheel.querySelectorAll('.return-marker-label:not([data-phase-closed="true"])')];
  const checkSpacing=()=>{
@@ -156,6 +161,7 @@ async function runR16ReflowProof(checkSeamTopology){
   const dynamic=labels();
   const collide=(a,b)=>{
    const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+   if((A.width===0&&A.height===0)||(B.width===0&&B.height===0))return false;
    return A.left<B.right+6&&A.right+6>B.left&&A.top<B.bottom+6&&A.bottom+6>B.top;
   };
   return !dynamic.some((label,i)=>
@@ -176,16 +182,12 @@ async function runR16ReflowProof(checkSeamTopology){
   (el.dataset.r16BaseX!==undefined&&el.getAttribute("x")!==el.dataset.r16BaseX)||
   Number.parseFloat(win.getComputedStyle(el).fontSize)!==16
  ))throw Error("stale mobile text offset/size survived desktop resize");
- // Emulate the actual accordion being collapsed and reopened after
- // viewport changes; the hidden state must never freeze a text offset.
- stage("collapse");
- details.open=false;
- await sleep(50);
+ // Resize back to the original mobile width without an accordion cycle.
+ // The primary phase fan must remain visible throughout the width change.
+ stage("mobile-width");
  frame.style.width=width+"px";
  await sleep(160);
- stage("reopen");
- details.open=true;
- await sleep(160);
+ if(!panel.getClientRects().length)throw Error("phase fan disappeared on mobile resize");
  if(!checkSpacing()){
   const debug=labels().map(label=>{
    const rect=label.getBoundingClientRect();
@@ -198,8 +200,8 @@ async function runR16ReflowProof(checkSeamTopology){
    ].join(":");
   });
   const instrumentRect=doc.querySelector("#recurrence-instrument").getBoundingClientRect();
-  throw Error("reopened mobile fan has overlapping labels; width="+win.innerWidth+
-   " open="+details.open+" box="+Math.round(instrumentRect.width)+"x"+
+  throw Error("mobile phase fan has overlapping labels after resize; width="+win.innerWidth+
+   " visible="+Boolean(panel.getClientRects().length)+" box="+Math.round(instrumentRect.width)+"x"+
    Math.round(instrumentRect.height)+" phase="+debug.join("|"));
  }
  // Changing the year count must redraw from canonical phase positions.

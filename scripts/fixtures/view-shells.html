@@ -108,6 +108,20 @@
       }
 
       const [recurrenceWin, recurrenceDoc] = docs["recurrence-mobile"];
+      // Research redesign R2: the year strip is a 01 tool behind the
+      // default-closed "try it" disclosure; audit its owners with it open.
+      const discreteTools = recurrenceDoc.getElementById("research-discrete-tools");
+      if (!("recurrenceDiscreteToolsOpenInLab" in probe.dataset)) probe.dataset.recurrenceDiscreteToolsOpenInLab = String(Boolean(discreteTools && discreteTools.tagName === "DIV" && discreteTools.closest("#research-lab")));
+      if (discreteTools) discreteTools.open = true;
+      // Review 2026-11-21 (fan everywhere): the reading fans are #research-cycle-fan
+      // (01) and #research-lab-fan; the original fan and its tools sit in the
+      // closed "研究者工具" disclosure. Record that, then open it to audit the tools.
+      const labTools = recurrenceDoc.getElementById("research-lab-tools");
+      const readingFans = ["#research-cycle-fan", "#research-lab-fan"].map(selector => recurrenceDoc.querySelector(selector));
+      if (!("recurrenceReadingFansVisible" in probe.dataset)) probe.dataset.recurrenceReadingFansVisible = String(readingFans.every(fan => fan && !fan.closest("details") && fan.querySelector(".cycle-fan-svg")?.getBoundingClientRect().height > 200));
+      if (!("recurrenceLabToolsClosed" in probe.dataset)) probe.dataset.recurrenceLabToolsClosed = String(Boolean(labTools && labTools.tagName === "DETAILS" && !labTools.open));
+      if (labTools) labTools.open = true;
+      recurrenceDoc.documentElement.getBoundingClientRect();
       const recurrenceInstrument = recurrenceDoc.querySelector("#recurrence-instrument");
       const recurrenceComparison = recurrenceDoc.querySelector("#research-cycle-comparison");
       const recurrenceYearCard = recurrenceDoc.querySelector(".research-cycles-card");
@@ -133,9 +147,9 @@
       const recurrenceQuestion = recurrenceDoc.querySelector(".recurrence-intro h1");
       const recurrenceLede = recurrenceDoc.querySelector(".recurrence-intro .lede");
       const recurrenceAlignmentRows = [...recurrenceDoc.querySelectorAll(".research-alignment-row")];
-      const recurrenceNext = recurrenceDoc.querySelector(".research-question-next");
+      const recurrenceNext = recurrenceDoc.querySelector("#research-overview-caption");
       const recurrenceScope = recurrenceDoc.querySelector(".scope-note");
-      const phaseFanDetails = recurrenceDoc.querySelector("#discrete-phase-fan-details");
+      const phaseFanPanel = recurrenceDoc.querySelector("#discrete-phase-fan-details");
       const sexagenaryDetails = recurrenceDoc.querySelector("#discrete-sexagenary-details");
       const astronomyTransition = recurrenceDoc.querySelector(".discrete-to-astronomy");
       const astronomyTaskHead = recurrenceDoc.querySelector("#research-astronomy > .research-task-head");
@@ -168,7 +182,7 @@
       if (baseEditor)baseEditor.open=true;
       const deltaDockRect = deltaDock?.getBoundingClientRect();
       const outlineRect = recurrenceOutline?.getBoundingClientRect();
-      const phaseFanDetailsRect = phaseFanDetails?.getBoundingClientRect();
+      const phaseFanPanelRect = phaseFanPanel?.getBoundingClientRect();
       const sexagenaryDetailsRect = sexagenaryDetails?.getBoundingClientRect();
       const astronomyTransitionRect = astronomyTransition?.getBoundingClientRect();
       const astronomyTaskHeadRect = astronomyTaskHead?.getBoundingClientRect();
@@ -186,7 +200,9 @@
       const baseEditorSummaryRect = baseEditorSummary?.getBoundingClientRect();
       const baseDateInputRect = baseDateInput?.getBoundingClientRect();
       const modelBoundarySummaryRect = modelBoundarySummary?.getBoundingClientRect();
-      const derivationRect = derivation?.getBoundingClientRect();
+      // Research redesign R2: the Δ derivation can sit inside 01's closed
+      // "try it" disclosure; then the disclosure is what the reader sees.
+      const derivationRect = (derivation?.closest("details:not([open])") ?? derivation)?.getBoundingClientRect();
       const zeroDeltaStepRect = zeroDeltaStep?.getBoundingClientRect();
       if (baseEditor)baseEditor.open=false;
       if (compactControls)compactControls.open=false;
@@ -208,14 +224,23 @@
       probe.dataset.recurrenceOutlineTop = String(Math.round(outlineRect?.top ?? -1));
       probe.dataset.recurrenceOutlineBottom = String(Math.round(outlineRect?.bottom ?? -1));
       probe.dataset.recurrenceOutlineHeight = String(Math.round(outlineRect?.height ?? -1));
-      probe.dataset.recurrencePhaseFanDetailsOpen = String(Boolean(phaseFanDetails?.open));
-      probe.dataset.recurrencePhaseFanDetailsTop = String(Math.round(phaseFanDetailsRect?.top ?? -1));
-      probe.dataset.recurrencePhaseFanDetailsHeight = String(Math.round(phaseFanDetailsRect?.height ?? -1));
+      probe.dataset.recurrencePhaseFanPrimaryVisible = String(Boolean(
+        phaseFanPanel?.tagName === "SECTION" &&
+        phaseFanPanel.dataset.researchPrimaryFigure === "discrete-phase-fan" &&
+        !phaseFanPanel.querySelector("summary") &&
+        recurrenceInstrument && phaseFanPanel.contains(recurrenceInstrument) &&
+        recurrenceInstrument.checkVisibility()
+      ));
+      probe.dataset.recurrencePhaseFanPanelTop = String(Math.round(phaseFanPanelRect?.top ?? -1));
+      probe.dataset.recurrencePhaseFanPanelHeight = String(Math.round(phaseFanPanelRect?.height ?? -1));
+      probe.dataset.recurrencePhaseFanPanelWidth = String(Math.round(phaseFanPanelRect?.width ?? -1));
       probe.dataset.recurrenceSexagenaryDetailsOpen = String(Boolean(sexagenaryDetails?.open));
       probe.dataset.recurrenceSexagenaryDetailsHeight = String(Math.round(sexagenaryDetailsRect?.height ?? -1));
+      const labFanRect = recurrenceDoc.querySelector("#research-lab-fan")?.getBoundingClientRect();
+      const labToolsRect = recurrenceDoc.querySelector("#research-lab-tools")?.getBoundingClientRect();
       probe.dataset.recurrenceSexagenaryAfterDerivation = String(Boolean(
-        derivationRect && sexagenaryDetailsRect &&
-        derivationRect.bottom <= sexagenaryDetailsRect.top
+        labFanRect && sexagenaryDetailsRect && labToolsRect &&
+        labFanRect.bottom <= sexagenaryDetailsRect.top && sexagenaryDetailsRect.bottom <= labToolsRect.top
       ));
       probe.dataset.recurrenceAstronomyTransitionBottom = String(Math.round(astronomyTransitionRect?.bottom ?? -1));
       probe.dataset.recurrenceAstronomyTaskTop = String(Math.round(astronomyTaskHeadRect?.top ?? -1));
@@ -232,10 +257,15 @@
         Boolean(baseRow && targetRow && originalYearStrip?.contains(recurrenceComparison))
       );
       probe.dataset.recurrenceDerivationGrammar = derivationThesis?.dataset.diagramGrammar ?? "missing";
+      // Review 2026-11-21: the page answers first — the one-sentence answer
+      // must start in the first mobile viewport; in the lab the derivation
+      // thesis must still precede the date explorer.
+      const plainConclusionRect = recurrenceDoc.querySelector(".research-question-intro .research-answer")?.getBoundingClientRect();
       probe.dataset.recurrenceDerivationThesisStartsInFirstViewport = String(Boolean(
+        plainConclusionRect &&
+        plainConclusionRect.top >= 0 &&
+        plainConclusionRect.top < viewportHeight &&
         derivationThesisRect &&
-        derivationThesisRect.top >= 0 &&
-        derivationThesisRect.top < viewportHeight &&
         originalStripRect &&
         derivationThesisRect.bottom <= originalStripRect.top
       ));
@@ -247,8 +277,11 @@
         targetRow.checkVisibility() &&
         !originalYearStrip.contains(zeroDeltaStep)
       ));
+      // Research redesign R2: the fan is 01's figure; the Year/Day comparison
+      // rail is a tool after it.
       probe.dataset.recurrenceComparisonBeforeFan = String(Boolean(
-        comparisonRect && recurrenceRect && comparisonRect.bottom <= recurrenceRect.top
+        recurrenceComparison && recurrenceInstrument &&
+        (recurrenceInstrument.compareDocumentPosition(recurrenceComparison) & Node.DOCUMENT_POSITION_FOLLOWING)
       ));
       probe.dataset.recurrenceInstrumentTop = String(Math.round(recurrenceRect?.top ?? -1));
       probe.dataset.recurrenceInstrumentHeight = String(Math.round(recurrenceRect?.height ?? -1));
@@ -292,13 +325,15 @@
       probe.dataset.recurrenceTargetDateInputHeight = String(Math.round(selectedDateInputClosedRect?.height ?? -1));
       probe.dataset.recurrenceModelBoundarySummaryHeight = String(Math.round(modelBoundarySummaryRect?.height ?? -1));
       probe.dataset.recurrenceDeltaControlsAfterInstrument = String(Boolean(
-        phaseFanDetails && recurrenceInstrument && phaseFanDetails.contains(recurrenceInstrument) &&
+        phaseFanPanel && recurrenceInstrument && phaseFanPanel.contains(recurrenceInstrument) &&
         derivation && compactControls && originalYearStrip &&
         derivation.contains(compactControls) &&
         !originalYearStrip.contains(compactControls) &&
         originalYearStrip.contains(selectedDateInput) &&
         controlsClosedOnEntry &&
-        phaseFanDetails.nextElementSibling === derivation
+        // Research redesign R2: Δ controls live in 01's "try it" tools after the fan.
+        Boolean(recurrenceDoc.getElementById("research-discrete-tools")?.contains(derivation)) &&
+        Boolean(phaseFanPanel.compareDocumentPosition(derivation) & Node.DOCUMENT_POSITION_FOLLOWING)
       ));
       probe.dataset.recurrenceDeltaRailOwnsZero = String(Boolean(
         zeroDeltaStep &&

@@ -7,6 +7,7 @@ import {
 const root = document.querySelector("#research-time-state");
 const instrument = document.querySelector("#recurrence-instrument");
 const discreteSection = document.querySelector("#research-discrete");
+const labSection = document.querySelector("#research-lab");
 const astronomySection = document.querySelector("#research-astronomy");
 const evidenceSection = document.querySelector("#research-evidence");
 const seasonalRoot = document.querySelector("#seasonal-drift-evidence");
@@ -168,7 +169,7 @@ if (root) {
     };
     if (contains(evidenceSection)) return "evidence";
     if (contains(astronomySection)) return "astronomy";
-    if (contains(discreteSection)) return "discrete";
+    if (contains(discreteSection) || contains(labSection)) return "discrete";
     return null;
   }
 
@@ -210,7 +211,11 @@ if (root) {
   }
 
   function syncStickyPresentation() {
-    const top = Number.parseFloat(getComputedStyle(root).top) || 0;
+    // Research redesign R2: the card now lives inside 01's "try it" tools and
+    // is not sticky; only a sticky card can be "stuck".
+    const style = getComputedStyle(root);
+    if (style.position !== "sticky") { root.dataset.stuck = "false"; return; }
+    const top = Number.parseFloat(style.top) || 0;
     const rect = root.getBoundingClientRect();
     root.dataset.stuck = String(window.scrollY > 0 && rect.top <= top + 1);
   }

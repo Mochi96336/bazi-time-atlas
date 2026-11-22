@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { recurrenceState } from "../src/recurrence/gregorian-cycle.js";
 import { zeroPhaseRadialRuns } from "../src/recurrence/phase-fan-zero-seam.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const bands=[
   {key:"day",inner:270,outer:360},
@@ -77,8 +78,8 @@ test("nonzero or missing phases are not connected or replaced by a false guide",
 
 test("native seam defaults on in the Draft, and legacy R16 remains a reversible fallback",()=>{
   const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
-  const css=readFileSync(new URL("../recurrence.css",import.meta.url),"utf8");
-  const calibration=readFileSync(new URL("../research-color-calibration.css",import.meta.url),"utf8");
+  const css=cssSource("recurrence.css");
+  const calibration=cssSource("research-color-calibration.css");
   assert.match(view,/get\("r16-seam"\)!=="0"/,
     "the legacy solid datum remains an explicit opt-out");
   assert.match(view,/ZERO_SEAM_ENABLED \? \[\[258,270\],\[560,575\]\] : \[\[258,575\]\]/);

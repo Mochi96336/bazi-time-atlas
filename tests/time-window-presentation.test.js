@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const scaleCss = readFileSync(new URL("../scale-emphasis.css", import.meta.url), "utf8");
-const analysisCss = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
+const scaleCss = cssSource("scale-emphasis.css");
+const analysisCss = cssSource("ux-analysis.css");
 
 test("ordinary observation-window lenses do not grow a duplicate visible heading", () => {
   assert.doesNotMatch(

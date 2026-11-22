@@ -16,6 +16,8 @@ const curveSvg = document.querySelector("#seasonal-drift-curve");
 const boundaryProofSvg = document.querySelector("#seasonal-boundary-proof-svg");
 const orbitSvg = document.querySelector("#seasonal-drift-orbit");
 const scrub = document.querySelector("#seasonal-drift-scrub");
+const boundarySelect = document.querySelector("#seasonal-boundary-select");
+const orbitDetails = document.querySelector("#seasonal-drift-orbit-details");
 const instrument = document.querySelector("#recurrence-instrument");
 const secondaryTools = document.querySelector("#secondary-astronomy-tools");
 const secondaryToolsMeta = document.querySelector("#secondary-astronomy-tools-meta");
@@ -140,7 +142,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
       const label=svgEl("text",{
         x:left-12,y:y+4,"text-anchor":"end",class:"seasonal-proof-axis"
       },boundaryProofSvg);
-      label.textContent=tick===0?"0 = 重合":tick+" d";
+      label.textContent=tick===0?"0 d":tick+" d";
     }
 
     JIE_SUMMARY.rows.forEach((row,index)=>{
@@ -273,7 +275,7 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
         class:"seasonal-drift-zero-caption",
         "text-anchor":"end"
       }, curveSvg);
-      zeroCaption.textContent = "0 = 完全重合";
+      zeroCaption.textContent = "0 = TT 時差為零";
     }
 
     const path = values.map((value,index) =>
@@ -691,6 +693,10 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
   }
 
   function render() {
+    if (boundarySelect) {
+      const longitude = longitudeForIndex(state.index);
+      boundarySelect.value = JIE_BY_LONGITUDE.has(longitude) ? String(longitude) : "";
+    }
     updateReadout();
     drawBoundaryProof();
     drawCurve();
@@ -734,11 +740,35 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
     render();
   });
 
+  if (boundarySelect) {
+    for (const row of JIE_SUMMARY.rows) {
+      const option = document.createElement("option");
+      option.value = String(row.longitudeDegrees);
+      option.textContent = `${row.termName} · ${row.longitudeDegrees}° · 提前 ${Math.abs(row.driftDays).toFixed(1)} 天`;
+      boundarySelect.appendChild(option);
+    }
+    boundarySelect.addEventListener("change", () => {
+      if (boundarySelect.value !== "") activateBoundary(Number(boundarySelect.value),"boundary-select");
+    });
+  }
+
+  // A deep link to the optional orbit still opens it.
+  const revealOrbitHash = () => {
+    if (!orbitDetails || !location.hash) return;
+    const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target && orbitDetails.contains(target)) orbitDetails.open = true;
+  };
+  revealOrbitHash();
+  window.addEventListener("hashchange",revealOrbitHash);
+
   scrub.addEventListener("input", () => setIndex(Number(scrub.value),"keyboard-slider"));
 
   root.addEventListener("keydown", event => {
     if (!["ArrowLeft","ArrowRight"].includes(event.key)) return;
-    if (event.target instanceof HTMLButtonElement) return;
+    if (event.target instanceof HTMLButtonElement ||
+        event.target instanceof HTMLSelectElement ||
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement) return;
     event.preventDefault();
     setIndex(state.index + (event.key === "ArrowRight" ? 1 : -1),"keyboard");
   });

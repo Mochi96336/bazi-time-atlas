@@ -11,7 +11,7 @@ const query=new URLSearchParams(location.search);
 const desktop=query.get("desktop")==="1";
 const requestedWidth=Number(query.get("width"));
 const width=desktop?1440:
-  ([320,390,768].includes(requestedWidth)?requestedWidth:390);
+  ([320,390,480,481,660,768].includes(requestedWidth)?requestedWidth:390);
 const bare=query.get("bare")==="1";
 const boundary=query.get("boundary")==="1";
 const interactive=query.get("interactive")==="1";
@@ -64,6 +64,19 @@ iframe.addEventListener("load",async()=>{
   const phaseFanDetails=d.getElementById("discrete-phase-fan-details");
   check(phaseFanDetails && phaseFanDetails.contains(instrument) && !phaseFanDetails.open,
     "R1 large phase fan must keep the original instrument behind its default-closed verification disclosure");
+  // Research redesign R2: the year strip, its comparison rail and the Δ
+  // controls are 01 tools behind one within-chapter "try it" disclosure
+  // (default closed). Open it to audit the original modules.
+  const tools=d.getElementById("research-discrete-tools");
+  // Review 2026-11-21: the tools are open in the lab after the three steps.
+  check(tools && tools.tagName==="DIV" && tools.closest("#research-lab") && tools.contains(d.getElementById("research-year-strip")),
+    "lab tools must keep the original year strip open inside the lab");
+  tools.open=true;
+  // Review 2026-11-21 (fan everywhere): the original tools sit behind 研究者工具.
+  const labTools=d.getElementById("research-lab-tools");
+  check(labTools&&labTools.tagName==="DETAILS"&&labTools.contains(tools),"original tools must live in the researcher-tools disclosure");
+  labTools.open=true;
+  await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
   const ids=["research-discrete","research-cycle-comparison",
     "research-year-strip","research-astronomy",
     "research-evidence","four-pillar-determinacy"];
@@ -179,8 +192,13 @@ iframe.addEventListener("load",async()=>{
   const globalStep=derivationSteps?.querySelector('[data-milestone="global-discrete"]');
   const localToGlobalBridge=derivationSteps?.querySelector(".discrete-derivation-bridge");
   const milestoneSteps=[...(derivationSteps?.querySelectorAll(".discrete-derivation-step")??[])];
+  const structuralDetails=derivationSteps?.querySelector("#research-structural-milestones");
+  const structuralSteps=[...(structuralDetails?.querySelectorAll(".discrete-derivation-step")??[])];
   check(milestoneSteps.length===6 &&
-    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,400,1200,8000,1980,24000" &&
+    milestoneSteps.map(step=>step.dataset.deltaYears).join(",")==="0,1980,24000,400,1200,8000" &&
+    structuralDetails && !structuralDetails.open &&
+    structuralSteps.map(step=>step.dataset.deltaYears).join(",")==="400,1200,8000" &&
+    structuralDetails.querySelector("summary")?.textContent.includes("補充驗算") &&
     zeroStep && zeroStep.textContent.includes("0 年") &&
     localStep && localStep.dataset.deltaYears==="1980" &&
     localStep.textContent.includes("首次重遇") &&
@@ -217,9 +235,13 @@ iframe.addEventListener("load",async()=>{
     "R11 Other time must be one 44–52px toolbar with duplicate candidates hidden");
   compactControls.open=false;
   check(sexagenaryDetails && derivation && astronomyTransition &&
-    derivation.getBoundingClientRect().bottom<=astronomyTransition.getBoundingClientRect().top &&
-    astronomyTransition.getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top,
-    "R9 60 Ganzhi source must move behind the primary next-step transition");
+    astronomyTransition.getBoundingClientRect().bottom<=derivation.getBoundingClientRect().top &&
+    // Review 2026-11-21: the 60-pair wheel follows the lab's cycle fan and
+    // precedes the researcher tools that hold the derivation.
+    d.getElementById("research-lab-fan").getBoundingClientRect().bottom<=sexagenaryDetails.getBoundingClientRect().top &&
+    sexagenaryDetails.getBoundingClientRect().bottom<=labTools.getBoundingClientRect().top &&
+    sexagenaryDetails.closest("#research-lab"),
+    "R9 60 Ganzhi source must follow the lab cycle fan, before the researcher tools");
     const optionalWheel=d.getElementById("research-sexagenary-cycle");
   check(optionalWheel && (optionalWheel.checkVisibility() ||
     optionalWheel.closest("details")?.querySelector("summary")?.checkVisibility()),

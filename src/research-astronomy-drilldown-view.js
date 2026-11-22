@@ -1,4 +1,5 @@
-const task = document.querySelector("#research-astronomy");
+// Review 2026-11-21: the other-Δ astronomy panel lives in the lab.
+const task = document.querySelector("#research-lab") ?? document.querySelector("#research-astronomy");
 
 function ensureStyles() {
   if (document.querySelector("link[data-research-astronomy-drilldown-styles]")) return;
@@ -54,17 +55,6 @@ function installAstronomyResidualDetail() {
   panel.insertAdjacentElement("afterend", detail);
 }
 
-function installNearRecurrenceDetail() {
-  if (!task || document.querySelector("#near-recurrence-detail")) return;
-  const panel = task.querySelector(".near-search-panel");
-  const body = panel?.querySelector(".near-search-body");
-  if (!panel || !body) return;
-
-  const detail = makeDetails("near-recurrence-detail", "候選分布與排名");
-  detail.appendChild(body);
-  panel.appendChild(detail);
-}
-
 function installMonthBoundaryDetail() {
   if (!task || document.querySelector("#month-boundary-detail")) return true;
   const panel = task.querySelector("#month-boundary-exposure");
@@ -92,7 +82,6 @@ function install() {
   if (!task) return;
   ensureStyles();
   installAstronomyResidualDetail();
-  installNearRecurrenceDetail();
   if (installMonthBoundaryDetail()) return;
 
   const observer = new MutationObserver(() => {

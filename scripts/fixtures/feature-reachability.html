@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feature reachability probe</title>
+  <style>
+    html, body { margin:0; background:#090a0b; }
+    #stage { display:block; width:1440px; height:900px; border:0; }
+    #probe { display:none; }
+  </style>
+</head>
+<body>
+  <iframe id="stage" title="Feature reachability probe"></iframe>
+  <output id="probe" data-ready="false"></output>
+  <script>
+    // Repair A2: every user-facing feature listed in the README must have a
+    // visible, hit-testable entry point. A feature whose entry disappears must
+    // fail this probe even when its unit tests stay green.
+    const frame = document.querySelector("#stage");
+    const probe = document.querySelector("#probe");
+    const viewport = new URLSearchParams(location.search).get("viewport") ?? "desktop";
+    if (viewport === "mobile") {
+      frame.style.width = "390px";
+      frame.style.height = "844px";
+    } else if (viewport !== "desktop") {
+      throw new Error("unknown viewport");
+    }
+    const target = new URL("../../", location.href);
+    target.search = "?instant=2026-09-13T23%3A43%3A42.000Z";
+    frame.src = target.href;
+
+    const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
+    const MIN_TARGET = 44; // Repair B6: 44 CSS px touch target (WCAG 2.5.5 AAA)
+
+    function reachable(doc, win, selector) {
+      const el = doc.querySelector(selector);
+      if (!el) return "missing";
+      const rect = el.getBoundingClientRect();
+      const style = win.getComputedStyle(el);
+      if (rect.width <= 0 || rect.height <= 0 || style.display === "none") return "not-rendered";
+      if (style.visibility === "hidden" || Number(style.opacity) === 0) return "invisible";
+      if (style.pointerEvents === "none") return "no-pointer";
+      if (rect.right < 0 || rect.bottom < 0 || rect.left > win.innerWidth || rect.top > win.innerHeight) return "offscreen";
+      if (rect.width < MIN_TARGET || rect.height < MIN_TARGET) return `too-small-${Math.round(rect.width)}x${Math.round(rect.height)}`;
+      const x = Math.min(win.innerWidth - 1, Math.max(0, rect.left + rect.width / 2));
+      const y = Math.min(win.innerHeight - 1, Math.max(0, rect.top + rect.height / 2));
+      const hit = doc.elementFromPoint(x, y);
+      if (!hit || !(hit === el || el.contains(hit))) return "covered";
+      return "ok";
+    }
+
+    async function run() {
+      const doc = frame.contentDocument;
+      const win = frame.contentWindow;
+      for (let i = 0; i < 80 && !doc.querySelector("#inverse-time-search-button"); i += 1) await wait(100);
+      await wait(400);
+      const mobile = viewport === "mobile";
+      const results = {};
+      const check = (name, selector) => { results[name] = reachable(doc, win, selector); };
+
+      // Ordinary (closed) reading state.
+      check("now", mobile ? "#mobile-now-button" : "#now-button");
+      check("tools", "#analysis-toggle");
+      check("research", ".site-nav a[data-nav-role=\"research\"]");
+
+      // Tools open.
+      doc.querySelector("#analysis-toggle")?.click();
+      await wait(500);
+      check("classification", "#classification-overlay-button");
+      check("solar-time", "#solar-time-tool-button");
+      check("find-time", "#inverse-time-search-button");
+      check("tools-close", "#analysis-close");
+
+      const failures = Object.entries(results).filter(([, value]) => value !== "ok");
+      for (const [name, value] of Object.entries(results)) probe.dataset[`f${name.replace(/-/g, "")}`] = value;
+      probe.dataset.failures = failures.map(([name, value]) => `${name}:${value}`).join(",");
+      probe.dataset.checked = String(Object.keys(results).length);
+      probe.dataset.ready = "true";
+    }
+
+    frame.addEventListener("load", () => {
+      run().catch(error => {
+        probe.dataset.error = String(error?.message ?? error);
+        probe.dataset.ready = "true";
+      });
+    }, { once:true });
+  </script>
+</body>
+</html>

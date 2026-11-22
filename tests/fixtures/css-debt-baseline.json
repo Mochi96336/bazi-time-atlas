@@ -1,0 +1,62 @@
+{
+  "atlas-chrome.css": {
+    "important": 10,
+    "hexColors": 46,
+    "smallFonts": 37
+  },
+  "atlas-tools.css": {
+    "important": 17,
+    "hexColors": 72,
+    "smallFonts": 91
+  },
+  "atlas-wheel.css": {
+    "important": 10,
+    "hexColors": 95,
+    "smallFonts": 54
+  },
+  "birth-panels.css": {
+    "important": 0,
+    "hexColors": 50,
+    "smallFonts": 96
+  },
+  "birth.css": {
+    "important": 0,
+    "hexColors": 49,
+    "smallFonts": 72
+  },
+  "legacy-dark.css": {
+    "important": 0,
+    "hexColors": 64,
+    "smallFonts": 5
+  },
+  "navigation-workspace.css": {
+    "important": 54,
+    "hexColors": 17,
+    "smallFonts": 7
+  },
+  "research-layout.css": {
+    "important": 43,
+    "hexColors": 240,
+    "smallFonts": 0
+  },
+  "research-sections.css": {
+    "important": 16,
+    "hexColors": 396,
+    "smallFonts": 0
+  },
+  "site-nav.css": {
+    "important": 0,
+    "hexColors": 3,
+    "smallFonts": 6
+  },
+  "styles.css": {
+    "important": 11,
+    "hexColors": 37,
+    "smallFonts": 21
+  },
+  "tokens.css": {
+    "important": 0,
+    "hexColors": 10,
+    "smallFonts": 0
+  }
+}

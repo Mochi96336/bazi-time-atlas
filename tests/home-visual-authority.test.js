@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const atlas = readFileSync(new URL("../kinetic-atlas.css", import.meta.url), "utf8");
-const analysis = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
-const tools = readFileSync(new URL("../desktop-tools-workspace.css", import.meta.url), "utf8");
-const inverse = readFileSync(new URL("../inverse-time-search.css", import.meta.url), "utf8");
-const mobile = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
-const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const atlas = cssSource("kinetic-atlas.css");
+const analysis = cssSource("ux-analysis.css");
+const tools = cssSource("desktop-tools-workspace.css");
+const inverse = cssSource("inverse-time-search.css");
+const mobile = cssSource("mobile-time.css");
+const classification = cssSource("classification-overlay.css");
 
 test("Home Art H0 gives page and edge surfaces one reference-field authority", () => {
   assert.match(atlas, /--field:\s*#0a0d13;/);
@@ -21,7 +22,7 @@ test("Home Art H0 gives page and edge surfaces one reference-field authority", (
   }
   assert.doesNotMatch(mobile, /#111512/);
   assert.match(mobile, /#mobile-instant-input[\s\S]*?border-bottom:\s*1px solid var\(--hairline\);[\s\S]*?background:\s*transparent;/);
-  assert.match(classification, /background:\s*color-mix\(in srgb, var\(--field\) 84%, transparent\);/);
+  assert.match(classification, /color-mix\(in srgb, var\(--field\) 96%, transparent\)/);
 });
 
 test("fixed identities have a readability authority distinct from ring material bodies", () => {
@@ -33,6 +34,6 @@ test("fixed identities have a readability authority distinct from ring material 
 
 test("Classification owns Zodiac outline structure independently from resting material color", () => {
   assert.match(classification, /--classification-zodiac-outline:\s*#8f999d;/);
-  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector \{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
+  assert.match(classification, /data-classification-overlay="on"\] \.zodiac-sector\[data-zodiac-element\]\.is-active \{[\s\S]*?stroke:\s*var\(--classification-zodiac-outline\);/);
   assert.doesNotMatch(classification, /data-classification-overlay="on"\] \.zodiac-sector \{[\s\S]*?stroke:[^;]*var\(--zodiac\)/);
 });

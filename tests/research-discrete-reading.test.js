@@ -6,6 +6,7 @@ import {
   findFirstLocalYearSequenceDayRecurrence
 } from "../src/recurrence/gregorian-cycle.js";
 import { explainDiscreteResult } from "../src/recurrence/discrete-reading.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const base={year:2026,month:9,day:13};
 const local=findFirstLocalYearSequenceDayRecurrence(base)?.deltaYears;
@@ -46,31 +47,31 @@ test("invalid leap-date comparison never infers a day-phase recurrence",()=>{
   assert.match(copy,/日序無法比較/);
 });
 
-test("existing Research reading path uses concrete examples without adding new cards",()=>{
+test("Research 01 has concise proof guidance and optional intermediate checks instead of duplicate prose",()=>{
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
   assert.match(html,/每圈的 0 只代表該循環序位回到起點/);
-  assert.match(html,/正負數是相對起點的最短位移，不是節氣提前或延後的天數/);
-  assert.match(html,/依序點上方 \+400、\+8,000、\+24,000 年的里程碑/);
-  assert.match(html,/三圈都為 0，也還要繼續 02 驗證節界/);
-  const css=readFileSync(new URL("../research-discrete-density.css",import.meta.url),"utf8");
-  assert.match(css,/#research-discrete \.research-discrete-thesis\[data-diagram-grammar="condition-ladder"\] > header p,[\s\S]*?#research-discrete \.research-discrete-explorer-intro \{\s*font-size: 12px;/);
+  assert.match(html,/正負數是最短相位差，不是節氣提前天數/);
+  assert.match(html,/真正的<a class="research-term" href="#term-jie">十二節<\/a>到 02 再驗/);
+  // Research redesign R2: one reading line under the fan replaces the
+  // thesis-header and explorer-intro paragraphs.
+  assert.match(html,/<p class="research-figure-howto">怎麼看：外圈公曆 400 年結構、中圈 60 年序、內圈 60 日序。/);
+  assert.doesNotMatch(html,/class="research-discrete-explorer-intro"/);
   assert.doesNotMatch(html,/class="research-reading-card"|id="research-reading-wizard"/);
 });
 
 test("Research 01 prioritizes readable evidence instead of truncating milestone reasoning",()=>{
   const html=readFileSync(new URL("../recurrence.html",import.meta.url),"utf8");
-  const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
-  assert.match(html,/01 先建立離散候選；02 再檢查真正的十二節界/);
-  assert.match(html,/只先算離散候選，不直接等同完整四柱週期/);
-  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:11px;/);
-  assert.match(css,/#research-discrete \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:10px;/);
-  assert.match(css,/\.research-outline small \{\s*font-size:9px;/);
+  const css=cssSource("research-entry.css");
+  assert.match(html,/目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期/);
+  assert.match(css,/#research-lab \.research-discrete-thesis \.discrete-derivation-step > small \{[\s\S]*?white-space:normal;[\s\S]*?text-overflow:clip;[\s\S]*?font-size:12px;/);
+  assert.match(css,/#research-lab \.research-discrete-thesis \.discrete-derivation-phases small \{\s*font-size:12px;/);
+  assert.match(css,/\.research-outline small \{\s*font-size:12px;/);
   assert.doesNotMatch(html,/research-reading-card|research-reading-wizard/);
 });
 
 test("structural year cards show the comparison verdict on mobile, not a hidden tooltip",()=>{
   const view=readFileSync(new URL("../src/recurrence-view.js",import.meta.url),"utf8");
-  const css=readFileSync(new URL("../research-entry.css",import.meta.url),"utf8");
+  const css=cssSource("research-entry.css");
   assert.match(view,/function derivationBrief\(state\)/);
   assert.match(view,/const isStructural = !isLocalYearDay && \[400, 1200, 8000\]\.includes\(deltaYears\)/);
   assert.match(view,/isStructural \? derivationBrief\(state\) : derivationMeaning\(deltaYears, localYears\)/);

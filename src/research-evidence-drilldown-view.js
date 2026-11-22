@@ -79,11 +79,20 @@ function ensureProofSupport() {
   const blocker = panel.querySelector("#proof-chain-first-blocker")?.textContent?.trim();
   const day = panel.querySelector("#proof-chain-day-status")?.textContent?.trim();
   const hour = panel.querySelector("#proof-chain-hour-status")?.textContent?.trim();
-  const meta = day === "已解析" && hour === "已解析"
-    ? "日柱與時柱皆已解析"
-    : blocker && blocker !== "—"
-      ? `第一阻塞 · ${blocker}`
-      : "展開研究約定與證據";
+  // Repair A3: this summary follows the current research Δ, not the fixed
+  // +24,000 conclusion above it, so it must always say which Δ it describes.
+  const deltaYears = Number(panel.dataset.deltaYears);
+  const identity = panel.dataset.identity === "true" || deltaYears === 0;
+  const deltaLabel = Number.isFinite(deltaYears)
+    ? `目前 Δ = ${deltaYears > 0 ? "+" : ""}${deltaYears.toLocaleString("en-US")} 年`
+    : "目前研究時間";
+  const meta = identity
+    ? `${deltaLabel}：同一天，不需證明（+24,000 年的結論見上方）`
+    : day === "已解析" && hour === "已解析"
+      ? `${deltaLabel}：日柱與時柱皆已解析`
+      : blocker && blocker !== "—"
+        ? `${deltaLabel} · 卡在：${blocker}`
+        : "展開研究約定與證據";
   setTextIfChanged(details?.querySelector("#proof-chain-support-meta"), meta);
   return details;
 }

@@ -5,24 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="從六十甲子年日週期出發，檢查節氣偏移與四柱是否能在深時間後重現。">
   <title>八字多久會重複一次？ · BaZi Time Atlas</title>
+  <link rel="stylesheet" href="./vendor/fonts/noto-sans-tc/noto-sans-tc.css">
+  <link rel="stylesheet" href="./tokens.css">
   <link rel="stylesheet" href="./site-nav.css">
-  <link rel="stylesheet" href="./recurrence.css">
-  <link rel="stylesheet" href="./research-foundations.css">
-  <link rel="stylesheet" href="./research-tasks.css">
-  <link rel="stylesheet" href="./research-sexagenary-cycle.css">
-  <link rel="stylesheet" href="./astronomical-residuals.css">
-  <link rel="stylesheet" href="./four-pillar-determinacy.css">
-  <link rel="stylesheet" href="./near-recurrence.css">
-  <link rel="stylesheet" href="./research-cycle-comparison.css">
-  <link rel="stylesheet" href="./research-year-strip-interaction.css">
-  <link rel="stylesheet" href="./research-compact-surface.css">
+  <link rel="stylesheet" href="./research-layout.css">
   <link rel="stylesheet" href="./navigation-workspace.css">
-  <link rel="stylesheet" href="./research-color-calibration.css">
-  <link rel="stylesheet" href="./research-seasonal-drift-evidence.css">
-  <link rel="stylesheet" href="./research-absolute-boundary-consequence.css">
-  <link rel="stylesheet" href="./research-time-state.css">
-  <link rel="stylesheet" href="./research-entry.css">
-  <link rel="stylesheet" href="./research-evidence-reading.css">
+  <link rel="stylesheet" href="./research-sections.css" data-research-evidence-drilldown-styles="1" data-research-astronomy-drilldown-styles="1" data-research-discrete-density-styles="1" data-target-clock-styles="1">
 </head>
 <body>
   <main class="recurrence-shell">
@@ -37,44 +25,43 @@
     <section class="recurrence-intro research-question-intro" aria-labelledby="research-question-title">
       <div class="research-question-copy">
         <h1 id="research-question-title">八字多久會重複一次？</h1>
-        <p class="lede">四柱都落在六十甲子序列上，但不是四個彼此獨立、可以任意錯開的轉盤。</p>
-        <p class="research-question-next"><span>所以先找</span><strong>年柱 × 日柱</strong><span>何時重遇；+24,000 年只先算離散候選，不直接等同完整四柱週期。</span></p>
-        <div class="research-entry" role="group" aria-label="用同一個研究時間比較兩個關鍵里程碑">
-          <p class="research-entry-label">先看差在哪 · 點選里程碑套用下方同一個研究時間</p>
-          <div class="research-entry-choices">
-            <button class="research-entry-choice research-entry-local" type="button" data-research-entry="local" aria-pressed="false" disabled>
-              <span>年序＋日序的第一次重遇</span>
-              <strong id="research-entry-local-years">計算中</strong>
-              <small id="research-entry-local-detail">依基準日期計算</small>
-            </button>
-            <button class="research-entry-choice research-entry-global" type="button" data-research-entry="global" aria-pressed="false">
-              <span>三項離散條件同時歸零</span>
-              <strong>+24,000 年</strong>
-              <small>僅是離散候選 · 02 再驗十二節</small>
-            </button>
+        <p class="lede research-answer">目前找不到<a class="research-term" href="#term-pillars">四柱</a>完整重複的週期。</p>
+        <p class="research-answer-detail">曆法上，24,000 年後年柱、日柱和公曆日期會同時回到起點；但到那時真正的<a class="research-term" href="#term-jie">節氣</a>已經提早 10 到 14 天，日柱和時柱也算不準。</p>
+        <p class="research-glossary-link"><a href="#research-glossary">看不懂名詞？點虛線字，或看頁尾名詞解釋 ↓</a></p>
+      </div>
+      <figure id="research-bazi-primer" class="research-bazi-primer" aria-labelledby="bazi-primer-title">
+        <figcaption><strong id="bazi-primer-title">先認識八字：一個時刻，排成四組干支</strong><span>例：2026 年 9 月 13 日 下午 3 點</span></figcaption>
+        <div class="bazi-primer-grid">
+          <div class="bazi-primer-rows" aria-hidden="true"><span>天干</span><span>地支</span></div>
+          <div class="bazi-primer-pillar" data-pillar="year">
+            <b>年柱</b><strong><i>丙</i><i>午</i></strong>
+            <p>看<a class="research-term" href="#term-lichun">立春</a>：過了立春才換年</p><small>60 年一輪</small>
           </div>
-          <p class="research-entry-selection" id="research-entry-selection">Δ=0 是同一基準，不是週期重遇。</p>
+          <div class="bazi-primer-pillar" data-pillar="month">
+            <b>月柱</b><strong><i>丁</i><i>酉</i></strong>
+            <p>看「節」：白露之後是酉月</p><small>一年 12 個月</small>
+          </div>
+          <div class="bazi-primer-pillar" data-pillar="day">
+            <b>日柱</b><strong><i>庚</i><i>寅</i></strong>
+            <p>每天往下走一格</p><small>60 天一輪</small>
+          </div>
+          <div class="bazi-primer-pillar" data-pillar="hour">
+            <b>時柱</b><strong><i>甲</i><i>申</i></strong>
+            <p>每 2 小時換一格：15–17 點是申時</p><small>一天 12 個時辰</small>
+          </div>
         </div>
-      </div>
-
-      <div class="research-alignment-map research-question-aside" role="group" aria-label="年月與日時在相同節令或時辰下的固定對齊關係">
-        <div class="research-alignment-row" data-alignment="year-month">
-          <strong><span>年柱</span><em>60</em></strong>
-          <span class="research-alignment-bridge research-alignment-season">
-            <i aria-hidden="true"></i><small>同一節令下固定對齊</small>
-          </span>
-          <strong><span>月柱</span><em>60</em></strong>
+        <p class="bazi-primer-sum"><b>4 柱 × 2 字 ＝ 八字。</b>天干有 10 個、地支有 12 個，輪流配成 60 組，年、月、日、時各自一格一格往下走。首頁的轉盤就是這四個輪子。</p>
+        <p class="bazi-primer-question">所以「八字多久重複一次」，問的是：四個輪子什麼時候會一起回到同一組干支？</p>
+      </figure>
+      <figure id="research-overview" class="research-overview" aria-labelledby="research-overview-caption">
+        <div class="research-overview-axis" role="img" aria-label="從現在到 24,000 年後的三個時間點">
+          <div class="research-overview-stop" data-stop="now" style="--x:0%"><strong>現在</strong><small>2026 年</small></div>
+          <div class="research-overview-stop" data-stop="local" style="--x:8.25%"><strong>+1,980 年</strong><small>年柱、日柱一起回來</small></div>
+          <div class="research-overview-stop" data-stop="global" style="--x:100%"><strong>+24,000 年</strong><small>曆法上三個循環全部對上</small><em>但節氣提早 10–14 天，日柱、時柱算不準</em></div>
         </div>
-        <div class="research-alignment-row" data-alignment="day-hour">
-          <strong><span>日柱</span><em>60</em></strong>
-          <span class="research-alignment-bridge">
-            <i aria-hidden="true"></i><small>同一時辰下固定對齊</small>
-          </span>
-          <strong><span>時柱</span><em>60</em></strong>
-        </div>
-      </div>
+        <figcaption id="research-overview-caption">橫線是時間，按比例畫：1,980 年只是 24,000 年的一小段。</figcaption>
+      </figure>
     </section>
-
 
     <!-- R3: retired the parallel ?mode=dates UI. The original Research
          instrument and original interactive Year strip below are the only
@@ -83,299 +70,42 @@
     <!-- Original Research sections restored as first-class, directly visible content.
          Legacy ?mode=dates exploration remains available only for old deep links;
          its replacement timeline is NOT the public Research landing page. -->
-    <nav class="research-outline" aria-label="研究項目">
-      <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>粗略週期</strong><small id="research-spine-discrete">24,000 離散候選</small></a>
-      <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>天文偏移</strong><small id="research-spine-astronomy">TT 提前 10–14 d</small></a>
-      <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>八字後果</strong><small id="research-spine-evidence">24,000 ≠ 完整週期</small></a>
+    <nav class="research-outline research-answer-map" aria-label="研究項目：三步答案">
+      <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>24,000 年</strong><small id="research-spine-discrete">曆法上三個循環全部對上</small></a>
+      <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>差 10–14 天</strong><small id="research-spine-astronomy">但真正的節氣沒有回來</small></a>
+      <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>年月 ✓ 日時 ？</strong><small id="research-spine-evidence">所以 24,000 年不是四柱的週期</small></a>
     </nav>
-
-    <section id="research-time-state" class="research-time-state" data-ready="false" data-owner="discrete" aria-label="目前研究時間與干支">
-      <header class="research-time-state-head">
-        <div>
-          <span id="research-time-kicker">研究時間</span>
-          <strong id="research-time-title">等待研究時間狀態</strong>
-        </div>
-        <small id="research-time-basis">01、02、03 共用同一個時間狀態；能判定的柱才顯示干支。</small>
-      </header>
-      <div class="research-time-state-compare">
-        <article class="research-time-side" data-research-time-side="base">
-          <header><span>基準</span><strong id="research-time-base-coordinate">—</strong></header>
-          <div class="research-time-pillars" aria-label="基準四柱">
-            <div class="research-time-pillar" data-research-time-pillar="year" data-status="unresolved"><span>年</span><strong>—</strong><small>未定</small></div>
-            <div class="research-time-pillar" data-research-time-pillar="month" data-status="unresolved"><span>月</span><strong>—</strong><small>未定</small></div>
-            <div class="research-time-pillar" data-research-time-pillar="day" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
-            <div class="research-time-pillar" data-research-time-pillar="hour" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
-          </div>
-        </article>
-        <article class="research-time-side" data-research-time-side="target">
-          <header><span>比較</span><strong id="research-time-target-coordinate">—</strong></header>
-          <div class="research-time-pillars" aria-label="比較四柱">
-            <div class="research-time-pillar" data-research-time-pillar="year" data-status="unresolved"><span>年</span><strong>—</strong><small>未定</small></div>
-            <div class="research-time-pillar" data-research-time-pillar="month" data-status="unresolved"><span>月</span><strong>—</strong><small>未定</small></div>
-            <div class="research-time-pillar" data-research-time-pillar="day" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
-            <div class="research-time-pillar" data-research-time-pillar="hour" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
-          </div>
-        </article>
-      </div>
-    </section>
 
     <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
       <header class="research-task-head">
         <div class="research-task-index">01</div>
         <div><div class="eyebrow">年序／日序</div><h2 id="research-discrete-title">粗略週期從哪裡來？</h2></div>
       </header>
-      <p class="research-discrete-scope">01 先建立離散候選；02 再檢查真正的十二節界。</p>
+      <p class="research-plain-conclusion" data-plain-conclusion="01">年柱和日柱大約 1,980 年後會一起回到同樣的<a class="research-term" href="#term-ganzhi">干支</a>（確切年數依日期而定）；但要連「季節位置」也一起對上，得等到 24,000 年。這個數字只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>。</p>
 
-      <section id="research-discrete-thesis" class="research-discrete-thesis" data-diagram-grammar="condition-ladder" aria-labelledby="research-discrete-thesis-title">
-        <header>
-          <div><div class="eyebrow">離散推導</div><h3 id="research-discrete-thesis-title">先看局部重遇缺哪一層，再把條件補滿</h3></div>
-          <p>讀法：每圈的 0 只代表該循環序位回到起點；正負數是相對起點的最短位移，不是節氣提前或延後的天數。公曆 400 年結構只是日曆代理，真正的十二節界要到 02 檢查。</p>
-        </header>
-        <div class="research-condition-route" aria-label="局部重遇到 24,000 年離散候選的主閱讀路徑">
-          <strong id="research-discrete-route-local">局部重遇</strong>
-          <i aria-hidden="true">→</i>
-          <span>缺季節位置</span>
-          <i aria-hidden="true">→</i>
-          <strong>+24,000</strong>
+      <figure id="research-cycle-fan" class="research-cycle-fan" data-default-years="1980" aria-labelledby="cycle-fan-title">
+        <figcaption><strong id="cycle-fan-title">三圈什麼時候一起回到起點？</strong><span>從 2026 年 9 月 13 日出發，按下面的年數看看。</span></figcaption>
+        <div class="cycle-fan-choices" role="group" aria-label="選擇經過的年數">
+          <button type="button" data-cycle-milestone="1200" aria-pressed="false"><strong>1,200 年</strong></button>
+          <button type="button" data-cycle-milestone="1980" aria-pressed="false"><strong>1,980 年</strong></button>
+          <button type="button" data-cycle-milestone="8000" aria-pressed="false"><strong>8,000 年</strong></button>
+          <button type="button" data-cycle-milestone="24000" aria-pressed="false"><strong>24,000 年</strong></button>
         </div>
-        <div class="research-solar-origin" aria-label="公曆結構與八字月序共享太陽年來源">
-          <span>公曆 400 年結構 · 01 代理</span>
-          <i>←</i>
-          <strong>共同追蹤：太陽年</strong>
-          <i>→</i>
-          <span>十二節／八字月序 · 02 驗真</span>
-          <small>不是三個獨立週期：01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真。</small>
-        </div>
-        <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
-        <p class="discrete-derivation-rule"><strong>推導關係：</strong>LCM(1,200, 8,000) = 24,000。局部重遇不是拿來找倍數，而是指出「年＋日已回來，還缺季節位置」這個條件差。</p>
-      </section>
+        <div class="cycle-fan-stage"></div>
+        <p id="cycle-fan-sentence" class="cycle-fan-sentence" aria-live="polite">—</p>
+      </figure>
+      <p class="research-figure-howto" data-figure-howto="01">怎麼看：和首頁的圓盤一樣，中間的金色指針不動，三圈在它底下轉。指針下那一格就是經過那麼多年後走到的位置；金框那一格是起點。金框回到指針下，那一圈就「回來了」；紅色弧線是還差多少。每一圈的格子大小不同，單位寫在圖下。公曆圈代表季節位置。</p>
 
-      <p class="research-discrete-explorer-intro"><strong>接著驗算：</strong>依序點上方 +400、+8,000、+24,000 年的里程碑：先看哪一圈是 0、哪一圈還沒回來；需要核對位置時，再展開下方「離散相位扇」。三圈都為 0，也還要繼續 02 驗證節界。</p>
-
-      <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
-        <header class="research-year-head">
-          <strong id="research-year-strip-title">年度時間條</strong>
-          <div class="research-year-actions">
-            <form id="research-target-date-form" class="research-date-picker" aria-label="選擇時間條所顯示的日期">
-              <label for="research-target-date-input">日期</label>
-              <input id="research-target-date-input" type="text" inputmode="numeric" autocomplete="off"
-                value="2026/09/13" placeholder="YYYY/MM/DD" aria-describedby="research-target-date-feedback">
-              <button type="submit" id="research-target-date-apply">前往</button>
-            </form>
-
-          </div>
-          <small id="research-target-date-feedback" class="research-target-date-feedback" role="status" aria-live="polite" hidden></small>
-          <span id="research-controls-base" hidden>2026/09/13</span>
-          <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
-        </header>
-        <div class="research-year-track" role="group" aria-label="原本年度時間條：公曆全年、立春年界及日期拖曳">
-          <div class="research-year-line" aria-hidden="true"></div>
-          <!-- One narrow accent along the EXISTING bar: previous authentic
-               甲子日 → selected Day. No second date owner or graphic. -->
-          <div id="research-year-day-progress" class="research-year-day-progress" aria-hidden="true"></div>
-          <div id="research-year-jiazi-ticks" class="research-year-jiazi-ticks" aria-hidden="true"></div>
-          <div id="research-year-li-chun-band" class="research-year-li-chun-band" hidden aria-hidden="true"></div>
-          <div id="research-year-approx-li-chun" class="research-year-approx-li-chun" hidden aria-hidden="true" title="立春通常在 2 月初，此標記只是概略位置，不是已驗證的節氣時刻"></div>
-          <div class="research-year-marker research-year-start" style="--year-x:0%">
-            <i aria-hidden="true"></i><strong>1/1</strong><small>公曆換年</small>
-          </div>
-          <div id="research-year-li-chun-marker" class="research-year-marker research-year-li-chun" hidden>
-            <i aria-hidden="true"></i><strong id="research-year-li-chun-title">立春 · — → —</strong><small id="research-year-li-chun-label">節氣年界</small>
-          </div>
-          <div id="research-year-base-marker" class="research-year-marker research-year-base" style="--year-x:70%">
-            <i aria-hidden="true"></i><strong id="research-year-base-title">選定日 · —年</strong><small id="research-year-base-label">2026/09/13</small>
-          </div>
-          <div class="research-year-marker research-year-end" style="--year-x:100%">
-            <i aria-hidden="true"></i><strong>12/31</strong><small>公曆年末</small>
-          </div>
-          <!-- This slider is a gesture surface for the EXISTING base+Δ date
-               owner, not another date form, timeline or selected-date model. -->
-          <input id="research-year-scrub" class="research-year-scrub"
-            type="range" min="0" max="364" value="0" step="1"
-            aria-label="沿原本年度時間條選擇日期"
-            aria-describedby="research-year-scrub-hint">
-        </div>
-        <small id="research-year-scrub-hint" class="research-year-scrub-hint">拖動時間條選擇日期，放開後套用至原本的日期控制。</small>
-        <small id="research-year-scrub-feedback" class="research-year-scrub-feedback" role="status" aria-live="polite" hidden></small>
-        <div id="research-year-li-chun-unavailable" class="research-year-li-chun-unavailable" hidden>
-          <strong id="research-year-li-chun-unavailable-title">立春 · — → —</strong>
-          <span id="research-year-li-chun-unavailable-copy">節氣天文 epoch 尚未解析</span>
-        </div>
-        <!-- All three readouts describe THIS original year strip, not a
-             second timeline or independently selected date. -->
-        <div id="research-cycle-comparison" class="research-cycle-inline" data-ready="false" aria-label="基準與比較干支對照">
-          <div class="research-cycle-inline-row" data-side="base">
-            <span class="research-cycle-inline-date">基準 <strong id="research-cycles-base-date">—</strong></span>
-            <span class="research-cycle-inline-year">年 <strong id="research-cycles-year-base">—</strong> <small id="research-cycles-year-base-ordinal">—/60</small></span>
-            <span class="research-cycle-inline-day">日 <strong id="research-cycles-day-base">—</strong> <small id="research-cycles-day-base-ordinal">—/60</small></span>
-          </div>
-          <div class="research-cycle-inline-row" data-side="target">
-            <span class="research-cycle-inline-date"><span id="research-cycles-target-label">比較</span> <strong id="research-cycles-target-date">—</strong></span>
-            <span class="research-cycle-inline-year">年 <strong id="research-cycles-year-target">—</strong> <small id="research-cycles-year-target-ordinal">—/60</small></span>
-            <span class="research-cycle-inline-day">日 <strong id="research-cycles-day-target">—</strong> <small id="research-cycles-day-target-ordinal">—/60</small></span>
-          </div>
-          <span id="research-cycles-closure" class="research-cycle-inline-closure" hidden>—</span>
-          <a class="research-cycle-inline-lookup" href="#discrete-sexagenary-details">六十日轉盤 ↗</a>
-        </div>
-        <div class="research-year-key-data" role="status" aria-live="polite">
-          <p class="research-year-transition-line">
-            <span id="research-year-transition">立春年界待查</span>
-            <small id="research-year-transition-note">—</small>
-          </p>
-          <p class="research-year-selection-line">
-            <span>選定 <strong id="research-year-selected-date">—</strong></span>
-            <span>年 <strong id="research-year-selected-year">—</strong>
-              <small id="research-year-selected-certainty">—</small></span>
-            <span>日 <strong id="research-year-selected-day">—</strong></span>
-          </p>
-          <p class="research-year-full-cycle" id="research-year-full-cycle">—</p>
-        </div>
-        <details class="research-year-same-date-details">
-          <summary>同月同日的比較參考（非全年日數）</summary>
-        <div class="research-year-relations" aria-label="三種一年關係">
-          <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
-          <div><strong>60 年序</strong><span>相隔年數 mod 60 的名義序號；不決定立春前後的年柱</span></div>
-          <div><strong>60 日序</strong><span>看兩日期間實際經過 <b id="research-year-day-count">—</b> 日</span></div>
-        </div>
-        <div class="research-year-continuation" aria-label="選定日到下一年同月同日">
-          <strong id="research-year-base-date">2026/09/13</strong>
-          <span><i aria-hidden="true"></i><em>實際經過 <b id="research-year-elapsed-days">—</b> 日</em></span>
-          <strong id="research-year-next-date">2027/09/13</strong>
-        </div>
-        </details>
-      </section>
-
-      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="三個離散週期相對基準零點的相位比較">
-        <div class="research-fan-graphic">
-          <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 與基準同相位 · 左右為距 0 的最短循環位移</span></div>
-        <div class="recurrence-legend" aria-hidden="true">
-          <div><i class="gregorian-dot"></i><span>公曆結構</span><strong id="gregorian-phase-readout">—</strong></div>
-          <div><i class="year-dot"></i><span>60 年序</span><strong id="year-phase-readout">—</strong></div>
-          <div><i class="day-dot"></i><span>60 日序</span><strong id="day-phase-readout">—</strong></div>
-        </div>
-        <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
-          <span>超出滑桿範圍</span>
-          <strong id="deep-time-badge-value">—</strong>
-        </div>
-
-        <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆 400 年、60 年序與 60 日序相對基準零點的最短相位">
-          <g id="recurrence-guides"></g>
-          <g id="gregorian-ring"></g>
-          <g id="year-ring"></g>
-          <g id="day-ring"></g>
-          <g id="astronomy-residual-ring" aria-hidden="true"></g>
-          <g id="recurrence-cursor"></g>
-        </svg>
-        </div>
-
-        <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
-          <div class="research-current-state-head"><span>相隔</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
-          <div class="research-current-state-phases">
-            <span data-closure="gregorian"><small>公曆結構</small><strong id="gregorian-status">—</strong></span>
-            <span data-closure="year"><small>60 年序</small><strong id="year-status">—</strong></span>
-            <span data-closure="day"><small>60 日序</small><strong id="day-status">—</strong></span>
-          </div>
-          <p id="closure-summary">基準點：三層都在 0 相位。</p>
-        </div>
-      </section>
+      <div class="research-discrete-mechanism">
+        <p><strong>為什麼是 1,980 年？</strong>年柱 60 年一輪，所以經過的年數只要是 60 的倍數，年柱就回來。日柱 60 天一輪，要經過的天數剛好是 60 的倍數才行。從 2026 年 9 月 13 日算，兩個條件第一次同時成立是 1,980 年後（換一個起始日期，這個數字會不同）。</p>
+        <p><strong>為什麼還要更久？</strong>公曆的閏年規則每 400 年循環一次，它決定日期和季節怎麼對應。1,980 不是 400 的倍數，所以季節位置還沒回來。年柱加公曆要 1,200 年，也就是 60 和 400 的最小公倍數。日柱加公曆要 8,000 年：400 年共有 146,097 天，除以 60 餘 57，要累積 20 個 400 年，天數才剛好被 60 整除。</p>
+        <p class="discrete-derivation-rule"><strong>所以是 24,000 年。</strong>要三個一起回來，取 1,200 和 8,000 的最小公倍數，就是 24,000 年。但這只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>：公曆只是季節的<a class="research-term" href="#term-proxy">代理</a>，真正的<a class="research-term" href="#term-jie">十二節</a>要到 02 再檢查。</p>
+      </div>
 
 
 
-      <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
-        <header>
-          <div class="discrete-derivation-title">
-            <strong id="discrete-derivation-title">用 Δ 驗算</strong>
-            <button id="research-delta-play" class="research-delta-play" type="button"
-              aria-pressed="false" aria-label="播放時間推演" title="播放時間推演">
-              <span class="research-delta-play-icon" aria-hidden="true">▶</span>
-              <span class="research-delta-play-label">播放</span>
-            </button>
-          </div>
-          <div class="research-delta-public-slider" role="group" aria-label="向後推演 0 到 24,000 年">
-            <input id="delta-slider" type="range" min="0" max="24000" step="1" value="0"
-              aria-label="向後推演 0 到 24,000 年" aria-describedby="delta-range-note delta-slider-output">
-            <output id="delta-slider-output" for="delta-slider">0 年</output>
-          </div>
-          <details id="research-controls" class="research-controls-compact research-derivation-controls">
-            <summary><span>其他時間</span></summary>
-            <span id="research-controls-delta" hidden>0 年</span>
-            <section class="delta-dock research-shift-toolbar" aria-label="其他時間工具">
-              <form id="research-jump-instant-form" class="research-shift-time" aria-label="直接前往具體時間">
-                <span class="research-shift-key">時間</span>
-                <input id="research-jump-instant" type="text" inputmode="numeric" autocomplete="off"
-                  value="2026/09/13" placeholder="YYYY/MM/DD HH:MM"
-                  aria-label="前往日期與可選時間">
-                <button type="submit" title="前往">↵</button>
-              </form>
-              <div class="research-shift-step" role="group" aria-label="跳轉步長">
-                <span class="research-shift-key">步長</span>
-                <select id="research-delta-step" aria-label="跳轉步長">
-                  <option value="60">60 年</option>
-                  <option value="400" selected>400 年</option>
-                  <option value="1200">1,200 年</option>
-                  <option value="8000">8,000 年</option>
-                  <option value="24000">24,000 年</option>
-                </select>
-                <button id="research-delta-step-minus" type="button" aria-label="目標時間向前移動目前步長">−</button>
-                <button id="research-delta-step-plus" type="button" aria-label="目標時間向後移動目前步長">+</button>
-              </div>
-              <div class="research-shift-exact" role="group" aria-label="任意推演年數">
-                <span class="research-shift-key">年數</span>
-                <input id="delta-number" type="number" min="0" max="999924" step="1" value="0"
-                  inputmode="numeric" aria-describedby="delta-range-note" aria-label="任意推演年數">
-                <button id="research-delta-number-apply" type="button" title="套用推演年數">↵</button>
-              </div>
-              <details id="research-base-editor" class="research-base-editor">
-                <summary>基準 <strong id="research-base-summary">2026/09/13</strong><span aria-hidden="true">⋯</span></summary>
-                <div class="base-date research-base-date" aria-label="基準日期">
-                  <label>年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
-                  <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
-                  <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
-                </div>
-              </details>
-              <small id="delta-range-note" class="research-shift-note">0–24,000 年可用滑桿或播放；此列可直接輸入任意年數或以步長 ± 跳轉。</small>
-              <output id="research-shift-feedback" class="research-shift-feedback" role="status" aria-live="polite" hidden></output>
-              <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="其他回歸候選" hidden></div>
-              <div class="global-period" hidden><span>離散全域 exact</span><strong>24,000 年</strong></div>
-            </section>
-          </details>
-        </header>
-      </section>
 
-      <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
-        <header class="research-cycle-head">
-          <div><div class="eyebrow">60-day Ganzhi</div><h3 id="research-cycle-heading">六十日干支循環</h3></div>
-          <p>10 天干與 12 地支同步逐日前進，60 日後第一次回到原配對。</p>
-        </header>
-        <div class="research-cycle-layout">
-          <div class="research-cycle-stage">
-            <div class="research-cycle-key" aria-hidden="true"><strong>六十日序</strong><i>由</i><strong>10 天干 · 12 地支配對</strong></div>
-            <svg id="research-sexagenary-wheel" viewBox="0 0 640 640" role="img" aria-label="六十日干支循環第 1 位甲子">
-              <g data-research-cycle-group="guides"></g>
-              <g data-research-cycle-group="stems"></g>
-              <g data-research-cycle-group="branches"></g>
-              <g data-research-cycle-group="cycle"></g>
-              <g data-research-cycle-group="selection"></g>
-              <circle cx="320" cy="320" r="82" class="research-cycle-center"></circle>
-              <text id="research-cycle-center-kicker" x="320" y="290" class="research-cycle-center-kicker">甲子</text>
-              <text id="research-cycle-center-value" x="320" y="334" class="research-cycle-center-value">01 / 60</text>
-              <text id="research-cycle-center-note" x="320" y="365" class="research-cycle-center-note">天干 甲 · 1/10　地支 子 · 1/12</text>
-            </svg>
-          </div>
-          <aside class="research-cycle-inspector" aria-live="polite">
-            <div class="eyebrow">目前日序</div>
-            <div class="research-cycle-inspector-head"><h4 id="research-cycle-title">甲子</h4><span id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</span></div>
-            <div class="research-cycle-phases">
-              <div class="research-cycle-phase"><span>天干</span><div><strong id="research-cycle-stem">甲</strong><small id="research-cycle-stem-meta">陽 · 木</small></div><em id="research-cycle-stem-index">1 / 10</em></div>
-              <div class="research-cycle-phase"><span>地支</span><div><strong id="research-cycle-branch">子</strong><small id="research-cycle-branch-meta">陽 · 水</small></div><em id="research-cycle-branch-index">1 / 12</em></div>
-            </div>
-            <p id="research-cycle-binding" class="research-cycle-binding">跟隨比較日期 · 目前日干支</p>
-            <button id="research-cycle-return" type="button" class="research-cycle-return" hidden>回到比較日</button>
-          </aside>
-        </div>
-      </section>
-
-      <p class="discrete-to-astronomy">年序與日序重遇後，下一步：立春與十二節邊界也回到同一位置嗎？</p>
+      <p class="discrete-to-astronomy">曆法說 24,000 年會對上。下一步：真正的節氣也回到原位了嗎？</p>
 
     </section>
 
@@ -385,7 +115,9 @@
         <div><div class="eyebrow">節界校驗</div><h2 id="research-astronomy-title">八字的節界回來了嗎？</h2></div>
         <span class="research-task-relation">固定 24,000 年候選 → 12 節界校驗</span>
       </header>
+      <p class="research-plain-conclusion" data-plain-conclusion="02">沒有。用深時間天文模型推算，24,000 年後十二個「節」（八字換月的時間點）全都提早了 10 到 14 天，沒有一個回到原位。</p>
 
+      <p class="research-case-transition" id="research-case-transition">比較的是 2026 年和 24,000 年後的 26026 年。</p>
       <section id="seasonal-drift-evidence" class="seasonal-drift-evidence"
         data-ready="false" data-mode="total" data-orbit-scale="exaggerated"
         data-diagram-grammar="zero-line-proof"
@@ -394,15 +126,14 @@
           <div class="seasonal-drift-evidence-copy">
             <div class="eyebrow">主線案例 · 固定 2026 → 26026</div>
             <h3 id="seasonal-drift-evidence-title">24,000 年後，年界與月界還在原位嗎？</h3>
-            <p>八字年柱在立春切換，月柱在十二個「節」切換。01 找到的是離散候選；02 把 0 天定義成真正重合，逐條檢查節界，再用俯視圖解釋偏移原因。</p>
           </div>
         </header>
 
         <div class="seasonal-drift-summary" aria-live="polite">
           <div class="seasonal-drift-stat verdict">
             <span>先看結論 · 八字節界</span>
-            <strong><b id="seasonal-drift-jie-count">12 / 12</b> 全部提前</strong>
-            <small><b id="seasonal-drift-jie-range">提前 10.235–14.177 天</b> · 沒有任何一條碰到 0</small>
+            <strong><b id="seasonal-drift-jie-count">12 / 12</b> 在模型中全部提前</strong>
+            <small><b id="seasonal-drift-jie-range">模型值提前 10.235–14.177 天</b> · 相對固定年差均未回到零</small>
           </div>
           <div class="seasonal-drift-stat cursor">
             <span>目前游標</span>
@@ -413,26 +144,37 @@
           </div>
         </div>
 
+        
         <section class="seasonal-boundary-proof" aria-labelledby="seasonal-boundary-proof-title">
           <header class="seasonal-boundary-proof-head">
             <div>
-              <span>判定基準</span>
-              <strong id="seasonal-boundary-proof-title">0 天 = 完全重合</strong>
+              <strong id="seasonal-boundary-proof-title">十二個節，各提早幾天？</strong>
+              <span>0 天＝回到原位，線越長提早越多</span>
             </div>
-            <p>十二個八字「節」全部離開 0；點任一節界可同步下方俯視圖與研究時間。</p>
+            <label class="seasonal-boundary-keyboard" for="seasonal-boundary-select"><span>選一個節</span><select id="seasonal-boundary-select" aria-label="選擇十二個八字節界，更新圖表與研究時間"><option value="">自訂黃經 · 非十二節</option></select></label>
           </header>
           <svg id="seasonal-boundary-proof-svg" class="seasonal-drift-svg" role="img"
             aria-label="十二個八字節界相對零天重合基準的提前量；全部提前約十至十四天"></svg>
         </section>
+        <p class="research-figure-howto" data-figure-howto="02">怎麼看：每一根線是一個「節」。0 天那條線代表回到原位；線越長，代表比 24,000 年前提早越多天。點任一根，可看那個節的數字。</p>
+        <p class="research-model-scope" id="seasonal-drift-method">算法：同一個節在 26026 年和 2026 年的到達時刻（TT，均勻流動的天文時間）相減，再扣掉整整 24,000 個公曆年（8,765,820 天）。數字來自深時間天文研究模型，26026 年的框架還沒有獨立驗證，所以是模型推算，不是實測。</p>
 
+        <figure id="research-drift-accumulation" class="research-drift-accumulation" aria-labelledby="research-drift-accumulation-title">
+          <figcaption>
+            <strong id="research-drift-accumulation-title">偏移是慢慢累積出來的</strong>
+            <span id="research-drift-accumulation-sentence">立春的時刻，和「同一個公曆日期」比，隨著年數拉長慢慢錯開。</span>
+          </figcaption>
+          <svg id="research-drift-accumulation-svg" viewBox="0 0 720 300" role="img" aria-labelledby="research-drift-accumulation-title research-drift-accumulation-sentence"></svg>
+          <p class="research-drift-accumulation-note">只有這四個年份有真實天文資料；點之間的虛線只是幫助閱讀，不代表中間年份的實際數值。</p>
+        </figure>
+
+        <div id="seasonal-drift-orbit-details" class="seasonal-drift-orbit-details research-why-figure">
         <div class="seasonal-drift-orbit-panel seasonal-drift-orbit-explainer">
           <div class="seasonal-drift-orbit-head">
             <div>
-              <span>同一太陽黃經 × 公曆／TT 到達時間相位</span>
-              <strong>同一節界方向仍在，但 26026 到達那個方向的時間已提前</strong>
-              <small>內圈：2026 / 26026 等效橢圓 · 外圈：同一「節」的到達時間相位</small>
-              <small>座標：太陽視黃經 +180° → 日心地球方向；外圈只表達時間相位</small>
-              <small>e：<b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b></small>
+              <strong>為什麼會提早？</strong>
+              <p>圖的中心是太陽，每條射線是一個節的方向，兩個年代都一樣。但地球軌道的形狀和方向會慢慢改變（虛線是 2026 年，實線是 26026 年），走到同一個方向的日子也跟著變。外圈把「早到幾天」畫成角度：圓點離刻度越遠，提早越多。</p>
+              <small>軌道偏心率 <b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b>（數字越小越接近正圓）</small>
             </div>
             <div class="seasonal-drift-orbit-tools">
               <small>虛線 2026<br>實線 26026</small>
@@ -441,7 +183,8 @@
           </div>
           <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
             aria-label="2026 與 26026 等效橢圓、十二個八字節界與到達時間相位外圈；外圈是時間相位，不是第二個物理地球位置"></svg>
-          <p class="seasonal-orbit-explainer-note"><strong>外圈不是第二顆地球。</strong>射線固定同一太陽黃經；外圈只把同一「節」在一年時間相位中的提前量換成角度，幫助理解「太陽位置相同」與「固定 24,000 年後到達時間相同」是兩件事。拖俯視圖仍可選黃經，上方干支同步更新。</p>
+          <p class="seasonal-orbit-explainer-note">外圈不是第二顆地球，只是把提早的天數換成角度。可以拖動圖選一個位置。</p>
+        </div>
         </div>
 
         <details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">
@@ -480,33 +223,35 @@
             </div>
           </div>
         </details>
+        <p class="seasonal-drift-evidence-note">十二個節都沒有回到 0 天，所以 24,000 年不能直接當成八字的週期。那四柱裡哪些還算得出來？</p>
 
-        <p class="seasonal-drift-evidence-note"><strong>主線怎麼讀：</strong>先看 0 天基準：十二「節」沒有一條重合，因此 24,000 只到離散候選。再用俯視圖理解「同一太陽黃經、不同到達時間相位」。只有想追原因時，才展開全年 360 點與共同位移／年內起伏。</p>
+
       </section>
 
-      <details id="secondary-astronomy-tools" class="secondary-astronomy-tools">
-        <summary><span>其他 Δ / 快速模型</span><strong id="secondary-astronomy-tools-meta">跟隨上方時間軸目前 Δ</strong></summary>
-      <section class="astronomy-panel" aria-label="季節相位與春分歸零後的十二節形狀殘差">
-        <div><span>季節形狀 · 春分歸零</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
-        <div class="astronomy-phase-card" data-phase-status="not-modeled"><span>季節相位 · 公曆框架</span><strong id="astronomy-phase-status">尚未納入</strong><small id="astronomy-phase-note">春分相對公曆的絕對位移另算；不要把形狀殘差當成完整節氣漂移。</small></div>
-        <div><span>軌道參數</span><div id="astronomy-orbit-readout">—</div><small>目前只比較春分後各黃經位置的相對到達時間。</small></div>
-        <div><span>視覺尺度</span><strong id="astronomy-scale-readout">—</strong><small>正值向外，負值向內。</small></div>
-      </section>
-      <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
 
-      <section class="near-search-panel" aria-label="模型有效範圍內的 exact 離散近回歸搜尋">
+      <details id="near-recurrence-disclosure" class="research-extension near-recurrence-disclosure">
+        <summary><span>延伸：更長的時間呢？</span><small>用快速近似模型比較 24,000 年的 41 個整數倍</small></summary>
+      <section id="near-recurrence-detail" class="near-search-panel" aria-label="長時間回歸搜尋，Berger 快速近似模型">
         <div class="near-search-head">
           <div class="near-search-copy">
-            <strong>近回歸排名</strong>
+            <strong>長時間回歸搜尋</strong>
             <small>24,000 年整數倍 · 季節形狀最大值 → RMS · 近似 ≠ 真正週期</small>
           </div>
           <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
           <div class="near-stat best"><span>搜尋最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
           <div class="near-stat"><span>搜尋最佳殘差</span><strong id="near-best-residual">—</strong><small>最大絕對值 / RMS</small></div>
         </div>
+        <p class="near-search-scope">只比較 Berger 1978 快速近似模型下的季節形狀殘差，候選為 +24,000 年的整數倍；這不是完整節界回歸，也不是獨立驗證的深時間天文預測。</p>
         <div class="near-search-body">
-          <svg id="near-recurrence-chart" viewBox="0 0 1000 180" role="img" aria-label="未來 exact 離散閉合候選的十二節最大殘差分布"></svg>
-          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名"></div>
+          <figure class="near-chart-figure">
+            <div class="near-chart-meta">
+              <strong>十二節最大形狀殘差 <span>· 小時</span></strong>
+              <small>越靠近 0，越接近基準年的季節形狀</small>
+            </div>
+            <svg id="near-recurrence-chart" viewBox="0 0 1000 220" role="group" aria-label="41 個離散候選的形狀殘差；縱軸小時，橫軸距基準年的千年數；各點可選取"></svg>
+            <figcaption>橫軸：距基準的 Δ 年數（千年） · 每點相隔 24,000 年</figcaption>
+          </figure>
+          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名，可選取帶入 Δ"></div>
         </div>
       </section>
       </details>
@@ -518,12 +263,19 @@
         <div><div class="eyebrow">四柱結論</div><h2 id="research-evidence-title">對八字意味著什麼？</h2></div>
         <span class="research-task-relation">12 / 12 節界位移 → 四柱可判範圍</span>
       </header>
+      <p class="research-plain-conclusion" data-plain-conclusion="03">在太陽走到同一個位置（<a class="research-term" href="#term-longitude">太陽黃經</a>相同）時，年柱和月柱可以跟現在相同；但日柱和時柱沒辦法確定。所以 24,000 年不能當作四柱完整重複的週期。</p>
+
+      <figure id="research-rotation-uncertainty" class="research-rotation-uncertainty" aria-labelledby="rotation-uncertainty-title">
+        <figcaption><strong id="rotation-uncertainty-title">地球自轉的誤差，越往後越大</strong><span>日柱看地球轉了幾圈，時柱看轉到哪一刻。地球自轉會慢慢變慢，而且變慢的速度沒辦法精確預測。</span></figcaption>
+        <svg role="img" aria-label="地球自轉時間的誤差範圍隨年代變寬，先寬過一個時辰，再寬過一天"></svg>
+        <p class="research-figure-howto" data-figure-howto="03-rotation">怎麼看：曲線是推算的誤差範圍有多寬（1σ，約 68% 的把握）。寬過一個時辰（2 小時），就不知道是哪個時辰；寬過一天，連哪一天都不知道。約 <b data-rotation-year="shichen">—</b> 年起時柱定不了，約 <b data-rotation-year="day">—</b> 年起日柱也定不了；到 26026 年，誤差是 <b data-rotation-end>—</b>。</p>
+      </figure>
 
       <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" data-diagram-grammar="pillar-verdict" aria-label="固定加二萬四千年、目前選定太陽黃經的四柱可判定範圍">
         <div class="determinacy-verdict">
-          <span>固定 +24,000 公曆年</span>
-          <strong>≠ 完整「時間 → 八字」精確週期</strong>
-          <small>同一太陽黃經下年／月可回同柱；但固定推進 +24,000 公曆年，仍不足以判定日／時，也不能推出完整四柱重現。</small>
+          <span>固定 +24,000 公曆年 · 深時間研究模型（尚未獨立驗證）</span>
+          <strong>模型內：並非固定時間下的精確節界回歸</strong>
+          <small>同一太陽黃經下年／月可依條件回同柱；但模型中固定推進 +24,000 公曆年並未讓十二節界時間重合。日／時仍未能判定，不能把模型結果當成經獨立驗證的完整四柱週期反證。</small>
         </div>
         <div class="determinacy-head">
           <strong class="determinacy-label">四柱可判範圍</strong>
@@ -535,11 +287,370 @@
           <article class="determinacy-card" data-determinacy-pillar="day" data-status="pending" data-resolved="false"><header><span>日</span><strong>日柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
           <article class="determinacy-card" data-determinacy-pillar="hour" data-status="pending" data-resolved="false"><header><span>時</span><strong>時柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
         </div>
+        <p class="research-figure-howto" data-figure-howto="03">怎麼看：左邊兩柱只看太陽走到哪，所以能算出來；右邊兩柱還要知道地球轉到哪一刻，24,000 年後這一點算不準。</p>
         <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
       </section>
 
+      <div id="research-evidence-why" class="research-evidence-why"></div>
+
+
       <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian/TT reference lattice 的 10–14 天位移與節界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區，以及由民用時刻定義的完整四柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
     </section>
+
+    <section id="research-lab" class="research-task research-task-primary research-lab" data-research-task="lab" aria-labelledby="research-lab-title">
+      <header class="research-task-head">
+        <div class="research-task-index">↻</div>
+        <div><div class="eyebrow">實驗台</div><h2 id="research-lab-title">自己動手算</h2></div>
+      </header>
+      <p class="research-lab-lede">上面三段用到的數字，都可以在這裡自己驗算：換起始日期、拖動年數，看三個循環各走到哪裡。</p>
+      <figure id="research-lab-fan" class="research-lab-fan" aria-labelledby="lab-fan-title">
+        <figcaption><strong id="lab-fan-title">換一個起點，三圈怎麼走？</strong><span>選起始日期和經過的年數，或直接按下面「一起回來」的年數。比較的都是同月同日。</span></figcaption>
+        <div class="lab-fan-controls">
+          <label class="lab-fan-field"><span>起始日期</span><input id="lab-fan-start" type="date" value="2026-09-13" min="0001-01-01" max="9999-12-31"></label>
+          <label class="lab-fan-field lab-fan-years-field"><span>經過</span><input id="lab-fan-years" type="number" inputmode="numeric" min="0" max="24000" step="1" value="0"><span>年</span></label>
+          <input id="lab-fan-slider" class="lab-fan-slider" type="range" min="0" max="24000" step="1" value="0" aria-label="經過的年數，0 到 24,000">
+          <div class="lab-fan-jumps" role="group" aria-label="直接跳到一起回來的年數">
+            <button type="button" data-lab-jump="next" data-lab-years="1980" aria-pressed="false"><small>年柱＋日柱</small><strong id="lab-fan-next-years">1,980 年</strong></button>
+            <button type="button" data-lab-jump="1200" data-lab-years="1200" aria-pressed="false"><small>年柱＋公曆</small><strong>1,200 年</strong></button>
+            <button type="button" data-lab-jump="8000" data-lab-years="8000" aria-pressed="false"><small>日柱＋公曆</small><strong>8,000 年</strong></button>
+            <button type="button" data-lab-jump="24000" data-lab-years="24000" aria-pressed="false"><small>三個一起</small><strong>24,000 年</strong></button>
+          </div>
+        </div>
+        <div class="cycle-fan-stage"></div>
+        <p id="lab-fan-sentence" class="cycle-fan-sentence" aria-live="polite">—</p>
+        <p class="lab-fan-note">年柱以立春約在 2 月 4 日估算；起始日期剛好在 2 月 3–5 日時，年柱可能差一位。</p>
+      </figure>
+
+      <section id="research-sexagenary-cycle" class="research-cycle" aria-labelledby="research-cycle-heading">
+        <header class="research-cycle-head">
+          <div><div class="eyebrow">六十日干支</div><h3 id="research-cycle-heading">六十日干支循環</h3></div>
+          <p>10 天干與 12 地支同步逐日前進，60 日後第一次回到原配對。</p>
+        </header>
+        <div class="research-cycle-layout">
+          <div class="research-cycle-stage">
+            <div class="research-cycle-key" aria-hidden="true"><strong>六十日序</strong><i>由</i><strong>10 天干 · 12 地支配對</strong></div>
+            <svg id="research-sexagenary-wheel" viewBox="0 0 640 640" role="img" aria-label="六十日干支循環第 1 位甲子">
+              <g data-research-cycle-group="guides"></g>
+              <g data-research-cycle-group="stems"></g>
+              <g data-research-cycle-group="branches"></g>
+              <g data-research-cycle-group="cycle"></g>
+              <g data-research-cycle-group="selection"></g>
+              <circle cx="320" cy="320" r="82" class="research-cycle-center"></circle>
+              <text id="research-cycle-center-kicker" x="320" y="290" class="research-cycle-center-kicker">甲子</text>
+              <text id="research-cycle-center-value" x="320" y="334" class="research-cycle-center-value">01 / 60</text>
+              <text id="research-cycle-center-note" x="320" y="365" class="research-cycle-center-note">天干 甲 · 1/10　地支 子 · 1/12</text>
+            </svg>
+          </div>
+          <aside class="research-cycle-inspector" aria-live="polite">
+            <div class="eyebrow">目前日序</div>
+            <div class="research-cycle-inspector-head"><h4 id="research-cycle-title">甲子</h4><span id="research-cycle-ordinal" class="research-cycle-ordinal">01 / 60</span></div>
+            <div class="research-cycle-phases">
+              <div class="research-cycle-phase"><span>天干</span><div><strong id="research-cycle-stem">甲</strong><small id="research-cycle-stem-meta">陽 · 木</small></div><em id="research-cycle-stem-index">1 / 10</em></div>
+              <div class="research-cycle-phase"><span>地支</span><div><strong id="research-cycle-branch">子</strong><small id="research-cycle-branch-meta">陽 · 水</small></div><em id="research-cycle-branch-index">1 / 12</em></div>
+            </div>
+            <p id="research-cycle-binding" class="research-cycle-binding">跟隨比較日期 · 目前日干支</p>
+            <button id="research-cycle-return" type="button" class="research-cycle-return" hidden>回到比較日</button>
+          </aside>
+        </div>
+      </section>
+
+      <details id="research-lab-tools" class="research-lab-tools">
+        <summary><strong>研究者工具</strong><span>原始相位扇、年度時間條、逐步推導，以及日柱、時柱和天文來源的完整證據</span></summary>
+        <div class="research-lab-tools-body">
+      <section id="recurrence-instrument" class="recurrence-instrument" aria-label="三個離散週期相對基準零點的相位比較">
+        <div class="research-fan-graphic">
+          <div class="phase-gauge-caption" aria-hidden="true"><strong>離散相位</strong><span>0 = 與基準同相位 · 左右為距 0 的最短循環位移</span></div>
+        <div class="recurrence-legend" aria-hidden="true">
+          <div><i class="gregorian-dot"></i><span>公曆結構</span><strong id="gregorian-phase-readout">—</strong></div>
+          <div><i class="year-dot"></i><span>60 年序</span><strong id="year-phase-readout">—</strong></div>
+          <div><i class="day-dot"></i><span>60 日序</span><strong id="day-phase-readout">—</strong></div>
+        </div>
+        <div id="deep-time-badge" class="deep-time-badge" hidden aria-live="polite">
+          <span>超出滑桿範圍</span>
+          <strong id="deep-time-badge-value">—</strong>
+        </div>
+
+        <svg id="recurrence-wheel" viewBox="0 0 1200 720" role="img" aria-label="公曆 400 年、60 年序與 60 日序相對基準零點的最短相位">
+          <g id="recurrence-guides"></g>
+          <g id="gregorian-ring"></g>
+          <g id="year-ring"></g>
+          <g id="day-ring"></g>
+          <g id="astronomy-residual-ring" aria-hidden="true"></g>
+          <g id="recurrence-cursor"></g>
+        </svg>
+        </div>
+        <div class="recurrence-readout research-current-state" aria-live="polite" aria-label="目前離散狀態">
+          <div class="research-current-state-head"><span>相隔</span><strong id="delta-readout">0 年</strong><i>→</i><strong id="target-date-readout">2026-09-13</strong></div>
+          <div class="research-current-state-phases">
+            <span data-closure="gregorian"><small>公曆結構</small><strong id="gregorian-status">—</strong></span>
+            <span data-closure="year"><small>60 年序</small><strong id="year-status">—</strong></span>
+            <span data-closure="day"><small>60 日序</small><strong id="day-status">—</strong></span>
+          </div>
+          <p id="closure-summary">基準點：三層都在 0 相位。</p>
+        </div>
+      </section>
+      <div class="research-entry" role="group" aria-label="用同一個研究時間比較兩個關鍵里程碑">
+        <p class="research-entry-label">按一下，看相位扇怎麼變：</p>
+        <div class="research-entry-choices">
+          <button class="research-entry-choice research-entry-local" type="button" data-research-entry="local" aria-pressed="false" disabled>
+            <span>年序＋日序的第一次重遇</span>
+            <strong id="research-entry-local-years">計算中</strong>
+            <small id="research-entry-local-detail">依基準日期計算</small>
+          </button>
+          <button class="research-entry-choice research-entry-global" type="button" data-research-entry="global" aria-pressed="false">
+            <span>三項離散條件同時歸零</span>
+            <strong>+24,000 年</strong>
+            <small>僅是離散候選 · 02 再驗十二節</small>
+          </button>
+        </div>
+        <p class="research-entry-selection" id="research-entry-selection">Δ=0 是同一基準，不是週期重遇。</p>
+      </div>
+      <p class="research-figure-howto">怎麼看：外圈公曆 400 年結構、中圈 60 年序、內圈 60 日序。每圈的 0 只代表該循環序位回到起點；正負數是最短相位差，不是節氣提前天數。公曆只是季節的<a class="research-term" href="#term-proxy">代理</a>，真正的<a class="research-term" href="#term-jie">十二節</a>到 02 再驗。</p>
+
+      <div id="research-discrete-tools" class="research-discrete-tools">
+        <div class="research-discrete-tools-body">
+          <section id="research-discrete-thesis" class="research-discrete-thesis" data-diagram-grammar="condition-ladder" aria-labelledby="research-discrete-thesis-title">
+            <header>
+              <div><div class="eyebrow">離散推導</div><h3 id="research-discrete-thesis-title">先看局部重遇缺哪一層，再把條件補滿</h3></div>
+            </header>
+            <div class="research-condition-route" aria-label="局部重遇到 24,000 年離散候選的主閱讀路徑">
+              <strong id="research-discrete-route-local">局部重遇</strong>
+              <i aria-hidden="true">→</i>
+              <span>缺季節位置</span>
+              <i aria-hidden="true">→</i>
+              <strong>+24,000</strong>
+            </div>
+            <div class="research-solar-origin" aria-label="公曆結構與八字月序共享太陽年來源">
+              <span>公曆 400 年結構 · 01 代理</span>
+              <i>←</i>
+              <strong>共同追蹤：太陽年</strong>
+              <i>→</i>
+              <span>十二節／八字月序 · 02 驗真</span>
+              <small>不是三個獨立週期：01 先用可計算的公曆結構代理季節位置，02 再以真正節界驗真。</small>
+            </div>
+            <div id="discrete-derivation-steps" class="discrete-derivation-steps"></div>
+          </section>
+          <section id="research-time-state" class="research-time-state" data-ready="false" data-owner="discrete" aria-label="目前研究時間與干支">
+            <header class="research-time-state-head">
+              <div>
+                <span id="research-time-kicker">研究時間</span>
+                <strong id="research-time-title">等待研究時間狀態</strong>
+              </div>
+              <small id="research-time-basis">01、02、03 共用同一個時間狀態；能判定的柱才顯示干支。</small>
+            </header>
+            <div class="research-time-state-compare">
+              <article class="research-time-side" data-research-time-side="base">
+                <header><span>基準</span><strong id="research-time-base-coordinate">—</strong></header>
+                <div class="research-time-pillars" aria-label="基準四柱">
+                  <div class="research-time-pillar" data-research-time-pillar="year" data-status="unresolved"><span>年</span><strong>—</strong><small>未定</small></div>
+                  <div class="research-time-pillar" data-research-time-pillar="month" data-status="unresolved"><span>月</span><strong>—</strong><small>未定</small></div>
+                  <div class="research-time-pillar" data-research-time-pillar="day" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
+                  <div class="research-time-pillar" data-research-time-pillar="hour" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
+                </div>
+              </article>
+              <article class="research-time-side" data-research-time-side="target">
+                <header><span>比較</span><strong id="research-time-target-coordinate">—</strong></header>
+                <div class="research-time-pillars" aria-label="比較四柱">
+                  <div class="research-time-pillar" data-research-time-pillar="year" data-status="unresolved"><span>年</span><strong>—</strong><small>未定</small></div>
+                  <div class="research-time-pillar" data-research-time-pillar="month" data-status="unresolved"><span>月</span><strong>—</strong><small>未定</small></div>
+                  <div class="research-time-pillar" data-research-time-pillar="day" data-status="unresolved"><span>日</span><strong>—</strong><small>未定</small></div>
+                  <div class="research-time-pillar" data-research-time-pillar="hour" data-status="unresolved"><span>時</span><strong>—</strong><small>未定</small></div>
+                </div>
+              </article>
+            </div>
+          </section>
+          <section id="research-year-strip" class="research-year-strip" aria-labelledby="research-year-strip-title" data-li-chun-position-available="false">
+            <header class="research-year-head">
+              <strong id="research-year-strip-title">年度時間條</strong>
+              <div class="research-year-actions">
+                <form id="research-target-date-form" class="research-date-picker" aria-label="選擇時間條所顯示的日期">
+                  <label for="research-target-date-input">比較目標日</label>
+                  <input id="research-target-date-input" type="text" inputmode="numeric" autocomplete="off"
+                    value="2026/09/13" placeholder="YYYY/MM/DD" aria-describedby="research-target-date-help research-target-date-feedback">
+                  <button type="submit" id="research-target-date-apply">前往</button>
+                </form>
+
+              </div>
+              <small id="research-target-date-help" class="research-target-date-help">選擇比較目標日期會保留目前 Δ 年位移，並反推基準日期。</small>
+              <small id="research-target-date-feedback" class="research-target-date-feedback" role="status" aria-live="polite" hidden></small>
+              <span id="research-controls-base" hidden>2026/09/13</span>
+              <span id="research-year-strip-basis">立春天文事件 · 顯示基準 UT1+8 固定時差</span>
+            </header>
+            <div class="research-year-track" role="group" aria-label="原本年度時間條：公曆全年、立春年界及日期拖曳">
+              <div class="research-year-line" aria-hidden="true"></div>
+              <!-- One narrow accent along the EXISTING bar: previous authentic
+                   甲子日 → selected Day. No second date owner or graphic. -->
+              <div id="research-year-day-progress" class="research-year-day-progress" aria-hidden="true"></div>
+              <div id="research-year-jiazi-ticks" class="research-year-jiazi-ticks" aria-hidden="true"></div>
+              <div id="research-year-li-chun-band" class="research-year-li-chun-band" hidden aria-hidden="true"></div>
+              <div id="research-year-approx-li-chun" class="research-year-approx-li-chun" hidden aria-hidden="true" title="立春通常在 2 月初，此標記只是概略位置，不是已驗證的節氣時刻"></div>
+              <div class="research-year-marker research-year-start" style="--year-x:0%">
+                <i aria-hidden="true"></i><strong>1/1</strong><small>公曆換年</small>
+              </div>
+              <div id="research-year-li-chun-marker" class="research-year-marker research-year-li-chun" hidden>
+                <i aria-hidden="true"></i><strong id="research-year-li-chun-title">立春 · — → —</strong><small id="research-year-li-chun-label">節氣年界</small>
+              </div>
+              <div id="research-year-base-marker" class="research-year-marker research-year-base" style="--year-x:70%">
+                <i aria-hidden="true"></i><strong id="research-year-base-title">選定日 · —年</strong><small id="research-year-base-label">2026/09/13</small>
+              </div>
+              <div class="research-year-marker research-year-end" style="--year-x:100%">
+                <i aria-hidden="true"></i><strong>12/31</strong><small>公曆年末</small>
+              </div>
+              <!-- This slider is a gesture surface for the EXISTING base+Δ date
+                   owner, not another date form, timeline or selected-date model. -->
+              <input id="research-year-scrub" class="research-year-scrub"
+                type="range" min="0" max="364" value="0" step="1"
+                aria-label="沿原本年度時間條選擇日期"
+                aria-describedby="research-year-scrub-hint">
+            </div>
+            <small id="research-year-scrub-hint" class="research-year-scrub-hint">拖動時間條選擇日期，放開後套用至原本的日期控制。</small>
+            <small id="research-year-scrub-feedback" class="research-year-scrub-feedback" role="status" aria-live="polite" hidden></small>
+            <div id="research-year-li-chun-unavailable" class="research-year-li-chun-unavailable" hidden>
+              <strong id="research-year-li-chun-unavailable-title">立春 · — → —</strong>
+              <span id="research-year-li-chun-unavailable-copy">節氣的天文時刻尚未解析</span>
+            </div>
+            <!-- All three readouts describe THIS original year strip, not a
+                 second timeline or independently selected date. -->
+            <div id="research-cycle-comparison" class="research-cycle-inline" data-ready="false" aria-label="基準與比較干支對照">
+              <div class="research-cycle-inline-row" data-side="base">
+                <span class="research-cycle-inline-date">基準 <strong id="research-cycles-base-date">—</strong></span>
+                <span class="research-cycle-inline-year">年 <strong id="research-cycles-year-base">—</strong> <small id="research-cycles-year-base-ordinal">—/60</small></span>
+                <span class="research-cycle-inline-day">日 <strong id="research-cycles-day-base">—</strong> <small id="research-cycles-day-base-ordinal">—/60</small></span>
+              </div>
+              <div class="research-cycle-inline-row" data-side="target">
+                <span class="research-cycle-inline-date"><span id="research-cycles-target-label">比較</span> <strong id="research-cycles-target-date">—</strong></span>
+                <span class="research-cycle-inline-year">年 <strong id="research-cycles-year-target">—</strong> <small id="research-cycles-year-target-ordinal">—/60</small></span>
+                <span class="research-cycle-inline-day">日 <strong id="research-cycles-day-target">—</strong> <small id="research-cycles-day-target-ordinal">—/60</small></span>
+              </div>
+              <span id="research-cycles-closure" class="research-cycle-inline-closure" hidden>—</span>
+              <a class="research-cycle-inline-lookup" href="#discrete-sexagenary-details">六十日轉盤 ↗</a>
+            </div>
+            <div class="research-year-key-data" role="status" aria-live="polite">
+              <p class="research-year-transition-line">
+                <span id="research-year-transition">立春年界待查</span>
+                <small id="research-year-transition-note">—</small>
+              </p>
+              <p class="research-year-selection-line">
+                <span>選定 <strong id="research-year-selected-date">—</strong></span>
+                <span>年 <strong id="research-year-selected-year">—</strong>
+                  <small id="research-year-selected-certainty">—</small></span>
+                <span>日 <strong id="research-year-selected-day">—</strong></span>
+              </p>
+              <p class="research-year-full-cycle" id="research-year-full-cycle">—</p>
+            </div>
+            <details class="research-year-same-date-details">
+              <summary>同月同日的比較參考（非全年日數）</summary>
+            <div class="research-year-relations" aria-label="三種一年關係">
+              <div><strong>公曆</strong><span>同月同日 → 下一個年份</span></div>
+              <div><strong>60 年序</strong><span>相隔年數 mod 60 的名義序號；不決定立春前後的年柱</span></div>
+              <div><strong>60 日序</strong><span>看兩日期間實際經過 <b id="research-year-day-count">—</b> 日</span></div>
+            </div>
+            <div class="research-year-continuation" aria-label="選定日到下一年同月同日">
+              <strong id="research-year-base-date">2026/09/13</strong>
+              <span><i aria-hidden="true"></i><em>實際經過 <b id="research-year-elapsed-days">—</b> 日</em></span>
+              <strong id="research-year-next-date">2027/09/13</strong>
+            </div>
+            </details>
+          </section>
+          <section class="discrete-derivation" aria-labelledby="discrete-derivation-title">
+            <header>
+              <div class="discrete-derivation-title">
+                <strong id="discrete-derivation-title">用 Δ 驗算</strong>
+                <button id="research-delta-play" class="research-delta-play" type="button"
+                  aria-pressed="false" aria-label="播放時間推演" title="播放時間推演">
+                  <span class="research-delta-play-icon" aria-hidden="true">▶</span>
+                  <span class="research-delta-play-label">播放</span>
+                </button>
+              </div>
+              <div class="research-delta-public-slider" role="group" aria-label="向後推演 0 到 24,000 年">
+                <input id="delta-slider" type="range" min="0" max="24000" step="1" value="0"
+                  aria-label="向後推演 0 到 24,000 年" aria-describedby="delta-range-note delta-slider-output">
+                <output id="delta-slider-output" for="delta-slider">0 年</output>
+              </div>
+              <details id="research-controls" class="research-controls-compact research-derivation-controls">
+                <summary><span>其他時間</span></summary>
+                <span id="research-controls-delta" hidden>0 年</span>
+                <section class="delta-dock research-shift-toolbar" aria-label="其他時間工具">
+                  <form id="research-jump-instant-form" class="research-shift-time" aria-label="直接前往具體時間">
+                    <span class="research-shift-key">時間</span>
+                    <input id="research-jump-instant" type="text" inputmode="numeric" autocomplete="off"
+                      value="2026/09/13" placeholder="YYYY/MM/DD HH:MM"
+                      aria-label="前往日期與可選時間">
+                    <button type="submit" title="前往">↵</button>
+                  </form>
+                  <div class="research-shift-step" role="group" aria-label="跳轉步長">
+                    <span class="research-shift-key">步長</span>
+                    <select id="research-delta-step" aria-label="跳轉步長">
+                      <option value="60">60 年</option>
+                      <option value="400" selected>400 年</option>
+                      <option value="1200">1,200 年</option>
+                      <option value="8000">8,000 年</option>
+                      <option value="24000">24,000 年</option>
+                    </select>
+                    <button id="research-delta-step-minus" type="button" aria-label="目標時間向前移動目前步長">−</button>
+                    <button id="research-delta-step-plus" type="button" aria-label="目標時間向後移動目前步長">+</button>
+                  </div>
+                  <div class="research-shift-exact" role="group" aria-label="任意推演年數">
+                    <span class="research-shift-key">年數</span>
+                    <input id="delta-number" type="number" min="0" max="999924" step="1" value="0"
+                      inputmode="numeric" aria-describedby="delta-range-note" aria-label="任意推演年數">
+                    <button id="research-delta-number-apply" type="button" title="套用推演年數">↵</button>
+                  </div>
+                  <details id="research-base-editor" class="research-base-editor">
+                    <summary>基準 <strong id="research-base-summary">2026/09/13</strong><span aria-hidden="true">⋯</span></summary>
+                    <div class="base-date research-base-date" aria-label="基準日期">
+                      <label>年 <input id="base-year" type="number" min="1" max="9999999" value="2026"></label>
+                      <label>月 <input id="base-month" type="number" min="1" max="12" value="9"></label>
+                      <label>日 <input id="base-day" type="number" min="1" max="31" value="13"></label>
+                    </div>
+                  </details>
+                  <small id="delta-range-note" class="research-shift-note">0–24,000 年可用滑桿或播放；此列可直接輸入任意年數或以步長 ± 跳轉。</small>
+                  <output id="research-shift-feedback" class="research-shift-feedback" role="status" aria-live="polite" hidden></output>
+                  <div id="candidate-buttons" class="candidate-buttons" role="group" aria-label="其他回歸候選" hidden></div>
+                  <div class="global-period" hidden><span>離散全域精確</span><strong>24,000 年</strong></div>
+                </section>
+              </details>
+            </header>
+          </section>
+        </div>
+      </div>
+
+
+      <div id="research-lab-evidence" class="research-lab-evidence" aria-label="日柱、時柱與天文來源的完整證據"></div>
+
+      <details id="secondary-astronomy-tools" class="secondary-astronomy-tools">
+        <summary><span>其他 Δ / 快速模型</span><strong id="secondary-astronomy-tools-meta">跟隨上方時間軸目前 Δ</strong></summary>
+      <section class="astronomy-panel" aria-label="季節相位與春分歸零後的十二節形狀殘差">
+        <div><span>季節形狀 · 春分歸零</span><strong id="astronomy-max-residual">—</strong><small id="astronomy-rms-residual">—</small></div>
+        <div class="astronomy-phase-card" data-phase-status="not-modeled"><span>季節相位 · 公曆框架</span><strong id="astronomy-phase-status">尚未納入</strong><small id="astronomy-phase-note">春分相對公曆的絕對位移另算；不要把形狀殘差當成完整節氣漂移。</small></div>
+        <div><span>軌道參數</span><div id="astronomy-orbit-readout">—</div><small>目前只比較春分後各黃經位置的相對到達時間。</small></div>
+        <div><span>視覺尺度</span><strong id="astronomy-scale-readout">—</strong><small>正值向外，負值向內。</small></div>
+      </section>
+      <div id="astronomy-term-grid" class="astronomy-term-grid" aria-label="十二節殘差明細"></div>
+
+      </details>
+        </div>
+      </details>
+    </section>
+
+    <section id="research-glossary" class="research-glossary" aria-labelledby="research-glossary-title">
+      <h2 id="research-glossary-title">名詞解釋</h2>
+      <p class="research-glossary-lead">這頁用到的專有名詞，用白話說明。</p>
+      <dl>
+        <div id="term-ganzhi"><dt>干支／六十甲子</dt><dd>10 個天干和 12 個地支輪流配對，共 60 組，用完一輪再從「甲子」開始。年、月、日、時各自都用這 60 組在輪。</dd></div>
+        <div id="term-pillars"><dt>四柱</dt><dd>用年、月、日、時各一組干支，描述一個時間點，例如「丙午年、丁酉月、辛卯日、壬辰時」。</dd></div>
+        <div id="term-jie"><dt>節（十二節）</dt><dd>一年裡 12 個換月的時間點，例如立春、驚蟄、清明。八字的月份是在「節」的那一刻換，不是在每月 1 號換。</dd></div>
+        <div id="term-lichun"><dt>立春</dt><dd>十二節的第一個，也是八字「換年」的時刻，所以立春同時換年柱和月柱。</dd></div>
+        <div id="term-longitude"><dt>太陽黃經</dt><dd>太陽在一年循環裡走到哪個位置，用 0° 到 360° 表示。每走 15° 就是一個節氣。</dd></div>
+        <div id="term-recurrence"><dt>重遇</dt><dd>兩個（或多個）各自在輪的循環，同時回到和起點一樣的位置。</dd></div>
+        <div id="term-discrete"><dt>離散候選</dt><dd>只用整數曆法（公曆的閏年規則、60 年、60 日）算出來「看起來會重複」的年數。還沒用真實天文檢查，所以叫候選。</dd></div>
+        <div id="term-proxy"><dt>公曆代理</dt><dd>用公曆日期來近似「季節位置」。公曆很好算，但它不是真正的節氣時刻，所以只能當代理，最後要用天文驗證。</dd></div>
+        <div id="term-phase"><dt>相位／序位</dt><dd>在一個循環裡走到第幾格。例如「年序 0」代表年柱回到和起點相同的那一組干支。</dd></div>
+        <div id="term-delta"><dt>Δ（相隔年數）</dt><dd>比較時間和基準時間相差多少年。Δ = 0 就是同一天，不算重複。</dd></div>
+        <div id="term-tt-ut1"><dt>TT／UT1</dt><dd>兩種天文時間標準。TT 是均勻流動的時間，UT1 跟著地球自轉走。地球自轉會慢慢變慢，所以幾千年後兩者會差很多，這會影響日柱和時柱能不能算準。</dd></div>
+      </dl>
+    </section>
+
   </main>
 
   <script type="module" src="./src/recurrence-view.js"></script>
@@ -548,10 +659,13 @@
   <script type="module" src="./src/research-sexagenary-cycle.js"></script>
   <script type="module" src="./src/astronomical-residuals-view.js"></script>
   <script type="module" src="./src/research-seasonal-drift-evidence-view.js"></script>
+  <script type="module" src="./src/research-drift-accumulation-view.js"></script>
   <script type="module" src="./src/research-absolute-boundary-consequence-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>
   <script type="module" src="./src/research-narrative-spine-view.js"></script>
+  <script type="module" src="./src/research-reading-figures.js"></script>
+  <script type="module" src="./src/research-glossary-inline.js"></script>
   <script type="module" src="./src/research-time-state-view.js"></script>
 </body>
 </html>

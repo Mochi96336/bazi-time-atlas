@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { cssSource } from "./helpers/css-source.js";
 
 const app=readFileSync(new URL("../src/kinetic-atlas.js",import.meta.url),"utf8");
 const drag=readFileSync(new URL("../src/wheel/ring-drag-controller.js",import.meta.url),"utf8");
-const css=readFileSync(new URL("../scale-emphasis.css",import.meta.url),"utf8");
+const css=cssSource("scale-emphasis.css");
 const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
 
 test("native-4K transition guard defaults to the verified all mode and has a URL rollback",()=>{
@@ -12,7 +13,7 @@ test("native-4K transition guard defaults to the verified all mode and has a URL
   assert.match(app,/if \(motionTransitionAudit !== "off"\) \{/);
   assert.match(app,/svg\.dataset\.motionTransitionAudit =\s*motionTransitionAudit === "surfaces" \? "surfaces" : "all";/);
   assert.doesNotMatch(app,/svg\.dataset\.motionTransitionAudit = "off"/);
-  assert.match(html,/href="\.\/scale-emphasis\.css"/);
+  assert.match(html,/href="\.\/atlas-wheel\.css"/);
 });
 
 test("active and coasting ownership both drive the *same* motion-only guard",()=>{

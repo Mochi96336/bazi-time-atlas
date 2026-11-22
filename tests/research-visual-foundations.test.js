@@ -1,16 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource, linkPosition } from "./helpers/css-source.js";
 
 const [css,html] = await Promise.all([
-  readFile(new URL("../research-foundations.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("research-foundations.css")),
   readFile(new URL("../recurrence.html", import.meta.url), "utf8")
 ]);
 
 test("Research visual foundations load before presentation styles", () => {
-  const foundation = html.indexOf('href="./research-foundations.css"');
-  const tasks = html.indexOf('href="./research-tasks.css"');
-  const calibration = html.indexOf('href="./research-color-calibration.css"');
+  const foundation = linkPosition(html, "research-foundations.css");
+  const tasks = linkPosition(html, "research-tasks.css");
+  const calibration = linkPosition(html, "research-color-calibration.css");
 
   assert.ok(foundation > 0, "Research foundation stylesheet must be linked");
   assert.ok(tasks > foundation, "task presentation must load after foundations");
@@ -53,16 +54,18 @@ test("Research visual foundations define the shared semantic vocabulary", () => 
 });
 
 test("Research foundation type and width floors match the visual constitution", () => {
-  assert.match(css,/--research-type-body:\s*\.9375rem;/);   // 15 px
-  assert.match(css,/--research-type-compact:\s*\.875rem;/); // 14 px
-  assert.match(css,/--research-type-meta:\s*\.75rem;/);     // 12 px
-  assert.match(css,/--research-type-plot:\s*\.6875rem;/);   // 11 px
+  // Repair C1: Research maps onto the shared site type scale (tokens.css).
+  assert.match(css,/--research-type-body:\s*var\(--type-body, 1rem\);/);           // 16 px
+  assert.match(css,/--research-type-compact:\s*var\(--type-compact, \.875rem\);/); // 14 px
+  assert.match(css,/--research-type-meta:\s*var\(--type-meta, \.8125rem\);/);      // 13 px
+  assert.match(css,/--research-type-plot:\s*var\(--type-annotation, \.75rem\);/);  // 12 px
   assert.match(css,/--research-width-narrative:\s*860px;/);
   assert.match(css,/--research-width-visual:\s*1280px;/);
 });
 
 test("Research foundations stay token-only and do not own component geometry", () => {
-  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g,"");
+  // Repair C4: the file is wrapped in `@layer page { … }`; inspect its contents.
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g,"").replace(/^\s*@layer page \{([\s\S]*)\}\s*$/,"$1");
   const selectors = [...withoutComments.matchAll(/(^|\})\s*([^@{}][^{}]*)\{/g)]
     .map(match => match[2].trim())
     .filter(Boolean);
@@ -72,7 +75,9 @@ test("Research foundations stay token-only and do not own component geometry", (
 });
 
 function tokenHex(name) {
-  const match = css.match(new RegExp(name + String.raw`:\s*(#[0-9a-fA-F]{6})`));
+  // Repair C2: a token may alias the site scale as var(--site-…, #hex); the
+  // fallback hex mirrors tokens.css and is what contrast is checked against.
+  const match = css.match(new RegExp(name + String.raw`:\s*(?:var\(--[\w-]+,\s*)?(#[0-9a-fA-F]{6})`));
   assert.ok(match, "missing hex token: " + name);
   return match[1];
 }
@@ -110,4 +115,14 @@ test("Research foundation colors keep readable contrast on the brightest dark la
     const ratio = contrastRatio(tokenHex(token),layer);
     assert.ok(ratio >= minimum, token + " contrast " + ratio.toFixed(2) + " is below " + minimum);
   }
+});
+test("site tokens and Research fallbacks stay in sync", async () => {
+  const { readFileSync } = await import("node:fs");
+  const site = readFileSync(new URL("../tokens.css", import.meta.url), "utf8");
+  const siteHex = name => site.match(new RegExp(name + String.raw`:\s*(#[0-9a-fA-F]{6})`))?.[1];
+  assert.equal(siteHex("--site-field"), "#0a0d13");
+  assert.match(css, new RegExp(String.raw`--research-bg-page:\s*var\(--site-field,\s*` + siteHex("--site-field") + String.raw`\)`));
+  assert.match(css, new RegExp(String.raw`--research-bg-layer-2:\s*var\(--site-layer-2,\s*` + siteHex("--site-layer-2") + String.raw`\)`));
+  assert.match(site, /--type-annotation:\s*\.75rem;/);
+  assert.match(site, /--type-meta:\s*\.8125rem;/);
 });

@@ -2,8 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { cycleIndexFromLocalPoint, cycleScrubIndexFromLocalPoint } from "../src/research-sexagenary-cycle.js";
 
+// The wheel is drawn with polar() from geometry.js: 0° = straight up, clockwise.
 function pointAt(angleDegrees, radius = 270) {
-  const angle = angleDegrees * Math.PI / 180;
+  const angle = (angleDegrees - 90) * Math.PI / 180;
   return {
     x:320 + Math.cos(angle) * radius,
     y:320 + Math.sin(angle) * radius
@@ -33,7 +34,16 @@ test("pointer mapping rejects non-finite geometry", () => {
 
 
 test("pointer scrub is owned by the outer 60-position annulus, not the center", () => {
-  assert.equal(cycleScrubIndexFromLocalPoint(590, 320), 0);
+  assert.equal(cycleScrubIndexFromLocalPoint(320, 50), 0);
+  assert.equal(cycleScrubIndexFromLocalPoint(590, 320), 15);
   assert.equal(cycleScrubIndexFromLocalPoint(320, 320), null);
   assert.equal(cycleScrubIndexFromLocalPoint(640, 320), null);
+});
+
+test("pressing a drawn sector selects that sector (pointer uses the drawing's angle convention)", async () => {
+  const { polar } = await import("../src/geometry.js");
+  for (const index of [0, 1, 14, 15, 30, 45, 59]) {
+    const point = polar(320, 320, 275, index * 6);
+    assert.equal(cycleIndexFromLocalPoint(point.x, point.y), index, `sector ${index}`);
+  }
 });

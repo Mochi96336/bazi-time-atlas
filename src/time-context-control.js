@@ -13,7 +13,9 @@ function installStyles() {
   if (document.querySelector("#time-context-control-style")) return;
   const style = document.createElement("style");
   style.id = "time-context-control-style";
+  // Repair C4: injected styles join the `page` cascade layer like every stylesheet.
   style.textContent = `
+  @layer page {
     #time-context-trigger {
       all: unset;
       display: inline;
@@ -97,6 +99,7 @@ function installStyles() {
       .time-context-popover select,
       .time-context-popover button { height: 30px; }
     }
+  }
   `;
   document.head.appendChild(style);
 }

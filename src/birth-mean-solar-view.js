@@ -111,11 +111,14 @@ function renderSensitivity(result) {
 function install() {
   if (!form || !utcOffsetInput || !timeGroup || !timeBasisNote || !pillarSummary) return false;
 
-  const stylesheet = document.createElement("link");
-  stylesheet.rel = "stylesheet";
-  stylesheet.href = "./mean-solar-time.css";
-  stylesheet.dataset.meanSolarStyles = "1";
-  document.head.append(stylesheet);
+  // Repair E5: birth-panels.css is a static link carrying this marker.
+  if (!document.querySelector("link[data-mean-solar-styles]")) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "./mean-solar-time.css";
+    stylesheet.dataset.meanSolarStyles = "1";
+    document.head.append(stylesheet);
+  }
 
   const basisTitle = timeBasisNote.querySelector("strong");
   const basisCopy = timeBasisNote.querySelector("span");
@@ -154,7 +157,7 @@ function install() {
   preview.setAttribute("aria-label", "地方太陽時與柱位敏感度比較");
   preview.innerHTML = `
     <div class="mean-solar-preview-copy">
-      <small>SOLAR TIME BASIS</small>
+      <small>太陽時基準</small>
       <strong>地方太陽時比較</strong>
       <span>平太陽時 = 經度校正；視太陽時再加均時差。</span>
     </div>

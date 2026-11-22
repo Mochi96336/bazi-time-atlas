@@ -8,6 +8,7 @@ import {
   researchSeasonalTimeState
 } from "../src/research/research-time-state.js";
 import { SEASONAL_DRIFT_26026_RESEARCH as DATA } from "../src/research/seasonal-drift-26026-research-data.js";
+import { cssSource } from "./helpers/css-source.js";
 
 test("seasonal catalogue year switches at Li Chun rather than Gregorian Jan 1", () => {
   assert.equal(activeLiChunYearForSeasonalLongitude(2026,270),2025);
@@ -76,7 +77,7 @@ test("date-only Research state exposes sequence evidence without pretending to k
 test("shared Research time state condenses only after the same sticky node is stuck", async () => {
   const [view, css, html] = await Promise.all([
     readFile(new URL("../src/research-time-state-view.js", import.meta.url), "utf8"),
-    readFile(new URL("../research-time-state.css", import.meta.url), "utf8"),
+    Promise.resolve(cssSource("research-time-state.css")),
     readFile(new URL("../recurrence.html", import.meta.url), "utf8")
   ]);
 
@@ -98,7 +99,7 @@ test("shared Research time state condenses only after the same sticky node is st
 });
 
 test("shared Research time surface stays neutral graphite in full and sticky states", async () => {
-  const css=await readFile(new URL("../research-time-state.css", import.meta.url),"utf8");
+  const css=await Promise.resolve(cssSource("research-time-state.css"));
   assert.match(css,/\.research-time-state\s*\{[^}]*background:rgba\(14,21,29,\.96\);/s);
   assert.match(css,/\.research-time-state\s*\{[^}]*border:1px solid var\(--research-line\);/s);
   assert.match(css,/\.research-time-state-head\s*\{[^}]*border-bottom:1px solid var\(--research-line-soft\);/s);
@@ -107,7 +108,7 @@ test("shared Research time surface stays neutral graphite in full and sticky sta
 });
 
 test("shared Research time state uses the Research semantic palette", async () => {
-  const css = await readFile(new URL("../research-time-state.css", import.meta.url), "utf8");
+  const css = await Promise.resolve(cssSource("research-time-state.css"));
   assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/);
   assert.match(css, /data-status="research-resolved"[^}]*var\(--research-candidate\)/);
   assert.match(css, /data-status="sequence-only"[^}]*var\(--research-text-secondary\)/);

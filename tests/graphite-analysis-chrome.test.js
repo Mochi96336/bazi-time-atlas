@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const css = readFileSync(new URL("../ux-analysis.css", import.meta.url), "utf8");
+const css = cssSource("ux-analysis.css");
 
 test("analysis chrome stays neutral under Graphite M2", () => {
   for (const legacy of [

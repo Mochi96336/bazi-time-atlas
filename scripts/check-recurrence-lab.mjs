@@ -118,7 +118,7 @@ function expectReaderMeaning(dom, fragments, label, url) {
 
 function expectDiscreteComprehension(dom, url) {
   if (!dom.includes("每圈的 0 只代表該循環序位回到起點") ||
-      !dom.includes("依序點上方 +400、+8,000、+24,000 年的里程碑")) {
+      !dom.includes('data-cycle-milestone="8000"')) {
     throw new Error(`Research 01 must instruct readers how to interpret 0 and compare concrete milestones: ${url}`);
   }
   if (!dom.includes('class="phase-gauge-caption"') || !dom.includes("0 = 與基準同相位 · 左右為距 0 的最短循環位移")) {
@@ -149,7 +149,7 @@ function expectDiscreteComprehension(dom, url) {
   if (!dom.includes('data-milestone="local-year-day"')) {
     throw new Error(`local Year+Day recurrence is not visually promoted in the derivation rail: ${url}`);
   }
-  if (!dom.includes("推導關係：</strong>LCM(1,200, 8,000) = 24,000") ||
+  if (!dom.includes("取 1,200 和 8,000 的最小公倍數，就是 24,000 年") ||
       !dom.includes('data-diagram-grammar="condition-ladder"')) {
     throw new Error(`selected local→global condition ladder is missing from Research 01: ${url}`);
   }
@@ -176,12 +176,14 @@ function expectDiscreteComprehension(dom, url) {
 function expectPhaseFanPreview(dom, { selected, values, context }, url) {
   const detail = tagById(dom,"discrete-phase-fan-details");
   if (attr(detail,"data-phase-preview-status") !== context) {
-    throw new Error(`Phase fan disclosure misclassifies ${selected} as ${attr(detail,"data-phase-preview-status")}: ${url}`);
+    throw new Error(`Visible phase fan panel misclassifies ${selected} as ${attr(detail,"data-phase-preview-status")}: ${url}`);
   }
   for (const [key, expected] of Object.entries(values)) {
-    const line = dom.match(new RegExp(`<span[^>]*data-phase-preview="${key}"[^>]*>[^<]*<em>[^<]*<\\/em><\\/span>`))?.[0] ?? "";
-    if (!line || !line.includes(`<em>${expected}</em>`)) {
-      throw new Error(`Phase fan preview ${key} should show ${expected}: ${url}`);
+    // Each phase now contains its ring label and state alongside the value.
+    // Assert the canonical signed number, not the former flat span markup.
+    const value = dom.match(new RegExp(`<span[^>]*data-phase-preview="${key}"[^>]*>[\\s\\S]*?<em>([^<]*)<\\/em>`))?.[1] ?? null;
+    if (value !== expected) {
+      throw new Error(`Phase fan preview ${key} should show ${expected}, got ${value}: ${url}`);
     }
   }
   if (selected === 0 && !dom.includes("基準 · 非重遇")) {
@@ -197,6 +199,17 @@ function expectResearchEntry(dom, { localYears, selected }, url) {
   const global = dom.match(/<button[^>]*data-research-entry="global"[^>]*>/)?.[0] ?? "";
   if (!local || !global || attr(local,"data-delta-years") !== String(localYears)) {
     throw new Error(`Research entry is not using the computed local milestone: ${url}`);
+  }
+  const structural = dom.match(/<details[^>]*id="research-structural-milestones"[^>]*>/)?.[0] ?? "";
+  if (!structural || !dom.includes('class="research-structural-milestone-grid"')) {
+    throw new Error(`Research 01 lost optional intermediate evidence: ${url}`);
+  }
+  const intermediateOpen = /\sopen(?:\s|=|>)/.test(structural);
+  if ([400,1200,8000].includes(selected) && !intermediateOpen) {
+    throw new Error(`Selected intermediate delta is hidden in collapsed supporting evidence: ${url}`);
+  }
+  if (selected === 0 && intermediateOpen) {
+    throw new Error(`Default Research 01 should prioritize the core +local to +24k argument: ${url}`);
   }
   if (attr(local,"aria-pressed") !== String(selected === localYears) ||
       attr(global,"aria-pressed") !== String(selected === 24000)) {

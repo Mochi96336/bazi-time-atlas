@@ -12,7 +12,7 @@ const [html,css,js,production]=await Promise.all([
 test("Research 02 diagram lab stays outside production",()=>{
   assert.doesNotMatch(production,/research-02-diagram-lab/);
   assert.match(html,/noindex,nofollow/);
-  assert.match(html,/\.\.\/research-foundations\.css/);
+  assert.match(html,/\.\.\/research-layout\.css/);
 });
 
 test("Research 02 lab compares exactly three independent diagram grammars",()=>{

@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { cssSource } from "./helpers/css-source.js";
 
 const [html, css, mobileController, kineticAtlas, commandContract] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
-  readFile(new URL("../mobile-time.css", import.meta.url), "utf8"),
+  Promise.resolve(cssSource("mobile-time.css")),
   readFile(new URL("../src/mobile-time-control.js", import.meta.url), "utf8"),
   readFile(new URL("../src/kinetic-atlas.js", import.meta.url), "utf8"),
   readFile(new URL("../src/interaction/selected-instant-command.js", import.meta.url), "utf8")
@@ -15,7 +16,7 @@ test("mobile atlas exposes a dedicated second-level exact-time dock", () => {
   assert.match(html, /id="mobile-instant-input"/);
   assert.match(html, /id="mobile-time-apply"/);
   assert.match(html, /src="\.\/src\/mobile-time-control\.js"/);
-  assert.match(html, /href="\.\/mobile-time\.css"/);
+  assert.match(html, /href="\.\/atlas-chrome\.css"/);
 });
 
 test("mobile visible exact-time format belongs to the mobile controller", () => {

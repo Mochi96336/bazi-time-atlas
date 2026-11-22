@@ -3,10 +3,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import { visibleStemTenGodState } from "../src/atlas-visible-ten-gods.js";
+import { cssSource } from "./helpers/css-source.js";
 
 const source = await readFile(new URL("../src/atlas-visible-ten-gods.js", import.meta.url), "utf8");
 const analysisMode = await readFile(new URL("../src/analysis-mode.js", import.meta.url), "utf8");
-const css = await readFile(new URL("../atlas-visible-ten-gods.css", import.meta.url), "utf8");
+const css = await Promise.resolve(cssSource("atlas-visible-ten-gods.css"));
 
 test("visible stem Ten Gods are derived from the Atlas-resolved four pillars", () => {
   const state = visibleStemTenGodState({

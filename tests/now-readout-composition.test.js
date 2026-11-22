@@ -7,9 +7,12 @@ const css = readFileSync(new URL("../navigation-workspace.css", import.meta.url)
 const editor = readFileSync(new URL("../src/selected-instant-editor.js", import.meta.url), "utf8");
 
 test("desktop Selected Instant owns the center and Now stays in normal flow", () => {
-  assert.match(page, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"/);
+  assert.match(page, /class="selected-instant-line"\s*>\s*<div id="instant-readout">—<\/div>\s*<button id="now-button"[^>]*>現在<\/button>[\s\S]*?<button id="play-button"[^>]*hidden/);
   assert.match(css, /\.selected-instant-line\s*\{\s*display:grid;[\s\S]*?grid-template-columns:72px max-content 72px;[\s\S]*?justify-content:center;/);
   assert.match(css, /\.selected-instant-line::before\s*\{[\s\S]*?grid-column:1;[\s\S]*?width:72px;/);
+  // Play is retired from the reading UI; the hidden control is only a harness hook.
+  assert.match(css, /\.selected-instant-line #play-button \{ display:none; \}/);
+  assert.doesNotMatch(page, /mobile-play-button/);
   assert.match(css, /#instant-readout\s*\{[\s\S]*?grid-column:2;/);
   assert.match(css, /#now-button\.readout-now\s*\{[\s\S]*?grid-column:3;[\s\S]*?position:static;[\s\S]*?transform:none;/);
   assert.doesNotMatch(css, /left:calc\(100% \+/);

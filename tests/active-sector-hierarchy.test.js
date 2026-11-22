@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const radial = readFileSync(new URL("../radial-hierarchy.css", import.meta.url), "utf8");
-const classification = readFileSync(new URL("../classification-overlay.css", import.meta.url), "utf8");
+const radial = cssSource("radial-hierarchy.css");
+const classification = cssSource("classification-overlay.css");
 
 test("graphite active sectors remain subordinate to the Selected Instant datum", () => {
   assert.match(radial, /data-classification-overlay="on"\]\) #hour-track \.cycle-sector\.is-active,[\s\S]*?#day-track \.cycle-sector\.is-active\s*\{[^}]*currentColor 20%/);
@@ -17,11 +18,11 @@ test("graphite active sectors remain subordinate to the Selected Instant datum",
 test("classification keeps independent categorical sector authority", () => {
   assert.match(
     classification,
-    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element="木"\][^\{]*\{[^}]*var\(--five-wood\) 34%/
+    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element="木"\][^\{]*\{[^}]*--stem-color:\s*var\(--five-wood\)/
   );
   assert.match(
     classification,
-    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\.is-active\s*\{[^}]*stroke-width:\s*2\.2;[^}]*filter:\s*brightness\(1\.2\);/
+    /#kinetic-instrument\[data-classification-overlay="on"\] \.cycle-sector\[data-stem-element\]\.is-active\s*\{[^}]*stroke:\s*var\(--branch-color\);[^}]*stroke-width:\s*2\.4;/
   );
   assert.doesNotMatch(
     radial,

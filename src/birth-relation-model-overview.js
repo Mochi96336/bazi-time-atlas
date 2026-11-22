@@ -49,11 +49,14 @@ function glyphFor(family) {
 function install() {
   if (!panel || !intro) return;
 
-  const stylesheet = document.createElement("link");
-  stylesheet.rel = "stylesheet";
-  stylesheet.href = "./relation-models.css";
-  stylesheet.dataset.relationModelStyles = "1";
-  document.head.append(stylesheet);
+  // Repair E5: birth-panels.css is a static link carrying this marker.
+  if (!document.querySelector("link[data-relation-model-styles]")) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "./relation-models.css";
+    stylesheet.dataset.relationModelStyles = "1";
+    document.head.append(stylesheet);
+  }
 
   const section = node("section", "relation-model-overview");
   section.id = "relation-model-overview";
@@ -61,7 +64,7 @@ function install() {
 
   const head = node("div", "relation-model-overview-head");
   head.append(
-    node("small", null, "RELATION TOPOLOGY"),
+    node("small", null, "關係結構"),
     node("span", null, "先看結構，再看名稱")
   );
 

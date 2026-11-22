@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cssSource } from "./helpers/css-source.js";
 
-const mobileCss = readFileSync(new URL("../mobile-time.css", import.meta.url), "utf8");
-const instrumentCss = readFileSync(new URL("../instrument-first.css", import.meta.url), "utf8");
+const mobileCss = cssSource("mobile-time.css");
+const instrumentCss = cssSource("instrument-first.css");
 const navCss = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
 const mobileController = readFileSync(new URL("../src/mobile-time-control.js", import.meta.url), "utf8");
 const mobileFixture = readFileSync(new URL("../scripts/fixtures/mobile-390.html", import.meta.url), "utf8");
