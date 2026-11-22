@@ -314,11 +314,11 @@ test("lacquer first paint preserves the SVG brass until the first complete WebGL
     "SVG must not be hidden until the GPU has a complete frame submitted");
   assert.ok(!material.slice(activation, ready).includes("shell.dataset.materialPrototype = requestedMode"),
     "shader compilation alone must not hide the fallback");
-  assert.match(material, /shell\\?\\.removeAttribute\\("data-material-prototype"\\)/,
+  assert.ok(material.includes('shell?.removeAttribute("data-material-prototype")'),
     "WebGL fallback and context-loss still restore the SVG bed");
-  assert.match(finish, /:root\\[data-look="lacquer"\\] #kinetic-instrument:not\\(\\[data-material-prototype="roughness"\\]\\) \\.m2-solar-brass-bed/);
-  assert.match(finish, /:root\\[data-look="lacquer"\\] #kinetic-instrument:not\\(\\[data-material-prototype="roughness"\\]\\) \\.m2-solar-brass-response/);
-  assert.match(finish, /opacity:\\s*\\.012;/);
-  assert.match(material, /requestIdleCallback\\(activate, \\{ timeout: 1800 \\}\\)/,
+  assert.ok(finish.includes(':root[data-look="lacquer"] #kinetic-instrument:not([data-material-prototype="roughness"]) .m2-solar-brass-bed'));
+  assert.ok(finish.includes(':root[data-look="lacquer"] #kinetic-instrument:not([data-material-prototype="roughness"]) .m2-solar-brass-response'));
+  assert.ok(finish.includes('opacity: .012;'));
+  assert.ok(material.includes('requestIdleCallback(activate, { timeout: 1800 })'),
     "keep the existing startup deferral instead of blocking first paint with shader compilation");
 });
