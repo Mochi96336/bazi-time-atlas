@@ -300,3 +300,25 @@ test("canvas stays pointer-inert and renderer owns the only runtime pose bridge"
   assert.doesNotMatch(material, /for \(int i = 0; i < 500/);
 });
 
+test("lacquer first paint preserves the SVG brass until the first complete WebGL draw", async () => {
+  const [material, finish] = await Promise.all([
+    readFile(new URL("../src/wheel/material-prototype.js", import.meta.url), "utf8"),
+    readFile(new URL("../atlas-wheel-finish.css", import.meta.url), "utf8")
+  ]);
+  const submit = material.indexOf("gl.drawArrays(gl.TRIANGLES, 0, 6);");
+  const flush = material.indexOf("gl.flush();", submit);
+  const show = material.indexOf("shell.dataset.materialPrototype = requestedMode;", submit);
+  const activation = material.indexOf("function activateShader()");
+  const ready = material.indexOf("function initialize()", activation);
+  assert.ok(submit >= 0 && flush > submit && show > flush,
+    "SVG must not be hidden until the GPU has a complete frame submitted");
+  assert.ok(!material.slice(activation, ready).includes("shell.dataset.materialPrototype = requestedMode"),
+    "shader compilation alone must not hide the fallback");
+  assert.match(material, /shell\\?\\.removeAttribute\\("data-material-prototype"\\)/,
+    "WebGL fallback and context-loss still restore the SVG bed");
+  assert.match(finish, /:root\\[data-look="lacquer"\\] #kinetic-instrument:not\\(\\[data-material-prototype="roughness"\\]\\) \\.m2-solar-brass-bed/);
+  assert.match(finish, /:root\\[data-look="lacquer"\\] #kinetic-instrument:not\\(\\[data-material-prototype="roughness"\\]\\) \\.m2-solar-brass-response/);
+  assert.match(finish, /opacity:\\s*\\.012;/);
+  assert.match(material, /requestIdleCallback\\(activate, \\{ timeout: 1800 \\}\\)/,
+    "keep the existing startup deferral instead of blocking first paint with shader compilation");
+});
