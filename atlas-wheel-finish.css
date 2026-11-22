@@ -4,7 +4,7 @@
    ?look=classic removes the root attribute and shows the previous finish.
 
    Luminance ladder (relative luminance, measured at 1440×900):
-     ground 0.004 · ring bodies 0.02–0.03 · brass band ~0.033 · hairlines 0.05–0.08
+     ground 0.004 · ring bodies 0.02–0.03 · brass band ~0.04 · hairlines 0.05–0.08
      resting 干支 0.12–0.18 · the four pillars 0.35–0.45
    Each emphasis uses one device only.
 
@@ -54,7 +54,7 @@
 
 /* brass: the WebGL body is the brass; dim it as a whole so its oxidation and
    scratches survive (the ring overlays in the same canvas are near-invisible) */
-:root[data-look="lacquer"] #material-wheel-layer { filter: brightness(.4) saturate(2.9); }
+:root[data-look="lacquer"] #material-wheel-layer { filter: brightness(.62) saturate(1.6); }
 :root[data-look="lacquer"] #kinetic-wheel .term-sector,
 :root[data-look="lacquer"] #kinetic-wheel .term-sector.jie { fill: transparent; stroke: none; }
 :root[data-look="lacquer"] .look-brass-sheen { mix-blend-mode: normal; }
