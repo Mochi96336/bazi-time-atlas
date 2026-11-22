@@ -1,11 +1,14 @@
-// Home look prototype (2026-11-21): "lacquer". Opt-in with ?look=lacquer so the
-// production wheel stays untouched while the direction is compared side by side.
+// Home wheel finish "lacquer" (2026-11): ink-blue lacquer rings, a turned brass
+// solar band, engraved hairlines and serif type. index.html sets
+// <html data-look="lacquer"> and loads atlas-wheel-finish.css; this module adds
+// the SVG detail that CSS cannot draw.
 //
-// Direction (from the reader review and the user's own art direction):
-//   - one material for every ring: dark lacquer with incised hairlines;
-//   - a luminance ladder with every level present (v2): ground, ring bodies,
-//     hairlines, resting labels, then the four pillars; warm = now;
-//   - the four pillars read down the needle in a serif face, everything else recedes;
+// Design rules (from the 2026-11 reader reviews):
+//   - one material per ring family: lacquer for the four pillars, brass for the
+//     sun's band; colour comes from the material's own knobs, never from veils;
+//   - a luminance ladder with every level present: ground, ring bodies,
+//     hairlines, resting labels, then the four pillars read down the needle;
+//   - warmth belongs to material (brass) or light (needle, current names);
 //   - fine engraved ticks give close-up detail without adding visual weight.
 // Presentation only: it reads the renderer's existing ring groups and never
 // touches time, phase or rotation state.
@@ -46,7 +49,6 @@ function engraveTicks(wheel) {
     const spec = FINE_TICKS[ring.id];
     const group = wheel.querySelector(`#${ring.groupId}`);
     if (!spec || !group || group.querySelector(".look-fine-ticks")) continue;
-    const layer = el("g", { class: "look-fine-ticks", "aria-hidden": "true" });
     const step = 6 / spec.per;
     let d = "";
     for (let i = 0; i < 60 * spec.per; i += 1) {
@@ -56,13 +58,12 @@ function engraveTicks(wheel) {
       const b = polar(ring.innerRadius + spec.length, angle);
       d += `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${b.x.toFixed(2)} ${b.y.toFixed(2)}`;
     }
-    el("path", { d }, layer);
-    group.prepend(layer);
+    // A bare path (no wrapper group) keeps each track's children flat.
+    group.prepend(el("path", { d, class: "look-fine-ticks", "aria-hidden": "true" }));
   }
   // Solar band: one hairline per degree of solar longitude along its outer edge.
   const solar = wheel.querySelector("#solar-track");
   if (solar && !solar.querySelector(".look-fine-ticks")) {
-    const layer = el("g", { class: "look-fine-ticks look-degree-ticks", "aria-hidden": "true" });
     let d = "";
     let major = "";
     for (let deg = 0; deg < 360; deg += 1) {
@@ -72,13 +73,14 @@ function engraveTicks(wheel) {
       const seg = `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${b.x.toFixed(2)} ${b.y.toFixed(2)}`;
       if (deg % 15 === 0) major += seg; else d += seg;
     }
-    el("path", { d }, layer);
-    el("path", { d: major, class: "major" }, layer);
-    solar.prepend(layer);
+    solar.prepend(
+      el("path", { d, class: "look-fine-ticks look-degree-ticks", "aria-hidden": "true" }),
+      el("path", { d: major, class: "look-fine-ticks look-degree-ticks major", "aria-hidden": "true" })
+    );
   }
 }
 
-// v5.2 brass finish — what separates machined brass from brown paint:
+// Brass finish — what separates machined brass from brown paint:
 //   - turned (circular-grain) metal shows its highlight as a narrow band
 //     pointing at the light, not as a soft blob; inside that band the grain
 //     itself is visible as fine concentric lines;
@@ -131,16 +133,11 @@ function brassFinish(layer, defs) {
 }
 
 // Stacked discs: a soft shadow just inside each ring edge, and a gentle
-// darkening toward the fan's far ends. No rim lights, no spotlight (v1 review).
+// darkening toward the fan's far ends. No rim lights, no spotlight.
 function shading(wheel) {
   if (wheel.querySelector("#look-light-layer")) return;
   const defs = wheel.querySelector("defs") ?? el("defs", {}, wheel);
-  // v3: one soft light from the upper left, falling off toward the lower right,
-  // so the disc has a lit side and a shadow side instead of an even grey.
-  const light = el("radialGradient", { id: "look-key-light", gradientUnits: "userSpaceOnUse", cx: 120, cy: 260, r: 1250 }, defs);
-  for (const [offset, color, opacity] of [[0, "#d4e0f0", 0.075], [0.45, "#c8d6ea", 0.03], [1, "#c8d6ea", 0]]) {
-    el("stop", { offset, "stop-color": color, "stop-opacity": opacity }, light);
-  }
+  // The key light comes from the upper left; this shade darkens the lower right.
   const shade = el("radialGradient", { id: "look-key-shade", gradientUnits: "userSpaceOnUse", cx: 1330, cy: 980, r: 1150 }, defs);
   for (const [offset, opacity] of [[0, 0.5], [0.55, 0.2], [1, 0]]) {
     el("stop", { offset, "stop-color": "#04060a", "stop-opacity": opacity }, shade);
@@ -148,9 +145,8 @@ function shading(wheel) {
   const layer = el("g", { id: "look-light-layer", class: "look-light-layer", "aria-hidden": "true" });
   const disc = annulus(RADII.inner, RADII.outer, FAN.start, FAN.end);
   el("path", { d: disc, class: "look-key-shade", fill: "url(#look-key-shade)" }, layer);
-  el("path", { d: disc, class: "look-key-light", fill: "url(#look-key-light)" }, layer);
-  // v5: brass sheen — the annual band catches the key light on its upper-left
-  // run, like brushed metal; it fades out long before the needle.
+  // Brass sheen: a broad warm lift on the lit run of the band (colour follows
+  // value: lights lean yellow); it fades out long before the needle.
   const sheenAt = polar((RADII.dayOuter + RADII.solarTermOuter) / 2, -128);
   const sheen = el("radialGradient", { id: "look-brass-sheen", gradientUnits: "userSpaceOnUse", cx: sheenAt.x, cy: sheenAt.y, r: 520 }, defs);
   for (const [offset, opacity] of [[0, 0.12], [0.4, 0.05], [1, 0]]) {
@@ -175,12 +171,11 @@ function shading(wheel) {
 }
 
 function install() {
-  if (LOOK !== "lacquer") return;
-  document.documentElement.dataset.look = "lacquer";
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = new URL("../atlas-look-lacquer.css", import.meta.url).href;
-  document.head.append(link);
+  const root = document.documentElement;
+  // ?look=classic shows the previous finish for comparison: without the root
+  // attribute none of atlas-wheel-finish.css applies.
+  if (LOOK === "classic") delete root.dataset.look;
+  if (root.dataset.look !== "lacquer") return;
   let tries = 0;
   const ready = () => {
     const wheel = document.querySelector("#kinetic-wheel");

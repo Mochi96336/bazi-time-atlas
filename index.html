@@ -1,17 +1,19 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-look="lacquer">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="把年、月、日、時干支、節氣與熱帶黃道放進同一個可拖動的多速時間圓盤。">
   <title>BaZi Time Atlas · Kinetic Atlas</title>
   <link rel="stylesheet" href="./vendor/fonts/noto-sans-tc/noto-sans-tc.css">
+  <link rel="preload" href="./assets/fonts/noto-serif-tc-wheel.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./tokens.css">
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./atlas-wheel.css">
   <link rel="stylesheet" href="./atlas-chrome.css">
   <link rel="stylesheet" href="./navigation-workspace.css">
   <link rel="stylesheet" href="./atlas-tools.css" id="time-context-control-style" data-analysis-first-screen="1" data-atlas-solar-time-analysis="1" data-inverse-time-search="1" data-atlas-visible-ten-gods-styles="1" data-analysis-first-screen-polish="1" data-analysis-tools-rail="1" data-desktop-tools-workspace="1" data-selected-instant-editor="1">
+  <link rel="stylesheet" href="./atlas-wheel-finish.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -300,6 +302,6 @@
   <script type="module" src="./src/legacy-annual-compat.js"></script>
   <script type="module" src="./src/analysis-mode.js"></script>
   <script type="module" src="./src/mobile-time-control.js"></script>
-  <script type="module" src="./src/atlas-look.js"></script>
+  <script type="module" src="./src/wheel-finish.js"></script>
 </body>
 </html>
