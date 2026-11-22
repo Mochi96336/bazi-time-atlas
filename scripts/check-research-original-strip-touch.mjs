@@ -115,12 +115,17 @@ try{
     await sleep(70);
   }
   assert.ok(original,"original Year strip did not initialize");
-  // The strip lives deep in the page (the lab follows the three reading
-  // steps); bring it into the touch viewport before dispatching real touches.
+  // The strip lives deep in the page, inside the collapsed lab-tools drawer
+  // that follows the three reading steps. Open the drawer the way a reader
+  // does (its summary), then bring the strip into the touch viewport before
+  // dispatching real touches; a closed <details> is not hit-testable.
   if(original.rect.y>300){
     await send("Runtime.evaluate",{expression:`(()=>{
       const f=document.getElementById("stage"),d=f?.contentDocument;
-      d?.getElementById("research-year-scrub")?.scrollIntoView({block:"center"});
+      const scrub=d?.getElementById("research-year-scrub");
+      for(let n=scrub?.closest("details:not([open])");n;n=n.parentElement?.closest("details:not([open])"))
+        n.querySelector(":scope > summary")?.click();
+      scrub?.scrollIntoView({block:"center"});
       return true;
     })()`,returnByValue:true});
     await sleep(250);
