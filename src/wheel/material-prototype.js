@@ -899,6 +899,13 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    // The first complete WebGL draw, not shader compilation, owns the SVG
+    // fallback handoff. This prevents the brass bed disappearing while the
+    // deferred GPU program is still preparing its first visible frame.
+    if (shell && shell.dataset.materialPrototype !== requestedMode) {
+      gl.flush();
+      shell.dataset.materialPrototype = requestedMode;
+    }
     drawnRotations.set(rotations);
     drawnSolarRotation = solarRotation;
     if (audit) {
@@ -958,7 +965,7 @@ export function createWheelMaterialPrototype({ canvas, svg, search = globalThis.
       shell?.removeAttribute("data-material-prototype-fallback");
       shell?.removeAttribute("data-material-prototype-error");
       if (shell) {
-        shell.dataset.materialPrototype = requestedMode;
+        // Keep the SVG material visible until draw() has submitted frame one.
         if (requestedProbe !== null) {
           const name = Object.keys(MATERIAL_PROBES).find(key => MATERIAL_PROBES[key] === requestedProbe);
           shell.dataset.materialProbe = name;
