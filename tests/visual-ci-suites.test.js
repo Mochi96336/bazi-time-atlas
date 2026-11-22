@@ -27,9 +27,9 @@ test("parallel visual CI retains every existing screenshot command and determina
     "material ablation depends on prototype screenshot files");
 });
 
-test("all seven matrix shards execute real existing scripts exactly once", () => {
+test("all eight matrix shards execute real existing scripts exactly once", () => {
   const expected = ["shader", "home", "research",
-    "capture-pages", "capture-interactions", "capture-material", "capture-responsive"];
+    "capture-pages", "capture-research", "capture-interactions", "capture-material", "capture-responsive"];
   assert.deepEqual(Object.keys(VISUAL_CI_SUITES), expected);
   const scripts = Object.values(VISUAL_CI_SUITES).flat();
   assert.equal(new Set(scripts).size, scripts.length);
@@ -37,7 +37,7 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
   for (const script of scripts) {
     assert.ok(existsSync(new URL("../scripts/" + script, import.meta.url)), "missing " + script);
   }
-  assert.match(workflow, /suite: \[shader, home, research, capture-pages, capture-interactions, capture-material, capture-responsive\]/);
+  assert.match(workflow, /suite: \[shader, home, research, capture-pages, capture-research, capture-interactions, capture-material, capture-responsive\]/);
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /run: node scripts\/run-visual-ci-suite\.mjs/);
   assert.ok(VISUAL_CI_SUITES.research.includes("check-seasonal-drift-evidence-live.mjs"));
@@ -48,27 +48,27 @@ test("all seven matrix shards execute real existing scripts exactly once", () =>
     "native R16 opt-in seam must be compared with unmodified R16 in real Chromium"
   );
   assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-01-diagram-lab.mjs"),
+    VISUAL_CI_SUITES["capture-research"].includes("visual-check-research-01-diagram-lab.mjs"),
     "Research 01 diagram lab must keep deterministic desktop/mobile PNG evidence"
   );
   assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-02-diagram-lab.mjs"),
+    VISUAL_CI_SUITES["capture-research"].includes("visual-check-research-02-diagram-lab.mjs"),
     "Research 02 diagram lab must keep deterministic desktop/mobile PNG evidence"
   );
   assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-02-production.mjs"),
+    VISUAL_CI_SUITES["capture-research"].includes("visual-check-research-02-production.mjs"),
     "Research 02 production must keep deterministic desktop/mobile PNG evidence"
   );
   assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-near-recurrence-production.mjs"),
+    VISUAL_CI_SUITES["capture-research"].includes("visual-check-near-recurrence-production.mjs"),
     "Near-recurrence chart must keep 320/390/1440 real-page PNG evidence"
   );
   assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-03-diagram-lab.mjs"),
+    VISUAL_CI_SUITES["capture-research"].includes("visual-check-research-03-diagram-lab.mjs"),
     "Research 03 diagram lab must keep deterministic desktop/mobile PNG evidence"
   );
   assert.ok(
-    VISUAL_CI_SUITES["capture-pages"].includes("visual-check-research-03-production.mjs"),
+    VISUAL_CI_SUITES["capture-research"].includes("visual-check-research-03-production.mjs"),
     "Research 03 production must keep deterministic desktop/mobile PNG evidence"
   );
 });
