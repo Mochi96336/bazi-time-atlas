@@ -76,9 +76,13 @@ if (initialReadheadMaxError > 0.01) {
 }
 if (
   attr(probe, "data-motion-fan-clipped") !== "true" || attr(probe, "data-cursor-fan-clipped") !== "true" ||
-  attr(probe, "data-motion-clip-owner") !== "kinetic-fan-layer" || attr(probe, "data-cursor-clip-owner") !== "kinetic-fan-layer" ||
-  attr(probe, "data-motion-parent") !== "kinetic-fan-layer" || attr(probe, "data-cursor-parent") !== "kinetic-fan-layer" ||
-  attr(probe, "data-fan-wrapper-clip") !== "url(#kinetic-master-fan-clip)"
+  attr(probe, "data-motion-clip-owner") !== "kinetic-fan-layer" || attr(probe, "data-motion-parent") !== "kinetic-fan-layer" ||
+  attr(probe, "data-fan-wrapper-clip") !== "url(#kinetic-master-fan-clip)" ||
+  // The cursor is fixed-world, so it sits in the static overlay SVG under a fan
+  // group that reuses the same master clip (src/wheel/static-wheel-layers.js).
+  attr(probe, "data-cursor-clip-owner") !== "kinetic-static-fan" || attr(probe, "data-cursor-parent") !== "kinetic-static-fan" ||
+  attr(probe, "data-cursor-wrapper-clip") !== "url(#kinetic-master-fan-clip)" ||
+  attr(probe, "data-cursor-layer-svg") !== "kinetic-wheel-over"
 ) throw new Error(`reference-frame: moving overlays are not children of the fixed master fan clip: ${url}`);
 
 if (attr(probe, "data-day-reference") !== "day") throw new Error(`reference-frame: Day reference did not activate: ${url}`);

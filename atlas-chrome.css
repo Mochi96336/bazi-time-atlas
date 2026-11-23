@@ -109,13 +109,21 @@
    labels laid directly over the radial stack. Active values already live on
    the Selected Instant read-head, so dots and duplicated values disappear.
    Analysis reuses the same DOM as the full layer-control legend. */
+/* display: contents, not an inset:0 box: the rows keep the same containing
+   block (#kinetic-instrument, which the box exactly covered) and identical
+   positions, but the legend stops being a full-instrument compositor layer
+   above the wheel. At 4K that layer pushed the static wheel layers past the
+   GPU tile budget (src/wheel/static-wheel-layers.js). */
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend {
   inset: 0;
-  display: block;
+  display: contents;
   pointer-events: none;
 }
 #kinetic-instrument:not([data-analysis-open="true"]) .ring-legend-row {
   position: absolute;
+  /* The display: contents container no longer stacks the rows; keep its
+     z-index (.ring-legend, atlas-wheel.css) so labels stay above the wheel. */
+  z-index: 3;
   display: block;
   width: auto;
   padding: 0;
@@ -874,6 +882,7 @@
 }
 
 #kinetic-wheel { z-index: 1; }
+.wheel-static-layer { z-index: 1; }
 
 
 @media (min-width: 481px) {

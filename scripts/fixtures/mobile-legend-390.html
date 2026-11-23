@@ -49,7 +49,11 @@
       if (!instrument || !legend) return;
 
       writeRect("instrument", instrument.getBoundingClientRect());
-      writeRect("legend", legend.getBoundingClientRect());
+      // The frame the identity labels are laid out in is their containing
+      // block. In the reading view the legend is display: contents (no box of
+      // its own), so measure the rows' offsetParent rather than the legend.
+      const labelFrame = legend.querySelector(".ring-legend-row")?.offsetParent ?? legend;
+      writeRect("legend", labelFrame.getBoundingClientRect());
       for (const id of ["year", "month", "solar", "day", "hour"]) {
         const row = doc.querySelector(`.ring-${id}`);
         const dot = row?.querySelector("i") ?? null;

@@ -13,7 +13,9 @@ test("small inner-ring identities keep a dedicated legibility floor without alte
 });
 
 test("normal reading view turns the layer legend into fixed ring identity labels", () => {
-  assert.match(analysisCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend \{[\s\S]*?inset:\s*0;[\s\S]*?display:\s*block;/);
+  // display: contents keeps the rows' containing block (#kinetic-instrument)
+  // without a full-instrument compositor layer above the wheel (4K tile budget).
+  assert.match(analysisCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend \{[^}]*inset:\s*0;[^}]*display:\s*contents;/);
   assert.match(analysisCss, /#kinetic-instrument:not\(\[data-analysis-open="true"\]\) \.ring-legend-row \{[\s\S]*?position:\s*absolute;/);
   assert.match(analysisCss, /\.ring-legend-row i,[\s\S]*?\.ring-legend-row strong \{\s*display:\s*none;/);
 

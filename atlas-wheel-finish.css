@@ -81,7 +81,7 @@
 :root[data-look="lacquer"] #kinetic-wheel .term-sector.is-active { fill: transparent; stroke: none; }
 
 /* engraving: low-contrast hairlines */
-:root[data-look="lacquer"] #kinetic-wheel .guide-arc { stroke: rgba(206, 212, 216, .10); stroke-width: .9; }
+:root[data-look="lacquer"] :is(#kinetic-wheel, #kinetic-wheel-under) .guide-arc { stroke: rgba(206, 212, 216, .10); stroke-width: .9; }
 :root[data-look="lacquer"] #kinetic-wheel .ring-tick { stroke: rgba(206, 212, 216, .16); stroke-width: .8; }
 :root[data-look="lacquer"] #kinetic-wheel .ring-tick.major { stroke: rgba(206, 212, 216, .26); stroke-width: .9; }
 :root[data-look="lacquer"] #kinetic-wheel path.look-fine-ticks { fill: none; stroke: rgba(206, 212, 216, .12); stroke-width: .7; }
@@ -91,7 +91,12 @@
 
 /* light layer: soft stacking shadows only — no white rims, no spotlight */
 :root[data-look="lacquer"] .look-light-layer { pointer-events: none; }
-:root[data-look="lacquer"] .look-key-shade { mix-blend-mode: multiply; opacity: .22; }
+:root[data-look="lacquer"] .look-key-shade { opacity: .22; }
+/* Normal blending on purpose. Multiply over the composited WebGL material
+   made Chrome split the wheel into many overlap layers, exhausting GPU tile
+   memory at 4K (black frames while dragging). With a #04060a shade at
+   alpha <= .5 * .22, normal differs from multiply by alpha * shade * (1 - base)
+   <= .11 * .039 ~= 1/255 per channel. */
 :root[data-look="lacquer"] .look-rim-shadow { fill: none; stroke: rgba(0, 0, 0, .16); stroke-width: 12; }
 
 /* type: serif throughout the wheel, engraved silver at rest */
@@ -128,9 +133,9 @@
 }
 
 /* needle: one fine warm line; the small cap is the only gold */
-:root[data-look="lacquer"] #kinetic-wheel .cursor-line { stroke: var(--lq-now); stroke-width: 1.2; opacity: .9; filter: drop-shadow(0 0 5px rgba(239, 213, 156, .28)); }
-:root[data-look="lacquer"] #kinetic-wheel .cursor-halo { display: none; }
-:root[data-look="lacquer"] #kinetic-wheel .cursor-cap { fill: var(--lq-now); }
+:root[data-look="lacquer"] :is(#kinetic-wheel, #kinetic-wheel-over) .cursor-line { stroke: var(--lq-now); stroke-width: 1.2; opacity: .9; filter: drop-shadow(0 0 5px rgba(239, 213, 156, .28)); }
+:root[data-look="lacquer"] :is(#kinetic-wheel, #kinetic-wheel-over) .cursor-halo { display: none; }
+:root[data-look="lacquer"] :is(#kinetic-wheel, #kinetic-wheel-over) .cursor-cap { fill: var(--lq-now); }
 
 /* the time readout: quieter, tabular */
 :root[data-look="lacquer"] #instant-readout {

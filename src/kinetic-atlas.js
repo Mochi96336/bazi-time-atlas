@@ -1,5 +1,6 @@
 import "./time-context-control.js";
 import { installKineticFanGuard } from "./kinetic-fan-guard.js";
+import { installStaticWheelLayers } from "./wheel/static-wheel-layers.js";
 import { solarTerms, zodiacSigns } from "./data.js";
 import {
   CURSOR_ANGLE,
@@ -773,6 +774,9 @@ function initialize() {
   assertWheelModel();
   renderer.renderStatic();
   installKineticFanGuard();
+  // After the fan guard has wrapped the rings: fixed-world groups move to
+  // their own static layers so drags only re-raster rotating content.
+  installStaticWheelLayers(svg);
   applyInitialSearchState();
   setSliderForScale();
   installPlayback();

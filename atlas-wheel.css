@@ -223,8 +223,12 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
   backface-visibility: hidden;
 }
 
+/* No will-change while kinetic: promoting the field (a ~6000px layer)
+   forced every ring painted above it into its own overlap layer. At 4K a
+   drag then grew composited layers from ~45 to ~146 MP, the GPU tile budget
+   ran out and whole frames flashed black. The field repaints instead. */
 #orbital-background[data-orbital-kinetic="true"] .orbital-field {
-  will-change: transform;
+  will-change: auto;
 }
 
 /* Only these long veils carry kinetic response. JS drives width/opacity from
@@ -264,6 +268,13 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 
 
 #kinetic-wheel { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Static siblings of the rotating wheel (src/wheel/static-wheel-layers.js):
+   each is its own compositor layer, rasterised once instead of on every drag
+   frame. They never take input. */
+.wheel-static-layer {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  overflow: hidden; pointer-events: none; will-change: transform;
+}
 .cycle-sector { stroke: color-mix(in srgb, var(--field) 74%, transparent); stroke-width: 1.2; transition: fill 140ms ease, opacity 140ms ease; }
 .year-sector { fill: color-mix(in srgb, var(--year) 17%, transparent); }
 .month-sector { fill: color-mix(in srgb, var(--month) 18%, transparent); }
@@ -1536,7 +1547,9 @@ body.legacy-projection .legacy-note { display: block; }
    release. Labels, sectors, hit targets and desktop filters keep their cadence. */
 @media (max-width: 480px), (pointer: coarse) {
   #kinetic-wheel:is([data-active-ring], [data-coasting-ring]) .ring-tick.major,
-  #kinetic-wheel:is([data-active-ring], [data-coasting-ring]) .cursor-line {
+  #kinetic-wheel:is([data-active-ring], [data-coasting-ring]) .cursor-line,
+  /* The cursor lives in the static overlay sibling (static-wheel-layers.js). */
+  #kinetic-wheel:is([data-active-ring], [data-coasting-ring]) + #kinetic-wheel-over .cursor-line {
     filter: none;
   }
 }
