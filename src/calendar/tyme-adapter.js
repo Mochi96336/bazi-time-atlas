@@ -161,6 +161,64 @@ function toSolarTermReferenceTime(localSolarTime, utcOffsetHours) {
     .getSolarTime();
 }
 
+// ---------------------------------------------------------------------------
+// Exact memoisation. Every Tyme EightChar evaluation builds a lunar date (new
+// moon series) and solar-term search; a wheel drag resolves a new instant on
+// every frame. Both caches below key on what the pillars provably depend on,
+// so Tyme stays the only calendar authority:
+//   - Day/Hour depend only on the local date, the hour branch (with 23:00 kept
+//     distinct: it carries the next day's stem) and the day-boundary rule.
+//   - Year/Month are constant between one Jie and the next (Li Chun is a Jie).
+//     The interval is taken from Tyme's own SolarTerm instants, and reuse is
+//     strictly inside it, so an instant on a boundary second is recomputed.
+const DAY_HOUR_CACHE_LIMIT = 512;
+const JIE_INTERVAL_CACHE_LIMIT = 16;
+const dayHourCache = new Map();
+let jieIntervalCache = [];
+
+function clockKey(time) {
+  return (((((time.getYear() * 12 + time.getMonth() - 1) * 31 + time.getDay() - 1) * 24
+    + time.getHour()) * 60 + time.getMinute()) * 60) + time.getSecond();
+}
+
+function cachedDayHour(solarTime, sourceHour, dayBoundary) {
+  const branchSlot = sourceHour === 23 ? 23 : ~~((sourceHour + 1) / 2);
+  const key = `${dayBoundary}|${solarTime.getYear()}|${solarTime.getMonth()}|${solarTime.getDay()}|${branchSlot}`;
+  let pillars = dayHourCache.get(key);
+  if (!pillars) {
+    pillars = dayHourFromSolarTime(solarTime, sourceHour, dayBoundary);
+    if (dayHourCache.size >= DAY_HOUR_CACHE_LIMIT) dayHourCache.delete(dayHourCache.keys().next().value);
+    dayHourCache.set(key, pillars);
+  }
+  return { day: { ...pillars.day }, hour: { ...pillars.hour } };
+}
+
+function cachedYearMonth(referenceSolarTime) {
+  const key = clockKey(referenceSolarTime);
+  const hit = jieIntervalCache.find(entry => entry.startKey < key && key < entry.endKey);
+  if (hit) return { year: { ...hit.year }, month: { ...hit.month } };
+
+  // Year/month are taken from the same astronomical instant expressed on
+  // Tyme's UTC+8 solar-term reference clock. Day-boundary choice cannot alter
+  // them, so use the default provider for this projection.
+  const referenceEightChar = resolveEightChar(
+    referenceSolarTime,
+    DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+  );
+  const year = pillarView(referenceEightChar.getYear());
+  const month = pillarView(referenceEightChar.getMonth());
+
+  let jie = referenceSolarTime.getTerm();
+  if (jie.isQi()) jie = jie.next(-1);
+  const startKey = clockKey(jie.getJulianDay().getSolarTime());
+  const endKey = clockKey(jie.next(2).getJulianDay().getSolarTime());
+  if (startKey <= key && key < endKey) {
+    jieIntervalCache = [{ startKey, endKey, year, month }, ...jieIntervalCache]
+      .slice(0, JIE_INTERVAL_CACHE_LIMIT);
+  }
+  return { year: { ...year }, month: { ...month } };
+}
+
 /**
  * Resolve four pillars from birthplace-local civil date/time components.
  *
@@ -191,19 +249,23 @@ export function resolveBirthPillars(input, options = {}) {
   );
   const referenceSolarTime = toSolarTermReferenceTime(localSolarTime, utcOffsetHours);
 
-  // Year/month are taken from the same astronomical instant expressed on
-  // Tyme's UTC+8 solar-term reference clock. Day-boundary choice cannot alter
-  // them, so use the default provider for this projection.
-  const referenceEightChar = resolveEightChar(
-    referenceSolarTime,
-    DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
-  );
-
-  // Day/hour are birthplace-local civil-time rules.
-  const { day, hour } = dayHourFromSolarTime(localSolarTime, input.hour, dayBoundary);
-
-  const year = pillarView(referenceEightChar.getYear());
-  const month = pillarView(referenceEightChar.getMonth());
+  let year;
+  let month;
+  let day;
+  let hour;
+  if (options.cache === false) {
+    const referenceEightChar = resolveEightChar(
+      referenceSolarTime,
+      DAY_BOUNDARY.ZI_INITIAL_NEXT_DAY
+    );
+    year = pillarView(referenceEightChar.getYear());
+    month = pillarView(referenceEightChar.getMonth());
+    // Day/hour are birthplace-local civil-time rules.
+    ({ day, hour } = dayHourFromSolarTime(localSolarTime, input.hour, dayBoundary));
+  } else {
+    ({ year, month } = cachedYearMonth(referenceSolarTime));
+    ({ day, hour } = cachedDayHour(localSolarTime, input.hour, dayBoundary));
+  }
 
   return {
     input: {
