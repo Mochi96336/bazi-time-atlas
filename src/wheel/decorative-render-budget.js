@@ -1,7 +1,11 @@
 // Only bitmap material and decorative motion use this budget. SVG labels,
 // hit targets, ring poses and the selected-time clock keep their own cadence.
+const UHD_PIXELS = 3840 * 2160;
+const UHD_MATERIAL_PIXELS = 2560 * 1440;
+
 export function decorativeRenderBudget({
   viewportWidth = globalThis.innerWidth,
+  viewportHeight = globalThis.innerHeight,
   coarsePointer = globalThis.matchMedia?.("(pointer: coarse)")?.matches ?? false,
   devicePixelRatio = globalThis.devicePixelRatio || 1,
   fullQuality = false
@@ -10,10 +14,13 @@ export function decorativeRenderBudget({
     || (Number.isFinite(viewportWidth) && viewportWidth <= 480));
   const ratio = Number.isFinite(devicePixelRatio) && devicePixelRatio > 0
     ? devicePixelRatio : 1;
+  const viewportArea = viewportWidth * viewportHeight;
+  const nativeRatio = Math.min(ratio, mobile ? 1 : 2);
+  const largeSurface = !mobile && !fullQuality && viewportArea * nativeRatio ** 2 >= UHD_PIXELS;
   return Object.freeze({
     mobile,
-    pixelRatio:Math.min(ratio, mobile ? 1 : 2),
-    frameIntervalMs:mobile ? 1000 / 30 : 0
+    pixelRatio:largeSurface ? Math.sqrt(UHD_MATERIAL_PIXELS / viewportArea) : nativeRatio,
+    frameIntervalMs:mobile || largeSurface ? 1000 / 30 : 0
   });
 }
 

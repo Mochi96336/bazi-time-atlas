@@ -14,6 +14,21 @@ function fakeNode() {
 const center = { x:600, y:1360 };
 const viewBox = { x:400, y:400, width:400, height:400 };
 
+test("a stationary ring refreshes after registration or a camera change while absent", () => {
+  const culler = createLabelCuller({ svg:null, center, marginRatio:0, minMargin:0 });
+  const poses = new Map([["year", 0]]);
+  const node = fakeNode();
+  culler.register("year", node, 600, 500);
+  assert.equal(culler.update(poses, viewBox), 0);
+  culler.register("year", fakeNode(), 600, 2220);
+  assert.equal(culler.update(poses, viewBox), 1);
+  assert.equal(culler.update(poses, viewBox), 1);
+  const shifted = { ...viewBox, x:1000 };
+  culler.update(new Map(), shifted);
+  assert.equal(culler.update(poses, shifted), 2);
+  assert.equal(node.hasAttribute(OFFSCREEN_ATTRIBUTE), true);
+});
+
 test("labels follow the SVG rotate() matrix into and out of the camera", () => {
   const culler = createLabelCuller({ svg:null, center, marginRatio:0, minMargin:0 });
   const top = fakeNode();

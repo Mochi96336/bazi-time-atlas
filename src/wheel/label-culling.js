@@ -13,12 +13,17 @@ export function createLabelCuller({ svg, center, marginRatio = .15, minMargin = 
     throw new TypeError("center must contain finite x/y coordinates");
   }
   const tracks = new Map();
+  let previousLeft, previousRight, previousTop, previousBottom;
 
   function register(ringId, node, x, y) {
     if (!node || !Number.isFinite(x) || !Number.isFinite(y)) return;
-    let labels = tracks.get(ringId);
-    if (!labels) tracks.set(ringId, labels = []);
-    labels.push({ node, dx:x - center.x, dy:y - center.y, offscreen:false });
+    let track = tracks.get(ringId);
+    if (!track) {
+      track = { labels:[], degrees:NaN, hidden:0 };
+      tracks.set(ringId, track);
+    }
+    track.degrees = NaN;
+    track.labels.push({ node, dx:x - center.x, dy:y - center.y, offscreen:false });
   }
 
   // `renderedRotations` maps ring id → the same degrees written to that ring's
@@ -30,24 +35,39 @@ export function createLabelCuller({ svg, center, marginRatio = .15, minMargin = 
     const right = viewBox.x + viewBox.width + margin;
     const top = viewBox.y - margin;
     const bottom = viewBox.y + viewBox.height + margin;
+    if (left !== previousLeft || right !== previousRight || top !== previousTop || bottom !== previousBottom) {
+      for (const track of tracks.values()) track.degrees = NaN;
+      previousLeft = left;
+      previousRight = right;
+      previousTop = top;
+      previousBottom = bottom;
+    }
     let hidden = 0;
 
-    for (const [ringId, labels] of tracks) {
+    for (const [ringId, track] of tracks) {
       const degrees = renderedRotations?.get(ringId);
       if (!Number.isFinite(degrees)) continue;
+      if (track.degrees === degrees) {
+        hidden += track.hidden;
+        continue;
+      }
       const radians = degrees * Math.PI / 180;
       const cos = Math.cos(radians);
       const sin = Math.sin(radians);
-      for (const label of labels) {
+      let trackHidden = 0;
+      for (const label of track.labels) {
         const x = center.x + label.dx * cos - label.dy * sin;
         const y = center.y + label.dx * sin + label.dy * cos;
         const offscreen = x < left || x > right || y < top || y > bottom;
-        if (offscreen) hidden += 1;
+        if (offscreen) trackHidden += 1;
         if (offscreen === label.offscreen) continue;
         label.offscreen = offscreen;
         if (offscreen) label.node.setAttribute(OFFSCREEN_ATTRIBUTE, "");
         else label.node.removeAttribute(OFFSCREEN_ATTRIBUTE);
       }
+      track.degrees = degrees;
+      track.hidden = trackHidden;
+      hidden += trackHidden;
     }
     return hidden;
   }

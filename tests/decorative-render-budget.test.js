@@ -14,6 +14,20 @@ test("mobile and coarse-pointer landscape material use one CSS pixel and 30 deco
   assert.equal(decorativeRenderBudget({ viewportWidth:390, devicePixelRatio:NaN }).pixelRatio, 1);
 });
 
+test("4K physical viewports budget the material bitmap independently of SVG detail", () => {
+  for (const scale of [1, 2]) {
+    const viewportWidth = 3840 / scale;
+    const viewportHeight = 2160 / scale;
+    const options = { viewportWidth, viewportHeight, devicePixelRatio:scale, coarsePointer:false };
+    const budget = decorativeRenderBudget(options);
+    assert.equal(viewportWidth * budget.pixelRatio, 2560);
+    assert.equal(viewportHeight * budget.pixelRatio, 1440);
+    assert.equal(budget.frameIntervalMs, 1000 / 30);
+    assert.deepEqual(decorativeRenderBudget({ ...options, fullQuality:true }),
+      { mobile:false, pixelRatio:scale, frameIntervalMs:0 });
+  }
+});
+
 function clockQueue() {
   let time = 0, pose = 0, hidden = false, timerId = 0;
   const timers = new Map(), draws = [];
