@@ -613,8 +613,19 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     // before this microtask flush. Its model rotation is therefore the canonical
     // Selected Instant coordinate even when Free Compare adds a manual offset to
     // the effective world rotation.
+    // Find Time is the exception: there a turned ring IS the query, so the
+    // large read-head stays under the fixed cursor and names the Ganzhi now
+    // there (the constraint being searched) instead of riding away with the
+    // ring. The effective world rotation includes the manual offset.
+    const findTimeActive = svg.closest("#kinetic-instrument")?.dataset.inverseTimeSearch === "active";
     SEXAGENARY_RING_IDS.forEach(id => {
       const group = groupFor(id);
+      const worldRotation = worldRotations.get(id);
+      if (findTimeActive && Number.isFinite(worldRotation)) {
+        const coordinate = ((CURSOR_ANGLE - worldRotation) % 360 + 360) % 360;
+        updateActiveCycleLabel(id, Math.floor(coordinate / 6) % sexagenary.length, worldRotation);
+        return;
+      }
       updateActiveCycleLabel(
         id,
         activeCycleIndices.get(id),
