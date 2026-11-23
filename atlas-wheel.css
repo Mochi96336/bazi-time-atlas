@@ -615,7 +615,6 @@ body.legacy-projection .legacy-note { display: block; }
     align-items: center;
     gap: 4px;
   }
-  .kinetic-topbar .brand { display: none; }
   .site-nav {
     width: 100%;
     justify-content: space-between;

@@ -6397,4 +6397,38 @@ body {
   .rotation-mark-label { font-size: 12px; }
   .rotation-mark-label.strong { font-size: 13px; }
 }
+
+/* Phone breathing room: the question title no longer sits on the nav rule,
+   pillar captions balance their wraps inside the four narrow columns, and
+   two-part summaries/legends stack instead of squeezing side by side. */
+@media (max-width: 560px) {
+  .recurrence-shell .recurrence-intro { margin-top: 36px; }
+  .bazi-primer-grid { gap: 0 6px; }
+  .bazi-primer-pillar p {
+    margin-top: 12px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    text-wrap: balance;
+  }
+  .bazi-primer-pillar small { margin-top: 6px; text-wrap: balance; }
+  .research-extension > summary,
+  .research-discrete-tools > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+  }
+  .research-extension > summary small,
+  .research-discrete-tools > summary small { grid-column: 1; grid-row: 2; line-height: 1.5; }
+  .research-extension > summary::after,
+  .research-discrete-tools > summary::after { grid-column: 2; grid-row: 1; margin-left: 0; }
+  #seasonal-drift-orbit-details .seasonal-drift-orbit-tools {
+    align-items: center;
+    gap: 16px;
+    margin-top: 4px;
+  }
+  #seasonal-drift-orbit-details .seasonal-drift-orbit-tools > small {
+    margin-top: 0;
+    text-align: left;
+  }
+}
 }

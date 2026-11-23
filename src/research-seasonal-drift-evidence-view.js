@@ -525,12 +525,19 @@ if (root && curveSvg && orbitSvg && scrub && boundaryProofSvg) {
 
       if (boundary.yearBoundary || selected) {
         const labelPoint=orbitDirectionXY(boundary.longitudeDegrees,ORBIT.timeRadius+20);
+        const anchor=Math.abs(labelPoint.x-ORBIT.cx)<12?"middle":labelPoint.x<ORBIT.cx?"end":"start";
         const label=svgEl("text",{
           x:labelPoint.x,y:labelPoint.y+3,
-          "text-anchor":Math.abs(labelPoint.x-ORBIT.cx)<12?"middle":labelPoint.x<ORBIT.cx?"end":"start",
+          "text-anchor":anchor,
           class:"seasonal-orbit-time-label"
         },group);
         label.textContent=boundary.termName+" · 提前 "+advanceDays.toFixed(2)+" d";
+        // Side labels grow away from the orbit; on a phone the SVG meets the
+        // screen edge, so keep the whole label inside the viewBox.
+        const width=typeof label.getComputedTextLength==="function" ? label.getComputedTextLength() : 0;
+        const edge=6;
+        if (width>0 && anchor==="end" && labelPoint.x-width<edge) label.setAttribute("x",(edge+width).toFixed(2));
+        if (width>0 && anchor==="start" && labelPoint.x+width>ORBIT.width-edge) label.setAttribute("x",(ORBIT.width-edge-width).toFixed(2));
       }
     }
   }

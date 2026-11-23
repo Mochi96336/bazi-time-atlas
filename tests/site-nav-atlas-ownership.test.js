@@ -4,11 +4,16 @@ import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../site-nav.css", import.meta.url), "utf8");
 
-test("desktop atlas header has one current-view owner", () => {
+test("atlas header has one current-view owner at every width", () => {
   assert.match(
     css,
-    /@media \(min-width: 481px\)[\s\S]*?\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{\s*display:\s*none;/,
-    "desktop atlas brand should own current-view identity instead of repeating a self-link pill"
+    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{\s*display:\s*none;/,
+    "the atlas brand should own current-view identity instead of repeating a self-link"
+  );
+  assert.doesNotMatch(
+    css,
+    /@media \(max-width: 480px\)[^}]*\.kinetic-topbar \.site-nav a\[aria-current="page"\]/,
+    "mobile shows the brand too, so it must not restore a second current-page owner"
   );
   assert.match(
     css,
@@ -18,46 +23,14 @@ test("desktop atlas header has one current-view owner", () => {
   assert.match(
     css,
     /\.kinetic-topbar \.site-nav a\.research-link\[data-nav-role="research"\]::before\s*\{\s*display:\s*none;/,
-    "desktop atlas Research exit should not retain a separator for a hidden sibling"
+    "the atlas Research exit should not retain a separator for a hidden sibling"
   );
 });
 
-test("mobile atlas keeps one typographic current-page owner without pill chrome", () => {
-  const mobile = css.match(/@media \(max-width: 480px\) \{([\s\S]*?)\n\}/);
-  assert.ok(mobile, "compact atlas navigation override must remain present");
-  assert.match(
-    mobile[1],
-    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/,
-    "mobile current-view identity should be text, not a dashboard pill"
-  );
-  assert.match(
-    mobile[1],
-    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{[\s\S]*?color:\s*var\(--accent\);/,
-    "mobile current-view ink should use the neutral M2 accent instead of the retired green palette"
-  );
-  assert.match(
-    mobile[1],
-    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]::after\s*\{[\s\S]*?bottom:\s*0;[\s\S]*?opacity:\s*\.72;/,
-    "mobile current-view identity should retain one quiet active baseline"
-  );
-  assert.doesNotMatch(
-    mobile[1],
-    /a\[aria-current="page"\][^}]*display:\s*none;/s,
-    "mobile must retain its current-page owner because the compact brand is hidden"
-  );
-  assert.match(
-    mobile[1],
-    /\.kinetic-topbar \.site-nav a\[aria-current="page"\]\s*\{[\s\S]*?display:\s*inline-flex;[\s\S]*?align-items:\s*center;[\s\S]*?min-height:\s*28px;[\s\S]*?font-size:\s*10px;[\s\S]*?line-height:\s*1;/,
-    "mobile current view should own a centered 28px text hitbox at the primary type size"
-  );
-  assert.match(
-    mobile[1],
-    /\.kinetic-topbar \.site-nav a\.research-link\[data-nav-role="research"\]\s*\{[\s\S]*?display:\s*inline-flex;[\s\S]*?align-items:\s*center;[\s\S]*?min-height:\s*28px;[\s\S]*?font-size:\s*9px;[\s\S]*?line-height:\s*1;/,
-    "mobile Research should remain secondary but readable and vertically centered"
-  );
-  assert.doesNotMatch(
-    mobile[1],
-    /#d7e0da|#334c46/i,
-    "compact atlas current-view styling must not reintroduce retired green ink"
-  );
+test("mobile shows the BaZi Time Atlas brand like desktop", () => {
+  const workspace = readFileSync(new URL("../navigation-workspace.css", import.meta.url), "utf8");
+  const wheel = readFileSync(new URL("../atlas-wheel.css", import.meta.url), "utf8");
+  assert.doesNotMatch(wheel, /\.kinetic-topbar \.brand\s*\{\s*display:\s*none/);
+  assert.doesNotMatch(workspace, /\.brand[^{]*\{[^}]*display:\s*none/);
+  assert.match(workspace, /\.kinetic-topbar \.brand, \.recurrence-topbar \.brand \{[^}]*display:\s*block/);
 });
