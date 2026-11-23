@@ -177,8 +177,25 @@ const dayHourCache = new Map();
 let jieIntervalCache = [];
 
 function clockKey(time) {
-  return (((((time.getYear() * 12 + time.getMonth() - 1) * 31 + time.getDay() - 1) * 24
-    + time.getHour()) * 60 + time.getMinute()) * 60) + time.getSecond();
+  return fieldsClockKey({
+    year: time.getYear(), month: time.getMonth(), day: time.getDay(),
+    hour: time.getHour(), minute: time.getMinute(), second: time.getSecond()
+  });
+}
+
+function fieldsClockKey(fields) {
+  return (((((fields.year * 12 + fields.month - 1) * 31 + fields.day - 1) * 24
+    + fields.hour) * 60 + (fields.minute ?? 0)) * 60) + (fields.second ?? 0);
+}
+
+/**
+ * Exact Year/Month for UTC+8 solar-term clock fields if a previously resolved
+ * Jie interval already covers them; null otherwise. Never computes.
+ */
+export function peekCachedYearMonth(referenceFields) {
+  const key = fieldsClockKey(referenceFields);
+  const hit = jieIntervalCache.find(entry => entry.startKey < key && key < entry.endKey);
+  return hit ? { year: { ...hit.year }, month: { ...hit.month } } : null;
 }
 
 function cachedDayHour(solarTime, sourceHour, dayBoundary) {

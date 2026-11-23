@@ -188,12 +188,16 @@ function commitLinkedDiagnostics() {
   }
 }
 
+// While a linked drag (or its inertia) runs, frames resolve pillars with the
+// O(1) estimate; the settled instant is re-resolved through Tyme on release.
+let linkedScrubActive = false;
+
 function commitLinkedWheelFrame() {
   commitLinkedDiagnostics();
   if (!linkedWheelRenderPending) return;
   linkedWheelRenderPending = false;
   setSliderForScale();
-  updateWheel();
+  updateWheel({ fast:linkedScrubActive });
 }
 
 function resetLinkedWheelFrame() {
@@ -367,11 +371,12 @@ function updateReadout(display) {
   }
 }
 
-function updateWheel() {
+function updateWheel({ fast = false } = {}) {
   currentDisplay = resolveAtlasDisplayState({
     selectedMs: state.selectedMs,
     legacyProjection: state.legacyProjection,
-    timeContext: state.timeContext
+    timeContext: state.timeContext,
+    fast
   });
   alignCycleRing("hour", currentDisplay.hourIndex, currentDisplay.phases.hour);
   alignCycleRing("day", currentDisplay.dayIndex, currentDisplay.phases.day);
@@ -520,6 +525,7 @@ function installRingDrag() {
     onLinkedDragStart(id) {
       stopPlayback();
       resetLinkedWheelFrame();
+      linkedScrubActive = true;
       if (state.legacyProjection) {
         clearLegacyProjection();
         updateWheel();
@@ -534,6 +540,9 @@ function installRingDrag() {
     },
     onLinkedDragEnd(id) {
       linkedWheelCommitQueue.flush();
+      linkedScrubActive = false;
+      // Settle: the final instant always comes from Tyme, never the estimate.
+      if (currentDisplay?.pillarsEstimated) updateWheel();
       instrument.dataset.lastLinkedScrubRing = id;
       instrument.dataset.linkedScrubEndMs = String(Math.round(state.selectedMs));
       delete instrument.dataset.dragRing;
