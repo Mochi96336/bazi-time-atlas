@@ -70,9 +70,9 @@ function validateNormal(run, probe, { edited = false } = {}) {
   const instrument = rect(probe, "instrument", "normal", run.url);
   const legend = rect(probe, "legend", "normal", run.url);
   const topbar = rect(probe, "topbar", "normal", run.url);
-  const currentNav = rect(probe, "current-nav", "normal", run.url);
+  const brand = rect(probe, "brand", "normal", run.url);
   const researchNav = rect(probe, "research-nav", "normal", run.url);
-  const currentNavFont = Number.parseFloat(requireAttr(probe, "data-current-nav-font-size", "normal", run.url));
+  const brandFont = Number.parseFloat(requireAttr(probe, "data-brand-font-size", "normal", run.url));
   const researchNavFont = Number.parseFloat(requireAttr(probe, "data-research-nav-font-size", "normal", run.url));
   const toolbar = rect(probe, "toolbar", "normal", run.url);
   const open = rect(probe, "open", "normal", run.url);
@@ -109,22 +109,24 @@ function validateNormal(run, probe, { edited = false } = {}) {
     }
   }
 
-  const currentCenter = (currentNav.top + currentNav.bottom) / 2;
+  // Phones mirror desktop: the brand owns the current view (it is text, not a
+  // tap target) and the self link stays hidden, so there is one owner.
+  const currentCenter = (brand.top + brand.bottom) / 2;
   const researchCenter = (researchNav.top + researchNav.bottom) / 2;
   const topbarCenter = (topbar.top + topbar.bottom) / 2;
   if (
-    requireAttr(probe, "data-current-nav-visible", "normal", run.url) !== "true"
+    requireAttr(probe, "data-brand-visible", "normal", run.url) !== "true"
+    || requireAttr(probe, "data-current-nav-visible", "normal", run.url) !== "false"
     || requireAttr(probe, "data-research-nav-visible", "normal", run.url) !== "true"
-    || currentNav.height < 27
     || researchNav.height < 27
-    || !Number.isFinite(currentNavFont) || currentNavFont < 9.5
+    || !Number.isFinite(brandFont) || brandFont < 9.5
     || !Number.isFinite(researchNavFont) || researchNavFont < 8.5
     || Math.abs(currentCenter - researchCenter) > 1.5
     || Math.abs(currentCenter - topbarCenter) > 2.5
   ) {
     throw new Error(
       "normal: compact topbar navigation lost readable centered ownership " +
-      "(current=" + currentNav.height.toFixed(1) + "px/" + currentNavFont +
+      "(brand=" + brand.height.toFixed(1) + "px/" + brandFont +
       "px, research=" + researchNav.height.toFixed(1) + "px/" + researchNavFont +
       "px, centers=" + currentCenter.toFixed(1) + "/" + researchCenter.toFixed(1) +
       "/" + topbarCenter.toFixed(1) + "): " + run.url

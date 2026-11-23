@@ -94,8 +94,10 @@ test("Visual gate owns a real 2047x1038 browser probe and PNG evidence", () => {
   assert.match(fixture, /scaleVisible:\s*String\(renderedVisibleCount\(win, scaleButtons\)\)/);
   assert.match(fixture, /ringToggleVisible:\s*String\(renderedVisibleCount\(win, ringToggles\)\)/);
   assert.match(fixture, /scrollHeight:\s*String\(Math\.max\(doc\.documentElement\.scrollHeight, doc\.body\.scrollHeight\)\)/);
-  assert.match(fixture, /hourVisibleLabels:\s*String\(displayVisibleCount\(win, hourLabels\)\)/);
-  assert.match(fixture, /dayVisibleLabels:\s*String\(displayVisibleCount\(win, dayLabels\)\)/);
+  assert.match(fixture, /hourVisibleLabels:\s*String\(ringLabelCount\(win, hourLabels\)\)/);
+  assert.match(fixture, /dayVisibleLabels:\s*String\(ringLabelCount\(win, dayLabels\)\)/);
+  // Camera-culled labels (data-offscreen) are not CSS thinning.
+  assert.match(fixture, /node\.hasAttribute\("data-offscreen"\) \|\| win\.getComputedStyle\(node\)\.display !== "none"/);
   assert.match(browserGate, /width !== 2047 \|\| height !== 1038/);
   assert.match(browserGate, /instrumentShare < 0\.92 \|\| instrumentShare > 0\.97/);
   assert.match(browserGate, /readoutBottomGap < 24/);
