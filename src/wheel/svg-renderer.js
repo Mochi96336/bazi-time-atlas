@@ -21,7 +21,15 @@ export function setDatasetIfChanged(node, name, value) {
 
 export function setTextIfChanged(node, value) {
   if (!node || node.textContent === value) return false;
-  node.textContent = value;
+  // Rewriting the existing text node is a characterData change; assigning
+  // textContent replaces the node, a childList change that also re-matches
+  // the page's structural body:has() rules on every readout tick.
+  const only = node.firstChild;
+  if (only && only === node.lastChild && only.nodeType === 3 && value !== "") {
+    only.data = String(value);
+  } else {
+    node.textContent = value;
+  }
   return true;
 }
 
