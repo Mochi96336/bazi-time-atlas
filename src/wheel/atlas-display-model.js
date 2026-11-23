@@ -1,6 +1,7 @@
 import { baziMonths, solarTerms, zodiacSigns } from "../data.js";
 import { apparentSolarLongitude } from "../astronomy/solar-longitude.js";
-import { resolveBirthPillars } from "../calendar/tyme-adapter.js";
+import { peekCachedYearMonth, resolveBirthPillars } from "../calendar/tyme-adapter.js";
+import { fastDayHourPillars, fastYearMonthPillars } from "../calendar/fast-pillars.js";
 import { monthPillarForYearStem } from "../calendar/five-tigers.js";
 import { heavenlyStems, sexagenaryCycle } from "../sexagenary-data.js";
 import { discretePhaseWindows } from "./discrete-phase.js";
@@ -131,18 +132,33 @@ export function parseAtlasSearch(search) {
   return Object.freeze({ instantMs: null, legacyProjection });
 }
 
+// `fast` is for frames of a continuous drag only: Day/Hour by exact
+// arithmetic, Year/Month from a cached Tyme Jie interval or, failing that,
+// the solar longitude (may differ within minutes of a Jie). The caller must
+// resolve the settled instant again without `fast` (see kinetic-atlas.js).
+function fastPillars(selectedMs, fields, context, actualLongitude) {
+  if (fields.year < 1 || fields.year > 9999) return null;
+  const referenceFields = civilFieldsFromInstant(selectedMs, { ...context, utcOffsetHours: 8 });
+  const { year, month } = peekCachedYearMonth(referenceFields)
+    ?? fastYearMonthPillars(referenceFields, actualLongitude);
+  const { day, hour } = fastDayHourPillars(fields, context.dayBoundary);
+  return { pillars: { year, month, day, hour } };
+}
+
 export function resolveAtlasDisplayState({
   selectedMs,
   legacyProjection = null,
-  timeContext = DEFAULT_ATLAS_TIME_CONTEXT
+  timeContext = DEFAULT_ATLAS_TIME_CONTEXT,
+  fast = false
 }) {
   const context = normalizeAtlasTimeContext(timeContext);
   const fields = civilFieldsFromInstant(selectedMs, context);
-  const result = resolveBirthPillars(fields, {
+  const actualLongitude = apparentSolarLongitude(fields, context.utcOffsetHours);
+  const estimated = fast ? fastPillars(selectedMs, fields, context, actualLongitude) : null;
+  const result = estimated ?? resolveBirthPillars(fields, {
     utcOffsetHours: context.utcOffsetHours,
     dayBoundary: context.dayBoundary
   });
-  const actualLongitude = apparentSolarLongitude(fields, context.utcOffsetHours);
   const longitude = legacyProjection?.longitude ?? actualLongitude;
   const phases = { ...discretePhaseWindows(selectedMs, context) };
   const yearName = result.pillars.year.name;
@@ -164,6 +180,7 @@ export function resolveAtlasDisplayState({
   return {
     fields,
     timeContext: context,
+    pillarsEstimated: estimated !== null,
     longitude,
     actualLongitude,
     phases,

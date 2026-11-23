@@ -1,4 +1,5 @@
 import { resetManualOffset } from "../wheel/ring-state.js";
+import { setTextIfChanged } from "../wheel/svg-renderer.js";
 
 export const FREE_COMPARE_OFFSET_EPSILON = 0.001;
 export const FREE_COMPARE_RESET_RING_EVENT = "atlas-free-compare-reset-ring";
@@ -85,13 +86,13 @@ export function createFreeCompareController({
       ringStates
     });
     compareButton.setAttribute("aria-pressed", view.buttonPressed);
-    compareButton.textContent = view.buttonLabel;
+    setTextIfChanged(compareButton, view.buttonLabel);
     resetRingsButton.hidden = view.resetHidden;
     instrument.dataset.compareMode = String(view.compareMode);
     instrument.dataset.scrubMode = view.scrubMode;
     instrument.dataset.detachedRings = view.detachedIds.join(",");
     compareStatus.hidden = view.statusHidden;
-    compareStatus.textContent = view.statusText;
+    setTextIfChanged(compareStatus, view.statusText);
     return view;
   }
 

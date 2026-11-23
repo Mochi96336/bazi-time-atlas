@@ -6,6 +6,7 @@ import {
   solarTermNamedEventsBetween
 } from "./astronomy/solar-term-boundaries.js";
 import { civilFieldsFromInstant } from "./wheel/atlas-display-model.js";
+import { setTextIfChanged } from "./wheel/svg-renderer.js";
 import {
   DEFAULT_ATLAS_TIME_CONTEXT,
   formatAtlasUtcOffset,
@@ -80,6 +81,37 @@ function railWindow(selectedMs) {
   };
 }
 
+// Events for a padded range around the rail window. While a drag slides the
+// window, the same cached events are filtered instead of re-querying the
+// almanac every frame. Filtering keeps the query's inclusive [lo, hi] rule.
+let eventCache = null;
+
+function railEventsFor(scale, startMs, endMs) {
+  if (!eventCache || eventCache.scale !== scale || startMs < eventCache.fromMs || endMs > eventCache.toMs) {
+    const pad = endMs - startMs;
+    const fromMs = startMs - pad;
+    const toMs = endMs + pad;
+    eventCache = {
+      scale,
+      fromMs,
+      toMs,
+      events:scale === "cycle"
+        ? solarTermNamedEventsBetween(fromMs, toMs, ["立春"])
+        : solarTermEventsBetween(fromMs, toMs).filter(event => event.kind === "jie")
+    };
+  }
+  return eventCache.events.filter(event => event.instantMs >= startMs && event.instantMs <= endMs);
+}
+
+function sameEvents(a, b) {
+  return a.length === b.length && a.every((event, index) => event.instantMs === b[index].instantMs);
+}
+
+function markerLeft(event, window) {
+  const position = (event.instantMs - window.startMs) / (window.endMs - window.startMs);
+  return `${Math.max(0, Math.min(1, position)) * 100}%`;
+}
+
 function renderRail(selectedMs, timeContext) {
   if (!boundaryRail || !slider) return;
   const window = railWindow(selectedMs);
@@ -87,18 +119,29 @@ function renderRail(selectedMs, timeContext) {
   const scale = activeScale();
   const signature = `${scale}|${Math.round(window.anchorMs / 1000)}|${window.minDays}|${window.maxDays}|${timeContext.utcOffsetHours}`;
   if (signature === railSignature) return;
+  const structure = `${scale}|${timeContext.utcOffsetHours}`;
+  const previousStructure = railSignature?.split("|");
   railSignature = signature;
 
-  railEvents = scale === "cycle"
-    ? solarTermNamedEventsBetween(window.startMs, window.endMs, ["立春"])
-    : solarTermEventsBetween(window.startMs, window.endMs).filter(event => event.kind === "jie");
+  const events = railEventsFor(scale, window.startMs, window.endMs);
 
+  // A drag slides the window under the same markers: move them in place rather
+  // than rebuilding the rail (a childList change per frame also re-matches the
+  // page's body:has() rules).
+  if (previousStructure && `${previousStructure[0]}|${previousStructure[4]}` === structure && sameEvents(events, railEvents)) {
+    railNodes.forEach((node, index) => {
+      const left = markerLeft(events[index], window);
+      if (node.style.left !== left) node.style.left = left;
+    });
+    return;
+  }
+
+  railEvents = events;
   boundaryRail.replaceChildren();
   railNodes = railEvents.map(event => {
     const marker = document.createElement("span");
-    const position = (event.instantMs - window.startMs) / (window.endMs - window.startMs);
     marker.className = `boundary-marker${event.name === "立春" ? " li-chun" : ""}`;
-    marker.style.left = `${Math.max(0, Math.min(1, position)) * 100}%`;
+    marker.style.left = markerLeft(event, window);
     marker.dataset.boundaryName = event.name;
     marker.dataset.boundaryInstant = new Date(event.instantMs).toISOString();
     marker.title = formatBoundaryTitle(event, timeContext);
@@ -111,11 +154,9 @@ function renderRail(selectedMs, timeContext) {
     return marker;
   });
 
-  if (boundaryMode) {
-    boundaryMode.textContent = scale === "cycle"
-      ? "60 年尺度：只標立春換年"
-      : `精確「節」界 · ${formatAtlasUtcOffset(timeContext.utcOffsetHours)}`;
-  }
+  setTextIfChanged(boundaryMode, scale === "cycle"
+    ? "60 年尺度：只標立春換年"
+    : `精確「節」界 · ${formatAtlasUtcOffset(timeContext.utcOffsetHours)}`);
 }
 
 function updateNearMarker(selectedMs) {
@@ -128,8 +169,8 @@ function updateNearMarker(selectedMs) {
 
 function updateBoundaryContext(selectedMs, timeContext) {
   const context = jieBoundaryContext(selectedMs);
-  if (previousReadout) previousReadout.textContent = formatCompact(context.previous, timeContext);
-  if (nextReadout) nextReadout.textContent = formatCompact(context.next, timeContext);
+  setTextIfChanged(previousReadout, formatCompact(context.previous, timeContext));
+  setTextIfChanged(nextReadout, formatCompact(context.next, timeContext));
 
   if (context.previous) {
     instrument.dataset.previousJie = context.previous.name;

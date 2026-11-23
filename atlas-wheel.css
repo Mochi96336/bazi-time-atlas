@@ -287,6 +287,9 @@ h1 { margin: 7px 0 7px; max-width: 850px; font-size: clamp(36px, 4.6vw, 64px); l
 .zodiac-sector { fill: color-mix(in srgb, var(--zodiac) 8%, transparent); stroke: color-mix(in srgb, var(--zodiac) 18%, transparent); stroke-width: 1.2; }
 .zodiac-sector.is-active { fill: color-mix(in srgb, var(--zodiac) 24%, transparent); }
 .zodiac-label { fill: color-mix(in srgb, var(--zodiac) 70%, #c5c6cc); font-size: 13px; font-weight: 720; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+/* label-culling.js: static ring labels rotated outside the camera are dropped
+   from paint, so a drag no longer re-rasterises ~280 unseen glyph runs. */
+#kinetic-wheel text[data-offscreen] { display: none; }
 
 .cursor-line { stroke: var(--cursor); stroke-width: 2.2; filter: drop-shadow(0 0 7px color-mix(in srgb, var(--cursor) 22%, transparent)); }
 .cursor-halo { stroke: color-mix(in srgb, var(--cursor) 18%, transparent); stroke-width: 10; }
@@ -612,7 +615,6 @@ body.legacy-projection .legacy-note { display: block; }
     align-items: center;
     gap: 4px;
   }
-  .kinetic-topbar .brand { display: none; }
   .site-nav {
     width: 100%;
     justify-content: space-between;

@@ -126,9 +126,16 @@ export function createRingDragController({
   eventTarget?.visualViewport?.addEventListener?.("resize", invalidatePointerProjection, { passive:true });
   eventTarget?.visualViewport?.addEventListener?.("scroll", invalidatePointerProjection, { passive:true });
 
+  // A finger has no cursor. `cursor` is inherited, so restyling the wheel root
+  // made all ~1300 SVG descendants recompute style (and the material camera
+  // re-measure layout) at the very start of every touch drag.
+  let cursorPointerType = "mouse";
+
   function updatePointerStyle() {
-    svg.style.touchAction = "none";
-    svg.style.cursor = active ? "grabbing" : hoverRingId ? "grab" : "";
+    if (svg.style.touchAction !== "none") svg.style.touchAction = "none";
+    const cursor = cursorPointerType === "touch" ? ""
+      : active ? "grabbing" : hoverRingId ? "grab" : "";
+    if (svg.style.cursor !== cursor) svg.style.cursor = cursor;
   }
 
   function setHoverRing(ringId) {
@@ -142,6 +149,7 @@ export function createRingDragController({
 
   function updateHover(event) {
     if (active) return;
+    cursorPointerType = event.pointerType || "mouse";
     if (!screenToWorld(svg, event.clientX, event.clientY, pointerWorld)) {
       setHoverRing(null);
       return;
@@ -316,6 +324,7 @@ export function createRingDragController({
 
   function begin(event) {
     if (event.button > 0 || active) return;
+    cursorPointerType = event.pointerType || "mouse";
     const inverse = screenInverse(svg);
     if (!screenToWorld(svg, event.clientX, event.clientY, pointerWorld, inverse)) return;
     const ring = ringAtWorldPoint(pointerWorld);

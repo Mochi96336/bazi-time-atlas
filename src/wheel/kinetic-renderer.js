@@ -25,6 +25,7 @@ import {
 } from "./reference-frame.js";
 import { addTitle, setActiveSector, svgElement, setAttributeIfChanged, setDatasetIfChanged } from "./svg-renderer.js";
 import { createWheelMaterialPrototype } from "./material-prototype.js";
+import { createLabelCuller } from "./label-culling.js";
 
 const MOTION_TRACE_TTL_MS = 420;
 const REFERENCE_FRAME_EVENT = "atlas-reference-frame-change";
@@ -73,6 +74,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     svg
   });
 
+  const labelCuller = createLabelCuller({ svg, center: WHEEL_CENTER });
   const el = (tag, attrs = {}, parent = svg) => svgElement(tag, attrs, parent);
   const polar = (radius, angle) => pointAt(WHEEL_CENTER, radius, angle);
 
@@ -231,6 +233,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       }, group);
       text.textContent = label;
       staticLabels.set(index, text);
+      labelCuller.register(id, text, point.x, point.y);
     });
 
     const activeLabel = el("text", {
@@ -439,6 +442,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       }, solarTrack);
       label.textContent = term.name;
       annualStaticLabels.get("term").push(label);
+      labelCuller.register("solar", label, labelPoint.x, labelPoint.y);
     });
 
     activeAnnualLabels.set("term", el("text", {
@@ -478,6 +482,7 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
       }, zodiacTrack);
       label.textContent = sign.name;
       annualStaticLabels.get("zodiac").push(label);
+      labelCuller.register("solar", label, point.x, point.y);
     });
 
     activeAnnualLabels.set("zodiac", el("text", {
@@ -602,13 +607,25 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
     // groups use. It never derives time/phase and therefore cannot become a
     // second ring-rotation authority. Lighting remains screen-space fixed.
     materialPrototype.updateFrame(renderedRotations);
+    labelCuller.update(renderedRotations);
 
     // setTrackDiagnostics() runs synchronously after each renderer pose update,
     // before this microtask flush. Its model rotation is therefore the canonical
     // Selected Instant coordinate even when Free Compare adds a manual offset to
     // the effective world rotation.
+    // Find Time is the exception: there a turned ring IS the query, so the
+    // large read-head stays under the fixed cursor and names the Ganzhi now
+    // there (the constraint being searched) instead of riding away with the
+    // ring. The effective world rotation includes the manual offset.
+    const findTimeActive = svg.closest("#kinetic-instrument")?.dataset.inverseTimeSearch === "active";
     SEXAGENARY_RING_IDS.forEach(id => {
       const group = groupFor(id);
+      const worldRotation = worldRotations.get(id);
+      if (findTimeActive && Number.isFinite(worldRotation)) {
+        const coordinate = ((CURSOR_ANGLE - worldRotation) % 360 + 360) % 360;
+        updateActiveCycleLabel(id, Math.floor(coordinate / 6) % sexagenary.length, worldRotation);
+        return;
+      }
       updateActiveCycleLabel(
         id,
         activeCycleIndices.get(id),
@@ -679,6 +696,13 @@ export function createKineticRenderer({ svg, sexagenary, solarTerms, zodiacSigns
   function setZodiacRingPose(_rotationDegrees, solarLongitude) {
     const normalized = ((solarLongitude % 360) + 360) % 360;
     setActiveSector(zodiacSectorNodes, Math.floor(normalized / 30) % 12);
+  }
+
+  // A camera change (rotation, resize) moves the visible window without a pose
+  // change, so re-cull against the new viewBox using the last rendered pose.
+  if (typeof MutationObserver === "function") {
+    new MutationObserver(() => labelCuller.update(renderedRotations))
+      .observe(svg, { attributes:true, attributeFilter:["viewBox"] });
   }
 
   svg.addEventListener(REFERENCE_FRAME_EVENT, () => {

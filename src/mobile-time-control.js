@@ -1,4 +1,5 @@
 import { SELECTED_INSTANT_COMMAND } from "./interaction/selected-instant-command.js";
+import { setTextIfChanged } from "./wheel/svg-renderer.js";
 import {
   DEFAULT_ATLAS_TIME_CONTEXT,
   formatAtlasUtcOffset,
@@ -37,7 +38,7 @@ function currentTimeContext() {
 
 function setStatus(message, state = "idle") {
   if (!status) return;
-  status.textContent = message;
+  setTextIfChanged(status, message);
   status.dataset.state = state;
 }
 
@@ -78,7 +79,7 @@ function configureMobileInput() {
 function syncContextCopy(context) {
   const offsetLabel = formatAtlasUtcOffset(context.utcOffsetHours);
   const accessibleLabel = `選定時間，${offsetLabel}，24 小時制，格式 ${MOBILE_ATLAS_INPUT_DISPLAY_FORMAT}，秒級`;
-  if (inputLabel) inputLabel.textContent = accessibleLabel;
+  setTextIfChanged(inputLabel, accessibleLabel);
   input?.setAttribute("aria-label", accessibleLabel);
   if (!status || status.dataset.state === "idle") setStatus(`${offsetLabel} · 秒級`, "idle");
   dock?.setAttribute("data-utc-offset-hours", String(context.utcOffsetHours));

@@ -28,6 +28,12 @@
     const displayVisibleCount = (win, nodes) => [...nodes]
       .filter(node => win.getComputedStyle(node).display !== "none")
       .length;
+    // A label culled because the camera cannot see it (data-offscreen, see
+    // src/wheel/label-culling.js) is not CSS thinning; on-screen labels hidden
+    // by a thinning rule still count as missing.
+    const ringLabelCount = (win, nodes) => [...nodes]
+      .filter(node => node.hasAttribute("data-offscreen") || win.getComputedStyle(node).display !== "none")
+      .length;
     const renderedVisibleCount = (win, nodes) => [...nodes]
       .filter(node => win.getComputedStyle(node).display !== "none" && node.getClientRects().length > 0)
       .length;
@@ -208,8 +214,8 @@
         closeFont: round(num(closeStyle.fontSize)),
         scaleVisible: String(renderedVisibleCount(win, scaleButtons)),
         ringToggleVisible: String(renderedVisibleCount(win, ringToggles)),
-        hourVisibleLabels: String(displayVisibleCount(win, hourLabels)),
-        dayVisibleLabels: String(displayVisibleCount(win, dayLabels)),
+        hourVisibleLabels: String(ringLabelCount(win, hourLabels)),
+        dayVisibleLabels: String(ringLabelCount(win, dayLabels)),
         playDisplay: display(win, play),
         stateStripDisplay: display(win, stateStrip),
         notesDisplay: display(win, notes),
