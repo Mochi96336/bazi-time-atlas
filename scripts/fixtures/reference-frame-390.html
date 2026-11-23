@@ -84,6 +84,9 @@
       probe.dataset.motionParent = motionLayer.parentElement?.id ?? "";
       probe.dataset.cursorParent = cursorLayer.parentElement?.id ?? "";
       probe.dataset.fanWrapperClip = fanLayer.getAttribute("clip-path") ?? "";
+      // The cursor lives in the static overlay's fan group (static-wheel-layers.js).
+      probe.dataset.cursorWrapperClip = cursorLayer.parentElement?.getAttribute("clip-path") ?? "";
+      probe.dataset.cursorLayerSvg = cursorLayer.ownerSVGElement?.id ?? "";
       probe.dataset.zodiacDerivedFrom = zodiacTrack.dataset.derivedFrom ?? "";
       const instantBefore = num(instrument.dataset.selectedInstantMs);
       const dayModelBefore = num(doc.querySelector("#day-track").dataset.modelRotation);

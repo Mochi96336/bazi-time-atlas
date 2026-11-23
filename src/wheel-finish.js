@@ -166,7 +166,10 @@ function shading(wheel) {
   for (const r of [RADII.hourOuter, RADII.dayOuter, RADII.solarOuter, RADII.monthOuter, RADII.yearOuter]) {
     el("path", { d: arc(r - 7), class: "look-rim-shadow" }, layer);
   }
-  const cursor = wheel.querySelector("#cursor-layer");
+  // Just beneath the cursor, wherever it lives: the atlas may already have
+  // moved it into the static #kinetic-wheel-over layer
+  // (src/wheel/static-wheel-layers.js), which moves this layer otherwise.
+  const cursor = document.getElementById("cursor-layer");
   cursor.parentNode.insertBefore(layer, cursor);
 }
 
