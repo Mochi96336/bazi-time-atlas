@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="從六十甲子年日週期出發，檢查節氣偏移與四柱是否能在深時間後重現。">
-  <title>八字多久會重複一次？ · BaZi Time Atlas</title>
+  <meta name="description" content="研究附錄：自己換時刻計算週期，以及曆法、節氣、四柱判定的數字、模型邊界與資料來源。">
+  <title>研究附錄 · BaZi Time Atlas</title>
   <link rel="stylesheet" href="./vendor/fonts/noto-sans-tc/noto-sans-tc.css">
   <link rel="stylesheet" href="./tokens.css">
   <link rel="stylesheet" href="./site-nav.css">
@@ -18,283 +18,21 @@
       <div class="brand">BaZi Time Atlas</div>
       <nav class="site-nav" aria-label="Atlas views">
         <a href="./">時間圖譜</a>
-        <a class="research-link active" data-nav-role="research" href="./recurrence.html" aria-current="page" aria-label="研究：回歸與深時間驗證">研究</a>
+        <a class="research-link active" data-nav-role="research" href="./?view=research" aria-label="研究：同一組八字多久會再出現">研究</a>
       </nav>
     </header>
 
-    <section class="recurrence-intro research-question-intro" aria-labelledby="research-question-title">
-      <div class="research-question-copy">
-        <h1 id="research-question-title">八字多久會重複一次？</h1>
-        <p class="lede research-answer">目前找不到<a class="research-term" href="#term-pillars">四柱</a>完整重複的週期。</p>
-        <p class="research-answer-detail">曆法上，24,000 年後年柱、日柱和公曆日期會同時回到起點；但到那時真正的<a class="research-term" href="#term-jie">節氣</a>已經提早 10 到 14 天，日柱和時柱也算不準。</p>
-        <p class="research-glossary-link"><a href="#research-glossary">看不懂名詞？點虛線字，或看頁尾名詞解釋 ↓</a></p>
-      </div>
-      <figure id="research-bazi-primer" class="research-bazi-primer" aria-labelledby="bazi-primer-title">
-        <figcaption><strong id="bazi-primer-title">先認識八字：一個時刻，排成四組干支</strong><span>例：2026 年 9 月 13 日 下午 3 點</span></figcaption>
-        <div class="bazi-primer-grid">
-          <div class="bazi-primer-rows" aria-hidden="true"><span>天干</span><span>地支</span></div>
-          <div class="bazi-primer-pillar" data-pillar="year">
-            <b>年柱</b><strong><i>丙</i><i>午</i></strong>
-            <p>看<a class="research-term" href="#term-lichun">立春</a>：過了立春才換年</p><small>60 年一輪</small>
-          </div>
-          <div class="bazi-primer-pillar" data-pillar="month">
-            <b>月柱</b><strong><i>丁</i><i>酉</i></strong>
-            <p>看「節」：白露之後是酉月</p><small>一年 12 個月</small>
-          </div>
-          <div class="bazi-primer-pillar" data-pillar="day">
-            <b>日柱</b><strong><i>庚</i><i>寅</i></strong>
-            <p>每天往下走一格</p><small>60 天一輪</small>
-          </div>
-          <div class="bazi-primer-pillar" data-pillar="hour">
-            <b>時柱</b><strong><i>甲</i><i>申</i></strong>
-            <p>每 2 小時換一格：15–17 點是申時</p><small>一天 12 個時辰</small>
-          </div>
-        </div>
-        <p class="bazi-primer-sum"><b>4 柱 × 2 字 ＝ 八字。</b>天干有 10 個、地支有 12 個，輪流配成 60 組，年、月、日、時各自一格一格往下走。首頁的轉盤就是這四個輪子。</p>
-        <p class="bazi-primer-question">所以「八字多久重複一次」，問的是：四個輪子什麼時候會一起回到同一組干支？</p>
-      </figure>
-      <figure id="research-overview" class="research-overview" aria-labelledby="research-overview-caption">
-        <div class="research-overview-axis" role="img" aria-label="從現在到 24,000 年後的三個時間點">
-          <div class="research-overview-stop" data-stop="now" style="--x:0%"><strong>現在</strong><small>2026 年</small></div>
-          <div class="research-overview-stop" data-stop="local" style="--x:8.25%"><strong>+1,980 年</strong><small>年柱、日柱一起回來</small></div>
-          <div class="research-overview-stop" data-stop="global" style="--x:100%"><strong>+24,000 年</strong><small>曆法上三個循環全部對上</small><em>但節氣提早 10–14 天，日柱、時柱算不準</em></div>
-        </div>
-        <figcaption id="research-overview-caption">橫線是時間，按比例畫：1,980 年只是 24,000 年的一小段。</figcaption>
-      </figure>
-    </section>
-
-    <!-- R3: retired the parallel ?mode=dates UI. The original Research
-         instrument and original interactive Year strip below are the only
-         public date/year interaction surface. Legacy URLs are normalized by
-         recurrence-view.js to this original owner. -->
-    <!-- Original Research sections restored as first-class, directly visible content.
-         Legacy ?mode=dates exploration remains available only for old deep links;
-         its replacement timeline is NOT the public Research landing page. -->
-    <nav class="research-outline research-answer-map" aria-label="研究項目：三步答案">
-      <a href="#research-discrete" data-research-spine="discrete"><span>01</span><strong>24,000 年</strong><small id="research-spine-discrete">曆法上三個循環全部對上</small></a>
-      <a href="#research-astronomy" data-research-spine="astronomy"><span>02</span><strong>差 10–14 天</strong><small id="research-spine-astronomy">但真正的節氣沒有回來</small></a>
-      <a href="#research-evidence" data-research-spine="evidence"><span>03</span><strong>年月 ✓ 日時 ？</strong><small id="research-spine-evidence">所以 24,000 年不是四柱的週期</small></a>
-    </nav>
-
-    <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
-      <header class="research-task-head">
-        <div class="research-task-index">01</div>
-        <div><div class="eyebrow">年序／日序</div><h2 id="research-discrete-title">粗略週期從哪裡來？</h2></div>
-      </header>
-      <p class="research-plain-conclusion" data-plain-conclusion="01">年柱和日柱大約 1,980 年後會一起回到同樣的<a class="research-term" href="#term-ganzhi">干支</a>（確切年數依日期而定）；但要連「季節位置」也一起對上，得等到 24,000 年。這個數字只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>。</p>
-
-      <figure id="research-cycle-fan" class="research-cycle-fan" data-default-years="1980" aria-labelledby="cycle-fan-title">
-        <figcaption><strong id="cycle-fan-title">三圈什麼時候一起回到起點？</strong><span>從 2026 年 9 月 13 日出發，按下面的年數看看。</span></figcaption>
-        <div class="cycle-fan-choices" role="group" aria-label="選擇經過的年數">
-          <button type="button" data-cycle-milestone="1200" aria-pressed="false"><strong>1,200 年</strong></button>
-          <button type="button" data-cycle-milestone="1980" aria-pressed="false"><strong>1,980 年</strong></button>
-          <button type="button" data-cycle-milestone="8000" aria-pressed="false"><strong>8,000 年</strong></button>
-          <button type="button" data-cycle-milestone="24000" aria-pressed="false"><strong>24,000 年</strong></button>
-        </div>
-        <div class="cycle-fan-stage"></div>
-        <p id="cycle-fan-sentence" class="cycle-fan-sentence" aria-live="polite">—</p>
-      </figure>
-      <p class="research-figure-howto" data-figure-howto="01">怎麼看：和首頁的圓盤一樣，中間的金色指針不動，三圈在它底下轉。指針下那一格就是經過那麼多年後走到的位置；金框那一格是起點。金框回到指針下，那一圈就「回來了」；紅色弧線是還差多少。每一圈的格子大小不同，單位寫在圖下。公曆圈代表季節位置。</p>
-
-      <div class="research-discrete-mechanism">
-        <p><strong>為什麼是 1,980 年？</strong>年柱 60 年一輪，所以經過的年數只要是 60 的倍數，年柱就回來。日柱 60 天一輪，要經過的天數剛好是 60 的倍數才行。從 2026 年 9 月 13 日算，兩個條件第一次同時成立是 1,980 年後（換一個起始日期，這個數字會不同）。</p>
-        <p><strong>為什麼還要更久？</strong>公曆的閏年規則每 400 年循環一次，它決定日期和季節怎麼對應。1,980 不是 400 的倍數，所以季節位置還沒回來。年柱加公曆要 1,200 年，也就是 60 和 400 的最小公倍數。日柱加公曆要 8,000 年：400 年共有 146,097 天，除以 60 餘 57，要累積 20 個 400 年，天數才剛好被 60 整除。</p>
-        <p class="discrete-derivation-rule"><strong>所以是 24,000 年。</strong>要三個一起回來，取 1,200 和 8,000 的最小公倍數，就是 24,000 年。但這只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>：公曆只是季節的<a class="research-term" href="#term-proxy">代理</a>，真正的<a class="research-term" href="#term-jie">十二節</a>要到 02 再檢查。</p>
-      </div>
-
-
-
-
-      <p class="discrete-to-astronomy">曆法說 24,000 年會對上。下一步：真正的節氣也回到原位了嗎？</p>
-
-    </section>
-
-    <section id="research-astronomy" class="research-task" data-research-task="astronomy" aria-labelledby="research-astronomy-title">
-      <header class="research-task-head">
-        <div class="research-task-index">02</div>
-        <div><div class="eyebrow">節界校驗</div><h2 id="research-astronomy-title">八字的節界回來了嗎？</h2></div>
-        <span class="research-task-relation">固定 24,000 年候選 → 12 節界校驗</span>
-      </header>
-      <p class="research-plain-conclusion" data-plain-conclusion="02">沒有。用深時間天文模型推算，24,000 年後十二個「節」（八字換月的時間點）全都提早了 10 到 14 天，沒有一個回到原位。</p>
-
-      <p class="research-case-transition" id="research-case-transition">比較的是 2026 年和 24,000 年後的 26026 年。</p>
-      <section id="seasonal-drift-evidence" class="seasonal-drift-evidence"
-        data-ready="false" data-mode="total" data-orbit-scale="exaggerated"
-        data-diagram-grammar="zero-line-proof"
-        tabindex="0" aria-labelledby="seasonal-drift-evidence-title">
-        <header class="seasonal-drift-evidence-head">
-          <div class="seasonal-drift-evidence-copy">
-            <div class="eyebrow">主線案例 · 固定 2026 → 26026</div>
-            <h3 id="seasonal-drift-evidence-title">24,000 年後，年界與月界還在原位嗎？</h3>
-          </div>
-        </header>
-
-        <div class="seasonal-drift-summary" aria-live="polite">
-          <div class="seasonal-drift-stat verdict">
-            <span>先看結論 · 八字節界</span>
-            <strong><b id="seasonal-drift-jie-count">12 / 12</b> 在模型中全部提前</strong>
-            <small><b id="seasonal-drift-jie-range">模型值提前 10.235–14.177 天</b> · 相對固定年差均未回到零</small>
-          </div>
-          <div class="seasonal-drift-stat cursor">
-            <span>目前游標</span>
-            <strong><i id="seasonal-drift-selected-name">立春</i> · <b id="seasonal-drift-selected-longitude">315°</b></strong>
-            <small class="total-only">這一刻：<b id="seasonal-drift-selected-total-human">—</b></small>
-            <small class="split-only">完整差異 <b id="seasonal-drift-selected-total">—</b> · 去平均後 <b id="seasonal-drift-selected-shape">—</b></small>
-            <small id="seasonal-drift-selected-bazi">—</small>
-          </div>
-        </div>
-
-        
-        <section class="seasonal-boundary-proof" aria-labelledby="seasonal-boundary-proof-title">
-          <header class="seasonal-boundary-proof-head">
-            <div>
-              <strong id="seasonal-boundary-proof-title">十二個節，各提早幾天？</strong>
-              <span>0 天＝回到原位，線越長提早越多</span>
-            </div>
-            <label class="seasonal-boundary-keyboard" for="seasonal-boundary-select"><span>選一個節</span><select id="seasonal-boundary-select" aria-label="選擇十二個八字節界，更新圖表與研究時間"><option value="">自訂黃經 · 非十二節</option></select></label>
-          </header>
-          <svg id="seasonal-boundary-proof-svg" class="seasonal-drift-svg" role="img"
-            aria-label="十二個八字節界相對零天重合基準的提前量；全部提前約十至十四天"></svg>
-        </section>
-        <p class="research-figure-howto" data-figure-howto="02">怎麼看：每一根線是一個「節」。0 天那條線代表回到原位；線越長，代表比 24,000 年前提早越多天。點任一根，可看那個節的數字。</p>
-        <p class="research-model-scope" id="seasonal-drift-method">算法：同一個節在 26026 年和 2026 年的到達時刻（TT，均勻流動的天文時間）相減，再扣掉整整 24,000 個公曆年（8,765,820 天）。數字來自深時間天文研究模型，26026 年的框架還沒有獨立驗證，所以是模型推算，不是實測。</p>
-
-        <figure id="research-drift-accumulation" class="research-drift-accumulation" aria-labelledby="research-drift-accumulation-title">
-          <figcaption>
-            <strong id="research-drift-accumulation-title">偏移是慢慢累積出來的</strong>
-            <span id="research-drift-accumulation-sentence">立春的時刻，和「同一個公曆日期」比，隨著年數拉長慢慢錯開。</span>
-          </figcaption>
-          <svg id="research-drift-accumulation-svg" viewBox="0 0 720 300" role="img" aria-labelledby="research-drift-accumulation-title research-drift-accumulation-sentence"></svg>
-          <p class="research-drift-accumulation-note">只有這四個年份有真實天文資料；點之間的虛線只是幫助閱讀，不代表中間年份的實際數值。</p>
-        </figure>
-
-        <div id="seasonal-drift-orbit-details" class="seasonal-drift-orbit-details research-why-figure">
-        <div class="seasonal-drift-orbit-panel seasonal-drift-orbit-explainer">
-          <div class="seasonal-drift-orbit-head">
-            <div>
-              <strong>為什麼會提早？</strong>
-              <p>圖的中心是太陽，每條射線是一個節的方向，兩個年代都一樣。但地球軌道的形狀和方向會慢慢改變（虛線是 2026 年，實線是 26026 年），走到同一個方向的日子也跟著變。外圈把「早到幾天」畫成角度：圓點離刻度越遠，提早越多。</p>
-              <small>軌道偏心率 <b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b>（數字越小越接近正圓）</small>
-            </div>
-            <div class="seasonal-drift-orbit-tools">
-              <small>虛線 2026<br>實線 26026</small>
-              <button type="button" id="seasonal-drift-orbit-scale" aria-pressed="true"><span id="seasonal-drift-scale-label">示意放大 ×10</span></button>
-            </div>
-          </div>
-          <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
-            aria-label="2026 與 26026 等效橢圓、十二個八字節界與到達時間相位外圈；外圈是時間相位，不是第二個物理地球位置"></svg>
-          <p class="seasonal-orbit-explainer-note">外圈不是第二顆地球，只是把提早的天數換成角度。可以拖動圖選一個位置。</p>
-        </div>
-        </div>
-
-        <details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">
-          <summary>
-            <span>深入：為什麼不是固定提前 12 天？</span>
-            <strong>全年曲線 · 共同位移 ＋ 年內起伏</strong>
-          </summary>
-          <div class="seasonal-drift-decomposition-body">
-            <p>主圖已經用十二個節界判定「沒有回到 0」。這裡才展開 360 個黃經位置：先看整條季節時間線共同提前，再扣掉平均，只留下不同黃經之間約 4 天的年內形狀差異。</p>
-            <small class="seasonal-drift-decomposition-note">完整偏移仍以 26026 相對固定推進 24,000 個公曆年計算；去平均視圖只解釋各節為何不會剛好提前同一個天數，不能拿來判斷節界是否重合。</small>
-            <div class="seasonal-drift-controls" role="group" aria-label="節氣漂移深入閱讀模式">
-              <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">看完整節界偏移</button>
-              <button type="button" data-seasonal-drift-mode="split" aria-pressed="false">扣除平均，看年內起伏</button>
-            </div>
-            <div class="seasonal-drift-decomposition-metrics">
-              <div class="seasonal-drift-stat phase">
-                <span>全年共同位移</span>
-                <strong id="seasonal-drift-phase-value">—</strong>
-                <small>360 個黃經位置的平均</small>
-              </div>
-              <div class="seasonal-drift-stat shape">
-                <span>去平均後的年內起伏</span>
-                <strong id="seasonal-drift-shape-span">—</strong>
-                <small>全年最大－最小</small>
-              </div>
-            </div>
-            <div class="seasonal-drift-plot seasonal-drift-plot-detail">
-              <svg id="seasonal-drift-curve" class="seasonal-drift-svg" role="img"
-                aria-label="2026 到 26026 全年 360 個太陽黃經的 Gregorian 相位漂移；可拖曳選擇黃經"></svg>
-              <div class="seasonal-drift-scrub-row">
-                <span>冬至</span>
-                <input id="seasonal-drift-scrub" type="range" min="0" max="359" step="1" value="45"
-                  aria-label="沿全年太陽黃經選擇位置">
-                <span>→ 冬至</span>
-              </div>
-            </div>
-          </div>
-        </details>
-        <p class="seasonal-drift-evidence-note">十二個節都沒有回到 0 天，所以 24,000 年不能直接當成八字的週期。那四柱裡哪些還算得出來？</p>
-
-
-      </section>
-
-
-      <details id="near-recurrence-disclosure" class="research-extension near-recurrence-disclosure">
-        <summary><span>延伸：更長的時間呢？</span><small>用快速近似模型比較 24,000 年的 41 個整數倍</small></summary>
-      <section id="near-recurrence-detail" class="near-search-panel" aria-label="長時間回歸搜尋，Berger 快速近似模型">
-        <div class="near-search-head">
-          <div class="near-search-copy">
-            <strong>長時間回歸搜尋</strong>
-            <small>24,000 年整數倍 · 季節形狀最大值 → RMS · 近似 ≠ 真正週期</small>
-          </div>
-          <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
-          <div class="near-stat best"><span>搜尋最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
-          <div class="near-stat"><span>搜尋最佳殘差</span><strong id="near-best-residual">—</strong><small>最大絕對值 / RMS</small></div>
-        </div>
-        <p class="near-search-scope">只比較 Berger 1978 快速近似模型下的季節形狀殘差，候選為 +24,000 年的整數倍；這不是完整節界回歸，也不是獨立驗證的深時間天文預測。</p>
-        <div class="near-search-body">
-          <figure class="near-chart-figure">
-            <div class="near-chart-meta">
-              <strong>十二節最大形狀殘差 <span>· 小時</span></strong>
-              <small>越靠近 0，越接近基準年的季節形狀</small>
-            </div>
-            <svg id="near-recurrence-chart" viewBox="0 0 1000 220" role="group" aria-label="41 個離散候選的形狀殘差；縱軸小時，橫軸距基準年的千年數；各點可選取"></svg>
-            <figcaption>橫軸：距基準的 Δ 年數（千年） · 每點相隔 24,000 年</figcaption>
-          </figure>
-          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名，可選取帶入 Δ"></div>
-        </div>
-      </section>
-      </details>
-    </section>
-
-    <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">
-      <header class="research-task-head">
-        <div class="research-task-index">03</div>
-        <div><div class="eyebrow">四柱結論</div><h2 id="research-evidence-title">對八字意味著什麼？</h2></div>
-        <span class="research-task-relation">12 / 12 節界位移 → 四柱可判範圍</span>
-      </header>
-      <p class="research-plain-conclusion" data-plain-conclusion="03">在太陽走到同一個位置（<a class="research-term" href="#term-longitude">太陽黃經</a>相同）時，年柱和月柱可以跟現在相同；但日柱和時柱沒辦法確定。所以 24,000 年不能當作四柱完整重複的週期。</p>
-
-      <figure id="research-rotation-uncertainty" class="research-rotation-uncertainty" aria-labelledby="rotation-uncertainty-title">
-        <figcaption><strong id="rotation-uncertainty-title">地球自轉的誤差，越往後越大</strong><span>日柱看地球轉了幾圈，時柱看轉到哪一刻。地球自轉會慢慢變慢，而且變慢的速度沒辦法精確預測。</span></figcaption>
-        <svg role="img" aria-label="地球自轉時間的誤差範圍隨年代變寬，先寬過一個時辰，再寬過一天"></svg>
-        <p class="research-figure-howto" data-figure-howto="03-rotation">怎麼看：曲線是推算的誤差範圍有多寬（1σ，約 68% 的把握）。寬過一個時辰（2 小時），就不知道是哪個時辰；寬過一天，連哪一天都不知道。約 <b data-rotation-year="shichen">—</b> 年起時柱定不了，約 <b data-rotation-year="day">—</b> 年起日柱也定不了；到 26026 年，誤差是 <b data-rotation-end>—</b>。</p>
-      </figure>
-
-      <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" data-diagram-grammar="pillar-verdict" aria-label="固定加二萬四千年、目前選定太陽黃經的四柱可判定範圍">
-        <div class="determinacy-verdict">
-          <span>固定 +24,000 公曆年 · 深時間研究模型（尚未獨立驗證）</span>
-          <strong>模型內：並非固定時間下的精確節界回歸</strong>
-          <small>同一太陽黃經下年／月可依條件回同柱；但模型中固定推進 +24,000 公曆年並未讓十二節界時間重合。日／時仍未能判定，不能把模型結果當成經獨立驗證的完整四柱週期反證。</small>
-        </div>
-        <div class="determinacy-head">
-          <strong class="determinacy-label">四柱可判範圍</strong>
-          <div class="determinacy-scope"><span>固定 +24,000 · 同一太陽黃經</span><strong id="determinacy-scope-value">等待研究時間狀態</strong></div>
-        </div>
-        <div class="determinacy-grid">
-          <article class="determinacy-card" data-determinacy-pillar="year" data-status="pending" data-resolved="false"><header><span>年</span><strong>年柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-          <article class="determinacy-card" data-determinacy-pillar="month" data-status="pending" data-resolved="false"><header><span>月</span><strong>月柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-          <article class="determinacy-card" data-determinacy-pillar="day" data-status="pending" data-resolved="false"><header><span>日</span><strong>日柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-          <article class="determinacy-card" data-determinacy-pillar="hour" data-status="pending" data-resolved="false"><header><span>時</span><strong>時柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
-        </div>
-        <p class="research-figure-howto" data-figure-howto="03">怎麼看：左邊兩柱只看太陽走到哪，所以能算出來；右邊兩柱還要知道地球轉到哪一刻，24,000 年後這一點算不準。</p>
-        <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
-      </section>
-
-      <div id="research-evidence-why" class="research-evidence-why"></div>
-
-
-      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian/TT reference lattice 的 10–14 天位移與節界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區，以及由民用時刻定義的完整四柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
+    <section class="recurrence-intro research-appendix-intro" aria-labelledby="research-appendix-title">
+      <p class="research-appendix-back"><a href="./?view=research">← 回到研究</a></p>
+      <h1 id="research-appendix-title">研究附錄：資料與方法</h1>
+      <p class="lede">研究頁用輪盤把結論講完了。這裡放細節：可以自己換時刻來算的實驗台，每一步的數字與圖表，還有模型的邊界與資料來源。</p>
+      <nav class="research-appendix-toc" aria-label="附錄目錄">
+        <a href="#research-lab">自己動手算</a>
+        <a href="#research-discrete">曆法：24,000 年怎麼來</a>
+        <a href="#research-astronomy">節氣：十二節提早多少</a>
+        <a href="#research-evidence">四柱：哪些柱算得準</a>
+        <a href="#research-glossary">名詞解釋</a>
+      </nav>
     </section>
 
     <section id="research-lab" class="research-task research-task-primary research-lab" data-research-task="lab" aria-labelledby="research-lab-title">
@@ -302,7 +40,7 @@
         <div class="research-task-index">↻</div>
         <div><div class="eyebrow">實驗台</div><h2 id="research-lab-title">自己動手算</h2></div>
       </header>
-      <p class="research-lab-lede">上面三段用到的數字，都可以在這裡自己驗算：換起始日期、拖動年數，看三個循環各走到哪裡。</p>
+      <p class="research-lab-lede">下面三段用到的數字，都可以在這裡自己驗算：換起始日期、拖動年數，看三個循環各走到哪裡。</p>
       <figure id="research-lab-fan" class="research-lab-fan" aria-labelledby="lab-fan-title">
         <figcaption><strong id="lab-fan-title">換一個起點，三圈怎麼走？</strong><span>選起始日期和經過的年數，或直接按下面「一起回來」的年數。比較的都是同月同日。</span></figcaption>
         <div class="lab-fan-controls">
@@ -633,6 +371,227 @@
       </details>
     </section>
 
+    <section id="research-discrete" class="research-task research-task-primary" data-research-task="discrete" aria-labelledby="research-discrete-title">
+      <header class="research-task-head">
+        <div class="research-task-index">01</div>
+        <div><div class="eyebrow">年序／日序</div><h2 id="research-discrete-title">粗略週期從哪裡來？</h2></div>
+      </header>
+      <p class="research-plain-conclusion" data-plain-conclusion="01">年柱和日柱大約 1,980 年後會一起回到同樣的<a class="research-term" href="#term-ganzhi">干支</a>（確切年數依日期而定）；但要連「季節位置」也一起對上，得等到 24,000 年。這個數字只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>。</p>
+
+      <figure id="research-cycle-fan" class="research-cycle-fan" data-default-years="1980" aria-labelledby="cycle-fan-title">
+        <figcaption><strong id="cycle-fan-title">三圈什麼時候一起回到起點？</strong><span>從 2026 年 9 月 13 日出發，按下面的年數看看。</span></figcaption>
+        <div class="cycle-fan-choices" role="group" aria-label="選擇經過的年數">
+          <button type="button" data-cycle-milestone="1200" aria-pressed="false"><strong>1,200 年</strong></button>
+          <button type="button" data-cycle-milestone="1980" aria-pressed="false"><strong>1,980 年</strong></button>
+          <button type="button" data-cycle-milestone="8000" aria-pressed="false"><strong>8,000 年</strong></button>
+          <button type="button" data-cycle-milestone="24000" aria-pressed="false"><strong>24,000 年</strong></button>
+        </div>
+        <div class="cycle-fan-stage"></div>
+        <p id="cycle-fan-sentence" class="cycle-fan-sentence" aria-live="polite">—</p>
+      </figure>
+      <p class="research-figure-howto" data-figure-howto="01">怎麼看：和首頁的圓盤一樣，中間的金色指針不動，三圈在它底下轉。指針下那一格就是經過那麼多年後走到的位置；金框那一格是起點。金框回到指針下，那一圈就「回來了」；紅色弧線是還差多少。每一圈的格子大小不同，單位寫在圖下。公曆圈代表季節位置。</p>
+
+      <div class="research-discrete-mechanism">
+        <p><strong>為什麼是 1,980 年？</strong>年柱 60 年一輪，所以經過的年數只要是 60 的倍數，年柱就回來。日柱 60 天一輪，要經過的天數剛好是 60 的倍數才行。從 2026 年 9 月 13 日算，兩個條件第一次同時成立是 1,980 年後（換一個起始日期，這個數字會不同）。</p>
+        <p><strong>為什麼還要更久？</strong>公曆的閏年規則每 400 年循環一次，它決定日期和季節怎麼對應。1,980 不是 400 的倍數，所以季節位置還沒回來。年柱加公曆要 1,200 年，也就是 60 和 400 的最小公倍數。日柱加公曆要 8,000 年：400 年共有 146,097 天，除以 60 餘 57，要累積 20 個 400 年，天數才剛好被 60 整除。</p>
+        <p class="discrete-derivation-rule"><strong>所以是 24,000 年。</strong>要三個一起回來，取 1,200 和 8,000 的最小公倍數，就是 24,000 年。但這只是用曆法算出來的<a class="research-term" href="#term-discrete">候選</a>：公曆只是季節的<a class="research-term" href="#term-proxy">代理</a>，真正的<a class="research-term" href="#term-jie">十二節</a>要到 02 再檢查。</p>
+      </div>
+
+
+
+
+      <p class="discrete-to-astronomy">曆法說 24,000 年會對上。下一步：真正的節氣也回到原位了嗎？</p>
+
+    </section>
+
+    <section id="research-astronomy" class="research-task" data-research-task="astronomy" aria-labelledby="research-astronomy-title">
+      <header class="research-task-head">
+        <div class="research-task-index">02</div>
+        <div><div class="eyebrow">節界校驗</div><h2 id="research-astronomy-title">八字的節界回來了嗎？</h2></div>
+        <span class="research-task-relation">固定 24,000 年候選 → 12 節界校驗</span>
+      </header>
+      <p class="research-plain-conclusion" data-plain-conclusion="02">沒有。用深時間天文模型推算，24,000 年後十二個「節」（八字換月的時間點）全都提早了 10 到 14 天，沒有一個回到原位。</p>
+
+      <p class="research-case-transition" id="research-case-transition">比較的是 2026 年和 24,000 年後的 26026 年。</p>
+      <section id="seasonal-drift-evidence" class="seasonal-drift-evidence"
+        data-ready="false" data-mode="total" data-orbit-scale="exaggerated"
+        data-diagram-grammar="zero-line-proof"
+        tabindex="0" aria-labelledby="seasonal-drift-evidence-title">
+        <header class="seasonal-drift-evidence-head">
+          <div class="seasonal-drift-evidence-copy">
+            <div class="eyebrow">主線案例 · 固定 2026 → 26026</div>
+            <h3 id="seasonal-drift-evidence-title">24,000 年後，年界與月界還在原位嗎？</h3>
+          </div>
+        </header>
+
+        <div class="seasonal-drift-summary" aria-live="polite">
+          <div class="seasonal-drift-stat verdict">
+            <span>先看結論 · 八字節界</span>
+            <strong><b id="seasonal-drift-jie-count">12 / 12</b> 在模型中全部提前</strong>
+            <small><b id="seasonal-drift-jie-range">模型值提前 10.235–14.177 天</b> · 相對固定年差均未回到零</small>
+          </div>
+          <div class="seasonal-drift-stat cursor">
+            <span>目前游標</span>
+            <strong><i id="seasonal-drift-selected-name">立春</i> · <b id="seasonal-drift-selected-longitude">315°</b></strong>
+            <small class="total-only">這一刻：<b id="seasonal-drift-selected-total-human">—</b></small>
+            <small class="split-only">完整差異 <b id="seasonal-drift-selected-total">—</b> · 去平均後 <b id="seasonal-drift-selected-shape">—</b></small>
+            <small id="seasonal-drift-selected-bazi">—</small>
+          </div>
+        </div>
+
+        
+        <section class="seasonal-boundary-proof" aria-labelledby="seasonal-boundary-proof-title">
+          <header class="seasonal-boundary-proof-head">
+            <div>
+              <strong id="seasonal-boundary-proof-title">十二個節，各提早幾天？</strong>
+              <span>0 天＝回到原位，線越長提早越多</span>
+            </div>
+            <label class="seasonal-boundary-keyboard" for="seasonal-boundary-select"><span>選一個節</span><select id="seasonal-boundary-select" aria-label="選擇十二個八字節界，更新圖表與研究時間"><option value="">自訂黃經 · 非十二節</option></select></label>
+          </header>
+          <svg id="seasonal-boundary-proof-svg" class="seasonal-drift-svg" role="img"
+            aria-label="十二個八字節界相對零天重合基準的提前量；全部提前約十至十四天"></svg>
+        </section>
+        <p class="research-figure-howto" data-figure-howto="02">怎麼看：每一根線是一個「節」。0 天那條線代表回到原位；線越長，代表比 24,000 年前提早越多天。點任一根，可看那個節的數字。</p>
+        <p class="research-model-scope" id="seasonal-drift-method">算法：同一個節在 26026 年和 2026 年的到達時刻（TT，均勻流動的天文時間）相減，再扣掉整整 24,000 個公曆年（8,765,820 天）。數字來自深時間天文研究模型，26026 年的框架還沒有獨立驗證，所以是模型推算，不是實測。</p>
+
+        <figure id="research-drift-accumulation" class="research-drift-accumulation" aria-labelledby="research-drift-accumulation-title">
+          <figcaption>
+            <strong id="research-drift-accumulation-title">偏移是慢慢累積出來的</strong>
+            <span id="research-drift-accumulation-sentence">立春的時刻，和「同一個公曆日期」比，隨著年數拉長慢慢錯開。</span>
+          </figcaption>
+          <svg id="research-drift-accumulation-svg" viewBox="0 0 720 300" role="img" aria-labelledby="research-drift-accumulation-title research-drift-accumulation-sentence"></svg>
+          <p class="research-drift-accumulation-note">只有這四個年份有真實天文資料；點之間的虛線只是幫助閱讀，不代表中間年份的實際數值。</p>
+        </figure>
+
+        <div id="seasonal-drift-orbit-details" class="seasonal-drift-orbit-details research-why-figure">
+        <div class="seasonal-drift-orbit-panel seasonal-drift-orbit-explainer">
+          <div class="seasonal-drift-orbit-head">
+            <div>
+              <strong>為什麼會提早？</strong>
+              <p>圖的中心是太陽，每條射線是一個節的方向，兩個年代都一樣。但地球軌道的形狀和方向會慢慢改變（虛線是 2026 年，實線是 26026 年），走到同一個方向的日子也跟著變。外圈把「早到幾天」畫成角度：圓點離刻度越遠，提早越多。</p>
+              <small>軌道偏心率 <b id="seasonal-drift-orbit-base-e">—</b> → <b id="seasonal-drift-orbit-target-e">—</b>（數字越小越接近正圓）</small>
+            </div>
+            <div class="seasonal-drift-orbit-tools">
+              <small>虛線 2026<br>實線 26026</small>
+              <button type="button" id="seasonal-drift-orbit-scale" aria-pressed="true"><span id="seasonal-drift-scale-label">示意放大 ×10</span></button>
+            </div>
+          </div>
+          <svg id="seasonal-drift-orbit" class="seasonal-drift-svg" role="img"
+            aria-label="2026 與 26026 等效橢圓、十二個八字節界與到達時間相位外圈；外圈是時間相位，不是第二個物理地球位置"></svg>
+          <p class="seasonal-orbit-explainer-note">外圈不是第二顆地球，只是把提早的天數換成角度。可以拖動圖選一個位置。</p>
+        </div>
+        </div>
+
+        <details id="seasonal-drift-decomposition" class="seasonal-drift-decomposition">
+          <summary>
+            <span>深入：為什麼不是固定提前 12 天？</span>
+            <strong>全年曲線 · 共同位移 ＋ 年內起伏</strong>
+          </summary>
+          <div class="seasonal-drift-decomposition-body">
+            <p>主圖已經用十二個節界判定「沒有回到 0」。這裡才展開 360 個黃經位置：先看整條季節時間線共同提前，再扣掉平均，只留下不同黃經之間約 4 天的年內形狀差異。</p>
+            <small class="seasonal-drift-decomposition-note">完整偏移仍以 26026 相對固定推進 24,000 個公曆年計算；去平均視圖只解釋各節為何不會剛好提前同一個天數，不能拿來判斷節界是否重合。</small>
+            <div class="seasonal-drift-controls" role="group" aria-label="節氣漂移深入閱讀模式">
+              <button type="button" data-seasonal-drift-mode="total" aria-pressed="true">看完整節界偏移</button>
+              <button type="button" data-seasonal-drift-mode="split" aria-pressed="false">扣除平均，看年內起伏</button>
+            </div>
+            <div class="seasonal-drift-decomposition-metrics">
+              <div class="seasonal-drift-stat phase">
+                <span>全年共同位移</span>
+                <strong id="seasonal-drift-phase-value">—</strong>
+                <small>360 個黃經位置的平均</small>
+              </div>
+              <div class="seasonal-drift-stat shape">
+                <span>去平均後的年內起伏</span>
+                <strong id="seasonal-drift-shape-span">—</strong>
+                <small>全年最大－最小</small>
+              </div>
+            </div>
+            <div class="seasonal-drift-plot seasonal-drift-plot-detail">
+              <svg id="seasonal-drift-curve" class="seasonal-drift-svg" role="img"
+                aria-label="2026 到 26026 全年 360 個太陽黃經的 Gregorian 相位漂移；可拖曳選擇黃經"></svg>
+              <div class="seasonal-drift-scrub-row">
+                <span>冬至</span>
+                <input id="seasonal-drift-scrub" type="range" min="0" max="359" step="1" value="45"
+                  aria-label="沿全年太陽黃經選擇位置">
+                <span>→ 冬至</span>
+              </div>
+            </div>
+          </div>
+        </details>
+        <p class="seasonal-drift-evidence-note">十二個節都沒有回到 0 天，所以 24,000 年不能直接當成八字的週期。那四柱裡哪些還算得出來？</p>
+
+
+      </section>
+
+
+      <details id="near-recurrence-disclosure" class="research-extension near-recurrence-disclosure">
+        <summary><span>延伸：更長的時間呢？</span><small>用快速近似模型比較 24,000 年的 41 個整數倍</small></summary>
+      <section id="near-recurrence-detail" class="near-search-panel" aria-label="長時間回歸搜尋，Berger 快速近似模型">
+        <div class="near-search-head">
+          <div class="near-search-copy">
+            <strong>長時間回歸搜尋</strong>
+            <small>24,000 年整數倍 · 季節形狀最大值 → RMS · 近似 ≠ 真正週期</small>
+          </div>
+          <div class="near-stat"><span>候選數</span><strong id="near-candidate-count">—</strong><small id="near-search-horizon">—</small></div>
+          <div class="near-stat best"><span>搜尋最佳</span><strong id="near-best-delta">—</strong><small>24,000 年整數倍</small></div>
+          <div class="near-stat"><span>搜尋最佳殘差</span><strong id="near-best-residual">—</strong><small>最大絕對值 / RMS</small></div>
+        </div>
+        <p class="near-search-scope">只比較 Berger 1978 快速近似模型下的季節形狀殘差，候選為 +24,000 年的整數倍；這不是完整節界回歸，也不是獨立驗證的深時間天文預測。</p>
+        <div class="near-search-body">
+          <figure class="near-chart-figure">
+            <div class="near-chart-meta">
+              <strong>十二節最大形狀殘差 <span>· 小時</span></strong>
+              <small>越靠近 0，越接近基準年的季節形狀</small>
+            </div>
+            <svg id="near-recurrence-chart" viewBox="0 0 1000 220" role="group" aria-label="41 個離散候選的形狀殘差；縱軸小時，橫軸距基準年的千年數；各點可選取"></svg>
+            <figcaption>橫軸：距基準的 Δ 年數（千年） · 每點相隔 24,000 年</figcaption>
+          </figure>
+          <div id="near-recurrence-ranking" class="near-ranking" aria-label="最佳近回歸候選排名，可選取帶入 Δ"></div>
+        </div>
+      </section>
+      </details>
+    </section>
+
+    <section id="research-evidence" class="research-task" data-research-task="evidence" aria-labelledby="research-evidence-title">
+      <header class="research-task-head">
+        <div class="research-task-index">03</div>
+        <div><div class="eyebrow">四柱結論</div><h2 id="research-evidence-title">對八字意味著什麼？</h2></div>
+        <span class="research-task-relation">12 / 12 節界位移 → 四柱可判範圍</span>
+      </header>
+      <p class="research-plain-conclusion" data-plain-conclusion="03">在太陽走到同一個位置（<a class="research-term" href="#term-longitude">太陽黃經</a>相同）時，年柱和月柱可以跟現在相同；但日柱和時柱沒辦法確定。所以 24,000 年不能當作四柱完整重複的週期。</p>
+
+      <figure id="research-rotation-uncertainty" class="research-rotation-uncertainty" aria-labelledby="rotation-uncertainty-title">
+        <figcaption><strong id="rotation-uncertainty-title">地球自轉的誤差，越往後越大</strong><span>日柱看地球轉了幾圈，時柱看轉到哪一刻。地球自轉會慢慢變慢，而且變慢的速度沒辦法精確預測。</span></figcaption>
+        <svg role="img" aria-label="地球自轉時間的誤差範圍隨年代變寬，先寬過一個時辰，再寬過一天"></svg>
+        <p class="research-figure-howto" data-figure-howto="03-rotation">怎麼看：曲線是推算的誤差範圍有多寬（1σ，約 68% 的把握）。寬過一個時辰（2 小時），就不知道是哪個時辰；寬過一天，連哪一天都不知道。約 <b data-rotation-year="shichen">—</b> 年起時柱定不了，約 <b data-rotation-year="day">—</b> 年起日柱也定不了；到 26026 年，誤差是 <b data-rotation-end>—</b>。</p>
+      </figure>
+
+      <section id="four-pillar-determinacy" class="determinacy-panel" data-ready="false" data-diagram-grammar="pillar-verdict" aria-label="固定加二萬四千年、目前選定太陽黃經的四柱可判定範圍">
+        <div class="determinacy-verdict">
+          <span>固定 +24,000 公曆年 · 深時間研究模型（尚未獨立驗證）</span>
+          <strong>模型內：並非固定時間下的精確節界回歸</strong>
+          <small>同一太陽黃經下年／月可依條件回同柱；但模型中固定推進 +24,000 公曆年並未讓十二節界時間重合。日／時仍未能判定，不能把模型結果當成經獨立驗證的完整四柱週期反證。</small>
+        </div>
+        <div class="determinacy-head">
+          <strong class="determinacy-label">四柱可判範圍</strong>
+          <div class="determinacy-scope"><span>固定 +24,000 · 同一太陽黃經</span><strong id="determinacy-scope-value">等待研究時間狀態</strong></div>
+        </div>
+        <div class="determinacy-grid">
+          <article class="determinacy-card" data-determinacy-pillar="year" data-status="pending" data-resolved="false"><header><span>年</span><strong>年柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+          <article class="determinacy-card" data-determinacy-pillar="month" data-status="pending" data-resolved="false"><header><span>月</span><strong>月柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+          <article class="determinacy-card" data-determinacy-pillar="day" data-status="pending" data-resolved="false"><header><span>日</span><strong>日柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+          <article class="determinacy-card" data-determinacy-pillar="hour" data-status="pending" data-resolved="false"><header><span>時</span><strong>時柱</strong></header><div class="determinacy-status">—</div><p>—</p></article>
+        </div>
+        <p class="research-figure-howto" data-figure-howto="03">怎麼看：左邊兩柱只看太陽走到哪，所以能算出來；右邊兩柱還要知道地球轉到哪一刻，24,000 年後這一點算不準。</p>
+        <div class="determinacy-foot"><strong>判定邊界：</strong> <span id="determinacy-footnote">—</span></div>
+      </section>
+
+      <div id="research-evidence-why" class="research-evidence-why"></div>
+
+
+      <details class="model-boundary research-evidence-appendix"><summary>模型邊界與來源</summary><p>離散層使用 proleptic Gregorian 與整數模運算。一般 Δ 的快速天文外圈仍使用 André Berger 1978 長期軌道參數，只比較春分歸零後的季節形狀；它刻意拿掉共同 seasonal phase。+24,000 主案例則另接 source-derived N-body 全年 absolute seasonal timeline，用來研究同一太陽黃經相對 Gregorian/TT reference lattice 的 10–14 天位移與節界窗口。這批深時間結果仍是 research-only：year-26026 frame 尚未在目標年獨立驗證，civil time、UTC／政治時區，以及由民用時刻定義的完整四柱也尚未因此取得 production authority。搜尋結果同樣不當作真正週期。</p></details>
+    </section>
+
     <section id="research-glossary" class="research-glossary" aria-labelledby="research-glossary-title">
       <h2 id="research-glossary-title">名詞解釋</h2>
       <p class="research-glossary-lead">這頁用到的專有名詞，用白話說明。</p>
@@ -663,7 +622,6 @@
   <script type="module" src="./src/research-absolute-boundary-consequence-view.js"></script>
   <script type="module" src="./src/four-pillar-determinacy-view.js"></script>
   <script type="module" src="./src/near-recurrence-view.js"></script>
-  <script type="module" src="./src/research-narrative-spine-view.js"></script>
   <script type="module" src="./src/research-reading-figures.js"></script>
   <script type="module" src="./src/research-glossary-inline.js"></script>
   <script type="module" src="./src/research-time-state-view.js"></script>

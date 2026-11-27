@@ -58,7 +58,8 @@ test("the lab leads with the same cycle fan, its controls right above it, then o
   assert.match(lab.slice(instrumentEnd, instrumentEnd + 80), /<\/section>\s*<div class="research-entry"/);
   assert.match(html, /<div id="research-discrete-tools" class="research-discrete-tools">/);
   assert.match(lab, /<details id="research-lab-tools" class="research-lab-tools">\s*<summary><strong>研究者工具<\/strong>/);
-  assert.ok(html.indexOf('id="research-lab"') > html.indexOf('id="research-evidence"'));
+  // 2026-11-28 appendix: the lab leads, ahead of the three data sections
+  assert.ok(html.indexOf('id="research-lab"') < html.indexOf('id="research-discrete"'));
   assert.ok(html.indexOf('id="research-lab"') < html.indexOf('id="research-glossary"'));
 });
 
@@ -121,12 +122,10 @@ test("glossary terms open their definition in place and keep the jump link witho
   assert.match(glossaryJs, /link\.setAttribute\("aria-expanded", "true"\)/);
 });
 
-test("the opening answers in one sentence, then a to-scale overview, then three chapter links", () => {
-  assert.match(html, /class="lede research-answer">目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期。<\/p>/);
-  assert.ok(html.indexOf('id="research-overview"') < html.indexOf('class="research-outline research-answer-map"'));
-  assert.match(html, /data-stop="local" style="--x:8\.25%"/);
-  assert.equal((html.match(/data-research-spine="/g) ?? []).length, 3);
-  assert.doesNotMatch(html, /research-alignment-map/);
+test("the appendix opens with its title, the way back to the story, and a table of contents", () => {
+  assert.ok(html.indexOf('class="research-appendix-back"') < html.indexOf('id="research-appendix-title"'));
+  assert.ok(html.indexOf('class="research-appendix-toc"') < html.indexOf('id="research-lab"'));
+  assert.doesNotMatch(html, /id="research-overview"|research-answer-map|research-alignment-map/);
 });
 
 test("rhythm comes from spacing tokens, without !important", () => {

@@ -14,15 +14,16 @@ const [html, view, data, css] = await Promise.all([
 test("Research 02 keeps the fixed +24k story visible before the delta sandbox", () => {
   const astronomyStart = html.indexOf('id="research-astronomy"');
   const seasonalEvidenceStart = html.indexOf('id="seasonal-drift-evidence"');
-  const dynamicPanelStart = html.indexOf('class="astronomy-panel"', astronomyStart);
+  const labStartForPanel = html.indexOf('id="research-lab"');
+  const dynamicPanelStart = html.indexOf('class="astronomy-panel"', labStartForPanel);
   const researchEvidenceStart = html.indexOf('id="research-evidence"');
-  // Review 2026-11-21: the other-Δ sandbox moved to the lab after 03.
+  // 2026-11-28 appendix: the lab (with the other-Δ sandbox) leads the page.
   const labStart = html.indexOf('id="research-lab"');
   assert.ok(
     astronomyStart >= 0 &&
     seasonalEvidenceStart > astronomyStart &&
     researchEvidenceStart > seasonalEvidenceStart &&
-    labStart > researchEvidenceStart &&
+    labStart < astronomyStart &&
     dynamicPanelStart > labStart
   );
   assert.match(html, /主線案例 · 固定 2026 → 26026/);

@@ -3,11 +3,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { cssSource } from "./helpers/css-source.js";
 
-const [html,view,model,spine,fourPillarView,css]=await Promise.all([
+const [html,view,model,fourPillarView,css]=await Promise.all([
   readFile(new URL("../recurrence.html",import.meta.url),"utf8"),
   readFile(new URL("../src/research-absolute-boundary-consequence-view.js",import.meta.url),"utf8"),
   readFile(new URL("../src/research/seasonal-absolute-boundary-consequence.js",import.meta.url),"utf8"),
-  readFile(new URL("../src/research-narrative-spine-view.js",import.meta.url),"utf8"),
   readFile(new URL("../src/four-pillar-determinacy-view.js",import.meta.url),"utf8"),
   Promise.resolve(cssSource("research-absolute-boundary-consequence.css"))
 ]);
@@ -42,14 +41,6 @@ test("fixed Research 03 pillar cards follow the shared selected seasonal state",
   assert.match(fourPillarView,/pillar\.status==="research-resolved"/);
   assert.match(fourPillarView,/Math\.abs\(state\.comparison\.driftDays\)/);
   assert.doesNotMatch(fourPillarView,/shape-only-secondary|shape-only-determinacy-details|shape-only 輔助判定/);
-});
-
-test("Research outline ends in the recurrence conclusion rather than repeating the 02 evidence",()=>{
-  for(const copy of ["曆法上三個循環全部對上","但真正的節氣沒有回來","所以 24,000 年不是四柱的週期"]){
-    assert.ok(spine.includes(copy),`missing fixed-spine copy: ${copy}`);
-  }
-  assert.doesNotMatch(spine,/12 \/ 12 節界位移/);
-  assert.doesNotMatch(spine,/dataset\.deltaYears|yearSequenceClosed|fourPillarResolvedCount/);
 });
 
 test("Research 03 states the distinction without repeating the same verdict twice",()=>{
