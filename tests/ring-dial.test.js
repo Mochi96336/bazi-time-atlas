@@ -59,5 +59,5 @@ test("Now buttons dial instead of jumping, and reduced motion still jumps", () =
   const mobile = readFileSync(new URL("../src/mobile-time-control.js", import.meta.url), "utf8");
   assert.match(atlas, /dialToInstant\(Date\.now\(\), "now"\)/);
   assert.match(mobile, /source:"mobile-now", animate:true/);
-  assert.match(atlas, /if \(prefersReducedMotion\(\) \|\| !currentDisplay\) return setSelectedInstant\(targetMs, source\);/);
+  assert.match(atlas, /if \(prefersReducedMotion\(\) \|\| !currentDisplay\) return settleWith\(setSelectedInstant\(targetMs, source\)\);/);
 });

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>研究分幕 · 捲動</title>
+  <link rel="stylesheet" href="../../vendor/fonts/noto-sans-tc/noto-sans-tc.css">
+  <link rel="stylesheet" href="../../tokens.css">
+  <link rel="stylesheet" href="./scenes.css">
+  <style>
+    /* the document itself scrolls (not body, not the stage): touch drags anywhere
+       go through the fixed stage to the page, so phones scroll like desktops */
+    html, body { height: auto; }
+    html { overflow-y: auto; }
+    body { overflow: visible; }
+    .rs-stage { position: fixed; inset: 0; pointer-events: none; }
+    .rs-topbar a, .rs-actions { pointer-events: auto; }
+    /* phones (iOS) still hand touches to an iframe under pointer-events: none and
+       scroll the embedded page instead; a plain layer above it takes every drag,
+       and drags on a fixed element scroll the document */
+    .rs-shield { position: absolute; inset: 0; pointer-events: auto; background: transparent; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+    /* the embedded home keeps one size while a phone's address bar slides:
+       a resize would make it re-lay-out the whole instrument mid-scroll */
+    #rs-wheel { transform-origin: 0 0; will-change: transform; height: 100vh; height: 100lvh; }
+    #rs-scroll { position: relative; z-index: -1; }
+    .rs-copy, .rs-kicker { transition: opacity .18s linear; }
+    .rs-copy.swapping, .rs-kicker.swapping { opacity: 0; }
+    .rs-copy :is(h1, p) { word-break: keep-all; overflow-wrap: anywhere; }
+    .rs-copy h1 { text-wrap: balance; }
+    /* desktop: the needle runs down through the words to the hub; a soft shade
+       behind the caption keeps the line from cutting through the title */
+    @media (min-width: 701px) {
+      .rs-copy::before { content: ""; position: absolute; inset: -18px -40px -14px; z-index: -1; pointer-events: none;
+        background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(9, 12, 17, .88) 45%, rgba(9, 12, 17, 0) 100%); }
+    }
+    .rs-copy p { text-wrap: pretty; }
+    .rs-progress { position: fixed; right: 14px; top: 50%; transform: translateY(-50%); z-index: 4; display: flex; flex-direction: column; gap: 6px; }
+    .rs-progress i { display: block; width: 3px; height: 14px; background: rgba(206, 212, 216, .16); }
+    .rs-progress i.on { background: rgba(233, 207, 149, .8); }
+    @media (max-width: 700px) { .rs-progress { display: none; } }
+    /* the wheel is scenery: wheel, touch and keys scroll this page */
+    #rs-wheel { pointer-events: none; }
+    /* the top bar's shade fades in and out instead of switching */
+    .rs-topbar { background: none; }
+    .rs-topbar::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .4s ease;
+      background: linear-gradient(#0a0d13, rgba(10, 13, 19, 0)); }
+    .rs-topbar.over::before { opacity: 1; }
+    .rs-topbar a { color: inherit; text-decoration: none; }
+    @media (max-width: 700px) { .rs-copy:not([data-panned]) { text-align: center !important; left: 50% !important; transform: translateX(-50%) !important; } }
+    /* entering the research room: the light closes in around the instrument */
+    .rs-room { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.6s ease;
+      background: radial-gradient(ellipse 70% 66% at 50% 46%, rgba(4, 6, 9, .14) 38%, rgba(4, 6, 9, .78) 100%); }
+    /* only while arriving: as soon as reading starts the light opens back up */
+    body[data-rs-entered][data-rs-scene="open0"] .rs-room { opacity: 1; }
+    /* the conclusion closes in again (the mirror of the arrival), with more
+       shade under the words so they read clearly over the rings */
+    body[data-rs-scene="end"] .rs-room { opacity: 1;
+      background: linear-gradient(to top, rgba(4, 6, 9, .9) 0, rgba(4, 6, 9, .72) 14%, rgba(4, 6, 9, 0) 36%),
+        radial-gradient(ellipse 70% 66% at 50% 46%, rgba(4, 6, 9, .14) 38%, rgba(4, 6, 9, .78) 100%); }
+    .rs-copy[data-scene="end"] h1 { color: #fbf3e2; text-shadow: 0 1px 12px rgba(4, 6, 9, .9); }
+    .rs-copy[data-scene="end"] .rs-body { color: rgba(234, 238, 240, .9); text-shadow: 0 1px 8px rgba(4, 6, 9, .9); }
+    .rs-fade { position: fixed; inset: 0; z-index: 5; pointer-events: none; background: #07090d; opacity: 0; transition: opacity .35s ease; }
+    body[data-rs-jumping] .rs-fade { opacity: 1; transition-duration: .2s; }
+    .rs-kicker, .rs-progress { z-index: 2; }
+    .rs-topbar nav a[aria-current] { position: relative; color: #f1e8d4; }
+    .rs-topbar nav a[aria-current]::after { content: ""; position: absolute; left: 24px; right: 24px; bottom: -9px; height: 1px;
+      background: rgba(233, 207, 149, .85); transform: scaleX(0); transform-origin: 50% 50%; transition: transform .9s cubic-bezier(.2, .7, .2, 1); }
+    body[data-rs-entering] .rs-topbar nav a[aria-current]::after { transform: scaleX(1); }
+    @media (max-width: 700px) { .rs-topbar nav a[aria-current]::after { left: 18px; right: 18px; } }
+    /* the title card arrives slowly */
+    .rs-copy[data-scene="open0"] { bottom: 58px; }
+    .rs-copy[data-scene="open0"]:not(.swapping) { transition: opacity 1.1s ease; }
+    .rs-copy[data-scene="open0"] h1 { font-size: 26px; }
+    @media (max-width: 700px) { .rs-copy[data-scene="open0"] { bottom: 56px; } .rs-copy[data-scene="open0"] h1 { font-size: 21px; } }
+    /* opening hint: where the home readout was; a light runs down a short track */
+    .rs-hint { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 3; margin: 0; display: flex; flex-direction: row; align-items: center; gap: 10px; white-space: nowrap;
+      font-size: 14px; letter-spacing: .1em; color: rgba(241, 232, 212, .86); pointer-events: none; transition: opacity .9s ease; }
+    .rs-hint[hidden] { display: flex; opacity: 0; }
+    .rs-hint.gone { opacity: 0; transition-duration: .3s; }
+    .rs-hint kbd { font: 600 12px "Noto Sans TC", sans-serif; display: inline-block; min-width: 22px; padding: 1px 6px; margin-left: 2px;
+      border: 1px solid rgba(233, 207, 149, .55); border-radius: 3px; color: #f1e8d4; }
+    .rs-hint i { order: -1; position: relative; display: block; width: 1px; height: 24px; background: rgba(233, 207, 149, .18); overflow: hidden; }
+    .rs-hint i::after { content: ""; position: absolute; left: 0; top: -10px; width: 1px; height: 10px;
+      background: linear-gradient(rgba(255, 227, 163, 0), #ffe3a3); animation: rs-hint-run 2.2s cubic-bezier(.45, 0, .25, 1) infinite; }
+    @keyframes rs-hint-run { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(34px); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .rs-hint i::after { animation: none; top: 13px; } }
+    .rs-hint .touch { display: none; }
+    @media (hover: none) and (pointer: coarse) { .rs-hint .desk { display: none; } .rs-hint .touch { display: inline; } }
+    @media (max-width: 700px) { .rs-hint { bottom: 18px; } }
+    /* end actions */
+    .rs-copy[data-scene="end"] { bottom: 16px; }
+    /* at the end the buttons' row is always laid out, so their arrival does not push the words up */
+    .rs-copy[data-scene="end"] .rs-actions { transition: opacity .4s ease; }
+    .rs-copy[data-scene="end"] .rs-actions[hidden] { display: flex; visibility: hidden; opacity: 0; }
+    .rs-actions { margin-top: 12px; display: flex; gap: 10px; justify-content: center; pointer-events: auto; }
+    .rs-actions[hidden] { display: none; }
+    .rs-actions button { font: 500 13px "Noto Sans TC", sans-serif; letter-spacing: .06em; color: #f1e8d4; background: rgba(9, 12, 17, .6);
+      border: 1px solid rgba(233, 207, 149, .35); padding: 8px 16px; cursor: pointer; }
+    .rs-actions button + button { color: rgba(214, 220, 222, .8); border-color: rgba(206, 212, 216, .2); }
+    .rs-actions button:hover, .rs-actions button:focus-visible { border-color: rgba(233, 207, 149, .8); outline: none; }
+    body[data-rs-leaving] .rs-copy { opacity: 0; transition: opacity .3s; }
+    /* 01 step ledger */
+    #rs-ledger, #rs-orbit { opacity: 0; }
+    #rs-ledger {
+      position: fixed; z-index: 3; pointer-events: none; overflow: visible;
+      right: 28px; top: 84px; width: 340px; height: 140px; padding: 10px 12px;
+      background: rgba(9, 12, 17, .82); border: 1px solid rgba(206, 212, 216, .1);
+      transition: opacity .2s linear;
+    }
+    @media (max-width: 700px) { #rs-ledger { right: 8px; left: 8px; top: 400px; width: auto; height: 118px; padding: 4px 8px; } }
+    #rs-ledger .lg-head { font: 500 11px "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .62); letter-spacing: .04em; }
+    #rs-ledger .lg-name { font: 500 12px var(--lq-serif, serif); fill: rgba(232, 226, 210, .86); letter-spacing: .1em; }
+    #rs-ledger .lg-base { stroke: rgba(206, 212, 216, .2); stroke-width: 1; }
+    #rs-ledger .lg-bar { stroke: rgba(196, 212, 232, .5); stroke-width: 2; }
+    #rs-ledger .lg-bar.cur { stroke: rgba(226, 234, 244, .95); }
+    #rs-ledger .lg-zero { fill: rgba(233, 207, 149, .8); }
+    #rs-ledger .lg-zero.cur { fill: #ffe3a3; }
+    #rs-ledger .lg-val { font: 500 11px "Noto Sans TC", sans-serif; fill: rgba(214, 224, 236, .8); text-anchor: end; }
+    #rs-ledger .lg-val.zero { fill: #f0dcae; }
+    #rs-ledger .lg-val.gap { fill: #d9806a; }
+    @media (min-width: 701px) { body[data-rs-ladder] #rs-ledger { right: auto; left: 28px; top: 100px; } }
+    #rs-ledger .lg-best-dot { fill: #ffe3a3; }
+    #rs-ledger .lg-ref { stroke: rgba(206, 212, 216, .22); stroke-dasharray: 2 3; }
+    #rs-ledger .lg-ref-label { font: 400 9.5px "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .5); text-anchor: end; }
+    #rs-ledger .lg-rung { stroke: rgba(196, 212, 232, .45); stroke-width: 3; }
+    #rs-ledger .lg-rung.cur { stroke: rgba(240, 244, 250, .95); }
+    #rs-ledger .lg-rung.best { stroke: #ffe3a3; }
+    #rs-ledger .lg-rung.cap { stroke-width: 1.4; }
+    #rs-ledger .lg-tick { font: 400 10px "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .6); text-anchor: middle; }
+    #rs-ledger .lg-tick.best { fill: #f0dcae; }
+    /* orbit inset: a small plate that grows in 2.4 */
+    #rs-orbit {
+      --rs-orbit-big: 0;
+      position: fixed; z-index: 3; pointer-events: none; overflow: visible;
+      right: 32px; top: 76px; width: 300px; height: 300px;
+      transform-origin: 100% 0; transform: scale(calc(1 + .5 * var(--rs-orbit-big)));
+      /* the round shade is the gradient itself; no border-radius: Safari clips an
+         <svg>'s own drawing to it (the caption under the plate was cut off) */
+      background: radial-gradient(circle, rgba(9, 12, 17, .9) 55%, rgba(9, 12, 17, 0) 71%);
+      transition: opacity .2s linear;
+    }
+    @media (max-width: 700px) {
+      #rs-orbit { right: auto; left: 0; top: 78px; width: 210px; height: 210px; transform-origin: 0 0; transform: scale(calc(1 + .55 * var(--rs-orbit-big))); }
+      #rs-orbit .ob-jie { font-size: 15px !important; }
+      #rs-orbit .ob-peri-label { font-size: 13px !important; }
+      #rs-orbit .ob-caption { font-size: 12px !important; }
+    }
+    #rs-orbit .ob-tick { stroke: rgba(206, 212, 216, .35); stroke-width: 1; }
+    #rs-orbit .ob-jie { font: 500 11.5px "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .62); text-anchor: middle; }
+    #rs-orbit .ob-orbit-old { fill: none; stroke: rgba(196, 212, 232, .55); stroke-width: 1; stroke-dasharray: 3 3; }
+    #rs-orbit .ob-orbit { fill: none; stroke: #c9a46a; stroke-width: 1.6; }
+    #rs-orbit .ob-window { fill: none; stroke: rgba(233, 207, 149, .75); stroke-width: 3; }
+    #rs-orbit .ob-gap { fill: none; stroke: #c8664f; stroke-width: 3; stroke-linecap: round; }
+    #rs-orbit .ob-shift { fill: none; stroke: rgba(233, 207, 149, .55); stroke-width: 2; }
+    #rs-orbit .ob-sun { fill: #d9b46e; }
+    #rs-orbit .ob-needle { stroke: #e9cf95; stroke-width: 1.2; }
+    #rs-orbit .ob-earth { fill: #0b0e14; stroke: #f4e2b4; stroke-width: 2; }
+    #rs-orbit .ob-dot { fill: #0b0e14; stroke: rgba(196, 212, 232, .9); stroke-width: 1.4; }
+    #rs-orbit .ob-dot-trail { fill: rgba(196, 212, 232, .55); }
+    #rs-orbit .ob-dot-warm { fill: #ffe3a3; }
+    #rs-orbit .ob-peri-old { stroke: rgba(196, 212, 232, .6); stroke-width: 1; stroke-dasharray: 2 3; }
+    #rs-orbit .ob-peri { stroke: #ffe3a3; stroke-width: 1.2; }
+    #rs-orbit .ob-peri-label { font: 500 11px "Noto Sans TC", sans-serif; fill: #f0dcae; }
+    #rs-orbit .ob-peri-label.old { fill: rgba(196, 212, 232, .8); }
+    #rs-orbit .ob-caption { font: 400 10.5px "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .62); text-anchor: middle; }
+    /* the plate's dark disc ends before its outer words; a dark halo keeps the
+       ring edges behind them from cutting through the letters */
+    #rs-orbit :is(.ob-caption, .ob-jie, .ob-peri-label) { paint-order: stroke; stroke: rgba(9, 12, 17, .92); stroke-width: 4px; stroke-linejoin: round; }
+  </style>
+</head>
+<body>
+  <main class="rs-stage">
+    <iframe id="rs-wheel" title="時間圖譜輪盤" tabindex="-1"></iframe>
+    <div class="rs-room" aria-hidden="true"></div>
+    <div class="rs-shield" aria-hidden="true"></div>
+    <div class="rs-fade" aria-hidden="true"></div>
+    <header class="rs-topbar"><a href="../../">BAZI TIME ATLAS</a><nav><a href="../../">時間圖譜</a><a href="./scroll.html" aria-current="page">研究</a></nav></header>
+    <p class="rs-kicker" id="rs-kicker"></p>
+    <section class="rs-copy" aria-live="polite">
+      <h1 id="rs-title"></h1>
+      <p class="rs-body" id="rs-body"></p>
+      <div class="rs-actions" hidden>
+        <button type="button" id="rs-back-now">回到時間圖譜</button>
+        <button type="button" id="rs-again">從頭再看</button>
+      </div>
+    </section>
+    <p class="rs-hint" hidden><span class="desk">往下捲動，或按 <kbd>↓</kbd></span><span class="touch">往上滑，或點一下</span><i></i></p>
+    <svg id="rs-ledger" viewBox="-6 -4 332 136" aria-hidden="true"></svg>
+    <svg id="rs-orbit" viewBox="-152 -152 304 304" aria-hidden="true"></svg>
+    <nav class="rs-progress" aria-hidden="true"></nav>
+  </main>
+  <div id="rs-scroll"></div>
+  <script type="module" src="./scroll.js"></script>
+</body>
+</html>

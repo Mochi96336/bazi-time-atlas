@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./navigation-workspace.css">
   <link rel="stylesheet" href="./atlas-tools.css" id="time-context-control-style" data-analysis-first-screen="1" data-atlas-solar-time-analysis="1" data-inverse-time-search="1" data-atlas-visible-ten-gods-styles="1" data-analysis-first-screen-polish="1" data-analysis-tools-rail="1" data-desktop-tools-workspace="1" data-selected-instant-editor="1">
   <link rel="stylesheet" href="./atlas-wheel-finish.css">
+  <link rel="stylesheet" href="./research-scroll.css">
 </head>
 <body>
   <main class="kinetic-shell">
@@ -22,7 +23,7 @@
       <div class="topbar-actions">
         <nav class="site-nav" aria-label="Atlas views">
           <a class="active" href="./" aria-current="page">時間圖譜</a>
-          <a class="research-link" data-nav-role="research" href="./recurrence.html" aria-label="研究：回歸與深時間驗證">研究</a>
+          <a class="research-link" data-nav-role="research" href="./?view=research" aria-label="研究：同一組八字多久會再出現">研究</a>
         </nav>
         <div class="topbar-tool-slot" aria-label="工具">
           <button id="analysis-toggle" class="analysis-toggle" type="button" aria-expanded="false" aria-controls="kinetic-instrument" title="顯示分析工具">工具</button>
@@ -282,6 +283,25 @@
     </details>
   </main>
 
+  <!-- Research view (src/research/research-mode.js): shown only in ?view=research -->
+  <div id="research-ui" hidden>
+    <div id="research-room" aria-hidden="true"></div>
+    <div id="research-fade" aria-hidden="true"></div>
+    <p id="research-kicker"></p>
+    <section id="research-copy" aria-live="polite">
+      <h1 id="research-title"></h1>
+      <p id="research-body"></p>
+      <div id="research-actions" hidden>
+        <button type="button" id="research-back">回到時間圖譜</button>
+        <button type="button" id="research-again">從頭再看</button>
+      </div>
+    </section>
+    <p id="research-hint" hidden><span class="desk">往下捲動，或按 <kbd>↓</kbd></span><span class="touch">往上滑，或點一下</span><i></i></p>
+    <svg id="research-ledger" viewBox="-6 -4 332 136" aria-hidden="true"></svg>
+    <nav id="research-progress" aria-hidden="true"></nav>
+  </div>
+  <div id="research-scroll" aria-hidden="true"></div>
+
   <div id="legacy-annual-compat" hidden data-birth-projection="" data-five-tigers="" data-month-stem="" data-month-branch="">
     <svg aria-hidden="true"><text id="center-value">—</text></svg>
     <h2 id="detail-title">—</h2>
@@ -303,5 +323,6 @@
   <script type="module" src="./src/analysis-mode.js"></script>
   <script type="module" src="./src/mobile-time-control.js"></script>
   <script type="module" src="./src/wheel-finish.js"></script>
+  <script type="module" src="./src/research/research-mode.js"></script>
 </body>
 </html>

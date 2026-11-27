@@ -1,0 +1,164 @@
+/* Research view (src/research/research-mode.js): the home instrument driven by
+   scroll. Everything here is scoped to body[data-view="research"]. */
+
+/* ---- the page scrolls; the instrument stays put ---------------------------
+   The shell is fixed and lets touches through (a fixed scroll container would
+   swallow drags on phones); the document itself is what scrolls. */
+/* (phones: the atlas locks html and body to the screen, ≤480px; the research
+   view must undo both or a finger cannot scroll, while scrollTo still can) */
+html[data-view="research"] { height: auto; overflow: visible; overflow-y: auto; }
+body[data-view="research"] { overflow: visible; height: auto; }
+/* (a fixed height, not the home's 100dvh: when a phone's address bar slides
+   the dynamic height changes, the camera re-frames and the wheel jumps. The
+   small viewport is the height with the bar shown, so nothing is cut off.) */
+body[data-view="research"] .kinetic-shell {
+  position: fixed; inset: 0 0 auto 0; height: 100vh; height: 100svh; overflow: visible; pointer-events: none;
+  /* (the home's rows below the wheel are hidden here; without this the spare
+     height stretches the top bar and the logo sits lower than on the home) */
+  align-content: start;
+}
+/* (the phone instrument's own height is 100dvh − 112px on the home: same) */
+@media (max-width: 480px) {
+  body[data-view="research"] .instrument-shell { height: calc(100vh - 112px); height: calc(100svh - 112px); }
+  /* (the home's bar is 42px with 44px buttons overhanging it; keep it so) */
+  body[data-view="research"] .kinetic-topbar { height: 42px; }
+}
+body[data-view="research"] .kinetic-topbar { position: relative; z-index: 6; }
+body[data-view="research"] .kinetic-topbar a { pointer-events: auto; }
+/* (ids in the selectors outrank the home's own display rules without !important) */
+html body[data-view="research"] :is(.atlas-intro, .topbar-tool-slot, .legacy-note, .kinetic-shell > section:not(#kinetic-instrument), .kinetic-shell > aside, #mobile-time-dock, #ganzhi-inspector):not(#research-ui) { display: none; }
+html body[data-view="research"] #kinetic-instrument > :not(#orbital-background, #material-wheel-layer, svg) { display: none; }
+/* no ring drag, no wheel focus: the scroll owns time here */
+body[data-view="research"] #kinetic-instrument :is(svg, canvas) { pointer-events: none; }
+body[data-view="research"] #kinetic-instrument { pointer-events: none; transform-origin: 50% 100%; }
+/* phones: the instrument is laid out 680px wide and panned (see WIDE) */
+/* phones pan by transform: the instrument is its own layer so a pan moves
+   pixels instead of repainting the wheel (680 px wide, phones only: at 4K a
+   full-viewport layer would strain GPU tile memory, see 4K black flash notes) */
+body[data-research-wide] #kinetic-instrument { width: 680px; max-width: none; will-change: transform; }
+/* …without widening the top bar with it: the bar keeps the screen's width */
+body[data-research-wide] .kinetic-topbar { width: calc(100vw - 16px); box-sizing: border-box; }
+
+#research-scroll { position: relative; height: 0; pointer-events: none; }
+#research-ui[hidden] { display: none; }
+
+/* ---- the instrument while the scenes draw on it -------------------------- */
+#kinetic-instrument[data-research-greg] #month-track > * { opacity: var(--research-month, 0); }
+body[data-view="research"] #day-track :is(.cycle-label, .active-cycle-label) { opacity: var(--research-day-labels, 1); }
+#research-greg .ring-tick { stroke: rgba(204, 212, 222, .34); stroke-width: 1; }
+#research-greg .ring-tick.major { stroke: rgba(204, 212, 222, .6); }
+.research-greg-label { font-family: var(--lq-serif, serif); font-weight: 500; fill: rgba(204, 212, 222, .5); }
+.research-veil { fill: #090c11; }
+.research-start, .research-echo { stroke: rgba(214, 224, 236, .78); }
+.research-trail { stroke: rgba(214, 224, 236, .5); }
+.research-name { font-family: var(--lq-serif, serif); font-weight: 500; fill: rgba(232, 226, 210, .86); letter-spacing: .12em; }
+.research-note { font-family: "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .5); letter-spacing: .04em; }
+.research-leader { stroke: rgba(206, 212, 216, .26); fill: none; }
+.research-ring-name { font-family: var(--lq-serif, serif); fill: rgba(206, 212, 216, .56); letter-spacing: .14em;
+  paint-order: stroke; stroke: rgba(9, 12, 17, .9); stroke-width: 4px; stroke-linejoin: round; }
+.research-echo-label { font-family: "Noto Sans TC", sans-serif; fill: rgba(214, 224, 236, .78); letter-spacing: .04em;
+  paint-order: stroke; stroke: rgba(9, 12, 17, .85); stroke-width: 3px; stroke-linejoin: round; }
+.research-gap { fill: none; stroke: #c8664f; stroke-linecap: round; }
+.research-gap-label { font-family: "Noto Sans TC", sans-serif; font-weight: 500; fill: #d9806a; }
+.research-back { font-family: "Noto Sans TC", sans-serif; fill: rgba(240, 226, 196, .72); letter-spacing: .06em; }
+.research-trail-tag { font-family: "Noto Sans TC", sans-serif; fill: rgba(214, 224, 236, .62); letter-spacing: .02em; }
+.research-split { font-family: var(--lq-serif, serif); font-weight: 500; fill: rgba(204, 212, 222, .34); }
+.research-split.hit { fill: #f1e8d4; font-weight: 600; }
+.research-row-name { font-family: "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .56); letter-spacing: .06em; }
+.research-shift { fill: none; stroke: rgba(233, 207, 149, .7); stroke-linecap: round; }
+.research-shift-value { font-family: "Noto Sans TC", sans-serif; fill: rgba(240, 226, 196, .8); }
+
+/* ---- the top bar: 研究 takes the underline as the room changes ----------- */
+body[data-view="research"] .site-nav a[aria-current] { position: relative; color: #f1e8d4; }
+body[data-view="research"] .site-nav a[data-nav-role="research"]::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: -7px; height: 1px;
+  background: rgba(233, 207, 149, .85); transform: scaleX(0); transition: transform .9s cubic-bezier(.2, .7, .2, 1);
+}
+body[data-research-entering] .site-nav a[data-nav-role="research"]::after { transform: scaleX(1); }
+
+/* ---- caption, kicker, hint, progress ------------------------------------- */
+#research-kicker { position: fixed; left: 29px; top: 62px; z-index: 5; margin: 0; font-size: 12px; letter-spacing: .14em; color: rgba(206, 212, 216, .5); }
+#research-kicker:empty { display: none; }
+#research-copy {
+  position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 5;
+  width: min(640px, calc(100% - 32px)); text-align: center; pointer-events: none;
+  transition: opacity .18s linear;
+}
+#research-copy.swapping { opacity: 0; }
+#research-copy:has(h1:empty) { display: none; }
+#research-copy h1 { margin: 0; font-size: 24px; font-weight: 500; line-height: 1.4; letter-spacing: .03em; color: #f1e8d4; text-wrap: balance; }
+#research-copy p { margin: 6px 0 0; font-size: 14px; line-height: 1.7; color: rgba(214, 220, 222, .72); text-wrap: pretty; }
+#research-copy :is(h1, p) { word-break: keep-all; overflow-wrap: anywhere; }
+/* desktop: the needle runs down through the words to the hub; a soft shade
+   behind the caption keeps the line from cutting through the title */
+@media (min-width: 701px) {
+  #research-copy::before { content: ""; position: absolute; inset: -18px -40px -14px; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(9, 12, 17, .88) 45%, rgba(9, 12, 17, 0) 100%); }
+}
+#research-copy[data-scene="open0"] { bottom: 58px; }
+#research-copy[data-scene="open0"]:not(.swapping) { transition: opacity 1.1s ease; }
+#research-copy[data-scene="open0"] h1 { font-size: 26px; }
+#research-copy[data-scene="end"] { bottom: 16px; }
+@media (max-width: 700px) {
+  #research-kicker { left: 9px; top: 58px; font-size: 12px; }
+  #research-copy { bottom: 22px; text-align: left; left: 16px; transform: none; }
+  #research-copy:not([data-panned]) { text-align: center; left: 50%; transform: translateX(-50%); }
+  #research-copy h1 { font-size: 20px; }
+  #research-copy[data-scene="open0"] { bottom: 56px; }
+  #research-copy[data-scene="open0"] h1 { font-size: 21px; }
+}
+
+#research-actions { margin-top: 12px; display: flex; gap: 10px; justify-content: center; pointer-events: auto; }
+#research-actions[hidden] { display: none; }
+#research-copy[data-scene="end"] #research-actions { transition: opacity .4s ease; }
+#research-copy[data-scene="end"] #research-actions[hidden] { display: flex; visibility: hidden; opacity: 0; }
+#research-actions button { font: 500 13px "Noto Sans TC", sans-serif; letter-spacing: .06em; color: #f1e8d4; background: rgba(9, 12, 17, .6);
+  border: 1px solid rgba(233, 207, 149, .35); padding: 8px 16px; cursor: pointer; }
+#research-actions button + button { color: rgba(214, 220, 222, .8); border-color: rgba(206, 212, 216, .2); }
+#research-actions button:hover, #research-actions button:focus-visible { border-color: rgba(233, 207, 149, .8); outline: none; }
+
+#research-hint { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 5; margin: 0; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  font-size: 14px; letter-spacing: .1em; color: rgba(241, 232, 212, .86); pointer-events: none; transition: opacity .9s ease; }
+#research-hint[hidden] { display: flex; opacity: 0; }
+#research-hint.gone { opacity: 0; transition-duration: .3s; }
+#research-hint kbd { font: 600 12px "Noto Sans TC", sans-serif; display: inline-block; min-width: 22px; padding: 1px 6px; margin-left: 2px;
+  border: 1px solid rgba(233, 207, 149, .55); border-radius: 3px; color: #f1e8d4; }
+#research-hint i { order: -1; position: relative; display: block; width: 1px; height: 24px; background: rgba(233, 207, 149, .18); overflow: hidden; }
+#research-hint i::after { content: ""; position: absolute; left: 0; top: -10px; width: 1px; height: 10px;
+  background: linear-gradient(rgba(255, 227, 163, 0), #ffe3a3); animation: research-hint-run 2.2s cubic-bezier(.45, 0, .25, 1) infinite; }
+@keyframes research-hint-run { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(34px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #research-hint i::after { animation: none; top: 13px; } }
+#research-hint .touch { display: none; }
+@media (hover: none) and (pointer: coarse) { #research-hint .desk { display: none; } #research-hint .touch { display: inline; } }
+
+#research-progress { position: fixed; right: 14px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+#research-progress i { display: block; width: 3px; height: 14px; background: rgba(206, 212, 216, .16); }
+#research-progress i.on { background: rgba(233, 207, 149, .8); }
+@media (max-width: 700px) { #research-progress { display: none; } }
+
+/* a brief dim for far jumps and the phone layout change; shown only then */
+#research-fade { position: fixed; inset: 0; z-index: 7; pointer-events: none; background: #07090d; opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s linear .35s; }
+body[data-research-jumping] #research-fade { opacity: 1; visibility: visible; transition: opacity .2s ease; }
+/* arriving: the light closes in around the instrument, only on the title card */
+#research-room { position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 1.6s ease, visibility 0s linear 1.6s;
+  background: radial-gradient(ellipse 70% 66% at 50% 46%, rgba(4, 6, 9, .14) 38%, rgba(4, 6, 9, .78) 100%); }
+body[data-research-entered][data-research-scene="open0"] #research-room { opacity: 1; visibility: visible; transition: opacity 1.6s ease; }
+
+/* ---- 一 曆法 step ledger --------------------------------------------------- */
+#research-ledger {
+  position: fixed; z-index: 5; pointer-events: none; overflow: visible; opacity: 0;
+  right: 28px; top: 84px; width: 340px; height: 140px; padding: 10px 12px;
+  background: rgba(9, 12, 17, .82); border: 1px solid rgba(206, 212, 216, .1);
+  transition: opacity .2s linear;
+}
+@media (max-width: 700px) { #research-ledger { right: 8px; left: 8px; top: 400px; width: auto; height: 118px; padding: 4px 8px; } }
+#research-ledger .lg-head { font: 500 11px "Noto Sans TC", sans-serif; fill: rgba(206, 212, 216, .62); letter-spacing: .04em; }
+#research-ledger .lg-name { font: 500 12px var(--lq-serif, serif); fill: rgba(232, 226, 210, .86); letter-spacing: .1em; }
+#research-ledger .lg-base { stroke: rgba(206, 212, 216, .2); stroke-width: 1; }
+#research-ledger .lg-bar { stroke: rgba(196, 212, 232, .5); stroke-width: 2; }
+#research-ledger .lg-bar.cur { stroke: rgba(226, 234, 244, .95); }
+#research-ledger .lg-zero { fill: rgba(233, 207, 149, .8); }
+#research-ledger .lg-zero.cur { fill: #ffe3a3; }
+#research-ledger .lg-val { font: 500 11px "Noto Sans TC", sans-serif; fill: rgba(214, 224, 236, .8); text-anchor: end; }
+#research-ledger .lg-val.zero { fill: #f0dcae; }
+#research-ledger .lg-val.gap { fill: #d9806a; }

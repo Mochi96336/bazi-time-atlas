@@ -23,7 +23,9 @@ export function createResponsiveCameraController({
   function refresh() {
     if (destroyed) return null;
     const { width, height } = svg.getBoundingClientRect();
-    const viewportWidth = eventTarget?.innerWidth;
+    // The research view lays the instrument out wider than a phone screen and
+    // pans across it; it names the width the camera should plan for.
+    const viewportWidth = Number(instrument?.dataset?.cameraViewportWidth) || eventTarget?.innerWidth;
     if (![width, height, viewportWidth].every(value => Number.isFinite(value) && value > 0)) return null;
     const camera = responsiveInstrumentCamera({
       center, outerRadius, viewportWidth, viewportAspect:width / height

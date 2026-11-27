@@ -469,25 +469,42 @@ function renderDialPose(pose) {
   renderer.setZodiacRingPose(effectiveRotation(ringStates.zodiac), longitude);
 }
 
-function dialToInstant(targetMs, source = "command") {
-  if (!Number.isFinite(targetMs)) return false;
-  cancelDial();
-  if (prefersReducedMotion() || !currentDisplay) return setSelectedInstant(targetMs, source);
+// The pose (model rotation of every ring, and the solar band) the wheel takes at
+// targetMs, each ring reached the shortest way from where it is now. Null when
+// the wheel has no display yet or the instant has no cycle index.
+function poseForInstant(targetMs) {
+  if (!Number.isFinite(targetMs) || !currentDisplay) return null;
   const target = resolveAtlasDisplayState({ selectedMs:targetMs, legacyProjection:null, timeContext:state.timeContext });
-  const from = {}, to = {};
+  const pose = {};
   for (const id of SEXAGENARY_RING_IDS) {
     const index = cycleIndexForRing(id, target);
-    if (index < 0) return setSelectedInstant(targetMs, source);
-    from[id] = ringStates[id].modelRotation;
-    to[id] = temporalCycleRotation({
+    if (index < 0) return null;
+    pose[id] = temporalCycleRotation({
       index,
       progress:target.phases[id]?.progress ?? 0.5,
       cursorAngle:CURSOR_ANGLE,
-      previousRotation:from[id]
+      previousRotation:ringStates[id].modelRotation
     });
   }
-  from.solar = ringStates.solar.modelRotation;
-  to.solar = from.solar - shortestAngleDelta(target.longitude, lastSolarLongitude ?? currentDisplay.longitude);
+  pose.solar = ringStates.solar.modelRotation - shortestAngleDelta(target.longitude, lastSolarLongitude ?? currentDisplay.longitude);
+  return pose;
+}
+
+function currentPose() {
+  const pose = {};
+  for (const id of SEXAGENARY_RING_IDS) pose[id] = ringStates[id].modelRotation;
+  pose.solar = ringStates.solar.modelRotation;
+  return pose;
+}
+
+function dialToInstant(targetMs, source = "command", { onSettled = () => {} } = {}) {
+  if (!Number.isFinite(targetMs)) return false;
+  cancelDial();
+  const settleWith = committed => { onSettled(); return committed; };
+  if (prefersReducedMotion() || !currentDisplay) return settleWith(setSelectedInstant(targetMs, source));
+  const to = poseForInstant(targetMs);
+  if (!to) return settleWith(setSelectedInstant(targetMs, source));
+  const from = currentPose();
   stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
   clearLegacyProjection();
   setFollowingNow(false);
@@ -496,6 +513,7 @@ function dialToInstant(targetMs, source = "command") {
     if (!activeDial) return;
     cancelDial();
     setSelectedInstant(targetMs, source);
+    onSettled();
   };
   const detach = () => {
     removeEventListener("pointerdown", finish, true);
@@ -528,6 +546,41 @@ function setTimeContext(timeContext, source = "command") {
   if (href) history.replaceState(history.state, "", href);
   return true;
 }
+
+// ---------------------------------------------------------------------------
+// Research view (src/research/): the same instrument, driven by scroll. While
+// it is active the home's own inputs rest (no ring drag, keys, playback or
+// live clock) and the research scenes write ring poses through the same path
+// as the dial, so the material layer, label culling and read-heads follow.
+function setResearchView(active) {
+  stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
+  cancelDial();
+  setFollowingNow(false);
+  instrument.dataset.view = active ? "research" : "atlas";
+  svg.setAttribute("tabindex", active ? "-1" : "0");
+  if (active && document.activeElement === svg) svg.blur();
+}
+
+export const researchHost = Object.freeze({
+  instrument,
+  svg,
+  isReady:() => currentDisplay !== null,
+  setResearchView,
+  poseForInstant,
+  currentPose,
+  renderPose(pose) {
+    cancelDial();
+    renderDialPose(pose);
+  },
+  dialTo(instantMs, source = "research") {
+    return new Promise(resolve => {
+      if (!dialToInstant(instantMs, source, { onSettled:resolve })) resolve();
+    });
+  },
+  commit(instantMs, source = "research") {
+    return setSelectedInstant(instantMs, source);
+  }
+});
 
 function installPlayback() {
   playbackController = createKineticPlaybackController({
@@ -842,6 +895,10 @@ function prefersReducedMotion() {
 }
 
 function runIntroSweep() {
+  if (new URLSearchParams(location.search).get("view") === "research") {
+    instrument.dataset.introSweep = "skipped";
+    return;
+  }
   if (!shouldRunIntroSweep({
     search:location.search,
     reducedMotion:prefersReducedMotion(),

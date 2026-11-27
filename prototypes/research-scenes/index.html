@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>研究分幕 · 靜態畫面</title>
+  <link rel="stylesheet" href="../../vendor/fonts/noto-sans-tc/noto-sans-tc.css">
+  <link rel="stylesheet" href="../../tokens.css">
+  <link rel="stylesheet" href="./scenes.css">
+</head>
+<body>
+  <main class="rs-stage">
+    <!-- The real home instrument (index.html), same origin, embedded. -->
+    <iframe id="rs-wheel" title="時間圖譜輪盤" tabindex="-1"></iframe>
+    <header class="rs-topbar" hidden><span>BAZI TIME ATLAS</span><nav><a aria-current="page">研究</a><a>工具</a></nav></header>
+    <p class="rs-kicker" id="rs-kicker"></p>
+    <section class="rs-copy" aria-live="polite">
+      <h1 id="rs-title"></h1>
+      <p class="rs-body" id="rs-body"></p>
+    </section>
+  </main>
+  <nav class="rs-frames" aria-label="靜態畫面"></nav>
+  <script type="module" src="./scenes.js"></script>
+</body>
+</html>
