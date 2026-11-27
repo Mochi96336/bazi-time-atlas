@@ -6432,3 +6432,32 @@ body {
   }
 }
 }
+
+/* ==== research appendix opening (2026-11-28) ==== */
+/* The story is told on the home wheel (?view=research); this page is its
+   appendix: a way back, a title, one sentence, and a table of contents. */
+@layer page {
+/* the same centred 860px column as the section headers below */
+.research-appendix-intro { display:block; margin:30px auto 0; width:min(860px, 100%); box-sizing:border-box; }
+/* the lab follows the contents directly (its own 200px top margin was for
+   following chapter 03) */
+.research-appendix-intro + #research-lab { margin-top:72px; }
+.research-appendix-back { margin:0 0 14px; font-size:13px; letter-spacing:.06em; }
+.research-appendix-back a { color:rgba(233,207,149,.85); text-decoration:none; }
+.research-appendix-back a:hover, .research-appendix-back a:focus-visible { color:rgb(241, 232, 212); text-decoration:underline; text-underline-offset:4px; }
+.research-appendix-intro h1 { margin:0; font-size:clamp(26px,2.6vw,36px); line-height:1.2; font-weight:600; letter-spacing:.01em; }
+.research-appendix-intro .lede { margin:10px 0 0; max-width:640px; font-size:15px; line-height:1.75; color:rgba(224,230,234,.78); }
+.research-appendix-toc { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.research-appendix-toc a {
+  display:inline-flex; align-items:center; min-height:40px; padding:0 14px;
+  border:1px solid rgba(206,212,216,.18); color:rgba(232,236,238,.88); font-size:13px; letter-spacing:.04em; text-decoration:none;
+}
+.research-appendix-toc a:hover, .research-appendix-toc a:focus-visible { border-color:rgba(233,207,149,.7); color:rgb(241, 232, 212); }
+@media (max-width:480px) {
+  .research-appendix-intro { margin:16px 0 0; }
+  .research-appendix-intro + #research-lab { margin-top:44px; }
+  .research-appendix-intro .lede { font-size:14px; }
+  .research-appendix-toc { gap:6px; }
+  .research-appendix-toc a { min-height:40px; padding:0 10px; font-size:13px; }
+}
+}

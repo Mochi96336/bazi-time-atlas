@@ -400,8 +400,9 @@ test("first-screen research milestones reuse the canonical delta state and date-
   // and its milestone buttons (attached right under it) live in the lab tools.
   const dials=recurrenceHtml.indexOf('id="research-cycle-fan"');
   const lab=recurrenceHtml.indexOf('id="research-lab"');
-  assert.ok(outline > 0 && outline < discrete && discrete < conclusion && conclusion < dials && dials < lab &&
-    lab < fan && fan < entry && entry < time,
+  // 2026-11-28 appendix: the lab leads the page, then 01 with its conclusion and fan
+  assert.ok(outline < 0 && lab > 0 && lab < fan && fan < entry && entry < time && time < discrete &&
+    discrete < conclusion && conclusion < dials,
     "route map, 01 conclusion, the cycle fan; then in the lab: original fan, its milestone buttons, the time card");
   assert.match(recurrenceHtml,/data-research-entry="local" aria-pressed="false" disabled/);
   assert.match(recurrenceHtml,/data-research-entry="global" aria-pressed="false"/);

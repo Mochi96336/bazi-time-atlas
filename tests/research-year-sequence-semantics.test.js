@@ -28,18 +28,16 @@ test("60-year sequence identity and Li-Chun year-pillar labeling remain separate
 });
 
 test("Research production code does not revive the ambiguous year-closure dataset", async () => {
-  const [view, determinacyView, spine] = await Promise.all([
+  const [view, determinacyView] = await Promise.all([
     readFile(new URL("../src/recurrence-view.js", import.meta.url), "utf8"),
-    readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8"),
-    readFile(new URL("../src/research-narrative-spine-view.js", import.meta.url), "utf8")
+    readFile(new URL("../src/four-pillar-determinacy-view.js", import.meta.url), "utf8")
   ]);
 
-  for (const source of [view, determinacyView, spine]) {
+  for (const source of [view, determinacyView]) {
     assert.doesNotMatch(source, /dataset\.yearClosed|dataset\.yearPhase\b|boolDataset\("yearClosed"\)|data-year-closed/);
   }
 
   assert.match(view, /dataset\.yearSequenceClosed/);
   assert.match(view, /dataset\.yearSequencePhase/);
   assert.match(determinacyView, /boolDataset\("yearSequenceClosed"\)/);
-  assert.doesNotMatch(spine, /yearSequenceClosed|yearClosed/);
 });

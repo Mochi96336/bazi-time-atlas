@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { cssSource, isLinked } from "./helpers/css-source.js";
 
-const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, discreteJs, astronomyCss, residualCss, recurrenceCss, spineJs] = await Promise.all([
+const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss, proofJs, evidenceJs, evidenceCss, discreteCss, discreteJs, astronomyCss, residualCss, recurrenceCss] = await Promise.all([
   readFile(new URL("../recurrence.html", import.meta.url), "utf8"),
   Promise.resolve(cssSource("research-tasks.css")),
   Promise.resolve(cssSource("research-sexagenary-cycle.css")),
@@ -18,8 +18,7 @@ const [html, taskCss, cycleCss, cycleJs, nearCss, determinacyCss, targetClockCss
   readFile(new URL("../src/research-discrete-density-view.js", import.meta.url), "utf8"),
   Promise.resolve(cssSource("research-astronomy-drilldown.css")),
   Promise.resolve(cssSource("astronomical-residuals.css")),
-  Promise.resolve(cssSource("recurrence.css")),
-  readFile(new URL("../src/research-narrative-spine-view.js", import.meta.url), "utf8")
+  Promise.resolve(cssSource("recurrence.css"))
 ]);
 
 const discreteStart = html.indexOf('id="research-discrete"');
@@ -30,7 +29,7 @@ const astronomy = html.slice(astronomyStart, evidenceStart);
 const evidence = html.slice(evidenceStart);
 // Review 2026-11-21: the discrete tools and the other-Δ sandbox live in the lab.
 const labStart = html.indexOf('id="research-lab"');
-const lab = html.slice(labStart, html.indexOf('id="research-glossary"'));
+const lab = html.slice(labStart, discreteStart);
 
 test("Research keeps three ordered evidence owners without task-card navigation", () => {
   // #500 navigation is an intentional LAST cascade layer. Moving the same
@@ -43,32 +42,21 @@ test("Research keeps three ordered evidence owners without task-card navigation"
   assert.ok(astronomyStart > discreteStart);
   assert.ok(evidenceStart > astronomyStart);
   assert.doesNotMatch(html, /class="research-task-nav"/);
-  // Research redesign R1: the outline is an answer route map — each step is
-  // the result of its section, not a topic label.
-  assert.match(html, /class="research-outline research-answer-map"[^>]*aria-label="研究項目：三步答案"/);
-  assert.match(html, /href="#research-discrete"[^>]*>[\s\S]*?01[\s\S]*?24,000 年/);
-  assert.match(html, /href="#research-astronomy"[^>]*>[\s\S]*?02[\s\S]*?差 10–14 天/);
-  assert.match(html, /href="#research-evidence"[^>]*>[\s\S]*?03[\s\S]*?年月 ✓ 日時 ？/);
-  assert.match(html, /八字多久會重複一次？/);
-  assert.match(html, /class="lede research-answer">目前找不到<a class="research-term" href="#term-pillars">四柱<\/a>完整重複的週期。/);
+  // 2026-11-28: the research story moved to the home wheel (?view=research);
+  // this page is its appendix, opened from there, with a plain table of contents.
+  assert.match(html, /<h1 id="research-appendix-title">研究附錄：資料與方法<\/h1>/);
+  assert.match(html, /class="research-appendix-back"><a href="\.\/\?view=research">/);
+  for (const id of ["research-lab", "research-discrete", "research-astronomy", "research-evidence", "research-glossary"]) {
+    assert.ok(html.slice(html.indexOf('class="research-appendix-toc"')).includes(`href="#${id}"`), `toc links ${id}`);
+  }
+  assert.doesNotMatch(html, /research-answer-map|data-research-spine/);
   assert.doesNotMatch(html, /research-alignment-map/);
   assert.doesNotMatch(html, /Recurrence laboratory|<h1>回歸研究<\/h1>|離散週期重新對齊/);
-  assert.match(html, /id="research-spine-discrete">曆法上三個循環全部對上<\/small>/);
-  assert.match(html, /id="research-spine-astronomy">但真正的節氣沒有回來<\/small>/);
-  assert.match(html, /id="research-spine-evidence">所以 24,000 年不是四柱的週期<\/small>/);
   assert.match(html, /class="research-task-relation">固定 24,000 年候選 → 12 節界校驗<\/span>/);
   assert.match(html, /class="research-task-relation">12 \/ 12 節界位移 → 四柱可判範圍<\/span>/);
   assert.doesNotMatch(html, /先回答：|再問：|最後才問：|Why 24,000\?|Exact ≠ astronomical/);
 });
 
-
-test("Research narrative spine summarizes the fixed argument rather than the current delta sandbox", () => {
-  assert.match(html, /research-narrative-spine-view\.js/);
-  for (const copy of ["曆法上三個循環全部對上", "但真正的節氣沒有回來", "所以 24,000 年不是四柱的週期"]) {
-    assert.ok(spineJs.includes(copy), `missing fixed-spine outcome: ${copy}`);
-  }
-  assert.doesNotMatch(spineJs, /instrument\.dataset|boolDataset|fourPillarResolvedCount|astronomyValidity/);
-});
 
 test("the lab owns one current-state rail, the year strip, derivation, and structural 60-day cycle", () => {
   const reading01 = html.slice(discreteStart, astronomyStart);
