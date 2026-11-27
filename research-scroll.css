@@ -316,3 +316,12 @@ body[data-view="research"] #research-orbit .ob-peri-label.current { fill: #f0dca
 @media (prefers-reduced-motion: reduce) {
   body[data-view="research"] #research-rotate, body[data-view="research"] #research-rotate i { animation: none; }
 }
+
+/* ---- desktop conclusion ---------------------------------------------------
+   The conclusion's words (three lines and two buttons) are taller than any
+   other caption; bottom-centre they covered the 日柱 / 時柱 names on the right
+   of the needle. Left of the needle there are only the faint ring labels. */
+@media (min-width: 701px) {
+  #research-copy[data-scene="end"] { left: 4vw; transform: none; width: min(520px, 38vw); bottom: 48px; text-align: left; }
+  #research-copy[data-scene="end"] #research-actions { justify-content: flex-start; }
+}
