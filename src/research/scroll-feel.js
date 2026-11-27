@@ -4,7 +4,7 @@
 // biased hard toward the way they were going. Keys and taps move one stop at
 // a time and SCRUB there (the rings turn), never cut. Reduced motion = cuts.
 //
-//   createScrollFeel({ stops, vh, body }) → { glideTo(px), destroy() }
+//   createScrollFeel({ stops, vh, body }) → { glideTo(px), jumpTo(px), destroy() }
 //   stops(all) → stop positions in px, ascending (all: every settle stop)
 //   vh()       → one screen of scroll in px (stable while the address bar moves)
 //
@@ -88,6 +88,7 @@ export function createScrollFeel({ stops, vh, body = document.body, win = global
   function settle() {
     if (touching || anim) return;
     const y = win.scrollY;
+    if (Math.abs(y - restY) < 1) return;
     const to = settleTarget(stops(true), y, y - restY < 0 ? -1 : 1, vh());
     if (to === null) restY = y; else glide(to, "settle");
   }
@@ -136,6 +137,12 @@ export function createScrollFeel({ stops, vh, body = document.body, win = global
 
   return {
     glideTo: to => glide(to, "key"),
+    jumpTo(to) {
+      cancel();
+      clearTimeout(idle);
+      win.scrollTo(0, to);
+      restY = win.scrollY;
+    },
     destroy() { cancel(); clearTimeout(idle); listen.abort(); delete body.dataset.researchJumping; }
   };
 }

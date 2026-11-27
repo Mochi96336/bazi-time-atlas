@@ -14,7 +14,7 @@
 
 **第一段完成**：架構、開場、序、一 曆法（場景 open0, open1, split, merge, sun, c11–c15）＋暫時的結尾 `end`（「第一段到這裡 / 二 太陽、三 地球自轉，製作中。」）。
 
-**第二段待做**（原型順序，見 `scroll.js` 的 `ORDER`）：
+**第二段已移植**（原型順序，見 `scroll.js` 的 `ORDER`）：
 
 ```
 c21, c22, c31, c23, c24, x1, x2, x3, c32, end
@@ -26,7 +26,7 @@ c21, c22, c31, c23, c24, x1, x2, x3, c32, end
 - c32：三 地球自轉（±1σ 誤差範圍）。
 - end：結論（「整套曆法回到原點：曆法上 24,000 年，實際算不出」，括號帶出 1,980 與 180）。
 
-原型對應的繪圖函式：`drawHaze`（誤差模糊帶）、`drawOrbit`（俯視圖，含偏心率）、`drawLadder`（梯子）。正式版的 `drawLedger` 已移植到 `research-mode.js`。
+正式版用輪盤顯示節氣差與誤差帶。軌道俯視圖由 `scroll-orbit.js` 繪製，41 個候選的最大節氣差沿用步數表面板。
 
 **待辦（不在第二段內）**：舊的 `recurrence.html` 保留、不連結；優化好再從結尾接回去。
 
@@ -36,13 +36,14 @@ c21, c22, c31, c23, c24, x1, x2, x3, c32, end
 |---|---|
 | `src/research/scroll-scenes.js` | 純函式：場景 `scene(id, 長度vh, state(p))`、停點、文案、下一次同八字的掃描。可測試。 |
 | `src/research/scroll-feel.js` | 捲動手感：馬達、吸附（前進偏好 AHEAD 1、回退 BEHIND .1）、鍵盤、手機點一下換幕。 |
-| `src/research/scroll-overlay.js` | 畫在輪盤 SVG 上的標記（起點標記、公曆 400 年圈、欄名、太陽帶…）。 |
-| `src/research/research-mode.js` | 進出研究模式、`frame()`、文案、步數表、手機鏡頭。 |
+| `src/research/scroll-overlay.js` | 畫在輪盤 SVG 上的標記（起點標記、公曆 400 年圈、欄名、太陽帶與自轉誤差帶）。 |
+| `src/research/scroll-orbit.js` | 軌道俯視圖、近日點、放大偏心率與節氣定位。 |
+| `src/research/research-mode.js` | 進出研究模式、`frame()`、文案、步數表、候選年份圖、手機鏡頭。 |
 | `research-scroll.css` | 研究模式樣式，全部限定在 `body[data-view="research"]`。 |
 | `src/kinetic-atlas.js` | 匯出 `researchHost`（`renderPose`、`dialTo`、`commit`、`setResearchView`…）。 |
 | `src/wheel/responsive-camera-controller.js` | 接受 `instrument.dataset.cameraViewportWidth`（手機研究模式設 680）。 |
 
-測試：`tests/research-scroll-scenes.test.js`、`tests/research-scroll-feel.test.js`。`npm test` 目前 1199 項全過。
+測試：`tests/research-scroll-scenes.test.js`、`tests/research-scroll-feel.test.js`。`npm run check` 目前 1,202 項測試全過，含語法檢查。
 
 ## 一定要守的規則
 
@@ -54,15 +55,16 @@ c21, c22, c31, c23, c24, x1, x2, x3, c32, end
 - 不要每幀切換大量 class，也不要每幀改會被繼承的 CSS 變數（會讓整圈重算樣式）。例：`--research-month` 只寫在 `#month-track` 上。
 - `frame()` 先讀版面（`scrollY`），再寫；幾何（`getBoundingClientRect`、`getScreenCTM`）只在版面改變時量（`measureLayout`）。
 - **4K**：不要加全螢幕大小的圖層，也不要對輪盤做 scale（桌機原型的「放大到差距」已拿掉，4K 會缺塊閃黑）。`will-change` 只在手機寬版用。
-- 太陽段（sun）目前 2 秒約 93 幀，一 曆法 各段 110–121 幀；第二段要把太陽段拉上來。
+- 太陽帶標記放進 `#solar-track`，太陽圈經 renderer 驅動。遮罩、軌道圖與候選圖重用節點，捲動時更新變動的屬性。量測紀錄見 `research-scenes-plan.md` §9。
 
 **手機**
 
 - 首頁在 ≤480px 會鎖住 `html` 和 `body` 的捲動；研究模式兩個都要解開（已做）。用 `scrollTo` 測不出這個問題，要用真的觸控事件測。
 - 研究模式下外框和輪盤高度都固定為 `100svh` 系列，不用首頁的 `100dvh`，否則網址列伸縮時輪盤會被重新取景、縮放。
 - 研究頁上方列要和首頁同高（logo 在 y=19，輪盤從 y=48 開始，390 寬）。
-- 進場時所有版面切換都在 0.2 秒暗場裡完成，置中後才亮。
+- 從首頁進研究時，短暗場遮住換版和重新取景。置中後，輪盤在亮回來時開始撥動，減速時開場文字和提示一起淡入。直接開研究網址或啟用減少動態效果時，直接定位到開場。
 - iOS：`<svg>` 上的 `border-radius` 會裁掉 SVG 內容，不要用。
+- 研究文案與圖表標註用自帶的 Noto Sans TC，含 PingFang TC 備援。研究模式指定 `text-size-adjust: 100%`。結論在手機版用四欄摘要呈現柱位，短螢幕的自轉誤差標註移到輪盤上方空間。
 
 **文案**
 
@@ -85,7 +87,4 @@ c21, c22, c31, c23, c24, x1, x2, x3, c32, end
 
 ## 下一步
 
-1. 照原型把 c21, c22, c31, c23, c24, x1–x3, c32, end 移進 `scroll-scenes.js`，畫面移進 `scroll-overlay.js` / `research-mode.js`，遵守上面的效能規則。
-2. 拿掉暫時的 `end`，換成結論。
-3. 補測試（停點、場景數、文案三層數字）。
-4. 量手機效能（含太陽段）與 4K，請使用者在手機上驗收。
+第二段已通過 Chrome 窄版觸控、鍵盤、結尾重播與 4K 擷取檢查。待手機實機驗收，特別是 iOS Safari 的捲動手感與軌道圖。

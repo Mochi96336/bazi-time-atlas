@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  SCENES, KEY_STOPS, STEPPED, fmt, locate, mod, nextSameBazi, pose, stepper, stopUnits, unitsAt
+  SCENES, KEY_STOPS, STEPPED, fmt, holdP, locate, mod, nextSameBazi, pose, stepper, stopUnits, unitsAt
 } from "../src/research/scroll-scenes.js";
 
 test("the same four pillars appear again 180 years later, on another date", () => {
@@ -39,6 +39,52 @@ test("every stop shows a settled caption, and stops are ordered", () => {
     assert.ok(st.copy?.title, `${SCENES[index].id} at ${p.toFixed(2)} has a title`);
   }
   for (const id of Object.keys(STEPPED)) assert.ok(KEY_STOPS[id], id);
+});
+
+test("the solar extension stays in chapter two before Earth rotation and the conclusion", () => {
+  assert.deepEqual(SCENES.map(s => s.id), [
+    "open0", "open1", "split", "merge", "sun", "c11", "c12", "c13", "c14", "c15",
+    "c21", "c22", "c31", "c23", "c24", "x1", "x2", "x3", "c32", "end"
+  ]);
+  for (const id of ["c31", "x1", "x2", "x3"]) {
+    assert.match(SCENES.find(s => s.id === id).state(.9).copy.kicker, /^二 太陽/);
+  }
+});
+
+test("solar and Earth-rotation stops hold on the stated comparison", () => {
+  const scene = id => SCENES.find(sc => sc.id === id);
+  const atStops = id => KEY_STOPS[id].map(step => {
+    const { p } = locate(unitsAt(id, holdP(STEPPED[id], step)));
+    return scene(id).state(p);
+  });
+  const terms = atStops("c22");
+  assert.deepEqual(terms.map(s => s.copy.kicker.split(" · ").at(-1)), ["白露", "寒露", "立冬", "大雪", "小寒", "立春"]);
+  assert.ok(terms.every(s => s.band.marks.length === 25 && s.band.arcs.length === 12));
+  assert.deepEqual(terms.map(s => s.band.arcs.find(arc => arc.lead === 1)?.label.split("提早")[0]),
+    ["白露", "寒露", "立冬", "大雪", "小寒", "立春"]);
+  // only the term on the needle is called out at a stop
+  assert.ok(terms.every(s => s.band.arcs.filter(arc => arc.lead > 0).length === 1));
+  const month = scene("c31").state(.9);
+  assert.ok(month.band.view > month.band.window.from && month.band.view < month.band.window.to);
+  assert.match(month.copy.title, /丙午年、丁酉月/);
+  assert.deepEqual(atStops("x2").map(s => Math.round(s.ladder.upto)), [1, 2, 32, 40]);
+  const closest = scene("x3").state(.5);
+  assert.equal(closest.ladder.focus, 32);
+  assert.match(closest.copy.title, /792,000 年.*10\.4 小時/);
+  const rotation = atStops("c32");
+  assert.ok(rotation[0].haze.hours < .001);
+  assert.match(rotation[1].haze.label, /±1\.7 小時/);
+  assert.ok(Math.abs(rotation[2].haze.hours - 21) < .5);
+  assert.equal(rotation[3].haze.label, "±7.1 天");
+  assert.equal(scene("end").state(.75).haze.hours, rotation[3].haze.hours);
+});
+
+test("the conclusion distinguishes the three recurrence claims", () => {
+  const end = SCENES.at(-1).state(.75);
+  assert.equal(end.end, true);
+  assert.match(end.copy.title, /整套曆法回到原點.*24,000 年.*實際算不出/);
+  assert.match(end.copy.body, /同一天同一刻，1,980 年/);
+  assert.match(end.copy.body, /任何日期的同一組八字，180 年/);
 });
 
 test("scroll units and scene progress convert both ways", () => {

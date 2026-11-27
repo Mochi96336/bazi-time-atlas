@@ -6,7 +6,7 @@
   <meta name="description" content="把年、月、日、時干支、節氣與熱帶黃道放進同一個可拖動的多速時間圓盤。">
   <title>BaZi Time Atlas · Kinetic Atlas</title>
   <link rel="stylesheet" href="./vendor/fonts/noto-sans-tc/noto-sans-tc.css">
-  <link rel="preload" href="./assets/fonts/noto-serif-tc-wheel.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/noto-serif-tc-wheel.woff2?v=3" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./tokens.css">
   <link rel="stylesheet" href="./site-nav.css">
   <link rel="stylesheet" href="./atlas-wheel.css">
@@ -291,6 +291,12 @@
     <section id="research-copy" aria-live="polite">
       <h1 id="research-title"></h1>
       <p id="research-body"></p>
+      <dl id="research-end-pillars" aria-label="24,000 年後的四柱">
+        <div><dt>年柱</dt><dd>丙午</dd></div>
+        <div><dt>月柱</dt><dd>丁酉</dd></div>
+        <div><dt>日柱</dt><dd>未定</dd></div>
+        <div><dt>時柱</dt><dd>未定</dd></div>
+      </dl>
       <div id="research-actions" hidden>
         <button type="button" id="research-back">回到時間圖譜</button>
         <button type="button" id="research-again">從頭再看</button>
@@ -298,7 +304,9 @@
     </section>
     <p id="research-hint" hidden><span class="desk">往下捲動，或按 <kbd>↓</kbd></span><span class="touch">往上滑，或點一下</span><i></i></p>
     <svg id="research-ledger" viewBox="-6 -4 332 136" aria-hidden="true"></svg>
+    <svg id="research-orbit" viewBox="-152 -152 304 314" aria-hidden="true"></svg>
     <nav id="research-progress" aria-hidden="true"></nav>
+    <div id="research-rotate"><i aria-hidden="true"></i><p>轉成直向，看得更清楚</p><small>這一頁的畫面是照直式螢幕排的</small></div>
   </div>
   <div id="research-scroll" aria-hidden="true"></div>
 

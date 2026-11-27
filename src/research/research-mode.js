@@ -6,10 +6,11 @@
 // drawn through the renderer (ring poses) and scroll-overlay.js (marks).
 import { researchHost } from "../kinetic-atlas.js";
 import {
-  BASE_MS, SCENES, clamp, fmt, locate, signed, stopUnits, totalLength
+  BASE_MS, EXT, EXT_BEST, SCENES, SUN0, clamp, fmt, locate, signed, stopUnits, totalLength
 } from "./scroll-scenes.js";
 import { createScrollFeel } from "./scroll-feel.js";
 import { createResearchOverlay } from "./scroll-overlay.js";
+import { createOrbitPlate } from "./scroll-orbit.js";
 import { RADII, WHEEL_CENTER } from "../wheel/ring-model.js";
 
 const NS = "http://www.w3.org/2000/svg";
@@ -19,7 +20,8 @@ const $ = id => document.getElementById(id);
 const ui = {
   root: $("research-ui"), scroll: $("research-scroll"), kicker: $("research-kicker"), copy: $("research-copy"),
   title: $("research-title"), text: $("research-body"), actions: $("research-actions"), hint: $("research-hint"),
-  ledger: $("research-ledger"), progress: $("research-progress"), back: $("research-back"), again: $("research-again")
+  ledger: $("research-ledger"), orbit: $("research-orbit"), progress: $("research-progress"), back: $("research-back"), again: $("research-again"),
+  fade: $("research-fade")
 };
 const researchLinks = [...document.querySelectorAll('.site-nav [data-nav-role="research"]')];
 const atlasLinks = [...document.querySelectorAll('.site-nav a:not([data-nav-role])')];
@@ -91,11 +93,13 @@ function applyCamera(st) {
 function writePose(st) {
   const b = session.base;
   const p = st.manual ? st.pose : null;
-  const pose = { hour: b.hour, month: b.month, year: b.year + (p?.year ?? 0), day: b.day + (p?.day ?? 0), solar: b.solar };
-  const key = `${pose.year.toFixed(3)}|${pose.day.toFixed(3)}`;
+  const solar = b.solar - signed((st.band?.view ?? SUN0) - SUN0, 360);
+  const pose = { hour: b.hour, month: b.month, year: b.year + (p?.year ?? 0), day: b.day + (p?.day ?? 0), solar };
+  const key = `${pose.year.toFixed(3)}|${pose.day.toFixed(3)}|${solar.toFixed(3)}`;
   if (key === session.poseKey) return;
   session.poseKey = key;
-  researchHost.renderPose(pose);
+  researchHost.renderPose(pose, session.lastPose);
+  session.lastPose = pose;
 }
 
 function frame(force = false) {
@@ -111,7 +115,8 @@ function frame(force = false) {
   // (on the month ring only: a variable on the instrument would restyle every ring)
   setStyle(s.monthTrack, "--research-month", String(st.greg ? clamp(1 - st.greg * 1.6) : 1));
   applyCamera(st);
-  s.overlay.draw(st, st.push ?? 0);
+  s.overlay.draw(sc.id, st, st.push ?? 0);
+  s.orbit.draw(st.orbit, st.band);
   drawLedger(st);
   setCopy(st.copy, force, { scene: sc.id === "open0" || sc.id === "end" ? sc.id : "", panned: s.mobile && !!st.wide, inset: sceneInset(sc) });
   ui.actions.hidden = !st.end;
@@ -136,7 +141,7 @@ function setCopy(copy, force, layout) {
   copyKey = key; copyWords = words;
   const write = () => {
     // lines break only after punctuation or at spaces (keep-all)
-    const breaks = t => (t ?? "").replace(/([，；：。、？）])(?!$)/g, "$1​");
+    const breaks = t => (t ?? "").replace(/(\d) (?=年|天|小時)/g, "$1\u00a0").replace(/([，；：。、？）])(?!$)/g, "$1​");
     ui.kicker.textContent = copy?.kicker ?? "";
     ui.title.textContent = breaks(copy?.title);
     ui.text.textContent = breaks(copy?.body);
@@ -155,13 +160,21 @@ function setCopy(copy, force, layout) {
 // ring's start is from the needle (signed, as a share of its cycle).
 const LEDGER_ROWS = [["year", "年序", "yearSequence", 60, "年"], ["greg", "公曆", "gregorian", 400, "年"], ["day", "日序", "day", 60, "天"]];
 function drawLedger(st) {
-  const host = ui.ledger, L = st.ledger, o = L ? (L.o ?? 1) : 0;
+  const host = ui.ledger, L = st.ledger, ladder = st.ladder;
+  const plate = L ?? ladder;
+  const o = plate ? plate.o ?? 1 : 0;
   setStyle(host, "opacity", String(o));
-  const key = L && o >= .01 ? JSON.stringify([L.title, L.poses.length, L.n, L.flag ?? "", LEDGER_ROWS.map(([r]) => Math.round((st.veil[r] ?? 0) * 100))]) : "";
+  setData(host, "ladder", ladder ? "" : null);
+  const key = ladder ? "ladder" : L && o >= .01 ? JSON.stringify([L.title, L.poses.length, L.n, L.flag ?? "", LEDGER_ROWS.map(([r]) => Math.round((st.veil[r] ?? 0) * 100))]) : "";
+  if (ladder) {
+    if (key !== session.ledgerKey) session.ladder = createLadder(host);
+    session.ledgerKey = key;
+    session.ladder(ladder);
+    return;
+  }
   if (key === session.ledgerKey) return;
   session.ledgerKey = key;
   if (!key) { host.replaceChildren(); return; }
-  if (session.mobile) setStyle(host, "top", `${Math.round(session.dayTop - host.getBoundingClientRect().height - 4)}px`);
   const g = document.createElementNS(NS, "g");
   const el = (parent, name, attrs = {}, text) => {
     const n = document.createElementNS(NS, name);
@@ -188,10 +201,59 @@ function drawLedger(st) {
   host.replaceChildren(...g.childNodes);
 }
 
+function createLadder(host) {
+  host.replaceChildren();
+  const add = (parent, name, attrs, word) => {
+    const node = document.createElementNS(NS, name);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+    if (word) node.textContent = word;
+    parent.append(node);
+    return node;
+  };
+  const x0 = 5, x1 = 288, base = 108, top = 38, clip = 160;
+  const y = h => base - Math.min(h, clip) / clip * (base - top);
+  add(host, "text", { class: "lg-head", x: 0, y: 12 }, "41 個候選 · 最大節氣差（小時）");
+  add(host, "line", { class: "lg-base", x1: 0, y1: base, x2: x1 + 5, y2: base });
+  add(host, "line", { class: "lg-ref", x1: 0, y1: y(24), x2: x1 + 8, y2: y(24) });
+  add(host, "text", { class: "lg-ref-label", x: 322, y: y(24) + 5 }, "24");
+  const bars = EXT.map((candidate, i) => {
+    const x = x0 + (x1 - x0) * i / (EXT.length - 1);
+    const group = add(host, "g", { visibility: "hidden" });
+    const best = candidate === EXT_BEST;
+    const bar = add(group, "line", { class: best ? "lg-rung best" : "lg-rung", x1: x, y1: base, x2: x, y2: y(candidate.maxAbs) });
+    if (candidate.maxAbs > clip) add(group, "line", { class: "lg-rung cap", x1: x - 2, y1: top - 2, x2: x + 2, y2: top - 2 });
+    if (best) {
+      add(group, "circle", { class: "lg-best-dot", cx: x, cy: y(candidate.maxAbs) - 6, r: 3 });
+      add(group, "text", { class: "lg-tick best lg-best-value", x: 0, y: 32 },
+        `最小值 ${candidate.maxAbs.toFixed(1)} 小時`);
+    }
+    if (i === 0 || best || i === EXT.length - 1) {
+      add(group, "text", { class: best ? "lg-tick best" : "lg-tick", x, y: base + 17,
+        "text-anchor": i === 0 ? "start" : best ? "end" : "middle" }, `+${fmt(candidate.delta / 1000)}k`);
+    }
+    return { group, bar };
+  });
+  let shown = -1, selected = -1;
+  return ({ upto, focus = Math.round(upto) }) => {
+    const last = Math.round(upto);
+    for (let i = Math.min(shown, last) + 1; i <= Math.max(shown, last); i++)
+      bars[i].group.setAttribute("visibility", i <= last ? "visible" : "hidden");
+    shown = last;
+    if (selected === focus) return;
+    bars[selected]?.bar.classList.remove("cur");
+    bars[focus]?.bar.classList.add("cur");
+    selected = focus;
+  };
+}
+
 // ---------------------------------------------------------------- enter / leave
 function measureLayout() {
   const s = session;
   s.vw = innerWidth;
+  // big screens: the wheel grows with the window, so the words and figures
+  // grow with it (1 up to ~1080p, ~2.2 at 4K); set once per layout, never per frame
+  s.k = s.mobile ? 1 : Math.round(clamp(Math.min(innerWidth / 1600, innerHeight / 950), 1, 2.2) * 100) / 100;
+  setStyle(body, "--rk", String(s.k));
   const prev = instrument.style.transform;
   instrument.style.transform = "";
   const box = instrument.getBoundingClientRect();
@@ -202,25 +264,37 @@ function measureLayout() {
   const capY = cap ? cap.top + cap.height / 2 - box.top : box.height / 2;
   instrument.style.transformOrigin = `${s.capX}px ${capY}px`;
   const m = svg.getScreenCTM();
-  s.dayTop = m ? m.d * (WHEEL_CENTER.y - RADII.dayOuter) + m.f : 400;
+  if (s.mobile) {
+    const dayTop = m ? m.d * (WHEEL_CENTER.y - RADII.dayOuter) + m.f : 400;
+    setStyle(ui.ledger, "--research-ledger-top", `${Math.round(dayTop - ui.ledger.getBoundingClientRect().height - 4)}px`);
+  }
   instrument.style.transform = prev;
   insets.clear();
 }
 
 async function enter({ opening }) {
   if (session) return;
-  const s = session = { ready: false, mobile: innerWidth < 700, sceneIndex: -1, poseKey: "", ledgerKey: "" };
-  // input during the opening cuts it short: the reader does not wait
-  let skip; const skipped = new Promise(resolve => { skip = resolve; });
-  const inputs = ["touchstart", "wheel", "keydown", "pointerdown"];
-  for (const type of inputs) addEventListener(type, skip, { passive: true, once: true });
+  const s = session = { ready: false, mobile: matchMedia("(max-width: 700px)").matches, sceneIndex: -1, poseKey: "", ledgerKey: "" };
+  const animate = opening && !matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   ui.root.hidden = false;
-  for (let i = 0; i < 100 && !researchHost.isReady(); i++) await sleep(50);
-  // Phones change layout on the way in (the home's controls leave, the wide
-  // camera comes in): all of it happens under one short dim, centred before
-  // the light returns, so the wheel never jumps in view.
-  if (s.mobile && opening) { body.dataset.researchJumping = "true"; await sleep(220); }
+  for (let i = 0; session === s && i < 100 && !researchHost.isReady(); i++) await sleep(50);
+  if (session !== s) return;
+
+  let skipDial = false;
+  let landed = false;
+  if (animate) {
+    s.entryInput = new AbortController();
+    for (const type of ["wheel", "keydown", "pointerdown"])
+      addEventListener(type, () => { skipDial = true; }, { passive: true, signal: s.entryInput.signal });
+    body.dataset.researchEntrance = "";
+    body.dataset.researchMasking = "";
+    body.dataset.researchCopyWaiting = "";
+    s.mask = ui.fade.animate({ opacity: [0, 1] }, { duration: 150, easing: "ease-in", fill: "forwards" });
+    await s.mask.finished.catch(() => {});
+    if (session !== s) return;
+  }
+
   document.documentElement.dataset.view = body.dataset.view = "research";
   researchHost.setResearchView(true);
   for (const a of researchLinks) a.setAttribute("aria-current", "page");
@@ -231,53 +305,79 @@ async function enter({ opening }) {
   if (s.mobile) {
     instrument.dataset.cameraViewportWidth = String(WIDE);
     body.dataset.researchWide = "";
-    await sleep(opening ? 700 : 400);
-    measureLayout();
-    applyCamera({ pan: 0 });
-    await sleep(60);
-    delete body.dataset.researchJumping;
   }
-  if (opening) {
-    body.dataset.researchEntering = "";
-    ui.kicker.textContent = "研究 · 撥到 2026 年 9 月 13 日 下午 3 點";
-    await Promise.race([sleep(350), skipped]);
-    await Promise.race([researchHost.dialTo(BASE_MS, "research-open"), skipped]);
+  researchHost.refreshCamera();
+  // The static SVG layers copy the camera's viewBox in a MutationObserver.
+  await Promise.resolve();
+  if (session !== s) return;
+  measureLayout();
+  applyCamera({ pan: 0 });
+  body.dataset.researchScene = "open0";
+  setCopy(SCENES[0].state(0).copy, true, { scene: "open0" });
+  ui.actions.hidden = true;
+  ui.hint.classList.remove("gone");
+  ui.hint.hidden = false;
+
+  if (animate) {
+    // Keep the reframe behind the mask. The wheel starts turning as the light
+    // returns, and the caption comes in during the last part of that turn.
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (session !== s) return;
+    s.entryInput.abort();
+    s.mask.cancel();
+    s.mask = ui.fade.animate({ opacity: [1, 0] }, { duration: 300, easing: "ease-out", fill: "forwards" });
+    void s.mask.finished.then(() => {
+      if (session !== s) return;
+      delete body.dataset.researchMasking;
+      s.mask.cancel();
+      s.mask = null;
+    }, () => {});
+    if (!skipDial) {
+      landed = await researchHost.dialTo(BASE_MS, "research-open", { onProgress: p => {
+        if (p >= .68 && body.hasAttribute("data-research-copy-waiting")) delete body.dataset.researchCopyWaiting;
+      } });
+      if (session !== s) return;
+    }
   }
-  researchHost.commit(BASE_MS, "research");
+
+  if (!landed) researchHost.commit(BASE_MS, "research");
   // the atlas writes its instant into the URL; the research view's address stays plain
   history.replaceState(history.state, "", "./?view=research");
-  for (const type of inputs) removeEventListener(type, skip);
-  await sleep(80);
-  if (session !== s) return;
-  body.dataset.researchEntered = "";
+  delete body.dataset.researchCopyWaiting;
+  delete body.dataset.researchEntrance;
   s.base = researchHost.currentPose();
   s.monthTrack = svg.querySelector("#month-track");
-  measureLayout();
   s.overlay = createResearchOverlay({ svg, mobile: s.mobile });
-  s.overlay.measure(s.base);
+  s.overlay.measure(s.base, s.k);
+  s.orbit = createOrbitPlate(ui.orbit);
   s.feel = createScrollFeel({ stops: stopsPx, vh: VH });
   s.ready = true;
   let queued = false;
   s.onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; frame(); }); } };
   addEventListener("scroll", s.onScroll, { passive: true });
   s.onResize = () => {
-    if (innerWidth === s.vw) return; // the address bar only
+    if (s.mobile && innerWidth === s.vw) return; // the address bar only
+    // phone ↔ desktop layout (a phone opened sideways, then turned upright):
+    // the wide camera is set up on entry, so enter again
+    if ((innerWidth < 700) !== s.mobile) { location.reload(); return; }
     vhPx = 0; ui.scroll.style.height = `${(totalLength() + 1) * VH()}px`;
-    measureLayout(); s.overlay.measure(s.base); frame(true);
+    measureLayout(); s.overlay.measure(s.base, s.k); frame(true);
   };
   addEventListener("resize", s.onResize);
   frame(true);
-  setTimeout(() => { ui.hint.hidden = false; }, opening ? 900 : 0);
 }
 
 async function leave({ toNow = true } = {}) {
   const s = session;
   if (!s) return;
   session = null;
+  s.entryInput?.abort();
+  s.mask?.cancel();
   s.feel?.destroy();
   removeEventListener("scroll", s.onScroll);
   removeEventListener("resize", s.onResize);
   s.overlay?.destroy();
+  s.orbit?.destroy();
   clearTimeout(copyTimer); copyKey = copyWords = "";
   ui.root.hidden = true; ui.hint.hidden = true;
   ui.scroll.style.height = "0px";
@@ -285,13 +385,14 @@ async function leave({ toNow = true } = {}) {
   s.monthTrack?.style.removeProperty("--research-month");
   delete instrument.dataset.researchGreg;
   delete instrument.dataset.cameraViewportWidth;
-  for (const key of ["researchWide", "researchEntering", "researchEntered", "researchScene", "researchJumping"]) delete body.dataset[key];
+  for (const key of ["researchWide", "researchEntrance", "researchMasking", "researchCopyWaiting", "researchScene", "researchJumping"]) delete body.dataset[key];
   for (const a of researchLinks) a.removeAttribute("aria-current");
   for (const a of atlasLinks) { a.setAttribute("aria-current", "page"); a.classList.add("active"); }
   scrollTo(0, 0);
   delete body.dataset.view;
   delete document.documentElement.dataset.view;
   researchHost.setResearchView(false);
+  researchHost.refreshCamera();
   if (toNow) {
     await researchHost.dialTo(Date.now(), "now");
     // back to the plain atlas address (it follows the live clock again)
@@ -317,19 +418,19 @@ for (const a of atlasLinks) a.addEventListener("click", event => {
   leave();
 });
 ui.back.addEventListener("click", () => { history.pushState({}, "", "./"); leave(); });
-ui.again.addEventListener("click", () => scrollTo(0, 0));
+ui.again.addEventListener("click", () => session?.feel?.jumpTo(0));
 addEventListener("popstate", () => {
   if (isResearchUrl() && !session) enter({ opening: false });
   else if (!isResearchUrl() && session) leave();
 });
-if (isResearchUrl()) enter({ opening: true });
+if (isResearchUrl()) enter({ opening: false });
 
 // review hook (captures): jump to a scene position and redraw
 globalThis.__research = {
   jump(id, p) {
     const i = SCENES.findIndex(sc => sc.id === id);
     const u = SCENES.slice(0, i).reduce((t, sc) => t + sc.length, 0) + SCENES[i].length * p;
-    scrollTo(0, Math.round(u * VH()));
+    session?.feel?.jumpTo(Math.round(u * VH()));
     frame(true);
   },
   get ready() { return !!session?.ready; }

@@ -137,6 +137,10 @@ function refreshCompositionDiagnostics() {
 
 let cameraController = null;
 
+export function refreshKineticCamera() {
+  cameraController?.refresh();
+}
+
 // The renderer calls this immediately after renderStatic. Module download speed
 // must not decide whether the master clip and responsive camera get installed.
 export function installKineticFanGuard() {

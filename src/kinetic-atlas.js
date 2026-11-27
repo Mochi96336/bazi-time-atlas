@@ -1,5 +1,5 @@
 import "./time-context-control.js";
-import { installKineticFanGuard } from "./kinetic-fan-guard.js";
+import { installKineticFanGuard, refreshKineticCamera } from "./kinetic-fan-guard.js";
 import { installStaticWheelLayers } from "./wheel/static-wheel-layers.js";
 import { solarTerms, zodiacSigns } from "./data.js";
 import {
@@ -444,23 +444,26 @@ function setSelectedInstant(instantMs, source = "command") {
 // Any direct input ends the dial at its target; reduced motion jumps.
 let activeDial = null;
 
-function cancelDial() {
+function cancelDial(notify = true) {
   if (!activeDial) return;
   const dial = activeDial;
   activeDial = null;
   cancelAnimationFrame(dial.frame);
   dial.detach();
   instrument.dataset.dial = "done";
+  if (notify) dial.onCancelled();
 }
 
-function renderDialPose(pose) {
+function renderDialPose(pose, previousPose) {
   for (const id of SEXAGENARY_RING_IDS) {
+    if (pose[id] === previousPose?.[id]) continue;
     setModelRotation(ringStates[id], pose[id]);
     const rotation = effectiveRotation(ringStates[id]);
     renderer.setCyclePose(id, rotation, cycleIndexAtCursor(rotation, CURSOR_ANGLE));
     // the read-head is placed from the track's model rotation (see renderer)
     setTrackDiagnostics(id);
   }
+  if (pose.solar === previousPose?.solar) return;
   setModelRotation(ringStates.solar, pose.solar);
   setModelRotation(ringStates.zodiac, pose.solar);
   const solarRotation = effectiveRotation(ringStates.solar);
@@ -497,10 +500,10 @@ function currentPose() {
   return pose;
 }
 
-function dialToInstant(targetMs, source = "command", { onSettled = () => {} } = {}) {
+function dialToInstant(targetMs, source = "command", { onSettled = () => {}, onProgress } = {}) {
   if (!Number.isFinite(targetMs)) return false;
   cancelDial();
-  const settleWith = committed => { onSettled(); return committed; };
+  const settleWith = committed => { onSettled(committed); return committed; };
   if (prefersReducedMotion() || !currentDisplay) return settleWith(setSelectedInstant(targetMs, source));
   const to = poseForInstant(targetMs);
   if (!to) return settleWith(setSelectedInstant(targetMs, source));
@@ -511,9 +514,8 @@ function dialToInstant(targetMs, source = "command", { onSettled = () => {} } = 
   const durationMs = dialDurationMs(largestTurn(from, to));
   const finish = () => {
     if (!activeDial) return;
-    cancelDial();
-    setSelectedInstant(targetMs, source);
-    onSettled();
+    cancelDial(false);
+    settleWith(setSelectedInstant(targetMs, source));
   };
   const detach = () => {
     removeEventListener("pointerdown", finish, true);
@@ -529,10 +531,11 @@ function dialToInstant(targetMs, source = "command", { onSettled = () => {} } = 
     if (!activeDial) return;
     const t = Math.min(1, (now - startedAt) / durationMs);
     renderDialPose(dialPose(from, to, minimumJerk(t)));
+    onProgress?.(t);
     if (t >= 1) { finish(); return; }
     activeDial.frame = requestAnimationFrame(step);
   };
-  activeDial = { frame:requestAnimationFrame(step), detach };
+  activeDial = { frame:requestAnimationFrame(step), detach, onCancelled:() => onSettled(false) };
   return true;
 }
 
@@ -566,15 +569,16 @@ export const researchHost = Object.freeze({
   svg,
   isReady:() => currentDisplay !== null,
   setResearchView,
+  refreshCamera: refreshKineticCamera,
   poseForInstant,
   currentPose,
-  renderPose(pose) {
+  renderPose(pose, previousPose) {
     cancelDial();
-    renderDialPose(pose);
+    renderDialPose(pose, previousPose);
   },
-  dialTo(instantMs, source = "research") {
+  dialTo(instantMs, source = "research", { onProgress } = {}) {
     return new Promise(resolve => {
-      if (!dialToInstant(instantMs, source, { onSettled:resolve })) resolve();
+      if (!dialToInstant(instantMs, source, { onSettled:resolve, onProgress })) resolve(false);
     });
   },
   commit(instantMs, source = "research") {
