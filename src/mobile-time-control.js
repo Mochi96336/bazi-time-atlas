@@ -138,7 +138,7 @@ nowButton?.addEventListener("click", () => {
   // input must not block our normal MutationObserver/UI synchronization.
   input?.blur();
   instrument.dispatchEvent(new CustomEvent(SELECTED_INSTANT_COMMAND, {
-    detail:{ instantMs:Date.now(), source:"mobile-now" }
+    detail:{ instantMs:Date.now(), source:"mobile-now", animate:true }
   }));
   clearInputError();
   syncFromInstrument();

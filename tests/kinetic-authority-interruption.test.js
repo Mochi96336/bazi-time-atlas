@@ -24,7 +24,13 @@ test("external time authorities interrupt active drag without making drag-start 
   const externalInterrupts = source.match(
     /stopPlayback\(\{ interruptActiveDrag:true, reason:"external-control" \}\);/g
   ) ?? [];
-  assert.equal(externalInterrupts.length, 4);
+  // setSelectedInstant, setTimeContext, the slider, the instant input, and the
+  // ring dial (Now / animated commands) each take over as an external authority.
+  assert.equal(externalInterrupts.length, 5);
+  assert.match(
+    bodyBetween("function dialToInstant", "function setTimeContext"),
+    /stopPlayback\(\{ interruptActiveDrag:true, reason:"external-control" \}\);/
+  );
 
   const playback = bodyBetween("function installPlayback", "function applyLinkedDragToTime");
   assert.match(
