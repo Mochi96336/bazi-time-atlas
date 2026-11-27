@@ -27,7 +27,9 @@ BRANCHES = "子丑寅卯辰巳午未申酉戌亥"
 SOLAR_TERMS = "立春雨水驚蟄春分清明穀雨立夏小滿芒種夏至小暑大暑立秋處暑白露秋分寒露霜降立冬小雪大雪冬至小寒大寒"
 ZODIAC = "白羊金牛雙子巨蟹獅子處女天秤天蠍射手摩羯水瓶雙魚"
 RING_NAMES = "年月太陽日時"
-WHEEL_TEXT = "".join(dict.fromkeys(STEMS + BRANCHES + SOLAR_TERMS + ZODIAC + RING_NAMES))
+# the research view names the pillars in the same face (年柱…, 未定, 節)
+RESEARCH = "柱定節"
+WHEEL_TEXT = "".join(dict.fromkeys(STEMS + BRANCHES + SOLAR_TERMS + ZODIAC + RING_NAMES + RESEARCH))
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "fonts" / "noto-serif-tc-wheel.woff2"

@@ -1,5 +1,5 @@
 import "./time-context-control.js";
-import { installKineticFanGuard } from "./kinetic-fan-guard.js";
+import { installKineticFanGuard, refreshKineticCamera } from "./kinetic-fan-guard.js";
 import { installStaticWheelLayers } from "./wheel/static-wheel-layers.js";
 import { solarTerms, zodiacSigns } from "./data.js";
 import {
@@ -11,6 +11,14 @@ import {
   assertWheelModel
 } from "./wheel/ring-model.js";
 import { temporalCycleRotation } from "./wheel/temporal-track.js";
+import {
+  cycleIndexAtCursor,
+  dialDurationMs,
+  dialPose,
+  largestTurn,
+  longitudeAtCursor,
+  minimumJerk
+} from "./interaction/ring-dial.js";
 import { shortestAngleDelta } from "./wheel/polar-geometry.js";
 import { createKineticRenderer } from "./wheel/kinetic-renderer.js";
 import { setAttributeIfChanged, setDatasetIfChanged, setTextIfChanged } from "./wheel/svg-renderer.js";
@@ -416,6 +424,7 @@ function stopPlayback({ interruptActiveDrag = false, reason = "external-control"
 
 function setSelectedInstant(instantMs, source = "command") {
   if (!Number.isFinite(instantMs)) return false;
+  cancelDial();
   stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
   clearLegacyProjection();
   state.selectedMs = instantMs;
@@ -429,6 +438,107 @@ function setSelectedInstant(instantMs, source = "command") {
   return true;
 }
 
+// Dial: turn each ring the shortest way to its pose at targetMs, then commit
+// the instant (see interaction/ring-dial.js). During the dial the cell under
+// the cursor follows the ring, so the read-heads tick past as the rings turn.
+// Any direct input ends the dial at its target; reduced motion jumps.
+let activeDial = null;
+
+function cancelDial(notify = true) {
+  if (!activeDial) return;
+  const dial = activeDial;
+  activeDial = null;
+  cancelAnimationFrame(dial.frame);
+  dial.detach();
+  instrument.dataset.dial = "done";
+  if (notify) dial.onCancelled();
+}
+
+function renderDialPose(pose, previousPose) {
+  for (const id of SEXAGENARY_RING_IDS) {
+    if (pose[id] === previousPose?.[id]) continue;
+    setModelRotation(ringStates[id], pose[id]);
+    const rotation = effectiveRotation(ringStates[id]);
+    renderer.setCyclePose(id, rotation, cycleIndexAtCursor(rotation, CURSOR_ANGLE));
+    // the read-head is placed from the track's model rotation (see renderer)
+    setTrackDiagnostics(id);
+  }
+  if (pose.solar === previousPose?.solar) return;
+  setModelRotation(ringStates.solar, pose.solar);
+  setModelRotation(ringStates.zodiac, pose.solar);
+  const solarRotation = effectiveRotation(ringStates.solar);
+  const longitude = longitudeAtCursor(solarRotation, CURSOR_ANGLE);
+  renderer.setSolarRingPose(solarRotation, longitude);
+  renderer.setZodiacRingPose(effectiveRotation(ringStates.zodiac), longitude);
+}
+
+// The pose (model rotation of every ring, and the solar band) the wheel takes at
+// targetMs, each ring reached the shortest way from where it is now. Null when
+// the wheel has no display yet or the instant has no cycle index.
+function poseForInstant(targetMs) {
+  if (!Number.isFinite(targetMs) || !currentDisplay) return null;
+  const target = resolveAtlasDisplayState({ selectedMs:targetMs, legacyProjection:null, timeContext:state.timeContext });
+  const pose = {};
+  for (const id of SEXAGENARY_RING_IDS) {
+    const index = cycleIndexForRing(id, target);
+    if (index < 0) return null;
+    pose[id] = temporalCycleRotation({
+      index,
+      progress:target.phases[id]?.progress ?? 0.5,
+      cursorAngle:CURSOR_ANGLE,
+      previousRotation:ringStates[id].modelRotation
+    });
+  }
+  pose.solar = ringStates.solar.modelRotation - shortestAngleDelta(target.longitude, lastSolarLongitude ?? currentDisplay.longitude);
+  return pose;
+}
+
+function currentPose() {
+  const pose = {};
+  for (const id of SEXAGENARY_RING_IDS) pose[id] = ringStates[id].modelRotation;
+  pose.solar = ringStates.solar.modelRotation;
+  return pose;
+}
+
+function dialToInstant(targetMs, source = "command", { onSettled = () => {}, onProgress } = {}) {
+  if (!Number.isFinite(targetMs)) return false;
+  cancelDial();
+  const settleWith = committed => { onSettled(committed); return committed; };
+  if (prefersReducedMotion() || !currentDisplay) return settleWith(setSelectedInstant(targetMs, source));
+  const to = poseForInstant(targetMs);
+  if (!to) return settleWith(setSelectedInstant(targetMs, source));
+  const from = currentPose();
+  stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
+  clearLegacyProjection();
+  setFollowingNow(false);
+  const durationMs = dialDurationMs(largestTurn(from, to));
+  const finish = () => {
+    if (!activeDial) return;
+    cancelDial(false);
+    settleWith(setSelectedInstant(targetMs, source));
+  };
+  const detach = () => {
+    removeEventListener("pointerdown", finish, true);
+    removeEventListener("keydown", finish, true);
+    removeEventListener("wheel", finish, true);
+  };
+  addEventListener("pointerdown", finish, true);
+  addEventListener("keydown", finish, true);
+  addEventListener("wheel", finish, { capture:true, passive:true });
+  instrument.dataset.dial = "running";
+  const startedAt = performance.now();
+  const step = now => {
+    if (!activeDial) return;
+    const t = Math.min(1, (now - startedAt) / durationMs);
+    renderDialPose(dialPose(from, to, minimumJerk(t)));
+    onProgress?.(t);
+    if (t >= 1) { finish(); return; }
+    activeDial.frame = requestAnimationFrame(step);
+  };
+  activeDial = { frame:requestAnimationFrame(step), detach, onCancelled:() => onSettled(false) };
+  return true;
+}
+
 function setTimeContext(timeContext, source = "command") {
   if (!timeContext) return false;
   stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
@@ -439,6 +549,42 @@ function setTimeContext(timeContext, source = "command") {
   if (href) history.replaceState(history.state, "", href);
   return true;
 }
+
+// ---------------------------------------------------------------------------
+// Research view (src/research/): the same instrument, driven by scroll. While
+// it is active the home's own inputs rest (no ring drag, keys, playback or
+// live clock) and the research scenes write ring poses through the same path
+// as the dial, so the material layer, label culling and read-heads follow.
+function setResearchView(active) {
+  stopPlayback({ interruptActiveDrag:true, reason:"external-control" });
+  cancelDial();
+  setFollowingNow(false);
+  instrument.dataset.view = active ? "research" : "atlas";
+  svg.setAttribute("tabindex", active ? "-1" : "0");
+  if (active && document.activeElement === svg) svg.blur();
+}
+
+export const researchHost = Object.freeze({
+  instrument,
+  svg,
+  isReady:() => currentDisplay !== null,
+  setResearchView,
+  refreshCamera: refreshKineticCamera,
+  poseForInstant,
+  currentPose,
+  renderPose(pose, previousPose) {
+    cancelDial();
+    renderDialPose(pose, previousPose);
+  },
+  dialTo(instantMs, source = "research", { onProgress } = {}) {
+    return new Promise(resolve => {
+      if (!dialToInstant(instantMs, source, { onSettled:resolve, onProgress })) resolve(false);
+    });
+  },
+  commit(instantMs, source = "research") {
+    return setSelectedInstant(instantMs, source);
+  }
+});
 
 function installPlayback() {
   playbackController = createKineticPlaybackController({
@@ -621,7 +767,7 @@ function bindControls() {
   });
   playButton.addEventListener("click", () => playbackController?.toggle());
   nowButton.addEventListener("click", () => {
-    setSelectedInstant(Date.now(), "now");
+    dialToInstant(Date.now(), "now");
   });
   svg.addEventListener("keydown", handleWheelKeydown);
   instantInput.addEventListener("change", () => {
@@ -633,7 +779,8 @@ function bindControls() {
     const instant = selectedInstantFromCommandDetail(event.detail);
     if (instant === null) return;
     const source = typeof event.detail?.source === "string" ? event.detail.source : "command";
-    setSelectedInstant(instant, source);
+    if (event.detail?.animate === true) dialToInstant(instant, source);
+    else setSelectedInstant(instant, source);
   });
   instrument.addEventListener(TIME_CONTEXT_COMMAND, event => {
     const timeContext = timeContextFromCommandDetail(event.detail);
@@ -752,6 +899,10 @@ function prefersReducedMotion() {
 }
 
 function runIntroSweep() {
+  if (new URLSearchParams(location.search).get("view") === "research") {
+    instrument.dataset.introSweep = "skipped";
+    return;
+  }
   if (!shouldRunIntroSweep({
     search:location.search,
     reducedMotion:prefersReducedMotion(),

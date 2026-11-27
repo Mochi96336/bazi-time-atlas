@@ -31,5 +31,5 @@ test("the wheel serif ships as one small woff2 declared by the finish stylesheet
   assert.match(css, /noto-serif-tc-wheel\.woff2/);
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   assert.match(html, /<html[^>]*data-look="lacquer"/);
-  assert.match(html, /rel="preload" href="\.\/assets\/fonts\/noto-serif-tc-wheel\.woff2"/);
+  assert.match(html, /rel="preload" href="\.\/assets\/fonts\/noto-serif-tc-wheel\.woff2(\?v=\d+)?"/);
 });

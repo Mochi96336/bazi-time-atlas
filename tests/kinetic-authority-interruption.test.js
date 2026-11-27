@@ -24,7 +24,18 @@ test("external time authorities interrupt active drag without making drag-start 
   const externalInterrupts = source.match(
     /stopPlayback\(\{ interruptActiveDrag:true, reason:"external-control" \}\);/g
   ) ?? [];
-  assert.equal(externalInterrupts.length, 4);
+  // setSelectedInstant, setTimeContext, the slider, the instant input, the ring
+  // dial (Now / animated commands) and entering/leaving the research view each
+  // take over as an external authority.
+  assert.equal(externalInterrupts.length, 6);
+  assert.match(
+    bodyBetween("function setResearchView", "export const researchHost"),
+    /stopPlayback\(\{ interruptActiveDrag:true, reason:"external-control" \}\);/
+  );
+  assert.match(
+    bodyBetween("function dialToInstant", "function setTimeContext"),
+    /stopPlayback\(\{ interruptActiveDrag:true, reason:"external-control" \}\);/
+  );
 
   const playback = bodyBetween("function installPlayback", "function applyLinkedDragToTime");
   assert.match(

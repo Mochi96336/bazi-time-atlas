@@ -23,7 +23,7 @@
    weights 500–600: one 23 KB file. Rebuild with scripts/subset-wheel-serif.py. */
 @font-face {
   font-family: "Atlas Wheel Serif";
-  src: url("./assets/fonts/noto-serif-tc-wheel.woff2") format("woff2");
+  src: url("./assets/fonts/noto-serif-tc-wheel.woff2?v=3") format("woff2");
   font-weight: 500 600;
   font-style: normal;
   font-display: swap;

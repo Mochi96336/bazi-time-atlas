@@ -109,3 +109,18 @@ test("visual viewport, rotation and foreground restore remeasure, and destroy re
   h.resized();
   assert.equal(h.frames.size, 0);
 });
+
+test("the research view can name a wider viewport for the camera to plan for", () => {
+  const h = harness({ width:374, height:732 }); h.flush();
+  const phone = h.cameras.at(-1);
+  h.instrument.dataset.cameraViewportWidth = "680";
+  h.setBounds({ width:680, height:732 });
+  h.resized(); h.flush();
+  const wide = h.cameras.at(-1);
+  assert.notDeepEqual(wide.viewBox, phone.viewBox, "a 680 px plan frames the wheel differently");
+  delete h.instrument.dataset.cameraViewportWidth;
+  h.setBounds({ width:374, height:732 });
+  h.resized(); h.flush();
+  assert.deepEqual(h.cameras.at(-1).viewBox, phone.viewBox, "without the override the phone camera returns");
+  h.controller.destroy();
+});

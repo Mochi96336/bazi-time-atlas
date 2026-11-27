@@ -1,0 +1,39 @@
+/* Research scenes: stage B static frames on the real home instrument.
+   The wheel is index.html in a same-origin iframe; this file only places copy. */
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0a0d13; color: var(--site-ink); font-family: var(--font-sans); }
+body { overflow: hidden; }
+
+.rs-stage { position: fixed; inset: 0; overflow: hidden; }
+#rs-wheel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 0; display: block; background: #0a0d13; }
+
+/* one claim, in the hub under the needle — the slot the home time readout uses */
+.rs-copy {
+  position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%);
+  width: min(640px, calc(100% - 32px)); text-align: center; z-index: 2; pointer-events: none;
+}
+.rs-copy:has(h1:empty) { display: none; }
+/* parent top bar, shown only when the embedded page is pushed in and its own bar leaves the frame */
+.rs-topbar { position: fixed; inset: 0 0 auto 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding: 28px 28px; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: #eef2f1; background: linear-gradient(#0a0d13, rgba(10, 13, 19, 0)); }
+.rs-topbar[hidden] { display: none; }
+.rs-topbar nav a { font-weight: 600; letter-spacing: .06em; padding: 0 24px; color: rgba(228, 226, 220, .78); }
+.rs-topbar nav a + a { border-left: 1px solid rgba(224, 234, 238, .14); }
+.rs-kicker:empty { display: none; }
+/* the figure line: chapter and coordinate, top left under the brand */
+.rs-kicker { position: fixed; left: 29px; top: 62px; margin: 0; font-size: 12px; letter-spacing: .14em; color: rgba(206, 212, 216, .5); text-align: left; }
+.rs-copy h1 { margin: 0; font-size: 24px; font-weight: 500; line-height: 1.4; letter-spacing: .03em; color: #f1e8d4; }
+.rs-body { margin: 6px 0 0; font-size: 14px; line-height: 1.7; color: rgba(214, 220, 222, .72); }
+
+.rs-frames { position: fixed; right: 16px; top: 72px; z-index: 4; display: flex; flex-direction: column; gap: 4px; }
+.rs-frames a { font-size: 11px; color: var(--site-ink-muted); text-decoration: none; padding: 3px 8px; border: 1px solid var(--site-line-subtle); background: rgba(10, 13, 19, .7); }
+.rs-frames a[aria-current] { color: #f1e8d4; border-color: var(--site-line-strong); }
+body.capture .rs-frames { display: none; }
+
+@media (max-width: 700px) {
+  .rs-copy { bottom: 22px; }
+  .rs-kicker { left: 9px; top: 58px; font-size: 11px; }
+  .rs-topbar { padding: 20px 8px; }
+  .rs-topbar nav a { padding: 0 18px; }
+  .rs-copy h1 { font-size: 20px; }
+  body:has(.rs-topbar:not([hidden])) .rs-copy { text-align: left; left: 16px; transform: none; }
+}
