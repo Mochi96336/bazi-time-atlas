@@ -79,11 +79,15 @@ c21, c22, c31, c23, c24, x1, x2, x3, c32, end
 
 ## 怎麼測
 
-- 本機伺服器：`node <scratchpad>/serve.mjs d:/Projects/bazi-time-atlas 0.0.0.0`（`python http.server` 在這台機器上 .mjs 的 MIME 會錯）。手機連 `http://<電腦區網 IP>:4173/?view=research`。
+腳本在 `scripts/research-checks/`（Chrome 路徑可用 `CHROMIUM_BIN` 指定，輸出到 `tmp/research-checks/`，已 git-ignore）。
+
+- 本機伺服器：`node scripts/research-checks/serve.mjs`；手機測試用 `node scripts/research-checks/serve.mjs 0.0.0.0`，手機連 `http://<電腦區網 IP>:4173/?view=research`（`python http.server` 在這台機器上 .mjs 的 MIME 會錯）。
+- 手機三項：`node scripts/research-checks/phone.mjs`。上方列、logo、輪盤位置和首頁一致；進場亮起後讀針不動；真的手指拖動會捲動（只用 `scrollTo` 測不出捲動鎖）。
+- 截圖：`node scripts/research-checks/shots.mjs 390x844,1280x720 c22:.38,end:.9`。改過的每一幕都要看手機和桌機。
+- 4K：`node scripts/research-checks/k4.mjs c13 .5 9`。用真 GPU 捲動、錄畫面，數亮度低於中位數 0.6 倍的幀（應該是 0），並報幀間隔。
 - 跳到某一幕：主控台 `__research.jump("c21", .5)`；`__research.ready` 表示已進場。
-- 效能：Chrome 加 `--enable-gpu`，CDP `Emulation.setCPUThrottlingRate 4`，390×844@3x，量 rAF 幀間隔或 2 秒內的幀數。
-- 4K：截 screencast，數亮度低於中位數 0.6 倍的幀（應該是 0）。
-- 手機觸控：CDP `Input.dispatchTouchEvent` 真的拖動（不要只用 `scrollTo`）。
+- 手機效能：Chrome 加 `--enable-gpu`，CDP `Emulation.setCPUThrottlingRate 4`，390×844@3x，量 rAF 幀間隔或 2 秒內的幀數。
+- 測不到的：iPhone 放開手指後的慣性、網址列伸縮，要實機看。
 
 ## 下一步
 
